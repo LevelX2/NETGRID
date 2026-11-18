@@ -37,7 +37,7 @@ describe("existing terminal score continuation before emergency agenda flood", (
       cp.runtime,
     );
     const decision = chooseAiAction(cp.input);
-    expect(decision.actionId).toBe("corp.gain_credit");
+    expect(decision.actionId).toBe("cb");
     expect(decision.reasonCode).toBe("plan_first.corp.economy");
     expect(decision.fallbackUsed).toBe(false);
     const portfolio = residentPlanPortfolioSnapshot(cp.input)!;
@@ -69,7 +69,7 @@ describe("existing terminal score continuation before emergency agenda flood", (
       cp.runtime,
     );
     const decision = chooseAiAction(cp.input);
-    expect(decision.actionId).toBe("corp.gain_credit");
+    expect(decision.actionId).toBe("cb");
     expect(decision.reasonCode).toBe("plan_first.corp.economy");
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.evidence).toEqual(
@@ -107,7 +107,7 @@ describe("existing terminal score continuation before emergency agenda flood", (
       cp.runtime,
     );
     const decision = chooseAiAction(cp.input);
-    expect(decision.actionId).toBe("corp.gain_credit");
+    expect(decision.actionId).toBe("cb");
     expect(decision.reasonCode).toBe("plan_first.corp.economy");
     expect(decision.fallbackUsed).toBe(false);
     const portfolio = residentPlanPortfolioSnapshot(cp.input)!;
@@ -189,7 +189,7 @@ describe("existing terminal score continuation before emergency agenda flood", (
         cp.runtime,
       );
       const decision = chooseAiAction(cp.input);
-      expect(decision.actionId).toBe("corp.gain_credit");
+      expect(decision.actionId).toBe("cb");
       expect(decision.reasonCode).toBe("plan_first.corp.economy");
       if (hq === "exposed") {
         const portfolio = residentPlanPortfolioSnapshot(cp.input)!;

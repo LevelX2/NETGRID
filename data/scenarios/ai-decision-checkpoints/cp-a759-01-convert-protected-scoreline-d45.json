@@ -5955,7 +5955,7 @@
       "schemaVersion": "tactical-plan-v1",
       "memoryId": "match_a7593a9bf8632052:corp:corp-ai-v0.9-hard",
       "side": "corp",
-      "planId": "corp.rez_defense:corp.rez_ice.c2rq.c2rq",
+      "planId": "corp.rez_defense:cq.c2rq.c2rq",
       "type": "corp.rez_defense",
       "status": "satisfied",
       "target": {
@@ -5963,7 +5963,7 @@
         "id": "hq"
       },
       "selectedStepKind": "rez_outer_ice",
-      "selectedActionId": "corp.rez_ice.c2rq.c2rq",
+      "selectedActionId": "cq.c2rq.c2rq",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -5985,7 +5985,7 @@
       "turnKey": "corp:turn:8",
       "foreground": {
         "portfolioEntryId": "corp.create_score_window:server:r1",
-        "sourcePlanId": "corp.create_score_window:corp.install_card.c2i5.r1.c2i5",
+        "sourcePlanId": "corp.create_score_window:cc.c2i5.r1.c2i5",
         "planType": "corp.create_score_window",
         "side": "corp",
         "executionClass": "bounded_sequence",
@@ -6001,7 +6001,7 @@
         "progress": 0.5,
         "selectedStepKind": "find_remote_protection",
         "actionCandidateIds": [
-          "corp.draw_card"
+          "c8"
         ],
         "cadence": {
           "turnKey": "corp:turn:8",
@@ -6014,7 +6014,7 @@
         },
         "updatedAtStateVersion": 102,
         "evidence": [
-          "plan_portfolio_source_plan:corp.create_score_window:corp.install_card.c2i5.r1.c2i5",
+          "plan_portfolio_source_plan:corp.create_score_window:cc.c2i5.r1.c2i5",
           "plan_portfolio_execution_class:bounded_sequence",
           "plan_portfolio_role:foreground",
           "plan_portfolio_lifecycle:active"
@@ -6039,7 +6039,7 @@
           "progress": 0.5,
           "selectedStepKind": "protect_remote",
           "actionCandidateIds": [
-            "corp.install_card.c2rp.rd.c2rp.0"
+            "cc.c2rp.rd.c2rp.0"
           ],
           "cadence": {
             "turnKey": "corp:turn:8",
@@ -6077,7 +6077,7 @@
           "progress": 0.5,
           "selectedStepKind": "protect_remote",
           "actionCandidateIds": [
-            "corp.install_card.c2ta.rd.c2ta.0"
+            "cc.c2ta.rd.c2ta.0"
           ],
           "cadence": {
             "turnKey": "corp:turn:8",
@@ -6133,7 +6133,7 @@
         "plan_portfolio_foreground:corp.create_score_window",
         "plan_portfolio_backgrounds:corp.establish_scoring_remote|corp.establish_scoring_remote",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:corp.play_operation.c33q.c33q"
+        "plan_portfolio_selected_action:ci.c33q.c33q"
       ]
     },
     "strategicIntent": {
@@ -7040,7 +7040,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "corp.install_card.c2rp.r1.c2rp.1"
+        "actionId": "cc.c2rp.r1.c2rp.1"
       }
     ],
     "planExecution": {

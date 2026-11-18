@@ -33,7 +33,7 @@ it.each([
 ])("does not replace current route or payoff evidence: %s", (condition) => {
   const { input } = fixture();
   const target = evaluateRunnerRunTargets({ input }).find(
-    (e) => e.actionId === "runner.start_run.r2",
+    (e) => e.actionId === "rs.r2",
   )!;
   if (condition === "guaranteed_access")
     target.routeQuote!.reachability = "guaranteed_access";
@@ -55,7 +55,7 @@ it.each([
 it("declines the repeated free remote stop through the exact Remote owner while preserving the known trash payoff", () => {
   const { cp, input } = fixture();
   const target = evaluateRunnerRunTargets({ input }).find(
-    (e) => e.actionId === "runner.start_run.r2",
+    (e) => e.actionId === "rs.r2",
   )!;
   expect(target.accessPayoff).toBe("trash_affordable");
   expect(target.runCommitment).toBe("probe_only");
@@ -109,7 +109,7 @@ it.each(["paid_defense", "next_turn", "new_installation"])(
       cp.runtime,
     );
     const decision = chooseAiAction(input);
-    expect(decision.actionId).toBe("runner.start_run.r2");
+    expect(decision.actionId).toBe("rs.r2");
     expect(decision.fallbackUsed).toBe(false);
     expect(
       residentPlanPortfolioSnapshot(input)!.instances.find(
@@ -119,7 +119,7 @@ it.each(["paid_defense", "next_turn", "new_installation"])(
     ).toMatchObject({
       signal: {
         runActionAssessments: {
-          "runner.start_run.r2": { verdict: "executable" },
+          "rs.r2": { verdict: "executable" },
         },
       },
     });

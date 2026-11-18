@@ -114,7 +114,7 @@ export function preferUnbreakableEquivalentTemporaryIce(
           .filter((a) => a.type === "resolve_choice")
           .map((a) => a.actionId),
         owner: "plan_module",
-        planInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+        planInstanceId: "penw02zfrkklof54c2nuye5att",
         removalCondition:
           "Provide the current Engine temporary-encounter break quote bound to this option, run, fort and StateVersion.",
       });

@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "./plan-instance";
 import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { RunnerCorePlanDomain } from "./runner-core-plan-contracts";
 import {
@@ -68,7 +69,7 @@ describe("Runner tactical plan modules", () => {
 
   it("owns early EndTurn only through a rules-proven terminal-win plan", () => {
     const endTurn = candidate(
-      "runner.end_turn",
+      "r9",
       "end_turn",
       "turn_flow.end_turn",
     );
@@ -108,7 +109,7 @@ describe("Runner tactical plan modules", () => {
     );
     expect(
       materialization.candidates.map((entry) => entry.candidate.actionId),
-    ).toEqual(["runner.end_turn"]);
+    ).toEqual(["r9"]);
     expect(materialization.earlyEndTurnJustification).toEqual({
       kind: "rules_proven_terminal_win",
       terminalCondition: "corp_empty_rd_mandatory_draw",
@@ -1132,8 +1133,8 @@ describe("Runner tactical plan modules", () => {
         {
           windowId: "access-7",
           serverId: "rd",
-          rootPlanInstanceId: "plan:runner.pressure_central:rd",
-          leafPlanInstanceId: "plan:runner.convert_run_window:access-7",
+          rootPlanInstanceId: "p38stoh90qlansmp2rmcijavgw",
+          leafPlanInstanceId: "pbfz62otcor5fiokwoikzjhjlp",
           semanticActionTypes: ["access.resolve_card"],
           purposeCode: "resolve_rd_access",
           evidenceCode: "successful_rd_run",
@@ -1154,7 +1155,7 @@ describe("Runner tactical plan modules", () => {
       runnerContext,
     );
 
-    expect(proposal.parentInstanceId).toBe("plan:runner.pressure_central:rd");
+    expect(proposal.parentInstanceId).toBe("p38stoh90qlansmp2rmcijavgw");
     expect(
       materialized.candidates.map((entry) => entry.candidate.actionId),
     ).toEqual(["access"]);
@@ -1169,7 +1170,7 @@ describe("Runner tactical plan modules", () => {
           windowId: `bonus:${serverId}`,
           serverId,
           rootPlanInstanceId: "rules.restricted_action_sequence",
-          leafPlanInstanceId: `plan:runner.convert_run_window:bonus%3A${serverId}`,
+          leafPlanInstanceId: planInstanceIdForProposal({ moduleId: "runner.convert_run_window", dedupeKey: `bonus:${serverId}` }),
           semanticActionTypes: ["run.start"],
           purposeCode: "continue_engine_restricted_run_sequence",
           evidenceCode: "runner_engine_restricted_run_sequence_continuation",
@@ -1236,7 +1237,7 @@ describe("Runner tactical plan modules", () => {
           windowId: "unassessed-access",
           rootPlanInstanceId: "rules.access_window",
           leafPlanInstanceId:
-            "plan:runner.convert_run_window:unassessed-access",
+            "pbda36eddx3a1b7lhv2bkk7jxq",
           semanticActionTypes: ["access.resolve_card"],
           purposeCode: "resolve_access",
           evidenceCode: "legal_access_window_without_run_snapshot",
@@ -1269,9 +1270,9 @@ describe("Runner tactical plan modules", () => {
         {
           windowId: "dangerous-next-encounter",
           serverId: "hq",
-          rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
+          rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
           leafPlanInstanceId:
-            "plan:runner.convert_run_window:dangerous-next-encounter",
+            "p7ctuuhaz5tsq1ywsd9cal8pp9",
           semanticActionTypes: ["run.continue", "run.jack_out"],
           purposeCode: "convert_active_run_window",
           evidenceCode: "runner_future_encounter_damage_requires_jack_out",
@@ -1328,9 +1329,9 @@ describe("Runner tactical plan modules", () => {
         {
           windowId: "fatal-attractor-encounter",
           serverId: "hq",
-          rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
+          rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
           leafPlanInstanceId:
-            "plan:runner.convert_run_window:fatal-attractor-encounter",
+            "p35ihmz3ziywo0w5dpdsj7g6zs",
           semanticActionTypes: ["breaker.boost_strength", "run.continue"],
           purposeCode: "convert_active_run_window",
           evidenceCode:
@@ -1394,8 +1395,8 @@ describe("Runner tactical plan modules", () => {
         {
           windowId: "access-hq-trash",
           serverId: "hq",
-          rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-          leafPlanInstanceId: "plan:runner.convert_run_window:access-hq-trash",
+          rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+          leafPlanInstanceId: "p8q2cg9qhcz2qnia8g2ljhrkde",
           semanticActionTypes: ["access.decline_trash", "access.trash_card"],
           purposeCode: "convert_active_run_window",
           evidenceCode: "visible_active_run",

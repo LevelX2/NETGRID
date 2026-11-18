@@ -54,8 +54,8 @@ function funding(
 ) {
   const input = original(),
     actionId = cardRun
-      ? "runner.play_event.c9l.rd.c9l"
-      : "runner.start_run.rd";
+      ? "rh.c9l.rd.c9l"
+      : "rs.rd";
   const target = evaluateRunnerRunTargets({ input }).find(
     (t) => t.actionId === actionId,
   );
@@ -88,13 +88,13 @@ it("does not fund Library Search by randomly discarding the event required by th
   expect(action).toBeDefined();
   expect(action!.expiresAtStateVersion).toBe(input.playerView.stateVersion);
   expect(action!.payload?.damageAmount).toBeUndefined();
-  expect(action!.actionId).toBe("runner.gain_credit");
+  expect(action!.actionId).toBe("rb");
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.economy:runner-portfolio-credit-reserve",
+    "pc7ebuiw5dxhlbzbf1nhcs4p4z",
   );
   expect(
     decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toBe("plan:runner.economy:runner-portfolio-credit-reserve");
+  ).toBe("pc7ebuiw5dxhlbzbf1nhcs4p4z");
   expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
   expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({
     actionId: decision.actionId,
@@ -122,6 +122,6 @@ it("retains the original funded basic run when its zero hand buffer needs no gri
 });
 it("keeps ordinary credit funding for the same event when its hand source survives", () => {
   const route = funding(true, false, 7, 2);
-  expect(route.routeActionIds).toEqual(["runner.gain_credit"]);
+  expect(route.routeActionIds).toEqual(["rb"]);
   expect(route.routeAssessment.status).toBe("covered_guaranteed");
 });

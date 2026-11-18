@@ -11,7 +11,7 @@ describe("match c41a runner resolved future damage decision checkpoint", () => {
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
-    expect(result.decision?.actionId).toBe("runner.jack_out");
+    expect(result.decision?.actionId).toBe("rd");
     expect(
       result.decision?.decisionDebug?.planFirstDecision
         ?.assessmentEvidenceCodes,
@@ -19,11 +19,11 @@ describe("match c41a runner resolved future damage decision checkpoint", () => {
       "runner_future_encounter_damage_requires_jack_out|source:454|damage:3|hand:4|projected_hand:1|required_floor:4",
     );
     expect(result.decision?.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A82",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      leafExecutorInstanceId: "p8kyw2m8259x1xx0ftk3rudzhw",
       selectedStep: {
-        planInstanceId: "plan:runner.convert_run_window:run%3A82",
-        parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+        planInstanceId: "p8kyw2m8259x1xx0ftk3rudzhw",
+        parentInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       },
     });
   });

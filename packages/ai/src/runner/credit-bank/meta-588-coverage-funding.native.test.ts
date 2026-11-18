@@ -102,7 +102,7 @@ it("funds the current Sentry answer with one sufficient bank and preserves P4, p
       (i) => i.moduleId === "runner.credit_bank" && i.phase === "cash_out",
     )!;
   expect(bank).toMatchObject({
-    parentInstanceId: "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry",
+    parentInstanceId: "pde8a64nmn1hkbrzgi9sbuf6fo",
     parentNeedId: "coverage-bank-funding:coverage:breaker_sentry",
   });
   const signal = (bank.moduleState as { signal: RunnerCreditBankSignal })
@@ -392,7 +392,7 @@ it("does not cash out two small Brokers when their combined payout still misses 
     f.runtime,
   );
   expect(chooseAiAction(f.input)).toMatchObject({
-    actionId: "runner.gain_credit",
+    actionId: "rb",
     fallbackUsed: false,
     timeoutUsed: false,
   });

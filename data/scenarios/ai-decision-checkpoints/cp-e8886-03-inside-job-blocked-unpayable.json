@@ -3752,7 +3752,7 @@
         "id": "runner_credit_base"
       },
       "selectedStepKind": "gain_credits",
-      "selectedActionId": "runner.play_event.c1wr.c1wr",
+      "selectedActionId": "rh.c1wr.c1wr",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -3815,7 +3815,7 @@
         "plan_portfolio_foreground:runner.build_credit_base",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.play_event.c1wr.c1wr"
+        "plan_portfolio_selected_action:rh.c1wr.c1wr"
       ]
     },
     "strategicIntent": {
@@ -4841,7 +4841,7 @@
         "targetServerId": "rd"
       },
       {
-        "actionId": "runner.start_run.rd"
+        "actionId": "rs.rd"
       }
     ],
     "planExecution": {

@@ -35,7 +35,7 @@ const POLITICAL = 421;
 const ON_CALL = 420;
 const FILLER = 404;
 const LAB = 7;
-const DRAW = "corp.draw_card";
+const DRAW = "c8";
 
 const testedMatches = new Set<string>();
 afterEach(() => {

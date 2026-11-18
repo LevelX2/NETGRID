@@ -1,4 +1,5 @@
 import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
+import { compactCampaignId } from "./compact-plan-identity";
 import type { CorpCorePlanDomain } from "./corp-core-plan-contracts";
 import { corpSpecialDevelopmentAdmission } from "./corp-tactical-module-support";
 import {
@@ -10,7 +11,7 @@ import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 
 import { createCorpTacticalPlanModules } from "./corp-tactical-plan-modules";
-import { instantiatePlanProposal } from "./plan-instance";
+import { instantiatePlanProposal, planInstanceIdForProposal } from "./plan-instance";
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
 import type { PlanSchedulerContext } from "./plan-scheduler";
 
@@ -223,7 +224,7 @@ describe("Corp tactical plan modules", () => {
     const instance = instantiatePlanProposal(proposal, 10);
 
     expect(proposal.parentInstanceId).toBe(
-      "plan:corp.punish_campaign:campaign",
+      planInstanceIdForProposal({ moduleId: "corp.punish_campaign", dedupeKey: punishSignal("trace").campaignId }),
     );
     expect(proposal.parentNeedId).toBe("punish-execution:campaign:route");
     expect(
@@ -459,7 +460,7 @@ describe("Corp tactical plan modules", () => {
       ...signal,
       phase: "draw_for_plan" as const,
       actionIds: [draw.actionId],
-      parentPlanInstanceId: "plan:corp.create_score_window:target",
+      parentPlanInstanceId: "p2p7bi93nhut6wvl9yi754dfw8",
       parentNeedId: "draw-one",
     };
 
@@ -495,7 +496,7 @@ describe("Corp tactical plan modules", () => {
     };
     const handSignal = {
       handPlanId: "draw-for-plan",
-      parentPlanInstanceId: "plan:corp.score_agenda:general",
+      parentPlanInstanceId: "pa1d7j8c33k25iup8n8nyo9r2g",
       parentNeedId: "score-material:general",
       phase: "draw_for_plan" as const,
       agendaCount: 0,
@@ -551,7 +552,7 @@ describe("Corp tactical plan modules", () => {
           },
           {
             handPlanId: "partial-card-support",
-            parentPlanInstanceId: "plan:corp.score_agenda:agenda",
+            parentPlanInstanceId: "p75vwiqoqyj17mzri2e0m2ote6",
             phase: "develop_card",
             sourceDefinitionIds: [syntheticCardDefinitionId("score-support")],
             actionIds: [develop.actionId],
@@ -564,7 +565,7 @@ describe("Corp tactical plan modules", () => {
           },
           {
             handPlanId: "bound-card-support",
-            parentPlanInstanceId: "plan:corp.score_agenda:agenda",
+            parentPlanInstanceId: "p75vwiqoqyj17mzri2e0m2ote6",
             parentNeedId: "score-setup:agenda:score-support",
             phase: "develop_card",
             sourceDefinitionIds: [syntheticCardDefinitionId("score-support")],
@@ -604,7 +605,7 @@ describe("Corp tactical plan modules", () => {
     ]);
     expect(proposals[0]).toMatchObject({
       persistencePolicy: "flexible_support",
-      parentInstanceId: "plan:corp.score_agenda:agenda",
+      parentInstanceId: "p75vwiqoqyj17mzri2e0m2ote6",
       parentNeedId: "score-setup:agenda:score-support",
     });
     expect(proposals[1]).toMatchObject({
@@ -636,7 +637,8 @@ function tacticalModule(moduleId: string) {
 
 function punishSignal(phase: "prepare" | "trace" | "tag" | "damage" | "kill") {
   return {
-    campaignId: "campaign",
+    campaignId: compactCampaignId({ ownerModuleId: "corp.punish_campaign", objectiveKey: "fixture-punish-campaign" }),
+    identity: { ownerModuleId: "corp.punish_campaign" as const, objectiveKey: "fixture-punish-campaign" },
     phase,
     sourceDefinitionIds: [syntheticCardDefinitionId("punish-card")],
     feasible: true,

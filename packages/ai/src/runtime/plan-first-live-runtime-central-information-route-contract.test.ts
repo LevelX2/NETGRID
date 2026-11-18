@@ -123,7 +123,7 @@ describe("plan-first Central information-action ownership", () => {
     });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_first_root:plan:runner.pressure_central:central%3Ahq",
+        "plan_first_root:pa7nez1ioecg7mf06q1uwqq57o",
         "plan_step_capability:central_pressure_convert_accumulated_pressure",
         "plan_priority_class:P3",
       ]),
@@ -465,7 +465,7 @@ describe("plan-first Central information-action ownership", () => {
     });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_priority_delegated_from:plan:runner.pressure_central:central%3Ard",
+        "plan_priority_delegated_from:pa90fufw9vc5bkshp96ztlryxl",
       ]),
     );
   });
@@ -523,7 +523,7 @@ describe("plan-first Central information-action ownership", () => {
     expect(
       residentPlanPortfolioSnapshot(input)?.instances.find(
         (instance) =>
-          instance.instanceId === "plan:runner.pressure_central:central%3Ard",
+          instance.instanceId === "pa90fufw9vc5bkshp96ztlryxl",
       ),
     ).toMatchObject({
       moduleId: "runner.pressure_central",

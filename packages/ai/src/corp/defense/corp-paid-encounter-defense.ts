@@ -39,7 +39,7 @@ export function assessCorpPaidEncounterDefense(
       legalActionTypes: input.legalActions.map((entry) => entry.type),
       unresolvedActionIds: [action.actionId],
       owner: "plan_module",
-      planInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      planInstanceId: "penw02zfrkklof54c2nuye5att",
       removalCondition:
         "Bind the exact legal paid encounter ability to its current Engine defense quote in corp.defend_servers.",
     });

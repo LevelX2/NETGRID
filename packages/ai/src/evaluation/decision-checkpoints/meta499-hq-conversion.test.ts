@@ -36,10 +36,10 @@ describe("native meta499 HQ conversion", () => {
       cp.runtime,
     );
     const decision = chooseAiAction(input);
-    expect(decision.actionId).toBe("runner.start_run.hq");
+    expect(decision.actionId).toBe("rs.hq");
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-      "plan:runner.pressure_central:central%3Ahq",
+      "pa7nez1ioecg7mf06q1uwqq57o",
     );
     const owner = residentPlanPortfolioSnapshot(input)!.instances.find(
       (p) => p.moduleId === "runner.pressure_central" && p.target?.id === "hq",
@@ -64,11 +64,13 @@ describe("native meta499 HQ conversion", () => {
     );
     const score = chooseAiAction(before.input);
     expect(score.actionId).toBe(
-      "corp.score_agenda.c2id.c2id",
+      "cr.c2id.c2id",
     );
     expect(
-      score.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-    ).toContain("corp.score_agenda");
+      score.decisionDebug?.planFirstDecision?.portfolio.find(
+        (instance) => instance.instanceId === score.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+      )?.moduleId,
+    ).toBe("corp.score_agenda");
     const choice = chooseAiAction(after.input);
     expect(choice.fallbackUsed).toBe(false);
     expect(

@@ -92,8 +92,10 @@ it("selects the actual scored trace head for an affordable lethal payoff", () =>
   });
   expect(decision.fallbackUsed).toBe(false);
   expect(
-    decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-  ).toContain("corp.punish_campaign");
+    decision.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+    )?.moduleId,
+  ).toBe("corp.punish_campaign");
 });
 it("does not claim a forced trace through a richer Runner's full response", () => {
   const state = fixture();

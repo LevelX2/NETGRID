@@ -150,7 +150,7 @@ function fixture(
     (target) => target.actionId === selected.actionId,
   );
   const normal = targets.find(
-    (target) => target.actionId === `runner.start_run.${serverId}`,
+    (target) => target.actionId === `rs.${serverId}`,
   );
   if (!eventTarget || !normal) throw Error("Missing native comparison routes");
   return { state, input, selected, eventTarget, normal, runnerDeck, corpDeck };
@@ -304,8 +304,11 @@ describe("Demolition Run's native successful-run replacement", () => {
       selected.payload?.successfulRunAccessReplacement,
       start.actionId,
     ).toBe("trash_rezzed_ice_on_fort_and_tag_runner");
-    const rootId = start.decisionDebug?.planFirstDecision?.rootPlanInstanceId;
-    expect(rootId).toContain("runner.pressure_central");
+    const plan = start.decisionDebug?.planFirstDecision;
+    const rootId = plan?.rootPlanInstanceId;
+    expect(plan?.portfolio.find(
+      (instance) => instance.instanceId === rootId,
+    )?.moduleId).toBe("runner.pressure_central");
     const played = applyAction(state, {
       matchId: state.matchId,
       side: "runner",

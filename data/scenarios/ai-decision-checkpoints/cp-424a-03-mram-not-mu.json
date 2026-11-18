@@ -10077,7 +10077,7 @@
         "id": "hq"
       },
       "selectedStepKind": "run_target",
-      "selectedActionId": "runner.play_event.c1w9.c1w9",
+      "selectedActionId": "rh.c1w9.c1w9",
       "blockedBy": [
         "missing_breaker_coverage"
       ],
@@ -10180,7 +10180,7 @@
         "plan_portfolio_foreground:runner.opportunistic_central_run",
         "plan_portfolio_backgrounds:runner.build_credit_bank",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.play_event.c1w9.c1w9"
+        "plan_portfolio_selected_action:rh.c1w9.c1w9"
       ]
     },
     "strategicIntent": {

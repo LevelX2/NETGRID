@@ -9224,7 +9224,7 @@
       "stateVersion": 190,
       "instances": [
         {
-          "instanceId": "plan:corp.defend_servers:server-defense-portfolio",
+          "instanceId": "penw02zfrkklof54c2nuye5att",
           "dedupeKey": "server-defense-portfolio",
           "moduleId": "corp.defend_servers",
           "moduleVersion": "1",
@@ -9255,14 +9255,14 @@
             "signals": [
               {
                 "kind": "generic",
-                "defenseId": "install:hq:corp.install_card.c2v9.hq.c2v9.1",
+                "defenseId": "install:hq:cc.c2v9.hq.c2v9.1",
                 "serverId": "hq",
                 "phase": "install_ice",
                 "sourceDefinitionIds": [
                   464
                 ],
                 "actionIds": [
-                  "corp.install_card.c2v9.hq.c2v9.1"
+                  "cc.c2v9.hq.c2v9.1"
                 ],
                 "urgent": false,
                 "centralPressure": "acute",
@@ -9273,7 +9273,7 @@
                   "rezFundingGap": 0,
                   "projection": {
                     "knowledge": "known",
-                    "actionId": "corp.install_card.c2v9.hq.c2v9.1",
+                    "actionId": "cc.c2v9.hq.c2v9.1",
                     "sourceCardInstanceId": "c2v9",
                     "sourceDefinitionId": 464,
                     "targetServerId": "hq",
@@ -9449,14 +9449,14 @@
               },
               {
                 "kind": "generic",
-                "defenseId": "install:rd:corp.install_card.c2v9.rd.c2v9.1",
+                "defenseId": "install:rd:cc.c2v9.rd.c2v9.1",
                 "serverId": "rd",
                 "phase": "install_ice",
                 "sourceDefinitionIds": [
                   464
                 ],
                 "actionIds": [
-                  "corp.install_card.c2v9.rd.c2v9.1"
+                  "cc.c2v9.rd.c2v9.1"
                 ],
                 "urgent": false,
                 "centralPressure": "acute",
@@ -9467,7 +9467,7 @@
                   "rezFundingGap": 0,
                   "projection": {
                     "knowledge": "known",
-                    "actionId": "corp.install_card.c2v9.rd.c2v9.1",
+                    "actionId": "cc.c2v9.rd.c2v9.1",
                     "sourceCardInstanceId": "c2v9",
                     "sourceDefinitionId": 464,
                     "targetServerId": "rd",
@@ -9643,14 +9643,14 @@
               },
               {
                 "kind": "generic",
-                "defenseId": "install:archives:corp.install_card.c2v9.archives.c2v9.1",
+                "defenseId": "install:archives:cc.c2v9.archives.c2v9.1",
                 "serverId": "archives",
                 "phase": "install_ice",
                 "sourceDefinitionIds": [
                   464
                 ],
                 "actionIds": [
-                  "corp.install_card.c2v9.archives.c2v9.1"
+                  "cc.c2v9.archives.c2v9.1"
                 ],
                 "urgent": true,
                 "immediateInstallSupport": false,
@@ -9660,7 +9660,7 @@
                   "rezFundingGap": 0,
                   "projection": {
                     "knowledge": "known",
-                    "actionId": "corp.install_card.c2v9.archives.c2v9.1",
+                    "actionId": "cc.c2v9.archives.c2v9.1",
                     "sourceCardInstanceId": "c2v9",
                     "sourceDefinitionId": 464,
                     "targetServerId": "archives",
@@ -9940,7 +9940,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.economy:economy-liquidity-development%3Acorp%3A26",
+          "instanceId": "py80og3dbxz2yzbp75vcvexsu",
           "dedupeKey": "economy-liquidity-development:corp:26",
           "moduleId": "corp.economy",
           "moduleVersion": "1",
@@ -9977,7 +9977,7 @@
               "gap": 1,
               "projectedCreditGain": 1,
               "actionIds": [
-                "corp.gain_credit"
+                "cb"
               ],
               "priorityClass": "P6",
               "cadence": {
@@ -10029,7 +10029,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.hand_and_agenda_management:draw-for-score-material",
+          "instanceId": "p13oe6jmk9id0pfdx7x2bne8ui",
           "dedupeKey": "draw-for-score-material",
           "moduleId": "corp.hand_and_agenda_management",
           "moduleVersion": "1",
@@ -10052,7 +10052,7 @@
             "kind": "player",
             "id": "corp"
           },
-          "parentInstanceId": "plan:corp.score_agenda:general",
+          "parentInstanceId": "pa1d7j8c33k25iup8n8nyo9r2g",
           "parentNeedId": "score-material:general",
           "openNeedIds": [],
           "phase": "draw_for_plan",
@@ -10061,7 +10061,7 @@
             "kind": "hand",
             "signal": {
               "handPlanId": "draw-for-score-material",
-              "parentPlanInstanceId": "plan:corp.score_agenda:general",
+              "parentPlanInstanceId": "pa1d7j8c33k25iup8n8nyo9r2g",
               "parentNeedId": "score-material:general",
               "phase": "draw_for_plan",
               "agendaCount": 0,
@@ -10126,7 +10126,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:general",
+          "instanceId": "pa1d7j8c33k25iup8n8nyo9r2g",
           "dedupeKey": "general",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -10203,37 +10203,37 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:corp.defend_servers:server-defense-portfolio",
+          "instanceId": "penw02zfrkklof54c2nuye5att",
           "stateVersion": 190,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.economy:economy-liquidity-development%3Acorp%3A26",
+          "instanceId": "py80og3dbxz2yzbp75vcvexsu",
           "stateVersion": 190,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:corp.hand_and_agenda_management:draw-for-score-material",
+          "instanceId": "p13oe6jmk9id0pfdx7x2bne8ui",
           "stateVersion": 190,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:corp.score_agenda:general",
+          "instanceId": "pa1d7j8c33k25iup8n8nyo9r2g",
           "stateVersion": 190,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:corp.economy:economy-immediate-operation%3Ac34t",
+          "instanceId": "pdbzsa50bxtengyjga344q1j0b",
           "stateVersion": 190,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:corp.defend_servers:server-defense-portfolio",
+          "instanceId": "penw02zfrkklof54c2nuye5att",
           "stateVersion": 190,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
@@ -10244,11 +10244,11 @@
       "campaigns": [
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:archives:corp.install_card.c2v9.archives.c2v9.1",
+          "campaignId": "k2o16mdmxtnwidjq5a2c3n626f",
           "kind": "defense",
           "status": "continuable",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "archives"
           },
@@ -10275,15 +10275,19 @@
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
             "engine_certified_visible_agenda_exposure_defense"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "install:archives:cc.c2v9.archives.c2v9.1"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:hq:corp.install_card.c2v9.hq.c2v9.1",
+          "campaignId": "kf2gj0uv25ebd7a9z1avn24v8b",
           "kind": "defense",
           "status": "continuable",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "hq"
           },
@@ -10310,15 +10314,19 @@
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
             "engine_certified_global_defense_access_probability_reduced"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "install:hq:cc.c2v9.hq.c2v9.1"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:rd:corp.install_card.c2v9.rd.c2v9.1",
+          "campaignId": "k7aqsgr5samn18rt78k6ux0wnl",
           "kind": "defense",
           "status": "continuable",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "rd"
           },
@@ -10345,12 +10353,16 @@
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
             "engine_certified_global_defense_access_probability_reduced"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "install:rd:cc.c2v9.rd.c2v9.1"
+          }
         }
       ],
       "turnPlanCommitment": {
         "schemaVersion": "turn-plan-commitment-v2",
-        "sequenceRootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+        "sequenceRootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
         "commitmentId": "fnv1a:f25c1510",
         "sourcePlanId": "fnv1a:ce503254",
         "sourceLineHash": "fnv1a:2c72858a",
@@ -10370,7 +10382,7 @@
           {
             "phaseId": "fnv1a:b62539ca",
             "root": {
-              "planInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+              "planInstanceId": "penw02zfrkklof54c2nuye5att",
               "moduleId": "corp.defend_servers",
               "milestoneId": "ice_installed_rez_ready",
               "provenance": "resident"
@@ -10475,7 +10487,7 @@
           "sideSafePlanningFingerprint": "fnv1a:3f3c4ef6"
         },
         "currentBinding": {
-          "actionId": "corp.install_card.c2v9.archives.c2v9.1",
+          "actionId": "cc.c2v9.archives.c2v9.1",
           "stateVersion": 190,
           "semanticActionSetFingerprint": "fnv1a:3968f955",
           "invocationKey": "fnv1a:6deb01b5"
@@ -10483,14 +10495,14 @@
         "actionType": "install_card",
         "expectationId": "fnv1a:14a91def"
       },
-      "rootForegroundInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
-      "executorInstanceId": "plan:corp.defend_servers:server-defense-portfolio"
+      "rootForegroundInstanceId": "penw02zfrkklof54c2nuye5att",
+      "executorInstanceId": "penw02zfrkklof54c2nuye5att"
     }
   },
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "corp.install_card.c2rp.new_remote.c2rp"
+        "actionId": "cc.c2rp.new_remote.c2rp"
       }
     ],
     "planExecution": {
@@ -10501,7 +10513,7 @@
         "improve_remote_protection_path"
       ],
       "requiredAssessmentEvidence": [
-        "corp_layered_remote_ice_staging:remote:strategic-score-remote:new_remote:corp.install_card.c2rp.new_remote.c2rp:layers_0:unrezzed_0:rez_gap_0"
+        "corp_layered_remote_ice_staging:remote:strategic-score-remote:new_remote:cc.c2rp.new_remote.c2rp:layers_0:unrezzed_0:rez_gap_0"
       ]
     }
   }

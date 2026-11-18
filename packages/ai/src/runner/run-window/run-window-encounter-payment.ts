@@ -87,7 +87,7 @@ export function programProtectionEncounterPayment(
     return invalid();
   const next = currentEncounterUnbrokenSubroutineIndexes(input);
   const selected = parseSubroutineIndexes(
-    action.payload?.payOrTrashProgramSubroutineIndexes,
+    action.payOrTrashProgramSubroutineIndexes,
   );
   const immediate = ice.effectiveRunQuote.subroutines.reduce(
     (sum, s, i) => sum + (next.has(i) ? s.amount! : 0),

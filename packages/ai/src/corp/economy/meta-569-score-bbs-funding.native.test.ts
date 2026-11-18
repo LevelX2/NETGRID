@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { afterEach, expect, it } from "vitest";
 import { applyAction, hashState, replayEvents } from "@netgrid/engine";
 import type { GameState } from "@netgrid/shared";
@@ -46,9 +47,10 @@ function prefix(name: "bbs" | "accounts", actionTypes: string[]) {
   const saved = fixture(name);
   let current = structuredClone(saved.engineState);
   expect(Object.values(saved.validation).every(Boolean)).toBe(true);
-  const expectedParent =
-    "plan:corp.score_agenda:agenda%3Ac2i5%3Ar" +
-    (name === "bbs" ? "3" : "1");
+  const expectedParent = planInstanceIdForProposal({
+    moduleId: "corp.score_agenda",
+    dedupeKey: `agenda:c2i5:r${name === "bbs" ? "3" : "1"}`,
+  });
   for (const [index, type] of actionTypes.entries()) {
     const input =
       index === 0

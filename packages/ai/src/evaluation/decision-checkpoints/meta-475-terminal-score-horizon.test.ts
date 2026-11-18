@@ -81,7 +81,7 @@ it.each([
     const result = chooseAiAction(input);
     const lab = cardInstanceIdForCopy("corp", 7, game === 12 ? 2 : 3);
     expect(result.actionId).toBe(
-      `corp.install_card.${lab}.r1.${lab}`,
+      `cc.${lab}.r1.${lab}`,
     );
     expect(result.fallbackUsed).toBe(false);
     expect(result.timeoutUsed).toBe(false);

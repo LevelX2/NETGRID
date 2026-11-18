@@ -292,7 +292,7 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       pending.executorInstanceId === executorInstanceId &&
       pending.selectedAtStateVersion === previous?.stateVersion &&
       pending.sourceStepId === `run.encounter_ice:${previous?.stateVersion}` &&
-      pending.originalActionId.startsWith("runner.continue_run.") &&
+      pending.originalActionId.startsWith("r5.") &&
       executorState?.signal?.serverId === run?.attackedServerId &&
       root?.target !== undefined &&
       root.target.kind === "server" &&
@@ -330,7 +330,7 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       traceWindowIsContinuous;
     const completedSelectedTrace =
       interveningEvents.length === 1 &&
-      pending?.originalActionId === "runner.resolve_choice" &&
+      pending?.originalActionId === "rn" &&
       pending.selectedAtStateVersion === previous?.stateVersion &&
       pending.sourceStepId === `run.encounter_ice:${previous?.stateVersion}` &&
       interveningEvents[0]?.publicPayload.actor === "runner" &&
@@ -370,7 +370,7 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       selectedAction.type === "continue_run" &&
       ((run?.phase === "movement" &&
         input.playerView.timingPoint === "run.jack_out_window" &&
-        selectedAction.actionId === "runner.continue_run") ||
+        selectedAction.actionId === "r5") ||
         (run?.phase === "encounter_ice" &&
           input.playerView.timingPoint === "run.encounter_ice" &&
           selectedAction.payload?.encounterContinue === true)) &&

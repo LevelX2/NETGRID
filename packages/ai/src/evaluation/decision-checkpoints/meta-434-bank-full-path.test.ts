@@ -44,13 +44,13 @@ it("binds the available bank payout to the complete urgent path before spending 
     (a) => a.actionId === result.actionId,
   )!;
   expect(action.actionId).toBe(
-    "runner.activated_card_ability.c29d.c29d.activated.441",
+    "r1.c29d.c29d.activated.441",
   );
   expect(result.fallbackUsed).toBe(false);
   expect(result.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar2",
+    rootPlanInstanceId: "p1p4x83h7yolw2hjtvi0ud06dm",
     leafExecutorInstanceId:
-      "plan:runner.credit_bank:c29d",
+      "pdeck54mcc1lshdzs9k74eyxih",
     route: {
       actionId: action.actionId,
       stateVersion: input.playerView.stateVersion,
@@ -58,7 +58,7 @@ it("binds the available bank payout to the complete urgent path before spending 
   });
   expect(
     result.decisionDebug?.planFirstDecision?.assessmentEvidenceCodes,
-  ).toContain("runner_credit_bank_bound_run_action:runner.start_run.r2");
+  ).toContain("runner_credit_bank_bound_run_action:rs.r2");
 });
 
 it.each([
@@ -85,7 +85,7 @@ it.each([
     expect(result.fallbackUsed).toBe(false);
     const bank = residentPlanPortfolioSnapshot(input)?.instances.find(
       (p) =>
-        p.instanceId === "plan:runner.credit_bank:c29d",
+        p.instanceId === "pdeck54mcc1lshdzs9k74eyxih",
     );
     expect(bank?.parentNeedId).toBeUndefined();
   },
@@ -136,6 +136,6 @@ it("keeps one provider when two banks can fund the same exact run", () => {
     (p) => p.parentNeedId === "run-support:remote:r2",
   );
   expect(providers.map((p) => p.instanceId)).toEqual([
-    "plan:runner.credit_bank:c29d",
+    "pdeck54mcc1lshdzs9k74eyxih",
   ]);
 });

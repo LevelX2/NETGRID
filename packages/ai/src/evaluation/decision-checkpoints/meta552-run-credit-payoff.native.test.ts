@@ -120,7 +120,7 @@ describe("current-rule companions for captured run-credit differential payoff", 
           evidenceCodes: expect.arrayContaining(["runner_hand_rotation_status:known_rotation_target_available"]),
         });
       } else {
-        expect(a.actionId).toBe("runner.start_run.archives");
+        expect(a.actionId).toBe("rs.archives");
         expect(p?.selectedPlan?.moduleId).toBe("runner.pressure_central");
       }
       expect(p?.route).toMatchObject({

@@ -12439,7 +12439,7 @@
         "id": "r1"
       },
       "selectedStepKind": "run_target",
-      "selectedActionId": "runner.start_run.archives",
+      "selectedActionId": "rs.archives",
       "selectedActionType": "start_run",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
@@ -12511,7 +12511,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:runner.build_credit_bank",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.end_turn"
+        "plan_portfolio_selected_action:r9"
       ]
     },
     "strategicIntent": {
@@ -13584,7 +13584,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.activated_card_ability.c29e.c29e.activated.441"
+        "actionId": "r1.c29e.c29e.activated.441"
       }
     ],
     "planExecution": {

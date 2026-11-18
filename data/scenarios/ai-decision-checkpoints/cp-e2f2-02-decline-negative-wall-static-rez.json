@@ -3278,7 +3278,7 @@
       "schemaVersion": "tactical-plan-v1",
       "memoryId": "match_e2f2f6f433debe00:corp:corp-ai-v0.9-hard",
       "side": "corp",
-      "planId": "corp.rez_defense:corp.rez_ice.c2rz.c2rz",
+      "planId": "corp.rez_defense:cq.c2rz.c2rz",
       "type": "corp.rez_defense",
       "status": "satisfied",
       "target": {
@@ -3286,15 +3286,15 @@
         "id": "rd"
       },
       "selectedStepKind": "rez_outer_ice",
-      "selectedActionId": "corp.rez_ice.c2rz.c2rz",
+      "selectedActionId": "cq.c2rz.c2rz",
       "selectedActionType": "rez_ice",
       "blockedBy": [],
       "actionDemands": [
         {
           "schemaVersion": "action-demand-v1",
-          "demandId": "corp.rez_defense:corp.rez_ice.c2rz.c2rz:actions",
+          "demandId": "corp.rez_defense:cq.c2rz.c2rz:actions",
           "side": "corp",
-          "sourcePlanId": "corp.rez_defense:corp.rez_ice.c2rz.c2rz",
+          "sourcePlanId": "corp.rez_defense:cq.c2rz.c2rz",
           "purpose": "current_remote_protection",
           "priority": "current_foreground_plan",
           "priorityRank": 4,
@@ -3311,7 +3311,7 @@
             "install_card"
           ],
           "evidence": [
-            "action_demand_source_plan:corp.rez_defense:corp.rez_ice.c2rz.c2rz",
+            "action_demand_source_plan:corp.rez_defense:cq.c2rz.c2rz",
             "action_demand_source_step:rez_outer_ice",
             "action_demand_target_from_plan:1",
             "action_demand_side:corp",
@@ -3329,8 +3329,8 @@
       ],
       "selectedActionCapacityRoute": {
         "schemaVersion": "action-capacity-route-v1",
-        "routeId": "corp.rez_defense:corp.rez_ice.c2rz.c2rz:actions:uncovered",
-        "demandId": "corp.rez_defense:corp.rez_ice.c2rz.c2rz:actions",
+        "routeId": "corp.rez_defense:cq.c2rz.c2rz:actions:uncovered",
+        "demandId": "corp.rez_defense:cq.c2rz.c2rz:actions",
         "status": "uncovered",
         "reliability": "contingent",
         "horizon": "same_turn",
@@ -3388,7 +3388,7 @@
           "progress": 0.6,
           "selectedStepKind": "protect_remote",
           "actionCandidateIds": [
-            "corp.install_card.c31b.hq.c31b.0"
+            "cc.c31b.hq.c31b.0"
           ],
           "creditDemands": [],
           "actionDemands": [
@@ -3600,7 +3600,7 @@
             "plan_action_capacity_route:corp.establish_scoring_remote:new_remote:actions:already_sufficient",
             "plan_action_capacity_route_status:already_sufficient",
             "plan_action_capacity_hard_blocker_resolved:false",
-            "plan_portfolio_action_progress:corp.install_card.c31b.hq.c31b.0",
+            "plan_portfolio_action_progress:cc.c31b.hq.c31b.0",
             "plan_portfolio_carried_without_current_action:true",
             "plan_action_reservation_requested:1",
             "plan_action_reservation_allocated:1",
@@ -3669,7 +3669,7 @@
         "plan_action_allocation_entries:1",
         "plan_action_allocation_unallocated:0",
         "plan_action_allocation_credit_remainder:8",
-        "plan_portfolio_selected_action:corp.end_turn"
+        "plan_portfolio_selected_action:c9"
       ]
     },
     "strategicIntent": {

@@ -99,7 +99,7 @@ describe("meta 403 remembered unrezzed remote access", () => {
       runnerTurnPlannerMode: "cutover",
     });
     expect(result.actionId).toBe(
-      "runner.install_card.c1a9.c1a9",
+      "rc.c1a9.c1a9",
     );
     expect(
       deriveObservedRemoteNoProgressAccessMemory(current, "r1"),

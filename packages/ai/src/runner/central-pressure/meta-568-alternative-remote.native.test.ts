@@ -35,8 +35,8 @@ function targets() {
   return {
     input,
     runs,
-    hq: runs.find((r) => r.actionId === "runner.start_run.hq")!,
-    remote: runs.find((r) => r.actionId === "runner.start_run.r4")!,
+    hq: runs.find((r) => r.actionId === "rs.hq")!,
+    remote: runs.find((r) => r.actionId === "rs.r4")!,
   };
 }
 afterEach(resetResidentPlanPortfolioMemory);
@@ -57,7 +57,7 @@ it("chooses the admitted free unknown remote instead of falsely treating HQ as t
     result = chooseAiAction(input);
   expect(JSON.stringify(input)).toBe(before);
   expect(result).toMatchObject({
-    actionId: "runner.start_run.r4",
+    actionId: "rs.r4",
     fallbackUsed: false,
     timeoutUsed: false,
   });

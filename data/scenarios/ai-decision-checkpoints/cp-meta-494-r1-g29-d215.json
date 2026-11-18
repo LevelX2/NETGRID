@@ -6115,7 +6115,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.gain_credit",
+          "actionId": "rb",
           "side": "runner",
           "type": "gain_credit",
           "label": "1 Credit nehmen",
@@ -6136,7 +6136,7 @@
           }
         },
         {
-          "actionId": "runner.draw_card",
+          "actionId": "r8",
           "side": "runner",
           "type": "draw_card",
           "label": "Karte ziehen",
@@ -6159,7 +6159,7 @@
           }
         },
         {
-          "actionId": "runner.remove_tag",
+          "actionId": "rm",
           "side": "runner",
           "type": "remove_tag",
           "label": "Tag entfernen",
@@ -6176,7 +6176,7 @@
           "expiresAtStateVersion": 214
         },
         {
-          "actionId": "runner.install_card.cbd.cbd",
+          "actionId": "rc.cbd.cbd",
           "side": "runner",
           "type": "install_card",
           "label": "Little Black Box installieren",
@@ -6197,7 +6197,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c8b.c8b",
+          "actionId": "rc.c8b.c8b",
           "side": "runner",
           "type": "install_card",
           "label": "Superglue installieren",
@@ -6218,7 +6218,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c8b.c8b.runner_program_trash_before_install",
+          "actionId": "rc.c8b.c8b.runner_program_trash_before_install",
           "side": "runner",
           "type": "install_card",
           "label": "Superglue mit Programmtrash installieren",
@@ -6240,7 +6240,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c75.c75",
+          "actionId": "rc.c75.c75",
           "side": "runner",
           "type": "install_card",
           "label": "Matador installieren",
@@ -6261,7 +6261,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c75.c75.runner_program_trash_before_install",
+          "actionId": "rc.c75.c75.runner_program_trash_before_install",
           "side": "runner",
           "type": "install_card",
           "label": "Matador mit Programmtrash installieren",
@@ -6283,7 +6283,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c9t.c9t.58",
+          "actionId": "rh.c9t.c9t.58",
           "side": "runner",
           "type": "play_event",
           "label": "Meat Upgrade spielen",
@@ -6312,7 +6312,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.hq",
+          "actionId": "rs.hq",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf HQ",
@@ -6333,7 +6333,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.rd",
+          "actionId": "rs.rd",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf R&D",
@@ -6354,7 +6354,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.archives",
+          "actionId": "rs.archives",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf Archives",
@@ -6375,7 +6375,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.r1",
+          "actionId": "rs.r1",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf Remote 1",
@@ -6396,7 +6396,7 @@
           }
         },
         {
-          "actionId": "runner.end_turn",
+          "actionId": "r9",
           "side": "runner",
           "type": "end_turn",
           "label": "Zug beenden",
@@ -8422,7 +8422,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "runner.gain_credit",
+        "actionId": "rb",
         "side": "runner",
         "type": "gain_credit",
         "label": "1 Credit nehmen",
@@ -8443,7 +8443,7 @@
         }
       },
       {
-        "actionId": "runner.draw_card",
+        "actionId": "r8",
         "side": "runner",
         "type": "draw_card",
         "label": "Karte ziehen",
@@ -8466,7 +8466,7 @@
         }
       },
       {
-        "actionId": "runner.remove_tag",
+        "actionId": "rm",
         "side": "runner",
         "type": "remove_tag",
         "label": "Tag entfernen",
@@ -8483,7 +8483,7 @@
         "expiresAtStateVersion": 214
       },
       {
-        "actionId": "runner.install_card.cbd.cbd",
+        "actionId": "rc.cbd.cbd",
         "side": "runner",
         "type": "install_card",
         "label": "Little Black Box installieren",
@@ -8504,7 +8504,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c8b.c8b",
+        "actionId": "rc.c8b.c8b",
         "side": "runner",
         "type": "install_card",
         "label": "Superglue installieren",
@@ -8525,7 +8525,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c8b.c8b.runner_program_trash_before_install",
+        "actionId": "rc.c8b.c8b.runner_program_trash_before_install",
         "side": "runner",
         "type": "install_card",
         "label": "Superglue mit Programmtrash installieren",
@@ -8547,7 +8547,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c75.c75",
+        "actionId": "rc.c75.c75",
         "side": "runner",
         "type": "install_card",
         "label": "Matador installieren",
@@ -8568,7 +8568,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c75.c75.runner_program_trash_before_install",
+        "actionId": "rc.c75.c75.runner_program_trash_before_install",
         "side": "runner",
         "type": "install_card",
         "label": "Matador mit Programmtrash installieren",
@@ -8590,7 +8590,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c9t.c9t.58",
+        "actionId": "rh.c9t.c9t.58",
         "side": "runner",
         "type": "play_event",
         "label": "Meat Upgrade spielen",
@@ -8619,7 +8619,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.hq",
+        "actionId": "rs.hq",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf HQ",
@@ -8640,7 +8640,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.rd",
+        "actionId": "rs.rd",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf R&D",
@@ -8661,7 +8661,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.archives",
+        "actionId": "rs.archives",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf Archives",
@@ -8682,7 +8682,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.r1",
+        "actionId": "rs.r1",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf Remote 1",
@@ -8703,7 +8703,7 @@
         }
       },
       {
-        "actionId": "runner.end_turn",
+        "actionId": "r9",
         "side": "runner",
         "type": "end_turn",
         "label": "Zug beenden",
@@ -14790,7 +14790,7 @@
       "stateVersion": 213,
       "instances": [
         {
-          "instanceId": "plan:runner.contest_remote:remote%3Ar1",
+          "instanceId": "p1p4xezjcxov79rno40lq3f7rv",
           "dedupeKey": "remote:r1",
           "moduleId": "runner.contest_remote",
           "moduleVersion": "1",
@@ -14826,7 +14826,7 @@
               "terminalPatternThreat": true,
               "reachable": true,
               "marginalValue": 1400,
-              "evidenceCode": "runner_terminal_remote_contest_mandatory:r1:runner.start_run.r1",
+              "evidenceCode": "runner_terminal_remote_contest_mandatory:r1:rs.r1",
               "accessCommitment": {
                 "payoff": "score_threat",
                 "intendedAction": "steal",
@@ -14930,13 +14930,13 @@
           "updatedAtStateVersion": 213,
           "evidenceRefs": [
             {
-              "code": "runner_terminal_remote_contest_mandatory:r1:runner.start_run.r1",
+              "code": "runner_terminal_remote_contest_mandatory:r1:rs.r1",
               "source": "visible_state"
             }
           ]
         },
         {
-          "instanceId": "plan:runner.convert_run_window:run%3A199",
+          "instanceId": "p9nll9ew5devywk30suhb398h9",
           "dedupeKey": "run:199",
           "moduleId": "runner.convert_run_window",
           "moduleVersion": "1",
@@ -14959,7 +14959,7 @@
             "kind": "window",
             "id": "run:199"
           },
-          "parentInstanceId": "plan:runner.contest_remote:remote%3Ar1",
+          "parentInstanceId": "p1p4xezjcxov79rno40lq3f7rv",
           "openNeedIds": [],
           "phase": "execute",
           "milestone": "admitted",
@@ -14968,8 +14968,8 @@
             "signal": {
               "windowId": "run:199",
               "serverId": "r1",
-              "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar1",
-              "leafPlanInstanceId": "plan:runner.convert_run_window:run%3A199",
+              "rootPlanInstanceId": "p1p4xezjcxov79rno40lq3f7rv",
+              "leafPlanInstanceId": "p9nll9ew5devywk30suhb398h9",
               "semanticActionTypes": [
                 "access.steal_agenda"
               ],
@@ -15072,7 +15072,7 @@
                 ]
               },
               "actionAssessments": {
-                "runner.steal_agenda.c2hi": {
+                "rt.c2hi": {
                   "admissible": true,
                   "evidenceCodes": [
                     "runner_access_window_action_plan_admissible",
@@ -15120,7 +15120,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.defense_and_recovery:runner",
+          "instanceId": "p1gzjb6yfcv4zbzow512kexs33",
           "dedupeKey": "runner",
           "moduleId": "runner.defense_and_recovery",
           "moduleVersion": "1",
@@ -15216,7 +15216,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.economy:runner-portfolio-credit-reserve",
+          "instanceId": "pc7ebuiw5dxhlbzbf1nhcs4p4z",
           "dedupeKey": "runner-portfolio-credit-reserve",
           "moduleId": "runner.economy",
           "moduleVersion": "1",
@@ -15321,25 +15321,25 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:runner.contest_remote:remote%3Ar1",
+          "instanceId": "p1p4xezjcxov79rno40lq3f7rv",
           "stateVersion": 213,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.convert_run_window:run%3A199",
+          "instanceId": "p9nll9ew5devywk30suhb398h9",
           "stateVersion": 213,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.defense_and_recovery:runner",
+          "instanceId": "p1gzjb6yfcv4zbzow512kexs33",
           "stateVersion": 213,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.economy:runner-portfolio-credit-reserve",
+          "instanceId": "pc7ebuiw5dxhlbzbf1nhcs4p4z",
           "stateVersion": 213,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
@@ -15350,7 +15350,7 @@
         "commitmentId": "fnv1a:9c76879f",
         "sourcePlanId": "fnv1a:709067e0",
         "sourceLineHash": "fnv1a:38c43cda",
-        "sequenceRootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar1",
+        "sequenceRootPlanInstanceId": "p1p4xezjcxov79rno40lq3f7rv",
         "side": "runner",
         "turnKey": "runner:turn:29",
         "planningRulesFingerprint": "fnv1a:cd5e4e13",
@@ -15367,7 +15367,7 @@
           {
             "phaseId": "fnv1a:77c76f58",
             "root": {
-              "planInstanceId": "plan:runner.contest_remote:remote%3Ar1",
+              "planInstanceId": "p1p4xezjcxov79rno40lq3f7rv",
               "moduleId": "runner.convert_run_window",
               "milestoneId": "convert_active_run_window",
               "provenance": "resident"
@@ -15463,7 +15463,7 @@
           "sideSafePlanningFingerprint": "fnv1a:c2d727c8"
         },
         "currentBinding": {
-          "actionId": "runner.steal_agenda.c2hi",
+          "actionId": "rt.c2hi",
           "stateVersion": 213,
           "semanticActionSetFingerprint": "fnv1a:b97ddb47",
           "invocationKey": "fnv1a:099534ee"
@@ -15471,8 +15471,8 @@
         "actionType": "steal_agenda",
         "expectationId": "fnv1a:5bbfb5b2"
       },
-      "rootForegroundInstanceId": "plan:runner.contest_remote:remote%3Ar1",
-      "executorInstanceId": "plan:runner.convert_run_window:run%3A199"
+      "rootForegroundInstanceId": "p1p4xezjcxov79rno40lq3f7rv",
+      "executorInstanceId": "p9nll9ew5devywk30suhb398h9"
     }
   },
   "validation": {

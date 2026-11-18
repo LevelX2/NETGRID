@@ -704,14 +704,14 @@ describe("Originalset Spotcheck 2026-05-16 Breaker/Ice Subtype Mix hardening", (
       visibility: "hidden_info_barrier",
     });
     expect(seeya.pendingChoice?.options).toContainEqual({
-      id: expect.stringMatching(/^card_h[a-z0-9]{1,7}$/),
+      id: "card_hr1.r0",
       label: "Remote 1 Root 1",
       value: upgradeId,
     });
     const upgradeOptionId = seeya.pendingChoice?.options.find(
       (option) => option.value === upgradeId,
     )?.id;
-    expect(upgradeOptionId).toMatch(/^card_h[a-z0-9]{1,7}$/);
+    expect(upgradeOptionId).toBe("card_hr1.r0");
     const runnerExposeChoice = getPlayerView(seeya, "runner").pendingChoice;
     expect(runnerExposeChoice?.options).toContainEqual({
       id: upgradeOptionId,
@@ -1579,7 +1579,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
       (action) =>
         action.type === "break_subroutine" &&
         String(action.payload?.breakerId) === pileDriverId &&
-        action.payload?.subroutineIndexes === "0,1,2,3",
+        action.subroutineIndexes?.join(",") === "0,1,2,3",
     );
     expect(breakAction.costs).toEqual([{ credits: 3 }]);
     const stale = applyAction(state, {
@@ -1690,7 +1690,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
       (action) =>
         action.type === "break_subroutine" &&
         String(action.payload?.breakerId) === pileDriverId &&
-        action.payload?.subroutineIndexes === "0",
+        action.subroutineIndexes?.join(",") === "0",
     );
     expect(breakAction.costs).toEqual([{ credits: 3 }]);
     expect(breakAction.payload).toMatchObject({

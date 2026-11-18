@@ -64,7 +64,7 @@ describe("e6aca Corp remediation decision checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     if (json === activateBbsEconomyJson) {
       const plan = result.decision?.decisionDebug?.planFirstDecision;
-      const defenseRoot = "plan:corp.defend_servers:server-defense-portfolio";
+      const defenseRoot = "penw02zfrkklof54c2nuye5att";
       expect(plan?.selectedPlan).toMatchObject({
         moduleId: "corp.defend_servers",
         instanceId: defenseRoot,
@@ -80,14 +80,14 @@ describe("e6aca Corp remediation decision checkpoints", () => {
         planInstanceId: plan?.selectedPlan?.instanceId,
       });
       const bbsRoot =
-        "plan:corp.economy:economy-campaign%3Ac37x%3Arez%3Ar1";
+        "p26dm801tcnpn5btscwp4uv3o9";
       expect(plan?.turnPlanning?.heads).toContainEqual(
         expect.objectContaining({
           moduleId: "corp.economy",
           rootPlanInstanceId: bbsRoot,
           executorPlanInstanceId: bbsRoot,
           actionId:
-            "corp.rez_card.c37x.r1.c37x",
+            "cp.c37x.r1.c37x",
           witnessValid: true,
         }),
       );
@@ -158,7 +158,7 @@ describe("e6aca Corp remediation decision checkpoints", () => {
           acceptableActions: [
             {
               actionId:
-                "corp.install_card.cfx.rd.cfx.4",
+                "cc.cfx.rd.cfx.4",
             },
           ],
         };

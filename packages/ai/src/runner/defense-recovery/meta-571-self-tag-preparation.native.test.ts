@@ -54,7 +54,7 @@ it.each([
   )!;
   expect(action.type).toBe("install_card");
   expect(referencesDefaultDeckCard(action.source, 373)).toBe(true);
-  const parent = "plan:runner.pressure_central:central%3Ahq";
+  const parent = "pa7nez1ioecg7mf06q1uwqq57o";
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
     parent,
   );

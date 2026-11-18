@@ -50,15 +50,15 @@ it("retains the direct central run root across both real Pocket traces and Chiba
       selectedAtStateVersion: d === 124 ? 123 : 125,
       originalActionId:
         d === 124
-          ? "runner.continue_run.1"
-          : "runner.resolve_choice",
+          ? "r5.1"
+          : "rn",
     });
     if (d === 126)
       expect(z.selectedChoices?.selectedOptionIds).toEqual(["bid_6"]);
     if (d === 127) {
       const a = input.legalActions.find((a: any) => a.actionId === z.actionId)!;
       expect(a.payload.costPenaltySupportOriginalActionId).toBe(
-        "runner.resolve_choice",
+        "rn",
       );
       expect(a.payload.costPenaltySupportWindowId).toBe(
         126,
@@ -205,8 +205,8 @@ it("executes the full second-trace, Chiba and exact original bid sequence twice 
       state = r.state;
       expect(validateGameState(state).ok).toBe(true);
     }
-    expect(actions[0]).toBe("runner.continue_run.1");
-    expect(actions[4]).toBe("runner.resolve_choice");
+    expect(actions[0]).toBe("r5.1");
+    expect(actions[4]).toBe("rn");
     expect(state.runner.credits).toBe(0);
     hashes.push(hashGameState(state));
   }

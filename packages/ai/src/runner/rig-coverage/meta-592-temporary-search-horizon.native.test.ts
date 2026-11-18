@@ -234,7 +234,7 @@ it("keeps the native terminal remote search with one guaranteed funding click (S
   expect(
     gaps.some(
       (g) =>
-        g.targetRunActionId === "runner.start_run.r1" &&
+        g.targetRunActionId === "rs.r1" &&
         g.directSearchActionIds.includes(d.actionId!),
     ),
   ).toBe(true);
@@ -261,7 +261,7 @@ it("uses the existing terminal run admission after two actual engine draws, with
   expect(cp.origin.checkedOriginalPrefix).toBe(159);
   expect(
     cp.origin.commands.map((x: { actionId: string }) => x.actionId),
-  ).toEqual(["runner.draw_card", "runner.draw_card"]);
+  ).toEqual(["r8", "r8"]);
   const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
   input.planningStateIdentity = buildPlanningStateIdentity(input);
   resetResidentPlanPortfolioMemory();

@@ -31,7 +31,7 @@ function checkpoint() {
 it("funds the exact last-chance contest while preserving all ten exit credits", () => {
   const { input, runtime } = checkpoint();
   const target = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.r1",
+    (t) => t.actionId === "rs.r1",
   );
   expect(target).toMatchObject({
     pathPassability: "blocked_unpayable",
@@ -55,7 +55,7 @@ it("funds the exact last-chance contest while preserving all ten exit credits", 
     decisionDebug: {
       planFirstDecision: {
         selectedStep: {
-          parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+          parentInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
         },
         route: {
           actionId: result.actionId,

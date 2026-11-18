@@ -80,7 +80,7 @@ it("keeps an immediately unpayable lifecycle action out of the executable plan",
     actions.find((a) => a.actionId === cp.engineLifecycleQuoteProof.actionId)!.payload!.cardImplementationLifecycleLeavePlayPaymentStatus = "unpayable";
   }
   const { result } = choose(cp);
-  expect(result.actionId).toBe("runner.end_turn");
+  expect(result.actionId).toBe("r9");
   expect(result.decisionDebug!.planFirstDecision!.selectedPlan!.moduleId).toBe("runner.complete_turn");
 });
 
@@ -88,7 +88,7 @@ it("retains the loan when the visible remaining-turn ceiling does not repay the 
   const cp = checkpoint();
   cp.input.playerView.opponent.deckCount = 10;
   const { result } = choose(cp);
-  expect(result.actionId).toBe("runner.end_turn");
+  expect(result.actionId).toBe("r9");
 });
 
 it.each([
@@ -101,5 +101,5 @@ it.each([
     delete actions.find((a) => a.actionId === cp.engineLifecycleQuoteProof.actionId)!.payload![missing];
   }
   const { result } = choose(cp);
-  expect(result.actionId).toBe("runner.end_turn");
+  expect(result.actionId).toBe("r9");
 });

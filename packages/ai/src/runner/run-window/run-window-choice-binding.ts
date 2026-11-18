@@ -251,7 +251,7 @@ export function selectedRunnerAccessProgramInstallMemoryOptionIds(
     targetCardId !== undefined &&
     Number.isInteger(automaticFreedMemory) &&
     automaticFreedMemory >= 0 &&
-    originalChoiceId.startsWith(`runner.steal_agenda.${targetCardId}.`) &&
+    originalChoiceId.startsWith(`rt.${targetCardId}.`) &&
     originalSourceMatch?.[1] === targetCardId &&
     Number(originalSourceMatch[2]) > 0 &&
     choice.side === "runner" &&

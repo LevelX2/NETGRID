@@ -127,7 +127,7 @@ it("replaces the original blind run with exact Remote information preparation", 
   expect(referencesDefaultDeckCard(decision.actionId, 270)).toBe(true);
   expect(decision.reasonCode).toBe("plan_first.runner.contest_remote");
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Ar1",
+    "p1p4xezjcxov79rno40lq3f7rv",
   );
   expect(decision.fallbackUsed).toBe(false);
   expect(
@@ -214,7 +214,7 @@ it("keeps a financed root preparation when a more advanced remote lacks a funded
   const first = chooseAiAction(input(state));
   expect(referencesDefaultDeckCard(first.actionId, 270)).toBe(true);
   expect(first.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Ar1",
+    "p1p4xezjcxov79rno40lq3f7rv",
   );
   const after = apply(state, first.actionId!),
     choice = input(after),
@@ -282,7 +282,7 @@ it("keeps the native G14/D49 financed information head despite the general econo
   expect(decision.reasonCode).toBe("plan_first.runner.contest_remote");
   const plan = decision.decisionDebug!.planFirstDecision!;
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Ar1",
+    "p1p4xezjcxov79rno40lq3f7rv",
   );
   expect(plan.route?.actionId).toBe(decision.actionId);
   expect(plan.route?.stateVersion).toBe(cp.input.playerView.stateVersion);

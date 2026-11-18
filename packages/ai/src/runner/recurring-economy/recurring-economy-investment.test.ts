@@ -106,7 +106,7 @@ describe("assessRunnerRecurringEconomyRunHorizon", () => {
     ready: true,
     terminal: false,
     serverId: "hq",
-    parentPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
+    parentPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
     value: 1800,
     fundingGap: 0,
   };

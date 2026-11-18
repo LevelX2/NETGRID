@@ -40,7 +40,7 @@ describe("pairing 329 delegated Airport Locker coverage checkpoint", () => {
     );
 
     expect(decision).toMatchObject({
-      actionId: "runner.resolve_choice",
+      actionId: "rn",
       reasonCode: "plan_first.engine_window",
       fallbackUsed: false,
       selectedChoices: {
@@ -50,10 +50,8 @@ describe("pairing 329 delegated Airport Locker coverage checkpoint", () => {
     });
     expect(portfolio).toMatchObject({
       stateVersion: 239,
-      rootForegroundInstanceId: "plan:runner.pressure_central:central%3Ard",
-      executorInstanceId: expect.stringContaining(
-        "plan:runner.rig_and_coverage:coverage%3Abreaker_wall",
-      ),
+      rootForegroundInstanceId: "pa90fufw9vc5bkshp96ztlryxl",
+      executorInstanceId: executor?.instanceId,
     });
     expect(executor).toMatchObject({
       moduleId: "runner.rig_and_coverage",

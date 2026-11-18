@@ -190,7 +190,7 @@ describe("TargetChoiceShadow", () => {
   it("ranks real Engine payload server targets as report-only options", () => {
     const report = buildTargetChoiceShadowReport({
       action: action({
-        actionId: "runner.start_run.r1",
+        actionId: "rs.r1",
         type: "start_run",
         payload: { serverId: "r1" },
       }),
@@ -229,7 +229,7 @@ describe("TargetChoiceShadow", () => {
   it("ranks real Engine payload card targets when the card id is side-safe", () => {
     const report = buildTargetChoiceShadowReport({
       action: action({
-        actionId: "corp.score_agenda.r1_agenda",
+        actionId: "cr.r1_agenda",
         side: "corp",
         type: "score_agenda",
         payload: { cardId: "r1_agenda" },

@@ -70,7 +70,7 @@ it("spends an affordable mandatory ETR payment on the last action of the bound t
   expect(d.fallbackUsed).toBe(false);
   expect(d.timeoutUsed).toBe(false);
   expect(p.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Ar1",
+    "p1p4xezjcxov79rno40lq3f7rv",
   );
   expect(p.selectedPlan!.moduleId).toBe("runner.convert_run_window");
   expect(p.route).toMatchObject({
@@ -142,7 +142,7 @@ it("keeps the free ETR break after paying Skeleton's strength in the same termin
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.timeoutUsed).toBe(false);
   expect(decision.decisionDebug!.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+    rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
     selectedPlan: { moduleId: "runner.convert_run_window" },
     route: { actionId: action.actionId, stateVersion: 342 },
   });

@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import type { AiDecisionInput, MatchEventId, PublicGameEvent } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import runnerCheckpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-known-trap-unsafe-remote-run.json";
@@ -156,7 +157,7 @@ function residentAmbush(
   return {
     instances: [
       {
-        instanceId: `plan:corp.ambush_and_bluff:${cardInstanceId}`,
+        instanceId: planInstanceIdForProposal({ moduleId: "corp.ambush_and_bluff", dedupeKey: cardInstanceId }),
         moduleId: "corp.ambush_and_bluff",
         viability: "ready",
         moduleState: {

@@ -9591,7 +9591,7 @@
         "label": "Jack 'n' Joe"
       },
       "selectedStepKind": "install_development_card",
-      "selectedActionId": "runner.play_event.c1w9.c1w9",
+      "selectedActionId": "rh.c1w9.c1w9",
       "selectedActionType": "play_event",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
@@ -9641,7 +9641,7 @@
         },
         "updatedAtStateVersion": 249,
         "evidence": [
-          "plan_portfolio_source_plan:runner.contest_remote:r1",
+          "plan_portfolio_source_pdl5beuqtdrahr4fqagyng1zk5",
           "plan_portfolio_execution_class:bounded_sequence",
           "plan_portfolio_role:foreground",
           "plan_portfolio_lifecycle:active"
@@ -9703,7 +9703,7 @@
         "plan_portfolio_foreground:runner.contest_remote",
         "plan_portfolio_backgrounds:runner.build_credit_bank",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.play_event.c1w9.c1w9"
+        "plan_portfolio_selected_action:rh.c1w9.c1w9"
       ]
     },
     "strategicIntent": {
@@ -10787,7 +10787,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.install_card.c29d.c29d"
+        "actionId": "rc.c29d.c29d"
       }
     ],
     "planExecution": {

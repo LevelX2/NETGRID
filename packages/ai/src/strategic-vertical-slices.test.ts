@@ -122,7 +122,7 @@ describe("Deck strategy runtime vertical slices", () => {
       ]),
     );
     expect(first.decisionDebug?.planId).toContain(
-      "plan:runner.pressure_central:central%3Ard",
+      "pa90fufw9vc5bkshp96ztlryxl",
     );
     expect(second.evidence).toEqual(
       expect.arrayContaining([

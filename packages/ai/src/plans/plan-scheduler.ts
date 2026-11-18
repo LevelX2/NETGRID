@@ -35,6 +35,7 @@ import {
   type SemanticContinuation,
 } from "./plan-route";
 import { PlanResolutionFailure } from "./plan-resolution-failure";
+import { comparePlanIdentities } from "./compact-plan-identity";
 import {
   requireCurrentTransientPlanSignals,
   transientPlanSignalsForExactPlanTarget,
@@ -430,7 +431,7 @@ export function enumerateCurrentPlanSchedulerRoutes(params: {
     candidates: candidates.sort(
       (left, right) =>
         compareValidatedPlanAssessments(left.assessment, right.assessment) ||
-        left.instance.instanceId.localeCompare(right.instance.instanceId) ||
+        comparePlanIdentities(left.instance, right.instance) ||
         comparePlanRouteCandidates(left, right),
     ),
     issues: issues.sort(
@@ -484,6 +485,7 @@ function currentPlanAssessmentState(params: {
     needId: string;
   }>;
 } {
+  const instanceById = new Map(params.portfolio.instances.map((instance) => [instance.instanceId, instance]));
   const rawValidatedAssessments = params.portfolio.instances
     .filter((instance) => instance.viability === "ready")
     .map((instance) => {
@@ -533,8 +535,12 @@ function currentPlanAssessmentState(params: {
     params.context,
   );
   return {
-    assessments: supportBindings.assessments.sort(
-      compareValidatedPlanAssessments,
+    assessments: supportBindings.assessments.sort((left, right) =>
+      compareValidatedPlanAssessments(left, right) ||
+      comparePlanIdentities(
+        instanceById.get(left.instanceId)!,
+        instanceById.get(right.instanceId)!,
+      ),
     ),
     ineligibleProviderInstanceIds:
       supportBindings.ineligibleProviderInstanceIds,

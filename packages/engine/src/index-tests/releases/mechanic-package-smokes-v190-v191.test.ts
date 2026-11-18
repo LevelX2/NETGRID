@@ -707,12 +707,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
       "runner",
       (action) => action.type === "continue_run",
     );
-    expect(continueAction.payload).toMatchObject({
-      unbrokenSubroutineCount: 2,
-      encounterSubroutineIds:
-        "0,1",
-      encounterWillEndRun: true,
-    });
+    expect(continueAction).toMatchObject({encounterSubroutineIds: ["0","1"], payload: { unbrokenSubroutineCount: 2, encounterWillEndRun: true }});
     unbroken = apply(
       unbroken,
       "runner",
@@ -873,11 +868,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
       "runner",
       (action) => action.type === "continue_run",
     );
-    expect(tesseractContinue.payload).toMatchObject({
-      unbrokenSubroutineCount: 2,
-      encounterSubroutineIds:
-        "0,1",
-    });
+    expect(tesseractContinue).toMatchObject({encounterSubroutineIds: ["0","1"], payload: { unbrokenSubroutineCount: 2 }});
     expect(tesseractContinue.payload).not.toHaveProperty(
       "payOrEndRunSubroutineIndexes",
     );

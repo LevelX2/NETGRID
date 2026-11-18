@@ -42,7 +42,7 @@ it("preserves the current run capability's successful-run self tag in the existi
 it("does not transfer the held event's self tag to basic runs", () => {
   const { input } = fixture();
   const target = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.hq",
+    (t) => t.actionId === "rs.hq",
   )!;
   expect(target.runActionProjection.riskSignals).not.toContain(
     "tag_self:successful_run",

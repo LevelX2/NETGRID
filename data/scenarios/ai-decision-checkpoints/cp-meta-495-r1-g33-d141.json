@@ -4679,7 +4679,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "corp.gain_credit",
+          "actionId": "cb",
           "side": "corp",
           "type": "gain_credit",
           "label": "1 Credit nehmen",
@@ -4700,7 +4700,7 @@
           }
         },
         {
-          "actionId": "corp.draw_card",
+          "actionId": "c8",
           "side": "corp",
           "type": "draw_card",
           "label": "Karte ziehen",
@@ -4716,7 +4716,7 @@
           "expiresAtStateVersion": 140
         },
         {
-          "actionId": "corp.install_card.c6t.new_remote.c6t",
+          "actionId": "cc.c6t.new_remote.c6t",
           "side": "corp",
           "type": "install_card",
           "label": "Karte in neuem Remote installieren",
@@ -4738,7 +4738,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c6t.hq.c6t",
+          "actionId": "cc.c6t.hq.c6t",
           "side": "corp",
           "type": "install_card",
           "label": "Karte in HQ installieren",
@@ -4760,7 +4760,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c6t.rd.c6t",
+          "actionId": "cc.c6t.rd.c6t",
           "side": "corp",
           "type": "install_card",
           "label": "Karte in R&D installieren",
@@ -4782,7 +4782,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c6t.r1.c6t",
+          "actionId": "cc.c6t.r1.c6t",
           "side": "corp",
           "type": "install_card",
           "label": "Karte in Remote 1 installieren",
@@ -4804,7 +4804,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c6t.r2.c6t",
+          "actionId": "cc.c6t.r2.c6t",
           "side": "corp",
           "type": "install_card",
           "label": "Karte in Remote 2 installieren",
@@ -4826,7 +4826,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c5h.new_remote.c5h",
+          "actionId": "cc.c5h.new_remote.c5h",
           "side": "corp",
           "type": "install_card",
           "label": "Karte in neuem Remote installieren",
@@ -4849,7 +4849,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c5h.hq.c5h",
+          "actionId": "cc.c5h.hq.c5h",
           "side": "corp",
           "type": "install_card",
           "label": "Karte in HQ installieren",
@@ -4872,7 +4872,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c5h.rd.c5h",
+          "actionId": "cc.c5h.rd.c5h",
           "side": "corp",
           "type": "install_card",
           "label": "Karte in R&D installieren",
@@ -4895,7 +4895,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c5h.r1.c5h",
+          "actionId": "cc.c5h.r1.c5h",
           "side": "corp",
           "type": "install_card",
           "label": "Karte in Remote 1 installieren",
@@ -4918,7 +4918,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c5h.r2.c5h",
+          "actionId": "cc.c5h.r2.c5h",
           "side": "corp",
           "type": "install_card",
           "label": "Karte in Remote 2 installieren",
@@ -4941,7 +4941,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c2e.new_remote.c2e",
+          "actionId": "cc.c2e.new_remote.c2e",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor neuem Remote installieren",
@@ -4973,7 +4973,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c2e.hq.c2e.1",
+          "actionId": "cc.c2e.hq.c2e.1",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor HQ installieren",
@@ -5010,7 +5010,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c2e.rd.c2e.1",
+          "actionId": "cc.c2e.rd.c2e.1",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor R&D installieren",
@@ -5047,7 +5047,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c2e.archives.c2e.0",
+          "actionId": "cc.c2e.archives.c2e.0",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor Archives installieren",
@@ -5083,7 +5083,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c2e.r1.c2e.1",
+          "actionId": "cc.c2e.r1.c2e.1",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor Remote 1 installieren",
@@ -5120,7 +5120,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c2e.r2.c2e.1",
+          "actionId": "cc.c2e.r2.c2e.1",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor Remote 2 installieren",
@@ -5157,7 +5157,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c4d.new_remote.c4d",
+          "actionId": "cc.c4d.new_remote.c4d",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor neuem Remote installieren",
@@ -5189,7 +5189,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c4d.hq.c4d.1",
+          "actionId": "cc.c4d.hq.c4d.1",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor HQ installieren",
@@ -5226,7 +5226,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c4d.rd.c4d.1",
+          "actionId": "cc.c4d.rd.c4d.1",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor R&D installieren",
@@ -5263,7 +5263,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c4d.archives.c4d.0",
+          "actionId": "cc.c4d.archives.c4d.0",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor Archives installieren",
@@ -5299,7 +5299,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c4d.r1.c4d.1",
+          "actionId": "cc.c4d.r1.c4d.1",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor Remote 1 installieren",
@@ -5336,7 +5336,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c4d.r2.c4d.1",
+          "actionId": "cc.c4d.r2.c4d.1",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor Remote 2 installieren",
@@ -5373,7 +5373,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c2u.new_remote.c2u",
+          "actionId": "cc.c2u.new_remote.c2u",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor neuem Remote installieren",
@@ -5405,7 +5405,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c2u.hq.c2u.1",
+          "actionId": "cc.c2u.hq.c2u.1",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor HQ installieren",
@@ -5442,7 +5442,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c2u.rd.c2u.1",
+          "actionId": "cc.c2u.rd.c2u.1",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor R&D installieren",
@@ -5479,7 +5479,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c2u.archives.c2u.0",
+          "actionId": "cc.c2u.archives.c2u.0",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor Archives installieren",
@@ -5515,7 +5515,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c2u.r1.c2u.1",
+          "actionId": "cc.c2u.r1.c2u.1",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor Remote 1 installieren",
@@ -5552,7 +5552,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c2u.r2.c2u.1",
+          "actionId": "cc.c2u.r2.c2u.1",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor Remote 2 installieren",
@@ -5589,7 +5589,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c19.new_remote.c19",
+          "actionId": "cc.c19.new_remote.c19",
           "side": "corp",
           "type": "install_card",
           "label": "Karte in neuem Remote installieren",
@@ -5620,7 +5620,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c19.r1.c19",
+          "actionId": "cc.c19.r1.c19",
           "side": "corp",
           "type": "install_card",
           "label": "Karte in Remote 1 installieren",
@@ -5652,7 +5652,7 @@
           }
         },
         {
-          "actionId": "corp.advance_card.c1a.c1a",
+          "actionId": "c2.c1a.c1a",
           "side": "corp",
           "type": "advance_card",
           "label": "Data Fort Remapping in Remote 2 advancen",
@@ -5672,7 +5672,7 @@
           }
         },
         {
-          "actionId": "corp.end_turn",
+          "actionId": "c9",
           "side": "corp",
           "type": "end_turn",
           "label": "Zug beenden",
@@ -7983,7 +7983,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "corp.gain_credit",
+        "actionId": "cb",
         "side": "corp",
         "type": "gain_credit",
         "label": "1 Credit nehmen",
@@ -8004,7 +8004,7 @@
         }
       },
       {
-        "actionId": "corp.draw_card",
+        "actionId": "c8",
         "side": "corp",
         "type": "draw_card",
         "label": "Karte ziehen",
@@ -8020,7 +8020,7 @@
         "expiresAtStateVersion": 140
       },
       {
-        "actionId": "corp.install_card.c6t.new_remote.c6t",
+        "actionId": "cc.c6t.new_remote.c6t",
         "side": "corp",
         "type": "install_card",
         "label": "Karte in neuem Remote installieren",
@@ -8042,7 +8042,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c6t.hq.c6t",
+        "actionId": "cc.c6t.hq.c6t",
         "side": "corp",
         "type": "install_card",
         "label": "Karte in HQ installieren",
@@ -8064,7 +8064,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c6t.rd.c6t",
+        "actionId": "cc.c6t.rd.c6t",
         "side": "corp",
         "type": "install_card",
         "label": "Karte in R&D installieren",
@@ -8086,7 +8086,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c6t.r1.c6t",
+        "actionId": "cc.c6t.r1.c6t",
         "side": "corp",
         "type": "install_card",
         "label": "Karte in Remote 1 installieren",
@@ -8108,7 +8108,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c6t.r2.c6t",
+        "actionId": "cc.c6t.r2.c6t",
         "side": "corp",
         "type": "install_card",
         "label": "Karte in Remote 2 installieren",
@@ -8130,7 +8130,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c5h.new_remote.c5h",
+        "actionId": "cc.c5h.new_remote.c5h",
         "side": "corp",
         "type": "install_card",
         "label": "Karte in neuem Remote installieren",
@@ -8153,7 +8153,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c5h.hq.c5h",
+        "actionId": "cc.c5h.hq.c5h",
         "side": "corp",
         "type": "install_card",
         "label": "Karte in HQ installieren",
@@ -8176,7 +8176,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c5h.rd.c5h",
+        "actionId": "cc.c5h.rd.c5h",
         "side": "corp",
         "type": "install_card",
         "label": "Karte in R&D installieren",
@@ -8199,7 +8199,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c5h.r1.c5h",
+        "actionId": "cc.c5h.r1.c5h",
         "side": "corp",
         "type": "install_card",
         "label": "Karte in Remote 1 installieren",
@@ -8222,7 +8222,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c5h.r2.c5h",
+        "actionId": "cc.c5h.r2.c5h",
         "side": "corp",
         "type": "install_card",
         "label": "Karte in Remote 2 installieren",
@@ -8245,7 +8245,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c2e.new_remote.c2e",
+        "actionId": "cc.c2e.new_remote.c2e",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor neuem Remote installieren",
@@ -8277,7 +8277,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c2e.hq.c2e.1",
+        "actionId": "cc.c2e.hq.c2e.1",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor HQ installieren",
@@ -8314,7 +8314,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c2e.rd.c2e.1",
+        "actionId": "cc.c2e.rd.c2e.1",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor R&D installieren",
@@ -8351,7 +8351,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c2e.archives.c2e.0",
+        "actionId": "cc.c2e.archives.c2e.0",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor Archives installieren",
@@ -8387,7 +8387,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c2e.r1.c2e.1",
+        "actionId": "cc.c2e.r1.c2e.1",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor Remote 1 installieren",
@@ -8424,7 +8424,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c2e.r2.c2e.1",
+        "actionId": "cc.c2e.r2.c2e.1",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor Remote 2 installieren",
@@ -8461,7 +8461,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c4d.new_remote.c4d",
+        "actionId": "cc.c4d.new_remote.c4d",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor neuem Remote installieren",
@@ -8493,7 +8493,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c4d.hq.c4d.1",
+        "actionId": "cc.c4d.hq.c4d.1",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor HQ installieren",
@@ -8530,7 +8530,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c4d.rd.c4d.1",
+        "actionId": "cc.c4d.rd.c4d.1",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor R&D installieren",
@@ -8567,7 +8567,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c4d.archives.c4d.0",
+        "actionId": "cc.c4d.archives.c4d.0",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor Archives installieren",
@@ -8603,7 +8603,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c4d.r1.c4d.1",
+        "actionId": "cc.c4d.r1.c4d.1",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor Remote 1 installieren",
@@ -8640,7 +8640,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c4d.r2.c4d.1",
+        "actionId": "cc.c4d.r2.c4d.1",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor Remote 2 installieren",
@@ -8677,7 +8677,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c2u.new_remote.c2u",
+        "actionId": "cc.c2u.new_remote.c2u",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor neuem Remote installieren",
@@ -8709,7 +8709,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c2u.hq.c2u.1",
+        "actionId": "cc.c2u.hq.c2u.1",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor HQ installieren",
@@ -8746,7 +8746,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c2u.rd.c2u.1",
+        "actionId": "cc.c2u.rd.c2u.1",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor R&D installieren",
@@ -8783,7 +8783,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c2u.archives.c2u.0",
+        "actionId": "cc.c2u.archives.c2u.0",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor Archives installieren",
@@ -8819,7 +8819,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c2u.r1.c2u.1",
+        "actionId": "cc.c2u.r1.c2u.1",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor Remote 1 installieren",
@@ -8856,7 +8856,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c2u.r2.c2u.1",
+        "actionId": "cc.c2u.r2.c2u.1",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor Remote 2 installieren",
@@ -8893,7 +8893,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c19.new_remote.c19",
+        "actionId": "cc.c19.new_remote.c19",
         "side": "corp",
         "type": "install_card",
         "label": "Karte in neuem Remote installieren",
@@ -8924,7 +8924,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c19.r1.c19",
+        "actionId": "cc.c19.r1.c19",
         "side": "corp",
         "type": "install_card",
         "label": "Karte in Remote 1 installieren",
@@ -8956,7 +8956,7 @@
         }
       },
       {
-        "actionId": "corp.advance_card.c1a.c1a",
+        "actionId": "c2.c1a.c1a",
         "side": "corp",
         "type": "advance_card",
         "label": "Data Fort Remapping in Remote 2 advancen",
@@ -8976,7 +8976,7 @@
         }
       },
       {
-        "actionId": "corp.end_turn",
+        "actionId": "c9",
         "side": "corp",
         "type": "end_turn",
         "label": "Zug beenden",
@@ -16259,7 +16259,7 @@
       "stateVersion": 140,
       "instances": [
         {
-          "instanceId": "plan:corp.economy:economy-visible-liquidity-development%3A9",
+          "instanceId": "p4gj7ufjz3vz3frwsqhg6znxs8",
           "dedupeKey": "economy-visible-liquidity-development:9",
           "moduleId": "corp.economy",
           "moduleVersion": "1",
@@ -16296,7 +16296,7 @@
               "gap": 4,
               "projectedCreditGain": 1,
               "actionIds": [
-                "corp.gain_credit"
+                "cb"
               ],
               "priorityClass": "P6",
               "cadence": {
@@ -16348,7 +16348,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.establish_scoring_remote:strategic-score-remote",
+          "instanceId": "p6vrrjl5fc78gjet2n25nst7pp",
           "dedupeKey": "strategic-score-remote",
           "moduleId": "corp.establish_scoring_remote",
           "moduleVersion": "2",
@@ -16517,7 +16517,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac19%3Anew_remote",
+          "instanceId": "p7q2e2hem5lgvto1cjajh88n90",
           "dedupeKey": "agenda:c19:new_remote",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -16551,7 +16551,7 @@
               "agendaPoints": 2,
               "agendaInstanceId": "c19",
               "actionIds": [
-                "corp.install_card.c19.new_remote.c19"
+                "cc.c19.new_remote.c19"
               ],
               "serverId": "new_remote",
               "phase": "install_agenda",
@@ -16577,7 +16577,7 @@
                       "credits": 0
                     },
                     {
-                      "reserveId": "score_action:corp.install_card.c19.new_remote.c19",
+                      "reserveId": "score_action:cc.c19.new_remote.c19",
                       "credits": 0
                     },
                     {
@@ -16598,7 +16598,7 @@
                   "availableCorpAgendaPoints": 2,
                   "totalScoreReserveCredits": 4,
                   "hardClickReserve": 0,
-                  "scoreReserveFingerprint": "clicks:0|127:score_action:corp.install_card.c19.new_remote.c19=0|26:defense_central_protection=0|59:post_score_floor:c19=0|64:remaining_advancement:c19=4",
+                  "scoreReserveFingerprint": "clicks:0|127:score_action:cc.c19.new_remote.c19=0|26:defense_central_protection=0|59:post_score_floor:c19=0|64:remaining_advancement:c19=4",
                   "protection": {
                     "knowledge": "known",
                     "runnerAccessSuccessProbability": {
@@ -16718,7 +16718,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac19%3Ar1",
+          "instanceId": "p82me9cuz25b3s2ky5odrk4ci0",
           "dedupeKey": "agenda:c19:r1",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -16752,7 +16752,7 @@
               "agendaPoints": 2,
               "agendaInstanceId": "c19",
               "actionIds": [
-                "corp.install_card.c19.r1.c19"
+                "cc.c19.r1.c19"
               ],
               "serverId": "r1",
               "phase": "install_agenda",
@@ -16778,7 +16778,7 @@
                       "credits": 0
                     },
                     {
-                      "reserveId": "score_action:corp.install_card.c19.r1.c19",
+                      "reserveId": "score_action:cc.c19.r1.c19",
                       "credits": 0
                     },
                     {
@@ -16799,7 +16799,7 @@
                   "availableCorpAgendaPoints": 2,
                   "totalScoreReserveCredits": 4,
                   "hardClickReserve": 0,
-                  "scoreReserveFingerprint": "clicks:0|125:score_action:corp.install_card.c19.r1.c19=0|26:defense_central_protection=0|59:post_score_floor:c19=0|64:remaining_advancement:c19=4",
+                  "scoreReserveFingerprint": "clicks:0|125:score_action:cc.c19.r1.c19=0|26:defense_central_protection=0|59:post_score_floor:c19=0|64:remaining_advancement:c19=4",
                   "protection": {
                     "knowledge": "known",
                     "runnerAccessSuccessProbability": {
@@ -16927,7 +16927,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac1a%3Ar1",
+          "instanceId": "pe32huaypnrqu4d7eixpbfwfdc",
           "dedupeKey": "agenda:c1a:r1",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -16963,7 +16963,7 @@
               "agendaPoints": 2,
               "agendaInstanceId": "c1a",
               "actionIds": [
-                "corp.install_card.c1a.r1.c1a"
+                "cc.c1a.r1.c1a"
               ],
               "serverId": "r1",
               "phase": "install_agenda",
@@ -16989,7 +16989,7 @@
                       "credits": 0
                     },
                     {
-                      "reserveId": "score_action:corp.install_card.c1a.r1.c1a",
+                      "reserveId": "score_action:cc.c1a.r1.c1a",
                       "credits": 0
                     },
                     {
@@ -17010,7 +17010,7 @@
                   "availableCorpAgendaPoints": 2,
                   "totalScoreReserveCredits": 4,
                   "hardClickReserve": 0,
-                  "scoreReserveFingerprint": "clicks:0|125:score_action:corp.install_card.c1a.r1.c1a=0|26:defense_central_protection=0|59:post_score_floor:c1a=0|64:remaining_advancement:c1a=4",
+                  "scoreReserveFingerprint": "clicks:0|125:score_action:cc.c1a.r1.c1a=0|26:defense_central_protection=0|59:post_score_floor:c1a=0|64:remaining_advancement:c1a=4",
                   "protection": {
                     "knowledge": "known",
                     "runnerAccessSuccessProbability": {
@@ -17142,7 +17142,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac1a%3Ar2",
+          "instanceId": "pe32h8p2evsczce2lbr4gdels5",
           "dedupeKey": "agenda:c1a:r2",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -17176,7 +17176,7 @@
               "agendaPoints": 2,
               "agendaInstanceId": "c1a",
               "actionIds": [
-                "corp.advance_card.c1a.c1a"
+                "c2.c1a.c1a"
               ],
               "serverId": "r2",
               "phase": "advance_agenda",
@@ -17259,7 +17259,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac1h%3Anew_remote",
+          "instanceId": "pdihbs5r5t8680dvuljiradv01",
           "dedupeKey": "agenda:c1h:new_remote",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -17296,7 +17296,7 @@
               "agendaPoints": 2,
               "agendaInstanceId": "c1h",
               "actionIds": [
-                "corp.install_card.c1h.new_remote.c1h"
+                "cc.c1h.new_remote.c1h"
               ],
               "serverId": "new_remote",
               "phase": "install_agenda",
@@ -17322,7 +17322,7 @@
                       "credits": 0
                     },
                     {
-                      "reserveId": "score_action:corp.install_card.c1h.new_remote.c1h",
+                      "reserveId": "score_action:cc.c1h.new_remote.c1h",
                       "credits": 0
                     },
                     {
@@ -17343,7 +17343,7 @@
                   "availableCorpAgendaPoints": 0,
                   "totalScoreReserveCredits": 3,
                   "hardClickReserve": 0,
-                  "scoreReserveFingerprint": "clicks:0|109:score_action:corp.install_card.c1h.new_remote.c1h=0|26:defense_central_protection=0|50:post_score_floor:c1h=0|55:remaining_advancement:c1h=3",
+                  "scoreReserveFingerprint": "clicks:0|109:score_action:cc.c1h.new_remote.c1h=0|26:defense_central_protection=0|50:post_score_floor:c1h=0|55:remaining_advancement:c1h=3",
                   "protection": {
                     "knowledge": "known",
                     "runnerAccessSuccessProbability": {
@@ -17467,7 +17467,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac1h%3Ar1",
+          "instanceId": "pf3b2cjmou6z1rf60x6n216pqd",
           "dedupeKey": "agenda:c1h:r1",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -17503,7 +17503,7 @@
               "agendaPoints": 2,
               "agendaInstanceId": "c1h",
               "actionIds": [
-                "corp.install_card.c1h.r1.c1h"
+                "cc.c1h.r1.c1h"
               ],
               "serverId": "r1",
               "phase": "install_agenda",
@@ -17529,7 +17529,7 @@
                       "credits": 0
                     },
                     {
-                      "reserveId": "score_action:corp.install_card.c1h.r1.c1h",
+                      "reserveId": "score_action:cc.c1h.r1.c1h",
                       "credits": 0
                     },
                     {
@@ -17550,7 +17550,7 @@
                   "availableCorpAgendaPoints": 0,
                   "totalScoreReserveCredits": 3,
                   "hardClickReserve": 0,
-                  "scoreReserveFingerprint": "clicks:0|107:score_action:corp.install_card.c1h.r1.c1h=0|26:defense_central_protection=0|50:post_score_floor:c1h=0|55:remaining_advancement:c1h=3",
+                  "scoreReserveFingerprint": "clicks:0|107:score_action:cc.c1h.r1.c1h=0|26:defense_central_protection=0|50:post_score_floor:c1h=0|55:remaining_advancement:c1h=3",
                   "protection": {
                     "knowledge": "known",
                     "runnerAccessSuccessProbability": {
@@ -17674,7 +17674,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac1q%3Ar1",
+          "instanceId": "p2a3gtklln9ckv4f3b2pyipaow",
           "dedupeKey": "agenda:c1q:r1",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -17710,7 +17710,7 @@
               "agendaPoints": 2,
               "agendaInstanceId": "c1q",
               "actionIds": [
-                "corp.install_card.c1q.r1.c1q"
+                "cc.c1q.r1.c1q"
               ],
               "serverId": "r1",
               "phase": "install_agenda",
@@ -17736,7 +17736,7 @@
                       "credits": 0
                     },
                     {
-                      "reserveId": "score_action:corp.install_card.c1q.r1.c1q",
+                      "reserveId": "score_action:cc.c1q.r1.c1q",
                       "credits": 0
                     },
                     {
@@ -17757,7 +17757,7 @@
                   "availableCorpAgendaPoints": 0,
                   "totalScoreReserveCredits": 3,
                   "hardClickReserve": 0,
-                  "scoreReserveFingerprint": "clicks:0|129:score_action:corp.install_card.c1q.r1.c1q=0|26:defense_central_protection=0|61:post_score_floor:c1q=0|66:remaining_advancement:c1q=3",
+                  "scoreReserveFingerprint": "clicks:0|129:score_action:cc.c1q.r1.c1q=0|26:defense_central_protection=0|61:post_score_floor:c1q=0|66:remaining_advancement:c1q=3",
                   "protection": {
                     "knowledge": "known",
                     "runnerAccessSuccessProbability": {
@@ -17884,67 +17884,67 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:corp.economy:economy-visible-liquidity-development%3A9",
+          "instanceId": "p4gj7ufjz3vz3frwsqhg6znxs8",
           "stateVersion": 140,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.establish_scoring_remote:strategic-score-remote",
+          "instanceId": "p6vrrjl5fc78gjet2n25nst7pp",
           "stateVersion": 140,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac19%3Anew_remote",
+          "instanceId": "p7q2e2hem5lgvto1cjajh88n90",
           "stateVersion": 140,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac19%3Ar1",
+          "instanceId": "p82me9cuz25b3s2ky5odrk4ci0",
           "stateVersion": 140,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac1a%3Ar2",
+          "instanceId": "pe32h8p2evsczce2lbr4gdels5",
           "stateVersion": 140,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:corp.complete_turn:standard-turn-completion",
+          "instanceId": "p6yjycy2qsqgb3jl5pov75ajtq",
           "stateVersion": 140,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac1a%3Ar1",
+          "instanceId": "pe32huaypnrqu4d7eixpbfwfdc",
           "stateVersion": 140,
           "reason": "retained",
           "detailCode": "retention_protected"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac1h%3Anew_remote",
+          "instanceId": "pdihbs5r5t8680dvuljiradv01",
           "stateVersion": 140,
           "reason": "retained",
           "detailCode": "retention_protected"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac1h%3Ar1",
+          "instanceId": "pf3b2cjmou6z1rf60x6n216pqd",
           "stateVersion": 140,
           "reason": "retained",
           "detailCode": "retention_protected"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac1q%3Ar1",
+          "instanceId": "p2a3gtklln9ckv4f3b2pyipaow",
           "stateVersion": 140,
           "reason": "retained",
           "detailCode": "retention_protected"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac1a%3Ar2",
+          "instanceId": "pe32h8p2evsczce2lbr4gdels5",
           "stateVersion": 140,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
@@ -17955,11 +17955,11 @@
       "campaigns": [
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:agenda:c19:new_remote",
+          "campaignId": "k3zitwerm4dof9rrey7kk7utf1",
           "kind": "agenda",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.score_agenda:agenda%3Ac19%3Anew_remote",
+            "rootPlanInstanceId": "p7q2e2hem5lgvto1cjajh88n90",
             "moduleId": "corp.score_agenda",
             "targetCardInstanceId": "c19"
           },
@@ -17985,15 +17985,19 @@
             "campaign_status:blocked",
             "corp-opponent-campaign-continuity-v1",
             "corp_resident_score_parent_dominates_sibling_route:c1a:r2"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.score_agenda",
+            "objectiveKey": "agenda:c19:new_remote"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:agenda:c19:r1",
+          "campaignId": "kcifphjc3y5txe81cubxxw4ka1",
           "kind": "agenda",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.score_agenda:agenda%3Ac19%3Ar1",
+            "rootPlanInstanceId": "p82me9cuz25b3s2ky5odrk4ci0",
             "moduleId": "corp.score_agenda",
             "targetServerId": "r1",
             "targetCardInstanceId": "c19"
@@ -18020,15 +18024,19 @@
             "campaign_status:blocked",
             "corp-opponent-campaign-continuity-v1",
             "corp_resident_score_parent_dominates_sibling_route:c1a:r2"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.score_agenda",
+            "objectiveKey": "agenda:c19:r1"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:agenda:c1a:r1",
+          "campaignId": "k3d96o7olnl753bunmf06q8ru9",
           "kind": "agenda",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.score_agenda:agenda%3Ac1a%3Ar1",
+            "rootPlanInstanceId": "pe32huaypnrqu4d7eixpbfwfdc",
             "moduleId": "corp.score_agenda",
             "targetServerId": "r1",
             "targetCardInstanceId": "c1a"
@@ -18057,15 +18065,19 @@
             "corp-opponent-campaign-continuity-v1",
             "corp_resident_score_parent_dominates_sibling_route:c1q:r2",
             "corp_score_protection_required:r1"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.score_agenda",
+            "objectiveKey": "agenda:c1a:r1"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:agenda:c1a:r2",
+          "campaignId": "k3d978vx6cfyfi19e93tqmu6f0",
           "kind": "agenda",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.score_agenda:agenda%3Ac1a%3Ar2",
+            "rootPlanInstanceId": "pe32h8p2evsczce2lbr4gdels5",
             "moduleId": "corp.score_agenda",
             "targetServerId": "r2",
             "targetCardInstanceId": "c1a"
@@ -18097,15 +18109,19 @@
             "corp_engine_certified_mature_remote_score_install:r2",
             "corp_funded_protected_score_advance:r2",
             "engine_certified_next_turn_score_continuation:c1a:r2"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.score_agenda",
+            "objectiveKey": "agenda:c1a:r2"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:agenda:c1h:new_remote",
+          "campaignId": "k1sfq67c6vl993773qkq9equmo",
           "kind": "agenda",
           "status": "abandoned",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.score_agenda:agenda%3Ac1h%3Anew_remote",
+            "rootPlanInstanceId": "pdihbs5r5t8680dvuljiradv01",
             "moduleId": "corp.score_agenda",
             "targetCardInstanceId": "c1h"
           },
@@ -18127,7 +18143,7 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "9:run_declared:campaign:agenda:c1h:new_remote",
+              "outcomeId": "9:run_declared:k1sfq67c6vl993773qkq9equmo",
               "eventId": 9,
               "eventType": "start_run",
               "stateVersionAfter": 8,
@@ -18139,7 +18155,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "10:corp_rez:campaign:agenda:c1h:new_remote",
+              "outcomeId": "10:corp_rez:k1sfq67c6vl993773qkq9equmo",
               "eventId": 10,
               "eventType": "rez_ice",
               "stateVersionAfter": 9,
@@ -18151,7 +18167,7 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "12:run_declared:campaign:agenda:c1h:new_remote",
+              "outcomeId": "12:run_declared:k1sfq67c6vl993773qkq9equmo",
               "eventId": 12,
               "eventType": "continue_run",
               "stateVersionAfter": 11,
@@ -18163,7 +18179,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "14:run_declared:campaign:agenda:c1h:new_remote",
+              "outcomeId": "14:run_declared:k1sfq67c6vl993773qkq9equmo",
               "eventId": 14,
               "eventType": "continue_run",
               "stateVersionAfter": 13,
@@ -18175,7 +18191,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "16:run_declared:campaign:agenda:c1h:new_remote",
+              "outcomeId": "16:run_declared:k1sfq67c6vl993773qkq9equmo",
               "eventId": 16,
               "eventType": "start_run",
               "stateVersionAfter": 15,
@@ -18187,7 +18203,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "17:run_declared:campaign:agenda:c1h:new_remote",
+              "outcomeId": "17:run_declared:k1sfq67c6vl993773qkq9equmo",
               "eventId": 17,
               "eventType": "continue_run",
               "stateVersionAfter": 16,
@@ -18199,7 +18215,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "19:access_resolved:campaign:agenda:c1h:new_remote",
+              "outcomeId": "19:access_resolved:k1sfq67c6vl993773qkq9equmo",
               "eventId": 19,
               "eventType": "access_card",
               "stateVersionAfter": 18,
@@ -18211,7 +18227,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "21:run_declared:campaign:agenda:c1h:new_remote",
+              "outcomeId": "21:run_declared:k1sfq67c6vl993773qkq9equmo",
               "eventId": 21,
               "eventType": "start_run",
               "stateVersionAfter": 20,
@@ -18223,7 +18239,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "22:access_resolved:campaign:agenda:c1h:new_remote",
+              "outcomeId": "22:access_resolved:k1sfq67c6vl993773qkq9equmo",
               "eventId": 22,
               "eventType": "access_card",
               "stateVersionAfter": 21,
@@ -18234,7 +18250,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "30:run_declared:campaign:agenda:c1h:new_remote",
+              "outcomeId": "30:run_declared:k1sfq67c6vl993773qkq9equmo",
               "eventId": 30,
               "eventType": "start_run",
               "stateVersionAfter": 29,
@@ -18246,7 +18262,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "32:run_declared:campaign:agenda:c1h:new_remote",
+              "outcomeId": "32:run_declared:k1sfq67c6vl993773qkq9equmo",
               "eventId": 32,
               "eventType": "continue_run",
               "stateVersionAfter": 31,
@@ -18258,7 +18274,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "33:access_resolved:campaign:agenda:c1h:new_remote",
+              "outcomeId": "33:access_resolved:k1sfq67c6vl993773qkq9equmo",
               "eventId": 33,
               "eventType": "access_card",
               "stateVersionAfter": 32,
@@ -18269,7 +18285,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "34:access_resolved:campaign:agenda:c1h:new_remote",
+              "outcomeId": "34:access_resolved:k1sfq67c6vl993773qkq9equmo",
               "eventId": 34,
               "eventType": "steal_agenda",
               "stateVersionAfter": 33,
@@ -18280,7 +18296,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "35:run_declared:campaign:agenda:c1h:new_remote",
+              "outcomeId": "35:run_declared:k1sfq67c6vl993773qkq9equmo",
               "eventId": 35,
               "eventType": "start_run",
               "stateVersionAfter": 34,
@@ -18292,7 +18308,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "37:run_declared:campaign:agenda:c1h:new_remote",
+              "outcomeId": "37:run_declared:k1sfq67c6vl993773qkq9equmo",
               "eventId": 37,
               "eventType": "continue_run",
               "stateVersionAfter": 36,
@@ -18304,7 +18320,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "38:access_resolved:campaign:agenda:c1h:new_remote",
+              "outcomeId": "38:access_resolved:k1sfq67c6vl993773qkq9equmo",
               "eventId": 38,
               "eventType": "access_card",
               "stateVersionAfter": 37,
@@ -18315,7 +18331,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "86:corp_rez:campaign:agenda:c1h:new_remote",
+              "outcomeId": "86:corp_rez:k1sfq67c6vl993773qkq9equmo",
               "eventId": 86,
               "eventType": "rez_card",
               "stateVersionAfter": 85,
@@ -18327,7 +18343,7 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "118:run_declared:campaign:agenda:c1h:new_remote",
+              "outcomeId": "118:run_declared:k1sfq67c6vl993773qkq9equmo",
               "eventId": 118,
               "eventType": "start_run",
               "stateVersionAfter": 117,
@@ -18339,7 +18355,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "119:corp_rez:campaign:agenda:c1h:new_remote",
+              "outcomeId": "119:corp_rez:k1sfq67c6vl993773qkq9equmo",
               "eventId": 119,
               "eventType": "rez_ice",
               "stateVersionAfter": 118,
@@ -18351,7 +18367,7 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "121:run_declared:campaign:agenda:c1h:new_remote",
+              "outcomeId": "121:run_declared:k1sfq67c6vl993773qkq9equmo",
               "eventId": 121,
               "eventType": "continue_run",
               "stateVersionAfter": 120,
@@ -18363,7 +18379,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "123:run_declared:campaign:agenda:c1h:new_remote",
+              "outcomeId": "123:run_declared:k1sfq67c6vl993773qkq9equmo",
               "eventId": 123,
               "eventType": "continue_run",
               "stateVersionAfter": 122,
@@ -18384,15 +18400,19 @@
             "campaign_target_card_missing",
             "corp-opponent-campaign-continuity-v1",
             "corp_score_protection_funding_gap:new_remote:8"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.score_agenda",
+            "objectiveKey": "agenda:c1h:new_remote"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:agenda:c1h:r1",
+          "campaignId": "k5rnm0pnrrmqr3wee5cdbhk730",
           "kind": "agenda",
           "status": "abandoned",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.score_agenda:agenda%3Ac1h%3Ar1",
+            "rootPlanInstanceId": "pf3b2cjmou6z1rf60x6n216pqd",
             "moduleId": "corp.score_agenda",
             "targetServerId": "r1",
             "targetCardInstanceId": "c1h"
@@ -18415,7 +18435,7 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "16:run_declared:campaign:agenda:c1h:r1",
+              "outcomeId": "16:run_declared:k5rnm0pnrrmqr3wee5cdbhk730",
               "eventId": 16,
               "eventType": "start_run",
               "stateVersionAfter": 15,
@@ -18427,7 +18447,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "17:run_declared:campaign:agenda:c1h:r1",
+              "outcomeId": "17:run_declared:k5rnm0pnrrmqr3wee5cdbhk730",
               "eventId": 17,
               "eventType": "continue_run",
               "stateVersionAfter": 16,
@@ -18439,7 +18459,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "19:access_resolved:campaign:agenda:c1h:r1",
+              "outcomeId": "19:access_resolved:k5rnm0pnrrmqr3wee5cdbhk730",
               "eventId": 19,
               "eventType": "access_card",
               "stateVersionAfter": 18,
@@ -18451,7 +18471,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "19:remote_compromised:campaign:agenda:c1h:r1",
+              "outcomeId": "19:remote_compromised:k5rnm0pnrrmqr3wee5cdbhk730",
               "eventId": 19,
               "eventType": "access_card",
               "stateVersionAfter": 18,
@@ -18463,7 +18483,7 @@
               "evidenceCode": "campaign_remote_compromised_by_access"
             },
             {
-              "outcomeId": "22:access_resolved:campaign:agenda:c1h:r1",
+              "outcomeId": "22:access_resolved:k5rnm0pnrrmqr3wee5cdbhk730",
               "eventId": 22,
               "eventType": "access_card",
               "stateVersionAfter": 21,
@@ -18474,7 +18494,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "22:remote_compromised:campaign:agenda:c1h:r1",
+              "outcomeId": "22:remote_compromised:k5rnm0pnrrmqr3wee5cdbhk730",
               "eventId": 22,
               "eventType": "access_card",
               "stateVersionAfter": 21,
@@ -18485,7 +18505,7 @@
               "evidenceCode": "campaign_remote_compromised_by_access"
             },
             {
-              "outcomeId": "33:access_resolved:campaign:agenda:c1h:r1",
+              "outcomeId": "33:access_resolved:k5rnm0pnrrmqr3wee5cdbhk730",
               "eventId": 33,
               "eventType": "access_card",
               "stateVersionAfter": 32,
@@ -18496,7 +18516,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "33:remote_compromised:campaign:agenda:c1h:r1",
+              "outcomeId": "33:remote_compromised:k5rnm0pnrrmqr3wee5cdbhk730",
               "eventId": 33,
               "eventType": "access_card",
               "stateVersionAfter": 32,
@@ -18507,7 +18527,7 @@
               "evidenceCode": "campaign_remote_compromised_by_access"
             },
             {
-              "outcomeId": "34:access_resolved:campaign:agenda:c1h:r1",
+              "outcomeId": "34:access_resolved:k5rnm0pnrrmqr3wee5cdbhk730",
               "eventId": 34,
               "eventType": "steal_agenda",
               "stateVersionAfter": 33,
@@ -18518,7 +18538,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "34:remote_compromised:campaign:agenda:c1h:r1",
+              "outcomeId": "34:remote_compromised:k5rnm0pnrrmqr3wee5cdbhk730",
               "eventId": 34,
               "eventType": "steal_agenda",
               "stateVersionAfter": 33,
@@ -18529,7 +18549,7 @@
               "evidenceCode": "campaign_remote_compromised_by_access"
             },
             {
-              "outcomeId": "38:access_resolved:campaign:agenda:c1h:r1",
+              "outcomeId": "38:access_resolved:k5rnm0pnrrmqr3wee5cdbhk730",
               "eventId": 38,
               "eventType": "access_card",
               "stateVersionAfter": 37,
@@ -18540,7 +18560,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "38:remote_compromised:campaign:agenda:c1h:r1",
+              "outcomeId": "38:remote_compromised:k5rnm0pnrrmqr3wee5cdbhk730",
               "eventId": 38,
               "eventType": "access_card",
               "stateVersionAfter": 37,
@@ -18551,7 +18571,7 @@
               "evidenceCode": "campaign_remote_compromised_by_access"
             },
             {
-              "outcomeId": "86:corp_rez:campaign:agenda:c1h:r1",
+              "outcomeId": "86:corp_rez:k5rnm0pnrrmqr3wee5cdbhk730",
               "eventId": 86,
               "eventType": "rez_card",
               "stateVersionAfter": 85,
@@ -18563,7 +18583,7 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "123:run_declared:campaign:agenda:c1h:r1",
+              "outcomeId": "123:run_declared:k5rnm0pnrrmqr3wee5cdbhk730",
               "eventId": 123,
               "eventType": "continue_run",
               "stateVersionAfter": 122,
@@ -18584,15 +18604,19 @@
             "corp-opponent-campaign-continuity-v1",
             "corp_score_protection_funding_gap:r1:8",
             "corp_score_protection_funding_gap:r1:9"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.score_agenda",
+            "objectiveKey": "agenda:c1h:r1"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:agenda:c1q:r1",
+          "campaignId": "k6pw3kjddxj3zzpcxwm1eid9hd",
           "kind": "agenda",
           "status": "completed",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.score_agenda:agenda%3Ac1q%3Ar1",
+            "rootPlanInstanceId": "p2a3gtklln9ckv4f3b2pyipaow",
             "moduleId": "corp.score_agenda",
             "targetServerId": "r1",
             "targetCardInstanceId": "c1q"
@@ -18615,7 +18639,7 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "123:run_declared:campaign:agenda:c1q:r1",
+              "outcomeId": "123:run_declared:k6pw3kjddxj3zzpcxwm1eid9hd",
               "eventId": 123,
               "eventType": "continue_run",
               "stateVersionAfter": 122,
@@ -18634,15 +18658,19 @@
             "campaign_target_agenda_scored",
             "corp-opponent-campaign-continuity-v1",
             "corp_score_protection_required:r1"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.score_agenda",
+            "objectiveKey": "agenda:c1q:r1"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:agenda:c1q:r2",
+          "campaignId": "k6pw44a22sqjksgbc1q4te43ik",
           "kind": "agenda",
           "status": "completed",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.score_agenda:agenda%3Ac1q%3Ar2",
+            "rootPlanInstanceId": "p2a3g8wey358pu2n7puezomtcl",
             "moduleId": "corp.score_agenda",
             "targetServerId": "r2",
             "targetCardInstanceId": "c1q"
@@ -18665,7 +18693,7 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "118:run_declared:campaign:agenda:c1q:r2",
+              "outcomeId": "118:run_declared:k6pw44a22sqjksgbc1q4te43ik",
               "eventId": 118,
               "eventType": "start_run",
               "stateVersionAfter": 117,
@@ -18677,7 +18705,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "119:corp_rez:campaign:agenda:c1q:r2",
+              "outcomeId": "119:corp_rez:k6pw44a22sqjksgbc1q4te43ik",
               "eventId": 119,
               "eventType": "rez_ice",
               "stateVersionAfter": 118,
@@ -18689,7 +18717,7 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "121:run_declared:campaign:agenda:c1q:r2",
+              "outcomeId": "121:run_declared:k6pw44a22sqjksgbc1q4te43ik",
               "eventId": 121,
               "eventType": "continue_run",
               "stateVersionAfter": 120,
@@ -18701,7 +18729,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "123:run_declared:campaign:agenda:c1q:r2",
+              "outcomeId": "123:run_declared:k6pw44a22sqjksgbc1q4te43ik",
               "eventId": 123,
               "eventType": "continue_run",
               "stateVersionAfter": 122,
@@ -18725,15 +18753,19 @@
             "corp_engine_certified_mature_remote_score_install:r2",
             "corp_funded_protected_score_advance:r2",
             "engine_certified_next_turn_score_continuation:c1q:r2"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.score_agenda",
+            "objectiveKey": "agenda:c1q:r2"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:hq:corp.install_card.c31.hq.c31.0",
+          "campaignId": "kcrsdzhgzkm5qa1ztqv71odvgw",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "hq"
           },
@@ -18755,7 +18787,7 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "21:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.c31.hq.c31.0",
+              "outcomeId": "21:run_declared:kcrsdzhgzkm5qa1ztqv71odvgw",
               "eventId": 21,
               "eventType": "start_run",
               "stateVersionAfter": 20,
@@ -18767,7 +18799,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "22:access_resolved:campaign:corp.defend_servers:install:hq:corp.install_card.c31.hq.c31.0",
+              "outcomeId": "22:access_resolved:kcrsdzhgzkm5qa1ztqv71odvgw",
               "eventId": 22,
               "eventType": "access_card",
               "stateVersionAfter": 21,
@@ -18778,7 +18810,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "30:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.c31.hq.c31.0",
+              "outcomeId": "30:run_declared:kcrsdzhgzkm5qa1ztqv71odvgw",
               "eventId": 30,
               "eventType": "start_run",
               "stateVersionAfter": 29,
@@ -18790,7 +18822,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "32:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.c31.hq.c31.0",
+              "outcomeId": "32:run_declared:kcrsdzhgzkm5qa1ztqv71odvgw",
               "eventId": 32,
               "eventType": "continue_run",
               "stateVersionAfter": 31,
@@ -18802,7 +18834,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "33:access_resolved:campaign:corp.defend_servers:install:hq:corp.install_card.c31.hq.c31.0",
+              "outcomeId": "33:access_resolved:kcrsdzhgzkm5qa1ztqv71odvgw",
               "eventId": 33,
               "eventType": "access_card",
               "stateVersionAfter": 32,
@@ -18813,7 +18845,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "34:access_resolved:campaign:corp.defend_servers:install:hq:corp.install_card.c31.hq.c31.0",
+              "outcomeId": "34:access_resolved:kcrsdzhgzkm5qa1ztqv71odvgw",
               "eventId": 34,
               "eventType": "steal_agenda",
               "stateVersionAfter": 33,
@@ -18824,7 +18856,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "35:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.c31.hq.c31.0",
+              "outcomeId": "35:run_declared:kcrsdzhgzkm5qa1ztqv71odvgw",
               "eventId": 35,
               "eventType": "start_run",
               "stateVersionAfter": 34,
@@ -18836,7 +18868,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "37:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.c31.hq.c31.0",
+              "outcomeId": "37:run_declared:kcrsdzhgzkm5qa1ztqv71odvgw",
               "eventId": 37,
               "eventType": "continue_run",
               "stateVersionAfter": 36,
@@ -18848,7 +18880,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "38:access_resolved:campaign:corp.defend_servers:install:hq:corp.install_card.c31.hq.c31.0",
+              "outcomeId": "38:access_resolved:kcrsdzhgzkm5qa1ztqv71odvgw",
               "eventId": 38,
               "eventType": "access_card",
               "stateVersionAfter": 37,
@@ -18859,7 +18891,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "123:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.c31.hq.c31.0",
+              "outcomeId": "123:run_declared:kcrsdzhgzkm5qa1ztqv71odvgw",
               "eventId": 123,
               "eventType": "continue_run",
               "stateVersionAfter": 122,
@@ -18880,15 +18912,19 @@
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
             "engine_certified_global_defense_access_probability_reduced"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "install:hq:cc.c31.hq.c31.0"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:hq:corp.install_card.c3i.hq.c3i.0",
+          "campaignId": "k3utgltarmh5zl2beeciym5rc0",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "hq"
           },
@@ -18910,7 +18946,7 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "21:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.c3i.hq.c3i.0",
+              "outcomeId": "21:run_declared:k3utgltarmh5zl2beeciym5rc0",
               "eventId": 21,
               "eventType": "start_run",
               "stateVersionAfter": 20,
@@ -18922,7 +18958,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "22:access_resolved:campaign:corp.defend_servers:install:hq:corp.install_card.c3i.hq.c3i.0",
+              "outcomeId": "22:access_resolved:k3utgltarmh5zl2beeciym5rc0",
               "eventId": 22,
               "eventType": "access_card",
               "stateVersionAfter": 21,
@@ -18933,7 +18969,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "30:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.c3i.hq.c3i.0",
+              "outcomeId": "30:run_declared:k3utgltarmh5zl2beeciym5rc0",
               "eventId": 30,
               "eventType": "start_run",
               "stateVersionAfter": 29,
@@ -18945,7 +18981,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "32:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.c3i.hq.c3i.0",
+              "outcomeId": "32:run_declared:k3utgltarmh5zl2beeciym5rc0",
               "eventId": 32,
               "eventType": "continue_run",
               "stateVersionAfter": 31,
@@ -18957,7 +18993,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "33:access_resolved:campaign:corp.defend_servers:install:hq:corp.install_card.c3i.hq.c3i.0",
+              "outcomeId": "33:access_resolved:k3utgltarmh5zl2beeciym5rc0",
               "eventId": 33,
               "eventType": "access_card",
               "stateVersionAfter": 32,
@@ -18968,7 +19004,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "34:access_resolved:campaign:corp.defend_servers:install:hq:corp.install_card.c3i.hq.c3i.0",
+              "outcomeId": "34:access_resolved:k3utgltarmh5zl2beeciym5rc0",
               "eventId": 34,
               "eventType": "steal_agenda",
               "stateVersionAfter": 33,
@@ -18979,7 +19015,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "35:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.c3i.hq.c3i.0",
+              "outcomeId": "35:run_declared:k3utgltarmh5zl2beeciym5rc0",
               "eventId": 35,
               "eventType": "start_run",
               "stateVersionAfter": 34,
@@ -18991,7 +19027,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "37:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.c3i.hq.c3i.0",
+              "outcomeId": "37:run_declared:k3utgltarmh5zl2beeciym5rc0",
               "eventId": 37,
               "eventType": "continue_run",
               "stateVersionAfter": 36,
@@ -19003,7 +19039,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "38:access_resolved:campaign:corp.defend_servers:install:hq:corp.install_card.c3i.hq.c3i.0",
+              "outcomeId": "38:access_resolved:k3utgltarmh5zl2beeciym5rc0",
               "eventId": 38,
               "eventType": "access_card",
               "stateVersionAfter": 37,
@@ -19014,7 +19050,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "123:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.c3i.hq.c3i.0",
+              "outcomeId": "123:run_declared:k3utgltarmh5zl2beeciym5rc0",
               "eventId": 123,
               "eventType": "continue_run",
               "stateVersionAfter": 122,
@@ -19034,17 +19070,21 @@
             "campaign_status:blocked",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "corp_agenda_capacity_defense_conversion:hq:corp.install_card.c3i.hq.c3i.0",
+            "corp_agenda_capacity_defense_conversion:hq:cc.c3i.hq.c3i.0",
             "engine_certified_global_defense_access_probability_reduced"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "install:hq:cc.c3i.hq.c3i.0"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:hq:corp.install_card.c3p.hq.c3p.0",
+          "campaignId": "k9yv69e8mkbv6n76erfsrvktwu",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "hq"
           },
@@ -19066,7 +19106,7 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "21:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.c3p.hq.c3p.0",
+              "outcomeId": "21:run_declared:k9yv69e8mkbv6n76erfsrvktwu",
               "eventId": 21,
               "eventType": "start_run",
               "stateVersionAfter": 20,
@@ -19078,7 +19118,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "22:access_resolved:campaign:corp.defend_servers:install:hq:corp.install_card.c3p.hq.c3p.0",
+              "outcomeId": "22:access_resolved:k9yv69e8mkbv6n76erfsrvktwu",
               "eventId": 22,
               "eventType": "access_card",
               "stateVersionAfter": 21,
@@ -19089,7 +19129,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "30:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.c3p.hq.c3p.0",
+              "outcomeId": "30:run_declared:k9yv69e8mkbv6n76erfsrvktwu",
               "eventId": 30,
               "eventType": "start_run",
               "stateVersionAfter": 29,
@@ -19101,7 +19141,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "32:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.c3p.hq.c3p.0",
+              "outcomeId": "32:run_declared:k9yv69e8mkbv6n76erfsrvktwu",
               "eventId": 32,
               "eventType": "continue_run",
               "stateVersionAfter": 31,
@@ -19113,7 +19153,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "33:access_resolved:campaign:corp.defend_servers:install:hq:corp.install_card.c3p.hq.c3p.0",
+              "outcomeId": "33:access_resolved:k9yv69e8mkbv6n76erfsrvktwu",
               "eventId": 33,
               "eventType": "access_card",
               "stateVersionAfter": 32,
@@ -19124,7 +19164,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "34:access_resolved:campaign:corp.defend_servers:install:hq:corp.install_card.c3p.hq.c3p.0",
+              "outcomeId": "34:access_resolved:k9yv69e8mkbv6n76erfsrvktwu",
               "eventId": 34,
               "eventType": "steal_agenda",
               "stateVersionAfter": 33,
@@ -19135,7 +19175,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "35:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.c3p.hq.c3p.0",
+              "outcomeId": "35:run_declared:k9yv69e8mkbv6n76erfsrvktwu",
               "eventId": 35,
               "eventType": "start_run",
               "stateVersionAfter": 34,
@@ -19147,7 +19187,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "37:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.c3p.hq.c3p.0",
+              "outcomeId": "37:run_declared:k9yv69e8mkbv6n76erfsrvktwu",
               "eventId": 37,
               "eventType": "continue_run",
               "stateVersionAfter": 36,
@@ -19159,7 +19199,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "38:access_resolved:campaign:corp.defend_servers:install:hq:corp.install_card.c3p.hq.c3p.0",
+              "outcomeId": "38:access_resolved:k9yv69e8mkbv6n76erfsrvktwu",
               "eventId": 38,
               "eventType": "access_card",
               "stateVersionAfter": 37,
@@ -19170,7 +19210,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "123:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.c3p.hq.c3p.0",
+              "outcomeId": "123:run_declared:k9yv69e8mkbv6n76erfsrvktwu",
               "eventId": 123,
               "eventType": "continue_run",
               "stateVersionAfter": 122,
@@ -19190,17 +19230,21 @@
             "campaign_status:blocked",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "corp_agenda_capacity_defense_conversion:hq:corp.install_card.c3p.hq.c3p.0",
-            "corp_defense_exact_route_funding_required:hq:corp.install_card.c3p.hq.c3p.0"
-          ]
+            "corp_agenda_capacity_defense_conversion:hq:cc.c3p.hq.c3p.0",
+            "corp_defense_exact_route_funding_required:hq:cc.c3p.hq.c3p.0"
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "install:hq:cc.c3p.hq.c3p.0"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:rd:corp.install_card.c3b.rd.c3b.0",
+          "campaignId": "ka6n8yp1k06w40zqi7nkaspuba",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "rd"
           },
@@ -19222,7 +19266,7 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "9:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.c3b.rd.c3b.0",
+              "outcomeId": "9:run_declared:ka6n8yp1k06w40zqi7nkaspuba",
               "eventId": 9,
               "eventType": "start_run",
               "stateVersionAfter": 8,
@@ -19234,7 +19278,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "10:corp_rez:campaign:corp.defend_servers:install:rd:corp.install_card.c3b.rd.c3b.0",
+              "outcomeId": "10:corp_rez:ka6n8yp1k06w40zqi7nkaspuba",
               "eventId": 10,
               "eventType": "rez_ice",
               "stateVersionAfter": 9,
@@ -19246,7 +19290,7 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "12:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.c3b.rd.c3b.0",
+              "outcomeId": "12:run_declared:ka6n8yp1k06w40zqi7nkaspuba",
               "eventId": 12,
               "eventType": "continue_run",
               "stateVersionAfter": 11,
@@ -19258,7 +19302,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "22:access_resolved:campaign:corp.defend_servers:install:rd:corp.install_card.c3b.rd.c3b.0",
+              "outcomeId": "22:access_resolved:ka6n8yp1k06w40zqi7nkaspuba",
               "eventId": 22,
               "eventType": "access_card",
               "stateVersionAfter": 21,
@@ -19269,7 +19313,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "33:access_resolved:campaign:corp.defend_servers:install:rd:corp.install_card.c3b.rd.c3b.0",
+              "outcomeId": "33:access_resolved:ka6n8yp1k06w40zqi7nkaspuba",
               "eventId": 33,
               "eventType": "access_card",
               "stateVersionAfter": 32,
@@ -19280,7 +19324,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "34:access_resolved:campaign:corp.defend_servers:install:rd:corp.install_card.c3b.rd.c3b.0",
+              "outcomeId": "34:access_resolved:ka6n8yp1k06w40zqi7nkaspuba",
               "eventId": 34,
               "eventType": "steal_agenda",
               "stateVersionAfter": 33,
@@ -19291,7 +19335,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "38:access_resolved:campaign:corp.defend_servers:install:rd:corp.install_card.c3b.rd.c3b.0",
+              "outcomeId": "38:access_resolved:ka6n8yp1k06w40zqi7nkaspuba",
               "eventId": 38,
               "eventType": "access_card",
               "stateVersionAfter": 37,
@@ -19302,7 +19346,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "123:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.c3b.rd.c3b.0",
+              "outcomeId": "123:run_declared:ka6n8yp1k06w40zqi7nkaspuba",
               "eventId": 123,
               "eventType": "continue_run",
               "stateVersionAfter": 122,
@@ -19323,16 +19367,20 @@
             "campaign_status:blocked",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "corp_agenda_capacity_defense_conversion:rd:corp.install_card.c3b.rd.c3b.0"
-          ]
+            "corp_agenda_capacity_defense_conversion:rd:cc.c3b.rd.c3b.0"
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "install:rd:cc.c3b.rd.c3b.0"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:rd:corp.install_card.c3i.rd.c3i.0",
+          "campaignId": "k469rh67uf0fvtprt6osr3ya6w",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "rd"
           },
@@ -19354,7 +19402,7 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "9:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.c3i.rd.c3i.0",
+              "outcomeId": "9:run_declared:k469rh67uf0fvtprt6osr3ya6w",
               "eventId": 9,
               "eventType": "start_run",
               "stateVersionAfter": 8,
@@ -19366,7 +19414,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "10:corp_rez:campaign:corp.defend_servers:install:rd:corp.install_card.c3i.rd.c3i.0",
+              "outcomeId": "10:corp_rez:k469rh67uf0fvtprt6osr3ya6w",
               "eventId": 10,
               "eventType": "rez_ice",
               "stateVersionAfter": 9,
@@ -19378,7 +19426,7 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "12:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.c3i.rd.c3i.0",
+              "outcomeId": "12:run_declared:k469rh67uf0fvtprt6osr3ya6w",
               "eventId": 12,
               "eventType": "continue_run",
               "stateVersionAfter": 11,
@@ -19390,7 +19438,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "22:access_resolved:campaign:corp.defend_servers:install:rd:corp.install_card.c3i.rd.c3i.0",
+              "outcomeId": "22:access_resolved:k469rh67uf0fvtprt6osr3ya6w",
               "eventId": 22,
               "eventType": "access_card",
               "stateVersionAfter": 21,
@@ -19401,7 +19449,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "33:access_resolved:campaign:corp.defend_servers:install:rd:corp.install_card.c3i.rd.c3i.0",
+              "outcomeId": "33:access_resolved:k469rh67uf0fvtprt6osr3ya6w",
               "eventId": 33,
               "eventType": "access_card",
               "stateVersionAfter": 32,
@@ -19412,7 +19460,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "34:access_resolved:campaign:corp.defend_servers:install:rd:corp.install_card.c3i.rd.c3i.0",
+              "outcomeId": "34:access_resolved:k469rh67uf0fvtprt6osr3ya6w",
               "eventId": 34,
               "eventType": "steal_agenda",
               "stateVersionAfter": 33,
@@ -19423,7 +19471,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "38:access_resolved:campaign:corp.defend_servers:install:rd:corp.install_card.c3i.rd.c3i.0",
+              "outcomeId": "38:access_resolved:k469rh67uf0fvtprt6osr3ya6w",
               "eventId": 38,
               "eventType": "access_card",
               "stateVersionAfter": 37,
@@ -19434,7 +19482,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "123:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.c3i.rd.c3i.0",
+              "outcomeId": "123:run_declared:k469rh67uf0fvtprt6osr3ya6w",
               "eventId": 123,
               "eventType": "continue_run",
               "stateVersionAfter": 122,
@@ -19455,16 +19503,20 @@
             "campaign_status:blocked",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "corp_agenda_capacity_defense_conversion:rd:corp.install_card.c3i.rd.c3i.0"
-          ]
+            "corp_agenda_capacity_defense_conversion:rd:cc.c3i.rd.c3i.0"
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "install:rd:cc.c3i.rd.c3i.0"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:rd:corp.install_card.c3p.rd.c3p.0",
+          "campaignId": "k2r6x1oxyazz907rnp3hyzdwju",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "rd"
           },
@@ -19486,7 +19538,7 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "9:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.c3p.rd.c3p.0",
+              "outcomeId": "9:run_declared:k2r6x1oxyazz907rnp3hyzdwju",
               "eventId": 9,
               "eventType": "start_run",
               "stateVersionAfter": 8,
@@ -19498,7 +19550,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "10:corp_rez:campaign:corp.defend_servers:install:rd:corp.install_card.c3p.rd.c3p.0",
+              "outcomeId": "10:corp_rez:k2r6x1oxyazz907rnp3hyzdwju",
               "eventId": 10,
               "eventType": "rez_ice",
               "stateVersionAfter": 9,
@@ -19510,7 +19562,7 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "12:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.c3p.rd.c3p.0",
+              "outcomeId": "12:run_declared:k2r6x1oxyazz907rnp3hyzdwju",
               "eventId": 12,
               "eventType": "continue_run",
               "stateVersionAfter": 11,
@@ -19522,7 +19574,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "22:access_resolved:campaign:corp.defend_servers:install:rd:corp.install_card.c3p.rd.c3p.0",
+              "outcomeId": "22:access_resolved:k2r6x1oxyazz907rnp3hyzdwju",
               "eventId": 22,
               "eventType": "access_card",
               "stateVersionAfter": 21,
@@ -19533,7 +19585,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "33:access_resolved:campaign:corp.defend_servers:install:rd:corp.install_card.c3p.rd.c3p.0",
+              "outcomeId": "33:access_resolved:k2r6x1oxyazz907rnp3hyzdwju",
               "eventId": 33,
               "eventType": "access_card",
               "stateVersionAfter": 32,
@@ -19544,7 +19596,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "34:access_resolved:campaign:corp.defend_servers:install:rd:corp.install_card.c3p.rd.c3p.0",
+              "outcomeId": "34:access_resolved:k2r6x1oxyazz907rnp3hyzdwju",
               "eventId": 34,
               "eventType": "steal_agenda",
               "stateVersionAfter": 33,
@@ -19555,7 +19607,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "38:access_resolved:campaign:corp.defend_servers:install:rd:corp.install_card.c3p.rd.c3p.0",
+              "outcomeId": "38:access_resolved:k2r6x1oxyazz907rnp3hyzdwju",
               "eventId": 38,
               "eventType": "access_card",
               "stateVersionAfter": 37,
@@ -19566,7 +19618,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "123:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.c3p.rd.c3p.0",
+              "outcomeId": "123:run_declared:k2r6x1oxyazz907rnp3hyzdwju",
               "eventId": 123,
               "eventType": "continue_run",
               "stateVersionAfter": 122,
@@ -19587,16 +19639,20 @@
             "campaign_status:blocked",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "corp_agenda_capacity_defense_conversion:rd:corp.install_card.c3p.rd.c3p.0"
-          ]
+            "corp_agenda_capacity_defense_conversion:rd:cc.c3p.rd.c3p.0"
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "install:rd:cc.c3p.rd.c3p.0"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:rd:corp.install_card.c3p.rd.c3p.1",
+          "campaignId": "k2r6wtxav26t2inz7150fzx9gp",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "rd"
           },
@@ -19618,7 +19674,7 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "9:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.c3p.rd.c3p.1",
+              "outcomeId": "9:run_declared:k2r6wtxav26t2inz7150fzx9gp",
               "eventId": 9,
               "eventType": "start_run",
               "stateVersionAfter": 8,
@@ -19630,7 +19686,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "10:corp_rez:campaign:corp.defend_servers:install:rd:corp.install_card.c3p.rd.c3p.1",
+              "outcomeId": "10:corp_rez:k2r6wtxav26t2inz7150fzx9gp",
               "eventId": 10,
               "eventType": "rez_ice",
               "stateVersionAfter": 9,
@@ -19642,7 +19698,7 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "12:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.c3p.rd.c3p.1",
+              "outcomeId": "12:run_declared:k2r6wtxav26t2inz7150fzx9gp",
               "eventId": 12,
               "eventType": "continue_run",
               "stateVersionAfter": 11,
@@ -19654,7 +19710,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "22:access_resolved:campaign:corp.defend_servers:install:rd:corp.install_card.c3p.rd.c3p.1",
+              "outcomeId": "22:access_resolved:k2r6wtxav26t2inz7150fzx9gp",
               "eventId": 22,
               "eventType": "access_card",
               "stateVersionAfter": 21,
@@ -19665,7 +19721,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "33:access_resolved:campaign:corp.defend_servers:install:rd:corp.install_card.c3p.rd.c3p.1",
+              "outcomeId": "33:access_resolved:k2r6wtxav26t2inz7150fzx9gp",
               "eventId": 33,
               "eventType": "access_card",
               "stateVersionAfter": 32,
@@ -19676,7 +19732,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "34:access_resolved:campaign:corp.defend_servers:install:rd:corp.install_card.c3p.rd.c3p.1",
+              "outcomeId": "34:access_resolved:k2r6wtxav26t2inz7150fzx9gp",
               "eventId": 34,
               "eventType": "steal_agenda",
               "stateVersionAfter": 33,
@@ -19687,7 +19743,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "38:access_resolved:campaign:corp.defend_servers:install:rd:corp.install_card.c3p.rd.c3p.1",
+              "outcomeId": "38:access_resolved:k2r6wtxav26t2inz7150fzx9gp",
               "eventId": 38,
               "eventType": "access_card",
               "stateVersionAfter": 37,
@@ -19698,7 +19754,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "123:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.c3p.rd.c3p.1",
+              "outcomeId": "123:run_declared:k2r6wtxav26t2inz7150fzx9gp",
               "eventId": 123,
               "eventType": "continue_run",
               "stateVersionAfter": 122,
@@ -19719,16 +19775,20 @@
             "campaign_status:blocked",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "corp_defense_exact_route_funding_required:rd:corp.install_card.c3p.rd.c3p.1"
-          ]
+            "corp_defense_exact_route_funding_required:rd:cc.c3p.rd.c3p.1"
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "install:rd:cc.c3p.rd.c3p.1"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.0",
+          "campaignId": "kerqb4wfd7w2lrbohy0aanp4le",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "r1"
           },
@@ -19750,7 +19810,7 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "16:run_declared:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.0",
+              "outcomeId": "16:run_declared:kerqb4wfd7w2lrbohy0aanp4le",
               "eventId": 16,
               "eventType": "start_run",
               "stateVersionAfter": 15,
@@ -19762,7 +19822,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "17:run_declared:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.0",
+              "outcomeId": "17:run_declared:kerqb4wfd7w2lrbohy0aanp4le",
               "eventId": 17,
               "eventType": "continue_run",
               "stateVersionAfter": 16,
@@ -19774,7 +19834,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "19:access_resolved:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.0",
+              "outcomeId": "19:access_resolved:kerqb4wfd7w2lrbohy0aanp4le",
               "eventId": 19,
               "eventType": "access_card",
               "stateVersionAfter": 18,
@@ -19786,7 +19846,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "19:remote_compromised:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.0",
+              "outcomeId": "19:remote_compromised:kerqb4wfd7w2lrbohy0aanp4le",
               "eventId": 19,
               "eventType": "access_card",
               "stateVersionAfter": 18,
@@ -19798,7 +19858,7 @@
               "evidenceCode": "campaign_remote_compromised_by_access"
             },
             {
-              "outcomeId": "22:access_resolved:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.0",
+              "outcomeId": "22:access_resolved:kerqb4wfd7w2lrbohy0aanp4le",
               "eventId": 22,
               "eventType": "access_card",
               "stateVersionAfter": 21,
@@ -19809,7 +19869,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "22:remote_compromised:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.0",
+              "outcomeId": "22:remote_compromised:kerqb4wfd7w2lrbohy0aanp4le",
               "eventId": 22,
               "eventType": "access_card",
               "stateVersionAfter": 21,
@@ -19820,7 +19880,7 @@
               "evidenceCode": "campaign_remote_compromised_by_access"
             },
             {
-              "outcomeId": "33:access_resolved:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.0",
+              "outcomeId": "33:access_resolved:kerqb4wfd7w2lrbohy0aanp4le",
               "eventId": 33,
               "eventType": "access_card",
               "stateVersionAfter": 32,
@@ -19831,7 +19891,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "33:remote_compromised:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.0",
+              "outcomeId": "33:remote_compromised:kerqb4wfd7w2lrbohy0aanp4le",
               "eventId": 33,
               "eventType": "access_card",
               "stateVersionAfter": 32,
@@ -19842,7 +19902,7 @@
               "evidenceCode": "campaign_remote_compromised_by_access"
             },
             {
-              "outcomeId": "34:access_resolved:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.0",
+              "outcomeId": "34:access_resolved:kerqb4wfd7w2lrbohy0aanp4le",
               "eventId": 34,
               "eventType": "steal_agenda",
               "stateVersionAfter": 33,
@@ -19853,7 +19913,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "34:remote_compromised:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.0",
+              "outcomeId": "34:remote_compromised:kerqb4wfd7w2lrbohy0aanp4le",
               "eventId": 34,
               "eventType": "steal_agenda",
               "stateVersionAfter": 33,
@@ -19864,7 +19924,7 @@
               "evidenceCode": "campaign_remote_compromised_by_access"
             },
             {
-              "outcomeId": "38:access_resolved:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.0",
+              "outcomeId": "38:access_resolved:kerqb4wfd7w2lrbohy0aanp4le",
               "eventId": 38,
               "eventType": "access_card",
               "stateVersionAfter": 37,
@@ -19875,7 +19935,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "38:remote_compromised:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.0",
+              "outcomeId": "38:remote_compromised:kerqb4wfd7w2lrbohy0aanp4le",
               "eventId": 38,
               "eventType": "access_card",
               "stateVersionAfter": 37,
@@ -19886,7 +19946,7 @@
               "evidenceCode": "campaign_remote_compromised_by_access"
             },
             {
-              "outcomeId": "86:corp_rez:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.0",
+              "outcomeId": "86:corp_rez:kerqb4wfd7w2lrbohy0aanp4le",
               "eventId": 86,
               "eventType": "rez_card",
               "stateVersionAfter": 85,
@@ -19898,7 +19958,7 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "123:run_declared:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.0",
+              "outcomeId": "123:run_declared:kerqb4wfd7w2lrbohy0aanp4le",
               "eventId": 123,
               "eventType": "continue_run",
               "stateVersionAfter": 122,
@@ -19921,16 +19981,20 @@
             "campaign_status:continuable",
             "campaign_target_remote_missing",
             "corp-opponent-campaign-continuity-v1",
-            "corp_defense_exact_route_funding_required:r1:corp.install_card.c3p.r1.c3p.0"
-          ]
+            "corp_defense_exact_route_funding_required:r1:cc.c3p.r1.c3p.0"
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "install:r1:cc.c3p.r1.c3p.0"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.1",
+          "campaignId": "kerqay2g027izn1m3ujk2u4wip",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "r1"
           },
@@ -19952,7 +20016,7 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "16:run_declared:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.1",
+              "outcomeId": "16:run_declared:kerqay2g027izn1m3ujk2u4wip",
               "eventId": 16,
               "eventType": "start_run",
               "stateVersionAfter": 15,
@@ -19964,7 +20028,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "17:run_declared:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.1",
+              "outcomeId": "17:run_declared:kerqay2g027izn1m3ujk2u4wip",
               "eventId": 17,
               "eventType": "continue_run",
               "stateVersionAfter": 16,
@@ -19976,7 +20040,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "19:access_resolved:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.1",
+              "outcomeId": "19:access_resolved:kerqay2g027izn1m3ujk2u4wip",
               "eventId": 19,
               "eventType": "access_card",
               "stateVersionAfter": 18,
@@ -19988,7 +20052,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "19:remote_compromised:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.1",
+              "outcomeId": "19:remote_compromised:kerqay2g027izn1m3ujk2u4wip",
               "eventId": 19,
               "eventType": "access_card",
               "stateVersionAfter": 18,
@@ -20000,7 +20064,7 @@
               "evidenceCode": "campaign_remote_compromised_by_access"
             },
             {
-              "outcomeId": "22:access_resolved:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.1",
+              "outcomeId": "22:access_resolved:kerqay2g027izn1m3ujk2u4wip",
               "eventId": 22,
               "eventType": "access_card",
               "stateVersionAfter": 21,
@@ -20011,7 +20075,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "22:remote_compromised:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.1",
+              "outcomeId": "22:remote_compromised:kerqay2g027izn1m3ujk2u4wip",
               "eventId": 22,
               "eventType": "access_card",
               "stateVersionAfter": 21,
@@ -20022,7 +20086,7 @@
               "evidenceCode": "campaign_remote_compromised_by_access"
             },
             {
-              "outcomeId": "33:access_resolved:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.1",
+              "outcomeId": "33:access_resolved:kerqay2g027izn1m3ujk2u4wip",
               "eventId": 33,
               "eventType": "access_card",
               "stateVersionAfter": 32,
@@ -20033,7 +20097,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "33:remote_compromised:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.1",
+              "outcomeId": "33:remote_compromised:kerqay2g027izn1m3ujk2u4wip",
               "eventId": 33,
               "eventType": "access_card",
               "stateVersionAfter": 32,
@@ -20044,7 +20108,7 @@
               "evidenceCode": "campaign_remote_compromised_by_access"
             },
             {
-              "outcomeId": "34:access_resolved:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.1",
+              "outcomeId": "34:access_resolved:kerqay2g027izn1m3ujk2u4wip",
               "eventId": 34,
               "eventType": "steal_agenda",
               "stateVersionAfter": 33,
@@ -20055,7 +20119,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "34:remote_compromised:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.1",
+              "outcomeId": "34:remote_compromised:kerqay2g027izn1m3ujk2u4wip",
               "eventId": 34,
               "eventType": "steal_agenda",
               "stateVersionAfter": 33,
@@ -20066,7 +20130,7 @@
               "evidenceCode": "campaign_remote_compromised_by_access"
             },
             {
-              "outcomeId": "38:access_resolved:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.1",
+              "outcomeId": "38:access_resolved:kerqay2g027izn1m3ujk2u4wip",
               "eventId": 38,
               "eventType": "access_card",
               "stateVersionAfter": 37,
@@ -20077,7 +20141,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "38:remote_compromised:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.1",
+              "outcomeId": "38:remote_compromised:kerqay2g027izn1m3ujk2u4wip",
               "eventId": 38,
               "eventType": "access_card",
               "stateVersionAfter": 37,
@@ -20088,7 +20152,7 @@
               "evidenceCode": "campaign_remote_compromised_by_access"
             },
             {
-              "outcomeId": "86:corp_rez:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.1",
+              "outcomeId": "86:corp_rez:kerqay2g027izn1m3ujk2u4wip",
               "eventId": 86,
               "eventType": "rez_card",
               "stateVersionAfter": 85,
@@ -20100,7 +20164,7 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "123:run_declared:campaign:corp.defend_servers:install:r1:corp.install_card.c3p.r1.c3p.1",
+              "outcomeId": "123:run_declared:kerqay2g027izn1m3ujk2u4wip",
               "eventId": 123,
               "eventType": "continue_run",
               "stateVersionAfter": 122,
@@ -20122,16 +20186,20 @@
             "campaign_status:blocked",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "corp_defense_exact_route_funding_required:r1:corp.install_card.c3p.r1.c3p.1"
-          ]
+            "corp_defense_exact_route_funding_required:r1:cc.c3p.r1.c3p.1"
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "install:r1:cc.c3p.r1.c3p.1"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:qualitative-ice-staging:new_remote:corp.install_card.c3p.new_remote.c3p",
+          "campaignId": "k75d6m21mg99bzgintc9wrzsni",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "new_remote"
           },
@@ -20153,7 +20221,7 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "22:access_resolved:campaign:corp.defend_servers:qualitative-ice-staging:new_remote:corp.install_card.c3p.new_remote.c3p",
+              "outcomeId": "22:access_resolved:k75d6m21mg99bzgintc9wrzsni",
               "eventId": 22,
               "eventType": "access_card",
               "stateVersionAfter": 21,
@@ -20164,7 +20232,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "33:access_resolved:campaign:corp.defend_servers:qualitative-ice-staging:new_remote:corp.install_card.c3p.new_remote.c3p",
+              "outcomeId": "33:access_resolved:k75d6m21mg99bzgintc9wrzsni",
               "eventId": 33,
               "eventType": "access_card",
               "stateVersionAfter": 32,
@@ -20175,7 +20243,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "34:access_resolved:campaign:corp.defend_servers:qualitative-ice-staging:new_remote:corp.install_card.c3p.new_remote.c3p",
+              "outcomeId": "34:access_resolved:k75d6m21mg99bzgintc9wrzsni",
               "eventId": 34,
               "eventType": "steal_agenda",
               "stateVersionAfter": 33,
@@ -20186,7 +20254,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "38:access_resolved:campaign:corp.defend_servers:qualitative-ice-staging:new_remote:corp.install_card.c3p.new_remote.c3p",
+              "outcomeId": "38:access_resolved:k75d6m21mg99bzgintc9wrzsni",
               "eventId": 38,
               "eventType": "access_card",
               "stateVersionAfter": 37,
@@ -20197,7 +20265,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "123:run_declared:campaign:corp.defend_servers:qualitative-ice-staging:new_remote:corp.install_card.c3p.new_remote.c3p",
+              "outcomeId": "123:run_declared:k75d6m21mg99bzgintc9wrzsni",
               "eventId": 123,
               "eventType": "continue_run",
               "stateVersionAfter": 122,
@@ -20215,16 +20283,20 @@
             "campaign_retained_without_current_descriptor",
             "campaign_status:blocked",
             "corp-opponent-campaign-continuity-v1",
-            "corp_layered_remote_ice_staging:remote:strategic-score-remote:new_remote:corp.install_card.c3p.new_remote.c3p:layers_0:unrezzed_0:rez_gap_1"
-          ]
+            "corp_layered_remote_ice_staging:remote:strategic-score-remote:new_remote:cc.c3p.new_remote.c3p:layers_0:unrezzed_0:rez_gap_1"
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "qualitative-ice-staging:new_remote:cc.c3p.new_remote.c3p"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:rez:c3b:corp.rez_ice.c3b.c3b",
+          "campaignId": "k5pd1djsgkr9t07ysfuuecwucy",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "rd",
             "targetCardInstanceId": "c3b"
@@ -20247,7 +20319,7 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "9:run_declared:campaign:corp.defend_servers:rez:c3b:corp.rez_ice.c3b.c3b",
+              "outcomeId": "9:run_declared:k5pd1djsgkr9t07ysfuuecwucy",
               "eventId": 9,
               "eventType": "start_run",
               "stateVersionAfter": 8,
@@ -20259,7 +20331,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "10:corp_rez:campaign:corp.defend_servers:rez:c3b:corp.rez_ice.c3b.c3b",
+              "outcomeId": "10:corp_rez:k5pd1djsgkr9t07ysfuuecwucy",
               "eventId": 10,
               "eventType": "rez_ice",
               "stateVersionAfter": 9,
@@ -20271,7 +20343,7 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "12:run_declared:campaign:corp.defend_servers:rez:c3b:corp.rez_ice.c3b.c3b",
+              "outcomeId": "12:run_declared:k5pd1djsgkr9t07ysfuuecwucy",
               "eventId": 12,
               "eventType": "continue_run",
               "stateVersionAfter": 11,
@@ -20283,7 +20355,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "22:access_resolved:campaign:corp.defend_servers:rez:c3b:corp.rez_ice.c3b.c3b",
+              "outcomeId": "22:access_resolved:k5pd1djsgkr9t07ysfuuecwucy",
               "eventId": 22,
               "eventType": "access_card",
               "stateVersionAfter": 21,
@@ -20294,7 +20366,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "33:access_resolved:campaign:corp.defend_servers:rez:c3b:corp.rez_ice.c3b.c3b",
+              "outcomeId": "33:access_resolved:k5pd1djsgkr9t07ysfuuecwucy",
               "eventId": 33,
               "eventType": "access_card",
               "stateVersionAfter": 32,
@@ -20305,7 +20377,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "34:access_resolved:campaign:corp.defend_servers:rez:c3b:corp.rez_ice.c3b.c3b",
+              "outcomeId": "34:access_resolved:k5pd1djsgkr9t07ysfuuecwucy",
               "eventId": 34,
               "eventType": "steal_agenda",
               "stateVersionAfter": 33,
@@ -20316,7 +20388,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "38:access_resolved:campaign:corp.defend_servers:rez:c3b:corp.rez_ice.c3b.c3b",
+              "outcomeId": "38:access_resolved:k5pd1djsgkr9t07ysfuuecwucy",
               "eventId": 38,
               "eventType": "access_card",
               "stateVersionAfter": 37,
@@ -20327,7 +20399,7 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "123:run_declared:campaign:corp.defend_servers:rez:c3b:corp.rez_ice.c3b.c3b",
+              "outcomeId": "123:run_declared:k5pd1djsgkr9t07ysfuuecwucy",
               "eventId": 123,
               "eventType": "continue_run",
               "stateVersionAfter": 122,
@@ -20348,16 +20420,20 @@
             "campaign_status:blocked",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "engine_certified_ice_rez_qualitative_encounter_defense:rd:corp.rez_ice.c3b.c3b"
-          ]
+            "engine_certified_ice_rez_qualitative_encounter_defense:rd:cq.c3b.c3b"
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "rez:c3b:cq.c3b.c3b"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:rez:c3p:corp.rez_ice.c3p.c3p",
+          "campaignId": "k4alkslynfy32brjutlo26ut7g",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "r2",
             "targetCardInstanceId": "c3p"
@@ -20380,7 +20456,7 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "119:corp_rez:campaign:corp.defend_servers:rez:c3p:corp.rez_ice.c3p.c3p",
+              "outcomeId": "119:corp_rez:k4alkslynfy32brjutlo26ut7g",
               "eventId": 119,
               "eventType": "rez_ice",
               "stateVersionAfter": 118,
@@ -20392,7 +20468,7 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "121:run_declared:campaign:corp.defend_servers:rez:c3p:corp.rez_ice.c3p.c3p",
+              "outcomeId": "121:run_declared:k4alkslynfy32brjutlo26ut7g",
               "eventId": 121,
               "eventType": "continue_run",
               "stateVersionAfter": 120,
@@ -20404,7 +20480,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "123:run_declared:campaign:corp.defend_servers:rez:c3p:corp.rez_ice.c3p.c3p",
+              "outcomeId": "123:run_declared:k4alkslynfy32brjutlo26ut7g",
               "eventId": 123,
               "eventType": "continue_run",
               "stateVersionAfter": 122,
@@ -20424,8 +20500,12 @@
             "campaign_status:blocked",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "engine_certified_ice_rez_access_reduction:r2:corp.rez_ice.c3p.c3p"
-          ]
+            "engine_certified_ice_rez_access_reduction:r2:cq.c3p.c3p"
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "rez:c3p:cq.c3p.c3p"
+          }
         }
       ],
       "turnPlanCommitment": {
@@ -20433,7 +20513,7 @@
         "commitmentId": "fnv1a:1246cc60",
         "sourcePlanId": "fnv1a:2315a84f",
         "sourceLineHash": "fnv1a:dff9250d",
-        "sequenceRootPlanInstanceId": "plan:corp.score_agenda:agenda%3Ac1a%3Ar2",
+        "sequenceRootPlanInstanceId": "pe32h8p2evsczce2lbr4gdels5",
         "side": "corp",
         "turnKey": "corp:turn:20",
         "planningRulesFingerprint": "fnv1a:cd5e4e13",
@@ -20450,7 +20530,7 @@
           {
             "phaseId": "fnv1a:df7662c6",
             "root": {
-              "planInstanceId": "plan:corp.score_agenda:agenda%3Ac1a%3Ar2",
+              "planInstanceId": "pe32h8p2evsczce2lbr4gdels5",
               "moduleId": "corp.score_agenda",
               "milestoneId": "advance_score_agenda",
               "provenance": "resident"
@@ -20546,7 +20626,7 @@
           "sideSafePlanningFingerprint": "fnv1a:95ec762b"
         },
         "currentBinding": {
-          "actionId": "corp.advance_card.c1a.c1a",
+          "actionId": "c2.c1a.c1a",
           "stateVersion": 140,
           "semanticActionSetFingerprint": "fnv1a:616a5163",
           "invocationKey": "fnv1a:85b89fd9"
@@ -20554,8 +20634,8 @@
         "actionType": "advance_card",
         "expectationId": "fnv1a:e3ed2c2f"
       },
-      "rootForegroundInstanceId": "plan:corp.score_agenda:agenda%3Ac1a%3Ar2",
-      "executorInstanceId": "plan:corp.score_agenda:agenda%3Ac1a%3Ar2"
+      "rootForegroundInstanceId": "pe32h8p2evsczce2lbr4gdels5",
+      "executorInstanceId": "pe32h8p2evsczce2lbr4gdels5"
     }
   },
   "validation": {

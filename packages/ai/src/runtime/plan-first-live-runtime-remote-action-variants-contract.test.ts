@@ -125,7 +125,7 @@ describe("plan-first Remote same-server action variants", () => {
       { payload: { serverId: "r1" } },
     );
     const endTurn = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",

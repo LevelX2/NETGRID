@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
 import { cardInstanceIdForCopy } from "../../../../engine/src/game/state/card-instance-id";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../../actions/action-card-semantic-profiles";
@@ -62,7 +63,7 @@ it.each(["unrezzed-replacement", "rezzed-replacement"])(
       "corp", 432, kind === "unrezzed-replacement" ? 1 : 2,
     );
     expect(plan.rootPlanInstanceId).toBe(
-      `plan:corp.score_agenda:agenda%3A${agenda}%3Ar1`,
+      planInstanceIdForProposal({ moduleId: "corp.score_agenda", dedupeKey: `agenda:${agenda}:r1` }),
     );
     expect(plan.route!.actionId).toBe(action.actionId);
     expect(plan.route!.stateVersion).toBe(input.playerView.stateVersion);
@@ -80,7 +81,7 @@ it("keeps the actual funded counter transfer preparation", () => {
   );
   const result = chooseAiAction(input);
   expect(result.actionId).toBe(
-    "corp.rez_card.c3gd.r1.c3gd",
+    "cp.c3gd.r1.c3gd",
   );
   expect(result.fallbackUsed).toBe(false);
   expect(result.timeoutUsed).toBe(false);

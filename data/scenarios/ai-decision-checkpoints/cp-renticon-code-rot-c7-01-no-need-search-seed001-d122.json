@@ -2702,7 +2702,7 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "clientKnownStateVersion": 0,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_runner_0",
@@ -2713,7 +2713,7 @@
                 "idempotencyKey": "ai-sim-0"
               },
               "legalAction": {
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "side": "runner",
                 "type": "resolve_choice",
                 "label": "Runner-Starthand",
@@ -2787,7 +2787,7 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "clientKnownStateVersion": 1,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_corp_1",
@@ -2798,7 +2798,7 @@
                 "idempotencyKey": "ai-sim-1"
               },
               "legalAction": {
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "side": "corp",
                 "type": "resolve_choice",
                 "label": "Korp-Starthand",
@@ -2855,12 +2855,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 2,
                 "idempotencyKey": "ai-sim-2"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -2912,12 +2912,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.install_card.c2od.hq.c2od.0",
+                "actionId": "cc.c2od.hq.c2od.0",
                 "clientKnownStateVersion": 3,
                 "idempotencyKey": "ai-sim-3"
               },
               "legalAction": {
-                "actionId": "corp.install_card.c2od.hq.c2od.0",
+                "actionId": "cc.c2od.hq.c2od.0",
                 "side": "corp",
                 "type": "install_card",
                 "label": "ICE vor HQ installieren",
@@ -2983,12 +2983,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.install_card.c2qt.rd.c2qt.0",
+                "actionId": "cc.c2qt.rd.c2qt.0",
                 "clientKnownStateVersion": 4,
                 "idempotencyKey": "ai-sim-4"
               },
               "legalAction": {
-                "actionId": "corp.install_card.c2qt.rd.c2qt.0",
+                "actionId": "cc.c2qt.rd.c2qt.0",
                 "side": "corp",
                 "type": "install_card",
                 "label": "ICE vor R&D installieren",
@@ -3045,12 +3045,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 5,
                 "idempotencyKey": "ai-sim-5"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -3089,12 +3089,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 6,
                 "idempotencyKey": "ai-sim-6"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -3142,12 +3142,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.start_run.rd",
+                "actionId": "rs.rd",
                 "clientKnownStateVersion": 7,
                 "idempotencyKey": "ai-sim-7"
               },
               "legalAction": {
-                "actionId": "runner.start_run.rd",
+                "actionId": "rs.rd",
                 "side": "runner",
                 "type": "start_run",
                 "label": "Run auf R&D",
@@ -3201,12 +3201,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.rez_ice.c2qt.c2qt",
+                "actionId": "cq.c2qt.c2qt",
                 "clientKnownStateVersion": 8,
                 "idempotencyKey": "ai-sim-8"
               },
               "legalAction": {
-                "actionId": "corp.rez_ice.c2qt.c2qt",
+                "actionId": "cq.c2qt.c2qt",
                 "side": "corp",
                 "type": "rez_ice",
                 "label": "Crystal Wall rezzen",
@@ -3270,12 +3270,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.continue_run.0",
+                "actionId": "r5.0",
                 "clientKnownStateVersion": 9,
                 "idempotencyKey": "ai-sim-9"
               },
               "legalAction": {
-                "actionId": "runner.continue_run.0",
+                "actionId": "r5.0",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Subroutinen auslösen (Run endet)",
@@ -3290,8 +3290,7 @@
                   "sourceDefinitionId": 444,
                   "unbrokenSubroutineCount": 1,
                   "encounterWillEndRun": true,
-                  "encounterSourceWillTrashAtEndOfTurn": false,
-                  "encounterSubroutineIds": "0"
+                  "encounterSourceWillTrashAtEndOfTurn": false
                 },
                 "resolvedEffects": [
                   {
@@ -3306,6 +3305,9 @@
                     "subroutineType": "end_the_run",
                     "endedRun": true
                   }
+                ],
+                "encounterSubroutineIds": [
+                  "0"
                 ]
               }
             }
@@ -3353,12 +3355,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.install_card.c15d.c15d",
+                "actionId": "rc.c15d.c15d",
                 "clientKnownStateVersion": 10,
                 "idempotencyKey": "ai-sim-10"
               },
               "legalAction": {
-                "actionId": "runner.install_card.c15d.c15d",
+                "actionId": "rc.c15d.c15d",
                 "side": "runner",
                 "type": "install_card",
                 "label": "Airport Locker installieren",
@@ -3429,12 +3431,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "clientKnownStateVersion": 11,
                 "idempotencyKey": "ai-sim-11"
               },
               "legalAction": {
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "side": "runner",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -3481,12 +3483,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "clientKnownStateVersion": 12,
                 "idempotencyKey": "ai-sim-12"
               },
               "legalAction": {
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "side": "runner",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -3525,12 +3527,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "clientKnownStateVersion": 13,
                 "idempotencyKey": "ai-sim-13"
               },
               "legalAction": {
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -3565,12 +3567,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 14,
                 "idempotencyKey": "ai-sim-14"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -3613,12 +3615,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 15,
                 "idempotencyKey": "ai-sim-15"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -3665,12 +3667,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 16,
                 "idempotencyKey": "ai-sim-16"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -3717,12 +3719,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 17,
                 "idempotencyKey": "ai-sim-17"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -3761,12 +3763,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 18,
                 "idempotencyKey": "ai-sim-18"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -3817,12 +3819,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.install_card.c7v.c7v",
+                "actionId": "rc.c7v.c7v",
                 "clientKnownStateVersion": 19,
                 "idempotencyKey": "ai-sim-19"
               },
               "legalAction": {
-                "actionId": "runner.install_card.c7v.c7v",
+                "actionId": "rc.c7v.c7v",
                 "side": "runner",
                 "type": "install_card",
                 "label": "Rent-I-Con installieren",
@@ -3880,12 +3882,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "clientKnownStateVersion": 20,
                 "idempotencyKey": "ai-sim-20"
               },
               "legalAction": {
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "side": "runner",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -3932,12 +3934,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "clientKnownStateVersion": 21,
                 "idempotencyKey": "ai-sim-21"
               },
               "legalAction": {
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "side": "runner",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -3984,12 +3986,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "clientKnownStateVersion": 22,
                 "idempotencyKey": "ai-sim-22"
               },
               "legalAction": {
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "side": "runner",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -4028,12 +4030,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "clientKnownStateVersion": 23,
                 "idempotencyKey": "ai-sim-23"
               },
               "legalAction": {
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -4068,12 +4070,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 24,
                 "idempotencyKey": "ai-sim-24"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -4116,12 +4118,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 25,
                 "idempotencyKey": "ai-sim-25"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -4168,12 +4170,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 26,
                 "idempotencyKey": "ai-sim-26"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -4220,12 +4222,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 27,
                 "idempotencyKey": "ai-sim-27"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -4264,12 +4266,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 28,
                 "idempotencyKey": "ai-sim-28"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -4322,7 +4324,7 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "clientKnownStateVersion": 29,
                 "selectedChoices": {
                   "choiceId": "discard_corp_29",
@@ -4333,7 +4335,7 @@
                 "idempotencyKey": "ai-sim-29"
               },
               "legalAction": {
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "side": "corp",
                 "type": "resolve_choice",
                 "label": "Korp-Discard wählen",
@@ -4407,12 +4409,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.start_run.rd",
+                "actionId": "rs.rd",
                 "clientKnownStateVersion": 30,
                 "idempotencyKey": "ai-sim-30"
               },
               "legalAction": {
-                "actionId": "runner.start_run.rd",
+                "actionId": "rs.rd",
                 "side": "runner",
                 "type": "start_run",
                 "label": "Run auf R&D",
@@ -4464,12 +4466,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.pump_breaker.c7v.c7v.c2qt",
+                "actionId": "rj.c7v.c7v.c2qt",
                 "clientKnownStateVersion": 31,
                 "idempotencyKey": "ai-sim-31"
               },
               "legalAction": {
-                "actionId": "runner.pump_breaker.c7v.c7v.c2qt",
+                "actionId": "rj.c7v.c7v.c2qt",
                 "side": "runner",
                 "type": "pump_breaker",
                 "label": "Rent-I-Con: Stärke +1",
@@ -4538,12 +4540,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.break_subroutine.c7v.c7v.c2qt.0.0",
+                "actionId": "r3.c7v.c7v.c2qt.0.0",
                 "clientKnownStateVersion": 32,
                 "idempotencyKey": "ai-sim-32"
               },
               "legalAction": {
-                "actionId": "runner.break_subroutine.c7v.c7v.c2qt.0.0",
+                "actionId": "r3.c7v.c7v.c2qt.0.0",
                 "side": "runner",
                 "type": "break_subroutine",
                 "label": "Rent-I-Con: Subroutine brechen",
@@ -4616,12 +4618,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "clientKnownStateVersion": 33,
                 "idempotencyKey": "ai-sim-33"
               },
               "legalAction": {
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "ICE passieren",
@@ -4636,9 +4638,9 @@
                   "sourceDefinitionId": 444,
                   "unbrokenSubroutineCount": 0,
                   "encounterWillEndRun": false,
-                  "encounterSourceWillTrashAtEndOfTurn": false,
-                  "encounterSubroutineIds": ""
-                }
+                  "encounterSourceWillTrashAtEndOfTurn": false
+                },
+                "encounterSubroutineIds": []
               }
             }
           }
@@ -4669,12 +4671,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "clientKnownStateVersion": 34,
                 "idempotencyKey": "ai-sim-34"
               },
               "legalAction": {
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Run fortsetzen",
@@ -4735,12 +4737,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.access_card",
+                "actionId": "r0",
                 "clientKnownStateVersion": 35,
                 "idempotencyKey": "ai-sim-35"
               },
               "legalAction": {
-                "actionId": "runner.access_card",
+                "actionId": "r0",
                 "side": "runner",
                 "type": "access_card",
                 "label": "Karte accessen",
@@ -4797,12 +4799,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "clientKnownStateVersion": 36,
                 "idempotencyKey": "ai-sim-36"
               },
               "legalAction": {
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "side": "runner",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -4849,12 +4851,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "clientKnownStateVersion": 37,
                 "idempotencyKey": "ai-sim-37"
               },
               "legalAction": {
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "side": "runner",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -4919,12 +4921,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.play_event.c20j.c20j",
+                "actionId": "rh.c20j.c20j",
                 "clientKnownStateVersion": 38,
                 "idempotencyKey": "ai-sim-38"
               },
               "legalAction": {
-                "actionId": "runner.play_event.c20j.c20j",
+                "actionId": "rh.c20j.c20j",
                 "side": "runner",
                 "type": "play_event",
                 "label": "Temple Microcode Outlet spielen",
@@ -5012,7 +5014,7 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "clientKnownStateVersion": 39,
                 "selectedChoices": {
                   "choiceId": "p3_37_search_stack_to_grip_39",
@@ -5023,7 +5025,7 @@
                 "idempotencyKey": "ai-sim-39"
               },
               "legalAction": {
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "side": "runner",
                 "type": "resolve_choice",
                 "label": "Stack durchsuchen",
@@ -5126,12 +5128,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "clientKnownStateVersion": 40,
                 "idempotencyKey": "ai-sim-40"
               },
               "legalAction": {
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -5166,12 +5168,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 41,
                 "idempotencyKey": "ai-sim-41"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -5229,12 +5231,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.play_operation.c33p.c33p",
+                "actionId": "ci.c33p.c33p",
                 "clientKnownStateVersion": 42,
                 "idempotencyKey": "ai-sim-42"
               },
               "legalAction": {
-                "actionId": "corp.play_operation.c33p.c33p",
+                "actionId": "ci.c33p.c33p",
                 "side": "corp",
                 "type": "play_operation",
                 "label": "Efficiency Experts spielen",
@@ -5299,12 +5301,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 43,
                 "idempotencyKey": "ai-sim-43"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -5351,12 +5353,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 44,
                 "idempotencyKey": "ai-sim-44"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -5395,12 +5397,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 45,
                 "idempotencyKey": "ai-sim-45"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -5443,12 +5445,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "clientKnownStateVersion": 46,
                 "idempotencyKey": "ai-sim-46"
               },
               "legalAction": {
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "side": "runner",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -5503,12 +5505,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.install_card.c7t.c7t",
+                "actionId": "rc.c7t.c7t",
                 "clientKnownStateVersion": 47,
                 "idempotencyKey": "ai-sim-47"
               },
               "legalAction": {
-                "actionId": "runner.install_card.c7t.c7t",
+                "actionId": "rc.c7t.c7t",
                 "side": "runner",
                 "type": "install_card",
                 "label": "Rent-I-Con installieren",
@@ -5566,12 +5568,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "clientKnownStateVersion": 48,
                 "idempotencyKey": "ai-sim-48"
               },
               "legalAction": {
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "side": "runner",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -5618,12 +5620,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "clientKnownStateVersion": 49,
                 "idempotencyKey": "ai-sim-49"
               },
               "legalAction": {
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "side": "runner",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -5662,12 +5664,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "clientKnownStateVersion": 50,
                 "idempotencyKey": "ai-sim-50"
               },
               "legalAction": {
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -5702,12 +5704,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 51,
                 "idempotencyKey": "ai-sim-51"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -5750,12 +5752,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 52,
                 "idempotencyKey": "ai-sim-52"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -5802,12 +5804,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 53,
                 "idempotencyKey": "ai-sim-53"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -5854,12 +5856,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 54,
                 "idempotencyKey": "ai-sim-54"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -5898,12 +5900,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 55,
                 "idempotencyKey": "ai-sim-55"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -5956,7 +5958,7 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "clientKnownStateVersion": 56,
                 "selectedChoices": {
                   "choiceId": "discard_corp_56",
@@ -5967,7 +5969,7 @@
                 "idempotencyKey": "ai-sim-56"
               },
               "legalAction": {
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "side": "corp",
                 "type": "resolve_choice",
                 "label": "Korp-Discard wählen",
@@ -6036,12 +6038,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "clientKnownStateVersion": 57,
                 "idempotencyKey": "ai-sim-57"
               },
               "legalAction": {
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "side": "runner",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -6124,12 +6126,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.install_card.c1dl.c1dl",
+                "actionId": "rc.c1dl.c1dl",
                 "clientKnownStateVersion": 58,
                 "idempotencyKey": "ai-sim-58"
               },
               "legalAction": {
-                "actionId": "runner.install_card.c1dl.c1dl",
+                "actionId": "rc.c1dl.c1dl",
                 "side": "runner",
                 "type": "install_card",
                 "label": "Cloak installieren",
@@ -6208,12 +6210,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.draw_card",
+                "actionId": "r8",
                 "clientKnownStateVersion": 59,
                 "idempotencyKey": "ai-sim-59"
               },
               "legalAction": {
-                "actionId": "runner.draw_card",
+                "actionId": "r8",
                 "side": "runner",
                 "type": "draw_card",
                 "label": "Karte ziehen",
@@ -6263,12 +6265,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "clientKnownStateVersion": 60,
                 "idempotencyKey": "ai-sim-60"
               },
               "legalAction": {
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "side": "runner",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -6307,12 +6309,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "clientKnownStateVersion": 61,
                 "idempotencyKey": "ai-sim-61"
               },
               "legalAction": {
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -6347,12 +6349,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 62,
                 "idempotencyKey": "ai-sim-62"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -6395,12 +6397,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 63,
                 "idempotencyKey": "ai-sim-63"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -6447,12 +6449,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 64,
                 "idempotencyKey": "ai-sim-64"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -6499,12 +6501,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 65,
                 "idempotencyKey": "ai-sim-65"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -6543,12 +6545,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 66,
                 "idempotencyKey": "ai-sim-66"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -6601,7 +6603,7 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "clientKnownStateVersion": 67,
                 "selectedChoices": {
                   "choiceId": "discard_corp_67",
@@ -6612,7 +6614,7 @@
                 "idempotencyKey": "ai-sim-67"
               },
               "legalAction": {
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "side": "corp",
                 "type": "resolve_choice",
                 "label": "Korp-Discard wählen",
@@ -6681,12 +6683,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "clientKnownStateVersion": 68,
                 "idempotencyKey": "ai-sim-68"
               },
               "legalAction": {
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "side": "runner",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -6733,12 +6735,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "clientKnownStateVersion": 69,
                 "idempotencyKey": "ai-sim-69"
               },
               "legalAction": {
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "side": "runner",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -6790,12 +6792,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.start_run.rd",
+                "actionId": "rs.rd",
                 "clientKnownStateVersion": 70,
                 "idempotencyKey": "ai-sim-70"
               },
               "legalAction": {
-                "actionId": "runner.start_run.rd",
+                "actionId": "rs.rd",
                 "side": "runner",
                 "type": "start_run",
                 "label": "Run auf R&D",
@@ -6847,12 +6849,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.pump_breaker.c7t.c7t.c2qt",
+                "actionId": "rj.c7t.c7t.c2qt",
                 "clientKnownStateVersion": 71,
                 "idempotencyKey": "ai-sim-71"
               },
               "legalAction": {
-                "actionId": "runner.pump_breaker.c7t.c7t.c2qt",
+                "actionId": "rj.c7t.c7t.c2qt",
                 "side": "runner",
                 "type": "pump_breaker",
                 "label": "Rent-I-Con: Stärke +1",
@@ -6921,12 +6923,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.break_subroutine.c7t.c7t.c2qt.0.0",
+                "actionId": "r3.c7t.c7t.c2qt.0.0",
                 "clientKnownStateVersion": 72,
                 "idempotencyKey": "ai-sim-72"
               },
               "legalAction": {
-                "actionId": "runner.break_subroutine.c7t.c7t.c2qt.0.0",
+                "actionId": "r3.c7t.c7t.c2qt.0.0",
                 "side": "runner",
                 "type": "break_subroutine",
                 "label": "Rent-I-Con: Subroutine brechen",
@@ -6999,12 +7001,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "clientKnownStateVersion": 73,
                 "idempotencyKey": "ai-sim-73"
               },
               "legalAction": {
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "ICE passieren",
@@ -7019,9 +7021,9 @@
                   "sourceDefinitionId": 444,
                   "unbrokenSubroutineCount": 0,
                   "encounterWillEndRun": false,
-                  "encounterSourceWillTrashAtEndOfTurn": false,
-                  "encounterSubroutineIds": ""
-                }
+                  "encounterSourceWillTrashAtEndOfTurn": false
+                },
+                "encounterSubroutineIds": []
               }
             }
           }
@@ -7052,12 +7054,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "clientKnownStateVersion": 74,
                 "idempotencyKey": "ai-sim-74"
               },
               "legalAction": {
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Run fortsetzen",
@@ -7108,12 +7110,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.access_card",
+                "actionId": "r0",
                 "clientKnownStateVersion": 75,
                 "idempotencyKey": "ai-sim-75"
               },
               "legalAction": {
-                "actionId": "runner.access_card",
+                "actionId": "r0",
                 "side": "runner",
                 "type": "access_card",
                 "label": "Karte accessen",
@@ -7178,12 +7180,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.steal_agenda.c2kf",
+                "actionId": "rt.c2kf",
                 "clientKnownStateVersion": 76,
                 "idempotencyKey": "ai-sim-76"
               },
               "legalAction": {
-                "actionId": "runner.steal_agenda.c2kf",
+                "actionId": "rt.c2kf",
                 "side": "runner",
                 "type": "steal_agenda",
                 "label": "Hostile Takeover stehlen",
@@ -7252,12 +7254,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.play_event.c1uj.c1uj",
+                "actionId": "rh.c1uj.c1uj",
                 "clientKnownStateVersion": 77,
                 "idempotencyKey": "ai-sim-77"
               },
               "legalAction": {
-                "actionId": "runner.play_event.c1uj.c1uj",
+                "actionId": "rh.c1uj.c1uj",
                 "side": "runner",
                 "type": "play_event",
                 "label": "Forgotten Backup Chip spielen",
@@ -7343,7 +7345,7 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "clientKnownStateVersion": 78,
                 "selectedChoices": {
                   "choiceId": "p3_37_search_trash_to_grip_78",
@@ -7354,7 +7356,7 @@
                 "idempotencyKey": "ai-sim-78"
               },
               "legalAction": {
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "side": "runner",
                 "type": "resolve_choice",
                 "label": "Heap durchsuchen",
@@ -7421,12 +7423,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "clientKnownStateVersion": 79,
                 "idempotencyKey": "ai-sim-79"
               },
               "legalAction": {
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -7461,12 +7463,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 80,
                 "idempotencyKey": "ai-sim-80"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -7524,12 +7526,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.play_operation.c33r.c33r",
+                "actionId": "ci.c33r.c33r",
                 "clientKnownStateVersion": 81,
                 "idempotencyKey": "ai-sim-81"
               },
               "legalAction": {
-                "actionId": "corp.play_operation.c33r.c33r",
+                "actionId": "ci.c33r.c33r",
                 "side": "corp",
                 "type": "play_operation",
                 "label": "Efficiency Experts spielen",
@@ -7594,12 +7596,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 82,
                 "idempotencyKey": "ai-sim-82"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -7646,12 +7648,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 83,
                 "idempotencyKey": "ai-sim-83"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -7705,12 +7707,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 84,
                 "idempotencyKey": "ai-sim-84"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -7773,12 +7775,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.start_run.hq",
+                "actionId": "rs.hq",
                 "clientKnownStateVersion": 85,
                 "idempotencyKey": "ai-sim-85"
               },
               "legalAction": {
-                "actionId": "runner.start_run.hq",
+                "actionId": "rs.hq",
                 "side": "runner",
                 "type": "start_run",
                 "label": "Run auf HQ",
@@ -7832,12 +7834,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.rez_ice.c2od.c2od",
+                "actionId": "cq.c2od.c2od",
                 "clientKnownStateVersion": 86,
                 "idempotencyKey": "ai-sim-86"
               },
               "legalAction": {
-                "actionId": "corp.rez_ice.c2od.c2od",
+                "actionId": "cq.c2od.c2od",
                 "side": "corp",
                 "type": "rez_ice",
                 "label": "Asp rezzen",
@@ -7908,12 +7910,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.continue_run.0",
+                "actionId": "r5.0",
                 "clientKnownStateVersion": 87,
                 "idempotencyKey": "ai-sim-87"
               },
               "legalAction": {
-                "actionId": "runner.continue_run.0",
+                "actionId": "r5.0",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Subroutinen auslösen",
@@ -7929,7 +7931,6 @@
                   "unbrokenSubroutineCount": 1,
                   "encounterWillEndRun": false,
                   "encounterSourceWillTrashAtEndOfTurn": false,
-                  "encounterSubroutineIds": "0",
                   "traceStarted": true,
                   "traceId": 88,
                   "sourceCardId": "c2od",
@@ -7949,6 +7950,9 @@
                     "subroutineIndex": 0,
                     "subroutineType": "initiate_trace"
                   }
+                ],
+                "encounterSubroutineIds": [
+                  "0"
                 ]
               }
             }
@@ -7993,7 +7997,7 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "clientKnownStateVersion": 88,
                 "selectedChoices": {
                   "choiceId": "88.corp.bid.88",
@@ -8004,7 +8008,7 @@
                 "idempotencyKey": "ai-sim-88"
               },
               "legalAction": {
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "side": "corp",
                 "type": "resolve_choice",
                 "label": "Korp Trace-Bid wählen (Base Trace 5)",
@@ -8109,7 +8113,7 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "clientKnownStateVersion": 89,
                 "selectedChoices": {
                   "choiceId": "88.runner.bid.89",
@@ -8120,7 +8124,7 @@
                 "idempotencyKey": "ai-sim-89"
               },
               "legalAction": {
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "side": "runner",
                 "type": "resolve_choice",
                 "label": "Runner Link-Bid wählen (Trace 5, Link 0)",
@@ -8213,12 +8217,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.play_event.c1zn.c1zn",
+                "actionId": "rh.c1zn.c1zn",
                 "clientKnownStateVersion": 90,
                 "idempotencyKey": "ai-sim-90"
               },
               "legalAction": {
-                "actionId": "runner.play_event.c1zn.c1zn",
+                "actionId": "rh.c1zn.c1zn",
                 "side": "runner",
                 "type": "play_event",
                 "label": "Sneak Preview spielen",
@@ -8284,7 +8288,7 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "clientKnownStateVersion": 91,
                 "selectedChoices": {
                   "choiceId": "v1911_temporary_program_install_source_91",
@@ -8295,7 +8299,7 @@
                 "idempotencyKey": "ai-sim-91"
               },
               "legalAction": {
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "side": "runner",
                 "type": "resolve_choice",
                 "label": "Sneak-Preview-Quelle wählen",
@@ -8377,7 +8381,7 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "clientKnownStateVersion": 92,
                 "selectedChoices": {
                   "choiceId": "v1911_temporary_program_install_heap_install_92",
@@ -8388,7 +8392,7 @@
                 "idempotencyKey": "ai-sim-92"
               },
               "legalAction": {
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "side": "runner",
                 "type": "resolve_choice",
                 "label": "Programm aus dem Heap installieren",
@@ -8459,12 +8463,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "clientKnownStateVersion": 93,
                 "idempotencyKey": "ai-sim-93"
               },
               "legalAction": {
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "side": "runner",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -8511,12 +8515,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "clientKnownStateVersion": 94,
                 "idempotencyKey": "ai-sim-94"
               },
               "legalAction": {
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "side": "runner",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -8571,12 +8575,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "clientKnownStateVersion": 95,
                 "idempotencyKey": "ai-sim-95"
               },
               "legalAction": {
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -8617,12 +8621,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 96,
                 "idempotencyKey": "ai-sim-96"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -8670,12 +8674,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.install_card.c2oe.new_remote.c2oe",
+                "actionId": "cc.c2oe.new_remote.c2oe",
                 "clientKnownStateVersion": 97,
                 "idempotencyKey": "ai-sim-97"
               },
               "legalAction": {
-                "actionId": "corp.install_card.c2oe.new_remote.c2oe",
+                "actionId": "cc.c2oe.new_remote.c2oe",
                 "side": "corp",
                 "type": "install_card",
                 "label": "ICE vor neuem Remote installieren",
@@ -8733,12 +8737,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.install_card.ce5.r1.ce5",
+                "actionId": "cc.ce5.r1.ce5",
                 "clientKnownStateVersion": 98,
                 "idempotencyKey": "ai-sim-98"
               },
               "legalAction": {
-                "actionId": "corp.install_card.ce5.r1.ce5",
+                "actionId": "cc.ce5.r1.ce5",
                 "side": "corp",
                 "type": "install_card",
                 "label": "Karte in Remote 1 installieren",
@@ -8793,12 +8797,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.advance_card.ce5.ce5",
+                "actionId": "c2.ce5.ce5",
                 "clientKnownStateVersion": 99,
                 "idempotencyKey": "ai-sim-99"
               },
               "legalAction": {
-                "actionId": "corp.advance_card.ce5.ce5",
+                "actionId": "c2.ce5.ce5",
                 "side": "corp",
                 "type": "advance_card",
                 "label": "Marked Accounts in Remote 1 advancen",
@@ -8841,12 +8845,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 100,
                 "idempotencyKey": "ai-sim-100"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -8889,12 +8893,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "clientKnownStateVersion": 101,
                 "idempotencyKey": "ai-sim-101"
               },
               "legalAction": {
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "side": "runner",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -8941,12 +8945,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.draw_card",
+                "actionId": "r8",
                 "clientKnownStateVersion": 102,
                 "idempotencyKey": "ai-sim-102"
               },
               "legalAction": {
-                "actionId": "runner.draw_card",
+                "actionId": "r8",
                 "side": "runner",
                 "type": "draw_card",
                 "label": "Karte ziehen",
@@ -9024,12 +9028,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.play_event.caa.caa",
+                "actionId": "rh.caa.caa",
                 "clientKnownStateVersion": 103,
                 "idempotencyKey": "ai-sim-103"
               },
               "legalAction": {
-                "actionId": "runner.play_event.caa.caa",
+                "actionId": "rh.caa.caa",
                 "side": "runner",
                 "type": "play_event",
                 "label": "Panzer Run spielen",
@@ -9099,12 +9103,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "clientKnownStateVersion": 104,
                 "idempotencyKey": "ai-sim-104"
               },
               "legalAction": {
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -9139,12 +9143,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 105,
                 "idempotencyKey": "ai-sim-105"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -9189,12 +9193,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.advance_card.ce5.ce5",
+                "actionId": "c2.ce5.ce5",
                 "clientKnownStateVersion": 106,
                 "idempotencyKey": "ai-sim-106"
               },
               "legalAction": {
-                "actionId": "corp.advance_card.ce5.ce5",
+                "actionId": "c2.ce5.ce5",
                 "side": "corp",
                 "type": "advance_card",
                 "label": "Marked Accounts in Remote 1 advancen",
@@ -9247,12 +9251,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.advance_card.ce5.ce5",
+                "actionId": "c2.ce5.ce5",
                 "clientKnownStateVersion": 107,
                 "idempotencyKey": "ai-sim-107"
               },
               "legalAction": {
-                "actionId": "corp.advance_card.ce5.ce5",
+                "actionId": "c2.ce5.ce5",
                 "side": "corp",
                 "type": "advance_card",
                 "label": "Marked Accounts in Remote 1 advancen",
@@ -9305,12 +9309,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.advance_card.ce5.ce5",
+                "actionId": "c2.ce5.ce5",
                 "clientKnownStateVersion": 108,
                 "idempotencyKey": "ai-sim-108"
               },
               "legalAction": {
-                "actionId": "corp.advance_card.ce5.ce5",
+                "actionId": "c2.ce5.ce5",
                 "side": "corp",
                 "type": "advance_card",
                 "label": "Marked Accounts in Remote 1 advancen",
@@ -9360,12 +9364,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.score_agenda.ce5.ce5",
+                "actionId": "cr.ce5.ce5",
                 "clientKnownStateVersion": 109,
                 "idempotencyKey": "ai-sim-109"
               },
               "legalAction": {
-                "actionId": "corp.score_agenda.ce5.ce5",
+                "actionId": "cr.ce5.ce5",
                 "side": "corp",
                 "type": "score_agenda",
                 "label": "Agenda in Remote 1 scoren",
@@ -9404,12 +9408,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 110,
                 "idempotencyKey": "ai-sim-110"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -9460,12 +9464,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.install_card.c7t.c7t",
+                "actionId": "rc.c7t.c7t",
                 "clientKnownStateVersion": 111,
                 "idempotencyKey": "ai-sim-111"
               },
               "legalAction": {
-                "actionId": "runner.install_card.c7t.c7t",
+                "actionId": "rc.c7t.c7t",
                 "side": "runner",
                 "type": "install_card",
                 "label": "Rent-I-Con installieren",
@@ -9551,12 +9555,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.play_event.ca9.ca9",
+                "actionId": "rh.ca9.ca9",
                 "clientKnownStateVersion": 112,
                 "idempotencyKey": "ai-sim-112"
               },
               "legalAction": {
-                "actionId": "runner.play_event.ca9.ca9",
+                "actionId": "rh.ca9.ca9",
                 "side": "runner",
                 "type": "play_event",
                 "label": "Panzer Run spielen",
@@ -9642,12 +9646,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.install_card.cax.cax",
+                "actionId": "rc.cax.cax",
                 "clientKnownStateVersion": 113,
                 "idempotencyKey": "ai-sim-113"
               },
               "legalAction": {
-                "actionId": "runner.install_card.cax.cax",
+                "actionId": "rc.cax.cax",
                 "side": "runner",
                 "type": "install_card",
                 "label": "Elena Laskova installieren",
@@ -9707,12 +9711,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "clientKnownStateVersion": 114,
                 "idempotencyKey": "ai-sim-114"
               },
               "legalAction": {
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -9747,12 +9751,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 115,
                 "idempotencyKey": "ai-sim-115"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -9810,12 +9814,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.play_operation.c31q.c31q",
+                "actionId": "ci.c31q.c31q",
                 "clientKnownStateVersion": 116,
                 "idempotencyKey": "ai-sim-116"
               },
               "legalAction": {
-                "actionId": "corp.play_operation.c31q.c31q",
+                "actionId": "ci.c31q.c31q",
                 "side": "corp",
                 "type": "play_operation",
                 "label": "Accounts Receivable spielen",
@@ -9885,12 +9889,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.install_card.c3iu.hq.c3iu",
+                "actionId": "cc.c3iu.hq.c3iu",
                 "clientKnownStateVersion": 117,
                 "idempotencyKey": "ai-sim-117"
               },
               "legalAction": {
-                "actionId": "corp.install_card.c3iu.hq.c3iu",
+                "actionId": "cc.c3iu.hq.c3iu",
                 "side": "corp",
                 "type": "install_card",
                 "label": "Karte in HQ installieren",
@@ -9943,12 +9947,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 118,
                 "idempotencyKey": "ai-sim-118"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -9987,12 +9991,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 119,
                 "idempotencyKey": "ai-sim-119"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -10051,12 +10055,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.play_event.c1sp.c1sp",
+                "actionId": "rh.c1sp.c1sp",
                 "clientKnownStateVersion": 120,
                 "idempotencyKey": "ai-sim-120"
               },
               "legalAction": {
-                "actionId": "runner.play_event.c1sp.c1sp",
+                "actionId": "rh.c1sp.c1sp",
                 "side": "runner",
                 "type": "play_event",
                 "label": "Bodyweight™ Synthetic Blood spielen",
@@ -10123,12 +10127,12 @@
               "action": {
                 "matchId": "selfplay:ai-renticon-code-rot-20260718-001",
                 "side": "runner",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "clientKnownStateVersion": 121,
                 "idempotencyKey": "ai-sim-121"
               },
               "legalAction": {
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "side": "runner",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -12956,7 +12960,7 @@
         "label": "Gideon's Pawnshop"
       },
       "selectedStepKind": "gain_credits",
-      "selectedActionId": "runner.gain_credit",
+      "selectedActionId": "rb",
       "blockedBy": [
         "missing_credits"
       ],
@@ -13013,7 +13017,7 @@
           "plan_portfolio_execution_class:bounded_sequence",
           "plan_portfolio_role:foreground",
           "plan_portfolio_lifecycle:active",
-          "plan_portfolio_action_progress:runner.gain_credit",
+          "plan_portfolio_action_progress:rb",
           "plan_portfolio_action_progress_source:selected_mapped_step"
         ]
       },
@@ -13025,7 +13029,7 @@
         "plan_portfolio_foreground:runner.develop_hand_card",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.gain_credit"
+        "plan_portfolio_selected_action:rb"
       ]
     },
     "strategicIntent": {

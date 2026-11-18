@@ -12,7 +12,7 @@ describe("corp Highlighter purge pressure checkpoint", () => {
     expect(result).toMatchObject({
       ok: true,
       decision: {
-        actionId: "corp.draw_card",
+        actionId: "c8",
         reasonCode: "plan_first.corp.defend_servers",
       },
     });

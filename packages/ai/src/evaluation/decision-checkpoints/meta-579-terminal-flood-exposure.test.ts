@@ -107,7 +107,9 @@ it("keeps the native scheduler and current LegalAction binding while avoiding th
   expect(
     action.type === "install_card" && action.payload?.serverId === "new_remote",
   ).toBe(false);
-  expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toMatch(
-    /^plan:corp\./,
-  );
+  expect(
+    decision.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+    )?.moduleId,
+  ).toMatch(/^corp\./);
 });

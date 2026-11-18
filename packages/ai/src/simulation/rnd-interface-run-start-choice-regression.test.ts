@@ -45,7 +45,7 @@ describe("R&D Interface Dig run-start choice regression", () => {
       );
       const choice = chooseAiAction(fixture.input(state));
       expect(choice).toMatchObject({
-        actionId: "runner.resolve_choice",
+        actionId: "rn",
         fallbackUsed: false,
         decisionDebug: { planKind: "runner.pressure_central" },
       });

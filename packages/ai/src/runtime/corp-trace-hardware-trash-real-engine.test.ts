@@ -37,7 +37,7 @@ it("resolves the native Cinderella hardware choice from its numeric definition",
   const decision = chooseAiAction(input, simulationEngineRuntimeOptions(state));
   const selected = decision.selectedChoices;
   if (
-    decision.actionId !== "corp.resolve_choice" ||
+    decision.actionId !== "cn" ||
     selected?.choiceId !== choice.choiceId ||
     !Array.isArray(selected.selectedOptionIds) ||
     selected.selectedOptionIds.length !== 1

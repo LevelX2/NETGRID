@@ -53,10 +53,12 @@ function shipping(i: AiDecisionInputWithDeckCapabilities) {
 it("aborts the native central access with one card after public Data Darts damage", () => {
   const f = fixture("g14-d12"),
     d = decide(f);
-  expect(d.actionId).toBe("runner.jack_out");
-  expect(d.decisionDebug?.planFirstDecision?.leafExecutorInstanceId).toContain(
-    "runner.convert_run_window",
-  );
+  expect(d.actionId).toBe("rd");
+  expect(
+    d.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === d.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    )?.moduleId,
+  ).toBe("runner.convert_run_window");
   expect(d.evidence?.join("|")).toContain(
     "runner_critical_low_grip_unknown_central_access_requires_jack_out",
   );
@@ -75,7 +77,7 @@ it("keeps the ordinary HQ run separate from the self-tag route", () => {
   const f = fixture();
   expect(
     evaluateRunnerRunTargets({ input: f.input }).find(
-      (t) => t.actionId === "runner.start_run.hq",
+      (t) => t.actionId === "rs.hq",
     )!.pathPassability,
   ).toBe("reachable");
 });
@@ -139,7 +141,7 @@ it("projects the exact successful-run tag amount without transferring it to basi
     ts = evaluateRunnerRunTargets({ input: f.input });
   expect(shipping(f.input).runActionProjection.successfulRunSelfTags).toBe(1);
   expect(
-    ts.find((t) => t.actionId === "runner.start_run.hq")!.runActionProjection
+    ts.find((t) => t.actionId === "rs.hq")!.runActionProjection
       .successfulRunSelfTags,
   ).toBeUndefined();
 });

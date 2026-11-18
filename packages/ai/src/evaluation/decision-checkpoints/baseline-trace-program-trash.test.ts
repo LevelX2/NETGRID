@@ -53,7 +53,7 @@ it.each(["05", "07"])(
     const decision = chooseAiAction(input);
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.timeoutUsed).toBe(false);
-    expect(decision.actionId).toBe("corp.resolve_choice");
+    expect(decision.actionId).toBe("cn");
     const pf = decision.decisionDebug!.planFirstDecision!;
     expect(pf.lane).toBe("plan");
     expect(pf.selectedPlan?.moduleId).toBe("corp.defend_servers");

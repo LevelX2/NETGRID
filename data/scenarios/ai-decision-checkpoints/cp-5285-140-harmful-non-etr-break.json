@@ -8187,7 +8187,7 @@
       "stateVersion": 133,
       "instances": [
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "dedupeKey": "standard-turn-completion",
           "moduleId": "runner.complete_turn",
           "moduleVersion": "1",
@@ -8216,7 +8216,7 @@
           "moduleState": {
             "kind": "turn_completion",
             "standardEndTurnActionIds": [
-              "runner.end_turn"
+              "r9"
             ]
           },
           "blockers": [],
@@ -8252,13 +8252,13 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "stateVersion": 133,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "stateVersion": 133,
           "reason": "executor_selected",
           "fromExecutionState": "idle",
@@ -8266,14 +8266,14 @@
           "detailCode": "validated_scheduler_selection"
         }
       ],
-      "rootForegroundInstanceId": "plan:runner.complete_turn:standard-turn-completion",
-      "executorInstanceId": "plan:runner.complete_turn:standard-turn-completion",
+      "rootForegroundInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
+      "executorInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
       "turnPlanCommitment": {
         "schemaVersion": "turn-plan-commitment-v2",
         "commitmentId": "fnv1a:7f36a90b",
         "sourcePlanId": "fnv1a:1c866247",
         "sourceLineHash": "fnv1a:5f06fb63",
-        "sequenceRootPlanInstanceId": "plan:runner.complete_turn:standard-turn-completion",
+        "sequenceRootPlanInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
         "side": "runner",
         "turnKey": "runner:turn:21",
         "planningRulesFingerprint": "fnv1a:99880efa",
@@ -8290,7 +8290,7 @@
           {
             "phaseId": "fnv1a:5524f35e",
             "root": {
-              "planInstanceId": "plan:runner.complete_turn:standard-turn-completion",
+              "planInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
               "moduleId": "runner.complete_turn",
               "milestoneId": "complete_turn_after_productive_routes_exhausted",
               "provenance": "resident"
@@ -8379,7 +8379,7 @@
           "sideSafePlanningFingerprint": "fnv1a:674bd467"
         },
         "currentBinding": {
-          "actionId": "runner.end_turn",
+          "actionId": "r9",
           "stateVersion": 133,
           "semanticActionSetFingerprint": "fnv1a:1237c312",
           "invocationKey": "fnv1a:d0ce60b2"
@@ -8392,7 +8392,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.start_run.r1"
+        "actionId": "rs.r1"
       }
     ],
     "planExecution": {
@@ -8405,7 +8405,7 @@
     },
     "runTargets": [
       {
-        "actionId": "runner.start_run.r1",
+        "actionId": "rs.r1",
         "pathPassability": "reachable",
         "pathCost": 10,
         "creditsAfterRun": 14,

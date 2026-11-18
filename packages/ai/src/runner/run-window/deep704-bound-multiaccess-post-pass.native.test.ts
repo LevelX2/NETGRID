@@ -103,7 +103,7 @@ it("preserves the bound funded full-path multiaccess instead of a one-credit der
       "runner_post_pass_derez_would_abandon_preserved_access_bonus",
     ]),
   });
-  expect(result["runner.continue_run"]?.admissible).toBe(true);
+  expect(result["r5"]?.admissible).toBe(true);
   expect(JSON.stringify(input)).toBe(before);
 });
 
@@ -117,14 +117,14 @@ it("chooses the exact continuation under the original central parent and run exe
   const before = JSON.stringify(input);
   const decision = chooseAiAction(input);
   expect(decision).toMatchObject({
-    actionId: "runner.continue_run",
+    actionId: "r5",
     fallbackUsed: false,
     timeoutUsed: false,
   });
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:runner.pressure_central:central%3Ard",
-    leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A111",
-    route: { actionId: "runner.continue_run", stateVersion: 113 },
+    rootPlanInstanceId: "pa90fufw9vc5bkshp96ztlryxl",
+    leafExecutorInstanceId: "p9o35stfp1b2evq8h4u1jv7k99",
+    route: { actionId: "r5", stateVersion: 113 },
   });
   expect(JSON.stringify(input)).toBe(before);
 });

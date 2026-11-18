@@ -45,8 +45,8 @@ it("reserves both remaining end-the-run breaks on the innermost ICE before optio
     decisionDebug: {
       planFirstDecision: {
         selectedStep: {
-          planInstanceId: "plan:runner.convert_run_window:run%3A243",
-          parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+          planInstanceId: "p8xv5fi9mik0afo9fzi3dgo48n",
+          parentInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
         },
         route: {
           actionId: result.actionId,

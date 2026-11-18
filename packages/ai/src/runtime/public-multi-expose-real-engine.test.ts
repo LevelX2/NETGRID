@@ -271,7 +271,7 @@ it("resolves the next real expose action toward an unseen target under the exist
   const before = hashState(state);
   const decision = chooseAiAction(current);
   expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
-  expect(decision.actionId).toBe("runner.resolve_choice");
+  expect(decision.actionId).toBe("rn");
   expect(decision.selectedChoices).toEqual({
     choiceId: state.pendingChoice!.choiceId,
     selectedOptionIds: [expected.id],

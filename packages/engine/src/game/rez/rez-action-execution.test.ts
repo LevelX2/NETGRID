@@ -30,7 +30,7 @@ function declineAction(
 ): LegalAction {
   return {
     ...rezAction(payload),
-    actionId: "corp.decline_rez",
+    actionId: "c6",
     type: "decline_rez",
     label: "Decline rez",
   } as LegalAction;

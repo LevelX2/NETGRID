@@ -435,9 +435,9 @@ describe("Corp turn planning coverage", () => {
 
   it("accepts a blocked score root only through an exactly bound executable support head", () => {
     const setup = coverageSetup();
-    const parentInstanceId = "plan:corp.score_agenda:agenda-1";
+    const parentInstanceId = "pec2em6rbxev7e1w1qcpuez4fk";
     const providerInstanceId =
-      "plan:corp.defend_servers:server-defense-portfolio";
+      "penw02zfrkklof54c2nuye5att";
     const needId = "score-protection:agenda-1:r1";
     const defense = setup.heads.find(
       (head) => head.currentBinding.actionId === "action:defense",
@@ -494,7 +494,7 @@ describe("Corp turn planning coverage", () => {
         {
           moduleId: "corp.establish_scoring_remote",
           planInstanceId:
-            "plan:corp.establish_scoring_remote:strategic-score-remote",
+            "p6vrrjl5fc78gjet2n25nst7pp",
           blocked: true,
           blockerCode: "remote_required_need_uncovered",
           requiredNeedId: "remote-hardening:strategic-score-remote:1",
@@ -523,7 +523,7 @@ describe("Corp turn planning coverage", () => {
 
   it("rejects nominal providers and parent progress claims without need reduction", () => {
     const setup = coverageSetup();
-    const parentInstanceId = "plan:corp.score_agenda:agenda-1";
+    const parentInstanceId = "pec2em6rbxev7e1w1qcpuez4fk";
     const needId = "score-protection:agenda-1:r1";
     const report = buildCorpTurnPlanningCoverageReport({
       ...setup,
@@ -539,7 +539,7 @@ describe("Corp turn planning coverage", () => {
             kind: "support_head",
             parentInstanceId,
             needId,
-            providerInstanceId: "plan:corp.defend_servers:missing",
+            providerInstanceId: "pbt9vwkjdrik6rff2zs3yaous4",
             actionId: "action:defense",
             needBefore: 2,
             needAfter: 2,
@@ -567,7 +567,7 @@ describe("Corp turn planning coverage", () => {
       progressRoots: [
         {
           moduleId: "corp.score_agenda",
-          planInstanceId: "plan:corp.score_agenda:agenda-1",
+          planInstanceId: "pec2em6rbxev7e1w1qcpuez4fk",
           blocked: true,
           blockerCode: "no_complete_line",
           requiredNeedId: "score-protection:agenda-1:r1",

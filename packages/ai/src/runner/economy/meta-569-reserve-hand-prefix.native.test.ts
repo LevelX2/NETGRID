@@ -92,7 +92,7 @@ it("uses the actual draw -> Networking -> credit prefix for 11 credits and the s
     )!;
     expect(action.type).toBe(type);
     expect(result.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.economy:runner-portfolio-credit-reserve",
+      rootPlanInstanceId: "pc7ebuiw5dxhlbzbf1nhcs4p4z",
       selectedPlan: { moduleId: "runner.economy" },
       route: { actionId: action.actionId, stateVersion: state.stateVersion },
     });
@@ -102,7 +102,7 @@ it("uses the actual draw -> Networking -> credit prefix for 11 credits and the s
       )!.instances.find(
         (entry) =>
           entry.instanceId ===
-          "plan:runner.economy:runner-portfolio-credit-reserve",
+          "pc7ebuiw5dxhlbzbf1nhcs4p4z",
       );
       expect(currentReserve?.moduleState).toMatchObject({
         need: {

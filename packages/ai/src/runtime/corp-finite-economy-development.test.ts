@@ -89,10 +89,10 @@ it("develops funded economy before speculative agenda search and takes the actua
     type: "install_card",
     payload: { serverId: "r1" },
   });
-  expect(
-    installationDecision.decisionDebug?.planFirstDecision
-      ?.leafExecutorInstanceId,
-  ).toMatch(/^plan:corp\.economy:/);
+  const installPlan = installationDecision.decisionDebug?.planFirstDecision;
+  expect(installPlan?.portfolio.find(
+    (instance) => instance.instanceId === installPlan.leafExecutorInstanceId,
+  )?.moduleId).toBe("corp.economy");
   expect(state.cardInstances[chosen.source]!.definitionId).toBe(pool);
   state = apply(state, chosen);
   resetResidentPlanPortfolioMemory();
@@ -108,8 +108,10 @@ it("develops funded economy before speculative agenda search and takes the actua
   )!;
   expect(rezAction).toMatchObject({ type: "rez_card", source: chosen.source });
   expect(
-    rezDecision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toMatch(/^plan:corp\.economy:/);
+    rezDecision.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === rezDecision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    )?.moduleId,
+  ).toBe("corp.economy");
   state = apply(state, rezAction);
   resetResidentPlanPortfolioMemory();
   const payoutInput = input(state);
@@ -122,8 +124,10 @@ it("develops funded economy before speculative agenda search and takes the actua
     source: chosen.source,
   });
   expect(
-    payout.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toMatch(/^plan:corp\.economy:/);
+    payout.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === payout.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    )?.moduleId,
+  ).toBe("corp.economy");
   expect(payout.decisionDebug?.planFirstDecision?.route).toMatchObject({
     actionId: payoutAction.actionId,
     stateVersion: state.stateVersion,

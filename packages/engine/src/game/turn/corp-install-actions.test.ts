@@ -21,7 +21,7 @@ describe("corp install main actions", () => {
     const cardId = "corp_ice_test" as CardInstanceId;
 
     expect(buildCorpNewRemoteIceInstallAction(state, cardId)).toMatchObject({
-      actionId: "corp.install_card.corp_ice_test.new_remote.corp_ice_test",
+      actionId: "cc.corp_ice_test.new_remote.corp_ice_test",
       side: "corp",
       type: "install_card",
       label: "ICE vor neuem Remote installieren",
@@ -55,7 +55,7 @@ describe("corp install main actions", () => {
         },
       ),
     ).toMatchObject({
-      actionId: "corp.install_card.corp_ice_test.hq.corp_ice_test.2.1864145823",
+      actionId: "cc.corp_ice_test.hq.corp_ice_test.2.1864145823",
       side: "corp",
       type: "install_card",
       label: "ICE vor HQ installieren",
@@ -119,7 +119,7 @@ describe("corp install main actions", () => {
 
     expect(buildCorpNewRemoteRootInstallAction(state, cardId, 3)).toMatchObject(
       {
-        actionId: "corp.install_card.corp_root_test.new_remote.corp_root_test",
+        actionId: "cc.corp_root_test.new_remote.corp_root_test",
         side: "corp",
         type: "install_card",
         label: "Karte in neuem Remote installieren",
@@ -147,7 +147,7 @@ describe("corp install main actions", () => {
         { replacesRootAsset: true, replacesRegion: true },
       ),
     ).toMatchObject({
-      actionId: "corp.install_card.corp_root_test.r1.corp_root_test",
+      actionId: "cc.corp_root_test.r1.corp_root_test",
       side: "corp",
       type: "install_card",
       label: "Karte in Remote 1 installieren",

@@ -215,7 +215,7 @@ describe("AI decision debug sanitizing", () => {
       actionAlternatives: [
         {
           rank: 1,
-          actionId: "runner.gain_credit",
+          actionId: "rb",
           actionType: "gain_credit",
           selected: true,
           score: 979,
@@ -237,24 +237,24 @@ describe("AI decision debug sanitizing", () => {
       decisionChain: {
         schemaVersion: "ai-decision-chain-debug-v1",
         legalActionCount: 2,
-        legalActionIds: ["corp.gain_credit", "corp.install"],
+        legalActionIds: ["cb", "corp.install"],
         exclusions: [
           {
             actionId: "corp.install",
             key: "hidden-card",
           },
         ],
-        rawScoreWinner: { actionId: "corp.gain_credit", score: 700 },
+        rawScoreWinner: { actionId: "cb", score: 700 },
         priorityCandidates: [
-          { route: "semantic_score", actionId: "corp.gain_credit" },
+          { route: "semantic_score", actionId: "cb" },
         ],
         initialSelection: {
           route: "semantic_score",
-          actionId: "corp.gain_credit",
+          actionId: "cb",
         },
         adjustments: [],
         finalSelection: {
-          actionId: "corp.gain_credit",
+          actionId: "cb",
           selectedOptionCount: 0,
         },
       },
@@ -263,13 +263,13 @@ describe("AI decision debug sanitizing", () => {
     expect(sanitized?.decisionChain).toMatchObject({
       schemaVersion: "ai-decision-chain-debug-v1",
       legalActionCount: 2,
-      rawScoreWinner: { actionId: "corp.gain_credit", score: 700 },
+      rawScoreWinner: { actionId: "cb", score: 700 },
       initialSelection: {
         route: "semantic_score",
-        actionId: "corp.gain_credit",
+        actionId: "cb",
       },
       finalSelection: {
-        actionId: "corp.gain_credit",
+        actionId: "cb",
         selectedOptionCount: 0,
       },
     });

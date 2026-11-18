@@ -37,8 +37,8 @@ it("compares the whole known remainder for carrying and ordinary breakers under 
   expect(action.type).toBe("break_subroutine");
   expect(action.source).toBe("c1pt");
   const plan = decision.decisionDebug!.planFirstDecision!;
-  expect(plan.rootPlanInstanceId).toBe("plan:runner.pressure_central:central%3Ahq");
-  expect(plan.leafExecutorInstanceId).toBe("plan:runner.convert_run_window:run%3A233");
+  expect(plan.rootPlanInstanceId).toBe("pa7nez1ioecg7mf06q1uwqq57o");
+  expect(plan.leafExecutorInstanceId).toBe("p8xfp40ysq7a34n7jv8rf56kxw");
   expect(plan.route).toMatchObject({ actionId: action.actionId, stateVersion: 235, capabilityId: "convert_active_run_window" });
   expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
   // The runtime can refresh planningStateIdentity; Engine facts stay immutable.

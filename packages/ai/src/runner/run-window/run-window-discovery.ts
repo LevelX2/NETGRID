@@ -163,7 +163,7 @@ export function buildRunnerRunWindowSignals({
             (restrictedRunSequence
               ? "rules.restricted_action_sequence"
               : "rules.access_window"),
-          leafPlanInstanceId: `plan:runner.convert_run_window:run%3A${input.playerView.run?.runId ?? input.playerView.stateVersion}`,
+          leafPlanInstanceId: planInstanceIdForProposal({ moduleId: "runner.convert_run_window", dedupeKey: `run:${input.playerView.run?.runId ?? input.playerView.stateVersion}` }),
           semanticActionTypes: [
             ...new Set(
               windowCandidates.map((candidate) => candidate.semanticActionType),

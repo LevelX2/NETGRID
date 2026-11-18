@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import {
   runnerCreditBankRunFundingClickCapacity,
   type creditBankReplacesBasicRunFunding,
@@ -28,7 +29,7 @@ export function creditBankFundsKnownUrgentRun(
   )
     return undefined;
   const needId = `run-support:remote:${target.targetServerId}`;
-  const parentPlanInstanceId = `plan:runner.contest_remote:${encodeURIComponent(`remote:${target.targetServerId}`)}`;
+  const parentPlanInstanceId = planInstanceIdForProposal({ moduleId: "runner.contest_remote", dedupeKey: `remote:${target.targetServerId}` });
   const cashOutIds = new Set(params.cashOutActionIds);
   const demand = createRunnerCreditDemand({
     demandId: needId,

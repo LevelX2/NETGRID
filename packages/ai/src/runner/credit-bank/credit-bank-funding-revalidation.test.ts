@@ -15,9 +15,9 @@ function bank(): RunnerCreditBankSignal {
     value: 1209,
     evidenceCodes: ["bound_run_funding"],
     runFunding: {
-      parentPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      parentPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       needId: "run-support:remote:r1",
-      runActionId: "runner.start_run.r1",
+      runActionId: "rs.r1",
       stateVersion: 324,
       gap: 5,
       routeAssessment: {
@@ -124,7 +124,7 @@ describe("bank funding revalidation at the actual run-owner boundary", () => {
   it("also requires the exact current central parent and need", () => {
     const original = bank();
     original.runFunding!.parentPlanInstanceId =
-      "plan:runner.pressure_central:central%3Ahq";
+      "pa7nez1ioecg7mf06q1uwqq57o";
     original.runFunding!.needId = "run-support:central:hq";
     const central = {
       pressureId: "central:hq",

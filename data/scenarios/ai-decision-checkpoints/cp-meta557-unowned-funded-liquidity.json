@@ -900,13 +900,13 @@
               }
             },
             {
-              "instanceId": "h1x887er",
+              "instanceId": "hhq.i1",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
             },
             {
-              "instanceId": "hf0yzf",
+              "instanceId": "hhq.i2",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -1056,7 +1056,7 @@
               }
             },
             {
-              "instanceId": "h3hhq7q",
+              "instanceId": "hrd.i3",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -1170,25 +1170,25 @@
           },
           "ice": [
             {
-              "instanceId": "h3rhbwp",
+              "instanceId": "hr1.i0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
             },
             {
-              "instanceId": "hg8qxiq",
+              "instanceId": "hr1.i1",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
             },
             {
-              "instanceId": "h2xiits",
+              "instanceId": "hr1.i2",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
             },
             {
-              "instanceId": "h1jmutx3",
+              "instanceId": "hr1.i3",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -10945,7 +10945,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.activated_card_ability.c2bt.c2bt.c2eq.activated.450.c2eq",
+          "actionId": "r1.c2bt.c2bt.c2eq.activated.450.c2eq",
           "side": "runner",
           "type": "activated_card_ability",
           "label": "Junkyard BBS: oberste Trash-Karte in die Grip nehmen",
@@ -10974,7 +10974,7 @@
           }
         },
         {
-          "actionId": "runner.activated_card_ability.c2ey.c2ey.activated.466",
+          "actionId": "r1.c2ey.c2ey.activated.466",
           "side": "runner",
           "type": "activated_card_ability",
           "label": "Silicon Saloon Franchise: 1 Credit nehmen und 1 Karte ziehen",
@@ -11003,7 +11003,7 @@
           }
         },
         {
-          "actionId": "runner.gain_credit",
+          "actionId": "rb",
           "side": "runner",
           "type": "gain_credit",
           "label": "1 Credit nehmen",
@@ -11024,7 +11024,7 @@
           }
         },
         {
-          "actionId": "runner.draw_card",
+          "actionId": "r8",
           "side": "runner",
           "type": "draw_card",
           "label": "Karte ziehen",
@@ -11047,7 +11047,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1u9.c1u9.382",
+          "actionId": "rh.c1u9.c1u9.382",
           "side": "runner",
           "type": "play_event",
           "label": "Forged Activation Orders spielen",
@@ -11074,7 +11074,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1w1.hq.c1w1.390",
+          "actionId": "rh.c1w1.hq.c1w1.390",
           "side": "runner",
           "type": "play_event",
           "label": "Inside Job auf HQ",
@@ -11104,7 +11104,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1w1.rd.c1w1.390",
+          "actionId": "rh.c1w1.rd.c1w1.390",
           "side": "runner",
           "type": "play_event",
           "label": "Inside Job auf R&D",
@@ -11134,7 +11134,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1w1.archives.c1w1.390",
+          "actionId": "rh.c1w1.archives.c1w1.390",
           "side": "runner",
           "type": "play_event",
           "label": "Inside Job auf Archives",
@@ -11164,7 +11164,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1w1.r1.c1w1.390",
+          "actionId": "rh.c1w1.r1.c1w1.390",
           "side": "runner",
           "type": "play_event",
           "label": "Inside Job auf Remote 1",
@@ -11194,7 +11194,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c22h.c22h",
+          "actionId": "rc.c22h.c22h",
           "side": "runner",
           "type": "install_card",
           "label": "Bodyweight™ Data Crèche installieren",
@@ -11215,7 +11215,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1z7.c1z7.404",
+          "actionId": "rh.c1z7.c1z7.404",
           "side": "runner",
           "type": "play_event",
           "label": "Score! spielen",
@@ -11244,7 +11244,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.hq",
+          "actionId": "rs.hq",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf HQ",
@@ -11265,7 +11265,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.rd",
+          "actionId": "rs.rd",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf R&D",
@@ -11286,7 +11286,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.archives",
+          "actionId": "rs.archives",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf Archives",
@@ -11307,7 +11307,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.r1",
+          "actionId": "rs.r1",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf Remote 1",
@@ -11328,7 +11328,7 @@
           }
         },
         {
-          "actionId": "runner.end_turn",
+          "actionId": "r9",
           "side": "runner",
           "type": "end_turn",
           "label": "Zug beenden",
@@ -13791,7 +13791,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "runner.activated_card_ability.c2bt.c2bt.c2eq.activated.450.c2eq",
+        "actionId": "r1.c2bt.c2bt.c2eq.activated.450.c2eq",
         "side": "runner",
         "type": "activated_card_ability",
         "label": "Junkyard BBS: oberste Trash-Karte in die Grip nehmen",
@@ -13820,7 +13820,7 @@
         }
       },
       {
-        "actionId": "runner.activated_card_ability.c2ey.c2ey.activated.466",
+        "actionId": "r1.c2ey.c2ey.activated.466",
         "side": "runner",
         "type": "activated_card_ability",
         "label": "Silicon Saloon Franchise: 1 Credit nehmen und 1 Karte ziehen",
@@ -13849,7 +13849,7 @@
         }
       },
       {
-        "actionId": "runner.gain_credit",
+        "actionId": "rb",
         "side": "runner",
         "type": "gain_credit",
         "label": "1 Credit nehmen",
@@ -13870,7 +13870,7 @@
         }
       },
       {
-        "actionId": "runner.draw_card",
+        "actionId": "r8",
         "side": "runner",
         "type": "draw_card",
         "label": "Karte ziehen",
@@ -13893,7 +13893,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1u9.c1u9.382",
+        "actionId": "rh.c1u9.c1u9.382",
         "side": "runner",
         "type": "play_event",
         "label": "Forged Activation Orders spielen",
@@ -13920,7 +13920,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1w1.hq.c1w1.390",
+        "actionId": "rh.c1w1.hq.c1w1.390",
         "side": "runner",
         "type": "play_event",
         "label": "Inside Job auf HQ",
@@ -13950,7 +13950,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1w1.rd.c1w1.390",
+        "actionId": "rh.c1w1.rd.c1w1.390",
         "side": "runner",
         "type": "play_event",
         "label": "Inside Job auf R&D",
@@ -13980,7 +13980,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1w1.archives.c1w1.390",
+        "actionId": "rh.c1w1.archives.c1w1.390",
         "side": "runner",
         "type": "play_event",
         "label": "Inside Job auf Archives",
@@ -14010,7 +14010,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1w1.r1.c1w1.390",
+        "actionId": "rh.c1w1.r1.c1w1.390",
         "side": "runner",
         "type": "play_event",
         "label": "Inside Job auf Remote 1",
@@ -14040,7 +14040,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c22h.c22h",
+        "actionId": "rc.c22h.c22h",
         "side": "runner",
         "type": "install_card",
         "label": "Bodyweight™ Data Crèche installieren",
@@ -14061,7 +14061,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1z7.c1z7.404",
+        "actionId": "rh.c1z7.c1z7.404",
         "side": "runner",
         "type": "play_event",
         "label": "Score! spielen",
@@ -14090,7 +14090,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.hq",
+        "actionId": "rs.hq",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf HQ",
@@ -14111,7 +14111,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.rd",
+        "actionId": "rs.rd",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf R&D",
@@ -14132,7 +14132,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.archives",
+        "actionId": "rs.archives",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf Archives",
@@ -14153,7 +14153,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.r1",
+        "actionId": "rs.r1",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf Remote 1",
@@ -14174,7 +14174,7 @@
         }
       },
       {
-        "actionId": "runner.end_turn",
+        "actionId": "r9",
         "side": "runner",
         "type": "end_turn",
         "label": "Zug beenden",
@@ -14228,7 +14228,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 319,
-      "sideSafePlanningFingerprint": "fnv1a:45d2f81b"
+      "sideSafePlanningFingerprint": "fnv1a:199d268d"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_last_call_at_rd_1.0.0",
@@ -20248,7 +20248,7 @@
       "stateVersion": 313,
       "instances": [
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "dedupeKey": "standard-turn-completion",
           "moduleId": "runner.complete_turn",
           "moduleVersion": "1",
@@ -20277,7 +20277,7 @@
           "moduleState": {
             "kind": "turn_completion",
             "standardEndTurnActionIds": [
-              "runner.end_turn"
+              "r9"
             ]
           },
           "blockers": [],
@@ -20313,61 +20313,61 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "stateVersion": 313,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.credit_bank:c2eq",
+          "instanceId": "pdik19o9yaib81mgcygdsofecq",
           "stateVersion": 313,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:generic%3Adraw-options",
+          "instanceId": "p6hb5l9cujr02om3vqn7gbqr35",
           "stateVersion": 313,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:recovery%3Ac2bt%3Ac2g3",
+          "instanceId": "p8x4xycdg04j9bes56v6e3rj70",
           "stateVersion": 313,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.economy:economy-liquidity-development%3Arunner%3A33",
+          "instanceId": "p5nlp1vrngmgcw4xnin0e3pkls",
           "stateVersion": 313,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.economy:runner-portfolio-credit-reserve",
+          "instanceId": "pc7ebuiw5dxhlbzbf1nhcs4p4z",
           "stateVersion": 313,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Aarchives",
+          "instanceId": "p22f66p721g9dgs7gsawwpf6hs",
           "stateVersion": 313,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ahq",
+          "instanceId": "pa7nez1ioecg7mf06q1uwqq57o",
           "stateVersion": 313,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ard",
+          "instanceId": "pa90fufw9vc5bkshp96ztlryxl",
           "stateVersion": 313,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "stateVersion": 313,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
@@ -20380,7 +20380,7 @@
         "commitmentId": "fnv1a:55560788",
         "sourcePlanId": "fnv1a:4691c3e4",
         "sourceLineHash": "fnv1a:93b58b60",
-        "sequenceRootPlanInstanceId": "plan:runner.complete_turn:standard-turn-completion",
+        "sequenceRootPlanInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
         "side": "runner",
         "turnKey": "runner:turn:33",
         "planningRulesFingerprint": "fnv1a:697f22b3",
@@ -20397,7 +20397,7 @@
           {
             "phaseId": "fnv1a:d6db8832",
             "root": {
-              "planInstanceId": "plan:runner.complete_turn:standard-turn-completion",
+              "planInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
               "moduleId": "runner.complete_turn",
               "milestoneId": "complete_turn_after_productive_routes_exhausted",
               "provenance": "resident"
@@ -20486,7 +20486,7 @@
           "sideSafePlanningFingerprint": "fnv1a:1b6a7910"
         },
         "currentBinding": {
-          "actionId": "runner.end_turn",
+          "actionId": "r9",
           "stateVersion": 313,
           "semanticActionSetFingerprint": "fnv1a:1237c312",
           "invocationKey": "fnv1a:ed016ce3"
@@ -20494,8 +20494,8 @@
         "actionType": "end_turn",
         "expectationId": "fnv1a:38a3bf70"
       },
-      "rootForegroundInstanceId": "plan:runner.complete_turn:standard-turn-completion",
-      "executorInstanceId": "plan:runner.complete_turn:standard-turn-completion"
+      "rootForegroundInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
+      "executorInstanceId": "p2ut8j92he0i09lc4xwtln5iys"
     }
   },
   "validation": {

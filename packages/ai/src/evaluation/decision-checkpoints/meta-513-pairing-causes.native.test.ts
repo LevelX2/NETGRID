@@ -89,7 +89,7 @@ it("admits the native G5/D170 Lucidrine remote contest through the live DTO", ()
   const { d, pf } = decide(input);
   expect(pf.selectedPlan?.moduleId).toBe("runner.contest_remote");
   expect(d.actionId).toBe(
-    "runner.play_event.c1wx.r1.c1wx.394",
+    "rh.c1wx.r1.c1wx.394",
   );
   const route = evaluateRunnerRunTargets({ input }).find(
     (t) => t.actionId === d.actionId,
@@ -106,17 +106,17 @@ it.each([true, false])(
     if (!terminal) input.playerView.opponent.agendaPoints = 0;
     const { d, pf } = decide(input);
     if (terminal) {
-      expect(d.actionId).toBe("runner.start_run.r1");
+      expect(d.actionId).toBe("rs.r1");
       expect(pf.selectedPlan?.moduleId).toBe("runner.contest_remote");
     } else {
-      expect(d.actionId).toBe("runner.gain_credit");
+      expect(d.actionId).toBe("rb");
       expect(pf.selectedPlan?.moduleId).toBe("runner.defense_and_recovery");
       expect(pf.selectedPlan?.evidenceCodes).toContain(
         "runner_damage_locked_hand_reaction_reserve",
       );
     }
     const route = evaluateRunnerRunTargets({ input }).find(
-      (t) => t.actionId === "runner.start_run.r1",
+      (t) => t.actionId === "rs.r1",
     )!;
     expect(route.pathPassability).toBe("reachable");
     expect(route.prerunReserveQuote).toMatchObject({
@@ -136,10 +136,10 @@ it("keeps the native G6/D186 real sentry gap when no Boon is installed", () => {
   const { input } = native("g6d186");
   bindPublicBoardStealQuoteCompanion(input);
   const { d, pf } = decide(input);
-  expect(d.actionId).toBe("runner.draw_card");
+  expect(d.actionId).toBe("r8");
   expect(pf.selectedPlan?.moduleId).toBe("runner.rig_and_coverage");
   const route = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.r1",
+    (t) => t.actionId === "rs.r1",
   )!;
   expect(route.pathPassability).toBe("blocked_missing_coverage");
 });
@@ -156,7 +156,7 @@ it("retains mature development cashout as an executable ordinary-priority candid
     signal: {
       priorityClass: "P4",
       actionIds: [
-        "runner.activated_card_ability.c29d.c29d.activated.441",
+        "r1.c29d.c29d.activated.441",
       ],
       evidenceCodes: expect.arrayContaining([
         "runner_credit_bank_cashout_for_mature_development_funding",
@@ -167,7 +167,7 @@ it("retains mature development cashout as an executable ordinary-priority candid
 it("keeps both Broker balances when changing the funded remote would leave a safer R&D route", () => {
   const { input } = native("g23d288");
   const { d, pf } = decide(input);
-  expect(d.actionId).toBe("runner.start_run.rd");
+  expect(d.actionId).toBe("rs.rd");
   expect(pf.selectedPlan?.moduleId).toBe("runner.pressure_central");
   const brokerWithdrawals = new Set(
     input.legalActions
@@ -187,7 +187,7 @@ it("keeps both Broker balances when changing the funded remote would leave a saf
     ]) }),
   ]);
   const route = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.r1",
+    (t) => t.actionId === "rs.r1",
   )!;
   expect(route.pathPassability).toBe("reachable");
   expect(route.routeQuote?.conditionalReasons).toContain(
@@ -247,7 +247,7 @@ it("preserves the actual seeded Engine strength after the first native run actio
   state = apply(
     state,
     "runner",
-    "runner.play_event.c1wx.r1.c1wx.394",
+    "rh.c1wx.r1.c1wx.394",
   );
   const view = getPlayerView(state, "runner"),
     original = view.own.rig!.find(
@@ -307,7 +307,7 @@ it("continues native G32 Shock with the exact legal Boon pump instead of accepti
   const { d, pf } = decide(input);
   expect(pf.selectedPlan?.moduleId).toBe("runner.convert_run_window");
   expect(d.actionId).toBe(
-    "runner.pump_breaker.c1bm.c1bm.c1bm.c2yt.277",
+    "rj.c1bm.c1bm.c1bm.c2yt.277",
   );
 });
 it("quotes a hypothetical pumped resolved breaker without mutating its current public state", () => {
@@ -352,7 +352,7 @@ it("executes the native G32 pump, break and remaining run through the current En
         state = apply(state, "corp", corp[0]!.actionId);
       } else {
         const originalRezId =
-          "corp.rez_ice.c31a.c31a";
+          "cq.c31a.c31a";
         expect(corp).toHaveLength(2);
         expect(corp.filter((a) => a.type === "decline_rez")).toHaveLength(1);
         expect(corp.find((a) => a.actionId === originalRezId)?.type).toBe(

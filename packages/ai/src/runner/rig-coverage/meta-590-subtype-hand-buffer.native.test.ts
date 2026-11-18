@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -39,7 +40,7 @@ it.each([
     const source = input.playerView.own.gripOrHq.find((card: { instanceId: string }) => card.instanceId === selected.source);
     expect(source?.definitionId).toBe(definitionId);
     expect(selected.expiresAtStateVersion).toBe(decisionNumber - 1);
-    const root = `plan:runner.rig_and_coverage:coverage%3A${role}`;
+    const root = planInstanceIdForProposal({ moduleId: "runner.rig_and_coverage", dedupeKey: `coverage:${role}` });
     expect(decision.decisionDebug!.planFirstDecision!).toMatchObject({
       rootPlanInstanceId: root,
       selectedPlan: { moduleId: "runner.rig_and_coverage", phase: "install_answer" },

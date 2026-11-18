@@ -47,7 +47,7 @@ describe("baseline Seed 02 effect-activation checkpoint", () => {
       result.decision?.decisionDebug?.planFirstDecision?.dispositions,
     ).toContainEqual(
       expect.objectContaining({
-        actionId: "corp.draw_card",
+        actionId: "c8",
         ownerModuleId: "corp.hand_and_agenda_management",
         evidenceCode: "corp_exact_draw_projection_exceeds_hand_capacity",
       }),
@@ -75,7 +75,7 @@ describe("baseline Seed 02 effect-activation checkpoint", () => {
       result.decision?.decisionDebug?.planFirstDecision?.dispositions,
     ).not.toContainEqual(
       expect.objectContaining({
-        actionId: "corp.draw_card",
+        actionId: "c8",
         evidenceCode: "corp_exact_draw_projection_exceeds_hand_capacity",
       }),
     );

@@ -18,7 +18,7 @@ describe("playeraction dry-run builder", () => {
         sourceKind: "basic_action",
         targetIdentity: "none",
       }),
-      actionId: "runner.gain_credit.1",
+      actionId: "rb.1",
       stateVersion: 12,
       side: "runner",
       intentContractId: "test.economy",
@@ -29,13 +29,13 @@ describe("playeraction dry-run builder", () => {
         actionType: "gain_credit",
         targetIdentity: "none",
       }),
-      legalActionIds: ["runner.gain_credit.1"],
+      legalActionIds: ["rb.1"],
     });
 
     expect(result.status).toBe("built");
     expect(result.playerAction).toMatchObject({
       side: "runner",
-      actionId: "runner.gain_credit.1",
+      actionId: "rb.1",
       clientKnownStateVersion: 12,
     });
   });
@@ -48,7 +48,7 @@ describe("playeraction dry-run builder", () => {
         sourceKind: "basic_action",
         targetIdentity: "server:rd",
       }),
-      actionId: "runner.start_run.rd",
+      actionId: "rs.rd",
       stateVersion: 20,
       side: "runner",
       intentContractId: "test.run",
@@ -59,7 +59,7 @@ describe("playeraction dry-run builder", () => {
         actionType: "start_run",
         targetIdentity: "server:rd",
       }),
-      legalActionIds: ["runner.start_run.rd"],
+      legalActionIds: ["rs.rd"],
     });
 
     expect(result.status).toBe("built");
@@ -74,7 +74,7 @@ describe("playeraction dry-run builder", () => {
         sourceKind: "basic_action",
         targetIdentity: "server:rd",
       }),
-      actionId: "runner.start_run.rd",
+      actionId: "rs.rd",
       stateVersion: 20,
       side: "runner",
       intentContractId: "test.run",
@@ -101,7 +101,7 @@ describe("playeraction dry-run builder", () => {
         sourceKind: "game_rule",
         targetIdentity,
       }),
-      actionId: "runner.resolve_choice.test",
+      actionId: "rn.test",
       stateVersion: 20,
       side: "runner",
       intentContractId: "test.choice",
@@ -127,7 +127,7 @@ describe("playeraction dry-run builder", () => {
         sourceKind: "basic_action",
         targetIdentity: "server:unknown",
       }),
-      actionId: "runner.start_run.unknown",
+      actionId: "rs.unknown",
       stateVersion: 20,
       side: "runner",
       intentContractId: "test.run",
@@ -138,7 +138,7 @@ describe("playeraction dry-run builder", () => {
         actionType: "start_run",
         targetIdentity: "server:unknown",
       }),
-      legalActionIds: ["runner.start_run.unknown"],
+      legalActionIds: ["rs.unknown"],
     });
 
     expect(result.status).toBe("blocked");
@@ -153,7 +153,7 @@ describe("playeraction dry-run builder", () => {
         sourceKind: "basic_action",
         targetIdentity: "none",
       }),
-      actionId: "runner.gain_credit.1",
+      actionId: "rb.1",
       stateVersion: 12,
       side: "runner",
       intentContractId: "test.economy",
@@ -164,7 +164,7 @@ describe("playeraction dry-run builder", () => {
         actionType: "gain_credit",
         targetIdentity: "none",
       }),
-      legalActionIds: ["runner.draw_card.1"],
+      legalActionIds: ["r8.1"],
     });
 
     expect(result.status).toBe("blocked");
@@ -238,7 +238,7 @@ describe("player action builder from LegalActionWitness", () => {
     const result = buildPlayerActionFromWitness({
       witness: buildLegalActionWitness({
         legalAction: action("install_card", {
-          actionId: "runner.install_card.program.hardware_host",
+          actionId: "rc.program.hardware_host",
           expiresAtStateVersion: 23,
           payload: {
             cardId: "program_to_install",
@@ -257,12 +257,12 @@ describe("player action builder from LegalActionWitness", () => {
         }),
         stateVersion: 23,
       }),
-      legalActionIds: ["runner.install_card.program.hardware_host"],
+      legalActionIds: ["rc.program.hardware_host"],
     });
 
     expect(result.status).toBe("built");
     expect(result.playerAction).toMatchObject({
-      actionId: "runner.install_card.program.hardware_host",
+      actionId: "rc.program.hardware_host",
       clientKnownStateVersion: 23,
       side: "runner",
     });

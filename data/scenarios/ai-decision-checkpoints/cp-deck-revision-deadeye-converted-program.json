@@ -218,7 +218,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "s1xjc7uf",
+            "instanceId": "s0",
             "known": false,
             "type": "resource",
             "subtypes": [
@@ -1733,7 +1733,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "corp.resolve_choice",
+          "actionId": "cn",
           "side": "corp",
           "type": "resolve_choice",
           "label": "Deadeye: installiertes Programm zum Trashing wählen.",
@@ -2865,7 +2865,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "corp.resolve_choice",
+        "actionId": "cn",
         "side": "corp",
         "type": "resolve_choice",
         "label": "Deadeye: installiertes Programm zum Trashing wählen.",

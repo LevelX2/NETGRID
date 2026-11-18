@@ -2627,7 +2627,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.pendingChoice?.maxSelections).toBe(2);
     expect(state.pendingChoice?.continuation).toMatchObject({
       family: "runner_post_break_stealth_loss",
-      originActionId: expect.stringContaining("runner.break_subroutine"),
+      originActionId: expect.stringContaining("r3"),
       requiredLoss: 2,
       sourceMode: "any_stealth_cards",
       createdAtStateVersion: state.stateVersion,

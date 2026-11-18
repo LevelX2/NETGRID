@@ -175,7 +175,7 @@ it("does not build a lasting recurring engine from the actual end-of-turn-bounce
   const before = JSON.stringify(input),
     d = chooseAiAction(input);
   expect(input.legalActions.some((a) => a.actionId === d.actionId)).toBe(true);
-  expect(d.actionId).toBe("runner.gain_credit");
+  expect(d.actionId).toBe("rb");
   expect(
     residentPlanPortfolioSnapshot(input)!.instances.some(
       (x) =>
@@ -197,19 +197,19 @@ it("binds the actual last-chance remote funding head to the one-credit break rou
     cp.runtime,
   );
   const d = chooseAiAction(input);
-  expect(d.actionId).toBe("runner.gain_credit");
+  expect(d.actionId).toBe("rb");
   expect(d.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
     "runner.economy",
   );
   const p = residentPlanPortfolioSnapshot(input)!,
     fund = p.instances.find(
       (x) =>
-        x.moduleId === "runner.economy" && x.instanceId.includes("run-support"),
+        x.moduleId === "runner.economy" && x.dedupeKey.includes("run-support"),
     );
   expect((fund!.moduleState as any).need).toMatchObject({
     gap: 1,
     targetCredits: 1,
-    parentPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+    parentPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
   });
   expect(d.fallbackUsed || d.timeoutUsed).toBe(false);
 });

@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 247,
-    "stateHash": "fnv1a:c8c85305",
+    "stateHash": "fnv1a:dc3da7ad",
     "testOnlyGameState": {
       "matchId": "match_fd7671d270e1a716",
       "baseline": {
@@ -3234,17 +3234,17 @@
         "kind": "select_cards",
         "options": [
           {
-            "id": "card_h12xsk9g",
+            "id": "card_hhq.i0",
             "label": "HQ ICE 1",
             "value": "c2s5"
           },
           {
-            "id": "card_h1fzy5yq",
+            "id": "card_hr1.i3",
             "label": "Remote 1 ICE 4",
             "value": "c2zh"
           },
           {
-            "id": "card_hi4u8p3",
+            "id": "card_hr1.r1",
             "label": "Remote 1 Root 2",
             "value": "c38l"
           }
@@ -9654,7 +9654,7 @@
         "id": "runner_credit_bank"
       },
       "selectedStepKind": "build_bank_counter",
-      "selectedActionId": "runner.activated_card_ability.c1o1.c1o1.activated.0",
+      "selectedActionId": "r1.c1o1.c1o1.activated.0",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -9719,7 +9719,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:runner.build_credit_bank",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.activated_card_ability.c1o1.c1o1.activated.0"
+        "plan_portfolio_selected_action:r1.c1o1.c1o1.activated.0"
       ]
     },
     "strategicIntent": {
@@ -10736,10 +10736,10 @@
   "expectation": {
     "choice": {
       "mustSelectOptionIds": [
-        "card_hi4u8p3"
+        "card_hr1.r1"
       ],
       "mustNotSelectOptionIds": [
-        "card_h12xsk9g"
+        "card_hhq.i0"
       ]
     }
   }

@@ -6618,7 +6618,7 @@
       "stateVersion": 93,
       "instances": [
         {
-          "instanceId": "plan:runner.contest_remote:remote%3Ar1",
+          "instanceId": "p1p4xezjcxov79rno40lq3f7rv",
           "dedupeKey": "remote:r1",
           "moduleId": "runner.contest_remote",
           "moduleVersion": "1",
@@ -6758,7 +6758,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.convert_run_window:run%3A89",
+          "instanceId": "p8kyx053fdf6jdaq38j06j4jv5",
           "dedupeKey": "run:89",
           "moduleId": "runner.convert_run_window",
           "moduleVersion": "1",
@@ -6781,7 +6781,7 @@
             "kind": "window",
             "id": "run:89"
           },
-          "parentInstanceId": "plan:runner.contest_remote:remote%3Ar1",
+          "parentInstanceId": "p1p4xezjcxov79rno40lq3f7rv",
           "openNeedIds": [],
           "phase": "execute",
           "milestone": "admitted",
@@ -6790,8 +6790,8 @@
             "signal": {
               "windowId": "run:89",
               "serverId": "r1",
-              "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar1",
-              "leafPlanInstanceId": "plan:runner.convert_run_window:run%3A89",
+              "rootPlanInstanceId": "p1p4xezjcxov79rno40lq3f7rv",
+              "leafPlanInstanceId": "p8kyx053fdf6jdaq38j06j4jv5",
               "semanticActionTypes": [
                 "breaker.boost_strength",
                 "breaker.break_subroutine",
@@ -6888,7 +6888,7 @@
               "encounterIntent": "mitigate_threat",
               "encounterEvidenceCode": "runner_visible_encounter_requires_mitigation:454",
               "actionAssessments": {
-                "runner.pump_breaker.c1jv.c1jv.c1jv.c2t3.251:icebreaker_abilities_increase_strength": {
+                "rj.c1jv.c1jv.c1jv.c2t3.251:icebreaker_abilities_increase_strength": {
                   "admissible": false,
                   "evidenceCodes": [
                     "runner_run_window_action_excluded:pump_cannot_lead_to_useful_break",
@@ -6896,7 +6896,7 @@
                     "pump_direct_break_already_legal:true"
                   ]
                 },
-                "runner.break_subroutine.c1jv.c1jv.c1jv.c2t3.0.printed_subroutines_next_encounter_unless_fully_break_damage_net.251:icebreaker_abilities_break_subroutine": {
+                "r3.c1jv.c1jv.c1jv.c2t3.0.printed_subroutines_next_encounter_unless_fully_break_damage_net.251:icebreaker_abilities_break_subroutine": {
                   "admissible": true,
                   "evidenceCodes": [
                     "runner_encounter_action_plan_admissible",
@@ -6905,7 +6905,7 @@
                     "runner_full_path_commitment_preserved"
                   ]
                 },
-                "runner.continue_run.printed_subroutines_next_encounter_unless_fully_break_damage_net": {
+                "r5.printed_subroutines_next_encounter_unless_fully_break_damage_net": {
                   "admissible": true,
                   "evidenceCodes": [
                     "runner_run_window_action_plan_admissible",
@@ -6957,13 +6957,13 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:runner.contest_remote:remote%3Ar1",
+          "instanceId": "p1p4xezjcxov79rno40lq3f7rv",
           "stateVersion": 93,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.convert_run_window:run%3A89",
+          "instanceId": "p8kyx053fdf6jdaq38j06j4jv5",
           "stateVersion": 93,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
@@ -6974,7 +6974,7 @@
         "commitmentId": "fnv1a:df161c53",
         "sourcePlanId": "fnv1a:5a6fa8ad",
         "sourceLineHash": "fnv1a:670fc88f",
-        "sequenceRootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar1",
+        "sequenceRootPlanInstanceId": "p1p4xezjcxov79rno40lq3f7rv",
         "side": "runner",
         "turnKey": "runner:turn:13",
         "planningRulesFingerprint": "fnv1a:99880efa",
@@ -6991,7 +6991,7 @@
           {
             "phaseId": "fnv1a:6a28912e",
             "root": {
-              "planInstanceId": "plan:runner.contest_remote:remote%3Ar1",
+              "planInstanceId": "p1p4xezjcxov79rno40lq3f7rv",
               "moduleId": "runner.convert_run_window",
               "milestoneId": "convert_active_run_window",
               "provenance": "resident"
@@ -7112,7 +7112,7 @@
           "sideSafePlanningFingerprint": "fnv1a:0b36f802"
         },
         "currentBinding": {
-          "actionId": "runner.break_subroutine.c1jv.c1jv.c1jv.c2t3.0.0.328",
+          "actionId": "r3.c1jv.c1jv.c1jv.c2t3.0.0.328",
           "stateVersion": 93,
           "semanticActionSetFingerprint": "fnv1a:31e74ffd",
           "invocationKey": "fnv1a:0966b57f"
@@ -7121,25 +7121,25 @@
         "expectationId": "fnv1a:dd834d8b"
       },
       "pendingRunnerCostPenaltySupportOrigin": {
-        "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar1",
-        "executorInstanceId": "plan:runner.convert_run_window:run%3A89",
-        "sourceStepId": "plan:runner.convert_run_window:run%3A89:convert",
-        "originalActionId": "runner.break_subroutine.c1jv.c1jv.c1jv.c2t3.0.0.328",
+        "rootPlanInstanceId": "p1p4xezjcxov79rno40lq3f7rv",
+        "executorInstanceId": "p8kyx053fdf6jdaq38j06j4jv5",
+        "sourceStepId": "p8kyx053fdf6jdaq38j06j4jv5:convert",
+        "originalActionId": "r3.c1jv.c1jv.c1jv.c2t3.0.0.328",
         "selectedAtStateVersion": 93
       },
-      "rootForegroundInstanceId": "plan:runner.contest_remote:remote%3Ar1",
-      "executorInstanceId": "plan:runner.convert_run_window:run%3A89"
+      "rootForegroundInstanceId": "p1p4xezjcxov79rno40lq3f7rv",
+      "executorInstanceId": "p8kyx053fdf6jdaq38j06j4jv5"
     }
   },
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.jack_out"
+        "actionId": "rd"
       }
     ],
     "forbiddenActions": [
       {
-        "actionId": "runner.continue_run"
+        "actionId": "r5"
       }
     ],
     "planExecution": {

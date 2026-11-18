@@ -124,7 +124,7 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
         acceptablePlanKinds: ["corp.economy"],
         acceptableCapabilities: ["develop_or_convert_corp_economy"],
         requiredAssessmentEvidence: [
-          "corp_defense_exact_route_funding_required:rd:corp.install_card.c2yu.rd.c2yu.0",
+          "corp_defense_exact_route_funding_required:rd:cc.c2yu.rd.c2yu.0",
         ],
       },
     };
@@ -133,7 +133,7 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     expect(result.decision?.evidence).toContain(
-      "plan_priority_delegated_from:plan:corp.defend_servers:server-defense-portfolio",
+      "plan_priority_delegated_from:penw02zfrkklof54c2nuye5att",
     );
   });
 
@@ -174,7 +174,7 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
     expect(
       [...selected].every(
         (actionId) =>
-          actionId === "corp.gain_credit" || actionId === "corp.draw_card",
+          actionId === "cb" || actionId === "c8",
       ),
     ).toBe(true);
     expect(

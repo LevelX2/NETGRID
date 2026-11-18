@@ -19,7 +19,7 @@ import { createSemanticRuntimeDecisionContext } from "../runtime/semantic-runtim
 import type { SemanticRuntimeDecisionContextDependencies } from "../runtime/semantic-runtime-decision-context";
 import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
 
-const DIRECT_RD_ACTION_ID = "runner.start_run.rd";
+const DIRECT_RD_ACTION_ID = "rs.rd";
 const INSIDE_JOB_RD_ACTION_ID = "runner.play.inside-job.rd";
 const SOCIAL_ENGINEERING_ACTION_ID = "runner.play.social-engineering";
 
@@ -131,10 +131,10 @@ describe("Inside Job central plan-first coverage", () => {
       decisionDebug: {
         planKind: "runner.pressure_central",
         planFirstDecision: {
-          rootPlanInstanceId: "plan:runner.pressure_central:central%3Ard",
-          leafExecutorInstanceId: "plan:runner.pressure_central:central%3Ard",
+          rootPlanInstanceId: "pa90fufw9vc5bkshp96ztlryxl",
+          leafExecutorInstanceId: "pa90fufw9vc5bkshp96ztlryxl",
           selectedStep: {
-            stepId: "plan:runner.pressure_central:central%3Ard:pressure:rd",
+            stepId: "pa90fufw9vc5bkshp96ztlryxl:pressure:rd",
           },
         },
         actionAlternatives: expect.arrayContaining([

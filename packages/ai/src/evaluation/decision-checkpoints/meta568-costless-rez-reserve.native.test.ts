@@ -98,7 +98,7 @@ it("executes that same native rez at the existing Defense owner", () => {
   });
   expect(result.decisionDebug?.planFirstDecision).toMatchObject({
     selectedPlan: { moduleId: "corp.defend_servers" },
-    rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+    rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
     route: {
       actionId: result.actionId,
       stateVersion: input.playerView.stateVersion,

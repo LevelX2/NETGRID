@@ -138,9 +138,12 @@ describe("pairing 556 terminal overadvance", () => {
         missingActionCount: 0,
         conflictingActionCount: 0,
       });
-      expect(pf?.rootPlanInstanceId).toContain(
-        encodeURIComponent("agenda:" + agendaId + ":r1"),
-      );
+      expect(pf?.portfolio.find(
+        (instance) => instance.instanceId === pf.rootPlanInstanceId,
+      )).toMatchObject({
+        moduleId: "corp.score_agenda",
+        dedupeKey: `agenda:${agendaId}:r1`,
+      });
       expect(pf?.rootPlanInstanceId).toBe(pf?.leafExecutorInstanceId);
       expect(pf?.route).toMatchObject({
         actionId: result.actionId,

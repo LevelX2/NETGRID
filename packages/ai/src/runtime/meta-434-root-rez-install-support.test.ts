@@ -88,14 +88,14 @@ describe("meta 434 SP-337 root rez before selected ICE installation", () => {
     it(`prepares the same defense allocation at G${game} D${decision}`, () => {
       const cp = checkpoint(game!, decision!);
       const before = choose(cp);
-      expect(before.actionId).toContain("corp.install_card.");
+      expect(before.actionId).toContain("cc.");
       const quotes = addCostQuotes(cp.input);
       Object.assign(cp.input, buildAiDecisionInputDto(cp.input));
       const after = choose(cp);
       expect(quotes.map((q) => q.actionId)).toContain(after.actionId);
       expect(after.reasonCode).toBe("plan_first.corp.defend_servers");
       expect(after.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-        "plan:corp.defend_servers:server-defense-portfolio",
+        "penw02zfrkklof54c2nuye5att",
       );
       expect(after.decisionDebug?.planFirstDecision?.selectedStep).toEqual(
         before.decisionDebug?.planFirstDecision?.selectedStep,
@@ -134,7 +134,7 @@ describe("meta 434 SP-337 root rez before selected ICE installation", () => {
       before.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
     );
     expect(after.decisionDebug?.planFirstDecision?.leafExecutorInstanceId).toBe(
-      "plan:corp.defend_servers:server-defense-portfolio",
+      "penw02zfrkklof54c2nuye5att",
     );
     expect(after.decisionDebug?.planFirstDecision?.route).toMatchObject({
       actionId: after.actionId,
@@ -223,7 +223,7 @@ describe("meta 434 SP-337 root rez before selected ICE installation", () => {
         mutate(q);
         action.payload!.rootRezIceInstallCostQuoteJson = JSON.stringify(q);
       }
-      expect(choose(cp).actionId).toContain("corp.install_card.");
+      expect(choose(cp).actionId).toContain("cc.");
     });
   }
 

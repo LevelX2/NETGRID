@@ -60,12 +60,7 @@ describe("Runner encounter remote payoff", () => {
         credits: 0,
       },
       {
-        payload: {
-          encounterContinue: true,
-          encounterWillEndRun: true,
-          unbrokenSubroutineCount: 2,
-          encounterSubroutineIds: "first,second",
-        },
+        payload: {encounterContinue: true, encounterWillEndRun: true, unbrokenSubroutineCount: 2}, encounterSubroutineIds: ["first","second"],
       },
     );
     const input = aiInput("runner", [first, second, cont]);
@@ -145,12 +140,7 @@ describe("Runner encounter remote payoff", () => {
       "Continue",
       { credits: 0 },
       {
-        payload: {
-          encounterContinue: true,
-          encounterWillEndRun: true,
-          unbrokenSubroutineCount: 2,
-          encounterSubroutineIds: "first,second",
-        },
+        payload: {encounterContinue: true, encounterWillEndRun: true, unbrokenSubroutineCount: 2}, encounterSubroutineIds: ["first","second"],
       },
     );
     const input = aiInput("runner", [first, second, cont]);

@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -49,9 +50,9 @@ it.each([
   ["cp-meta571-partial-known-funding.json", "hq"],
 ])("keeps bank funding on hold when %s cannot substantiate its information probe", (name, server) => {
   const { decision, portfolio } = decideFixture(name);
-  expect(decision.actionId).toBe("runner.draw_card");
+  expect(decision.actionId).toBe("r8");
   const parent = portfolio.instances.find(
-    (p) => p.instanceId === "plan:runner.pressure_central:central%3A" + server,
+    (p) => p.instanceId === planInstanceIdForProposal({ moduleId: "runner.pressure_central", dedupeKey: `central:${server}` }),
   );
   expect(parent?.moduleState).toMatchObject({ signal: { reachable: false } });
   expect(
@@ -102,7 +103,7 @@ it.each([2, 3, 4])(
       decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
     ).not.toBe("runner.credit_bank");
     const parent = portfolio.instances.find(
-      (p) => p.instanceId === "plan:runner.pressure_central:central%3Ard",
+      (p) => p.instanceId === "pa90fufw9vc5bkshp96ztlryxl",
     );
     expect(parent?.moduleState).toMatchObject({
       signal: {

@@ -54,7 +54,7 @@ describe("runner special zone install action builders", () => {
     const endSequence = buildRunnerValuPakSequenceEndAction(state, 5);
 
     expect(install).toMatchObject({
-      actionId: "runner.install_card.valu_pak_program.valu_pak_program",
+      actionId: "rc.valu_pak_program.valu_pak_program",
       side: "runner",
       type: "install_card",
       label: "Valu-Pak Program installieren",
@@ -76,7 +76,7 @@ describe("runner special zone install action builders", () => {
       visibility: "public",
     });
     expect(endSequence).toMatchObject({
-      actionId: "runner.stop_restricted_action_sequence",
+      actionId: "ru",
       side: "runner",
       type: "stop_restricted_action_sequence",
       label: "Valu-Pak-Installationssequenz beenden",
@@ -133,7 +133,7 @@ describe("runner special zone install action builders", () => {
 
     expect(setAside).toMatchObject({
       actionId:
-        "runner.trigger_ability.shell_traders_source.shell_traders_source.shell.shell_traders_target.set_aside_from_grip.shell_traders_target",
+        "rx.shell_traders_source.shell_traders_source.shell.shell_traders_target.set_aside_from_grip.shell_traders_target",
       side: "runner",
       type: "trigger_ability",
       label: "The Shell Traders: Prepared Program vorbereiten",
@@ -166,7 +166,7 @@ describe("runner special zone install action builders", () => {
     });
     expect(removeCounter).toMatchObject({
       actionId:
-        "runner.trigger_ability.shell_traders_source.shell_traders_source.shell.shell_traders_target.remove_shell_counter.shell_traders_target",
+        "rx.shell_traders_source.shell_traders_source.shell.shell_traders_target.remove_shell_counter.shell_traders_target",
       side: "runner",
       type: "trigger_ability",
       label: "The Shell Traders: Shell-Counter entfernen",

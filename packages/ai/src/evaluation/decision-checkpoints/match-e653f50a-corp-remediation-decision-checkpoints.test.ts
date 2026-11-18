@@ -40,7 +40,7 @@ describe("match e653f50a Corp remediation decision checkpoints", () => {
       checkpoint.expectation.acceptableActions = [
         {
           actionId:
-            "corp.rez_card.c3ad.r1.c3ad",
+            "cp.c3ad.r1.c3ad",
         },
       ];
       checkpoint.expectation.planExecution = {
@@ -53,7 +53,7 @@ describe("match e653f50a Corp remediation decision checkpoints", () => {
     expect(result.ok, `${result.code ?? "ok"}: ${result.message}`).toBe(true);
     if (
       json === tychoFalseSameTurnJson &&
-      result.decision?.actionId === "corp.draw_card"
+      result.decision?.actionId === "c8"
     ) {
       expect(result.decision.reasonCode).toBe("plan_first.corp.defend_servers");
       expect(result.decision.evidence).toContain(

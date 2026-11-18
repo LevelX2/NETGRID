@@ -189,11 +189,11 @@ describe("access action generation", () => {
     const finishActions = buildRunnerAccessActions(emptyHost).legalActions;
 
     expect(accessActions.map((action) => action.type)).toEqual(["access_card"]);
-    expect(accessActions[0]!.actionId).toBe("runner.access_card");
+    expect(accessActions[0]!.actionId).toBe("r0");
     expect(finishActions.map((action) => action.type)).toEqual([
       "continue_run",
     ]);
-    expect(finishActions[0]!.actionId).toBe("runner.continue_run");
+    expect(finishActions[0]!.actionId).toBe("r5");
   });
 
   it("offers only the next access between breach candidates", () => {
@@ -245,7 +245,7 @@ describe("access action generation", () => {
 
     expect(buildRunnerAccessActions(host).legalActions).toMatchObject([
       {
-        actionId: "runner.access_card",
+        actionId: "r0",
         type: "access_card",
         source: "game_rule",
       },
@@ -338,7 +338,7 @@ describe("access action generation", () => {
     expect(agendaActions[0]).toMatchObject({
       type: "steal_agenda",
       source: "agenda",
-      actionId: "runner.steal_agenda.agenda",
+      actionId: "rt.agenda",
     });
     expect(agendaActions[0]!.payload).toBeUndefined();
     expect(assetActions.some((action) => action.type === "steal_agenda")).toBe(
@@ -361,7 +361,7 @@ describe("access action generation", () => {
       "decline_trash",
     ]);
     expect(actions[0]).toMatchObject({
-      actionId: "runner.trash_accessed_card.asset.3",
+      actionId: "rv.asset.3",
       source: "asset",
       costs: [{ credits: 3 }],
       payload: {
@@ -371,7 +371,7 @@ describe("access action generation", () => {
       },
     });
     expect(actions[1]).toMatchObject({
-      actionId: "runner.decline_trash",
+      actionId: "r7",
       label: "Nicht trashen",
     });
     expect(actions[1]!.payload).toBeUndefined();
@@ -433,7 +433,7 @@ describe("access action generation", () => {
 
     expect(actions.map((action) => action.type)).toEqual(["decline_trash"]);
     expect(actions[0]).toMatchObject({
-      actionId: "runner.decline_trash",
+      actionId: "r7",
       label: "Zugriff abschließen",
     });
   });
@@ -467,7 +467,7 @@ describe("access action generation", () => {
 
     expect(actions).toHaveLength(1);
     expect(actions[0]).toMatchObject({
-      actionId: "runner.decline_trash",
+      actionId: "r7",
       label: "Weiter accessen",
     });
   });

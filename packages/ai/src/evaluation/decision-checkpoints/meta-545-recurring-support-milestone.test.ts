@@ -98,13 +98,17 @@ describe("admitted recurring support milestone", () => {
       first.runtime,
     );
     const setup = runtime.chooseAiAction(first.input);
-    expect(setup.actionId).toBe("runner.start_run.hq");
+    expect(setup.actionId).toBe("rs.hq");
     expectBoundRoute(first.input, setup);
     expect(setup.decisionDebug?.actionAlternatives).toContainEqual(
       expect.objectContaining({
-        actionId: "runner.install_card.c27l.c27l",
+        actionId: "rc.c27l.c27l",
         whyNot: expect.arrayContaining([
-          expect.stringMatching(/candidate_plan:.*card%3Ac27l:ready/),
+          expect.toBeOneOf(
+            setup.decisionDebug?.planFirstDecision?.portfolio
+              .filter((instance) => instance.dedupeKey.includes("card:c27l"))
+              .map((instance) => `candidate_plan:${instance.instanceId}:ready`) ?? [],
+          ),
         ]),
       }),
     );

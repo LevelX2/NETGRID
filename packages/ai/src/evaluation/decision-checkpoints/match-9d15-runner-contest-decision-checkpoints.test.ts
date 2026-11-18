@@ -43,13 +43,13 @@ describe("match 9D15 runner contest decision checkpoints", () => {
         forbiddenActions: [
           {
             actionId:
-              "runner.play_event.c1w2.r1.c1w2.390",
+              "rh.c1w2.r1.c1w2.390",
           },
         ],
         runTargets: [
           {
             actionId:
-              "runner.play_event.c1w2.r1.c1w2.390",
+              "rh.c1w2.r1.c1w2.390",
             targetServerId: "r1",
             pathPassability: "blocked_missing_coverage",
             recommendation: "find_breaker_first",
@@ -70,7 +70,7 @@ describe("match 9D15 runner contest decision checkpoints", () => {
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId = "9D15-C02-NO-FOLLOW-UP-CLICK";
         checkpoint.expectation = {
-          forbiddenActions: [{ actionId: "runner.trigger_ability" }],
+          forbiddenActions: [{ actionId: "rx" }],
         };
       },
     );
@@ -111,7 +111,7 @@ describe("match 9D15 runner contest decision checkpoints", () => {
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId = "9D15-C03-NO-REMOTE-THREAT";
         checkpoint.expectation = {
-          forbiddenActions: [{ actionId: "runner.trigger_ability" }],
+          forbiddenActions: [{ actionId: "rx" }],
           selectedScoreBreakdown: {
             forbiddenComponentKeys: ["runner_matchpoint_run_lock_release"],
           },
@@ -128,7 +128,7 @@ describe("match 9D15 runner contest decision checkpoints", () => {
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "9D15-C04-RUN-LOCK-UNAFFORDABLE";
       checkpoint.expectation = {
-        forbiddenActions: [{ actionId: "runner.trigger_ability" }],
+        forbiddenActions: [{ actionId: "rx" }],
       };
     });
 

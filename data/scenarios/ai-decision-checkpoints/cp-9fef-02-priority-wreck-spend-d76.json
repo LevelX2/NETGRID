@@ -6615,7 +6615,7 @@
         "label": "Priority Wreck"
       },
       "selectedStepKind": "install_development_card",
-      "selectedActionId": "runner.play_event.c1yh.hq.c1yh",
+      "selectedActionId": "rh.c1yh.hq.c1yh",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -6706,7 +6706,7 @@
             "plan_portfolio_role:background",
             "plan_portfolio_lifecycle:active",
             "plan_portfolio_previous_entry:runner.build_credit_bank:bank:runner_credit_bank",
-            "plan_portfolio_action_progress:runner.activated_card_ability.c29e.c29e.activated.0",
+            "plan_portfolio_action_progress:r1.c29e.c29e.activated.0",
             "plan_portfolio_action_progress_source:selected_mapped_step",
             "plan_portfolio_carried_without_current_action:true",
             "plan_portfolio_carried_without_current_action:true",
@@ -6725,7 +6725,7 @@
         "plan_portfolio_foreground:runner.opportunistic_central_run",
         "plan_portfolio_backgrounds:runner.build_credit_bank",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.play_event.c1yh.hq.c1yh"
+        "plan_portfolio_selected_action:rh.c1yh.hq.c1yh"
       ]
     },
     "strategicIntent": {
@@ -7776,7 +7776,7 @@
       ]
     },
     "runnerRunPlan": {
-      "id": "runner_run_plan:match_9fef30abd4b16341:128:runner:runner.play_event.c1yh.hq.c1yh:hq",
+      "id": "runner_run_plan:match_9fef30abd4b16341:128:runner:rh.c1yh.hq.c1yh:hq",
       "side": "runner",
       "lifecycle": "created",
       "origin": "card_initiated_run",
@@ -7795,7 +7795,7 @@
         "trashPolicy": "trash_if_value_positive",
         "reserveForStealOrTrash": 0
       },
-      "runStartActionId": "runner.play_event.c1yh.hq.c1yh",
+      "runStartActionId": "rh.c1yh.hq.c1yh",
       "sourceTacticalGoalIds": [
         "runner.pressure_good_central_target",
         "runner.draw_or_search_for_setup",
@@ -7869,7 +7869,7 @@
       "visibilityEvidence": [
         {
           "kind": "legal_action",
-          "ref": "runner.play_event.c1yh.hq.c1yh"
+          "ref": "rh.c1yh.hq.c1yh"
         },
         {
           "kind": "action_semantic_candidate",

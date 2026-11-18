@@ -2910,7 +2910,7 @@
         "allocate_server_defense"
       ],
       "requiredAssessmentEvidence": [
-        "corp_agenda_capacity_defense_conversion:rd:corp.install_card.c312.rd.c312.0"
+        "corp_agenda_capacity_defense_conversion:rd:cc.c312.rd.c312.0"
       ]
     }
   }

@@ -36,7 +36,7 @@ describe("selfplay cycle 126 decision checkpoints", () => {
       source: "basic_action",
     });
     expect(selectedAction?.actionId).not.toBe(
-      "corp.install_card.clj.r1.clj.4",
+      "cc.clj.r1.clj.4",
     );
     expect(selectedAction?.actionId).not.toContain(
       "c351",
@@ -44,9 +44,9 @@ describe("selfplay cycle 126 decision checkpoints", () => {
     expect(decision.decisionDebug?.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId:
-        "plan:corp.economy:economy-residual-capacity%3Acorp%3A24",
+        "p37orq2bskzwy1ftnnx6qa79pq",
       leafExecutorInstanceId:
-        "plan:corp.economy:economy-residual-capacity%3Acorp%3A24",
+        "p37orq2bskzwy1ftnnx6qa79pq",
       route: {
         actionId: selectedAction?.actionId,
         actionType: "gain_credit",

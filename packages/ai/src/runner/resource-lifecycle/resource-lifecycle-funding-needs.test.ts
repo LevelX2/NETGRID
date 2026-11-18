@@ -84,8 +84,8 @@ describe("resource lifecycle funding boundary", () => {
           need.kind === "parent_plan_support" && need.parentPlanInstanceId,
       ),
     ).toEqual([
-      "plan:runner.resource_lifecycle:loan%3Aloan-1",
-      "plan:runner.resource_lifecycle:loan%3Aloan-2",
+      "p3wy95clunimknc1spp05kjc12",
+      "p3wy9c8pwr9jb89shzo3mdhanr",
     ]);
     expect(assess().map((a) => a.resourceGaps.map((g) => g.needId))).toEqual([
       ["resource-lifecycle-support:loan-1"],
@@ -98,7 +98,7 @@ describe("resource lifecycle funding boundary", () => {
     const need = fundingNeeds[0]!;
     if (need.kind !== "parent_plan_support")
       throw new Error("expected parent support");
-    need.parentPlanInstanceId = "plan:runner.resource_lifecycle:loan%3Aloan-2";
+    need.parentPlanInstanceId = "p3wy9c8pwr9jb89shzo3mdhanr";
     expect(assess()[0]!.resourceGaps).toEqual([]);
   });
 

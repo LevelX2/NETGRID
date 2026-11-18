@@ -101,6 +101,7 @@ function legalAction(
   type: LegalAction["type"],
   payload: NonNullable<LegalAction["payload"]> = {},
   credits = 1,
+  subroutineIndexes?: readonly number[],
 ): LegalAction {
   return {
     actionId: `${type}.1`,
@@ -112,6 +113,7 @@ function legalAction(
     timingPoint: "run.encounter_ice",
     costs: credits > 0 ? [{ credits }] : [],
     payload,
+    subroutineIndexes,
   } as unknown as LegalAction;
 }
 
@@ -409,8 +411,7 @@ describe("runner-breaker-action-execution", () => {
     const calls: string[] = [];
     const action = legalAction("break_subroutine", {
       breakerId: BREAKER_ID,
-      subroutineIndexes: "0,1",
-    });
+      }, 1, [0, 1]);
 
     handleRunnerBreakerActionExecution(
       hostFor(state(), calls, {
@@ -577,8 +578,7 @@ describe("runner-breaker-action-execution", () => {
       }),
       legalAction("break_subroutine", {
         breakerId: BREAKER_ID,
-        subroutineIndexes: "0,1",
-      }),
+      }, 1, [0, 1]),
     );
 
     expect(multiCalls).toEqual(["multiBreak", "snowball"]);

@@ -9900,7 +9900,7 @@
         "id": "hq"
       },
       "selectedStepKind": "probe_central",
-      "selectedActionId": "runner.play_event.c1u1.hq.c1u1",
+      "selectedActionId": "rh.c1u1.hq.c1u1",
       "blockedBy": [],
       "ttlDecisionsRemaining": 0,
       "planProgressionReason": "previous_plan_considered",
@@ -9928,7 +9928,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.end_turn"
+        "plan_portfolio_selected_action:r9"
       ]
     },
     "strategicIntent": {
@@ -11042,7 +11042,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.resolve_choice"
+        "actionId": "rn"
       }
     ],
     "discardChoice": {

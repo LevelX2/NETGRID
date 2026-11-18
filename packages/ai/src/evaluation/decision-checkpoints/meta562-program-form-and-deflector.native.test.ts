@@ -84,7 +84,7 @@ it("resolves the original accessed-agenda MU choice with an installed program-fo
   const decision = chooseAiAction(f.memory.input);
   expect(JSON.stringify(f.memory.input)).toBe(before);
   expect(decision).toMatchObject({
-    actionId: "runner.resolve_choice",
+    actionId: "rn",
     fallbackUsed: false,
     timeoutUsed: false,
   });
@@ -134,7 +134,7 @@ it("keeps three credits when the original Trapdoor has no subsidiary target", ()
   const decision = chooseAiAction(f.trapdoor.input);
   expect(JSON.stringify(f.trapdoor.input)).toBe(before);
   expect(decision).toMatchObject({
-    actionId: "corp.decline_rez",
+    actionId: "c6",
     fallbackUsed: false,
     timeoutUsed: false,
   });

@@ -5250,7 +5250,7 @@
         "label": "Stakeout"
       },
       "selectedStepKind": "install_development_card",
-      "selectedActionId": "runner.play_event.c14h.c14h",
+      "selectedActionId": "rh.c14h.c14h",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_central_probe_satisfied",
@@ -5343,7 +5343,7 @@
         "plan_portfolio_foreground:runner.play_best_hand_card",
         "plan_portfolio_backgrounds:runner.build_credit_bank",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.play_event.c14h.c14h"
+        "plan_portfolio_selected_action:rh.c14h.c14h"
       ]
     },
     "strategicIntent": {

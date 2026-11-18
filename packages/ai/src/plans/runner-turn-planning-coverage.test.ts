@@ -79,7 +79,7 @@ describe("Runner turn planning coverage", () => {
   });
 
   it("keeps an unbound installed card run ability with the existing run owner", () => {
-    const actionId = "runner.activated_card_ability.shredder.archives.make_run";
+    const actionId = "r1.shredder.archives.make_run";
     const dispositions = runnerCoverageDispositions({
       input: {
         side: "runner",

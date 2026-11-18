@@ -4405,7 +4405,7 @@
         "id": "hq"
       },
       "selectedStepKind": "run_target",
-      "selectedActionId": "runner.start_run.hq",
+      "selectedActionId": "rs.hq",
       "selectedActionType": "start_run",
       "blockedBy": [],
       "ttlDecisionsRemaining": 1,
@@ -4434,7 +4434,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.access_card"
+        "plan_portfolio_selected_action:r0"
       ]
     },
     "strategicIntent": {

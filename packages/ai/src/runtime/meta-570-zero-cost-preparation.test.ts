@@ -95,7 +95,7 @@ it("publishes assessed zero break cost and installs the decoder under its actual
       ).toBe("runner.rig_and_coverage");
       expect(
         decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-      ).toBe("plan:runner.contest_remote:remote%3Ar1");
+      ).toBe("p1p4xezjcxov79rno40lq3f7rv");
     }
     const result = applyAction(state, {
       matchId: state.matchId,

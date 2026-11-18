@@ -60,8 +60,8 @@ describe("meta 403 information run preserves its bound damage reserve", () => {
       expect(selected.type).toBe("pump_breaker");
       expect(result.fallbackUsed).toBe(false);
       expect(result.decisionDebug?.planFirstDecision).toMatchObject({
-        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A150",
+        rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+        leafExecutorInstanceId: "p9nu28wpemlshk57iujv7ji5jm",
       });
     },
   );

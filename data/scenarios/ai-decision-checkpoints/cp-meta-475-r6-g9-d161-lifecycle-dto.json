@@ -601,7 +601,7 @@
           "label": "Remote 1",
           "ice": [
             {
-              "instanceId": "h1egxrc6",
+              "instanceId": "hr1.i0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -4998,7 +4998,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.end_turn.c2ch.c2ch.454.end_of_runner_turn",
+          "actionId": "r9.c2ch.c2ch.454.end_of_runner_turn",
           "side": "runner",
           "type": "end_turn",
           "label": "Loan from Chiba trashen",
@@ -5023,7 +5023,7 @@
           }
         },
         {
-          "actionId": "runner.end_turn",
+          "actionId": "r9",
           "side": "runner",
           "type": "end_turn",
           "label": "Zug beenden",
@@ -7215,7 +7215,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "runner.end_turn.c2ch.c2ch.454.end_of_runner_turn",
+        "actionId": "r9.c2ch.c2ch.454.end_of_runner_turn",
         "side": "runner",
         "type": "end_turn",
         "label": "Loan from Chiba trashen",
@@ -7240,7 +7240,7 @@
         }
       },
       {
-        "actionId": "runner.end_turn",
+        "actionId": "r9",
         "side": "runner",
         "type": "end_turn",
         "label": "Zug beenden",
@@ -7294,7 +7294,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 160,
-      "sideSafePlanningFingerprint": "fnv1a:48fd2430"
+      "sideSafePlanningFingerprint": "fnv1a:fe335cd8"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_bit_denial_lock_1.0.0",
@@ -11963,7 +11963,7 @@
       "stateVersion": 160,
       "instances": [
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "dedupeKey": "standard-turn-completion",
           "moduleId": "runner.complete_turn",
           "moduleVersion": "1",
@@ -11992,7 +11992,7 @@
           "moduleState": {
             "kind": "turn_completion",
             "standardEndTurnActionIds": [
-              "runner.end_turn"
+              "r9"
             ]
           },
           "blockers": [],
@@ -12029,7 +12029,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.credit_bank:c29e",
+          "instanceId": "pdeckcw9fkuryyxs8xionefklm",
           "dedupeKey": "c29e",
           "moduleId": "runner.credit_bank",
           "moduleVersion": "1",
@@ -12127,31 +12127,31 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "stateVersion": 160,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.credit_bank:c29e",
+          "instanceId": "pdeckcw9fkuryyxs8xionefklm",
           "stateVersion": 160,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.contest_remote:remote%3Ar2",
+          "instanceId": "p1p4x83h7yolw2hjtvi0ud06dm",
           "stateVersion": 160,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.convert_run_window:run%3A149",
+          "instanceId": "p9nrsi68f9bacx4uqdci0b0xoo",
           "stateVersion": 160,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "stateVersion": 160,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
@@ -12164,7 +12164,7 @@
         "commitmentId": "fnv1a:9be0316a",
         "sourcePlanId": "fnv1a:63d96ed5",
         "sourceLineHash": "fnv1a:b65925ac",
-        "sequenceRootPlanInstanceId": "plan:runner.complete_turn:standard-turn-completion",
+        "sequenceRootPlanInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
         "side": "runner",
         "turnKey": "runner:turn:21",
         "planningRulesFingerprint": "fnv1a:697f22b3",
@@ -12181,7 +12181,7 @@
           {
             "phaseId": "fnv1a:cbd06799",
             "root": {
-              "planInstanceId": "plan:runner.complete_turn:standard-turn-completion",
+              "planInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
               "moduleId": "runner.complete_turn",
               "milestoneId": "complete_turn_after_productive_routes_exhausted",
               "provenance": "resident"
@@ -12270,7 +12270,7 @@
           "sideSafePlanningFingerprint": "fnv1a:ac973b6d"
         },
         "currentBinding": {
-          "actionId": "runner.end_turn",
+          "actionId": "r9",
           "stateVersion": 160,
           "semanticActionSetFingerprint": "fnv1a:65114413",
           "invocationKey": "fnv1a:5c8c459f"
@@ -12278,8 +12278,8 @@
         "actionType": "end_turn",
         "expectationId": "fnv1a:2b162939"
       },
-      "rootForegroundInstanceId": "plan:runner.complete_turn:standard-turn-completion",
-      "executorInstanceId": "plan:runner.complete_turn:standard-turn-completion"
+      "rootForegroundInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
+      "executorInstanceId": "p2ut8j92he0i09lc4xwtln5iys"
     }
   },
   "validation": {
@@ -12299,7 +12299,7 @@
     "seed": "meta-475-6851b8431876-bce46446-009",
     "decisionIndex": 161,
     "stateVersion": 160,
-    "actionId": "runner.end_turn.c2ch.c2ch.454.end_of_runner_turn",
+    "actionId": "r9.c2ch.c2ch.454.end_of_runner_turn",
     "rawHistoricalPayload": {
       "cardId": "c2ch",
       "cardImplementationLifecycleAction": "end_of_runner_turn",

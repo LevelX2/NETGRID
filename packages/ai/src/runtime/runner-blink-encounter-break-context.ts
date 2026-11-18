@@ -208,26 +208,22 @@ function unbrokenEncounterSubroutines(
       candidate.payload?.encounterContinue === true,
   );
   const payload = continuation?.payload;
-  const nextIds = payload?.encounterSubroutineIds;
+  const nextIds = continuation?.encounterSubroutineIds;
   const useRemaining =
     scope === "remaining" &&
-    (payload?.encounterRemainingSubroutineIds !== undefined ||
+    (continuation?.encounterRemainingSubroutineIds !== undefined ||
       payload?.encounterRemainingSubroutineCount !== undefined);
-  const quotedIds = useRemaining ? payload?.encounterRemainingSubroutineIds : nextIds;
+  const ids = useRemaining ? continuation?.encounterRemainingSubroutineIds : nextIds;
   const count = useRemaining
     ? payload?.encounterRemainingSubroutineCount
     : payload?.unbrokenSubroutineCount;
-  const ids = typeof quotedIds === "string" && quotedIds.length
-    ? quotedIds.split(",")
-    : [];
   if (
-    typeof quotedIds !== "string" ||
+    !Array.isArray(ids) ||
     new Set(ids).size !== ids.length ||
     ids.length !== count ||
     ids.some((id) => !subroutines.some((subroutine) => subroutine.id === id)) ||
     (useRemaining &&
-      (typeof nextIds !== "string" ||
-        (nextIds.length > 0 && nextIds.split(",").some((id) => !ids.includes(id)))))
+      (!Array.isArray(nextIds) || nextIds.some((id) => !ids.includes(id))))
   ) {
     throw Object.assign(
       new Error(

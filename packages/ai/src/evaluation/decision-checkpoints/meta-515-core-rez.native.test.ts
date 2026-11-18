@@ -114,7 +114,7 @@ it.each([
   (key, knownCost, fundingGap) => {
     const { input } = native(key);
     const target = evaluateRunnerRunTargets({ input }).find(
-      (e) => e.actionId === "runner.start_run.rd",
+      (e) => e.actionId === "rs.rd",
     )!;
     expect(target).toMatchObject({
       pathPassability: "blocked_unpayable",
@@ -126,7 +126,7 @@ it.each([
       },
     });
     const { d } = decide(input);
-    expect(d.actionId).not.toBe("runner.start_run.rd");
+    expect(d.actionId).not.toBe("rs.rd");
   },
 );
 it("keeps the positive Core path and cash floor funded despite a free Archives alternative", () => {
@@ -134,7 +134,7 @@ it("keeps the positive Core path and cash floor funded despite a free Archives a
   expect(runnerArchivesHasQualifiedHiddenPayoff(input)).toBe(true);
   expect(
     evaluateRunnerRunTargets({ input }).find(
-      (e) => e.actionId === "runner.start_run.rd",
+      (e) => e.actionId === "rs.rd",
     ),
   ).toMatchObject({
     creditsAfterRun: 0,
@@ -168,7 +168,7 @@ it("does not charge for the native outer Mastermind's exact zero Core", () => {
   expect(zero.amount).toBe(0);
   expect(
     evaluateRunnerRunTargets({ input }).find(
-      (e) => e.actionId === "runner.start_run.rd",
+      (e) => e.actionId === "rs.rd",
     )!.routeQuote,
   ).toMatchObject({
     reachability: "guaranteed_access",
@@ -176,9 +176,9 @@ it("does not charge for the native outer Mastermind's exact zero Core", () => {
     fundingGap: 0,
   });
   const { d, pf } = decide(input);
-  expect(d.actionId).toBe("runner.gain_credit");
+  expect(d.actionId).toBe("rb");
   expect(pf.rootPlanInstanceId).toBe(
-    "plan:runner.pressure_central:central%3Ard",
+    "pa90fufw9vc5bkshp96ztlryxl",
   );
 });
 it.each([
@@ -225,8 +225,8 @@ it.each([
     expect(started).toBe(expectAccess);
     expect(access).toBe(expectAccess);
     if (!expectAccess) {
-      expect(rows).toContain("runner.draw_card");
-      expect(rows.at(-1)).toBe("runner.end_turn");
+      expect(rows).toContain("r8");
+      expect(rows.at(-1)).toBe("r9");
     }
     if (!state.winner) expect(state.run).toBeUndefined();
     expect(state.runner.coreDamage).toBe(initial.runner.coreDamage);
@@ -235,10 +235,10 @@ it.each([
     expect(replay.ok).toBe(true);
     expect(hashGameState(replay.state)).toBe(hashGameState(state));
     if (key === "g17d164" && credits === undefined) {
-      expect(rows.slice(0, 2)).toEqual(["runner.gain_credit", "runner.gain_credit"]);
+      expect(rows.slice(0, 2)).toEqual(["rb", "rb"]);
     }
     if (expectAccess)
-      expect(rows.some((id) => id.startsWith("runner.break_subroutine"))).toBe(
+      expect(rows.some((id) => id.startsWith("r3"))).toBe(
         true,
       );
   },
@@ -256,7 +256,7 @@ it("feeds the native Corp defense owner complete public fixed-credit post-rez qu
   expect(hashGameState(state)).toBe(before);
   const { d, pf } = decide(input);
   expect(pf.selectedPlan?.moduleId).toBe("corp.defend_servers");
-  expect(d.actionId).toContain("corp.install_card.cn2.rd.");
+  expect(d.actionId).toContain("cc.cn2.rd.");
   expect(
     apply(state, "corp", d.actionId!, d.selectedChoices).stateVersion,
   ).toBe(state.stateVersion + 1);

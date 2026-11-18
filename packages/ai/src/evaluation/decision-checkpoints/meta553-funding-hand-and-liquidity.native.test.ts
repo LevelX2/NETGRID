@@ -129,10 +129,10 @@ describe("native equivalent funding and independent finite liquidity", () => {
     expect(action.type).toBe("play_event");
     expect(visibleSourceDefinitionsByInstanceId(f.input.playerView)[action.source]).toBe(161);
     expect(plan.rootPlanInstanceId).toBe(
-      "plan:runner.pressure_central:central%3Ard",
+      "pa90fufw9vc5bkshp96ztlryxl",
     );
     expect(plan.leafExecutorInstanceId).toBe(
-      "plan:runner.economy:run-support%3Acentral%3Ard",
+      "p39qe95vble7jgc7bznje9d27l",
     );
   });
   it.each(["wait33", "wait33late", "wait34"])(
@@ -141,9 +141,14 @@ describe("native equivalent funding and independent finite liquidity", () => {
       const { action, plan } = decide(capture(key));
       expect(action.type).toBe("gain_credit");
       expect(plan.selectedPlan?.moduleId).toBe("runner.economy");
-      expect(plan.leafExecutorInstanceId).toContain(
-        "economy-liquidity-development",
-      );
+      expect(
+        plan?.portfolio.find(
+          (instance) => instance.instanceId === plan.leafExecutorInstanceId,
+        ),
+      ).toMatchObject({
+        moduleId: "runner.economy",
+        dedupeKey: expect.stringContaining("economy-liquidity-development"),
+      });
     },
   );
   it("keeps an immediately secured public empty-RD terminal wait ahead of P6 liquidity", () => {
@@ -158,7 +163,7 @@ describe("native equivalent funding and independent finite liquidity", () => {
       cs = candidates(f.input),
       request = {
         demandId: "native:two-credit-run-gap",
-        sourcePlanId: "plan:runner.pressure_central:central%3Ard",
+        sourcePlanId: "pa90fufw9vc5bkshp96ztlryxl",
         purpose: "current_run" as const,
         priority: "current_foreground_plan" as const,
         hardness: "hard" as const,
@@ -167,7 +172,7 @@ describe("native equivalent funding and independent finite liquidity", () => {
         remainingClicks: 2,
         requiredEndTurnHandBuffer: 3,
         paymentWindowTarget: evaluateRunnerRunTargets({ input: f.input }).find(
-          (t) => t.actionId === "runner.start_run.rd",
+          (t) => t.actionId === "rs.rd",
         )!,
       };
     const positive = runnerExactFundingRouteContract(f.input, cs, request);

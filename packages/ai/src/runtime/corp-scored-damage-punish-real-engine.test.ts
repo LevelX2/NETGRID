@@ -129,10 +129,16 @@ it("quotes and executes scored damage through the existing punish owner", () => 
     payload: { cardId: s.corp.scoreArea[0] },
   });
   const pf = decision.decisionDebug!.planFirstDecision!;
-  expect(pf.rootPlanInstanceId).toContain("corp.punish_campaign");
-  expect(pf.executionOrigin?.leafPlanInstanceId).toContain(
-    "corp.execute_punish_sequence",
-  );
+  expect(
+    pf.portfolio.find(
+      (instance) => instance.instanceId === pf.rootPlanInstanceId,
+    )?.moduleId,
+  ).toBe("corp.punish_campaign");
+  expect(
+    pf?.portfolio.find(
+      (instance) => instance.instanceId === pf.executionOrigin?.leafPlanInstanceId,
+    )?.moduleId,
+  ).toBe("corp.execute_punish_sequence");
   expect(pf.route).toBeDefined();
   expect(apply(s, action.actionId).winner).toBe("corp");
 });
@@ -158,9 +164,14 @@ it("converts a current tag before advancing a score project that cannot close th
       cardImplementationAbilityId: 628,
     },
   });
-  expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: expect.stringContaining("corp.punish_campaign"),
-    leafExecutorInstanceId: expect.stringContaining("corp.execute_punish_sequence"),
+  const plan = decision.decisionDebug?.planFirstDecision;
+  expect(plan?.portfolio.find(
+    (instance) => instance.instanceId === plan.rootPlanInstanceId,
+  )?.moduleId).toBe("corp.punish_campaign");
+  expect(plan?.portfolio.find(
+    (instance) => instance.instanceId === plan.leafExecutorInstanceId,
+  )?.moduleId).toBe("corp.execute_punish_sequence");
+  expect(plan).toMatchObject({
     route: { actionId: action.actionId, stateVersion: s.stateVersion },
   });
   expect(apply(s, action.actionId).runner.grip).toHaveLength(1);
@@ -265,8 +276,10 @@ it("discovers, quotes and executes the existing scored domain's immediate lethal
   const { decision, action } = decide(state);
   expect(action.source).toBe(state.corp.scoreArea[0]);
   expect(
-    decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-  ).toContain("corp.punish_campaign");
+    decision.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+    )?.moduleId,
+  ).toBe("corp.punish_campaign");
   const finished = apply(state, action.actionId);
   expect(finished.winner).toBe("corp");
   expect(finished.corp.clicks).toBe(state.corp.clicks - 1);

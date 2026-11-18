@@ -52,13 +52,13 @@ it("keeps the original run executor through untargeted Corp rez passes, Hunter t
       executorInstanceId: origin.executorInstanceId,
       originalActionId:
         d === 149
-          ? "runner.continue_run.0"
-          : "runner.resolve_choice",
+          ? "r5.0"
+          : "rn",
       selectedAtStateVersion: d === 149 ? 148 : 150,
     });
     if (d === 149)
       expect(result.actionId).toBe(
-        "runner.continue_run.0",
+        "r5.0",
       );
     if (d === 151)
       expect(result.selectedChoices?.selectedOptionIds).toEqual(["bid_5"]);
@@ -66,7 +66,7 @@ it("keeps the original run executor through untargeted Corp rez passes, Hunter t
       expect(
         input.legalActions.find((a: any) => a.actionId === result.actionId)
           ?.payload.costPenaltySupportOriginalActionId,
-      ).toBe("runner.resolve_choice");
+      ).toBe("rn");
       expect(referencesDefaultDeckCard(result.actionId, 210)).toBe(true);
     }
   }

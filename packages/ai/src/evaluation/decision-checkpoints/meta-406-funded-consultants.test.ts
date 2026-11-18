@@ -30,8 +30,16 @@ it("SP-301 funds the exact Accounts → Tycho → Consultants terminal score thr
   const decision = chooseAiAction(input);
   expect(decision.actionId).toBe(funding.actionId);
   const plan = decision.decisionDebug?.planFirstDecision;
-  expect(plan?.rootPlanInstanceId).toMatch(/^plan:corp\.score_agenda:/);
-  expect(plan?.leafExecutorInstanceId).toMatch(/^plan:corp\.economy:/);
+  expect(
+    plan?.portfolio.find(
+      (instance) => instance.instanceId === plan?.rootPlanInstanceId,
+    )?.moduleId,
+  ).toBe("corp.score_agenda");
+  expect(
+    plan?.portfolio.find(
+      (instance) => instance.instanceId === plan?.leafExecutorInstanceId,
+    )?.moduleId,
+  ).toBe("corp.economy");
   expect(plan?.route).toMatchObject({
     actionId: funding.actionId,
     stateVersion: input.playerView.stateVersion,

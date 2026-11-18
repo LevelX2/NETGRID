@@ -292,7 +292,7 @@
               }
             },
             {
-              "instanceId": "h1lj538k",
+              "instanceId": "hrd.i1",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -2197,7 +2197,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.gain_credit",
+          "actionId": "rb",
           "side": "runner",
           "type": "gain_credit",
           "label": "1 Credit nehmen",
@@ -2218,7 +2218,7 @@
           }
         },
         {
-          "actionId": "runner.draw_card",
+          "actionId": "r8",
           "side": "runner",
           "type": "draw_card",
           "label": "Karte ziehen",
@@ -2241,7 +2241,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c23u.c23u",
+          "actionId": "rc.c23u.c23u",
           "side": "runner",
           "type": "install_card",
           "label": "HQ Interface installieren",
@@ -2262,7 +2262,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c1gh.c1gh",
+          "actionId": "rc.c1gh.c1gh",
           "side": "runner",
           "type": "install_card",
           "label": "Expert Schedule Analyzer installieren",
@@ -2283,7 +2283,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c1gh.c1gh.runner_program_trash_before_install",
+          "actionId": "rc.c1gh.c1gh.runner_program_trash_before_install",
           "side": "runner",
           "type": "install_card",
           "label": "Expert Schedule Analyzer mit Programmtrash installieren",
@@ -2305,7 +2305,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c29f.c29f",
+          "actionId": "rc.c29f.c29f",
           "side": "runner",
           "type": "install_card",
           "label": "Broker installieren",
@@ -2336,7 +2336,7 @@
           }
         },
         {
-          "actionId": "runner.activated_card_ability.c28p.c28p.activated.435",
+          "actionId": "r1.c28p.c28p.activated.435",
           "side": "runner",
           "type": "activated_card_ability",
           "label": "Aujourd’Oui: Top 5 nach Programmen prüfen",
@@ -2362,7 +2362,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.hq",
+          "actionId": "rs.hq",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf HQ",
@@ -2383,7 +2383,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.rd",
+          "actionId": "rs.rd",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf R&D",
@@ -2404,7 +2404,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.archives",
+          "actionId": "rs.archives",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf Archives",
@@ -2425,7 +2425,7 @@
           }
         },
         {
-          "actionId": "runner.end_turn",
+          "actionId": "r9",
           "side": "runner",
           "type": "end_turn",
           "label": "Zug beenden",
@@ -4246,7 +4246,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "runner.gain_credit",
+        "actionId": "rb",
         "side": "runner",
         "type": "gain_credit",
         "label": "1 Credit nehmen",
@@ -4267,7 +4267,7 @@
         }
       },
       {
-        "actionId": "runner.draw_card",
+        "actionId": "r8",
         "side": "runner",
         "type": "draw_card",
         "label": "Karte ziehen",
@@ -4290,7 +4290,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c23u.c23u",
+        "actionId": "rc.c23u.c23u",
         "side": "runner",
         "type": "install_card",
         "label": "HQ Interface installieren",
@@ -4311,7 +4311,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c1gh.c1gh",
+        "actionId": "rc.c1gh.c1gh",
         "side": "runner",
         "type": "install_card",
         "label": "Expert Schedule Analyzer installieren",
@@ -4332,7 +4332,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c1gh.c1gh.runner_program_trash_before_install",
+        "actionId": "rc.c1gh.c1gh.runner_program_trash_before_install",
         "side": "runner",
         "type": "install_card",
         "label": "Expert Schedule Analyzer mit Programmtrash installieren",
@@ -4354,7 +4354,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c29f.c29f",
+        "actionId": "rc.c29f.c29f",
         "side": "runner",
         "type": "install_card",
         "label": "Broker installieren",
@@ -4385,7 +4385,7 @@
         }
       },
       {
-        "actionId": "runner.activated_card_ability.c28p.c28p.activated.435",
+        "actionId": "r1.c28p.c28p.activated.435",
         "side": "runner",
         "type": "activated_card_ability",
         "label": "Aujourd’Oui: Top 5 nach Programmen prüfen",
@@ -4411,7 +4411,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.hq",
+        "actionId": "rs.hq",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf HQ",
@@ -4432,7 +4432,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.rd",
+        "actionId": "rs.rd",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf R&D",
@@ -4453,7 +4453,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.archives",
+        "actionId": "rs.archives",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf Archives",
@@ -4474,7 +4474,7 @@
         }
       },
       {
-        "actionId": "runner.end_turn",
+        "actionId": "r9",
         "side": "runner",
         "type": "end_turn",
         "label": "Zug beenden",
@@ -4528,7 +4528,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 69,
-      "sideSafePlanningFingerprint": "fnv1a:46caa834"
+      "sideSafePlanningFingerprint": "fnv1a:f18c9706"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_mp48400s_1.0.0",
@@ -10300,7 +10300,7 @@
       "stateVersion": 69,
       "instances": [
         {
-          "instanceId": "plan:runner.credit_bank:c29f",
+          "instanceId": "pdeckjsbkjv1a67w3619j4ulzv",
           "dedupeKey": "c29f",
           "moduleId": "runner.credit_bank",
           "moduleVersion": "1",
@@ -10333,7 +10333,7 @@
               "bankId": "c29f",
               "phase": "install",
               "actionIds": [
-                "runner.install_card.c29f.c29f"
+                "rc.c29f.c29f"
               ],
               "priorityClass": "P5",
               "currentStoredCredits": 0,
@@ -10438,7 +10438,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:generic%3Adraw-options",
+          "instanceId": "p6hb5l9cujr02om3vqn7gbqr35",
           "dedupeKey": "generic:draw-options",
           "moduleId": "runner.develop_board_and_hand",
           "moduleVersion": "1",
@@ -10479,7 +10479,7 @@
                 "draw.card"
               ],
               "actionIds": [
-                "runner.draw_card"
+                "r8"
               ],
               "priorityClass": "P6",
               "value": 32,
@@ -10555,7 +10555,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.economy:economy-liquidity-development%3Arunner%3A9",
+          "instanceId": "pd33orsvhdwaw0vbqxnupb5l5z",
           "dedupeKey": "economy-liquidity-development:runner:9",
           "moduleId": "runner.economy",
           "moduleVersion": "1",
@@ -10587,7 +10587,7 @@
               "kind": "develop_liquidity",
               "needId": "economy-liquidity-development:runner:9",
               "actionIds": [
-                "runner.gain_credit"
+                "rb"
               ],
               "currentCreditsAtRevalidation": 5,
               "targetCredits": 9,
@@ -10641,7 +10641,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.economy:runner-portfolio-credit-reserve",
+          "instanceId": "pc7ebuiw5dxhlbzbf1nhcs4p4z",
           "dedupeKey": "runner-portfolio-credit-reserve",
           "moduleId": "runner.economy",
           "moduleVersion": "1",
@@ -10681,21 +10681,21 @@
                 "status": "portfolio_reserve_open"
               },
               "routeActionIds": [
-                "runner.gain_credit"
+                "rb"
               ],
               "routeAssessment": {
                 "stateVersion": 69,
-                "routeId": "runner-portfolio-credit-reserve:legal_action:runner.gain_credit",
+                "routeId": "runner-portfolio-credit-reserve:legal_action:rb",
                 "status": "covered_guaranteed",
                 "reliability": "guaranteed",
                 "horizon": "same_turn",
                 "projectedGap": 0,
                 "totalClickCost": 1,
-                "firstStepActionId": "runner.gain_credit",
+                "firstStepActionId": "rb",
                 "evidenceCodes": [
                   "funding_route_count:1",
                   "funding_route_best_status:covered_guaranteed",
-                  "funding_route_best_id:runner-portfolio-credit-reserve:legal_action:runner.gain_credit",
+                  "funding_route_best_id:runner-portfolio-credit-reserve:legal_action:rb",
                   "funding_route_status:covered_guaranteed",
                   "funding_route_reliability:guaranteed",
                   "funding_route_horizon:same_turn",
@@ -10741,7 +10741,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Aarchives",
+          "instanceId": "p22f66p721g9dgs7gsawwpf6hs",
           "dedupeKey": "central:archives",
           "moduleId": "runner.pressure_central",
           "moduleVersion": "1",
@@ -10783,14 +10783,14 @@
               "marginalValue": 60,
               "evidenceCode": "runner_central_pressure_known_no_current_payoff:archives",
               "runActionIds": [
-                "runner.start_run.archives"
+                "rs.archives"
               ],
               "runActionValues": {
-                "runner.start_run.archives": 0
+                "rs.archives": 0
               },
               "runActionDifferentialPayoffIds": [],
               "runActionEvidence": {
-                "runner.start_run.archives": [
+                "rs.archives": [
                   "run_route_raw_score:160",
                   "run_route_opportunity_cost:0",
                   "run_route_effective_score:160",
@@ -10798,14 +10798,14 @@
                 ]
               },
               "runActionRouteDiagnostics": {
-                "runner.start_run.archives": {
+                "rs.archives": {
                   "rawRouteScore": 160,
                   "opportunityCost": 0,
                   "effectiveRouteScore": 160
                 }
               },
               "runActionExclusions": {
-                "runner.start_run.archives": [
+                "rs.archives": [
                   "run_route_excluded:path:reachable",
                   "run_route_excluded:recommendation:run_if_free",
                   "run_route_excluded:score:160",
@@ -10942,7 +10942,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ahq",
+          "instanceId": "pa7nez1ioecg7mf06q1uwqq57o",
           "dedupeKey": "central:hq",
           "moduleId": "runner.pressure_central",
           "moduleVersion": "1",
@@ -10988,14 +10988,14 @@
               "runActionDifferentialPayoffIds": [],
               "runActionEvidence": {},
               "runActionRouteDiagnostics": {
-                "runner.start_run.hq": {
+                "rs.hq": {
                   "rawRouteScore": -615,
                   "opportunityCost": 0,
                   "effectiveRouteScore": -615
                 }
               },
               "runActionExclusions": {
-                "runner.start_run.hq": [
+                "rs.hq": [
                   "run_route_excluded:path:blocked_unpayable",
                   "run_route_excluded:recommendation:gain_credits_first",
                   "run_route_excluded:score:-615",
@@ -11132,7 +11132,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ard",
+          "instanceId": "pa90fufw9vc5bkshp96ztlryxl",
           "dedupeKey": "central:rd",
           "moduleId": "runner.pressure_central",
           "moduleVersion": "1",
@@ -11174,14 +11174,14 @@
               "marginalValue": 340,
               "evidenceCode": "target:rd",
               "runActionIds": [
-                "runner.start_run.rd"
+                "rs.rd"
               ],
               "runActionValues": {
-                "runner.start_run.rd": 0
+                "rs.rd": 0
               },
               "runActionDifferentialPayoffIds": [],
               "runActionEvidence": {
-                "runner.start_run.rd": [
+                "rs.rd": [
                   "run_route_raw_score:340",
                   "run_route_opportunity_cost:0",
                   "run_route_effective_score:340",
@@ -11189,7 +11189,7 @@
                 ]
               },
               "runActionRouteDiagnostics": {
-                "runner.start_run.rd": {
+                "rs.rd": {
                   "rawRouteScore": 340,
                   "opportunityCost": 0,
                   "effectiveRouteScore": 340
@@ -11296,7 +11296,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
+          "instanceId": "p5s1qdgqrafrs3n2kss1t9ct7m",
           "dedupeKey": "coverage:breaker_code_gate",
           "moduleId": "runner.rig_and_coverage",
           "moduleVersion": "1",
@@ -11339,7 +11339,7 @@
               "rejectedSearchActionIds": [],
               "searchEngineSetupActionIds": [],
               "drawForAnswerActionIds": [
-                "runner.draw_card"
+                "r8"
               ]
             },
             "phase": "draw_for_answer"
@@ -11378,7 +11378,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry",
+          "instanceId": "pde8a64nmn1hkbrzgi9sbuf6fo",
           "dedupeKey": "coverage:breaker_sentry",
           "moduleId": "runner.rig_and_coverage",
           "moduleVersion": "1",
@@ -11421,7 +11421,7 @@
               "rejectedSearchActionIds": [],
               "searchEngineSetupActionIds": [],
               "drawForAnswerActionIds": [
-                "runner.draw_card"
+                "r8"
               ]
             },
             "phase": "draw_for_answer"
@@ -11463,67 +11463,67 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:runner.credit_bank:c29f",
+          "instanceId": "pdeckjsbkjv1a67w3619j4ulzv",
           "stateVersion": 69,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:generic%3Adraw-options",
+          "instanceId": "p6hb5l9cujr02om3vqn7gbqr35",
           "stateVersion": 69,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.economy:economy-liquidity-development%3Arunner%3A9",
+          "instanceId": "pd33orsvhdwaw0vbqxnupb5l5z",
           "stateVersion": 69,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.economy:runner-portfolio-credit-reserve",
+          "instanceId": "pc7ebuiw5dxhlbzbf1nhcs4p4z",
           "stateVersion": 69,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Aarchives",
+          "instanceId": "p22f66p721g9dgs7gsawwpf6hs",
           "stateVersion": 69,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ahq",
+          "instanceId": "pa7nez1ioecg7mf06q1uwqq57o",
           "stateVersion": 69,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ard",
+          "instanceId": "pa90fufw9vc5bkshp96ztlryxl",
           "stateVersion": 69,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
+          "instanceId": "p5s1qdgqrafrs3n2kss1t9ct7m",
           "stateVersion": 69,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry",
+          "instanceId": "pde8a64nmn1hkbrzgi9sbuf6fo",
           "stateVersion": 69,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "stateVersion": 69,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ard",
+          "instanceId": "pa90fufw9vc5bkshp96ztlryxl",
           "stateVersion": 69,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
@@ -11536,7 +11536,7 @@
         "commitmentId": "fnv1a:c23060dc",
         "sourcePlanId": "fnv1a:48ef1223",
         "sourceLineHash": "fnv1a:ce11ecda",
-        "sequenceRootPlanInstanceId": "plan:runner.pressure_central:central%3Ard",
+        "sequenceRootPlanInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
         "side": "runner",
         "turnKey": "runner:turn:9",
         "planningRulesFingerprint": "fnv1a:697f22b3",
@@ -11553,7 +11553,7 @@
           {
             "phaseId": "fnv1a:e8fe4492",
             "root": {
-              "planInstanceId": "plan:runner.pressure_central:central%3Ard",
+              "planInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
               "moduleId": "runner.pressure_central",
               "milestoneId": "pressure_rd_information",
               "provenance": "resident"
@@ -11655,7 +11655,7 @@
           "sideSafePlanningFingerprint": "fnv1a:a0598d37"
         },
         "currentBinding": {
-          "actionId": "runner.start_run.rd",
+          "actionId": "rs.rd",
           "stateVersion": 69,
           "semanticActionSetFingerprint": "fnv1a:ea88d31a",
           "invocationKey": "fnv1a:bef9dcbd"
@@ -11663,15 +11663,15 @@
         "actionType": "start_run",
         "expectationId": "fnv1a:0addfb8d"
       },
-      "rootForegroundInstanceId": "plan:runner.pressure_central:central%3Ard",
-      "executorInstanceId": "plan:runner.pressure_central:central%3Ard",
+      "rootForegroundInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
+      "executorInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
       "selectedActionOrigin": {
-        "rootPlanInstanceId": "plan:runner.pressure_central:central%3Ard",
-        "executorInstanceId": "plan:runner.pressure_central:central%3Ard",
-        "selectedActionId": "runner.start_run.rd",
+        "rootPlanInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
+        "executorInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
+        "selectedActionId": "rs.rd",
         "selectedAtStateVersion": 69,
         "immediateChoicePolicy": "resolve_runner_run_start_order",
-        "sourceStepId": "plan:runner.pressure_central:central%3Ard:pressure:rd",
+        "sourceStepId": "pa90fufw9vc5bkshp96ztlryxl:pressure:rd",
         "sourceActionType": "start_run",
         "continuedThroughStateVersion": 69
       }

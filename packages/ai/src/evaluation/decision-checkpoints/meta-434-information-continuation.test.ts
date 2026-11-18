@@ -46,8 +46,8 @@ it("converts the exact information parent to access once the revealed path fits 
     decisionDebug: {
       planFirstDecision: {
         selectedStep: {
-          planInstanceId: "plan:runner.convert_run_window:run%3A254",
-          parentInstanceId: "plan:runner.pressure_central:central%3Ard",
+          planInstanceId: "p8xsrh3dmifqpse39r4m0xplfj",
+          parentInstanceId: "pa90fufw9vc5bkshp96ztlryxl",
         },
         route: {
           actionId: result.actionId,

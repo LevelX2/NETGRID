@@ -57,11 +57,11 @@ it("binds the native lethal damage replacement to the defense owner", () => {
   });
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
     selectedPlan: { moduleId: "runner.defense_and_recovery" },
-    rootPlanInstanceId: "plan:runner.defense_and_recovery:runner",
-    leafExecutorInstanceId: "plan:runner.defense_and_recovery:runner",
+    rootPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
+    leafExecutorInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
     route: {
       stepId:
-        "plan:runner.defense_and_recovery:runner:replace_damage_from_grip",
+        "p1gzjb6yfcv4zbzow512kexs33:replace_damage_from_grip",
     },
   });
 });

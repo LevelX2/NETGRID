@@ -66,7 +66,7 @@ describe("Runner start-of-turn order choice", () => {
       legalActions: [],
     } as unknown as AiDecisionInput;
     const action = {
-      actionId: "runner.resolve_choice",
+      actionId: "rn",
       side: "runner",
       type: "resolve_choice",
       label: "Resolve choice",
@@ -144,7 +144,7 @@ describe("Runner start-of-turn order choice", () => {
       legalActions: [],
     } as unknown as AiDecisionInput;
     const action = {
-      actionId: "runner.resolve_choice",
+      actionId: "rn",
       side: "runner",
       type: "resolve_choice",
       label: "Resolve choice",

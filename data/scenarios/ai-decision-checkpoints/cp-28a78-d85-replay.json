@@ -541,7 +541,7 @@
               }
             },
             {
-              "instanceId": "h4jecum",
+              "instanceId": "hrd.i1",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -549,7 +549,7 @@
           ],
           "root": [
             {
-              "instanceId": "h8wp1t8",
+              "instanceId": "hrd.r0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -645,13 +645,13 @@
           "label": "Remote 1",
           "ice": [
             {
-              "instanceId": "h1ssekb7",
+              "instanceId": "hr1.i0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
             },
             {
-              "instanceId": "h1m3m9q5",
+              "instanceId": "hr1.i1",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -699,7 +699,7 @@
           ],
           "root": [
             {
-              "instanceId": "hg4l0ug",
+              "instanceId": "hr1.r0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -5086,7 +5086,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.gain_credit",
+          "actionId": "rb",
           "side": "runner",
           "type": "gain_credit",
           "label": "1 Credit nehmen",
@@ -5107,7 +5107,7 @@
           }
         },
         {
-          "actionId": "runner.draw_card",
+          "actionId": "r8",
           "side": "runner",
           "type": "draw_card",
           "label": "Karte ziehen",
@@ -5130,7 +5130,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c262.c262",
+          "actionId": "rc.c262.c262",
           "side": "runner",
           "type": "install_card",
           "label": "R&D Interface installieren",
@@ -5151,7 +5151,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c1jt.c1jt",
+          "actionId": "rc.c1jt.c1jt",
           "side": "runner",
           "type": "install_card",
           "label": "Krash installieren",
@@ -5172,7 +5172,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c1jt.c1jt.runner_program_trash_before_install",
+          "actionId": "rc.c1jt.c1jt.runner_program_trash_before_install",
           "side": "runner",
           "type": "install_card",
           "label": "Krash mit Programmtrash installieren",
@@ -5194,7 +5194,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c20h.c20h.410",
+          "actionId": "rh.c20h.c20h.410",
           "side": "runner",
           "type": "play_event",
           "label": "Temple Microcode Outlet spielen",
@@ -5221,7 +5221,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c1fu.c1fu",
+          "actionId": "rc.c1fu.c1fu",
           "side": "runner",
           "type": "install_card",
           "label": "Dwarf installieren",
@@ -5242,7 +5242,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c1fu.c1fu.runner_program_trash_before_install",
+          "actionId": "rc.c1fu.c1fu.runner_program_trash_before_install",
           "side": "runner",
           "type": "install_card",
           "label": "Dwarf mit Programmtrash installieren",
@@ -5264,7 +5264,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1xl.c1xl.397",
+          "actionId": "rh.c1xl.c1xl.397",
           "side": "runner",
           "type": "play_event",
           "label": "MIT West Tier spielen",
@@ -5291,7 +5291,7 @@
           }
         },
         {
-          "actionId": "runner.activated_card_ability.c29d.c29d.activated.440",
+          "actionId": "r1.c29d.c29d.activated.440",
           "side": "runner",
           "type": "activated_card_ability",
           "label": "Broker: 3 Credits auf Broker legen",
@@ -5319,7 +5319,7 @@
           }
         },
         {
-          "actionId": "runner.activated_card_ability.c29d.c29d.activated.441",
+          "actionId": "r1.c29d.c29d.activated.441",
           "side": "runner",
           "type": "activated_card_ability",
           "label": "Broker: Credits von Broker nehmen",
@@ -5350,7 +5350,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.hq",
+          "actionId": "rs.hq",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf HQ",
@@ -5371,7 +5371,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.rd",
+          "actionId": "rs.rd",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf R&D",
@@ -5392,7 +5392,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.archives",
+          "actionId": "rs.archives",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf Archives",
@@ -5413,7 +5413,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.r1",
+          "actionId": "rs.r1",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf Remote 1",
@@ -5434,7 +5434,7 @@
           }
         },
         {
-          "actionId": "runner.end_turn",
+          "actionId": "r9",
           "side": "runner",
           "type": "end_turn",
           "label": "Zug beenden",
@@ -7604,7 +7604,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "runner.gain_credit",
+        "actionId": "rb",
         "side": "runner",
         "type": "gain_credit",
         "label": "1 Credit nehmen",
@@ -7625,7 +7625,7 @@
         }
       },
       {
-        "actionId": "runner.draw_card",
+        "actionId": "r8",
         "side": "runner",
         "type": "draw_card",
         "label": "Karte ziehen",
@@ -7648,7 +7648,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c262.c262",
+        "actionId": "rc.c262.c262",
         "side": "runner",
         "type": "install_card",
         "label": "R&D Interface installieren",
@@ -7669,7 +7669,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c1jt.c1jt",
+        "actionId": "rc.c1jt.c1jt",
         "side": "runner",
         "type": "install_card",
         "label": "Krash installieren",
@@ -7690,7 +7690,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c1jt.c1jt.runner_program_trash_before_install",
+        "actionId": "rc.c1jt.c1jt.runner_program_trash_before_install",
         "side": "runner",
         "type": "install_card",
         "label": "Krash mit Programmtrash installieren",
@@ -7712,7 +7712,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c20h.c20h.410",
+        "actionId": "rh.c20h.c20h.410",
         "side": "runner",
         "type": "play_event",
         "label": "Temple Microcode Outlet spielen",
@@ -7739,7 +7739,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c1fu.c1fu",
+        "actionId": "rc.c1fu.c1fu",
         "side": "runner",
         "type": "install_card",
         "label": "Dwarf installieren",
@@ -7760,7 +7760,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c1fu.c1fu.runner_program_trash_before_install",
+        "actionId": "rc.c1fu.c1fu.runner_program_trash_before_install",
         "side": "runner",
         "type": "install_card",
         "label": "Dwarf mit Programmtrash installieren",
@@ -7782,7 +7782,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1xl.c1xl.397",
+        "actionId": "rh.c1xl.c1xl.397",
         "side": "runner",
         "type": "play_event",
         "label": "MIT West Tier spielen",
@@ -7809,7 +7809,7 @@
         }
       },
       {
-        "actionId": "runner.activated_card_ability.c29d.c29d.activated.440",
+        "actionId": "r1.c29d.c29d.activated.440",
         "side": "runner",
         "type": "activated_card_ability",
         "label": "Broker: 3 Credits auf Broker legen",
@@ -7837,7 +7837,7 @@
         }
       },
       {
-        "actionId": "runner.activated_card_ability.c29d.c29d.activated.441",
+        "actionId": "r1.c29d.c29d.activated.441",
         "side": "runner",
         "type": "activated_card_ability",
         "label": "Broker: Credits von Broker nehmen",
@@ -7868,7 +7868,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.hq",
+        "actionId": "rs.hq",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf HQ",
@@ -7889,7 +7889,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.rd",
+        "actionId": "rs.rd",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf R&D",
@@ -7910,7 +7910,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.archives",
+        "actionId": "rs.archives",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf Archives",
@@ -7931,7 +7931,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.r1",
+        "actionId": "rs.r1",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf Remote 1",
@@ -7952,7 +7952,7 @@
         }
       },
       {
-        "actionId": "runner.end_turn",
+        "actionId": "r9",
         "side": "runner",
         "type": "end_turn",
         "label": "Zug beenden",
@@ -8006,7 +8006,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 158,
-      "sideSafePlanningFingerprint": "fnv1a:9c4ef95b"
+      "sideSafePlanningFingerprint": "fnv1a:3ab37831"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_redline_riot_1.0.0",
@@ -8459,10 +8459,10 @@
             "buildActionLegal": true,
             "cashOutActionLegal": true,
             "buildActionIds": [
-              "runner.activated_card_ability.c29d.c29d.activated.440"
+              "r1.c29d.c29d.activated.440"
             ],
             "cashOutActionIds": [
-              "runner.activated_card_ability.c29d.c29d.activated.441"
+              "r1.c29d.c29d.activated.441"
             ],
             "estimatedPayout": 3,
             "confidence": "high",
@@ -13791,7 +13791,7 @@
       "stateVersion": 158,
       "instances": [
         {
-          "instanceId": "plan:runner.contest_remote:remote%3Ar1",
+          "instanceId": "p1p4xezjcxov79rno40lq3f7rv",
           "dedupeKey": "remote:r1",
           "moduleId": "runner.contest_remote",
           "moduleVersion": "1",
@@ -13827,7 +13827,7 @@
               "terminalPatternThreat": true,
               "reachable": true,
               "marginalValue": 1400,
-              "evidenceCode": "runner_terminal_remote_contest_mandatory:r1:runner.start_run.r1",
+              "evidenceCode": "runner_terminal_remote_contest_mandatory:r1:rs.r1",
               "encounterCreditSpendLimit": 5,
               "accessCommitment": {
                 "payoff": "unknown",
@@ -13891,11 +13891,11 @@
                 ]
               },
               "runActionAssessments": {
-                "runner.start_run.r1": {
+                "rs.r1": {
                   "verdict": "executable",
                   "stepValue": 1360,
                   "evidenceCodes": [
-                    "runner_remote_run_variant_executable:r1:runner.start_run.r1",
+                    "runner_remote_run_variant_executable:r1:rs.r1",
                     "target:r1",
                     "target_kind:remote",
                     "access_server:r1",
@@ -14048,13 +14048,13 @@
           "updatedAtStateVersion": 158,
           "evidenceRefs": [
             {
-              "code": "runner_terminal_remote_contest_mandatory:r1:runner.start_run.r1",
+              "code": "runner_terminal_remote_contest_mandatory:r1:rs.r1",
               "source": "visible_state"
             }
           ]
         },
         {
-          "instanceId": "plan:runner.credit_bank:c29d",
+          "instanceId": "pdeck54mcc1lshdzs9k74eyxih",
           "dedupeKey": "c29d",
           "moduleId": "runner.credit_bank",
           "moduleVersion": "1",
@@ -14087,10 +14087,10 @@
               "bankId": "c29d",
               "phase": "cash_out",
               "actionIds": [
-                "runner.activated_card_ability.c29d.c29d.activated.441"
+                "r1.c29d.c29d.activated.441"
               ],
               "rejectedActionIds": [
-                "runner.activated_card_ability.c29d.c29d.activated.440"
+                "r1.c29d.c29d.activated.440"
               ],
               "priorityClass": "P4",
               "currentStoredCredits": 3,
@@ -14141,7 +14141,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac1xl",
+          "instanceId": "p3qysouaafvglehouuttnj25h1",
           "dedupeKey": "card:c1xl",
           "moduleId": "runner.develop_board_and_hand",
           "moduleVersion": "1",
@@ -14181,7 +14181,7 @@
                 "play.runner_event"
               ],
               "actionIds": [
-                "runner.play_event.c1xl.c1xl.397"
+                "rh.c1xl.c1xl.397"
               ],
               "priorityClass": "P5",
               "value": 80,
@@ -14225,7 +14225,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac23v",
+          "instanceId": "p5yrk8n0pcssxt97j0rkb1wt6p",
           "dedupeKey": "card:c23v",
           "moduleId": "runner.develop_board_and_hand",
           "moduleVersion": "1",
@@ -14281,21 +14281,21 @@
                 "releaseCondition": "parent_invalidated_or_material_value_lost_or_urgent_preemption"
               },
               "fundingRouteActionIds": [
-                "runner.gain_credit"
+                "rb"
               ],
               "fundingRouteAssessment": {
                 "stateVersion": 109,
-                "routeId": "development-support:c23v:legal_action:runner.gain_credit",
+                "routeId": "development-support:c23v:legal_action:rb",
                 "status": "covered_guaranteed",
                 "reliability": "guaranteed",
                 "horizon": "same_turn",
                 "projectedGap": 0,
                 "totalClickCost": 1,
-                "firstStepActionId": "runner.gain_credit",
+                "firstStepActionId": "rb",
                 "evidenceCodes": [
                   "funding_route_count:1",
                   "funding_route_best_status:covered_guaranteed",
-                  "funding_route_best_id:development-support:c23v:legal_action:runner.gain_credit",
+                  "funding_route_best_id:development-support:c23v:legal_action:rb",
                   "funding_route_status:covered_guaranteed",
                   "funding_route_reliability:guaranteed",
                   "funding_route_horizon:same_turn",
@@ -14310,7 +14310,7 @@
               "evidenceCodes": [
                 "funding_route_count:1",
                 "funding_route_best_status:covered_guaranteed",
-                "funding_route_best_id:development-support:c23v:legal_action:runner.gain_credit",
+                "funding_route_best_id:development-support:c23v:legal_action:rb",
                 "funding_route_status:covered_guaranteed",
                 "funding_route_reliability:guaranteed",
                 "funding_route_horizon:same_turn",
@@ -14363,7 +14363,7 @@
               "source": "visible_state"
             },
             {
-              "code": "funding_route_best_id:development-support:c23v:legal_action:runner.gain_credit",
+              "code": "funding_route_best_id:development-support:c23v:legal_action:rb",
               "source": "visible_state"
             },
             {
@@ -14393,7 +14393,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac262",
+          "instanceId": "p5z2ln29lay17a04vka37ijdpk",
           "dedupeKey": "card:c262",
           "moduleId": "runner.develop_board_and_hand",
           "moduleVersion": "1",
@@ -14449,21 +14449,21 @@
                 "releaseCondition": "parent_invalidated_or_material_value_lost_or_urgent_preemption"
               },
               "fundingRouteActionIds": [
-                "runner.gain_credit"
+                "rb"
               ],
               "fundingRouteAssessment": {
                 "stateVersion": 80,
-                "routeId": "development-support:c262:legal_action:runner.gain_credit",
+                "routeId": "development-support:c262:legal_action:rb",
                 "status": "covered_guaranteed",
                 "reliability": "guaranteed",
                 "horizon": "same_turn",
                 "projectedGap": 0,
                 "totalClickCost": 1,
-                "firstStepActionId": "runner.gain_credit",
+                "firstStepActionId": "rb",
                 "evidenceCodes": [
                   "funding_route_count:1",
                   "funding_route_best_status:covered_guaranteed",
-                  "funding_route_best_id:development-support:c262:legal_action:runner.gain_credit",
+                  "funding_route_best_id:development-support:c262:legal_action:rb",
                   "funding_route_status:covered_guaranteed",
                   "funding_route_reliability:guaranteed",
                   "funding_route_horizon:same_turn",
@@ -14478,7 +14478,7 @@
               "evidenceCodes": [
                 "funding_route_count:1",
                 "funding_route_best_status:covered_guaranteed",
-                "funding_route_best_id:development-support:c262:legal_action:runner.gain_credit",
+                "funding_route_best_id:development-support:c262:legal_action:rb",
                 "funding_route_status:covered_guaranteed",
                 "funding_route_reliability:guaranteed",
                 "funding_route_horizon:same_turn",
@@ -14531,7 +14531,7 @@
               "source": "visible_state"
             },
             {
-              "code": "funding_route_best_id:development-support:c262:legal_action:runner.gain_credit",
+              "code": "funding_route_best_id:development-support:c262:legal_action:rb",
               "source": "visible_state"
             },
             {
@@ -14561,7 +14561,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:generic%3Adraw-options",
+          "instanceId": "p6hb5l9cujr02om3vqn7gbqr35",
           "dedupeKey": "generic:draw-options",
           "moduleId": "runner.develop_board_and_hand",
           "moduleVersion": "1",
@@ -14602,7 +14602,7 @@
                 "draw.card"
               ],
               "actionIds": [
-                "runner.draw_card"
+                "r8"
               ],
               "priorityClass": "P6",
               "value": 18,
@@ -14678,7 +14678,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.economy:economy-liquidity-development%3Arunner%3A23",
+          "instanceId": "p5nnwb32t3o45f04xgf66ciiu5",
           "dedupeKey": "economy-liquidity-development:runner:23",
           "moduleId": "runner.economy",
           "moduleVersion": "1",
@@ -14710,7 +14710,7 @@
               "kind": "develop_liquidity",
               "needId": "economy-liquidity-development:runner:23",
               "actionIds": [
-                "runner.gain_credit"
+                "rb"
               ],
               "currentCreditsAtRevalidation": 6,
               "targetCredits": 10,
@@ -14764,7 +14764,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.economy:runner-portfolio-credit-reserve",
+          "instanceId": "pc7ebuiw5dxhlbzbf1nhcs4p4z",
           "dedupeKey": "runner-portfolio-credit-reserve",
           "moduleId": "runner.economy",
           "moduleVersion": "1",
@@ -14804,21 +14804,21 @@
                 "status": "portfolio_reserve_open"
               },
               "routeActionIds": [
-                "runner.gain_credit"
+                "rb"
               ],
               "routeAssessment": {
                 "stateVersion": 158,
-                "routeId": "runner-portfolio-credit-reserve:legal_action:runner.gain_credit",
+                "routeId": "runner-portfolio-credit-reserve:legal_action:rb",
                 "status": "covered_guaranteed",
                 "reliability": "guaranteed",
                 "horizon": "same_turn",
                 "projectedGap": 0,
                 "totalClickCost": 1,
-                "firstStepActionId": "runner.gain_credit",
+                "firstStepActionId": "rb",
                 "evidenceCodes": [
                   "funding_route_count:1",
                   "funding_route_best_status:covered_guaranteed",
-                  "funding_route_best_id:runner-portfolio-credit-reserve:legal_action:runner.gain_credit",
+                  "funding_route_best_id:runner-portfolio-credit-reserve:legal_action:rb",
                   "funding_route_status:covered_guaranteed",
                   "funding_route_reliability:guaranteed",
                   "funding_route_horizon:same_turn",
@@ -14864,7 +14864,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Aarchives",
+          "instanceId": "p22f66p721g9dgs7gsawwpf6hs",
           "dedupeKey": "central:archives",
           "moduleId": "runner.pressure_central",
           "moduleVersion": "1",
@@ -14906,14 +14906,14 @@
               "marginalValue": 60,
               "evidenceCode": "runner_central_pressure_known_no_current_payoff:archives",
               "runActionIds": [
-                "runner.start_run.archives"
+                "rs.archives"
               ],
               "runActionValues": {
-                "runner.start_run.archives": 0
+                "rs.archives": 0
               },
               "runActionDifferentialPayoffIds": [],
               "runActionEvidence": {
-                "runner.start_run.archives": [
+                "rs.archives": [
                   "run_route_raw_score:160",
                   "run_route_opportunity_cost:0",
                   "run_route_effective_score:160",
@@ -14921,14 +14921,14 @@
                 ]
               },
               "runActionRouteDiagnostics": {
-                "runner.start_run.archives": {
+                "rs.archives": {
                   "rawRouteScore": 160,
                   "opportunityCost": 0,
                   "effectiveRouteScore": 160
                 }
               },
               "runActionExclusions": {
-                "runner.start_run.archives": [
+                "rs.archives": [
                   "run_route_excluded:path:reachable",
                   "run_route_excluded:recommendation:run_if_free",
                   "run_route_excluded:score:160",
@@ -15065,7 +15065,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ahq",
+          "instanceId": "pa7nez1ioecg7mf06q1uwqq57o",
           "dedupeKey": "central:hq",
           "moduleId": "runner.pressure_central",
           "moduleVersion": "1",
@@ -15108,11 +15108,11 @@
               "evidenceCode": "runner_central_pressure_known_no_current_payoff:hq",
               "runActionIds": [],
               "runActionValues": {
-                "runner.start_run.hq": 0
+                "rs.hq": 0
               },
               "runActionDifferentialPayoffIds": [],
               "runActionEvidence": {
-                "runner.start_run.hq": [
+                "rs.hq": [
                   "run_route_raw_score:-880",
                   "run_route_opportunity_cost:0",
                   "run_route_effective_score:-880",
@@ -15120,14 +15120,14 @@
                 ]
               },
               "runActionRouteDiagnostics": {
-                "runner.start_run.hq": {
+                "rs.hq": {
                   "rawRouteScore": -880,
                   "opportunityCost": 0,
                   "effectiveRouteScore": -880
                 }
               },
               "runActionExclusions": {
-                "runner.start_run.hq": [
+                "rs.hq": [
                   "run_route_excluded:path:reachable",
                   "run_route_excluded:recommendation:do_not_run_now",
                   "run_route_excluded:score:-880",
@@ -15264,7 +15264,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ard",
+          "instanceId": "pa90fufw9vc5bkshp96ztlryxl",
           "dedupeKey": "central:rd",
           "moduleId": "runner.pressure_central",
           "moduleVersion": "1",
@@ -15307,11 +15307,11 @@
               "evidenceCode": "runner_central_pressure_no_admissible_route:rd",
               "runActionIds": [],
               "runActionValues": {
-                "runner.start_run.rd": 0
+                "rs.rd": 0
               },
               "runActionDifferentialPayoffIds": [],
               "runActionEvidence": {
-                "runner.start_run.rd": [
+                "rs.rd": [
                   "run_route_raw_score:120",
                   "run_route_opportunity_cost:0",
                   "run_route_effective_score:120",
@@ -15319,14 +15319,14 @@
                 ]
               },
               "runActionRouteDiagnostics": {
-                "runner.start_run.rd": {
+                "rs.rd": {
                   "rawRouteScore": 120,
                   "opportunityCost": 0,
                   "effectiveRouteScore": 120
                 }
               },
               "runActionExclusions": {
-                "runner.start_run.rd": [
+                "rs.rd": [
                   "run_route_excluded:path:reachable",
                   "run_route_excluded:recommendation:gain_credits_first",
                   "run_route_excluded:score:120",
@@ -15468,79 +15468,79 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:runner.contest_remote:remote%3Ar1",
+          "instanceId": "p1p4xezjcxov79rno40lq3f7rv",
           "stateVersion": 158,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.credit_bank:c29d",
+          "instanceId": "pdeck54mcc1lshdzs9k74eyxih",
           "stateVersion": 158,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac1xl",
+          "instanceId": "p3qysouaafvglehouuttnj25h1",
           "stateVersion": 158,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:generic%3Adraw-options",
+          "instanceId": "p6hb5l9cujr02om3vqn7gbqr35",
           "stateVersion": 158,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.economy:economy-liquidity-development%3Arunner%3A23",
+          "instanceId": "p5nnwb32t3o45f04xgf66ciiu5",
           "stateVersion": 158,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.economy:runner-portfolio-credit-reserve",
+          "instanceId": "pc7ebuiw5dxhlbzbf1nhcs4p4z",
           "stateVersion": 158,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Aarchives",
+          "instanceId": "p22f66p721g9dgs7gsawwpf6hs",
           "stateVersion": 158,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ahq",
+          "instanceId": "pa7nez1ioecg7mf06q1uwqq57o",
           "stateVersion": 158,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ard",
+          "instanceId": "pa90fufw9vc5bkshp96ztlryxl",
           "stateVersion": 158,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.defense_and_recovery:runner",
+          "instanceId": "p1gzjb6yfcv4zbzow512kexs33",
           "stateVersion": 158,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac23v",
+          "instanceId": "p5yrk8n0pcssxt97j0rkb1wt6p",
           "stateVersion": 158,
           "reason": "retained",
           "detailCode": "retention_protected"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac262",
+          "instanceId": "p5z2ln29lay17a04vka37ijdpk",
           "stateVersion": 158,
           "reason": "retained",
           "detailCode": "retention_protected"
         },
         {
-          "instanceId": "plan:runner.contest_remote:remote%3Ar1",
+          "instanceId": "p1p4xezjcxov79rno40lq3f7rv",
           "stateVersion": 158,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
@@ -15553,7 +15553,7 @@
         "commitmentId": "fnv1a:59f4373e",
         "sourcePlanId": "fnv1a:1255ea24",
         "sourceLineHash": "fnv1a:75ee5888",
-        "sequenceRootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar1",
+        "sequenceRootPlanInstanceId": "p1p4xezjcxov79rno40lq3f7rv",
         "side": "runner",
         "turnKey": "runner:turn:23",
         "planningRulesFingerprint": "fnv1a:697f22b3",
@@ -15570,7 +15570,7 @@
           {
             "phaseId": "fnv1a:b6f547e9",
             "root": {
-              "planInstanceId": "plan:runner.contest_remote:remote%3Ar1",
+              "planInstanceId": "p1p4xezjcxov79rno40lq3f7rv",
               "moduleId": "runner.contest_remote",
               "milestoneId": "contest_remote",
               "provenance": "resident"
@@ -15676,7 +15676,7 @@
           "sideSafePlanningFingerprint": "fnv1a:80e43200"
         },
         "currentBinding": {
-          "actionId": "runner.start_run.r1",
+          "actionId": "rs.r1",
           "stateVersion": 158,
           "semanticActionSetFingerprint": "fnv1a:5aa12d96",
           "invocationKey": "fnv1a:0f68f994"
@@ -15684,15 +15684,15 @@
         "actionType": "start_run",
         "expectationId": "fnv1a:b71064bd"
       },
-      "rootForegroundInstanceId": "plan:runner.contest_remote:remote%3Ar1",
-      "executorInstanceId": "plan:runner.contest_remote:remote%3Ar1",
+      "rootForegroundInstanceId": "p1p4xezjcxov79rno40lq3f7rv",
+      "executorInstanceId": "p1p4xezjcxov79rno40lq3f7rv",
       "selectedActionOrigin": {
-        "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar1",
-        "executorInstanceId": "plan:runner.contest_remote:remote%3Ar1",
-        "selectedActionId": "runner.start_run.r1",
+        "rootPlanInstanceId": "p1p4xezjcxov79rno40lq3f7rv",
+        "executorInstanceId": "p1p4xezjcxov79rno40lq3f7rv",
+        "selectedActionId": "rs.r1",
         "selectedAtStateVersion": 158,
         "immediateChoicePolicy": "resolve_runner_run_start_order",
-        "sourceStepId": "plan:runner.contest_remote:remote%3Ar1:contest",
+        "sourceStepId": "p1p4xezjcxov79rno40lq3f7rv:contest",
         "sourceActionType": "start_run",
         "continuedThroughStateVersion": 158
       }

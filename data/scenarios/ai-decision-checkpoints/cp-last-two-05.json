@@ -18259,7 +18259,7 @@
         "id": "runner_credit_bank"
       },
       "selectedStepKind": "build_bank_counter",
-      "selectedActionId": "runner.activated_card_ability.c29f.c29f.activated.0",
+      "selectedActionId": "r1.c29f.c29f.activated.0",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -18317,7 +18317,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:runner.build_credit_bank",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.end_turn"
+        "plan_portfolio_selected_action:r9"
       ]
     },
     "strategicIntent": {

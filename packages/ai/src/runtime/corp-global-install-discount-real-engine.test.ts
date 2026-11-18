@@ -168,14 +168,14 @@ it("funds the actual D80 install/rez gap from the current counter payout first",
     result = choose(cp);
   expect(cp.input.playerView.own.credits).toBe(2);
   expect(result.actionId).toBe(
-    "corp.activated_card_ability.c2i5.c2i5.activated.483",
+    "c1.c2i5.c2i5.activated.483",
   );
   expect(result.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+    rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
     selectedStep: {
-      parentInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      parentInstanceId: "penw02zfrkklof54c2nuye5att",
       needId:
-        "install:rd:corp.install_card.c2qu.rd.c2qu.1",
+        "install:rd:cc.c2qu.rd.c2qu.1",
     },
   });
 });

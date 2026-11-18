@@ -141,7 +141,7 @@ it("normal native run executor tries the ETR instead of risking damage on zero C
   expect(a.type).toBe("break_subroutine");
   expect(a.payload?.subroutineIndex).toBe(1);
   expect(d.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Ar1",
+    "p1p4xezjcxov79rno40lq3f7rv",
   );
   expect(d.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
     "runner.convert_run_window",
@@ -177,7 +177,7 @@ it("native three-Core rescue is admitted before guaranteed negative hand limit a
     "runner.convert_run_window",
   );
   expect(d.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.pressure_central:central%3Ahq",
+    "pa7nez1ioecg7mf06q1uwqq57o",
   );
   expect(d.fallbackUsed || d.timeoutUsed).toBe(false);
   const forced = take(
@@ -257,7 +257,7 @@ it("binds the native Downsizing rescue at scoring and consumes exactly that cont
   expect(input.playerView.own.stackOrRdCount).toBe(0);
   expect(input.playerView.own.clicks).toBe(0);
   const score = chooseAiAction(input);
-  expect(score.actionId).toBe("corp.score_agenda.c2ie.c2ie");
+  expect(score.actionId).toBe("cr.c2ie.c2ie");
   expect(score.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
     "corp.score_agenda",
   );
@@ -274,7 +274,7 @@ it("binds the native Downsizing rescue at scoring and consumes exactly that cont
     ownDeckSnapshot: input.ownDeckSnapshot!,
   });
   const choice = chooseAiAction(next);
-  expect(choice.actionId).toBe("corp.resolve_choice");
+  expect(choice.actionId).toBe("cn");
   expect(choice.selectedChoices).toEqual({
     choiceId: "scored_agenda_hq_agenda_shuffle_credits_314",
     selectedOptionIds: ["card_c2iu"],
@@ -301,7 +301,7 @@ it("retains the ordinary empty selection when a real R&D card prevents the next-
   restore(f, input);
   const score = chooseAiAction(input);
   expect(score.actionId).toBe(
-    "corp.score_agenda.c2ie.c2ie",
+    "cr.c2ie.c2ie",
   );
   const portfolio = residentPlanPortfolioSnapshot(input)!;
   const binding = portfolio.instances.find(

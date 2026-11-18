@@ -71,7 +71,7 @@ describe("match D153 Runner decision checkpoints", () => {
       ).toBe(false);
       expect(
         evaluateRunnerRunTargets({ input }).find(
-          (target) => target.actionId === "runner.start_run.r1",
+          (target) => target.actionId === "rs.r1",
         ),
       ).toMatchObject({
         pathPassability: "reachable",
@@ -79,11 +79,11 @@ describe("match D153 Runner decision checkpoints", () => {
       });
       const next = chooseAiAction(input);
       expect(next).toMatchObject({
-        actionId: "runner.start_run.r1",
+        actionId: "rs.r1",
         fallbackUsed: false,
       });
       expect(next.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-        "plan:runner.contest_remote:remote%3Ar1",
+        "p1p4xezjcxov79rno40lq3f7rv",
       );
       const run = applyAction(state, {
         matchId: state.matchId,
@@ -171,7 +171,7 @@ describe("match D153 Runner decision checkpoints", () => {
       acceptableActions: [
         {
           actionId:
-            "runner.activated_card_ability.c29d.c29d.activated.441",
+            "r1.c29d.c29d.activated.441",
         },
       ],
       planExecution: {
@@ -194,10 +194,10 @@ describe("match D153 Runner decision checkpoints", () => {
       checkpoint.source.findingId = "F08-SAFE-DAMAGE-ACCESS-BOUNDARY";
       const result = runAiDecisionCheckpoint(checkpoint);
       expect(result.ok, result.message).toBe(true);
-      expect(result.selectedAction?.actionId).toBe("runner.start_run.r1");
+      expect(result.selectedAction?.actionId).toBe("rs.r1");
       expect(
         evaluateRunnerRunTargets({ input: result.input }).find(
-          (t) => t.actionId === "runner.start_run.r1",
+          (t) => t.actionId === "rs.r1",
         ),
       ).toMatchObject({
         pathCost: 25,
@@ -234,7 +234,7 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
       acceptableActions: [
         {
           actionId:
-            "runner.activated_card_ability.c29e.c29e.activated.440",
+            "r1.c29e.c29e.activated.440",
         },
       ],
       planExecution: {

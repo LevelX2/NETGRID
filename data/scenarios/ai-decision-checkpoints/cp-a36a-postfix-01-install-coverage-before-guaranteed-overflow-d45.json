@@ -2753,7 +2753,7 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "runner",
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "clientKnownStateVersion": 0,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_runner_0",
@@ -2764,7 +2764,7 @@
                 "idempotencyKey": "ai-sim-0"
               },
               "legalAction": {
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "side": "runner",
                 "type": "resolve_choice",
                 "label": "Runner-Starthand",
@@ -2838,7 +2838,7 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "corp",
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "clientKnownStateVersion": 1,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_corp_1",
@@ -2849,7 +2849,7 @@
                 "idempotencyKey": "ai-sim-1"
               },
               "legalAction": {
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "side": "corp",
                 "type": "resolve_choice",
                 "label": "Korp-Starthand",
@@ -2906,12 +2906,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 2,
                 "idempotencyKey": "ai-sim-2"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -2970,21 +2970,21 @@
                   "side": "corp",
                   "stateVersion": 3,
                   "timingPoint": "corp_action.main",
-                  "planStepId": "plan:corp.defend_servers:server-defense-portfolio:allocate",
+                  "planStepId": "penw02zfrkklof54c2nuye5att:allocate",
                   "candidates": [
                     {
-                      "actionId": "corp.install_card.c2rx.hq.c2rx.0",
+                      "actionId": "cc.c2rx.hq.c2rx.0",
                       "targetServerId": "hq"
                     },
                     {
-                      "actionId": "corp.install_card.c2rx.rd.c2rx.0",
+                      "actionId": "cc.c2rx.rd.c2rx.0",
                       "targetServerId": "rd"
                     }
                   ],
-                  "candidateFingerprint": "6;42:engine-randomized-ice-install-selection-v11:278:corp.install_card.c2rx.hq.c2rx.02:hq78:corp.install_card.c2rx.rd.c2rx.02:rd",
+                  "candidateFingerprint": "6;42:engine-randomized-ice-install-selection-v11:278:cc.c2rx.hq.c2rx.02:hq78:cc.c2rx.rd.c2rx.02:rd",
                   "legalActions": [
                     {
-                      "actionId": "corp.install_card.c2rx.hq.c2rx.0",
+                      "actionId": "cc.c2rx.hq.c2rx.0",
                       "side": "corp",
                       "type": "install_card",
                       "label": "ICE vor HQ installieren",
@@ -3019,7 +3019,7 @@
                       }
                     },
                     {
-                      "actionId": "corp.install_card.c2rx.rd.c2rx.0",
+                      "actionId": "cc.c2rx.rd.c2rx.0",
                       "side": "corp",
                       "type": "install_card",
                       "label": "ICE vor R&D installieren",
@@ -3058,7 +3058,7 @@
                 "idempotencyKey": "ai-sim-3"
               },
               "legalAction": {
-                "actionId": "corp.install_card.c2rx.rd.c2rx.0",
+                "actionId": "cc.c2rx.rd.c2rx.0",
                 "side": "corp",
                 "type": "install_card",
                 "label": "ICE vor R&D installieren",
@@ -3100,14 +3100,14 @@
                 "stateVersionBefore": 3,
                 "stateVersionAfter": 4,
                 "timingPoint": "corp_action.main",
-                "planStepId": "plan:corp.defend_servers:server-defense-portfolio:allocate",
-                "candidateFingerprint": "6;42:engine-randomized-ice-install-selection-v11:278:corp.install_card.c2rx.hq.c2rx.02:hq78:corp.install_card.c2rx.rd.c2rx.02:rd",
+                "planStepId": "penw02zfrkklof54c2nuye5att:allocate",
+                "candidateFingerprint": "6;42:engine-randomized-ice-install-selection-v11:278:cc.c2rx.hq.c2rx.02:hq78:cc.c2rx.rd.c2rx.02:rd",
                 "selectedCandidate": {
-                  "actionId": "corp.install_card.c2rx.rd.c2rx.0",
+                  "actionId": "cc.c2rx.rd.c2rx.0",
                   "targetServerId": "rd"
                 },
                 "selectedLegalAction": {
-                  "actionId": "corp.install_card.c2rx.rd.c2rx.0",
+                  "actionId": "cc.c2rx.rd.c2rx.0",
                   "side": "corp",
                   "type": "install_card",
                   "label": "ICE vor R&D installieren",
@@ -3143,7 +3143,7 @@
                 },
                 "randomDraw": {
                   "counter": 147,
-                  "purpose": "8;39:engine.randomized_ice_install_selection42:engine-randomized-ice-install-selection-v143:selfplay:a36a-postfix-selfplay-20260731-0024:corp1:316:corp_action.main58:plan:corp.defend_servers:server-defense-portfolio:allocate220:6;42:engine-randomized-ice-install-selection-v11:278:corp.install_card.c2rx.hq.c2rx.02:hq78:corp.install_card.c2rx.rd.c2rx.02:rd",
+                  "purpose": "8;39:engine.randomized_ice_install_selection42:engine-randomized-ice-install-selection-v143:selfplay:a36a-postfix-selfplay-20260731-0024:corp1:316:corp_action.main58:penw02zfrkklof54c2nuye5att:allocate220:6;42:engine-randomized-ice-install-selection-v11:278:cc.c2rx.hq.c2rx.02:hq78:cc.c2rx.rd.c2rx.02:rd",
                   "value": 0.5366634626487432
                 }
               }
@@ -3196,12 +3196,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "corp",
-                "actionId": "corp.play_operation.c33p.c33p",
+                "actionId": "ci.c33p.c33p",
                 "clientKnownStateVersion": 4,
                 "idempotencyKey": "ai-sim-4"
               },
               "legalAction": {
-                "actionId": "corp.play_operation.c33p.c33p",
+                "actionId": "ci.c33p.c33p",
                 "side": "corp",
                 "type": "play_operation",
                 "label": "Efficiency Experts spielen",
@@ -3276,12 +3276,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "corp",
-                "actionId": "corp.install_card.ck7.hq.ck7.0",
+                "actionId": "cc.ck7.hq.ck7.0",
                 "clientKnownStateVersion": 5,
                 "idempotencyKey": "ai-sim-5"
               },
               "legalAction": {
-                "actionId": "corp.install_card.ck7.hq.ck7.0",
+                "actionId": "cc.ck7.hq.ck7.0",
                 "side": "corp",
                 "type": "install_card",
                 "label": "ICE vor HQ installieren",
@@ -3339,12 +3339,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 6,
                 "idempotencyKey": "ai-sim-6"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -3392,12 +3392,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "runner",
-                "actionId": "runner.start_run.rd",
+                "actionId": "rs.rd",
                 "clientKnownStateVersion": 7,
                 "idempotencyKey": "ai-sim-7"
               },
               "legalAction": {
-                "actionId": "runner.start_run.rd",
+                "actionId": "rs.rd",
                 "side": "runner",
                 "type": "start_run",
                 "label": "Run auf R&D",
@@ -3451,12 +3451,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "corp",
-                "actionId": "corp.rez_ice.c2rx.c2rx",
+                "actionId": "cq.c2rx.c2rx",
                 "clientKnownStateVersion": 8,
                 "idempotencyKey": "ai-sim-8"
               },
               "legalAction": {
-                "actionId": "corp.rez_ice.c2rx.c2rx",
+                "actionId": "cq.c2rx.c2rx",
                 "side": "corp",
                 "type": "rez_ice",
                 "label": "Data Wall rezzen",
@@ -3520,12 +3520,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "runner",
-                "actionId": "runner.continue_run.0",
+                "actionId": "r5.0",
                 "clientKnownStateVersion": 9,
                 "idempotencyKey": "ai-sim-9"
               },
               "legalAction": {
-                "actionId": "runner.continue_run.0",
+                "actionId": "r5.0",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Subroutinen auslösen (Run endet)",
@@ -3540,8 +3540,7 @@
                   "sourceDefinitionId": 449,
                   "unbrokenSubroutineCount": 1,
                   "encounterWillEndRun": true,
-                  "encounterSourceWillTrashAtEndOfTurn": false,
-                  "encounterSubroutineIds": "0"
+                  "encounterSourceWillTrashAtEndOfTurn": false
                 },
                 "resolvedEffects": [
                   {
@@ -3556,6 +3555,9 @@
                     "subroutineType": "end_the_run",
                     "endedRun": true
                   }
+                ],
+                "encounterSubroutineIds": [
+                  "0"
                 ]
               }
             }
@@ -3598,12 +3600,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "runner",
-                "actionId": "runner.install_card.c7v.c7v",
+                "actionId": "rc.c7v.c7v",
                 "clientKnownStateVersion": 10,
                 "idempotencyKey": "ai-sim-10"
               },
               "legalAction": {
-                "actionId": "runner.install_card.c7v.c7v",
+                "actionId": "rc.c7v.c7v",
                 "side": "runner",
                 "type": "install_card",
                 "label": "Rent-I-Con installieren",
@@ -3679,12 +3681,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "runner",
-                "actionId": "runner.play_event.c1wq.c1wq",
+                "actionId": "rh.c1wq.c1wq",
                 "clientKnownStateVersion": 11,
                 "idempotencyKey": "ai-sim-11"
               },
               "legalAction": {
-                "actionId": "runner.play_event.c1wq.c1wq",
+                "actionId": "rh.c1wq.c1wq",
                 "side": "runner",
                 "type": "play_event",
                 "label": "Livewire's Contacts spielen",
@@ -3756,12 +3758,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "runner",
-                "actionId": "runner.start_run.rd",
+                "actionId": "rs.rd",
                 "clientKnownStateVersion": 12,
                 "idempotencyKey": "ai-sim-12"
               },
               "legalAction": {
-                "actionId": "runner.start_run.rd",
+                "actionId": "rs.rd",
                 "side": "runner",
                 "type": "start_run",
                 "label": "Run auf R&D",
@@ -3817,12 +3819,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "runner",
-                "actionId": "runner.break_subroutine.c7v.c7v.c2rx.0.0",
+                "actionId": "r3.c7v.c7v.c2rx.0.0",
                 "clientKnownStateVersion": 13,
                 "idempotencyKey": "ai-sim-13"
               },
               "legalAction": {
-                "actionId": "runner.break_subroutine.c7v.c7v.c2rx.0.0",
+                "actionId": "r3.c7v.c7v.c2rx.0.0",
                 "side": "runner",
                 "type": "break_subroutine",
                 "label": "Rent-I-Con: Subroutine brechen",
@@ -3899,12 +3901,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "runner",
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "clientKnownStateVersion": 14,
                 "idempotencyKey": "ai-sim-14"
               },
               "legalAction": {
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "ICE passieren",
@@ -3920,9 +3922,9 @@
                   "unbrokenSubroutineCount": 0,
                   "encounterWillEndRun": false,
                   "encounterSourceWillTrashAtEndOfTurn": false,
-                  "encounterSubroutineIds": "",
                   "passedIcePosition": 1
-                }
+                },
+                "encounterSubroutineIds": []
               }
             }
           }
@@ -3953,12 +3955,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "runner",
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "clientKnownStateVersion": 15,
                 "idempotencyKey": "ai-sim-15"
               },
               "legalAction": {
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Run fortsetzen",
@@ -4018,12 +4020,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "runner",
-                "actionId": "runner.access_card",
+                "actionId": "r0",
                 "clientKnownStateVersion": 16,
                 "idempotencyKey": "ai-sim-16"
               },
               "legalAction": {
-                "actionId": "runner.access_card",
+                "actionId": "r0",
                 "side": "runner",
                 "type": "access_card",
                 "label": "Karte accessen",
@@ -4072,12 +4074,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "runner",
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "clientKnownStateVersion": 17,
                 "idempotencyKey": "ai-sim-17"
               },
               "legalAction": {
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -4112,12 +4114,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 18,
                 "idempotencyKey": "ai-sim-18"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -4165,12 +4167,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "corp",
-                "actionId": "corp.install_card.c31a.new_remote.c31a",
+                "actionId": "cc.c31a.new_remote.c31a",
                 "clientKnownStateVersion": 19,
                 "idempotencyKey": "ai-sim-19"
               },
               "legalAction": {
-                "actionId": "corp.install_card.c31a.new_remote.c31a",
+                "actionId": "cc.c31a.new_remote.c31a",
                 "side": "corp",
                 "type": "install_card",
                 "label": "ICE vor neuem Remote installieren",
@@ -4237,12 +4239,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "corp",
-                "actionId": "corp.install_card.c2id.r1.c2id",
+                "actionId": "cc.c2id.r1.c2id",
                 "clientKnownStateVersion": 20,
                 "idempotencyKey": "ai-sim-20"
               },
               "legalAction": {
-                "actionId": "corp.install_card.c2id.r1.c2id",
+                "actionId": "cc.c2id.r1.c2id",
                 "side": "corp",
                 "type": "install_card",
                 "label": "Karte in Remote 1 installieren",
@@ -4297,12 +4299,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "corp",
-                "actionId": "corp.advance_card.c2id.c2id",
+                "actionId": "c2.c2id.c2id",
                 "clientKnownStateVersion": 21,
                 "idempotencyKey": "ai-sim-21"
               },
               "legalAction": {
-                "actionId": "corp.advance_card.c2id.c2id",
+                "actionId": "c2.c2id.c2id",
                 "side": "corp",
                 "type": "advance_card",
                 "label": "Corporate Downsizing in Remote 1 advancen",
@@ -4345,12 +4347,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 22,
                 "idempotencyKey": "ai-sim-22"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -4395,12 +4397,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "runner",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "clientKnownStateVersion": 23,
                 "idempotencyKey": "ai-sim-23"
               },
               "legalAction": {
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "side": "runner",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -4467,12 +4469,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "runner",
-                "actionId": "runner.play_event.c1ux.c1ux",
+                "actionId": "rh.c1ux.c1ux",
                 "clientKnownStateVersion": 24,
                 "idempotencyKey": "ai-sim-24"
               },
               "legalAction": {
-                "actionId": "runner.play_event.c1ux.c1ux",
+                "actionId": "rh.c1ux.c1ux",
                 "side": "runner",
                 "type": "play_event",
                 "label": "Gideon's Pawnshop spielen",
@@ -4558,7 +4560,7 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "runner",
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "clientKnownStateVersion": 25,
                 "selectedChoices": {
                   "choiceId": "p3_37_search_trash_to_grip_25",
@@ -4569,7 +4571,7 @@
                 "idempotencyKey": "ai-sim-25"
               },
               "legalAction": {
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "side": "runner",
                 "type": "resolve_choice",
                 "label": "Heap durchsuchen",
@@ -4648,12 +4650,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "runner",
-                "actionId": "runner.start_run.r1",
+                "actionId": "rs.r1",
                 "clientKnownStateVersion": 26,
                 "idempotencyKey": "ai-sim-26"
               },
               "legalAction": {
-                "actionId": "runner.start_run.r1",
+                "actionId": "rs.r1",
                 "side": "runner",
                 "type": "start_run",
                 "label": "Run auf Remote 1",
@@ -4707,12 +4709,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "corp",
-                "actionId": "corp.rez_ice.c31a.c31a",
+                "actionId": "cq.c31a.c31a",
                 "clientKnownStateVersion": 27,
                 "idempotencyKey": "ai-sim-27"
               },
               "legalAction": {
-                "actionId": "corp.rez_ice.c31a.c31a",
+                "actionId": "cq.c31a.c31a",
                 "side": "corp",
                 "type": "rez_ice",
                 "label": "Wall of Static rezzen",
@@ -4776,12 +4778,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "runner",
-                "actionId": "runner.continue_run.0",
+                "actionId": "r5.0",
                 "clientKnownStateVersion": 28,
                 "idempotencyKey": "ai-sim-28"
               },
               "legalAction": {
-                "actionId": "runner.continue_run.0",
+                "actionId": "r5.0",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Subroutinen auslösen (Run endet)",
@@ -4796,8 +4798,7 @@
                   "sourceDefinitionId": 491,
                   "unbrokenSubroutineCount": 1,
                   "encounterWillEndRun": true,
-                  "encounterSourceWillTrashAtEndOfTurn": false,
-                  "encounterSubroutineIds": "0"
+                  "encounterSourceWillTrashAtEndOfTurn": false
                 },
                 "resolvedEffects": [
                   {
@@ -4812,6 +4813,9 @@
                     "subroutineType": "end_the_run",
                     "endedRun": true
                   }
+                ],
+                "encounterSubroutineIds": [
+                  "0"
                 ]
               }
             }
@@ -4851,12 +4855,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "runner",
-                "actionId": "runner.start_run.hq",
+                "actionId": "rs.hq",
                 "clientKnownStateVersion": 29,
                 "idempotencyKey": "ai-sim-29"
               },
               "legalAction": {
-                "actionId": "runner.start_run.hq",
+                "actionId": "rs.hq",
                 "side": "runner",
                 "type": "start_run",
                 "label": "Run auf HQ",
@@ -4930,12 +4934,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "corp",
-                "actionId": "corp.rez_ice.ck7.ck7",
+                "actionId": "cq.ck7.ck7",
                 "clientKnownStateVersion": 30,
                 "idempotencyKey": "ai-sim-30"
               },
               "legalAction": {
-                "actionId": "corp.rez_ice.ck7.ck7",
+                "actionId": "cq.ck7.ck7",
                 "side": "corp",
                 "type": "rez_ice",
                 "label": "Misleading Access Menus rezzen",
@@ -5020,12 +5024,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "runner",
-                "actionId": "runner.continue_run.0.0.1",
+                "actionId": "r5.0.0.1",
                 "clientKnownStateVersion": 31,
                 "idempotencyKey": "ai-sim-31"
               },
               "legalAction": {
-                "actionId": "runner.continue_run.0.0.1",
+                "actionId": "r5.0.0.1",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Subroutinen auslösen (Runner zahlt 1 Credit)",
@@ -5045,10 +5049,7 @@
                   "unbrokenSubroutineCount": 1,
                   "encounterWillEndRun": false,
                   "encounterSourceWillTrashAtEndOfTurn": false,
-                  "encounterSubroutineIds": "0",
-                  "payOrEndRunSubroutineIndexes": "0",
                   "payOrEndRunSubroutinePayment": 1,
-                  "payOrTrashProgramSubroutineIndexes": "",
                   "payOrTrashProgramSubroutinePayment": 0,
                   "passedIcePosition": 1
                 },
@@ -5066,7 +5067,14 @@
                     "amount": 1,
                     "paidCredits": 1
                   }
-                ]
+                ],
+                "encounterSubroutineIds": [
+                  "0"
+                ],
+                "payOrEndRunSubroutineIndexes": [
+                  0
+                ],
+                "payOrTrashProgramSubroutineIndexes": []
               }
             }
           }
@@ -5097,12 +5105,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "runner",
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "clientKnownStateVersion": 32,
                 "idempotencyKey": "ai-sim-32"
               },
               "legalAction": {
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Run fortsetzen",
@@ -5153,12 +5161,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "runner",
-                "actionId": "runner.access_card",
+                "actionId": "r0",
                 "clientKnownStateVersion": 33,
                 "idempotencyKey": "ai-sim-33"
               },
               "legalAction": {
-                "actionId": "runner.access_card",
+                "actionId": "r0",
                 "side": "runner",
                 "type": "access_card",
                 "label": "Karte accessen",
@@ -5214,12 +5222,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "runner",
-                "actionId": "runner.trash_accessed_card.c3ge.1",
+                "actionId": "rv.c3ge.1",
                 "clientKnownStateVersion": 34,
                 "idempotencyKey": "ai-sim-34"
               },
               "legalAction": {
-                "actionId": "runner.trash_accessed_card.c3ge.1",
+                "actionId": "rv.c3ge.1",
                 "side": "runner",
                 "type": "trash_accessed_card",
                 "label": "Vapor Ops trashen",
@@ -5268,12 +5276,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "runner",
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "clientKnownStateVersion": 35,
                 "idempotencyKey": "ai-sim-35"
               },
               "legalAction": {
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -5308,12 +5316,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 36,
                 "idempotencyKey": "ai-sim-36"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -5358,12 +5366,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "corp",
-                "actionId": "corp.advance_card.c2id.c2id",
+                "actionId": "c2.c2id.c2id",
                 "clientKnownStateVersion": 37,
                 "idempotencyKey": "ai-sim-37"
               },
               "legalAction": {
-                "actionId": "corp.advance_card.c2id.c2id",
+                "actionId": "c2.c2id.c2id",
                 "side": "corp",
                 "type": "advance_card",
                 "label": "Corporate Downsizing in Remote 1 advancen",
@@ -5416,12 +5424,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "corp",
-                "actionId": "corp.advance_card.c2id.c2id",
+                "actionId": "c2.c2id.c2id",
                 "clientKnownStateVersion": 38,
                 "idempotencyKey": "ai-sim-38"
               },
               "legalAction": {
-                "actionId": "corp.advance_card.c2id.c2id",
+                "actionId": "c2.c2id.c2id",
                 "side": "corp",
                 "type": "advance_card",
                 "label": "Corporate Downsizing in Remote 1 advancen",
@@ -5489,12 +5497,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "corp",
-                "actionId": "corp.score_agenda.c2id.c2id",
+                "actionId": "cr.c2id.c2id",
                 "clientKnownStateVersion": 39,
                 "idempotencyKey": "ai-sim-39"
               },
               "legalAction": {
-                "actionId": "corp.score_agenda.c2id.c2id",
+                "actionId": "cr.c2id.c2id",
                 "side": "corp",
                 "type": "score_agenda",
                 "label": "Agenda in Remote 1 scoren",
@@ -5558,12 +5566,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "corp",
-                "actionId": "corp.play_operation.c31x.c31x",
+                "actionId": "ci.c31x.c31x",
                 "clientKnownStateVersion": 40,
                 "idempotencyKey": "ai-sim-40"
               },
               "legalAction": {
-                "actionId": "corp.play_operation.c31x.c31x",
+                "actionId": "ci.c31x.c31x",
                 "side": "corp",
                 "type": "play_operation",
                 "label": "Annual Reviews spielen",
@@ -5620,12 +5628,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 41,
                 "idempotencyKey": "ai-sim-41"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -5670,12 +5678,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "runner",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "clientKnownStateVersion": 42,
                 "idempotencyKey": "ai-sim-42"
               },
               "legalAction": {
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "side": "runner",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -5726,12 +5734,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "runner",
-                "actionId": "runner.draw_card",
+                "actionId": "r8",
                 "clientKnownStateVersion": 43,
                 "idempotencyKey": "ai-sim-43"
               },
               "legalAction": {
-                "actionId": "runner.draw_card",
+                "actionId": "r8",
                 "side": "runner",
                 "type": "draw_card",
                 "label": "Karte ziehen",
@@ -5783,12 +5791,12 @@
               "action": {
                 "matchId": "selfplay:a36a-postfix-selfplay-20260731-002",
                 "side": "runner",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "clientKnownStateVersion": 44,
                 "idempotencyKey": "ai-sim-44"
               },
               "legalAction": {
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "side": "runner",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",

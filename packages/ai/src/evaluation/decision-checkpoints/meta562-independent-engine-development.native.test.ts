@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { readFileSync } from "node:fs";
 import { beforeEach, expect, it } from "vitest";
 
@@ -56,7 +57,7 @@ it.each([2, 10])(
       fallbackUsed: false,
       timeoutUsed: false,
     });
-    const planId = `plan:runner.develop_board_and_hand:card%3A${source.instanceId}`;
+    const planId = planInstanceIdForProposal({ moduleId: "runner.develop_board_and_hand", dedupeKey: `card:${source.instanceId}` });
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       selectedPlan: { moduleId: "runner.develop_board_and_hand" },
       rootPlanInstanceId: planId,

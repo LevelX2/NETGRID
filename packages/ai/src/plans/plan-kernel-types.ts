@@ -174,6 +174,8 @@ export type PlanInstance = {
 };
 
 export type PlanInstanceStateIssue =
+  | "incomplete_instance_state"
+  | "noncanonical_instance_id"
   | "module_side_mismatch"
   | "blank_dedupe_key"
   | "blank_phase"

@@ -44,7 +44,7 @@ it("funds an installed blocker against a terminal multi-point HQ steal before in
     capture.runtime,
   );
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("corp.gain_credit");
+  expect(decision.actionId).toBe("cb");
   expect(decision.fallbackUsed).toBe(false);
   const portfolio = residentPlanPortfolioSnapshot(input)!;
   const root = portfolio.instances.find(
@@ -63,7 +63,7 @@ it("funds an installed blocker against a terminal multi-point HQ steal before in
     needId: `terminal-central-rez-reserve:hq:${ice.instanceId}`,
   });
   const basic = input.legalActions.find(
-    (a) => a.actionId === "corp.gain_credit",
+    (a) => a.actionId === "cb",
   )!;
   expect(basic).toMatchObject({
     type: "gain_credit",
@@ -268,7 +268,7 @@ it("preserves funding against nominal capacity but gives genuinely productive sa
     corpDefenseReserveNeeds(
       input,
       [reserve, install],
-      ["corp.gain_credit"],
+      ["cb"],
       [],
       [],
     ),
@@ -282,7 +282,7 @@ it("preserves funding against nominal capacity but gives genuinely productive sa
     corpDefenseReserveNeeds(
       input,
       [reserve, productive],
-      ["corp.gain_credit"],
+      ["cb"],
       [],
       [],
     ),

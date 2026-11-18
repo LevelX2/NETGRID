@@ -98,7 +98,7 @@ describe("pairing 556 last central counter", () => {
       cp.runtime,
     );
     const result = chooseAiAction(cp.input);
-    expect(result.actionId).toBe("runner.start_run.r1");
+    expect(result.actionId).toBe("rs.r1");
     expect(
       result.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
     ).toBe("runner.contest_remote");

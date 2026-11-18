@@ -164,7 +164,7 @@ function admitsIncrementalInstallFunding(
     !context ||
     !reserve ||
     signal.parentPlanInstanceId !==
-      "plan:corp.defend_servers:server-defense-portfolio" ||
+      "penw02zfrkklof54c2nuye5att" ||
     signal.immediateDefenseConversion !== true ||
     reserve.targetCredits !== input.playerView.own.credits + signal.gap ||
     reserve.targetCredits <= q.currentCredits + q.baselineLiquidCreditGain ||
@@ -239,13 +239,12 @@ export function corpHostedBankCycleForParentFunding(
   fundingContext?: CorpHostedBankFundingWindowContext,
 ): CorpHostedCreditBankCycleQuote | undefined {
   const scoreFunding =
-    signal.parentPlanInstanceId?.startsWith("plan:corp.score_agenda:") ===
-      true &&
+    signal.parentPlanModuleId === "corp.score_agenda" &&
     signal.scoreFundingMilestone?.deadline === "multi_turn" &&
     signal.gap >= input.playerView.own.clicks;
   const installedDefenseFunding =
     signal.parentPlanInstanceId ===
-      "plan:corp.defend_servers:server-defense-portfolio" &&
+      "penw02zfrkklof54c2nuye5att" &&
     signal.incrementalDefenseReserve !== undefined &&
     signal.incrementalDefenseReserve.targetCredits ===
       input.playerView.own.credits + signal.gap &&

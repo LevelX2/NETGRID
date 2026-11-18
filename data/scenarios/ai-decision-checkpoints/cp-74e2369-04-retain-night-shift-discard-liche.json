@@ -12585,7 +12585,7 @@
       "schemaVersion": "tactical-plan-v1",
       "memoryId": "match_74e236955b3208a1:corp:corp-ai-v0.9-hard",
       "side": "corp",
-      "planId": "corp.create_score_window:corp.install_card.c2o5.r1.c2o5",
+      "planId": "corp.create_score_window:cc.c2o5.r1.c2o5",
       "type": "corp.create_score_window",
       "status": "progressing",
       "target": {
@@ -12593,7 +12593,7 @@
         "id": "r1"
       },
       "selectedStepKind": "build_rez_reserve",
-      "selectedActionId": "corp.gain_credit",
+      "selectedActionId": "cb",
       "selectedActionType": "gain_credit",
       "blockedBy": [
         "score_window_contestable"
@@ -12635,7 +12635,7 @@
           "progress": 0.5,
           "selectedStepKind": "protect_remote",
           "actionCandidateIds": [
-            "corp.install_card.c312.rd.c312.0"
+            "cc.c312.rd.c312.0"
           ],
           "cadence": {
             "turnKey": "corp:turn:22",
@@ -12807,7 +12807,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:corp.establish_scoring_remote|corp.establish_scoring_remote",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:corp.end_turn"
+        "plan_portfolio_selected_action:c9"
       ]
     },
     "strategicIntent": {

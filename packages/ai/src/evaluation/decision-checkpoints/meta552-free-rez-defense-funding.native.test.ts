@@ -211,7 +211,7 @@ describe("native free rez before Defense funding", () => {
     )!;
     const basic = advance(structuredClone(state), {
       side: "corp",
-      actionId: "corp.gain_credit",
+      actionId: "cb",
     });
     let improved = advance(structuredClone(state), {
       side: "corp",
@@ -263,13 +263,13 @@ describe("native free rez before Defense funding", () => {
       expect(p?.route?.planInstanceId).toBe(p?.leafExecutorInstanceId);
       if (index < 2) {
         expect(p?.rootPlanInstanceId).toBe(
-          "plan:corp.defend_servers:server-defense-portfolio",
+          "penw02zfrkklof54c2nuye5att",
         );
         expect(p?.selectedPlan?.moduleId).toBe("corp.economy");
       } else {
         expect(current.corp.credits).toBe(7);
         expect(p?.rootPlanInstanceId).toBe(
-          "plan:corp.score_agenda:agenda%3Ac2o5%3Ar1",
+          "p90hpy8yxs8swev9syuvfoksvw",
         );
         expect(p?.selectedPlan?.moduleId).toBe("corp.defend_servers");
       }
@@ -302,7 +302,7 @@ describe("native free rez before Defense funding", () => {
     ).toEqual(expected);
     expect(expected).toMatchObject({
       stateVersion: 25,
-      parentPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      parentPlanInstanceId: "penw02zfrkklof54c2nuye5att",
       parentNeedId: signal.parentNeedId,
       poolCreditsOnRez: 16,
       payoutCredits: 2,
@@ -330,7 +330,7 @@ describe("native free rez before Defense funding", () => {
     if (kind === "no_click") input.playerView.own.clicks = 0;
     if (kind === "funded") signal.gap = 0;
     if (kind === "other_parent")
-      signal.parentPlanInstanceId = "plan:corp.score_agenda:other";
+      signal.parentPlanInstanceId = "p5ooqqp5ofx0yrvg8322ut5eo2";
     expect(
       corpFreeRezPayoutPreparation(
         input,

@@ -2905,7 +2905,7 @@
         "id": "r1"
       },
       "selectedStepKind": "gain_credits",
-      "selectedActionId": "runner.gain_credit",
+      "selectedActionId": "rb",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "selected_new_plan",
@@ -2954,7 +2954,7 @@
         },
         "updatedAtStateVersion": 7,
         "evidence": [
-          "plan_portfolio_source_plan:runner.contest_remote:r1",
+          "plan_portfolio_source_pdl5beuqtdrahr4fqagyng1zk5",
           "plan_portfolio_execution_class:bounded_sequence",
           "plan_portfolio_role:foreground",
           "plan_portfolio_lifecycle:active"
@@ -2968,7 +2968,7 @@
         "plan_portfolio_foreground:runner.contest_remote",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.gain_credit"
+        "plan_portfolio_selected_action:rb"
       ]
     },
     "strategicIntent": {
@@ -4008,7 +4008,7 @@
         "contest_remote"
       ],
       "requiredAssessmentEvidence": [
-        "runner_targeted_ice_trash_preflight:r1:h1qjfwtp"
+        "runner_targeted_ice_trash_preflight:r1:hr1.i0"
       ]
     }
   }

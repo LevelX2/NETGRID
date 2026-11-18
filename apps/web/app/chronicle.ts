@@ -8793,12 +8793,9 @@ function breakSubroutineLabel(
   const rawIndex = numberValue(payload.subroutineIndex);
   if (rawIndex !== undefined && Number.isInteger(rawIndex) && rawIndex >= 0)
     return `Subroutine ${rawIndex + 1}`;
-  const rawIndexes = stringValue(payload.subroutineIndexes);
-  const indexes = rawIndexes
-    ?.split(",")
-    .map((value) => Number(value))
-    .filter((value) => Number.isInteger(value) && value >= 0);
-  if (indexes && indexes.length > 0)
+  const indexes = payload.subroutineIndexes;
+  if (Array.isArray(indexes) && indexes.length > 0 &&
+      [...indexes].every((value) => Number.isSafeInteger(value) && value >= 0))
     return `Subroutinen ${indexes.map((index) => index + 1).join(", ")}`;
   return fallbackCount === 1
     ? "eine Subroutine"

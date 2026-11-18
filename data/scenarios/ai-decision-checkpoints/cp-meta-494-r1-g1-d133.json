@@ -450,7 +450,7 @@
           "label": "HQ",
           "ice": [
             {
-              "instanceId": "h1y0tig9",
+              "instanceId": "hhq.i0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -617,13 +617,13 @@
           "label": "Remote 1",
           "ice": [
             {
-              "instanceId": "h11txazj",
+              "instanceId": "hr1.i0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
             },
             {
-              "instanceId": "h1q8yc13",
+              "instanceId": "hr1.i1",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -631,7 +631,7 @@
           ],
           "root": [
             {
-              "instanceId": "h1dqv37q",
+              "instanceId": "hr1.r0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -4074,7 +4074,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.gain_credit",
+          "actionId": "rb",
           "side": "runner",
           "type": "gain_credit",
           "label": "1 Credit nehmen",
@@ -4095,7 +4095,7 @@
           }
         },
         {
-          "actionId": "runner.draw_card",
+          "actionId": "r8",
           "side": "runner",
           "type": "draw_card",
           "label": "Karte ziehen",
@@ -4118,7 +4118,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c9m.hq.c9m",
+          "actionId": "rh.c9m.hq.c9m",
           "side": "runner",
           "type": "play_event",
           "label": "Library Search auf HQ",
@@ -4140,7 +4140,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c9m.rd.c9m",
+          "actionId": "rh.c9m.rd.c9m",
           "side": "runner",
           "type": "play_event",
           "label": "Library Search auf R&D",
@@ -4162,7 +4162,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c97.c97",
+          "actionId": "rh.c97.c97",
           "side": "runner",
           "type": "play_event",
           "label": "Finders Keepers spielen",
@@ -4182,7 +4182,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c89.c89",
+          "actionId": "rc.c89.c89",
           "side": "runner",
           "type": "install_card",
           "label": "Superglue installieren",
@@ -4203,7 +4203,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c89.c89.runner_program_trash_before_install",
+          "actionId": "rc.c89.c89.runner_program_trash_before_install",
           "side": "runner",
           "type": "install_card",
           "label": "Superglue mit Programmtrash installieren",
@@ -4225,7 +4225,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c9e.rd.c9e.56",
+          "actionId": "rh.c9e.rd.c9e.56",
           "side": "runner",
           "type": "play_event",
           "label": "Gypsy™ Schedule Analyzer auf R&D",
@@ -4254,7 +4254,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.ca1.ca1.59",
+          "actionId": "rh.ca1.ca1.59",
           "side": "runner",
           "type": "play_event",
           "label": "Networking spielen",
@@ -4283,7 +4283,7 @@
           }
         },
         {
-          "actionId": "runner.activated_card_ability.cc2.cc2.activated.69",
+          "actionId": "r1.cc2.cc2.activated.69",
           "side": "runner",
           "type": "activated_card_ability",
           "label": "Sandbox Dig: R&D-Spitze ansehen",
@@ -4310,7 +4310,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.hq",
+          "actionId": "rs.hq",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf HQ",
@@ -4331,7 +4331,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.rd",
+          "actionId": "rs.rd",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf R&D",
@@ -4352,7 +4352,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.archives",
+          "actionId": "rs.archives",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf Archives",
@@ -4373,7 +4373,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.r1",
+          "actionId": "rs.r1",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf Remote 1",
@@ -4394,7 +4394,7 @@
           }
         },
         {
-          "actionId": "runner.end_turn",
+          "actionId": "r9",
           "side": "runner",
           "type": "end_turn",
           "label": "Zug beenden",
@@ -6435,7 +6435,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "runner.gain_credit",
+        "actionId": "rb",
         "side": "runner",
         "type": "gain_credit",
         "label": "1 Credit nehmen",
@@ -6456,7 +6456,7 @@
         }
       },
       {
-        "actionId": "runner.draw_card",
+        "actionId": "r8",
         "side": "runner",
         "type": "draw_card",
         "label": "Karte ziehen",
@@ -6479,7 +6479,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c9m.hq.c9m",
+        "actionId": "rh.c9m.hq.c9m",
         "side": "runner",
         "type": "play_event",
         "label": "Library Search auf HQ",
@@ -6501,7 +6501,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c9m.rd.c9m",
+        "actionId": "rh.c9m.rd.c9m",
         "side": "runner",
         "type": "play_event",
         "label": "Library Search auf R&D",
@@ -6523,7 +6523,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c97.c97",
+        "actionId": "rh.c97.c97",
         "side": "runner",
         "type": "play_event",
         "label": "Finders Keepers spielen",
@@ -6543,7 +6543,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c89.c89",
+        "actionId": "rc.c89.c89",
         "side": "runner",
         "type": "install_card",
         "label": "Superglue installieren",
@@ -6564,7 +6564,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c89.c89.runner_program_trash_before_install",
+        "actionId": "rc.c89.c89.runner_program_trash_before_install",
         "side": "runner",
         "type": "install_card",
         "label": "Superglue mit Programmtrash installieren",
@@ -6586,7 +6586,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c9e.rd.c9e.56",
+        "actionId": "rh.c9e.rd.c9e.56",
         "side": "runner",
         "type": "play_event",
         "label": "Gypsy™ Schedule Analyzer auf R&D",
@@ -6615,7 +6615,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.ca1.ca1.59",
+        "actionId": "rh.ca1.ca1.59",
         "side": "runner",
         "type": "play_event",
         "label": "Networking spielen",
@@ -6644,7 +6644,7 @@
         }
       },
       {
-        "actionId": "runner.activated_card_ability.cc2.cc2.activated.69",
+        "actionId": "r1.cc2.cc2.activated.69",
         "side": "runner",
         "type": "activated_card_ability",
         "label": "Sandbox Dig: R&D-Spitze ansehen",
@@ -6671,7 +6671,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.hq",
+        "actionId": "rs.hq",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf HQ",
@@ -6692,7 +6692,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.rd",
+        "actionId": "rs.rd",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf R&D",
@@ -6713,7 +6713,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.archives",
+        "actionId": "rs.archives",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf Archives",
@@ -6734,7 +6734,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.r1",
+        "actionId": "rs.r1",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf Remote 1",
@@ -6755,7 +6755,7 @@
         }
       },
       {
-        "actionId": "runner.end_turn",
+        "actionId": "r9",
         "side": "runner",
         "type": "end_turn",
         "label": "Zug beenden",
@@ -6809,7 +6809,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 132,
-      "sideSafePlanningFingerprint": "fnv1a:b38d64a5"
+      "sideSafePlanningFingerprint": "fnv1a:71d5bbb2"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_classic_runner_prep_economy_pressure_2026_07_01_1.0.0",
@@ -12847,7 +12847,7 @@
       "stateVersion": 126,
       "instances": [
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "dedupeKey": "standard-turn-completion",
           "moduleId": "runner.complete_turn",
           "moduleVersion": "1",
@@ -12876,7 +12876,7 @@
           "moduleState": {
             "kind": "turn_completion",
             "standardEndTurnActionIds": [
-              "runner.end_turn"
+              "r9"
             ]
           },
           "blockers": [],
@@ -12909,7 +12909,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
+          "instanceId": "p5s1qdgqrafrs3n2kss1t9ct7m",
           "dedupeKey": "coverage:breaker_code_gate",
           "moduleId": "runner.rig_and_coverage",
           "moduleVersion": "1",
@@ -13008,55 +13008,55 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "stateVersion": 126,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
+          "instanceId": "p5s1qdgqrafrs3n2kss1t9ct7m",
           "stateVersion": 126,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Acc2",
+          "instanceId": "pdy8e6imo5nj5ljvousmctagqd",
           "stateVersion": 126,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.economy:economy-liquidity-development%3Arunner%3A19",
+          "instanceId": "p5nq6zehovc9j56sglyq4jrr8c",
           "stateVersion": 126,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.economy:runner-portfolio-credit-reserve",
+          "instanceId": "pc7ebuiw5dxhlbzbf1nhcs4p4z",
           "stateVersion": 126,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Aarchives",
+          "instanceId": "p22f66p721g9dgs7gsawwpf6hs",
           "stateVersion": 126,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ahq",
+          "instanceId": "pa7nez1ioecg7mf06q1uwqq57o",
           "stateVersion": 126,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ard",
+          "instanceId": "pa90fufw9vc5bkshp96ztlryxl",
           "stateVersion": 126,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "stateVersion": 126,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
@@ -13069,7 +13069,7 @@
         "commitmentId": "fnv1a:4b4006fe",
         "sourcePlanId": "fnv1a:879188a4",
         "sourceLineHash": "fnv1a:b9ccf12f",
-        "sequenceRootPlanInstanceId": "plan:runner.complete_turn:standard-turn-completion",
+        "sequenceRootPlanInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
         "side": "runner",
         "turnKey": "runner:turn:19",
         "planningRulesFingerprint": "fnv1a:cd5e4e13",
@@ -13086,7 +13086,7 @@
           {
             "phaseId": "fnv1a:34e45cad",
             "root": {
-              "planInstanceId": "plan:runner.complete_turn:standard-turn-completion",
+              "planInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
               "moduleId": "runner.complete_turn",
               "milestoneId": "complete_turn_after_productive_routes_exhausted",
               "provenance": "resident"
@@ -13175,7 +13175,7 @@
           "sideSafePlanningFingerprint": "fnv1a:fc9cf789"
         },
         "currentBinding": {
-          "actionId": "runner.end_turn",
+          "actionId": "r9",
           "stateVersion": 126,
           "semanticActionSetFingerprint": "fnv1a:1237c312",
           "invocationKey": "fnv1a:e81f6047"
@@ -13183,8 +13183,8 @@
         "actionType": "end_turn",
         "expectationId": "fnv1a:7b9b0749"
       },
-      "rootForegroundInstanceId": "plan:runner.complete_turn:standard-turn-completion",
-      "executorInstanceId": "plan:runner.complete_turn:standard-turn-completion"
+      "rootForegroundInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
+      "executorInstanceId": "p2ut8j92he0i09lc4xwtln5iys"
     }
   },
   "validation": {

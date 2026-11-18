@@ -39,9 +39,9 @@ it("SP-366 distinguishes canonical Wall and Code-Gate functions before binding t
     decisionDebug: {
       planFirstDecision: {
         rootPlanInstanceId:
-          "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry",
+          "pde8a64nmn1hkbrzgi9sbuf6fo",
         leafExecutorInstanceId:
-          "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry",
+          "pde8a64nmn1hkbrzgi9sbuf6fo",
         route: {
           actionId: action.actionId,
           stateVersion: input.playerView.stateVersion,
@@ -67,7 +67,7 @@ it("SP-366 distinguishes canonical Wall and Code-Gate functions before binding t
 it("does not reopen an already bound historical memory choice", () => {
   const input = fixture(boundChoice);
   expect(chooseAiAction(input)).toMatchObject({
-    actionId: "runner.resolve_choice",
+    actionId: "rn",
     fallbackUsed: false,
     selectedChoices: {
       selectedOptionIds: ["card_cy2"],

@@ -8754,7 +8754,7 @@
         "id": "c2id"
       },
       "selectedStepKind": "advance_score_card",
-      "selectedActionId": "corp.advance_card.c2id.c2id",
+      "selectedActionId": "c2.c2id.c2id",
       "selectedActionType": "advance_card",
       "scoreConversionDesiredAdvancementCounters": 3,
       "blockedBy": [],
@@ -8861,7 +8861,7 @@
         "progress": 0.6,
         "selectedStepKind": "advance_score_card",
         "actionCandidateIds": [
-          "corp.advance_card.c2id.c2id"
+          "c2.c2id.c2id"
         ],
         "creditDemands": [],
         "actionDemands": [
@@ -9012,7 +9012,7 @@
           "plan_action_capacity_route:corp.create_score_window:conversion:c2id:actions:already_sufficient",
           "plan_action_capacity_route_status:already_sufficient",
           "plan_action_capacity_hard_blocker_resolved:false",
-          "plan_portfolio_action_progress:corp.advance_card.c2id.c2id"
+          "plan_portfolio_action_progress:c2.c2id.c2id"
         ]
       },
       "backgrounds": [
@@ -9034,7 +9034,7 @@
           "progress": 0.5,
           "selectedStepKind": "find_remote_protection",
           "actionCandidateIds": [
-            "corp.draw_card"
+            "c8"
           ],
           "creditDemands": [],
           "actionDemands": [
@@ -9194,7 +9194,7 @@
           "progress": 0.5,
           "selectedStepKind": "build_remote",
           "actionCandidateIds": [
-            "corp.install_card.ck6.new_remote.ck6"
+            "cc.ck6.new_remote.ck6"
           ],
           "creditDemands": [],
           "actionDemands": [
@@ -9421,7 +9421,7 @@
         "plan_action_allocation_entries:3",
         "plan_action_allocation_unallocated:0",
         "plan_action_allocation_credit_remainder:12",
-        "plan_portfolio_selected_action:corp.advance_card.c2id.c2id"
+        "plan_portfolio_selected_action:c2.c2id.c2id"
       ]
     },
     "strategicIntent": {

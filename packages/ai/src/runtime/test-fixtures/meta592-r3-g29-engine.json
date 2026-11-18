@@ -2898,7 +2898,7 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.resolve_choice",
+              "actionId": "rn",
               "clientKnownStateVersion": 0,
               "selectedChoices": {
                 "choiceId": "setup_mulligan_runner_0",
@@ -2908,7 +2908,7 @@
               }
             },
             "legalAction": {
-              "actionId": "runner.resolve_choice",
+              "actionId": "rn",
               "side": "runner",
               "type": "resolve_choice",
               "label": "Runner-Starthand",
@@ -2983,7 +2983,7 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.resolve_choice",
+              "actionId": "cn",
               "clientKnownStateVersion": 1,
               "selectedChoices": {
                 "choiceId": "setup_mulligan_corp_1",
@@ -2993,7 +2993,7 @@
               }
             },
             "legalAction": {
-              "actionId": "corp.resolve_choice",
+              "actionId": "cn",
               "side": "corp",
               "type": "resolve_choice",
               "label": "Korp-Starthand",
@@ -3060,11 +3060,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.mandatory_draw",
+              "actionId": "ce",
               "clientKnownStateVersion": 2
             },
             "legalAction": {
-              "actionId": "corp.mandatory_draw",
+              "actionId": "ce",
               "side": "corp",
               "type": "mandatory_draw",
               "label": "Korp Pflichtkarte ziehen",
@@ -3131,11 +3131,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.install_card.c2v9.rd.c2v9.0",
+              "actionId": "cc.c2v9.rd.c2v9.0",
               "clientKnownStateVersion": 3
             },
             "legalAction": {
-              "actionId": "corp.install_card.c2v9.rd.c2v9.0",
+              "actionId": "cc.c2v9.rd.c2v9.0",
               "side": "corp",
               "type": "install_card",
               "label": "ICE vor R&D installieren",
@@ -3201,11 +3201,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.draw_card",
+              "actionId": "c8",
               "clientKnownStateVersion": 4
             },
             "legalAction": {
-              "actionId": "corp.draw_card",
+              "actionId": "c8",
               "side": "corp",
               "type": "draw_card",
               "label": "Karte ziehen",
@@ -3263,11 +3263,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.install_card.c2x9.hq.c2x9.0",
+              "actionId": "cc.c2x9.hq.c2x9.0",
               "clientKnownStateVersion": 5
             },
             "legalAction": {
-              "actionId": "corp.install_card.c2x9.hq.c2x9.0",
+              "actionId": "cc.c2x9.hq.c2x9.0",
               "side": "corp",
               "type": "install_card",
               "label": "ICE vor HQ installieren",
@@ -3326,11 +3326,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.end_turn",
+              "actionId": "c9",
               "clientKnownStateVersion": 6
             },
             "legalAction": {
-              "actionId": "corp.end_turn",
+              "actionId": "c9",
               "side": "corp",
               "type": "end_turn",
               "label": "Zug beenden",
@@ -3385,11 +3385,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.start_run.rd",
+              "actionId": "rs.rd",
               "clientKnownStateVersion": 7
             },
             "legalAction": {
-              "actionId": "runner.start_run.rd",
+              "actionId": "rs.rd",
               "side": "runner",
               "type": "start_run",
               "label": "Run auf R&D",
@@ -3451,11 +3451,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.rez_ice.c2v9.c2v9",
+              "actionId": "cq.c2v9.c2v9",
               "clientKnownStateVersion": 8
             },
             "legalAction": {
-              "actionId": "corp.rez_ice.c2v9.c2v9",
+              "actionId": "cq.c2v9.c2v9",
               "side": "corp",
               "type": "rez_ice",
               "label": "Keeper rezzen",
@@ -3521,11 +3521,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.continue_run.0",
+              "actionId": "r5.0",
               "clientKnownStateVersion": 9
             },
             "legalAction": {
-              "actionId": "runner.continue_run.0",
+              "actionId": "r5.0",
               "side": "runner",
               "type": "continue_run",
               "label": "Subroutinen auslösen (Run endet)",
@@ -3541,8 +3541,6 @@
                 "unbrokenSubroutineCount": 1,
                 "encounterWillEndRun": true,
                 "encounterSourceWillTrashAtEndOfTurn": false,
-                "encounterSubroutineIds": "0",
-                "encounterRemainingSubroutineIds": "0",
                 "encounterRemainingSubroutineCount": 1,
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access"
@@ -3560,6 +3558,12 @@
                   "subroutineType": "end_the_run",
                   "endedRun": true
                 }
+              ],
+              "encounterSubroutineIds": [
+                "0"
+              ],
+              "encounterRemainingSubroutineIds": [
+                "0"
               ]
             }
           }
@@ -3606,11 +3610,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.start_run.hq",
+              "actionId": "rs.hq",
               "clientKnownStateVersion": 10
             },
             "legalAction": {
-              "actionId": "runner.start_run.hq",
+              "actionId": "rs.hq",
               "side": "runner",
               "type": "start_run",
               "label": "Run auf HQ",
@@ -3665,11 +3669,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.decline_rez",
+              "actionId": "c6",
               "clientKnownStateVersion": 11
             },
             "legalAction": {
-              "actionId": "corp.decline_rez",
+              "actionId": "c6",
               "side": "corp",
               "type": "decline_rez",
               "label": "ICE nicht rezzen",
@@ -3719,11 +3723,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.continue_run",
+              "actionId": "r5",
               "clientKnownStateVersion": 12
             },
             "legalAction": {
-              "actionId": "runner.continue_run",
+              "actionId": "r5",
               "side": "runner",
               "type": "continue_run",
               "label": "Run fortsetzen",
@@ -3776,11 +3780,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.access_card",
+              "actionId": "r0",
               "clientKnownStateVersion": 13
             },
             "legalAction": {
-              "actionId": "runner.access_card",
+              "actionId": "r0",
               "side": "runner",
               "type": "access_card",
               "label": "Karte accessen",
@@ -3841,11 +3845,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.install_card.cax.cax",
+              "actionId": "rc.cax.cax",
               "clientKnownStateVersion": 14
             },
             "legalAction": {
-              "actionId": "runner.install_card.cax.cax",
+              "actionId": "rc.cax.cax",
               "side": "runner",
               "type": "install_card",
               "label": "Elena Laskova installieren",
@@ -3913,11 +3917,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.draw_card",
+              "actionId": "r8",
               "clientKnownStateVersion": 15
             },
             "legalAction": {
-              "actionId": "runner.draw_card",
+              "actionId": "r8",
               "side": "runner",
               "type": "draw_card",
               "label": "Karte ziehen",
@@ -3964,11 +3968,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.end_turn",
+              "actionId": "r9",
               "clientKnownStateVersion": 16
             },
             "legalAction": {
-              "actionId": "runner.end_turn",
+              "actionId": "r9",
               "side": "runner",
               "type": "end_turn",
               "label": "Zug beenden",
@@ -4013,11 +4017,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.mandatory_draw",
+              "actionId": "ce",
               "clientKnownStateVersion": 17
             },
             "legalAction": {
-              "actionId": "corp.mandatory_draw",
+              "actionId": "ce",
               "side": "corp",
               "type": "mandatory_draw",
               "label": "Korp Pflichtkarte ziehen",
@@ -4080,11 +4084,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.install_card.c399.new_remote.c399",
+              "actionId": "cc.c399.new_remote.c399",
               "clientKnownStateVersion": 18
             },
             "legalAction": {
-              "actionId": "corp.install_card.c399.new_remote.c399",
+              "actionId": "cc.c399.new_remote.c399",
               "side": "corp",
               "type": "install_card",
               "label": "Karte in neuem Remote installieren",
@@ -4136,11 +4140,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.draw_card",
+              "actionId": "c8",
               "clientKnownStateVersion": 19
             },
             "legalAction": {
-              "actionId": "corp.draw_card",
+              "actionId": "c8",
               "side": "corp",
               "type": "draw_card",
               "label": "Karte ziehen",
@@ -4192,11 +4196,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.advance_card.c399.c399",
+              "actionId": "c2.c399.c399",
               "clientKnownStateVersion": 20
             },
             "legalAction": {
-              "actionId": "corp.advance_card.c399.c399",
+              "actionId": "c2.c399.c399",
               "side": "corp",
               "type": "advance_card",
               "label": "Corprunner's Shattered Remains in Remote 1 advancen",
@@ -4239,11 +4243,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.end_turn",
+              "actionId": "c9",
               "clientKnownStateVersion": 21
             },
             "legalAction": {
-              "actionId": "corp.end_turn",
+              "actionId": "c9",
               "side": "corp",
               "type": "end_turn",
               "label": "Zug beenden",
@@ -4296,7 +4300,7 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.resolve_choice",
+              "actionId": "cn",
               "clientKnownStateVersion": 22,
               "selectedChoices": {
                 "choiceId": "discard_corp_22",
@@ -4306,7 +4310,7 @@
               }
             },
             "legalAction": {
-              "actionId": "corp.resolve_choice",
+              "actionId": "cn",
               "side": "corp",
               "type": "resolve_choice",
               "label": "Korp-Discard wählen",
@@ -4387,11 +4391,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.start_run.r1",
+              "actionId": "rs.r1",
               "clientKnownStateVersion": 23
             },
             "legalAction": {
-              "actionId": "runner.start_run.r1",
+              "actionId": "rs.r1",
               "side": "runner",
               "type": "start_run",
               "label": "Run auf Remote 1",
@@ -4460,11 +4464,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.access_card",
+              "actionId": "r0",
               "clientKnownStateVersion": 24
             },
             "legalAction": {
-              "actionId": "runner.access_card",
+              "actionId": "r0",
               "side": "runner",
               "type": "access_card",
               "label": "Karte accessen",
@@ -4520,11 +4524,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.trash_accessed_card.c399.0",
+              "actionId": "rv.c399.0",
               "clientKnownStateVersion": 25
             },
             "legalAction": {
-              "actionId": "runner.trash_accessed_card.c399.0",
+              "actionId": "rv.c399.0",
               "side": "runner",
               "type": "trash_accessed_card",
               "label": "Corprunner's Shattered Remains trashen",
@@ -4585,11 +4589,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.gain_credit",
+              "actionId": "rb",
               "clientKnownStateVersion": 26
             },
             "legalAction": {
-              "actionId": "runner.gain_credit",
+              "actionId": "rb",
               "side": "runner",
               "type": "gain_credit",
               "label": "1 Credit nehmen",
@@ -4649,11 +4653,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.install_card.c2bt.c2bt",
+              "actionId": "rc.c2bt.c2bt",
               "clientKnownStateVersion": 27
             },
             "legalAction": {
-              "actionId": "runner.install_card.c2bt.c2bt",
+              "actionId": "rc.c2bt.c2bt",
               "side": "runner",
               "type": "install_card",
               "label": "Junkyard BBS installieren",
@@ -4721,11 +4725,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.draw_card",
+              "actionId": "r8",
               "clientKnownStateVersion": 28
             },
             "legalAction": {
-              "actionId": "runner.draw_card",
+              "actionId": "r8",
               "side": "runner",
               "type": "draw_card",
               "label": "Karte ziehen",
@@ -4772,11 +4776,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.end_turn",
+              "actionId": "r9",
               "clientKnownStateVersion": 29
             },
             "legalAction": {
-              "actionId": "runner.end_turn",
+              "actionId": "r9",
               "side": "runner",
               "type": "end_turn",
               "label": "Zug beenden",
@@ -4821,11 +4825,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.mandatory_draw",
+              "actionId": "ce",
               "clientKnownStateVersion": 30
             },
             "legalAction": {
-              "actionId": "corp.mandatory_draw",
+              "actionId": "ce",
               "side": "corp",
               "type": "mandatory_draw",
               "label": "Korp Pflichtkarte ziehen",
@@ -4888,11 +4892,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.install_card.c37z.new_remote.c37z",
+              "actionId": "cc.c37z.new_remote.c37z",
               "clientKnownStateVersion": 31
             },
             "legalAction": {
-              "actionId": "corp.install_card.c37z.new_remote.c37z",
+              "actionId": "cc.c37z.new_remote.c37z",
               "side": "corp",
               "type": "install_card",
               "label": "Karte in neuem Remote installieren",
@@ -4944,11 +4948,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.draw_card",
+              "actionId": "c8",
               "clientKnownStateVersion": 32
             },
             "legalAction": {
-              "actionId": "corp.draw_card",
+              "actionId": "c8",
               "side": "corp",
               "type": "draw_card",
               "label": "Karte ziehen",
@@ -5014,11 +5018,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.play_operation.c33p.c33p.616",
+              "actionId": "ci.c33p.c33p.616",
               "clientKnownStateVersion": 33
             },
             "legalAction": {
-              "actionId": "corp.play_operation.c33p.c33p.616",
+              "actionId": "ci.c33p.c33p.616",
               "side": "corp",
               "type": "play_operation",
               "label": "Efficiency Experts spielen",
@@ -5084,11 +5088,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.end_turn",
+              "actionId": "c9",
               "clientKnownStateVersion": 34
             },
             "legalAction": {
-              "actionId": "corp.end_turn",
+              "actionId": "c9",
               "side": "corp",
               "type": "end_turn",
               "label": "Zug beenden",
@@ -5148,11 +5152,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.play_event.c1sp.c1sp.375",
+              "actionId": "rh.c1sp.c1sp.375",
               "clientKnownStateVersion": 35
             },
             "legalAction": {
-              "actionId": "runner.play_event.c1sp.c1sp.375",
+              "actionId": "rh.c1sp.c1sp.375",
               "side": "runner",
               "type": "play_event",
               "label": "Bodyweight™ Synthetic Blood spielen",
@@ -5240,11 +5244,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.install_card.c15d.c15d",
+              "actionId": "rc.c15d.c15d",
               "clientKnownStateVersion": 36
             },
             "legalAction": {
-              "actionId": "runner.install_card.c15d.c15d",
+              "actionId": "rc.c15d.c15d",
               "side": "runner",
               "type": "install_card",
               "label": "Airport Locker installieren",
@@ -5318,11 +5322,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.gain_credit",
+              "actionId": "rb",
               "clientKnownStateVersion": 37
             },
             "legalAction": {
-              "actionId": "runner.gain_credit",
+              "actionId": "rb",
               "side": "runner",
               "type": "gain_credit",
               "label": "1 Credit nehmen",
@@ -5377,11 +5381,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.gain_credit",
+              "actionId": "rb",
               "clientKnownStateVersion": 38
             },
             "legalAction": {
-              "actionId": "runner.gain_credit",
+              "actionId": "rb",
               "side": "runner",
               "type": "gain_credit",
               "label": "1 Credit nehmen",
@@ -5425,11 +5429,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.end_turn",
+              "actionId": "r9",
               "clientKnownStateVersion": 39
             },
             "legalAction": {
-              "actionId": "runner.end_turn",
+              "actionId": "r9",
               "side": "runner",
               "type": "end_turn",
               "label": "Zug beenden",
@@ -5482,7 +5486,7 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.resolve_choice",
+              "actionId": "rn",
               "clientKnownStateVersion": 40,
               "selectedChoices": {
                 "choiceId": "discard_runner_40",
@@ -5494,7 +5498,7 @@
               }
             },
             "legalAction": {
-              "actionId": "runner.resolve_choice",
+              "actionId": "rn",
               "side": "runner",
               "type": "resolve_choice",
               "label": "Runner-Discard wählen",
@@ -5567,11 +5571,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.mandatory_draw",
+              "actionId": "ce",
               "clientKnownStateVersion": 41
             },
             "legalAction": {
-              "actionId": "corp.mandatory_draw",
+              "actionId": "ce",
               "side": "corp",
               "type": "mandatory_draw",
               "label": "Korp Pflichtkarte ziehen",
@@ -5685,11 +5689,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.rez_card.c37z.r1.c37z",
+              "actionId": "cp.c37z.r1.c37z",
               "clientKnownStateVersion": 42
             },
             "legalAction": {
-              "actionId": "corp.rez_card.c37z.r1.c37z",
+              "actionId": "cp.c37z.r1.c37z",
               "side": "corp",
               "type": "rez_card",
               "label": "Karte in Remote 1 rezzen",
@@ -5773,11 +5777,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.install_card.c2xx.r1.c2xx.0",
+              "actionId": "cc.c2xx.r1.c2xx.0",
               "clientKnownStateVersion": 43
             },
             "legalAction": {
-              "actionId": "corp.install_card.c2xx.r1.c2xx.0",
+              "actionId": "cc.c2xx.r1.c2xx.0",
               "side": "corp",
               "type": "install_card",
               "label": "ICE vor Remote 1 installieren",
@@ -5916,11 +5920,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.activated_card_ability.c37z.c37z.activated.635",
+              "actionId": "c1.c37z.c37z.activated.635",
               "clientKnownStateVersion": 44
             },
             "legalAction": {
-              "actionId": "corp.activated_card_ability.c37z.c37z.activated.635",
+              "actionId": "c1.c37z.c37z.activated.635",
               "side": "corp",
               "type": "activated_card_ability",
               "label": "BBS Whispering Campaign: bis zu 2 gehostete Credits nehmen",
@@ -6081,11 +6085,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.activated_card_ability.c37z.c37z.activated.635",
+              "actionId": "c1.c37z.c37z.activated.635",
               "clientKnownStateVersion": 45
             },
             "legalAction": {
-              "actionId": "corp.activated_card_ability.c37z.c37z.activated.635",
+              "actionId": "c1.c37z.c37z.activated.635",
               "side": "corp",
               "type": "activated_card_ability",
               "label": "BBS Whispering Campaign: bis zu 2 gehostete Credits nehmen",
@@ -6166,11 +6170,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.end_turn",
+              "actionId": "c9",
               "clientKnownStateVersion": 46
             },
             "legalAction": {
-              "actionId": "corp.end_turn",
+              "actionId": "c9",
               "side": "corp",
               "type": "end_turn",
               "label": "Zug beenden",
@@ -6251,11 +6255,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.play_event.caa.caa.60",
+              "actionId": "rh.caa.caa.60",
               "clientKnownStateVersion": 47
             },
             "legalAction": {
-              "actionId": "runner.play_event.caa.caa.60",
+              "actionId": "rh.caa.caa.60",
               "side": "runner",
               "type": "play_event",
               "label": "Panzer Run spielen",
@@ -6360,11 +6364,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.start_run.r1",
+              "actionId": "rs.r1",
               "clientKnownStateVersion": 48
             },
             "legalAction": {
-              "actionId": "runner.start_run.r1",
+              "actionId": "rs.r1",
               "side": "runner",
               "type": "start_run",
               "label": "Run auf Remote 1",
@@ -6426,11 +6430,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.rez_ice.c2xx.c2xx",
+              "actionId": "cq.c2xx.c2xx",
               "clientKnownStateVersion": 49
             },
             "legalAction": {
-              "actionId": "corp.rez_ice.c2xx.c2xx",
+              "actionId": "cq.c2xx.c2xx",
               "side": "corp",
               "type": "rez_ice",
               "label": "Rex rezzen",
@@ -6510,11 +6514,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.continue_run.0",
+              "actionId": "r5.0",
               "clientKnownStateVersion": 50
             },
             "legalAction": {
-              "actionId": "runner.continue_run.0",
+              "actionId": "r5.0",
               "side": "runner",
               "type": "continue_run",
               "label": "Subroutinen auslösen",
@@ -6530,8 +6534,6 @@
                 "unbrokenSubroutineCount": 1,
                 "encounterWillEndRun": false,
                 "encounterSourceWillTrashAtEndOfTurn": false,
-                "encounterSubroutineIds": "0",
-                "encounterRemainingSubroutineIds": "0",
                 "encounterRemainingSubroutineCount": 1,
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access",
@@ -6556,6 +6558,12 @@
                   "subroutineIndex": 0,
                   "subroutineType": "initiate_trace"
                 }
+              ],
+              "encounterSubroutineIds": [
+                "0"
+              ],
+              "encounterRemainingSubroutineIds": [
+                "0"
               ]
             }
           }
@@ -6604,7 +6612,7 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.resolve_choice",
+              "actionId": "cn",
               "clientKnownStateVersion": 51,
               "selectedChoices": {
                 "choiceId": "51.corp.bid.51",
@@ -6614,7 +6622,7 @@
               }
             },
             "legalAction": {
-              "actionId": "corp.resolve_choice",
+              "actionId": "cn",
               "side": "corp",
               "type": "resolve_choice",
               "label": "Offenes Korp-Payment wählen (Basisstärke 3)",
@@ -6704,7 +6712,7 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.resolve_choice",
+              "actionId": "rn",
               "clientKnownStateVersion": 52,
               "selectedChoices": {
                 "choiceId": "51.runner.bid.52",
@@ -6714,7 +6722,7 @@
               }
             },
             "legalAction": {
-              "actionId": "runner.resolve_choice",
+              "actionId": "rn",
               "side": "runner",
               "type": "resolve_choice",
               "label": "Runner Link-Payment wählen (Trace-Stärke 3, Link 0; 6 Credits verfügbar)",
@@ -6802,11 +6810,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.continue_run",
+              "actionId": "r5",
               "clientKnownStateVersion": 53
             },
             "legalAction": {
-              "actionId": "runner.continue_run",
+              "actionId": "r5",
               "side": "runner",
               "type": "continue_run",
               "label": "ICE passieren",
@@ -6822,13 +6830,13 @@
                 "unbrokenSubroutineCount": 0,
                 "encounterWillEndRun": false,
                 "encounterSourceWillTrashAtEndOfTurn": false,
-                "encounterSubroutineIds": "",
-                "encounterRemainingSubroutineIds": "",
                 "encounterRemainingSubroutineCount": 0,
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access",
                 "passedIcePosition": 1
-              }
+              },
+              "encounterSubroutineIds": [],
+              "encounterRemainingSubroutineIds": []
             }
           }
         }
@@ -6866,11 +6874,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.continue_run",
+              "actionId": "r5",
               "clientKnownStateVersion": 54
             },
             "legalAction": {
-              "actionId": "runner.continue_run",
+              "actionId": "r5",
               "side": "runner",
               "type": "continue_run",
               "label": "Run fortsetzen",
@@ -6930,11 +6938,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.access_card",
+              "actionId": "r0",
               "clientKnownStateVersion": 55
             },
             "legalAction": {
-              "actionId": "runner.access_card",
+              "actionId": "r0",
               "side": "runner",
               "type": "access_card",
               "label": "Karte accessen",
@@ -6984,11 +6992,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.decline_trash",
+              "actionId": "r7",
               "clientKnownStateVersion": 56
             },
             "legalAction": {
-              "actionId": "runner.decline_trash",
+              "actionId": "r7",
               "side": "runner",
               "type": "decline_trash",
               "label": "Nicht trashen",
@@ -7049,11 +7057,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.start_run.hq",
+              "actionId": "rs.hq",
               "clientKnownStateVersion": 57
             },
             "legalAction": {
-              "actionId": "runner.start_run.hq",
+              "actionId": "rs.hq",
               "side": "runner",
               "type": "start_run",
               "label": "Run auf HQ",
@@ -7115,11 +7123,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.rez_ice.c2x9.c2x9",
+              "actionId": "cq.c2x9.c2x9",
               "clientKnownStateVersion": 58
             },
             "legalAction": {
-              "actionId": "corp.rez_ice.c2x9.c2x9",
+              "actionId": "cq.c2x9.c2x9",
               "side": "corp",
               "type": "rez_ice",
               "label": "Quandary rezzen",
@@ -7185,11 +7193,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.continue_run.0",
+              "actionId": "r5.0",
               "clientKnownStateVersion": 59
             },
             "legalAction": {
-              "actionId": "runner.continue_run.0",
+              "actionId": "r5.0",
               "side": "runner",
               "type": "continue_run",
               "label": "Subroutinen auslösen (Run endet)",
@@ -7205,8 +7213,6 @@
                 "unbrokenSubroutineCount": 1,
                 "encounterWillEndRun": true,
                 "encounterSourceWillTrashAtEndOfTurn": false,
-                "encounterSubroutineIds": "0",
-                "encounterRemainingSubroutineIds": "0",
                 "encounterRemainingSubroutineCount": 1,
                 "encounterFullBreakDamage": 0,
                 "abilityFamily": "run-access"
@@ -7224,6 +7230,12 @@
                   "subroutineType": "end_the_run",
                   "endedRun": true
                 }
+              ],
+              "encounterSubroutineIds": [
+                "0"
+              ],
+              "encounterRemainingSubroutineIds": [
+                "0"
               ]
             }
           }
@@ -7250,11 +7262,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.end_turn",
+              "actionId": "r9",
               "clientKnownStateVersion": 60
             },
             "legalAction": {
-              "actionId": "runner.end_turn",
+              "actionId": "r9",
               "side": "runner",
               "type": "end_turn",
               "label": "Zug beenden",
@@ -7307,7 +7319,7 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.resolve_choice",
+              "actionId": "rn",
               "clientKnownStateVersion": 61,
               "selectedChoices": {
                 "choiceId": "discard_runner_61",
@@ -7317,7 +7329,7 @@
               }
             },
             "legalAction": {
-              "actionId": "runner.resolve_choice",
+              "actionId": "rn",
               "side": "runner",
               "type": "resolve_choice",
               "label": "Runner-Discard wählen",
@@ -7388,11 +7400,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.mandatory_draw",
+              "actionId": "ce",
               "clientKnownStateVersion": 62
             },
             "legalAction": {
-              "actionId": "corp.mandatory_draw",
+              "actionId": "ce",
               "side": "corp",
               "type": "mandatory_draw",
               "label": "Korp Pflichtkarte ziehen",
@@ -7520,11 +7532,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.activated_card_ability.c37z.c37z.activated.635",
+              "actionId": "c1.c37z.c37z.activated.635",
               "clientKnownStateVersion": 63
             },
             "legalAction": {
-              "actionId": "corp.activated_card_ability.c37z.c37z.activated.635",
+              "actionId": "c1.c37z.c37z.activated.635",
               "side": "corp",
               "type": "activated_card_ability",
               "label": "BBS Whispering Campaign: bis zu 2 gehostete Credits nehmen",
@@ -7685,11 +7697,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.activated_card_ability.c37z.c37z.activated.635",
+              "actionId": "c1.c37z.c37z.activated.635",
               "clientKnownStateVersion": 64
             },
             "legalAction": {
-              "actionId": "corp.activated_card_ability.c37z.c37z.activated.635",
+              "actionId": "c1.c37z.c37z.activated.635",
               "side": "corp",
               "type": "activated_card_ability",
               "label": "BBS Whispering Campaign: bis zu 2 gehostete Credits nehmen",
@@ -7850,11 +7862,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.activated_card_ability.c37z.c37z.activated.635",
+              "actionId": "c1.c37z.c37z.activated.635",
               "clientKnownStateVersion": 65
             },
             "legalAction": {
-              "actionId": "corp.activated_card_ability.c37z.c37z.activated.635",
+              "actionId": "c1.c37z.c37z.activated.635",
               "side": "corp",
               "type": "activated_card_ability",
               "label": "BBS Whispering Campaign: bis zu 2 gehostete Credits nehmen",
@@ -7935,11 +7947,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.end_turn",
+              "actionId": "c9",
               "clientKnownStateVersion": 66
             },
             "legalAction": {
-              "actionId": "corp.end_turn",
+              "actionId": "c9",
               "side": "corp",
               "type": "end_turn",
               "label": "Zug beenden",
@@ -7992,7 +8004,7 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "corp",
-              "actionId": "corp.resolve_choice",
+              "actionId": "cn",
               "clientKnownStateVersion": 67,
               "selectedChoices": {
                 "choiceId": "discard_corp_67",
@@ -8002,7 +8014,7 @@
               }
             },
             "legalAction": {
-              "actionId": "corp.resolve_choice",
+              "actionId": "cn",
               "side": "corp",
               "type": "resolve_choice",
               "label": "Korp-Discard wählen",
@@ -8088,11 +8100,11 @@
             "action": {
               "matchId": "match_9da37bb814d70d01",
               "side": "runner",
-              "actionId": "runner.play_event.c1zn.c1zn.406",
+              "actionId": "rh.c1zn.c1zn.406",
               "clientKnownStateVersion": 68
             },
             "legalAction": {
-              "actionId": "runner.play_event.c1zn.c1zn.406",
+              "actionId": "rh.c1zn.c1zn.406",
               "side": "runner",
               "type": "play_event",
               "label": "Sneak Preview spielen",

@@ -4405,7 +4405,9 @@
           "actionType": "break_subroutine",
           "label": "Pile Driver: Subroutine 1 brechen",
           "breakSubroutineCount": 1,
-          "subroutineIndexes": "0",
+          "subroutineIndexes": [
+            0
+          ],
           "targetIceDefinitionId": 450,
           "targetIceTitle": "Data Wall 2.0",
           "breakSubroutineBaseCost": 3,
@@ -5119,7 +5121,9 @@
           "actionType": "break_subroutine",
           "label": "Pile Driver: Subroutine 1 brechen",
           "breakSubroutineCount": 1,
-          "subroutineIndexes": "0",
+          "subroutineIndexes": [
+            0
+          ],
           "targetIceDefinitionId": 450,
           "targetIceTitle": "Data Wall 2.0",
           "breakSubroutineBaseCost": 3,
@@ -5363,7 +5367,9 @@
           "actionType": "break_subroutine",
           "label": "Pile Driver: Subroutine 1 brechen",
           "breakSubroutineCount": 1,
-          "subroutineIndexes": "0",
+          "subroutineIndexes": [
+            0
+          ],
           "targetIceDefinitionId": 450,
           "targetIceTitle": "Data Wall 2.0",
           "breakSubroutineBaseCost": 3,
@@ -6985,7 +6991,7 @@
         "label": "If You Want It Done Right..."
       },
       "selectedStepKind": "install_development_card",
-      "selectedActionId": "runner.play_event.c1vu.c1vu",
+      "selectedActionId": "rh.c1vu.c1vu",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_central_probe_satisfied",
@@ -7048,7 +7054,7 @@
         "plan_portfolio_foreground:runner.opportunistic_central_run",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.gain_credit"
+        "plan_portfolio_selected_action:rb"
       ]
     },
     "strategicIntent": {
@@ -8174,10 +8180,10 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0"
+        "actionId": "r1.c1l5.c1l5.activated.0"
       },
       {
-        "actionId": "runner.start_run.r2"
+        "actionId": "rs.r2"
       }
     ],
     "forbiddenActions": [

@@ -57,7 +57,7 @@ describe("match 20EB run revalidation follow-up checkpoints", () => {
             acceptablePlanKinds: ["runner.contest_remote"],
             acceptableCapabilities: ["contest_remote"],
             requiredAssessmentEvidence: [
-              "runner_terminal_remote_contest_mandatory:r1:runner.start_run.r1",
+              "runner_terminal_remote_contest_mandatory:r1:rs.r1",
             ],
           },
         };

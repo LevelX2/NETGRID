@@ -16,7 +16,7 @@ describe("exact Runner coverage-copy ownership", () => {
     (definitionId, requiredRole) => {
       const actions = ["bound", "alternative"].map((source) =>
         legalAction(
-          `runner.install_card.${source}`,
+          `rc.${source}`,
           "runner",
           "install_card",
           "Install breaker",
@@ -104,15 +104,15 @@ describe("exact Runner coverage-copy ownership", () => {
       ]);
       expect(gap.installActionIds).toEqual([actions[0]!.actionId]);
       expect(actions.map((action) => action.actionId)).toEqual([
-        "runner.install_card.bound",
-        "runner.install_card.alternative",
+        "rc.bound",
+        "rc.alternative",
       ]);
       gap.installActionIds.push(actions[1]!.actionId);
       expect(inspect()).toEqual([]);
       gap.installActionIds.pop();
       Object.assign(gap, {
         requesterModuleId: "runner.pressure_central",
-        requesterPlanInstanceId: "plan:runner.pressure_central:central%3Ard",
+        requesterPlanInstanceId: "pa90fufw9vc5bkshp96ztlryxl",
         requesterNeedId: gap.gapId,
       });
       const parent = {
@@ -150,7 +150,7 @@ describe("exact Runner coverage-copy ownership", () => {
       domain.centralPressure.pop();
       Object.assign(gap, {
         requesterModuleId: "runner.contest_remote",
-        requesterPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+        requesterPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       });
       const remoteParent = {
         ...parent,
@@ -179,7 +179,7 @@ describe("exact Runner coverage-copy ownership", () => {
       );
       domain.coverageGaps.pop();
       Object.assign(gap, {
-        requesterPlanInstanceId: "plan:runner.contest_remote:remote%3Aother",
+        requesterPlanInstanceId: "prfibc7dsrjjjfxns4glb4n2",
       });
       expect(inspect().some((d) => d.actionId === actions[0]!.actionId)).toBe(
         false,

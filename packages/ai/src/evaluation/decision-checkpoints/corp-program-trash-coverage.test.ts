@@ -63,9 +63,9 @@ it.each([
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           leafExecutorInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           route: { actionId: action.actionId },
         },
       },
@@ -101,10 +101,10 @@ it("destroys the sole affordable Wall response and applies the exact Defense cho
     lane: "plan",
     route: { actionId: decision.actionId },
     selectedStep: {
-      planInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      planInstanceId: "penw02zfrkklof54c2nuye5att",
     },
-    rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
-    leafExecutorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+    rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
+    leafExecutorInstanceId: "penw02zfrkklof54c2nuye5att",
   });
   if (!decision.actionId || !decision.selectedChoices)
     throw new Error("Expected a bound legal action");

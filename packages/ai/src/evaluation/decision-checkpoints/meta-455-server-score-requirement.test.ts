@@ -63,7 +63,7 @@ it("quotes Babylon without Overtime and selects the newly reachable terminal Tyc
     source: "c35b",
   });
   const parent =
-    "plan:corp.score_agenda:agenda%3Ac2o6%3Ar1";
+    "pe8hzlbxfkyax7wyprfhxj50v7";
   const plan = result.decisionDebug?.planFirstDecision;
   expect(plan?.rootPlanInstanceId).toBe(parent);
   expect(plan?.leafExecutorInstanceId).toBe(parent);

@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { applyPostSetupDeckOrder, type PostSetupDeckOrder } from "./post-setup-deck-order.test-support";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -240,7 +241,7 @@ describe("native pre-rez approach information", () => {
           phase: "build_hand_buffer",
         });
         expect(plan.rootPlanInstanceId).toBe(
-          "plan:runner.defense_and_recovery:runner",
+          "p1gzjb6yfcv4zbzow512kexs33",
         );
         expect(plan.leafExecutorInstanceId).toBe(plan.rootPlanInstanceId);
         const deckCapabilities = input.ownDeckCapabilities;
@@ -274,7 +275,7 @@ describe("native pre-rez approach information", () => {
       }
       expect(a.actionId).toBe(engine.actionId);
       expect(plan.rootPlanInstanceId).toBe(
-        "plan:runner.pressure_central:central%3A" + server,
+        planInstanceIdForProposal({ moduleId: "runner.pressure_central", dedupeKey: `central:${server}` }),
       );
       expect(plan.leafExecutorInstanceId).toBe(plan.rootPlanInstanceId);
       expect(
@@ -290,7 +291,7 @@ describe("native pre-rez approach information", () => {
     expect(action.payload?.eventApproachIceExposeBeforeRez).toBe(true);
     const { a, p } = normal(input);
     expect(a.actionId).toBe(action.actionId);
-    expect(p.rootPlanInstanceId).toBe("plan:runner.pressure_central:central%3Ahq");
+    expect(p.rootPlanInstanceId).toBe("pa7nez1ioecg7mf06q1uwqq57o");
     expect(p.leafExecutorInstanceId).toBe(p.rootPlanInstanceId);
     expect(advance(state, { side: "runner", actionId: a.actionId }).stateVersion).toBe(state.stateVersion + 1);
   });
@@ -326,7 +327,7 @@ describe("native pre-rez approach information", () => {
   it("keeps the directly reachable unprotected remote ahead of optional central information", () => {
     const { input } = currentPreparation("unprotected_remote"),
       { a, p } = normal(input);
-    expect(a.actionId).toBe("runner.start_run.r1");
+    expect(a.actionId).toBe("rs.r1");
     expect(p.selectedPlan?.moduleId).toBe("runner.contest_remote");
   });
   it("continues through the actual expose owner before any Corp rez decision", () => {
@@ -394,7 +395,7 @@ describe("native pre-rez approach information", () => {
     );
     const continuation = normal(view);
     expect(continuation.p.rootPlanInstanceId).toBe(
-      "plan:runner.pressure_central:central%3Ard",
+      "pa90fufw9vc5bkshp96ztlryxl",
     );
     expect(continuation.a.payload?.cardId).toBe(a.payload?.cardId);
     expect(

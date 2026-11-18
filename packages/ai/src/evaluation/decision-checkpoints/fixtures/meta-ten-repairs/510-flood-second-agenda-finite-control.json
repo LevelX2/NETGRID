@@ -5,13 +5,13 @@
   "originalPrefixActions": 342,
   "prefixEveryHashMatches": true,
   "nativeCheckpointHashMatches": true,
-  "originalAction": "corp.install_card.c2hq.new_remote.c2hq",
-  "alternative": "corp.gain_credit",
+  "originalAction": "cc.c2hq.new_remote.c2hq",
+  "alternative": "cb",
   "allCommandsActualEngineLegal": true,
   "steps": [
     {
       "side": "corp",
-      "actionId": "corp.gain_credit",
+      "actionId": "cb",
       "before": {
         "hash": "fnv1a:5c377a12",
         "stateVersion": 342,
@@ -27,7 +27,7 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.end_turn",
+      "actionId": "c9",
       "before": {
         "hash": "fnv1a:5a3a0c33",
         "stateVersion": 343,
@@ -43,7 +43,7 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.resolve_choice",
+      "actionId": "cn",
       "selectedChoices": {
         "choiceId": "discard_corp_344",
         "selectedOptionIds": [
@@ -65,7 +65,7 @@
     },
     {
       "side": "runner",
-      "actionId": "runner.start_run.r1",
+      "actionId": "rs.r1",
       "before": {
         "hash": "fnv1a:04809893",
         "stateVersion": 345,
@@ -81,7 +81,7 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.rez_ice.c2xa.c2xa",
+      "actionId": "cq.c2xa.c2xa",
       "before": {
         "hash": "fnv1a:79a8d3ce",
         "stateVersion": 346,
@@ -97,7 +97,7 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.decline_rez",
+      "actionId": "c6",
       "before": {
         "hash": "fnv1a:d8baaf80",
         "stateVersion": 347,
@@ -113,7 +113,7 @@
     },
     {
       "side": "runner",
-      "actionId": "runner.break_subroutine.c1ep.c1ep.c1ep.c2xa.0.0.294",
+      "actionId": "r3.c1ep.c1ep.c1ep.c2xa.0.0.294",
       "before": {
         "hash": "fnv1a:48469fad",
         "stateVersion": 348,
@@ -129,7 +129,7 @@
     },
     {
       "side": "runner",
-      "actionId": "runner.continue_run",
+      "actionId": "r5",
       "before": {
         "hash": "fnv1a:b1e55268",
         "stateVersion": 349,
@@ -145,7 +145,7 @@
     },
     {
       "side": "runner",
-      "actionId": "runner.continue_run",
+      "actionId": "r5",
       "before": {
         "hash": "fnv1a:1c57a3f5",
         "stateVersion": 350,
@@ -161,7 +161,7 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.decline_rez.r1",
+      "actionId": "c6.r1",
       "before": {
         "hash": "fnv1a:e6977669",
         "stateVersion": 351,
@@ -177,7 +177,7 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.decline_rez",
+      "actionId": "c6",
       "before": {
         "hash": "fnv1a:3555f259",
         "stateVersion": 352,
@@ -193,7 +193,7 @@
     },
     {
       "side": "runner",
-      "actionId": "runner.continue_run",
+      "actionId": "r5",
       "before": {
         "hash": "fnv1a:7aa24298",
         "stateVersion": 353,
@@ -209,7 +209,7 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.decline_rez.r1",
+      "actionId": "c6.r1",
       "before": {
         "hash": "fnv1a:7ccc8c7c",
         "stateVersion": 354,
@@ -225,7 +225,7 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.decline_rez",
+      "actionId": "c6",
       "before": {
         "hash": "fnv1a:3d6d9180",
         "stateVersion": 355,
@@ -241,7 +241,7 @@
     },
     {
       "side": "runner",
-      "actionId": "runner.continue_run",
+      "actionId": "r5",
       "before": {
         "hash": "fnv1a:9b3ff971",
         "stateVersion": 356,
@@ -257,7 +257,7 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.decline_rez.r1",
+      "actionId": "c6.r1",
       "before": {
         "hash": "fnv1a:33cda45b",
         "stateVersion": 357,
@@ -273,7 +273,7 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.decline_rez",
+      "actionId": "c6",
       "before": {
         "hash": "fnv1a:8e3082a0",
         "stateVersion": 358,
@@ -289,7 +289,7 @@
     },
     {
       "side": "runner",
-      "actionId": "runner.continue_run",
+      "actionId": "r5",
       "before": {
         "hash": "fnv1a:39cef8ba",
         "stateVersion": 359,
@@ -305,7 +305,7 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.decline_rez.r1",
+      "actionId": "c6.r1",
       "before": {
         "hash": "fnv1a:dedeea93",
         "stateVersion": 360,
@@ -321,7 +321,7 @@
     },
     {
       "side": "runner",
-      "actionId": "runner.access_card",
+      "actionId": "r0",
       "before": {
         "hash": "fnv1a:211bdf54",
         "stateVersion": 361,
@@ -337,7 +337,7 @@
     },
     {
       "side": "runner",
-      "actionId": "runner.steal_agenda.c2hp",
+      "actionId": "rt.c2hp",
       "before": {
         "hash": "fnv1a:b56fa4d0",
         "stateVersion": 362,

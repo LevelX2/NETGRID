@@ -56,8 +56,8 @@ it("clears both native G26 tags instead of stranding one before Scorched Earth",
   expect(decision.actionId).toBe(action.actionId);
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:runner.defense_and_recovery:runner",
-    leafExecutorInstanceId: "plan:runner.defense_and_recovery:runner",
+    rootPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
+    leafExecutorInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
     turnPlanning: { coverage: { status: "pass", missingActionCount: 0, conflictingActionCount: 0 } },
   });
 });

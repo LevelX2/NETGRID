@@ -11553,7 +11553,7 @@
         "id": "r1"
       },
       "selectedStepKind": "run_target",
-      "selectedActionId": "runner.install_card.c2ch.c2ch",
+      "selectedActionId": "rc.c2ch.c2ch",
       "selectedActionType": "install_card",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
@@ -11603,7 +11603,7 @@
         },
         "updatedAtStateVersion": 318,
         "evidence": [
-          "plan_portfolio_source_plan:runner.contest_remote:r1",
+          "plan_portfolio_source_pdl5beuqtdrahr4fqagyng1zk5",
           "plan_portfolio_execution_class:bounded_sequence",
           "plan_portfolio_role:foreground",
           "plan_portfolio_lifecycle:active",
@@ -11668,7 +11668,7 @@
         "plan_portfolio_foreground:runner.contest_remote",
         "plan_portfolio_backgrounds:runner.build_credit_bank",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.install_card.c2ch.c2ch"
+        "plan_portfolio_selected_action:rc.c2ch.c2ch"
       ]
     },
     "strategicIntent": {
@@ -12752,7 +12752,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.start_run.r1"
+        "actionId": "rs.r1"
       }
     ],
     "planExecution": {

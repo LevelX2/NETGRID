@@ -7157,7 +7157,7 @@
         "id": "c2o5"
       },
       "selectedStepKind": "score_agenda",
-      "selectedActionId": "corp.score_agenda.c2o5.c2o5",
+      "selectedActionId": "cr.c2o5.c2o5",
       "scoreConversionDesiredAdvancementCounters": 4,
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
@@ -7189,7 +7189,7 @@
           "progress": 0.6,
           "selectedStepKind": "find_remote_protection",
           "actionCandidateIds": [
-            "corp.draw_card"
+            "c8"
           ],
           "cadence": {
             "turnKey": "corp:turn:12",
@@ -7214,7 +7214,7 @@
             "plan_portfolio_carried_without_current_action:true",
             "plan_portfolio_carried_without_current_action:true",
             "plan_portfolio_carried_without_current_action:true",
-            "plan_portfolio_action_progress:corp.draw_card",
+            "plan_portfolio_action_progress:c8",
             "plan_portfolio_carried_without_current_action:true",
             "plan_portfolio_carried_without_current_action:true",
             "plan_portfolio_carried_without_current_action:true",
@@ -7302,7 +7302,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:corp.establish_scoring_remote|corp.establish_scoring_remote",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:corp.end_turn"
+        "plan_portfolio_selected_action:c9"
       ]
     },
     "strategicIntent": {
@@ -8232,7 +8232,7 @@
     ],
     "planExecution": {
       "acceptablePlanIds": [
-        "plan:corp.economy:score-support%3Aagenda%3Ac2o6%3Ar1"
+        "p625rhx00hy84user23iueatcw"
       ],
       "acceptablePlanKinds": [
         "corp.economy"

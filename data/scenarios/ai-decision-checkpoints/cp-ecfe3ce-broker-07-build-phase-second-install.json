@@ -13294,13 +13294,13 @@
     "contractKind": "correctness",
     "acceptableActions": [
       {
-        "actionId": "runner.install_card.c29e.c29e"
+        "actionId": "rc.c29e.c29e"
       },
       {
-        "actionId": "runner.activated_card_ability.c29d.c29d.activated.440"
+        "actionId": "r1.c29d.c29d.activated.440"
       },
       {
-        "actionId": "runner.trigger_ability"
+        "actionId": "rx"
       }
     ]
   }

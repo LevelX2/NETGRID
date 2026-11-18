@@ -10060,7 +10060,7 @@
         "id": "r1"
       },
       "selectedStepKind": "run_target",
-      "selectedActionId": "runner.draw_card",
+      "selectedActionId": "r8",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -10110,7 +10110,7 @@
         },
         "updatedAtStateVersion": 264,
         "evidence": [
-          "plan_portfolio_source_plan:runner.contest_remote:r1",
+          "plan_portfolio_source_pdl5beuqtdrahr4fqagyng1zk5",
           "plan_portfolio_execution_class:bounded_sequence",
           "plan_portfolio_role:foreground",
           "plan_portfolio_lifecycle:active",
@@ -10164,7 +10164,7 @@
         "plan_portfolio_foreground:runner.contest_remote",
         "plan_portfolio_backgrounds:runner.build_credit_bank",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.draw_card"
+        "plan_portfolio_selected_action:r8"
       ]
     },
     "strategicIntent": {
@@ -11229,7 +11229,7 @@
     },
     "acceptableActions": [
       {
-        "actionId": "runner.gain_credit"
+        "actionId": "rb"
       }
     ],
     "forbiddenActions": [

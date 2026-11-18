@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import {
   applyAction,
   getLegalActions,
@@ -29,8 +30,8 @@ describe("SP-082 score campaign multi-step regression", () => {
         throw new Error("Missing the fixture's agenda or target remote.");
       }
       const projectKey = `agenda:${agenda}:${fort.id}`;
-      const scoreRoot = `plan:corp.score_agenda:${encodeURIComponent(projectKey)}`;
-      const scoreSupport = `plan:corp.economy:${encodeURIComponent(`score-support:${projectKey}`)}`;
+      const scoreRoot = planInstanceIdForProposal({ moduleId: "corp.score_agenda", dedupeKey: projectKey });
+      const scoreSupport = planInstanceIdForProposal({ moduleId: "corp.economy", dedupeKey: `score-support:${projectKey}` });
       // Reproduce the funding boundary itself. An independently chosen Runner
       // policy must not decide whether this regression reaches a turn boundary.
       state.corp.credits = initialCredits;

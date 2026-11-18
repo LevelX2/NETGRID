@@ -63,7 +63,7 @@ function fixture() {
     runnerDeck,
     traceRulesProfile: "modern_open",
   });
-  state = act(state, "corp", "corp.mandatory_draw");
+  state = act(state, "corp", "ce");
   RealEngineFixtureBuilder.forState(state)
     .withCorpHqSize(0)
     .withCorpCredits(12)
@@ -121,7 +121,7 @@ it("keeps an all-agenda overflow concealed through a Score-owned last-click inst
   const after = act(state, "corp", decision.actionId!);
   expect(after.corp.hq).toHaveLength(5);
   expect(after.corp.clicks).toBe(0);
-  const ended = act(after, "corp", "corp.end_turn");
+  const ended = act(after, "corp", "c9");
   expect(ended.activeSide).toBe("runner");
   expect(ended.pendingChoice).toBeUndefined();
   expect(hashState(act(state, "corp", decision.actionId!))).toBe(

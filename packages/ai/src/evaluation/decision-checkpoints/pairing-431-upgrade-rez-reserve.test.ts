@@ -31,7 +31,7 @@ it("preserves the only funded ICE instead of buying support for an unrezable tar
     capture.runtime,
   );
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("corp.end_turn");
+  expect(decision.actionId).toBe("c9");
   expect(decision.fallbackUsed).toBe(false);
   expect(
     decision.decisionDebug!.planFirstDecision!.selectedPlan?.moduleId,

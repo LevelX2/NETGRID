@@ -74,7 +74,7 @@ describe("corp main action generation", () => {
     const actions = buildCorpMainActions(testCorpMainHost(state));
 
     expect(actions.map((candidate) => candidate.actionId)).toEqual([
-      "corp.end_turn",
+      "c9",
     ]);
     expect(JSON.stringify(state)).toBe(before);
   });
@@ -88,8 +88,8 @@ describe("corp main action generation", () => {
     const actions = buildCorpMainActions(testCorpMainHost(state));
 
     expect(actions.map((candidate) => candidate.actionId)).toEqual([
-      "corp.gain_credit",
-      "corp.end_turn",
+      "cb",
+      "c9",
     ]);
     expect(actions.map((candidate) => candidate.type)).toEqual([
       "gain_credit",
@@ -108,7 +108,7 @@ describe("corp main action generation", () => {
     );
 
     expect(actions.map((candidate) => candidate.actionId)).toEqual([
-      "corp.forgo_action",
+      "ca",
     ]);
     expect(actions[0]?.payload).toMatchObject({
       actionDebtPaid: 1,

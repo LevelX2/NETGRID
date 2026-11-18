@@ -170,7 +170,7 @@ describe("formatChronicleEvent", () => {
       expect(serialized).not.toContain("fnv1a");
       expect(serialized).not.toContain("stateHashAfter");
       expect(serialized).not.toContain("stateVersionAfter");
-      expect(serialized).not.toContain("corp.play_operation");
+      expect(serialized).not.toContain("ci");
       expect(serialized).not.toContain("idempotencyKey");
     }
   });
@@ -4861,7 +4861,7 @@ describe("formatChronicleEvent", () => {
         aiReasonCode: "runner.encounter.break_etr",
         breakSubroutineBaseCost: 0,
         breakSubroutineCount: 2,
-        subroutineIndexes: "0,1",
+        subroutineIndexes: [0, 1],
         breakAllMatchingSubroutines: true,
         breakerEndsRunAfterBreak: true,
         targetIceTitle: "Banpei",

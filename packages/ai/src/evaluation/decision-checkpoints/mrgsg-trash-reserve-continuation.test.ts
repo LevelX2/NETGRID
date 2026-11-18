@@ -36,7 +36,7 @@ describe("MRGSG recurring draw-tax removal and reserve recovery", () => {
       ...event,
     }));
     checkpoint.expectation = {
-      acceptableActions: [{ actionId: "runner.start_run.r1" }],
+      acceptableActions: [{ actionId: "rs.r1" }],
       planExecution: {
         acceptablePlanKinds: ["runner.contest_remote"],
         acceptableCapabilities: ["contest_remote"],
@@ -119,13 +119,13 @@ describe("MRGSG recurring draw-tax removal and reserve recovery", () => {
           targetCredits: 10,
           currentCreditsAtRevalidation: 8,
           gap: 2,
-          routeActionIds: ["runner.gain_credit"],
+          routeActionIds: ["rb"],
         },
       },
     });
     expect(
       recoveryInput.legalActions.some(
-        (action) => action.actionId === "runner.gain_credit",
+        (action) => action.actionId === "rb",
       ),
     ).toBe(true);
   });

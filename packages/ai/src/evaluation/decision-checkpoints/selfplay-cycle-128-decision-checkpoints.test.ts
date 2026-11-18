@@ -38,7 +38,7 @@ describe("selfplay cycle 128 decision checkpoints", () => {
     const decision = chooseAiAction(capture.input as AiDecisionInput);
 
     expect(decision).toMatchObject({
-      actionId: "corp.resolve_choice",
+      actionId: "cn",
       selectedChoices: {
         choiceId: "trash_installed_program_120",
         selectedOptionIds: ["card_c7t"],
@@ -48,18 +48,18 @@ describe("selfplay cycle 128 decision checkpoints", () => {
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       lane: "plan",
       selectionAuthority: "turn_plan_commitment",
-      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
       leafExecutorInstanceId:
-        "plan:corp.defend_servers:server-defense-portfolio",
+        "penw02zfrkklof54c2nuye5att",
       selectedPlan: {
         moduleId: "corp.defend_servers",
         evidenceCodes: ["corp_program_trash_ranked_by_visible_coverage_loss"],
       },
       selectedStep: {
-        planInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+        planInstanceId: "penw02zfrkklof54c2nuye5att",
       },
       route: {
-        actionId: "corp.resolve_choice",
+        actionId: "cn",
         actionType: "resolve_choice",
         stateVersion: capture.input.playerView.stateVersion,
       },

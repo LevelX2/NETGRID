@@ -175,7 +175,7 @@
           "label": "HQ",
           "ice": [
             {
-              "instanceId": "h1kf0dgq",
+              "instanceId": "hhq.i0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -188,7 +188,7 @@
           "label": "R&D",
           "ice": [
             {
-              "instanceId": "h12xsk9g",
+              "instanceId": "hrd.i0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -461,7 +461,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.gain_credit",
+          "actionId": "rb",
           "side": "runner",
           "type": "gain_credit",
           "label": "1 Credit nehmen",
@@ -482,7 +482,7 @@
           }
         },
         {
-          "actionId": "runner.draw_card",
+          "actionId": "r8",
           "side": "runner",
           "type": "draw_card",
           "label": "Karte ziehen",
@@ -505,7 +505,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1z6.c1z6.404",
+          "actionId": "rh.c1z6.c1z6.404",
           "side": "runner",
           "type": "play_event",
           "label": "Score! spielen",
@@ -534,7 +534,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c2eh.c2eh",
+          "actionId": "rc.c2eh.c2eh",
           "side": "runner",
           "type": "install_card",
           "label": "The Short Circuit installieren",
@@ -565,7 +565,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.czt.czt.223",
+          "actionId": "rh.czt.czt.223",
           "side": "runner",
           "type": "play_event",
           "label": "Cruising for Netwatch spielen",
@@ -595,7 +595,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c14h.c14h.245",
+          "actionId": "rh.c14h.c14h.245",
           "side": "runner",
           "type": "play_event",
           "label": "Stakeout spielen",
@@ -625,7 +625,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.hq",
+          "actionId": "rs.hq",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf HQ",
@@ -646,7 +646,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.rd",
+          "actionId": "rs.rd",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf R&D",
@@ -667,7 +667,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.archives",
+          "actionId": "rs.archives",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf Archives",
@@ -688,7 +688,7 @@
           }
         },
         {
-          "actionId": "runner.end_turn",
+          "actionId": "r9",
           "side": "runner",
           "type": "end_turn",
           "label": "Zug beenden",
@@ -929,7 +929,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "runner.gain_credit",
+        "actionId": "rb",
         "side": "runner",
         "type": "gain_credit",
         "label": "1 Credit nehmen",
@@ -950,7 +950,7 @@
         }
       },
       {
-        "actionId": "runner.draw_card",
+        "actionId": "r8",
         "side": "runner",
         "type": "draw_card",
         "label": "Karte ziehen",
@@ -973,7 +973,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1z6.c1z6.404",
+        "actionId": "rh.c1z6.c1z6.404",
         "side": "runner",
         "type": "play_event",
         "label": "Score! spielen",
@@ -1002,7 +1002,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c2eh.c2eh",
+        "actionId": "rc.c2eh.c2eh",
         "side": "runner",
         "type": "install_card",
         "label": "The Short Circuit installieren",
@@ -1033,7 +1033,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.czt.czt.223",
+        "actionId": "rh.czt.czt.223",
         "side": "runner",
         "type": "play_event",
         "label": "Cruising for Netwatch spielen",
@@ -1063,7 +1063,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c14h.c14h.245",
+        "actionId": "rh.c14h.c14h.245",
         "side": "runner",
         "type": "play_event",
         "label": "Stakeout spielen",
@@ -1093,7 +1093,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.hq",
+        "actionId": "rs.hq",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf HQ",
@@ -1114,7 +1114,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.rd",
+        "actionId": "rs.rd",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf R&D",
@@ -1135,7 +1135,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.archives",
+        "actionId": "rs.archives",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf Archives",
@@ -1156,7 +1156,7 @@
         }
       },
       {
-        "actionId": "runner.end_turn",
+        "actionId": "r9",
         "side": "runner",
         "type": "end_turn",
         "label": "Zug beenden",
@@ -1210,7 +1210,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 7,
-      "sideSafePlanningFingerprint": "fnv1a:0867e83d"
+      "sideSafePlanningFingerprint": "fnv1a:97b4c817"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_breaker_lab_2026_05_25_1.1.0",

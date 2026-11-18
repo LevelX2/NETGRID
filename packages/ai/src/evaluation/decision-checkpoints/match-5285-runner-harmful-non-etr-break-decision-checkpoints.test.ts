@@ -19,10 +19,10 @@ describe("match 5285 runner harmful non-ETR break decision checkpoint", () => {
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     expect(result.decision?.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-      leafExecutorInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      leafExecutorInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       selectedStep: {
-        planInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+        planInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       },
     });
   });
@@ -52,7 +52,7 @@ describe("match 5285 runner harmful non-ETR break decision checkpoint", () => {
         const incomplete = structuredClone(input);
         for (const action of incomplete.legalActions) {
           if (action.payload?.encounterContinue === true)
-            delete action.payload.encounterSubroutineIds;
+            delete action.encounterSubroutineIds;
         }
         expect(() =>
           currentEncounterUnbrokenSubroutineIndexes(incomplete),

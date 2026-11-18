@@ -40,7 +40,7 @@ it("converts the existing agenda instead of generating capacity for another expo
   const p = decision.decisionDebug!.planFirstDecision!;
   expect(p.selectedPlan!.moduleId).toBe("corp.score_agenda");
   expect(p.rootPlanInstanceId).toBe(
-    "plan:corp.score_agenda:agenda%3Acet%3Ar1",
+    "p2nbew7o06g3beuckxcs2aivp",
   );
   expect(p.selectedStep!.stepId).toContain(":convert_agenda");
   expect(p.route).toMatchObject({
@@ -52,7 +52,7 @@ it("converts the existing agenda instead of generating capacity for another expo
   const other = port.instances.find(
     (x) =>
       x.instanceId ===
-      "plan:corp.score_agenda:agenda%3Ac2l2%3Anew_remote",
+      "p4hy08kguf3nbvrqks19opgiv6",
   )!;
   const signal = (other.moduleState as { signal: CorpScoreProjectSignal })
     .signal;

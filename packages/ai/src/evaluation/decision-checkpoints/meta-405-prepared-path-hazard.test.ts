@@ -27,7 +27,7 @@ it.each([false, true])(
       runtime,
     );
     const remote = evaluateRunnerRunTargets({ input }).find(
-      (r) => r.actionId === "runner.start_run.r1",
+      (r) => r.actionId === "rs.r1",
     )!;
     expect(remote.routeQuote?.preRunPreparation).toBeUndefined();
     expect(remote.visibleTraceTagHazardUnavoidable).toBe(false);
@@ -37,7 +37,7 @@ it.each([false, true])(
         status: "blocked",
         creditGap: 2,
       });
-      const eventRunId = "runner.play_event.czd.hq.czd.221";
+      const eventRunId = "rh.czd.hq.czd.221";
       const targets = evaluateRunnerRunTargets({ input });
       const eventRun = targets.find((target) => target.actionId === eventRunId);
       expect(eventRun).toMatchObject({
@@ -49,7 +49,7 @@ it.each([false, true])(
           (candidate) => candidate.actionId === eventRunId,
         )?.whyNot,
       ).toContain("run_route_excluded:post_run_credit_floor");
-      expect(decision.actionId).toBe("runner.start_run.hq");
+      expect(decision.actionId).toBe("rs.hq");
       const central = targets.find((target) => target.actionId === decision.actionId)!;
       expect(central.routeQuote).toMatchObject({
         reachability: "guaranteed_access",
@@ -60,8 +60,8 @@ it.each([false, true])(
       expect(central.creditsAfterRun).toBe(5);
       expect(decision.fallbackUsed).toBe(false);
       expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-        rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-        leafExecutorInstanceId: "plan:runner.pressure_central:central%3Ahq",
+        rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+        leafExecutorInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
         selectedPlan: { moduleId: "runner.pressure_central" },
         route: {
           actionId: decision.actionId,
@@ -78,10 +78,10 @@ it.each([false, true])(
       return;
     }
     expect(remote.prerunReserveQuote?.status).toBe("satisfied");
-    expect(decision.actionId).toBe("runner.start_run.r1");
+    expect(decision.actionId).toBe("rs.r1");
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-      leafExecutorInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      leafExecutorInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       route: {
         actionId: decision.actionId,
         stateVersion: input.playerView.stateVersion,
@@ -102,7 +102,7 @@ it("retains the native last-chance contest without an obsolete rig investment to
     runtime,
   );
   const remote = evaluateRunnerRunTargets({ input }).find(
-    (target) => target.actionId === "runner.start_run.r1",
+    (target) => target.actionId === "rs.r1",
   )!;
   expect(remote.visibleTraceTagHazardUnavoidable).toBe(false);
   expect(remote.prerunReserveQuote).toMatchObject({

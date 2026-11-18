@@ -592,7 +592,7 @@ function runnerRestrictedSequenceFailure(
     owner: "continuation",
     removalCondition,
     planInstanceId:
-      "plan:runner.develop_board_and_hand:restricted_program_install_sequence",
+      "p9kwr76kr643oivfln5fcmyf0r",
   });
 }
 

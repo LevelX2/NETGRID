@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import type { LegalAction } from "@netgrid/shared";
@@ -52,7 +53,7 @@ function decision(key: string) {
 it("does not admit answer development when a bounded event retains no new card", () => {
   const { cp, input, result } = decision("draw-retained-zero");
   expect(cp.stateVersion).toBe(287);
-  expect(cp.historical.root).toContain("runner.develop_board_and_hand");
+  expect(cp.historical.root).toBe(planInstanceIdForProposal({ moduleId: "runner.develop_board_and_hand", dedupeKey: "card:c1wb" }));
   expect(
     input.legalActions.find(
       (a: LegalAction) => a.actionId === cp.historical.actionId,
@@ -68,7 +69,7 @@ it("does not admit answer development when a bounded event retains no new card",
 it("does not spend three future actions purging two Thought counters below their native effect threshold", () => {
   const { cp, input, result } = decision("thought-below-threshold");
   expect(cp.stateVersion).toBe(186);
-  expect(cp.historical.root).toContain("corp.respond_to_virus_pressure");
+  expect(cp.historical.root).toBe(planInstanceIdForProposal({ moduleId: "corp.respond_to_virus_pressure", dedupeKey: "visible-virus-pressure" }));
   expect(input.playerView.own.identity.counterDisplays).toContainEqual(
     expect.objectContaining({ counterType: "thought", amount: 2 }),
   );

@@ -154,7 +154,7 @@ it("preserves that choice across the actual consecutive Corp decision inputs", (
     cp = native(11, 60);
   restore(previous);
   const end = chooseAiAction(previous.input);
-  expect(end.actionId).toBe("corp.end_turn");
+  expect(end.actionId).toBe("c9");
   const { action } = decide(cp);
   expect(action.type).toBe("advance_card");
   expect(action.source).toBe("c2l1");

@@ -50,7 +50,7 @@ describe("match B008 older decision checkpoints", () => {
     const result = runAiDecisionCheckpoint(openRnd);
     expect(result.ok, result.message).toBe(true);
     expect(result.decision?.decisionDebug?.planFirstDecision?.rootPlanInstanceId)
-      .toBe("plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate");
+      .toBe("p5s1qdgqrafrs3n2kss1t9ct7m");
     expect(
       result.input.legalActions.some(
         (action) =>

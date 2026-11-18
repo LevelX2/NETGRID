@@ -22,10 +22,10 @@ it("preserves normal HQ access over fixed denial against an empty Corp pool", ()
     capture.runtime,
   );
   const d = chooseAiAction(capture.input);
-  expect(d.actionId).toBe("runner.start_run.hq");
+  expect(d.actionId).toBe("rs.hq");
   expect(d.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-    leafExecutorInstanceId: "plan:runner.pressure_central:central%3Ahq",
+    rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+    leafExecutorInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
   });
   expect(d.fallbackUsed).toBe(false);
 });
@@ -43,7 +43,7 @@ it.each([0, 2, 9])(
     const manifestsOffer = input.legalActions.find((a) => definitions[a.source] === 296);
     const weather = e.find((x) => x.actionId === weatherOffer?.actionId)!;
     const manifests = e.find((x) => x.actionId === manifestsOffer?.actionId)!;
-    const basic = e.find((x) => x.actionId === "runner.start_run.hq")!;
+    const basic = e.find((x) => x.actionId === "rs.hq")!;
     expect(weather.runActionProjection.accessReplacement).toBe(
       "corp_lose_credits",
     );

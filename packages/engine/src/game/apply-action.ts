@@ -11,6 +11,7 @@ import { buildEvent } from "./events/build-event";
 import { getLegalActions } from "./legal-actions";
 import { cloneGameStateForAction } from "./apply-action-state";
 import { hashState } from "./hash";
+import { withActionRandomHistory } from "./state/draw-random";
 import { validateGameState } from "./validation";
 import { toPublicEvent } from "./view/public-event-view";
 import { checkWinConditions } from "./win-conditions";
@@ -97,11 +98,13 @@ export function buildApplyAction(
   const before = state.stateVersion;
 
   try {
-    host.actions.performAction(next, legalAction, playerAction);
-    if (next.runnerDrawSequence?.originActionId.length === 0) {
-      next.runnerDrawSequence.originActionId = legalAction.actionId;
-    }
-    host.actions.afterPerformAction?.(next, legalAction);
+    withActionRandomHistory(next, () => {
+      host.actions.performAction(next, legalAction, playerAction);
+      if (next.runnerDrawSequence?.originActionId.length === 0) {
+        next.runnerDrawSequence.originActionId = legalAction.actionId;
+      }
+      host.actions.afterPerformAction?.(next, legalAction);
+    });
     checkWinConditions(next);
     next.stateVersion = before + 1;
     if (next.pendingChoice) {

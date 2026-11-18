@@ -8236,7 +8236,7 @@
         "id": "rd"
       },
       "selectedStepKind": "draw_for_answer",
-      "selectedActionId": "runner.draw_card",
+      "selectedActionId": "r8",
       "blockedBy": [
         "missing_breaker_coverage",
         "search_target_not_available"
@@ -8293,7 +8293,7 @@
           "plan_portfolio_execution_class:bounded_sequence",
           "plan_portfolio_role:foreground",
           "plan_portfolio_lifecycle:active",
-          "plan_portfolio_action_progress:runner.draw_card",
+          "plan_portfolio_action_progress:r8",
           "plan_portfolio_action_progress_source:selected_mapped_step"
         ]
       },
@@ -8305,7 +8305,7 @@
         "plan_portfolio_foreground:runner.opportunistic_central_run",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.draw_card"
+        "plan_portfolio_selected_action:r8"
       ]
     },
     "strategicIntent": {
@@ -9425,15 +9425,15 @@
   "expectation": {
     "forbiddenActions": [
       {
-        "actionId": "runner.play_event.ca1.ca1"
+        "actionId": "rh.ca1.ca1"
       }
     ],
     "acceptableActions": [
       {
-        "actionId": "runner.start_run.hq"
+        "actionId": "rs.hq"
       },
       {
-        "actionId": "runner.play_event.c9l.hq.c9l"
+        "actionId": "rh.c9l.hq.c9l"
       }
     ]
   }

@@ -33,7 +33,7 @@ type ReconstructedDecisionCapture = {
 };
 
 const INSTALL_MISLEADING_ACCESS_MENUS_ON_HQ =
-  "corp.install_card.ck5.hq.ck5.0";
+  "cc.ck5.hq.ck5.0";
 
 describe("match f291a822 HQ defense allocation", () => {
   it("protects the exposed HQ with a current quoted encounter before an unsupported score-remote staging route", () => {
@@ -56,7 +56,7 @@ describe("match f291a822 HQ defense allocation", () => {
       decision.decisionDebug?.planFirstDecision?.selectedPlan,
     ).toMatchObject({
       moduleId: "corp.defend_servers",
-      instanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      instanceId: "penw02zfrkklof54c2nuye5att",
     });
     expect(decision.decisionDebug?.planFirstDecision?.selectionAuthority).toBe(
       "turn_plan_commitment",
@@ -66,7 +66,7 @@ describe("match f291a822 HQ defense allocation", () => {
         0,
       ),
     ).toMatchObject({
-      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
       rootModuleId: "corp.defend_servers",
       nodes: [{ semanticActionType: "install.card" }],
     });
@@ -88,10 +88,10 @@ describe("match f291a822 HQ defense allocation", () => {
       capture.runtime,
     );
     const decision = chooseAiAction(capture.input);
-    expect(decision.actionId).toBe("corp.draw_card");
+    expect(decision.actionId).toBe("c8");
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-      "plan:corp.score_agenda:agenda%3Acet%3Ar1",
+      "p2nbew7o06g3beuckxcs2aivp",
     );
     expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
       expect.objectContaining({

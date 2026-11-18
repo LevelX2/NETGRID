@@ -1,4 +1,5 @@
 import { afterEach, expect, it } from "vitest";
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { createGameAfterSetup } from "@netgrid/engine";
 import type { DeckDefinition } from "@netgrid/shared";
 import catalog from "../../../../../data/decks/standard-deck-catalog-1.0.0.json";
@@ -13,8 +14,7 @@ import {
 } from "../../runtime/ai-decision-input";
 import { RealEngineFixtureBuilder } from "../real-engine-fixture-builder";
 
-const remoteRoot = "plan:runner.contest_remote:remote%3Ar1";
-const wallExecutor = "plan:runner.rig_and_coverage:coverage%3Abreaker_wall";
+const remoteRoot = "p1p4xezjcxov79rno40lq3f7rv";
 const aujourdOui = 363;
 afterEach(resetResidentPlanPortfolioMemory);
 
@@ -112,7 +112,10 @@ function decide(adjust?: (input: AiDecisionInputWithDeckCapabilities) => void) {
 
 it("keeps the legal bounded lookup with the terminal Wall contest while its result stays unknown", () => {
   const { decision, search, targetRun, portfolio } = decide();
-  const executorId = `${wallExecutor}%3Arun%3A${encodeURIComponent(targetRun.actionId)}`;
+  const executorId = planInstanceIdForProposal({
+    moduleId: "runner.rig_and_coverage",
+    dedupeKey: `coverage:breaker_wall:run:${targetRun.actionId}`,
+  });
   expect(decision).toMatchObject({
     actionId: search.actionId,
     fallbackUsed: false,

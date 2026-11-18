@@ -64,14 +64,14 @@ describe("native R&D access/removal binding through the AI input DTO", () => {
     );
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.pressure_central:central%3Ard",
-      leafExecutorInstanceId: "plan:runner.pressure_central:central%3Ard",
+      rootPlanInstanceId: "pa90fufw9vc5bkshp96ztlryxl",
+      leafExecutorInstanceId: "pa90fufw9vc5bkshp96ztlryxl",
       selectedStep: {
-        planInstanceId: "plan:runner.pressure_central:central%3Ard",
-        stepId: "plan:runner.pressure_central:central%3Ard:pressure:rd",
+        planInstanceId: "pa90fufw9vc5bkshp96ztlryxl",
+        stepId: "pa90fufw9vc5bkshp96ztlryxl:pressure:rd",
       },
       route: {
-        actionId: "runner.start_run.rd",
+        actionId: "rs.rd",
         stateVersion: 13,
         capabilityId: "pressure_rd_access",
       },

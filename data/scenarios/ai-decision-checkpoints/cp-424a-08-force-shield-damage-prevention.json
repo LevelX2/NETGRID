@@ -5403,7 +5403,7 @@
         "id": "r2"
       },
       "selectedStepKind": "run_target",
-      "selectedActionId": "runner.start_run.r2",
+      "selectedActionId": "rs.r2",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "selected_new_plan",
@@ -5431,7 +5431,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.access_card"
+        "plan_portfolio_selected_action:r0"
       ]
     },
     "strategicIntent": {
@@ -6445,7 +6445,7 @@
       ]
     },
     "runnerRunPlan": {
-      "id": "runner_run_plan:match_424abdd1c7ac054d:87:runner:runner.start_run.r2:r2",
+      "id": "runner_run_plan:match_424abdd1c7ac054d:87:runner:rs.r2:r2",
       "side": "runner",
       "lifecycle": "adjusted",
       "origin": "basic_start_run",
@@ -6463,7 +6463,7 @@
         "trashPolicy": "trash_if_value_positive",
         "reserveForStealOrTrash": 0
       },
-      "runStartActionId": "runner.start_run.r2",
+      "runStartActionId": "rs.r2",
       "sourceTacticalGoalIds": [
         "runner.find_or_install_primary_breaker",
         "runner.contest_remote_if_score_threat",
@@ -6544,7 +6544,7 @@
       "visibilityEvidence": [
         {
           "kind": "legal_action",
-          "ref": "runner.start_run.r2"
+          "ref": "rs.r2"
         },
         {
           "kind": "action_semantic_candidate",

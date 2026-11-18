@@ -54,7 +54,7 @@ it("passes the captured Classic profile into the known-path trace hazard quote",
   const input = capture("runner-d44");
   expect(input.playerView.traceRulesProfile).toBe("classic_blind");
   const target = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.hq",
+    (t) => t.actionId === "rs.hq",
   )!;
   const hazard = target.visibleIceRunHazards!.find(
     (h) => h.kind === "trace_tag",
@@ -84,15 +84,15 @@ it("caps the historical Classic Hunter bid at the cheapest guaranteed fixed effe
 it("keeps the last distinct tag enabler over redundant payoffs in the captured discard", () => {
   const input = capture("corp-d37");
   const result = chooseAiAction(input);
-  expect(result.actionId).toBe("corp.resolve_choice");
+  expect(result.actionId).toBe("cn");
   expect(result.selectedChoices?.choiceId).toBe(
     input.playerView.pendingChoice!.choiceId,
   );
   expect(result.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:corp.hand_and_agenda_management:discard-window%3Adiscard_corp_75%3A75",
+    "pdrrjv4rjv8oxfsydli3fl3a",
   );
   expect(result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId).toBe(
-    "plan:corp.hand_and_agenda_management:discard-window%3Adiscard_corp_75%3A75",
+    "pdrrjv4rjv8oxfsydli3fl3a",
   );
   expect(result.selectedChoices?.selectedOptionIds).not.toContain(
     "card_c37b",

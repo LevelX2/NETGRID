@@ -12,7 +12,7 @@ describe("Rent-I-Con versus CODE ROT cycle-nine remediation checkpoint", () => {
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
-    expect(result.decision?.actionId).toBe("corp.gain_credit");
+    expect(result.decision?.actionId).toBe("cb");
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
         "plan_module:corp.economy",
@@ -29,15 +29,15 @@ describe("Rent-I-Con versus CODE ROT cycle-nine remediation checkpoint", () => {
     expect(planning).toMatchObject({
       mode: "cutover",
       shadowComparison: {
-        liveActionId: "corp.gain_credit",
-        shadowActionId: "corp.gain_credit",
+        liveActionId: "cb",
+        shadowActionId: "cb",
         agreement: true,
       },
       commitment: {
         status: "active",
         rematerialization: {
           status: "executable",
-          actionId: "corp.gain_credit",
+          actionId: "cb",
         },
       },
     });
@@ -47,10 +47,10 @@ describe("Rent-I-Con versus CODE ROT cycle-nine remediation checkpoint", () => {
     // before the technical line hash. Keep its selected agenda parent and
     // every delegation/commitment binding under test.
     const scoreParent =
-      "plan:corp.score_agenda:agenda%3Ac2j2%3Ar1";
+      "p67hposp6f7x1fw9zv0ogip3z0";
     expect(portfolio?.rootForegroundInstanceId).toBe(scoreParent);
     expect(portfolio?.executorInstanceId).toBe(
-      "plan:corp.economy:score-support%3Aagenda%3Ac2j2%3Ar1",
+      "p39559tmrm8c45ipbjzwgbe7h3",
     );
     expect(result.decision?.evidence).toContain(
       `plan_priority_delegated_from:${scoreParent}`,
@@ -58,7 +58,7 @@ describe("Rent-I-Con versus CODE ROT cycle-nine remediation checkpoint", () => {
     expect(portfolio).toMatchObject({
       turnPlanCommitment: { status: "active" },
       turnPlanExecutionLease: {
-        currentBinding: { actionId: "corp.gain_credit" },
+        currentBinding: { actionId: "cb" },
       },
     });
     expect(portfolio?.turnPlanExecutionLease?.sourcePlanId).toBe(

@@ -15,13 +15,13 @@ describe("match 3aac Corp regression evidence", () => {
       checkpointJson,
     ) as unknown as AiDecisionCheckpointV1;
     checkpoint.expectation.acceptableActions = [
-      { actionId: "corp.gain_credit" },
+      { actionId: "cb" },
     ];
     checkpoint.expectation.planExecution = {
       acceptablePlanKinds: ["corp.economy"],
       acceptableCapabilities: ["develop_or_convert_corp_economy"],
       requiredAssessmentEvidence: [
-        "corp_defense_exact_route_funding_required:hq:corp.install_card.cgu.hq.cgu.0",
+        "corp_defense_exact_route_funding_required:hq:cc.cgu.hq.cgu.0",
       ],
     };
     const result = runAiDecisionCheckpoint(checkpoint);
@@ -30,14 +30,14 @@ describe("match 3aac Corp regression evidence", () => {
     expect(result.input.playerView.own.clicks).toBe(2);
     expect(result.ok, `${result.code ?? "ok"}: ${result.message}`).toBe(true);
     expect(result.selectedAction).toMatchObject({
-      actionId: "corp.gain_credit",
+      actionId: "cb",
       type: "gain_credit",
     });
     const portfolio = residentPlanPortfolioSnapshot(result.input);
     const defenseRootInstanceId =
-      "plan:corp.defend_servers:server-defense-portfolio";
+      "penw02zfrkklof54c2nuye5att";
     const fundingExecutorId =
-      "plan:corp.economy:defense-reserve%3Ahq%3Acgu";
+      "pa68r4q2kezcfejpea71ufx6vu";
     const executor = portfolio?.instances.find(
       (instance) => instance.instanceId === portfolio.executorInstanceId,
     );
@@ -59,14 +59,14 @@ describe("match 3aac Corp regression evidence", () => {
       instanceId: fundingExecutorId,
       parentInstanceId: defenseRootInstanceId,
       parentNeedId:
-        "install:hq:corp.install_card.cgu.hq.cgu.0",
+        "install:hq:cc.cgu.hq.cgu.0",
     });
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
         `plan_first_root:${defenseRootInstanceId}`,
         `plan_first_executor:${fundingExecutorId}`,
         "plan_step_capability:develop_or_convert_corp_economy",
-        "plan_assessment_evidence:corp_defense_exact_route_funding_required:hq:corp.install_card.cgu.hq.cgu.0",
+        "plan_assessment_evidence:corp_defense_exact_route_funding_required:hq:cc.cgu.hq.cgu.0",
       ]),
     );
     expect(result.decision?.decisionDebug?.planFirstDecision).toMatchObject({
@@ -90,7 +90,7 @@ describe("match 3aac Corp regression evidence", () => {
                 expect.objectContaining({
                   planInstanceId: fundingExecutorId,
                   parentNeedId:
-                    "install:hq:corp.install_card.cgu.hq.cgu.0",
+                    "install:hq:cc.cgu.hq.cgu.0",
                 }),
               ]),
             }),
@@ -117,7 +117,7 @@ describe("match 3aac Corp regression evidence", () => {
     });
     const install = chooseAiAction(next);
     expect(install.actionId).toBe(
-      "corp.install_card.cgu.hq.cgu.0",
+      "cc.cgu.hq.cgu.0",
     );
     expect(install.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId: defenseRootInstanceId,

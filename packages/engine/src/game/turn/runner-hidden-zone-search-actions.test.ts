@@ -33,7 +33,7 @@ describe("runner hidden-zone search legal actions", () => {
     });
 
     expect(action.actionId).toBe(
-      "runner.gain_credit.runner_resource_1.runner_resource_1.search_stack_program_to_grip",
+      "rb.runner_resource_1.runner_resource_1.search_stack_program_to_grip",
     );
     expect(action.label).toBe(
       "The Short Circuit: Stack nach Programm durchsuchen",

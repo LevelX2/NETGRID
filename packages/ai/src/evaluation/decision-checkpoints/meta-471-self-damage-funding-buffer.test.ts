@@ -69,13 +69,13 @@ function replay(
           evidenceCodes: expect.arrayContaining(
             ordinaryCompanion
               ? [
-                  "runner_funding_consumer_buffer_budget_uncovered:runner.play_event.c8x.c8x.1",
+                  "runner_funding_consumer_buffer_budget_uncovered:rh.c8x.c8x.1",
                   "runner_funding_consumer_hand_after_funding:2|required:4",
-                  "runner_funding_consumer_buffer_repair_reserved:2|clicks:2|credits:0|action:runner.draw_card",
+                  "runner_funding_consumer_buffer_repair_reserved:2|clicks:2|credits:0|action:r8",
                 ]
               : [
                   "runner_funding_consumer_hand_after_funding:3|required:4",
-                  "runner_funding_consumer_buffer_repair_reserved:1|clicks:1|credits:0|action:runner.draw_card",
+                  "runner_funding_consumer_buffer_repair_reserved:1|clicks:1|credits:0|action:r8",
                 ],
           ),
         },
@@ -106,24 +106,24 @@ it.each([
   (game, number, amount, ordinaryCompanion) => {
     const decision = replay(game, number, game === 33, ordinaryCompanion);
     if (amount === 0) {
-      expect(decision.actionId).toBe("runner.start_run.r1");
+      expect(decision.actionId).toBe("rs.r1");
       expect(
         decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-      ).toBe("plan:runner.contest_remote:remote%3Ar1");
+      ).toBe("p1p4xezjcxov79rno40lq3f7rv");
       expect(
         decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-      ).toBe("plan:runner.contest_remote:remote%3Ar1");
+      ).toBe("p1p4xezjcxov79rno40lq3f7rv");
       return;
     }
     const source = cardInstanceIdForCopy("runner", 40, game === 33 ? 2 : 1);
     expect(decision.actionId).toBe(
-      `runner.play_event.${source}.${source}.${amount}`,
+      `rh.${source}.${source}.${amount}`,
     );
     expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-      "plan:runner.contest_remote:remote%3Ar1",
+      "p1p4xezjcxov79rno40lq3f7rv",
     );
     expect(
       decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-    ).toBe("plan:runner.economy:run-support%3Aremote%3Ar1");
+    ).toBe("p8dvcw6jj6cbaz1qxlt9ksvoh5");
   },
 );

@@ -115,17 +115,13 @@ export function currentEncounterUnbrokenSubroutineIndexes(
       candidate.type === "continue_run" &&
       candidate.payload?.encounterContinue === true,
   );
-  const quotedIds = action?.payload?.encounterSubroutineIds;
-  const ids =
-    typeof quotedIds === "string" && quotedIds.length > 0
-      ? quotedIds.split(",")
-      : [];
+  const ids = action?.encounterSubroutineIds;
   const subroutines =
     currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines;
   if (
     !actionMatchesCurrentDecision(input, action) ||
     !subroutines ||
-    typeof quotedIds !== "string" ||
+    !Array.isArray(ids) ||
     new Set(ids).size !== ids.length ||
     ids.length !== action?.payload?.unbrokenSubroutineCount ||
     ids.some((id) => !subroutines.some((subroutine) => subroutine.id === id))
@@ -162,13 +158,12 @@ export function currentEncounterCompleteSubroutineIndexes(
   );
   const subroutines =
     currentEncounteredIceCard(input)!.effectiveRunQuote!.subroutines;
-  const raw = action?.payload?.encounterRemainingSubroutineIds;
+  const ids = action?.encounterRemainingSubroutineIds;
   const count = action?.payload?.encounterRemainingSubroutineCount;
-  if (raw === undefined && count === undefined)
+  if (ids === undefined && count === undefined)
     return next.size === subroutines.length ? next : undefined;
-  const ids = typeof raw === "string" && raw.length ? raw.split(",") : [];
   if (
-    typeof raw !== "string" ||
+    !Array.isArray(ids) ||
     !Number.isSafeInteger(count) ||
     count !== ids.length ||
     new Set(ids).size !== ids.length ||

@@ -239,7 +239,7 @@ function campaignDevelopmentExpectation(): AiDecisionCheckpointV1["expectation"]
     acceptableActions: [
       {
         actionId:
-          "corp.install_card.c37y.r1.c37y",
+          "cc.c37y.r1.c37y",
       },
     ],
     planExecution: {

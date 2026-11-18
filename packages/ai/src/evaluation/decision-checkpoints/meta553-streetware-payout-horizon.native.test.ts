@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { beforeEach, describe, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
@@ -71,11 +72,16 @@ describe("pairing 553 native automatic bank payout horizon", () => {
       expect(decision.reasonCode).toBe("plan_first.runner.credit_bank");
       expect(
         decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-      ).toContain(source!.instanceId);
+      ).toBe(
+        planInstanceIdForProposal({
+          moduleId: "runner.credit_bank",
+          dedupeKey: source!.instanceId,
+        }),
+      );
     } else {
       expect(decision.actionId).not.toBe(action.actionId);
       expect(decision.evidence).toContain(
-        `plan_portfolio_blocked_evidence:plan:runner.credit_bank:${source!.instanceId}:runner_credit_bank_automatic_load_not_profitable_within_horizon`,
+        `plan_portfolio_blocked_evidence:${planInstanceIdForProposal({ moduleId: "runner.credit_bank", dedupeKey: source!.instanceId })}:runner_credit_bank_automatic_load_not_profitable_within_horizon`,
       );
     }
   });

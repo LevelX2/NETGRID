@@ -213,7 +213,7 @@ describe("game event builder", () => {
         originalActionId:
           origin === "same_action"
             ? legalAction.actionId
-            : "runner.continue_run",
+            : "r5",
         amountDue: 2,
         kind: "cost",
         createdAtStateVersion: previous.stateVersion,

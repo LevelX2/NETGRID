@@ -25,7 +25,7 @@ it.each([true, false])(
         (card) => card.definitionId !== 347,
       );
     }
-    const runActionId = "runner.start_run.r1";
+    const runActionId = "rs.r1";
     const { target } = quoteRunnerRunTarget({
       input: cp.input,
       runActionId,
@@ -59,12 +59,12 @@ it.each([true, false])(
     const expectedActionId = installed ? runActionId : bank.actionId;
     expect(decision.actionId).toBe(expectedActionId);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       selectedPlan: installed
         ? { moduleId: "runner.contest_remote" }
         : {
             moduleId: "runner.credit_bank",
-            parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+            parentInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
             parentNeedId: "run-support:remote:r1",
           },
       route: {

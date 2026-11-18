@@ -4405,7 +4405,9 @@
           "actionType": "break_subroutine",
           "label": "Pile Driver: Subroutine 1 brechen",
           "breakSubroutineCount": 1,
-          "subroutineIndexes": "0",
+          "subroutineIndexes": [
+            0
+          ],
           "targetIceDefinitionId": 450,
           "targetIceTitle": "Data Wall 2.0",
           "breakSubroutineBaseCost": 3,
@@ -5119,7 +5121,9 @@
           "actionType": "break_subroutine",
           "label": "Pile Driver: Subroutine 1 brechen",
           "breakSubroutineCount": 1,
-          "subroutineIndexes": "0",
+          "subroutineIndexes": [
+            0
+          ],
           "targetIceDefinitionId": 450,
           "targetIceTitle": "Data Wall 2.0",
           "breakSubroutineBaseCost": 3,
@@ -5363,7 +5367,9 @@
           "actionType": "break_subroutine",
           "label": "Pile Driver: Subroutine 1 brechen",
           "breakSubroutineCount": 1,
-          "subroutineIndexes": "0",
+          "subroutineIndexes": [
+            0
+          ],
           "targetIceDefinitionId": 450,
           "targetIceTitle": "Data Wall 2.0",
           "breakSubroutineBaseCost": 3,
@@ -7384,7 +7390,7 @@
         "id": "hq"
       },
       "selectedStepKind": "probe_central",
-      "selectedActionId": "runner.start_run.hq",
+      "selectedActionId": "rs.hq",
       "blockedBy": [],
       "ttlDecisionsRemaining": 0,
       "planProgressionReason": "previous_plan_considered",
@@ -7447,7 +7453,7 @@
         "plan_portfolio_foreground:runner.opportunistic_central_run",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.gain_credit"
+        "plan_portfolio_selected_action:rb"
       ]
     },
     "strategicIntent": {
@@ -8573,7 +8579,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.start_run.hq"
+        "actionId": "rs.hq"
       }
     ],
     "forbiddenActions": [

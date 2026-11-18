@@ -518,7 +518,7 @@ export function buildRunnerDefenseSignals(params: {
     tagClearFundingOpen
       ? {
           needId: "runner-defense-tag-clear-funding",
-          parentPlanInstanceId: "plan:runner.defense_and_recovery:runner",
+          parentPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
           targetCredits:
             tagClearTargetCredits * (bankTagClearFunding ? tags : 1),
           currentCreditsAtRevalidation: currentCredits,
@@ -573,7 +573,7 @@ export function buildRunnerDefenseSignals(params: {
               needId:
                 "runner-defense-persistent-hazard-counter-funding" as const,
               parentPlanInstanceId:
-                "plan:runner.defense_and_recovery:runner" as const,
+                "p1gzjb6yfcv4zbzow512kexs33" as const,
               counterType: quote.counterType,
               observedAmount: quote.observedAmount,
               targetCredits: quote.credits,
@@ -640,7 +640,7 @@ export function buildRunnerDefenseSignals(params: {
     reactionReserveOpen
       ? {
           needId: "runner-defense-reaction-reserve",
-          parentPlanInstanceId: "plan:runner.defense_and_recovery:runner",
+          parentPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
           targetCredits: reactionReserveTargetCredits,
           currentCreditsAtRevalidation: currentCredits,
           gap: Math.max(0, reactionReserveTargetCredits - currentCredits),
@@ -991,7 +991,7 @@ function bindVisibleDrawTaxPreparation(
     return;
   defense.reactionReserveNeed = {
     needId: "runner-defense-reaction-reserve",
-    parentPlanInstanceId: "plan:runner.defense_and_recovery:runner",
+    parentPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
     targetCredits,
     currentCreditsAtRevalidation: input.playerView.own.credits,
     gap: targetCredits - input.playerView.own.credits,

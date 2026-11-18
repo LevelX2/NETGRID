@@ -50,7 +50,7 @@ it("keeps the real cheaper-answer recovery in acquisition instead of installing 
       .installActionIds ?? [],
   ).toEqual([]);
   expect(decision.actionId).not.toBe(
-    "runner.install_card.c1rm.c1rm",
+    "rc.c1rm.c1rm",
   );
   expect(input.legalActions.some((a) => a.actionId === decision.actionId)).toBe(
     true,

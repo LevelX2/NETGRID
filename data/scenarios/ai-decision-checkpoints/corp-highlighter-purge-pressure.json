@@ -3190,7 +3190,7 @@
         "id": "strategy_credit_reserve"
       },
       "selectedStepKind": "gain_credits",
-      "selectedActionId": "corp.gain_credit",
+      "selectedActionId": "cb",
       "selectedActionType": "gain_credit",
       "blockedBy": [
         "missing_credits"
@@ -3239,7 +3239,7 @@
       ],
       "selectedFundingRoute": {
         "schemaVersion": "funding-route-v1",
-        "routeId": "corp.fund_strategy_reserve:credits:legal_action:corp.gain_credit",
+        "routeId": "corp.fund_strategy_reserve:credits:legal_action:cb",
         "demandId": "corp.fund_strategy_reserve:credits",
         "status": "covered_guaranteed",
         "reliability": "guaranteed",
@@ -3252,9 +3252,9 @@
         "totalClickCost": 1,
         "steps": [
           {
-            "stepId": "legal_action:corp.gain_credit",
+            "stepId": "legal_action:cb",
             "kind": "legal_action",
-            "actionId": "corp.gain_credit",
+            "actionId": "cb",
             "ownTurnOffset": 0,
             "clickCost": 1,
             "creditCost": 0,
@@ -3262,7 +3262,7 @@
             "creditRestriction": "general",
             "reliability": "guaranteed",
             "evidence": [
-              "legal_action:corp.gain_credit",
+              "legal_action:cb",
               "kind:immediate_liquid",
               "click_cost:1",
               "credit_cost:0",
@@ -3323,7 +3323,7 @@
           "progress": 0.5,
           "selectedStepKind": "protect_remote",
           "actionCandidateIds": [
-            "corp.install_card.ck7.rd.ck7.0"
+            "cc.ck7.rd.ck7.0"
           ],
           "creditDemands": [],
           "fundingRoutes": [],
@@ -3362,7 +3362,7 @@
         "plan_credit_allocation_entries:1",
         "plan_credit_allocation_unallocated:5",
         "plan_click_allocation_unallocated:0",
-        "plan_portfolio_selected_action:corp.end_turn"
+        "plan_portfolio_selected_action:c9"
       ]
     },
     "strategicIntent": {
@@ -4201,7 +4201,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "corp.draw_card"
+        "actionId": "c8"
       }
     ]
   }

@@ -35,7 +35,7 @@ it("rezzes installed advancement support as the exact first step of the winning 
   expect(action.type).toBe("rez_card");
   expect(action.source).toBe("c38m");
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:corp.score_agenda:agenda%3Ac2ie%3Ar2",
+    "p9cjat7so2g0t24r7ujibgxn83",
   );
   expect(decision.fallbackUsed).toBe(false);
 });

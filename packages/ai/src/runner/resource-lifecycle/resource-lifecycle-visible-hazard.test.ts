@@ -33,7 +33,7 @@ function fixture() {
     },
   );
   const run = legalAction(
-    "runner.start_run.rd",
+    "rs.rd",
     "runner",
     "start_run",
     "Run R&D",

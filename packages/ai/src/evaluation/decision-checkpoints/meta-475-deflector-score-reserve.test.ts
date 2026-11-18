@@ -67,7 +67,7 @@ it.each([
     expect(Object.values(cp.validation)).toEqual(Array(9).fill(true));
     cp.input.playerView.own.credits = credits;
     const { input, result } = choose(cp);
-    expect(result.actionId).toBe("corp.resolve_choice");
+    expect(result.actionId).toBe("cn");
     expect(result.selectedChoices).toEqual({
       choiceId: "classic_deflector_317",
       selectedOptionIds: [optionId],

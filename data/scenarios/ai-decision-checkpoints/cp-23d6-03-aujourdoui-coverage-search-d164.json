@@ -10849,7 +10849,7 @@
         "label": "Lucidrine™ Drip Feed"
       },
       "selectedStepKind": "draw_for_answer",
-      "selectedActionId": "runner.draw_card",
+      "selectedActionId": "r8",
       "blockedBy": [
         "missing_credits"
       ],
@@ -10906,7 +10906,7 @@
           "plan_portfolio_execution_class:bounded_sequence",
           "plan_portfolio_role:foreground",
           "plan_portfolio_lifecycle:active",
-          "plan_portfolio_action_progress:runner.draw_card",
+          "plan_portfolio_action_progress:r8",
           "plan_portfolio_action_progress_source:selected_mapped_step"
         ]
       },
@@ -10955,7 +10955,7 @@
         "plan_portfolio_foreground:runner.develop_hand_card",
         "plan_portfolio_backgrounds:runner.build_credit_bank",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.draw_card"
+        "plan_portfolio_selected_action:r8"
       ]
     },
     "strategicIntent": {
@@ -12033,7 +12033,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.install_card.c28p.c28p"
+        "actionId": "rc.c28p.c28p"
       }
     ]
   }

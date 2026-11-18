@@ -31,7 +31,7 @@ it("uses the compiled breaker role when native affordable-coverage losses tie", 
     const decision = chooseAiAction(input);
     expect(JSON.stringify(input.playerView)).toBe(before);
     expect(decision).toMatchObject({
-      actionId: "corp.resolve_choice",
+      actionId: "cn",
       selectedChoices: {
         choiceId: "trash_installed_program_104",
         selectedOptionIds: ["card_c1ju"],
@@ -40,9 +40,9 @@ it("uses the compiled breaker role when native affordable-coverage losses tie", 
       timeoutUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
-          leafExecutorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
-          route: { actionId: "corp.resolve_choice", stateVersion: 104 },
+          rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
+          leafExecutorInstanceId: "penw02zfrkklof54c2nuye5att",
+          route: { actionId: "cn", stateVersion: 104 },
         },
       },
     });

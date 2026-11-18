@@ -53,14 +53,16 @@ describe("native deep672 terminal HQ relocation", () => {
     );
     const score = chooseAiAction(before.input);
     expect(score.actionId).toBe(
-      "corp.score_agenda.c2if.c2if",
+      "cr.c2if.c2if",
     );
     expect(
-      score.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-    ).toContain("corp.score_agenda");
+      score.decisionDebug?.planFirstDecision?.portfolio.find(
+        (instance) => instance.instanceId === score.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+      )?.moduleId,
+    ).toBe("corp.score_agenda");
     const choice = chooseAiAction(after.input);
     expect(choice.fallbackUsed).toBe(false);
-    expect(choice.actionId).toBe("corp.resolve_choice");
+    expect(choice.actionId).toBe("cn");
     expect(choice.selectedChoices).toEqual({
       choiceId: after.input.playerView.pendingChoice!.choiceId,
       selectedOptionIds: ["card_c2iv"],

@@ -1,3 +1,10 @@
+import { createTurnPlanCommitment, executionExpectationFromLegalAction } from "../plans/turn-plan-commitment";
+import {
+  buildCanonicalLegalActionInvocation,
+  TURN_PLAN_EVALUATION_REGISTRY_VERSION,
+  TURN_PLANNING_CONTRACT_SCHEMA_VERSION,
+  type TurnPlan,
+} from "../plans/turn-planning-contracts";
 import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import { isRemoteServerId } from "@netgrid/shared";
 import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
@@ -55,8 +62,8 @@ import {
   restoreResidentPlanPortfolioMemorySnapshot,
   residentPlanPortfolioSnapshot,
 } from "../plans/resident-plan-portfolio-memory";
-import { instantiatePlanProposal } from "../plans/plan-instance";
-import type { PlanInstance } from "../plans/plan-kernel-types";
+import { instantiatePlanProposal, planInstanceIdForProposal } from "../plans/plan-instance";
+import type { PlanInstance, PlanModuleId } from "../plans/plan-kernel-types";
 import { corpClassicDeflectorDefenseChoiceSignal } from "../corp/defense/defense-choice-signals";
 
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
@@ -346,7 +353,7 @@ function alternativeWallBreakerForUpgradeSelection(): BreakerCapability {
 describe("authoritative plan-first live runtime", () => {
   it("coalesces repeated same-owner Runner action dispositions", () => {
     const action = legalAction(
-      "runner.install_card.support",
+      "rc.support",
       "runner",
       "install_card",
       "Install support",
@@ -397,7 +404,7 @@ describe("authoritative plan-first live runtime", () => {
 
   it("delegates current tag-clear funding to the defense owner", () => {
     const gainCredit = legalAction(
-      "runner.gain_credit",
+      "rb",
       "runner",
       "gain_credit",
       "Gain a credit",
@@ -437,7 +444,7 @@ describe("authoritative plan-first live runtime", () => {
           drawAllowed: true,
           tagClearFundingNeed: {
             needId: "runner-defense-tag-clear-funding",
-            parentPlanInstanceId: "plan:runner.defense_and_recovery:runner",
+            parentPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
             targetCredits: 2,
             currentCreditsAtRevalidation: 1,
             gap: 1,
@@ -462,7 +469,7 @@ describe("authoritative plan-first live runtime", () => {
 
   it("dispositions a later coverage draw while memory preparation is the current coverage phase", () => {
     const prepareMemory = legalAction(
-      "runner.install_card.memory",
+      "rc.memory",
       "runner",
       "install_card",
       "Install memory",
@@ -473,14 +480,14 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     const draw = legalAction(
-      "runner.draw_card",
+      "r8",
       "runner",
       "draw_card",
       "Draw",
       { credits: 0, clicks: 1 },
     );
     const deferredInstall = legalAction(
-      "runner.install_card.snowball.runner_program_trash_before_install",
+      "rc.snowball.runner_program_trash_before_install",
       "runner",
       "install_card",
       "Trash a program and install Snowball",
@@ -604,7 +611,7 @@ describe("authoritative plan-first live runtime", () => {
 
   it("leaves rejected trash-before-install variants with their specialized owner", () => {
     const action = legalAction(
-      "runner.install_card.baedeker.runner_program_trash_before_install",
+      "rc.baedeker.runner_program_trash_before_install",
       "runner",
       "install_card",
       "Trash a program and install Baedeker's Net Map",
@@ -842,7 +849,7 @@ describe("authoritative plan-first live runtime", () => {
 
   it("defers tag removal inside Defense while a support install is current", () => {
     const removeTag = legalAction(
-      "runner.remove_tag",
+      "rm",
       "runner",
       "remove_tag",
       "Tag entfernen",
@@ -962,8 +969,8 @@ describe("authoritative plan-first live runtime", () => {
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-          leafExecutorInstanceId: "plan:runner.pressure_central:central%3Ahq",
+          rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+          leafExecutorInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
           selectedPlan: {
             moduleId: "runner.pressure_central",
           },
@@ -1038,8 +1045,8 @@ describe("authoritative plan-first live runtime", () => {
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-          leafExecutorInstanceId: "plan:runner.pressure_central:central%3Ahq",
+          rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+          leafExecutorInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
           selectedPlan: { moduleId: "runner.pressure_central" },
         },
       },
@@ -1050,7 +1057,7 @@ describe("authoritative plan-first live runtime", () => {
   it("keeps an HQ setup run admissible when its direct access score is negative but it opens a targeted ICE-trash window", () => {
     resetResidentPlanPortfolioMemory();
     const hqRun = legalAction(
-      "runner.start_run.hq",
+      "rs.hq",
       "runner",
       "start_run",
       "Run HQ",
@@ -1058,14 +1065,14 @@ describe("authoritative plan-first live runtime", () => {
       { payload: { serverId: "hq" } },
     );
     const credit = legalAction(
-      "runner.gain_credit",
+      "rb",
       "runner",
       "gain_credit",
       "Gain 1 Credit",
       { credits: 0, clicks: 1 },
     );
     const end = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -1158,7 +1165,7 @@ describe("authoritative plan-first live runtime", () => {
   it("keeps a deferred HQ setup run owned by central pressure while economy builds its exact route", () => {
     resetResidentPlanPortfolioMemory();
     const hqRun = legalAction(
-      "runner.start_run.hq",
+      "rs.hq",
       "runner",
       "start_run",
       "Run HQ",
@@ -1166,14 +1173,14 @@ describe("authoritative plan-first live runtime", () => {
       { payload: { serverId: "hq" } },
     );
     const credit = legalAction(
-      "runner.gain_credit",
+      "rb",
       "runner",
       "gain_credit",
       "Gain 1 Credit",
       { credits: 0, clicks: 1 },
     );
     const end = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -1458,12 +1465,8 @@ describe("authoritative plan-first live runtime", () => {
       decisionDebug: {
         planKind: "runner.secure_terminal_win",
         planFirstDecision: {
-          rootPlanInstanceId: expect.stringContaining(
-            "plan:runner.secure_terminal_win:",
-          ),
-          leafExecutorInstanceId: expect.stringContaining(
-            "plan:runner.secure_terminal_win:",
-          ),
+          rootPlanInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "runner.secure_terminal_win"),
+          leafExecutorInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "runner.secure_terminal_win"),
         },
       },
     });
@@ -1810,7 +1813,7 @@ describe("authoritative plan-first live runtime", () => {
       decisionDebug: { planKind: "runner.defense_and_recovery" },
     });
     expect(decision.evidence).toContain(
-      "plan_step_id:plan:runner.defense_and_recovery:runner:clear_tags",
+      "plan_step_id:p1gzjb6yfcv4zbzow512kexs33:clear_tags",
     );
   });
 
@@ -2354,12 +2357,12 @@ describe("authoritative plan-first live runtime", () => {
     });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_first_root:plan:runner.pressure_central:central%3Ard",
+        "plan_first_root:pa90fufw9vc5bkshp96ztlryxl",
       ]),
     );
     const campaign = residentPlanPortfolioSnapshot(input)?.instances.find(
       (instance) =>
-        instance.instanceId === "plan:runner.pressure_central:central%3Ard",
+        instance.instanceId === "pa90fufw9vc5bkshp96ztlryxl",
     );
     expect(campaign).toMatchObject({
       moduleId: "runner.pressure_central",
@@ -2512,13 +2515,13 @@ describe("authoritative plan-first live runtime", () => {
       fallbackUsed: false,
     });
     expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
-      rootForegroundInstanceId: "plan:runner.pressure_central:central%3Ard",
+      rootForegroundInstanceId: "pa90fufw9vc5bkshp96ztlryxl",
       executorInstanceId:
-        "plan:runner.economy:access-payoff-support%3Acentral%3Ard%3Apayoff-card",
+        "p4hgig9inzb7tp4daxv63lizqe",
     });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_priority_delegated_from:plan:runner.pressure_central:central%3Ard",
+        "plan_priority_delegated_from:pa90fufw9vc5bkshp96ztlryxl",
         "plan_priority_need:access-payoff-support:central:rd:payoff-card",
       ]),
     );
@@ -2666,12 +2669,12 @@ describe("authoritative plan-first live runtime", () => {
     expect(residentPlanPortfolioSnapshot(input)?.instances).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          instanceId: "plan:runner.pressure_central:central%3Ahq",
+          instanceId: "pa7nez1ioecg7mf06q1uwqq57o",
           openNeedIds: ["coverage:breaker_wall:run:run-hq"],
         }),
         expect.objectContaining({
           moduleId: "runner.rig_and_coverage",
-          parentInstanceId: "plan:runner.pressure_central:central%3Ahq",
+          parentInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
           parentNeedId: "coverage:breaker_wall:run:run-hq",
           moduleState: expect.objectContaining({
             phase: "draw_for_answer",
@@ -2773,7 +2776,7 @@ describe("authoritative plan-first live runtime", () => {
       expect.arrayContaining([
         expect.objectContaining({
           moduleId: "runner.rig_and_coverage",
-          parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+          parentInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
         }),
       ]),
     );
@@ -2904,7 +2907,7 @@ describe("authoritative plan-first live runtime", () => {
     });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_first_root:plan:runner.pressure_central:central%3Ard",
+        "plan_first_root:pa90fufw9vc5bkshp96ztlryxl",
       ]),
     );
   });
@@ -3006,7 +3009,7 @@ describe("authoritative plan-first live runtime", () => {
     const sourceDefinitionId = syntheticCardDefinitionId("generic-deflector");
     const subroutineId = "generic-deflector.subroutine.1.deflect_run";
     const action = legalAction(
-      "corp.resolve_choice",
+      "cn",
       "corp",
       "resolve_choice",
       "Deflector-Ziel wählen",
@@ -3106,7 +3109,7 @@ describe("authoritative plan-first live runtime", () => {
     }).chooseSemanticRuntimeAction(input, {});
 
     expect(decision).toMatchObject({
-      actionId: "corp.resolve_choice",
+      actionId: "cn",
       selectedChoices: {
         choiceId,
         selectedOptionIds: ["server_archives"],
@@ -3117,7 +3120,7 @@ describe("authoritative plan-first live runtime", () => {
         planKind: "corp.defend_servers",
         planFirstDecision: {
           selectedPlan: {
-            instanceId: "plan:corp.defend_servers:server-defense-portfolio",
+            instanceId: "penw02zfrkklof54c2nuye5att",
             target: {
               id: "allocate_server_defense",
             },
@@ -3238,7 +3241,7 @@ describe("authoritative plan-first live runtime", () => {
           planKind: "corp.defend_servers",
           planFirstDecision: {
             selectedPlan: {
-              instanceId: "plan:corp.defend_servers:server-defense-portfolio",
+              instanceId: "penw02zfrkklof54c2nuye5att",
             },
             route: {
               actionId: expectedAction.actionId,
@@ -3332,7 +3335,7 @@ describe("authoritative plan-first live runtime", () => {
           planKind: "corp.defend_servers",
           planFirstDecision: {
             selectedPlan: {
-              instanceId: "plan:corp.defend_servers:server-defense-portfolio",
+              instanceId: "penw02zfrkklof54c2nuye5att",
             },
             route: {
               actionId: expectedAction.actionId,
@@ -3455,7 +3458,7 @@ describe("authoritative plan-first live runtime", () => {
       { payload: { serverId: "rd" } },
     );
     const credit = legalAction(
-      "runner.gain_credit",
+      "rb",
       "runner",
       "gain_credit",
       "Gain 1 Credit",
@@ -3563,7 +3566,7 @@ describe("authoritative plan-first live runtime", () => {
   it("classifies unbound ordinary installs under the development owner", () => {
     resetResidentPlanPortfolioMemory();
     const installBoringBit = legalAction(
-      "runner.install_card.boring-bit",
+      "rc.boring-bit",
       "runner",
       "install_card",
       "Install Boring Bit",
@@ -3577,7 +3580,7 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     const installGarbageIn = legalAction(
-      "runner.install_card.garbage-in",
+      "rc.garbage-in",
       "runner",
       "install_card",
       "Install Garbage In",
@@ -3671,7 +3674,7 @@ describe("authoritative plan-first live runtime", () => {
 
   it("does not carry stale central-preparation dispositions into a run window", () => {
     const jackOut = legalAction(
-      "runner.jack_out",
+      "rd",
       "runner",
       "jack_out",
       "Jack-out",
@@ -3679,7 +3682,7 @@ describe("authoritative plan-first live runtime", () => {
       { source: "game_rule" },
     );
     const continueRun = legalAction(
-      "runner.continue_run",
+      "r5",
       "runner",
       "continue_run",
       "Run fortsetzen",
@@ -3703,7 +3706,7 @@ describe("authoritative plan-first live runtime", () => {
       stateVersion: input.playerView.stateVersion,
     });
     const staleInstallActionId =
-      "runner.install_card.rd-protocol-files.rd-protocol-files";
+      "rc.rd-protocol-files.rd-protocol-files";
 
     const dispositions = runnerActionDispositions(
       input,
@@ -3752,7 +3755,7 @@ describe("authoritative plan-first live runtime", () => {
   it("keeps a terminal agenda transfer under the existing development owner", () => {
     resetResidentPlanPortfolioMemory();
     const corruption = legalAction(
-      "runner.play_event.corruption",
+      "rh.corruption",
       "runner",
       "play_event",
       "Corruption spielen",
@@ -3772,7 +3775,7 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     const draw = legalAction(
-      "runner.draw_card",
+      "r8",
       "runner",
       "draw_card",
       "Karte ziehen",
@@ -3780,7 +3783,7 @@ describe("authoritative plan-first live runtime", () => {
       { source: "basic_action" },
     );
     const end = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "Zug beenden",
@@ -3863,7 +3866,7 @@ describe("authoritative plan-first live runtime", () => {
 
   it("classifies an optional program-trash install exactly once when its direct sibling is unadmitted", () => {
     const direct = legalAction(
-      "runner.install_card.bulldozer",
+      "rc.bulldozer",
       "runner",
       "install_card",
       "Install Bulldozer",
@@ -3877,7 +3880,7 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     const trashBeforeInstall = legalAction(
-      "runner.install_card.bulldozer.runner_program_trash_before_install",
+      "rc.bulldozer.runner_program_trash_before_install",
       "runner",
       "install_card",
       "Trash a program and install Bulldozer",
@@ -3982,14 +3985,14 @@ describe("authoritative plan-first live runtime", () => {
             installActionIds: [direct.actionId, trashBeforeInstall.actionId],
             fundingGap: 1,
             sameTurnRunConversion: {
-              targetRunActionId: "runner.start_run.rd",
+              targetRunActionId: "rs.rd",
               requiredCredits: 8,
               requiredClicksAfterFunding: 2,
               projectedKnownPathCost: 0,
               postRunCreditFloor: 1,
               installProjection: "current_legal_action",
             },
-            fundingActionIds: ["runner.gain_credit"],
+            fundingActionIds: ["rb"],
             directSearchActionIds: [],
             searchEngineSetupActionIds: [],
             drawForAnswerActionIds: [],
@@ -4024,7 +4027,7 @@ describe("authoritative plan-first live runtime", () => {
 
   it("does not terminally reject a hand-development action owned by the active defense hand-buffer plan", () => {
     const meatUpgrade = legalAction(
-      "runner.play_event.meat-upgrade",
+      "rh.meat-upgrade",
       "runner",
       "play_event",
       "Play Meat Upgrade",
@@ -4101,7 +4104,7 @@ describe("authoritative plan-first live runtime", () => {
   it("does not let a grouped hand-development rejection duplicate a sibling's exact specialized owner", () => {
     const sourceCardId = "specialized-install-card";
     const ordinaryVariant = legalAction(
-      "runner.install_card.specialized.ordinary",
+      "rc.specialized.ordinary",
       "runner",
       "install_card",
       "Ordinary variant",
@@ -4112,7 +4115,7 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     const selfDamageVariant = legalAction(
-      "runner.install_card.specialized.alternative",
+      "rc.specialized.alternative",
       "runner",
       "install_card",
       "Alternative variant",
@@ -4163,7 +4166,7 @@ describe("authoritative plan-first live runtime", () => {
           definitionId: syntheticCardDefinitionId("test-program"),
           phase: "execute",
           purposeCode: "test_specialized_install",
-          assignedDomainPlanIds: ["plan:runner.develop_board_and_hand:test"],
+          assignedDomainPlanIds: ["p2rbkzjiw5oillnc50yws4fyzl"],
           duplicateAlreadyInstalled: false,
           affordableOrSupportable: true,
           semanticActionTypes: ["install.card"],
@@ -4223,7 +4226,7 @@ describe("authoritative plan-first live runtime", () => {
   it("keeps a rejected run event exclusively with its exact run owner", () => {
     resetResidentPlanPortfolioMemory();
     const playRunningInterference = legalAction(
-      "runner.play_event.running-interference.hq",
+      "rh.running-interference.hq",
       "runner",
       "play_event",
       "Play Running Interference on HQ",
@@ -4322,13 +4325,13 @@ describe("authoritative plan-first live runtime", () => {
   it("removes only the exact TurnPlanner-selected action from disposition evidence", () => {
     const dispositions = [
       {
-        actionId: "runner.start_run.hq",
+        actionId: "rs.hq",
         disposition: "explicitly_nonproductive" as const,
         ownerModuleId: "runner.pressure_central" as const,
         evidenceCode: "stale_pre_cutover_disposition",
       },
       {
-        actionId: "runner.start_run.rd",
+        actionId: "rs.rd",
         disposition: "explicitly_nonproductive" as const,
         ownerModuleId: "runner.pressure_central" as const,
         evidenceCode: "current_rd_disposition",
@@ -4337,7 +4340,7 @@ describe("authoritative plan-first live runtime", () => {
     const lease = {
       stateIdentity: { stateVersion: 8 },
       currentBinding: {
-        actionId: "runner.start_run.hq",
+        actionId: "rs.hq",
         stateVersion: 8,
       },
     } as never;
@@ -4345,7 +4348,7 @@ describe("authoritative plan-first live runtime", () => {
     expect(
       reconcileSelectedTurnPlannerActionDispositions({
         dispositions,
-        selectedActionId: "runner.start_run.hq",
+        selectedActionId: "rs.hq",
         stateVersion: 8,
         lease,
       }),
@@ -4353,7 +4356,7 @@ describe("authoritative plan-first live runtime", () => {
     expect(() =>
       reconcileSelectedTurnPlannerActionDispositions({
         dispositions,
-        selectedActionId: "runner.start_run.hq",
+        selectedActionId: "rs.hq",
         stateVersion: 9,
         lease,
       }),
@@ -4378,7 +4381,7 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     const credit = legalAction(
-      "runner.gain_credit.no-sacrifice",
+      "rb.no-sacrifice",
       "runner",
       "gain_credit",
       "Gain 1 Credit",
@@ -4386,7 +4389,7 @@ describe("authoritative plan-first live runtime", () => {
       { payload: { gainCreditsAmount: 1 } },
     );
     const run = legalAction(
-      "runner.start_run.hq.no-sacrifice",
+      "rs.hq.no-sacrifice",
       "runner",
       "start_run",
       "Run HQ",
@@ -4394,7 +4397,7 @@ describe("authoritative plan-first live runtime", () => {
       { payload: { serverId: "hq" } },
     );
     const endTurn = legalAction(
-      "runner.end_turn.no-sacrifice",
+      "r9.no-sacrifice",
       "runner",
       "end_turn",
       "End turn",
@@ -4481,7 +4484,7 @@ describe("authoritative plan-first live runtime", () => {
   it("binds the exact acceptable sacrifice before a plan-owned program-trash install", () => {
     resetResidentPlanPortfolioMemory();
     const install = legalAction(
-      "runner.install_card.smc.smc.runner_program_trash_before_install",
+      "rc.smc.smc.runner_program_trash_before_install",
       "runner",
       "install_card",
       "Trash a program and install Self-Modifying Code",
@@ -4496,7 +4499,7 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     const credit = legalAction(
-      "runner.gain_credit.program-trash-binding",
+      "rb.program-trash-binding",
       "runner",
       "gain_credit",
       "Gain 1 Credit",
@@ -4616,7 +4619,7 @@ describe("authoritative plan-first live runtime", () => {
     });
 
     const resolveChoice = legalAction(
-      "runner.resolve_choice",
+      "rn",
       "runner",
       "resolve_choice",
       "Resolve program trash before install",
@@ -4690,7 +4693,7 @@ describe("authoritative plan-first live runtime", () => {
   it("classifies a matchpoint-reserved optional Cyfermaster trash-install only through its variant owner", () => {
     resetResidentPlanPortfolioMemory();
     const direct = legalAction(
-      "runner.install_card.c1eq.c1eq",
+      "rc.c1eq.c1eq",
       "runner",
       "install_card",
       "Install Cyfermaster",
@@ -4701,7 +4704,7 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     const withTrash = legalAction(
-      "runner.install_card.c1eq.c1eq.runner_program_trash_before_install",
+      "rc.c1eq.c1eq.runner_program_trash_before_install",
       "runner",
       "install_card",
       "Trash a program and install Cyfermaster",
@@ -4715,7 +4718,7 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     const credit = legalAction(
-      "runner.gain_credit",
+      "rb",
       "runner",
       "gain_credit",
       "Gain 1 Credit",
@@ -5088,12 +5091,7 @@ describe("authoritative plan-first live runtime", () => {
       "Resolve current ICE",
       { credits: 0, clicks: 0 },
       {
-        payload: {
-          encounterContinue: true,
-          encounterWillEndRun: true,
-          unbrokenSubroutineCount: 1,
-          encounterSubroutineIds: "outer-code-gate-fixture-subroutine",
-        },
+        payload: {encounterContinue: true, encounterWillEndRun: true, unbrokenSubroutineCount: 1}, encounterSubroutineIds: ["outer-code-gate-fixture-subroutine"],
       },
     );
     const input = aiInput("runner", [resolveCurrentIce, breakCurrentEtr]);
@@ -5209,9 +5207,8 @@ describe("authoritative plan-first live runtime", () => {
       strength: 4,
       subtypes: ["code_gate"],
     });
-    resolveIce.payload!.encounterSubroutineIds = encounteredIce
-      .effectiveRunQuote!.subroutines.map((s) => s.id)
-      .join(",");
+    resolveIce.encounterSubroutineIds = encounteredIce
+      .effectiveRunQuote!.subroutines.map((s) => s.id);
     input.playerView.run = {
       runId: 104,
       attackedServerId: "r1",
@@ -5638,12 +5635,7 @@ describe("authoritative plan-first live runtime", () => {
       "Resolve Entrapment",
       { credits: 0, clicks: 0 },
       {
-        payload: {
-          encounterContinue: true,
-          encounterWillEndRun: false,
-          unbrokenSubroutineCount: 1,
-          encounterSubroutineIds: "paid-deflect",
-        },
+        payload: {encounterContinue: true, encounterWillEndRun: false, unbrokenSubroutineCount: 1}, encounterSubroutineIds: ["paid-deflect"],
       },
     );
     const input = aiInput("runner", [pump, breakDeflector, continueRun]);
@@ -5705,9 +5697,7 @@ describe("authoritative plan-first live runtime", () => {
       decisionDebug: {
         planKind: "runner.convert_run_window",
         planFirstDecision: {
-          leafExecutorInstanceId: expect.stringContaining(
-            "plan:runner.convert_run_window:",
-          ),
+          leafExecutorInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "runner.convert_run_window"),
           route: { actionId: continueRun.actionId },
         },
       },
@@ -5738,12 +5728,7 @@ describe("authoritative plan-first live runtime", () => {
       "Subroutinen auslösen",
       { credits: 0, clicks: 0 },
       {
-        payload: {
-          encounterContinue: true,
-          encounterWillEndRun: false,
-          unbrokenSubroutineCount: 1,
-          encounterSubroutineIds: "brain-drain-random-damage",
-        },
+        payload: {encounterContinue: true, encounterWillEndRun: false, unbrokenSubroutineCount: 1}, encounterSubroutineIds: ["brain-drain-random-damage"],
       },
     );
     const input = aiInput("runner", [pump, continueRun]);
@@ -5812,9 +5797,7 @@ describe("authoritative plan-first live runtime", () => {
       decisionDebug: {
         planKind: "runner.convert_run_window",
         planFirstDecision: {
-          leafExecutorInstanceId: expect.stringContaining(
-            "plan:runner.convert_run_window:",
-          ),
+          leafExecutorInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "runner.convert_run_window"),
           route: { actionId: pump.actionId },
         },
       },
@@ -5822,7 +5805,7 @@ describe("authoritative plan-first live runtime", () => {
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_step_capability:convert_active_run_window",
-        "plan_scheduler:route:breaker.boost_strength:plan:runner.convert_run_window:run%3A106",
+        `plan_scheduler:route:breaker.boost_strength:${decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId}`,
       ]),
     );
   });
@@ -5830,42 +5813,25 @@ describe("authoritative plan-first live runtime", () => {
   it("preserves the exact run-window break origin through mandatory post-break Stealth loss", () => {
     resetResidentPlanPortfolioMemory();
     const breakWall = legalAction(
-      "runner.break_subroutine.pile-driver.fire-wall",
+      "r3.pile-driver.fire-wall",
       "runner",
       "break_subroutine",
       "Pile Driver: Subroutine brechen",
       { credits: 3, clicks: 0 },
       {
         source: "pile-driver",
-        payload: {
-          breakerId: "pile-driver",
-          iceId: "fire-wall",
-          subroutineIndex: 0,
-          subroutineIndexes: "0",
-          breakSubroutineCount: 1,
-          multiBreakSubroutines: true,
-          breakSubroutineBaseCost: 3,
-          cardId: "pile-driver",
-          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-          cardImplementationAbilityKey: "icebreaker_abilities_break_subroutine",
-          cardImplementationAbilityId:
-            338,
-        },
+        payload: {breakerId: "pile-driver", iceId: "fire-wall", subroutineIndex: 0, breakSubroutineCount: 1, multiBreakSubroutines: true, breakSubroutineBaseCost: 3, cardId: "pile-driver", cardImplementationCapabilityBindingKind: "card_spec_capability_key", cardImplementationAbilityKey: "icebreaker_abilities_break_subroutine", cardImplementationAbilityId:
+            338}, subroutineIndexes: [0],
       },
     );
     const continueRun = legalAction(
-      "runner.continue_run.fire-wall",
+      "r5.fire-wall",
       "runner",
       "continue_run",
       "Subroutinen auslösen",
       { credits: 0, clicks: 0 },
       {
-        payload: {
-          encounterContinue: true,
-          encounterWillEndRun: true,
-          unbrokenSubroutineCount: 1,
-          encounterSubroutineIds: "0",
-        },
+        payload: {encounterContinue: true, encounterWillEndRun: true, unbrokenSubroutineCount: 1}, encounterSubroutineIds: ["0"],
       },
     );
     const input = aiInput("runner", [breakWall, continueRun]);
@@ -6007,7 +5973,7 @@ describe("authoritative plan-first live runtime", () => {
       "stealth_owl_3",
     ];
     const resolveChoice = legalAction(
-      "runner.resolve_choice",
+      "rn",
       "runner",
       "resolve_choice",
       "Stealth-Verlust verteilen",
@@ -6070,12 +6036,8 @@ describe("authoritative plan-first live runtime", () => {
       decisionDebug: {
         planKind: "runner.convert_run_window",
         planFirstDecision: {
-          rootPlanInstanceId: expect.stringContaining(
-            "plan:runner.convert_run_window:",
-          ),
-          leafExecutorInstanceId: expect.stringContaining(
-            "plan:runner.convert_run_window:",
-          ),
+          rootPlanInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(next)?.instances, "runner.convert_run_window"),
+          leafExecutorInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(next)?.instances, "runner.convert_run_window"),
         },
       },
     });
@@ -6130,7 +6092,7 @@ describe("authoritative plan-first live runtime", () => {
     (bindingMode) => {
       resetResidentPlanPortfolioMemory();
       const startRun = legalAction(
-        "runner.start_run.rd",
+        "rs.rd",
         "runner",
         "start_run",
         "Run R&D",
@@ -6138,44 +6100,27 @@ describe("authoritative plan-first live runtime", () => {
         { payload: { serverId: "rd" } },
       );
       const breakVacuumLink = legalAction(
-        "runner.break_subroutine.blink.vacuum-link",
+        "r3.blink.vacuum-link",
         "runner",
         "break_subroutine",
         "Blink: Subroutine brechen",
         { credits: 0, clicks: 0 },
         {
           source: "blink",
-          payload: {
-            breakerId: "blink",
-            iceId: "vacuum-link",
-            subroutineIndex: 0,
-            subroutineIndexes: "0",
-            breakSubroutineCount: 1,
-            cardId: "blink",
-            cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-            cardImplementationAbilityKey:
-              "icebreaker_abilities_break_subroutine",
-            cardImplementationAbilityId:
-              286,
-          },
+          payload: {breakerId: "blink", iceId: "vacuum-link", subroutineIndex: 0, breakSubroutineCount: 1, cardId: "blink", cardImplementationCapabilityBindingKind: "card_spec_capability_key", cardImplementationAbilityKey:
+              "icebreaker_abilities_break_subroutine", cardImplementationAbilityId:
+              286}, subroutineIndexes: [0],
         },
       );
       const continueVacuumLink = legalAction(
-        "runner.continue_run.vacuum-link",
+        "r5.vacuum-link",
         "runner",
         "continue_run",
         "Subroutinen auslösen",
         { credits: 0, clicks: 0 },
         {
           source: "game_rule",
-          payload: {
-            encounterContinue: true,
-            encounterWillEndRun: false,
-            sourceDefinitionId: 487,
-            unbrokenSubroutineCount: 1,
-            encounterSubroutineIds:
-              "0",
-          },
+          payload: {encounterContinue: true, encounterWillEndRun: false, sourceDefinitionId: 487, unbrokenSubroutineCount: 1}, encounterSubroutineIds: ["0"],
         },
       );
       for (const action of [breakVacuumLink, continueVacuumLink]) {
@@ -6318,23 +6263,33 @@ describe("authoritative plan-first live runtime", () => {
       if (bindingMode !== "foreground_root") {
         const commitment = runOwner!.turnPlanCommitment!;
         const lease = runOwner!.turnPlanExecutionLease!;
+        const currentPhase = commitment.phases[commitment.cursor.phaseIndex]!;
+        const currentNode = currentPhase.nodes[commitment.cursor.nodeIndex]!;
+        const phaseId = bindingMode === "wrong_phase" ? "unrelated-phase" : lease.phaseId;
+        const nodeId = bindingMode === "wrong_node" ? "unrelated-node" : lease.nodeId;
         commitment.sequenceRootPlanInstanceId = executorInstanceId!;
         commitment.cursor = { phaseIndex: 0, nodeIndex: 0 };
         commitment.phases = [
           {
-            phaseId:
-              bindingMode === "wrong_phase" ? "unrelated-phase" : lease.phaseId,
-            root: { planInstanceId: executorInstanceId },
+            ...structuredClone(currentPhase),
+            phaseId,
+            root: { ...currentPhase.root, planInstanceId: executorInstanceId!, moduleId: "runner.convert_run_window" },
             nodes: [
               {
-                nodeId:
-                  bindingMode === "wrong_node"
-                    ? "unrelated-node"
-                    : lease.nodeId,
+                ...structuredClone(currentNode),
+                nodeId,
+                expectation: { ...currentNode.expectation, nodeId },
               },
             ],
           },
-        ] as never;
+        ];
+        commitment.phaseEntry.phaseId = phaseId;
+        commitment.nextExpectedTransition = {
+          ...commitment.nextExpectedTransition,
+          phaseId,
+          nodeId,
+          routeKey: currentNode.invocation.routeKey,
+        };
         rememberResidentPlanPortfolio(input, runOwner!);
       }
 
@@ -6384,7 +6339,7 @@ describe("authoritative plan-first live runtime", () => {
 
       const choiceId = "card_implementation.vacuum_link_rewind:108:4";
       const resolveChoice = legalAction(
-        "runner.resolve_choice",
+        "rn",
         "runner",
         "resolve_choice",
         "Vacuum Link: Run fortsetzen oder ausstöpseln",
@@ -6645,9 +6600,9 @@ describe("authoritative plan-first live runtime", () => {
         planKind: "corp.defend_servers",
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           leafExecutorInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           route: { actionId: endRun.actionId },
           turnPlanning: {
             coverage: { status: "pass", coveragePercent: 100 },
@@ -6660,7 +6615,7 @@ describe("authoritative plan-first live runtime", () => {
   it("keeps an exact CardSpec successful-run followup inside the run-window plan", () => {
     resetResidentPlanPortfolioMemory();
     const creditSubversion = legalAction(
-      "runner.trigger_ability.credit-subversion.hq",
+      "rx.credit-subversion.hq",
       "runner",
       "trigger_ability",
       "Credit Subversion: Korp verliert Credits",
@@ -6723,12 +6678,8 @@ describe("authoritative plan-first live runtime", () => {
       decisionDebug: {
         planKind: "runner.convert_run_window",
         planFirstDecision: {
-          rootPlanInstanceId: expect.stringContaining(
-            "plan:runner.convert_run_window:",
-          ),
-          leafExecutorInstanceId: expect.stringContaining(
-            "plan:runner.convert_run_window:",
-          ),
+          rootPlanInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "runner.convert_run_window"),
+          leafExecutorInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "runner.convert_run_window"),
           route: { actionId: creditSubversion.actionId },
           turnPlanning: {
             coverage: { status: "pass", coveragePercent: 100 },
@@ -6741,7 +6692,7 @@ describe("authoritative plan-first live runtime", () => {
   it("fails closed when a claimed CardSpec successful-run followup lacks AbilityRef", () => {
     resetResidentPlanPortfolioMemory();
     const malformed = legalAction(
-      "runner.trigger_ability.credit-subversion.unbound",
+      "rx.credit-subversion.unbound",
       "runner",
       "trigger_ability",
       "Unbound successful-run followup",
@@ -6961,7 +6912,7 @@ describe("authoritative plan-first live runtime", () => {
       { credits: 0, clicks: 1 },
     );
     const end = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -7402,7 +7353,7 @@ describe("authoritative plan-first live runtime", () => {
       reasonCode: "plan_first.runner.credit_bank",
       fallbackUsed: false,
       decisionDebug: {
-        planId: expect.stringContaining("broker-card"),
+        planId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "runner.credit_bank", "broker-card"),
         planKind: "runner.credit_bank",
         planFirstDecision: {
           route: {
@@ -7885,10 +7836,10 @@ describe("authoritative plan-first live runtime", () => {
       reasonCode: "plan_first.runner.credit_bank",
       fallbackUsed: false,
       decisionDebug: {
-        planId: expect.stringContaining("broker-2"),
+        planId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "runner.credit_bank", "broker-2"),
         planKind: "runner.credit_bank",
         planFirstDecision: {
-          leafExecutorInstanceId: expect.stringContaining("broker-2"),
+          leafExecutorInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "runner.credit_bank", "broker-2"),
           route: {
             actionId: secondBuild.actionId,
           },
@@ -8033,12 +7984,12 @@ describe("authoritative plan-first live runtime", () => {
       fallbackUsed: false,
       decisionDebug: {
         planKind: "runner.credit_bank",
-        planId: expect.stringContaining("runner.credit_bank"),
+        planId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "runner.credit_bank"),
         planFirstDecision: {
           schemaVersion: "ai-plan-first-decision-debug-v1",
           selectionAuthority: "turn_plan_commitment",
-          rootPlanInstanceId: expect.stringContaining("runner.credit_bank"),
-          leafExecutorInstanceId: expect.stringContaining("runner.credit_bank"),
+          rootPlanInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "runner.credit_bank"),
+          leafExecutorInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "runner.credit_bank"),
           selectedPlan: {
             moduleId: "runner.credit_bank",
             executionState: "executor",
@@ -8504,7 +8455,7 @@ describe("authoritative plan-first live runtime", () => {
       rezCost: 4,
     });
     const action = legalAction(
-      "corp.resolve_choice",
+      "cn",
       "corp",
       "resolve_choice",
       "Asset rezzen?",
@@ -8776,7 +8727,7 @@ describe("authoritative plan-first live runtime", () => {
         ],
       };
       const action = {
-        actionId: "runner.resolve_choice",
+        actionId: "rn",
         label: "Installationsziel wählen",
         type: "resolve_choice",
         side: "runner",
@@ -9215,12 +9166,8 @@ describe("authoritative plan-first live runtime", () => {
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId: expect.stringContaining(
-            "plan:corp.hand_and_agenda_management:resolve-hq-overflow",
-          ),
-          leafExecutorInstanceId: expect.stringContaining(
-            "plan:corp.hand_and_agenda_management:resolve-hq-overflow",
-          ),
+          rootPlanInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "corp.hand_and_agenda_management", "hq-overflow"),
+          leafExecutorInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "corp.hand_and_agenda_management", "hq-overflow"),
           dispositions: expect.arrayContaining([
             expect.objectContaining({
               actionId: installReserved.actionId,
@@ -9340,12 +9287,8 @@ describe("authoritative plan-first live runtime", () => {
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId: expect.stringContaining(
-            "plan:corp.economy:economy-campaign",
-          ),
-          leafExecutorInstanceId: expect.stringContaining(
-            "plan:corp.economy:economy-campaign",
-          ),
+          rootPlanInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "corp.economy", "economy-campaign"),
+          leafExecutorInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "corp.economy", "economy-campaign"),
           dispositions: expect.arrayContaining([
             expect.objectContaining({
               actionId: installReserved.actionId,
@@ -10655,12 +10598,8 @@ describe("authoritative plan-first live runtime", () => {
       decisionDebug: {
         planKind: "corp.score_agenda",
         planFirstDecision: {
-          rootPlanInstanceId: expect.stringContaining(
-            "plan:corp.score_agenda:",
-          ),
-          leafExecutorInstanceId: expect.stringContaining(
-            "plan:corp.score_agenda:",
-          ),
+          rootPlanInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "corp.score_agenda"),
+          leafExecutorInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "corp.score_agenda"),
           route: { actionId: installAgenda.actionId },
         },
       },
@@ -11068,7 +11007,7 @@ describe("authoritative plan-first live runtime", () => {
       "score-material:general",
     );
     expect(JSON.stringify(residentPlanPortfolioSnapshot(input))).not.toContain(
-      "plan:corp.score_agenda:general",
+      "pa1d7j8c33k25iup8n8nyo9r2g",
     );
 
     const afterDraw = structuredClone(input);
@@ -11460,11 +11399,11 @@ describe("authoritative plan-first live runtime", () => {
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId: expect.stringContaining("%3Ar1"),
+          rootPlanInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "corp.score_agenda", ":r1"),
           leafExecutorInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           selectedStep: {
-            parentInstanceId: expect.stringContaining("%3Ar1"),
+            parentInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "corp.score_agenda", ":r1"),
           },
         },
       },
@@ -12047,7 +11986,7 @@ describe("authoritative plan-first live runtime", () => {
       "plan_assessment_evidence:corp_defense_exact_route_funding_required:r1:install-data-wall-remote-1",
     );
     expect(portfolio).toContain(
-      '"parentInstanceId":"plan:corp.defend_servers:server-defense-portfolio"',
+      "\"parentInstanceId\":\"penw02zfrkklof54c2nuye5att\"",
     );
     expect(portfolio).toContain(
       '"parentNeedId":"install:r1:install-data-wall-remote-1"',
@@ -12558,7 +12497,7 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     const end = legalAction(
-      "corp.end_turn",
+      "c9",
       "corp",
       "end_turn",
       "End turn",
@@ -13625,9 +13564,9 @@ describe("authoritative plan-first live runtime", () => {
     resetResidentPlanPortfolioMemory();
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
     const scoreRoot =
-      "plan:corp.score_agenda:agenda%3Aagenda-protected%3Ar1";
+      "p4xwxf2i2w3l1k9ezoonaaazsi";
     const scoreSupport =
-      "plan:corp.economy:score-support%3Aagenda%3Aagenda-protected%3Ar1";
+      "p522ng60bcoxe6499s52xwqnqh";
     expect(decision).toMatchObject({
       actionId: credit.actionId,
       reasonCode: "plan_first.corp.economy",
@@ -14154,9 +14093,9 @@ describe("authoritative plan-first live runtime", () => {
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           leafExecutorInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
         },
       },
     });
@@ -14538,12 +14477,8 @@ describe("authoritative plan-first live runtime", () => {
       decisionDebug: {
         planKind: "corp.score_agenda",
         planFirstDecision: {
-          rootPlanInstanceId: expect.stringContaining(
-            "plan:corp.score_agenda:",
-          ),
-          leafExecutorInstanceId: expect.stringContaining(
-            "plan:corp.score_agenda:",
-          ),
+          rootPlanInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "corp.score_agenda"),
+          leafExecutorInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "corp.score_agenda"),
           route: { actionId: installAgenda.actionId },
         },
       },
@@ -15175,7 +15110,7 @@ describe("authoritative plan-first live runtime", () => {
       fallbackUsed: false,
     });
     expect(protectedPortfolio).toContain(
-      '"instanceId":"plan:corp.score_agenda:agenda%3Aagenda-protected%3Ar1"',
+      "\"instanceId\":\"p4xwxf2i2w3l1k9ezoonaaazsi\"",
     );
     expect(protectedPortfolio).toContain(
       '"runnerAccessSuccessProbability":{"numerator":1,"denominator":4}',
@@ -15678,7 +15613,7 @@ describe("authoritative plan-first live runtime", () => {
     expect(portfolio).toContain('"effect":"satisfied"');
     expect(portfolio).not.toContain('"effect":"progress"');
     expect(portfolio).toContain(
-      '"parentInstanceId":"plan:corp.score_agenda:agenda%3Aagenda-1%3Ar1"',
+      "\"parentInstanceId\":\"pbdq9qo2j7h919e58ns3d9h9nh\"",
     );
     expect((defenseDecision.evidence ?? []).join("\n")).not.toContain(
       "new_remote",
@@ -15710,10 +15645,10 @@ describe("authoritative plan-first live runtime", () => {
       residentPlanPortfolioSnapshot(blockedPreparedInput),
     );
     expect(siblingPortfolio).toContain(
-      '"parentInstanceId":"plan:corp.score_agenda:agenda%3Aagenda-1%3Anew_remote"',
+      "\"parentInstanceId\":\"p2btcios09wllgc3khmfqcqa7d\"",
     );
     expect(siblingPortfolio).not.toContain(
-      '"parentInstanceId":"plan:corp.score_agenda:agenda%3Aagenda-1%3Ar1","effect":"progress"',
+      "\"parentInstanceId\":\"pbdq9qo2j7h919e58ns3d9h9nh\",\"effect\":\"progress\"",
     );
 
     const compromisedPreparedInput = structuredClone(input);
@@ -15786,15 +15721,15 @@ describe("authoritative plan-first live runtime", () => {
     });
     expect(fundedPreparedDecision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_first_root:plan:corp.score_agenda:agenda%3Aagenda-1%3Ar1",
-        "plan_priority_delegated_from:plan:corp.score_agenda:agenda%3Aagenda-1%3Ar1",
+        "plan_first_root:pbdq9qo2j7h919e58ns3d9h9nh",
+        "plan_priority_delegated_from:pbdq9qo2j7h919e58ns3d9h9nh",
       ]),
     );
     const fundedPreparedPortfolio = JSON.stringify(
       residentPlanPortfolioSnapshot(fundPreparedInput),
     );
     expect(fundedPreparedPortfolio).toContain(
-      '"parentInstanceId":"plan:corp.score_agenda:agenda%3Aagenda-1%3Ar1"',
+      "\"parentInstanceId\":\"pbdq9qo2j7h919e58ns3d9h9nh\"",
     );
     expect(fundedPreparedPortfolio).not.toContain("new_remote");
 
@@ -15954,7 +15889,7 @@ describe("authoritative plan-first live runtime", () => {
     });
     expect(firstCredit.evidence).toEqual(
       expect.arrayContaining([
-        "plan_first_root:plan:corp.defend_servers:server-defense-portfolio",
+        "plan_first_root:penw02zfrkklof54c2nuye5att",
         "plan_priority_class:P2",
         "plan_assessment_evidence:corp_terminal_central_rez_reserve_required:rd:rd-crystal-wall:gap_2",
       ]),
@@ -16145,7 +16080,7 @@ describe("authoritative plan-first live runtime", () => {
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
     const portfolio = JSON.stringify(residentPlanPortfolioSnapshot(input));
     const scoreParentInstanceId =
-      "plan:corp.score_agenda:agenda%3Aagenda-terminal%3Ar1";
+      "pbb8gimv7lxd474ustqmx6wrzo";
     const terminalProject = residentPlanPortfolioSnapshot(
       input,
     )!.instances.find(
@@ -16236,8 +16171,13 @@ describe("authoritative plan-first live runtime", () => {
       reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
-    expect(JSON.stringify(residentPlanPortfolioSnapshot(input))).toContain(
-      "economy-campaign%3Afinite-pool-card%3Ainstall%3Ar1",
+    expect(residentPlanPortfolioSnapshot(input)?.instances).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          moduleId: "corp.economy",
+          dedupeKey: "economy-campaign:finite-pool-card:install:r1",
+        }),
+      ]),
     );
   });
 
@@ -16355,7 +16295,7 @@ describe("authoritative plan-first live runtime", () => {
       fallbackUsed: false,
     });
     expect(JSON.stringify(residentPlanPortfolioSnapshot(input))).not.toContain(
-      "plan:corp.score_agenda:general",
+      "pa1d7j8c33k25iup8n8nyo9r2g",
     );
   });
 
@@ -16569,7 +16509,7 @@ describe("authoritative plan-first live runtime", () => {
 
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
     const parentInstanceId =
-      "plan:corp.score_agenda:agenda%3Aagenda%3Ar1";
+      "pe7a0bgouywh4y2yzngesz9af3";
     const parentNeedId = "score-setup:agenda:agenda:r1:chicago";
 
     expect(decision).toMatchObject({
@@ -16580,7 +16520,7 @@ describe("authoritative plan-first live runtime", () => {
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         `plan_first_root:${parentInstanceId}`,
-        "plan_first_executor:plan:corp.hand_and_agenda_management:score-setup%3Aagenda%3Aagenda%3Ar1%3Achicago",
+        `plan_first_executor:${planInstanceIdForProposal({ moduleId: "corp.hand_and_agenda_management", dedupeKey: "score-setup:agenda:agenda:r1:chicago" })}`,
         "plan_priority_class:P4",
         `plan_priority_delegated_from:${parentInstanceId}`,
         `plan_priority_need:${parentNeedId}`,
@@ -16691,7 +16631,7 @@ describe("authoritative plan-first live runtime", () => {
   it("keeps a finite basic-credit economy action productive when no parent-bound development route exists", () => {
     resetResidentPlanPortfolioMemory();
     const end = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -16699,7 +16639,7 @@ describe("authoritative plan-first live runtime", () => {
       { source: "game_rule" },
     );
     const credit = legalAction(
-      "runner.gain_credit",
+      "rb",
       "runner",
       "gain_credit",
       "Gain 1 Credit",
@@ -16720,7 +16660,7 @@ describe("authoritative plan-first live runtime", () => {
   it("retains Loan from Chiba instead of treating its card EndTurn as standard completion", () => {
     resetResidentPlanPortfolioMemory();
     const standardEnd = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -16793,14 +16733,14 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     const credit = legalAction(
-      "runner.gain_credit",
+      "rb",
       "runner",
       "gain_credit",
       "Gain 1 Credit",
       { credits: 0, clicks: 1 },
     );
     const standardEnd = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -16832,7 +16772,7 @@ describe("authoritative plan-first live runtime", () => {
           },
           selectedPlan: {
             parentInstanceId:
-              "plan:runner.resource_lifecycle:380%3Aloan-1",
+              "pepsyg36y5sum0h62cw7oot5u5",
             parentNeedId: "resource-lifecycle-support:loan-1",
           },
           route: { actionId: credit.actionId },
@@ -16841,24 +16781,24 @@ describe("authoritative plan-first live runtime", () => {
       fallbackUsed: false,
     });
     expect(decision.evidence).toContain(
-      "plan_first_executor:plan:runner.economy:resource-lifecycle-support%3Aloan-1",
+      "plan_first_executor:p7vfjrggeonfh8zjd7ujz7lfxa",
     );
     expect(decision.evidence).toContain("plan_priority_class:P5");
     expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
       rootForegroundInstanceId:
-        "plan:runner.resource_lifecycle:380%3Aloan-1",
+        "pepsyg36y5sum0h62cw7oot5u5",
       executorInstanceId:
-        "plan:runner.economy:resource-lifecycle-support%3Aloan-1",
+        "p7vfjrggeonfh8zjd7ujz7lfxa",
       instances: expect.arrayContaining([
         expect.objectContaining({
           instanceId:
-            "plan:runner.resource_lifecycle:380%3Aloan-1",
+            "pepsyg36y5sum0h62cw7oot5u5",
           openNeedIds: ["resource-lifecycle-support:loan-1"],
         }),
         expect.objectContaining({
-          instanceId: "plan:runner.economy:resource-lifecycle-support%3Aloan-1",
+          instanceId: "p7vfjrggeonfh8zjd7ujz7lfxa",
           parentInstanceId:
-            "plan:runner.resource_lifecycle:380%3Aloan-1",
+            "pepsyg36y5sum0h62cw7oot5u5",
           parentNeedId: "resource-lifecycle-support:loan-1",
         }),
       ]),
@@ -16884,14 +16824,14 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     const credit = legalAction(
-      "runner.gain_credit",
+      "rb",
       "runner",
       "gain_credit",
       "Gain 1 Credit",
       { credits: 0, clicks: 1 },
     );
     const standardEnd = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -16916,7 +16856,7 @@ describe("authoritative plan-first live runtime", () => {
       "resource-lifecycle-support:loan-1",
     );
     expect(decision.evidence).toContain(
-      "plan_portfolio_blocked_evidence:plan:runner.resource_lifecycle:380%3Aloan-1:runner_resource_exact_funding_route_unavailable",
+      "plan_portfolio_blocked_evidence:pepsyg36y5sum0h62cw7oot5u5:runner_resource_exact_funding_route_unavailable",
     );
   });
 
@@ -16937,14 +16877,14 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     const credit = legalAction(
-      "runner.gain_credit",
+      "rb",
       "runner",
       "gain_credit",
       "Gain 1 Credit",
       { credits: 0, clicks: 1 },
     );
     const standardEnd = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -16970,14 +16910,14 @@ describe("authoritative plan-first live runtime", () => {
       "resource-lifecycle-support:loan-1",
     );
     expect(decision.evidence).toContain(
-      "plan_portfolio_blocked_evidence:plan:runner.resource_lifecycle:380%3Aloan-1:runner_resource_leave_payment_quote_unknown",
+      "plan_portfolio_blocked_evidence:pepsyg36y5sum0h62cw7oot5u5:runner_resource_leave_payment_quote_unknown",
     );
   });
 
   it("uses Loan from Chiba's card EndTurn only as a profitable lifecycle step after clicks are spent", () => {
     resetResidentPlanPortfolioMemory();
     const standardEnd = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -17045,14 +16985,14 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     const credit = legalAction(
-      "runner.gain_credit",
+      "rb",
       "runner",
       "gain_credit",
       "Gain 1 Credit",
       { credits: 0, clicks: 1 },
     );
     const standardEnd = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -17109,7 +17049,7 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     const standardEnd = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -17168,14 +17108,14 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     const credit = legalAction(
-      "runner.gain_credit",
+      "rb",
       "runner",
       "gain_credit",
       "Gain 1 Credit",
       { credits: 0, clicks: 1 },
     );
     const standardEnd = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -17198,14 +17138,14 @@ describe("authoritative plan-first live runtime", () => {
     expect(decision.reasonCode).toBe("plan_first.runner.economy");
     expect(decision.actionId).not.toBe(loanEnd.actionId);
     expect(decision.evidence).toContain(
-      "plan_portfolio_blocked_evidence:plan:runner.resource_lifecycle:380%3Aloan-1:runner_resource_leave_deferred_until_capacity_spent",
+      "plan_portfolio_blocked_evidence:pepsyg36y5sum0h62cw7oot5u5:runner_resource_leave_deferred_until_capacity_spent",
     );
   });
 
   it("keeps two profitable Loan from Chiba EndTurns covered by separate lifecycle plans", () => {
     resetResidentPlanPortfolioMemory();
     const standardEnd = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -17346,7 +17286,7 @@ describe("authoritative plan-first live runtime", () => {
   it("selects the standard turn completion instead of an unsafe card-scoped EndTurn", () => {
     resetResidentPlanPortfolioMemory();
     const unsafeCardEndTurn = legalAction(
-      "runner.end_turn.loan",
+      "r9.loan",
       "runner",
       "end_turn",
       "Trash Loan from Chiba and end turn",
@@ -17354,7 +17294,7 @@ describe("authoritative plan-first live runtime", () => {
       { source: "loan-1", payload: { cardId: "loan-1" } },
     );
     const standardEndTurn = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -17372,7 +17312,7 @@ describe("authoritative plan-first live runtime", () => {
     ];
 
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
-      actionId: "runner.end_turn",
+      actionId: "r9",
       reasonCode: "plan_first.runner.complete_turn",
       fallbackUsed: false,
     });
@@ -17941,7 +17881,7 @@ describe("authoritative plan-first live runtime", () => {
   });
 
   it("keeps only an exact current parent need on a shared-server coverage gap", () => {
-    const requesterPlanInstanceId = "plan:runner.pressure_central:central%3Ard";
+    const requesterPlanInstanceId = "pa90fufw9vc5bkshp96ztlryxl";
     const acceptedNeedId = "coverage:breaker_sentry:run:basic-rd";
     const alternativeNeedId = "coverage:breaker_sentry:run:event-rd";
     const gap = (gapId: string) =>
@@ -17958,7 +17898,7 @@ describe("authoritative plan-first live runtime", () => {
         fundingActionIds: [],
         directSearchActionIds: [],
         searchEngineSetupActionIds: [],
-        drawForAnswerActionIds: ["runner.draw_card"],
+        drawForAnswerActionIds: ["r8"],
       }) as never;
 
     const reconciled = reconcileRunnerCoverageRequesterBindings({
@@ -18616,7 +18556,7 @@ describe("authoritative plan-first live runtime", () => {
   it("uses only the best admissible target for restricted run capacity", () => {
     resetResidentPlanPortfolioMemory();
     const end = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -18670,7 +18610,7 @@ describe("authoritative plan-first live runtime", () => {
   it("does not materialize restricted Archives run capacity against rules-proven empty Archives", () => {
     resetResidentPlanPortfolioMemory();
     const end = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -18701,7 +18641,7 @@ describe("authoritative plan-first live runtime", () => {
         evaluateRunnerRunTargets: () => [stalePositiveProjection],
       }).chooseSemanticRuntimeAction(input, {}),
     ).toMatchObject({
-      actionId: "runner.end_turn",
+      actionId: "r9",
       reasonCode: "plan_first.runner.complete_turn",
       fallbackUsed: false,
     });
@@ -18710,7 +18650,7 @@ describe("authoritative plan-first live runtime", () => {
   it("keeps an Engine-restricted multi-run sequence run-window-owned after ordinary central cadence was consumed", () => {
     resetResidentPlanPortfolioMemory();
     const runRd = legalAction(
-      "runner.start_run.rd.bonus_run.multi-run-event",
+      "rs.rd.bonus_run.multi-run-event",
       "runner",
       "start_run",
       "Continue sequence run on R&D",
@@ -18802,7 +18742,7 @@ describe("authoritative plan-first live runtime", () => {
   it("keeps an Engine-restricted run-window action exclusively owned when its remote is not independently productive", () => {
     resetResidentPlanPortfolioMemory();
     const runRemote = legalAction(
-      "runner.start_run.r1.bonus_run.engine-grant",
+      "rs.r1.bonus_run.engine-grant",
       "runner",
       "start_run",
       "Continue the Engine-granted run on Remote 1",
@@ -18862,7 +18802,7 @@ describe("authoritative plan-first live runtime", () => {
   it("keeps an optional restricted run with its run-window owner but rejects it when the exact route needs a damage buffer", () => {
     resetResidentPlanPortfolioMemory();
     const runRemote = legalAction(
-      "runner.start_run.r3.wilson-grant",
+      "rs.r3.wilson-grant",
       "runner",
       "start_run",
       "Wilson run on Remote 3",
@@ -18878,7 +18818,7 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     const draw = legalAction(
-      "runner.draw_card",
+      "r8",
       "runner",
       "draw_card",
       "Draw card",
@@ -18928,7 +18868,7 @@ describe("authoritative plan-first live runtime", () => {
     resetResidentPlanPortfolioMemory();
     const bonusRuns = ["hq", "rd", "archives"].map((serverId) =>
       legalAction(
-        `runner.start_run.${serverId}.bonus_run.onr_v1_123_bodyweight-data-creche`,
+        `rs.${serverId}.bonus_run.onr_v1_123_bodyweight-data-creche`,
         "runner",
         "start_run",
         `Bodyweight run on ${serverId}`,
@@ -18947,7 +18887,7 @@ describe("authoritative plan-first live runtime", () => {
       ),
     );
     const decline = legalAction(
-      "runner.trigger_ability.bodyweight.decline_successful_run_extra_run",
+      "rx.bodyweight.decline_successful_run_extra_run",
       "runner",
       "trigger_ability",
       "Decline Bodyweight bonus run",
@@ -19085,7 +19025,7 @@ describe("authoritative plan-first live runtime", () => {
   it("fails closed when a purported restricted run omits the Engine-certified remaining-action count", () => {
     resetResidentPlanPortfolioMemory();
     const incompleteRun = legalAction(
-      "runner.start_run.rd.bonus_run.incomplete",
+      "rs.rd.bonus_run.incomplete",
       "runner",
       "start_run",
       "Continue sequence run on R&D",
@@ -19121,7 +19061,7 @@ describe("authoritative plan-first live runtime", () => {
   it("lets the safety plan exclusively forgo unsafe run-only capacity", () => {
     resetResidentPlanPortfolioMemory();
     const end = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -19196,7 +19136,7 @@ describe("authoritative plan-first live runtime", () => {
         ],
       }).chooseSemanticRuntimeAction(input, {}),
     ).toMatchObject({
-      actionId: "runner.end_turn",
+      actionId: "r9",
       reasonCode: "plan_first.runner.defense_and_recovery",
       fallbackUsed: false,
     });
@@ -19762,8 +19702,8 @@ describe("authoritative plan-first live runtime", () => {
       fallbackUsed: false,
     });
     expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
-      rootForegroundInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-      executorInstanceId: "plan:runner.economy:run-support%3Aremote%3Ar1",
+      rootForegroundInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      executorInstanceId: "p8dvcw6jj6cbaz1qxlt9ksvoh5",
     });
   });
 
@@ -19937,17 +19877,17 @@ describe("authoritative plan-first live runtime", () => {
         expect(decision.evidence).toContain("plan_priority_class:P2");
         expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
           rootForegroundInstanceId:
-            "plan:runner.contest_remote:remote%3Ar1",
+            "p1p4xezjcxov79rno40lq3f7rv",
           executorInstanceId:
-            "plan:runner.economy:run-support%3Aremote%3Ar1",
+            "p8dvcw6jj6cbaz1qxlt9ksvoh5",
           instances: expect.arrayContaining([
             expect.objectContaining({
-              instanceId: "plan:runner.contest_remote:remote%3Ar1",
+              instanceId: "p1p4xezjcxov79rno40lq3f7rv",
               openNeedIds: ["run-support:remote:r1"],
             }),
             expect.objectContaining({
-              instanceId: "plan:runner.economy:run-support%3Aremote%3Ar1",
-              parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+              instanceId: "p8dvcw6jj6cbaz1qxlt9ksvoh5",
+              parentInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
               parentNeedId: "run-support:remote:r1",
             }),
           ]),
@@ -19961,7 +19901,7 @@ describe("authoritative plan-first live runtime", () => {
   it("ends the turn when the only remaining run has no known payoff", () => {
     resetResidentPlanPortfolioMemory();
     const end = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -20006,7 +19946,7 @@ describe("authoritative plan-first live runtime", () => {
   it("ends the turn when the only remaining run has negative payoff", () => {
     resetResidentPlanPortfolioMemory();
     const end = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -20054,7 +19994,7 @@ describe("authoritative plan-first live runtime", () => {
   it("fails closed when a positive reachable Remote action has no plan route", () => {
     resetResidentPlanPortfolioMemory();
     const end = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -20098,7 +20038,7 @@ describe("authoritative plan-first live runtime", () => {
   it("keeps a nonurgent gain-credits-first Remote bound to its funding step", () => {
     resetResidentPlanPortfolioMemory();
     const end = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -20154,7 +20094,7 @@ describe("authoritative plan-first live runtime", () => {
   it("fails closed instead of ending a normal click while only an unsafe run is represented", () => {
     resetResidentPlanPortfolioMemory();
     const end = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -20186,7 +20126,7 @@ describe("authoritative plan-first live runtime", () => {
   it("keeps nonempty-Stack normal capacity on the P6 liquidity owner", () => {
     resetResidentPlanPortfolioMemory();
     const end = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -20194,7 +20134,7 @@ describe("authoritative plan-first live runtime", () => {
       { source: "game_rule" },
     );
     const credit = legalAction(
-      "runner.gain_credit",
+      "rb",
       "runner",
       "gain_credit",
       "Gain 1 Credit",
@@ -20219,7 +20159,7 @@ describe("authoritative plan-first live runtime", () => {
   it("does not treat a composite draw action as hand-buffer progress when the Stack is empty", () => {
     resetResidentPlanPortfolioMemory();
     const saloon = legalAction(
-      "runner.activated_card_ability.saloon.gain-and-draw",
+      "r1.saloon.gain-and-draw",
       "runner",
       "activated_card_ability",
       "Silicon Saloon Franchise: 1 Credit nehmen und 1 Karte ziehen",
@@ -20236,7 +20176,7 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     const end = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -20474,9 +20414,9 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     const planInstanceId =
-      "plan:runner.develop_board_and_hand:card%3Asaloon-engine-card";
+      "p586l5wo9x2ct5dx2uesmcphlf";
     const fundingLeafInstanceId =
-      "plan:runner.economy:development-support%3Asaloon-engine-card";
+      "p96izgmfv03o70ua4yxx7zrhck";
     const expectedOwnedDecision = (
       actionId: string,
       phase: "fund" | "execute",
@@ -20793,8 +20733,8 @@ describe("authoritative plan-first live runtime", () => {
       ]),
     );
     expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
-      rootForegroundInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-      executorInstanceId: "plan:runner.economy:run-support%3Aremote%3Ar1",
+      rootForegroundInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      executorInstanceId: "p8dvcw6jj6cbaz1qxlt9ksvoh5",
     });
   });
 
@@ -21005,8 +20945,8 @@ describe("authoritative plan-first live runtime", () => {
       );
       expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
         rootForegroundInstanceId:
-          "plan:runner.contest_remote:remote%3Ar1",
-        executorInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+          "p1p4xezjcxov79rno40lq3f7rv",
+        executorInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       });
       if (restrictedCapacity) {
         expect(
@@ -21231,12 +21171,8 @@ describe("authoritative plan-first live runtime", () => {
       decisionDebug: {
         planKind: "runner.develop_board_and_hand",
         planFirstDecision: {
-          rootPlanInstanceId: expect.stringContaining(
-            "runner.develop_board_and_hand",
-          ),
-          leafExecutorInstanceId: expect.stringContaining(
-            "runner.develop_board_and_hand",
-          ),
+          rootPlanInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "runner.develop_board_and_hand"),
+          leafExecutorInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "runner.develop_board_and_hand"),
           selectedPlan: {
             moduleId: "runner.develop_board_and_hand",
           },
@@ -21251,7 +21187,7 @@ describe("authoritative plan-first live runtime", () => {
   it("does not replace an installed Smarteye with a duplicate for the information plan", () => {
     resetResidentPlanPortfolioMemory();
     const duplicateInstall = legalAction(
-      "runner.install_card.smarteye-2.smarteye-2.runner_program_trash_before_install",
+      "rc.smarteye-2.smarteye-2.runner_program_trash_before_install",
       "runner",
       "install_card",
       "Install Smarteye and trash a program",
@@ -22076,7 +22012,7 @@ describe("authoritative plan-first live runtime", () => {
       instances: expect.arrayContaining([
         expect.objectContaining({
           instanceId: expect.stringContaining(
-            "plan:runner.develop_board_and_hand:card%3Avalu-pak-card",
+            "p733uotpiopu5okw9e71l7nxbx",
           ),
           viability: "blocked",
           phase: "prepare_restricted_sequence",
@@ -22284,7 +22220,7 @@ describe("authoritative plan-first live runtime", () => {
         5,
         binding === "ambiguous",
       );
-      rememberResidentPlanPortfolio(input, {
+      const rememberAmbiguousFixture = () => rememberResidentPlanPortfolio(input, {
         schemaVersion: "resident-plan-portfolio-v2",
         side: "runner",
         stateVersion: 5,
@@ -22298,6 +22234,13 @@ describe("authoritative plan-first live runtime", () => {
         completionHistory: [],
         transitions: [],
       });
+      if (binding === "ambiguous") {
+        expect(rememberAmbiguousFixture).toThrowError(
+          expect.objectContaining({ code: "executor_invariant_broken" }),
+        );
+        return;
+      }
+      rememberAmbiguousFixture();
 
       expect(() =>
         liveContext().chooseSemanticRuntimeAction(input, {}),
@@ -22483,7 +22426,7 @@ describe("authoritative plan-first live runtime", () => {
       clicks: 1,
     });
     const end = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -22895,9 +22838,9 @@ describe("authoritative plan-first live runtime", () => {
       decisionDebug: {
         planKind: "runner.economy",
         planFirstDecision: {
-          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+          rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
           leafExecutorInstanceId:
-            "plan:runner.economy:run-support%3Aremote%3Ar1",
+            "p8dvcw6jj6cbaz1qxlt9ksvoh5",
           selectedStep: {
             stepId: expect.stringContaining(
               ":fund:run-support:remote:r1",
@@ -23031,12 +22974,8 @@ describe("authoritative plan-first live runtime", () => {
       decisionDebug: {
         planKind: "runner.pressure_central",
         planFirstDecision: {
-          rootPlanInstanceId: expect.stringContaining(
-            "plan:runner.pressure_central:central%3A",
-          ),
-          leafExecutorInstanceId: expect.stringContaining(
-            "plan:runner.pressure_central:central%3A",
-          ),
+          rootPlanInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "runner.pressure_central", "central:"),
+          leafExecutorInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "runner.pressure_central", "central:"),
           selectedStep: {
             stepId: expect.stringMatching(/:pressure:(hq|rd)$/),
           },
@@ -23458,7 +23397,7 @@ describe("authoritative plan-first live runtime", () => {
         fallbackUsed: false,
       });
       expect(decision.evidence, malformed.label).toContain(
-        "plan_portfolio_blocked_evidence:plan:runner.pressure_central:central%3Ahq:runner_central_pressure_cadence_event_turn_invalid:hq:" + malformedHistory.eventTail[0]!.eventId,
+        "plan_portfolio_blocked_evidence:pa7nez1ioecg7mf06q1uwqq57o:runner_central_pressure_cadence_event_turn_invalid:hq:" + malformedHistory.eventTail[0]!.eventId,
       );
     }
 
@@ -23820,7 +23759,7 @@ describe("authoritative plan-first live runtime", () => {
   it("owns the exact post-pass derez-and-end-run ability inside the active run plan", () => {
     resetResidentPlanPortfolioMemory();
     const derez = legalAction(
-      "runner.trigger_ability.disgruntled-derez",
+      "rx.disgruntled-derez",
       "runner",
       "trigger_ability",
       "Disgruntled Ice Technician: ICE derezzen und Run beenden",
@@ -23891,7 +23830,7 @@ describe("authoritative plan-first live runtime", () => {
   it("fails closed when a post-pass trigger has no bound functional ability", () => {
     resetResidentPlanPortfolioMemory();
     const incompleteDerez = legalAction(
-      "runner.trigger_ability.incomplete-post-pass-derez",
+      "rx.incomplete-post-pass-derez",
       "runner",
       "trigger_ability",
       "Post-pass derez without ability binding",
@@ -23908,7 +23847,7 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     const continueRun = legalAction(
-      "runner.continue_run.incomplete-post-pass-control",
+      "r5.incomplete-post-pass-control",
       "runner",
       "continue_run",
       "Continue",
@@ -23941,7 +23880,7 @@ describe("authoritative plan-first live runtime", () => {
   it("keeps the exactly paid post-pass derez inside its exclusive run-plan route at the server", () => {
     resetResidentPlanPortfolioMemory();
     const derez = legalAction(
-      "runner.trigger_ability.post-pass-at-server",
+      "rx.post-pass-at-server",
       "runner",
       "trigger_ability",
       "Derez the passed ICE and end the run",
@@ -23964,7 +23903,7 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     const continueRun = legalAction(
-      "runner.continue_run.post-pass-at-server",
+      "r5.post-pass-at-server",
       "runner",
       "continue_run",
       "Continue to R&D access",
@@ -24015,7 +23954,7 @@ describe("authoritative plan-first live runtime", () => {
   it("owns a generic run-remainder strength boost that does not claim a CardSpec source", () => {
     resetResidentPlanPortfolioMemory();
     const boost = legalAction(
-      "runner.trigger_ability.generic-run-strength-boost",
+      "rx.generic-run-strength-boost",
       "runner",
       "trigger_ability",
       "Run support: breaker +2",
@@ -24068,7 +24007,7 @@ describe("authoritative plan-first live runtime", () => {
   it("keeps an exact encounter subtype change inside the active run-window owner", () => {
     resetResidentPlanPortfolioMemory();
     const chooseCodeGate = legalAction(
-      "runner.trigger_ability.fubar.code_gate",
+      "rx.fubar.code_gate",
       "runner",
       "trigger_ability",
       "Fubar: Code Gate wählen",
@@ -24084,7 +24023,7 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     const chooseSentry = legalAction(
-      "runner.trigger_ability.fubar.sentry",
+      "rx.fubar.sentry",
       "runner",
       "trigger_ability",
       "Fubar: Sentry wählen",
@@ -24100,19 +24039,13 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     const continueUnbroken = legalAction(
-      "runner.continue_run.quandary",
+      "r5.quandary",
       "runner",
       "continue_run",
       "Subroutinen auslösen (Run endet)",
       { credits: 0, clicks: 0 },
       {
-        payload: {
-          encounterContinue: true,
-          encounterWillEndRun: true,
-          unbrokenSubroutineCount: 1,
-          encounterSubroutineIds: "0",
-          sourceDefinitionId: 473,
-        },
+        payload: {encounterContinue: true, encounterWillEndRun: true, unbrokenSubroutineCount: 1, sourceDefinitionId: 473}, encounterSubroutineIds: ["0"],
       },
     );
     const input = aiInput("runner", [
@@ -24174,9 +24107,7 @@ describe("authoritative plan-first live runtime", () => {
       decisionDebug: {
         planKind: "runner.convert_run_window",
         planFirstDecision: {
-          leafExecutorInstanceId: expect.stringContaining(
-            "plan:runner.convert_run_window:",
-          ),
+          leafExecutorInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "runner.convert_run_window"),
           route: {
             actionId: chooseCodeGate.actionId,
             stepId: expect.any(String),
@@ -24212,7 +24143,7 @@ describe("authoritative plan-first live runtime", () => {
   it("explicitly rejects post-pass derez when it would abandon a visible agenda", () => {
     resetResidentPlanPortfolioMemory();
     const derez = legalAction(
-      "runner.trigger_ability.disgruntled-derez",
+      "rx.disgruntled-derez",
       "runner",
       "trigger_ability",
       "Disgruntled Ice Technician: ICE derezzen und Run beenden",
@@ -24236,7 +24167,7 @@ describe("authoritative plan-first live runtime", () => {
       },
     );
     const continueRun = legalAction(
-      "runner.continue_run.remote",
+      "r5.remote",
       "runner",
       "continue_run",
       "Continue to remote",
@@ -24444,12 +24375,8 @@ describe("authoritative plan-first live runtime", () => {
       decisionDebug: {
         planKind: "runner.convert_run_window",
         planFirstDecision: {
-          rootPlanInstanceId: expect.stringContaining(
-            "plan:runner.convert_run_window:",
-          ),
-          leafExecutorInstanceId: expect.stringContaining(
-            "plan:runner.convert_run_window:",
-          ),
+          rootPlanInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "runner.convert_run_window"),
+          leafExecutorInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "runner.convert_run_window"),
           route: {
             actionId: jackOut.actionId,
             stepId: expect.any(String),
@@ -24477,7 +24404,7 @@ describe("authoritative plan-first live runtime", () => {
       { payload: { serverId: "rd" } },
     );
     const credit = legalAction(
-      "runner.gain_credit.visible-lethal",
+      "rb.visible-lethal",
       "runner",
       "gain_credit",
       "Gain 1 Credit",
@@ -24485,7 +24412,7 @@ describe("authoritative plan-first live runtime", () => {
       { payload: { gainCreditsAmount: 1 } },
     );
     const endTurn = legalAction(
-      "runner.end_turn.visible-lethal",
+      "r9.visible-lethal",
       "runner",
       "end_turn",
       "End turn",
@@ -24545,7 +24472,7 @@ describe("authoritative plan-first live runtime", () => {
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         expect.stringContaining(
-          "plan_portfolio_blocked:plan:runner.pressure_central:central%3Ard",
+          "plan_portfolio_blocked:pa90fufw9vc5bkshp96ztlryxl",
         ),
       ]),
     );
@@ -25120,9 +25047,7 @@ describe("authoritative plan-first live runtime", () => {
         planKind: "runner.convert_run_window",
         planFirstDecision: {
           route: { actionId: trash.actionId },
-          leafExecutorInstanceId: expect.stringContaining(
-            "runner.convert_run_window",
-          ),
+          leafExecutorInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "runner.convert_run_window"),
         },
       },
     });
@@ -25502,7 +25427,7 @@ describe("authoritative plan-first live runtime", () => {
   it("keeps match-like known R&D multiaccess repetition blocked inside runner.pressure_central", () => {
     resetResidentPlanPortfolioMemory();
     const run = legalAction(
-      "runner.start_run.rd",
+      "rs.rd",
       "runner",
       "start_run",
       "Run R&D",
@@ -25510,7 +25435,7 @@ describe("authoritative plan-first live runtime", () => {
       { payload: { serverId: "rd" } },
     );
     const credit = legalAction(
-      "runner.gain_credit",
+      "rb",
       "runner",
       "gain_credit",
       "Gain 1 Credit",
@@ -25606,7 +25531,7 @@ describe("authoritative plan-first live runtime", () => {
     });
 
     expect(evaluateRunnerRunTargets({ input })[0]).toMatchObject({
-      actionId: "runner.start_run.rd",
+      actionId: "rs.rd",
       targetServerId: "rd",
       knownAccessState: "known_no_current_payoff",
       recommendation: "do_not_run_now",
@@ -26293,7 +26218,7 @@ describe("authoritative plan-first live runtime", () => {
       ];
     }
     const runHq = legalAction(
-      "runner.start_run.hq",
+      "rs.hq",
       "runner",
       "start_run",
       "Run auf HQ",
@@ -26378,7 +26303,7 @@ describe("authoritative plan-first live runtime", () => {
       ]),
     ];
     const target = {
-      ...safeRuntimeRunTarget("runner.start_run.hq", "hq"),
+      ...safeRuntimeRunTarget("rs.hq", "hq"),
       targetKind: "central" as const,
       accessTargetKind: "hq" as const,
       pathPassability: "blocked_missing_coverage" as const,
@@ -26798,7 +26723,7 @@ describe("authoritative plan-first live runtime", () => {
         "plan_priority_class:P2",
         "plan_priority_reason:survival_threat",
         "plan_step_capability:fund_install_breaker_wall",
-        "plan_priority_delegated_from:plan:runner.contest_remote:remote%3Ar1",
+        "plan_priority_delegated_from:p1p4xezjcxov79rno40lq3f7rv",
       ]),
     );
     expect(
@@ -26989,24 +26914,22 @@ describe("authoritative plan-first live runtime", () => {
         "plan_priority_class:P2",
         "plan_priority_reason:survival_threat",
         "plan_step_capability:fund_install_breaker_code_gate",
-        "plan_priority_delegated_from:plan:runner.contest_remote:remote%3Ar1",
+        "plan_priority_delegated_from:p1p4xezjcxov79rno40lq3f7rv",
       ]),
     );
     expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
-      rootForegroundInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-      executorInstanceId: expect.stringContaining(
-        "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
-      ),
+      rootForegroundInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      executorInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "runner.rig_and_coverage", "coverage:breaker_code_gate"),
       instances: expect.arrayContaining([
         expect.objectContaining({
-          instanceId: "plan:runner.contest_remote:remote%3Ar1",
+          instanceId: "p1p4xezjcxov79rno40lq3f7rv",
           openNeedIds: expect.arrayContaining([
             expect.stringContaining("coverage:breaker_code_gate"),
           ]),
         }),
         expect.objectContaining({
           moduleId: "runner.rig_and_coverage",
-          parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+          parentInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
           moduleState: expect.objectContaining({
             phase: "fund_answer",
             gap: expect.objectContaining({
@@ -27040,10 +26963,8 @@ describe("authoritative plan-first live runtime", () => {
       fallbackUsed: false,
     });
     expect(residentPlanPortfolioSnapshot(funded)).toMatchObject({
-      rootForegroundInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-      executorInstanceId: expect.stringContaining(
-        "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
-      ),
+      rootForegroundInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      executorInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(funded)?.instances, "runner.rig_and_coverage", "coverage:breaker_code_gate"),
     });
 
     coverageInstalled = true;
@@ -27065,8 +26986,8 @@ describe("authoritative plan-first live runtime", () => {
       fallbackUsed: false,
     });
     expect(residentPlanPortfolioSnapshot(installed)).toMatchObject({
-      rootForegroundInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-      executorInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      rootForegroundInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      executorInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
     });
   });
 
@@ -27305,7 +27226,7 @@ describe("authoritative plan-first live runtime", () => {
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_step_capability:search_answer_breaker_wall",
-        "plan_priority_delegated_from:plan:runner.pressure_central:central%3Ahq",
+        "plan_priority_delegated_from:pa7nez1ioecg7mf06q1uwqq57o",
         "plan_assessment_evidence:coverage_upgrade:hq:265",
       ]),
     );
@@ -27772,15 +27693,15 @@ describe("authoritative plan-first live runtime", () => {
     expect(residentPlanPortfolioSnapshot(input)?.instances).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          instanceId: "plan:runner.pressure_central:central%3Ahq",
+          instanceId: "pa7nez1ioecg7mf06q1uwqq57o",
           openNeedIds: [
             "coverage:breaker_wall:efficiency:hq:run:run-costly-hq-wall",
           ],
         }),
         expect.objectContaining({
           instanceId:
-            "plan:runner.rig_and_coverage:coverage%3Abreaker_wall%3Aefficiency%3Ahq%3Arun%3Arun-costly-hq-wall",
-          parentInstanceId: "plan:runner.pressure_central:central%3Ahq",
+            "p71cmemj9qvcmv3668j49ua5l",
+          parentInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
           parentNeedId:
             "coverage:breaker_wall:efficiency:hq:run:run-costly-hq-wall",
         }),
@@ -28083,7 +28004,7 @@ describe("authoritative plan-first live runtime", () => {
       need: {
         targetCredits: 13,
         gap: 4,
-        parentPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
+        parentPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
       },
     });
   });
@@ -28224,7 +28145,7 @@ describe("authoritative plan-first live runtime", () => {
       expect.arrayContaining([
         "plan_step_capability:search_answer_breaker_code_gate",
         "plan_priority_class:P4",
-        "plan_priority_delegated_from:plan:runner.pressure_central:central%3Ahq",
+        "plan_priority_delegated_from:pa7nez1ioecg7mf06q1uwqq57o",
       ]),
     );
     const executor = residentPlanPortfolioSnapshot(input)?.instances.find(
@@ -28794,21 +28715,21 @@ describe("authoritative plan-first live runtime", () => {
         "plan_priority_class:P2",
         "plan_assessment_evidence:terminal_remote_coverage:r1",
         "plan_step_capability:search_answer_breaker_wall",
-        "plan_priority_delegated_from:plan:runner.contest_remote:remote%3Ar1",
+        "plan_priority_delegated_from:p1p4xezjcxov79rno40lq3f7rv",
       ]),
     );
     expect(residentPlanPortfolioSnapshot(repeatedScoringRemote)).toMatchObject({
-      rootForegroundInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      rootForegroundInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       executorInstanceId:
-        "plan:runner.rig_and_coverage:coverage%3Abreaker_wall",
+        "p6c0cqw460f4dpux5zmx6n3hjf",
       instances: expect.arrayContaining([
         expect.objectContaining({
-          instanceId: "plan:runner.contest_remote:remote%3Ar1",
+          instanceId: "p1p4xezjcxov79rno40lq3f7rv",
           openNeedIds: ["coverage:breaker_wall"],
         }),
         expect.objectContaining({
-          instanceId: "plan:runner.rig_and_coverage:coverage%3Abreaker_wall",
-          parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+          instanceId: "p6c0cqw460f4dpux5zmx6n3hjf",
+          parentInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
           parentNeedId: "coverage:breaker_wall",
         }),
       ]),
@@ -28848,12 +28769,12 @@ describe("authoritative plan-first live runtime", () => {
       fallbackUsed: false,
     });
     expect(residentPlanPortfolioSnapshot(visibleAgendaRemote)).toMatchObject({
-      rootForegroundInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      rootForegroundInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       executorInstanceId:
-        "plan:runner.rig_and_coverage:coverage%3Abreaker_wall",
+        "p6c0cqw460f4dpux5zmx6n3hjf",
       instances: expect.arrayContaining([
         expect.objectContaining({
-          instanceId: "plan:runner.contest_remote:remote%3Ar1",
+          instanceId: "p1p4xezjcxov79rno40lq3f7rv",
           openNeedIds: ["coverage:breaker_wall"],
         }),
       ]),
@@ -28956,14 +28877,12 @@ describe("authoritative plan-first live runtime", () => {
       decisionDebug: { planKind: "runner.rig_and_coverage" },
     });
     expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
-      rootForegroundInstanceId: "plan:runner.pressure_central:central%3Ahq",
-      executorInstanceId: expect.stringContaining(
-        "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry%3Aprepare-run",
-      ),
+      rootForegroundInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+      executorInstanceId: planReferenceMatching(residentPlanPortfolioSnapshot(input)?.instances, "runner.rig_and_coverage", "coverage:breaker_sentry:prepare-run"),
       instances: expect.arrayContaining([
         expect.objectContaining({
           moduleId: "runner.rig_and_coverage",
-          parentInstanceId: "plan:runner.pressure_central:central%3Ahq",
+          parentInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
           moduleState: expect.objectContaining({
             phase: "prepare_coverage",
           }),
@@ -30080,7 +29999,7 @@ describe("plan-bound approach-ICE information continuation", () => {
     ({ binding, approachedIceKnown, rememberedIce }) => {
       resetResidentPlanPortfolioMemory();
       const expose = legalAction(
-        "runner.trigger_ability.smarteye.expose",
+        "rx.smarteye.expose",
         "runner",
         "trigger_ability",
         "Smarteye: Ice aufdecken",
@@ -30096,7 +30015,7 @@ describe("plan-bound approach-ICE information continuation", () => {
         },
       );
       const decline = legalAction(
-        "runner.trigger_ability.smarteye.decline",
+        "rx.smarteye.decline",
         "runner",
         "trigger_ability",
         "Smarteye: Nicht aufdecken",
@@ -30206,10 +30125,10 @@ describe("plan-bound approach-ICE information continuation", () => {
       priorInput.playerView.stateVersion = priorStateVersion;
       priorInput.legalActions = [];
       priorInput.playerView.legalActions = [];
-      const runPlanInstanceId = "plan:runner.contest_remote:remote%3Ar1";
+      const runPlanInstanceId = "p1p4xezjcxov79rno40lq3f7rv";
       const executorInstanceId =
         binding === "continued-run-lease"
-          ? "plan:runner.convert_run_window:run%3A79"
+          ? "p8liuwahqoajnbws8jijc5ch5i"
           : runPlanInstanceId;
       rememberResidentPlanPortfolio(priorInput, {
         schemaVersion: "resident-plan-portfolio-v2",
@@ -30221,6 +30140,7 @@ describe("plan-bound approach-ICE information continuation", () => {
           ...(binding === "continued-run-lease"
             ? [
                 {
+ ...choicePlanFixture("runner.contest_remote", "remote:r1", priorStateVersion),
                   instanceId: runPlanInstanceId,
                   dedupeKey: "remote:r1",
                   moduleVersion: "1",
@@ -30269,6 +30189,7 @@ describe("plan-bound approach-ICE information continuation", () => {
               ]
             : [
                 {
+ ...choicePlanFixture("runner.contest_remote", "remote:r1", priorStateVersion),
                   instanceId: runPlanInstanceId,
                   dedupeKey: "remote:r1",
                   moduleVersion: "1",
@@ -30314,7 +30235,7 @@ describe("plan-bound approach-ICE information continuation", () => {
               selectedActionOrigin: {
                 rootPlanInstanceId: runPlanInstanceId,
                 executorInstanceId: runPlanInstanceId,
-                selectedActionId: "runner.start_run.r1",
+                selectedActionId: "rs.r1",
                 selectedAtStateVersion: priorStateVersion,
                 immediateChoicePolicy: "resolve_runner_run_start_order",
                 continuedThroughStateVersion: priorStateVersion,
@@ -30323,27 +30244,11 @@ describe("plan-bound approach-ICE information continuation", () => {
               },
             }
           : {
-              turnPlanCommitment: {
-                commitmentId: "inside-job-commitment",
-                sourcePlanId: "inside-job-plan",
-                sequenceRootPlanInstanceId: runPlanInstanceId,
-                status: "active",
-              },
-              turnPlanExecutionLease: {
-                commitmentId: "inside-job-commitment",
-                sourcePlanId: "inside-job-plan",
-                actionType:
-                  binding === "continued-run-lease"
-                    ? "continue_run"
-                    : "play_event",
-                currentBinding: {
-                  actionId:
-                    binding === "continued-run-lease"
-                      ? "runner.continue_run"
-                      : "runner.play_event.inside-job.r1",
-                  stateVersion: priorStateVersion,
-                },
-              },
+              ...committedRunFixture(
+                priorInput, runPlanInstanceId, "runner.contest_remote",
+                binding === "continued-run-lease" ? "continue_run" : "play_event",
+                binding === "continued-run-lease" ? "r5" : "rh.inside-job.r1",
+              ),
             }),
         completionHistory: [],
         transitions: [],
@@ -30363,11 +30268,11 @@ describe("plan-bound approach-ICE information continuation", () => {
           planFirstDecision: {
             rootPlanInstanceId: runPlanInstanceId,
             leafExecutorInstanceId:
-              "plan:runner.expose_information:ice%3Acorp_private_ice_1",
+              "pec8eprbhbwqw5kzg83nfa0uop",
             executionOrigin: {
               rootPlanInstanceId: runPlanInstanceId,
               leafPlanInstanceId:
-                "plan:runner.expose_information:ice%3Acorp_private_ice_1",
+                "pec8eprbhbwqw5kzg83nfa0uop",
             },
           },
         },
@@ -30411,7 +30316,7 @@ describe("plan-bound Corp delayed-success continuation", () => {
         planOrigin === "resident_remote" ? "r1" : "hq";
       const choiceId = "p3_54_delayed_success_202";
       const resolveChoice = legalAction(
-        "corp.resolve_choice",
+        "cn",
         "corp",
         "resolve_choice",
         "Dr. Dreff: Successful Run verzögern?",
@@ -30674,14 +30579,14 @@ describe("plan-bound Corp delayed-success continuation", () => {
       priorInput.playerView.stateVersion = priorStateVersion;
       delete priorInput.playerView.pendingChoice;
       const defensePlanInstanceId =
-        "plan:corp.defend_servers:server-defense-portfolio";
+        "penw02zfrkklof54c2nuye5att";
       const completionPlanInstanceId =
-        "plan:corp.complete_turn:standard-turn-completion";
+        "p6yjycy2qsqgb3jl5pov75ajtq";
       const handPlanInstanceId =
-        "plan:corp.hand_and_agenda_management:discard-window%3Atest";
+        "p2irh7fxqayie84tcjytn318uc";
       if (planOrigin === "reactive" || planOrigin === "reactive_event") {
         const endTurn = legalAction(
-          "corp.end_turn",
+          "c9",
           "corp",
           "end_turn",
           "Zug beenden",
@@ -30742,6 +30647,7 @@ describe("plan-bound Corp delayed-success continuation", () => {
             planOrigin === "active"
               ? [
                   {
+ ...choicePlanFixture("corp.defend_servers", "server-defense-portfolio", priorStateVersion),
                     instanceId: defensePlanInstanceId,
                     side: "corp",
                     moduleId: "corp.defend_servers",
@@ -30758,6 +30664,7 @@ describe("plan-bound Corp delayed-success continuation", () => {
               : planOrigin === "post_turn_discard"
                 ? [
                     {
+ ...choicePlanFixture("corp.hand_and_agenda_management", "discard-window:test", priorStateVersion),
                       instanceId: handPlanInstanceId,
                       side: "corp",
                       moduleId: "corp.hand_and_agenda_management",
@@ -30767,6 +30674,7 @@ describe("plan-bound Corp delayed-success continuation", () => {
                       blockers: [],
                     },
                     {
+ ...choicePlanFixture("corp.defend_servers", "server-defense-portfolio", priorStateVersion),
                       instanceId: defensePlanInstanceId,
                       side: "corp",
                       moduleId: "corp.defend_servers",
@@ -30778,6 +30686,7 @@ describe("plan-bound Corp delayed-success continuation", () => {
                   ]
                 : [
                     {
+ ...choicePlanFixture("corp.complete_turn", "standard-turn-completion", priorStateVersion),
                       instanceId: completionPlanInstanceId,
                       side: "corp",
                       moduleId: "corp.complete_turn",
@@ -30787,6 +30696,7 @@ describe("plan-bound Corp delayed-success continuation", () => {
                       blockers: [],
                     },
                     {
+ ...choicePlanFixture("corp.defend_servers", "server-defense-portfolio", priorStateVersion),
                       instanceId: defensePlanInstanceId,
                       side: "corp",
                       moduleId: "corp.defend_servers",
@@ -30861,7 +30771,7 @@ describe("plan-bound broken-ICE virus-counter continuation", () => {
     const weakerOptionId = "source_pattel_1_target_outer_ice";
     const strongerOptionId = "source_pattel_1_target_inner_ice";
     const resolveChoice = legalAction(
-      "runner.resolve_choice",
+      "rn",
       "runner",
       "resolve_choice",
       "Pattel-Counter platzieren",
@@ -30941,32 +30851,29 @@ describe("plan-bound broken-ICE virus-counter continuation", () => {
     delete priorInput.playerView.pendingChoice;
     priorInput.legalActions = [];
     priorInput.playerView.legalActions = [];
-    const rootPlanInstanceId = "plan:runner.contest_remote:r1";
-    const executorInstanceId = "plan:runner.convert_run_window:run%3A42";
+    const rootPlanInstanceId = "pdl5beuqtdrahr4fqagyng1zk5";
+    const executorInstanceId = "p8lpowaw69ltc9qfdkfmg9pns8";
     rememberResidentPlanPortfolio(priorInput, {
       schemaVersion: "resident-plan-portfolio-v2",
       side: "runner",
       stateVersion: 370,
       rootForegroundInstanceId: rootPlanInstanceId,
       executorInstanceId,
-      turnPlanCommitment: {
-        commitmentId: "remote-run-commitment",
-        sourcePlanId: "remote-run-plan",
-        sequenceRootPlanInstanceId: rootPlanInstanceId,
-        status: "active",
-      },
+      turnPlanCommitment: committedRunFixture(priorInput, rootPlanInstanceId, "runner.contest_remote", "start_run", "rs.r1").turnPlanCommitment,
       instances: [
         {
+ ...choicePlanFixture("runner.contest_remote", "r1", 370),
           instanceId: rootPlanInstanceId,
           side: "runner",
           moduleId: "runner.contest_remote",
-          executionState: "suspended",
+          executionState: "preempted",
           moduleState: {
             kind: "remote_contest",
             signal: { serverId: "r1" },
           },
         },
         {
+ ...choicePlanFixture("runner.convert_run_window", "run:42", 370),
           instanceId: executorInstanceId,
           parentInstanceId: rootPlanInstanceId,
           side: "runner",
@@ -31038,7 +30945,7 @@ describe("plan-bound Trace Base-Link continuation", () => {
   it("keeps the exact resolve-choice action inside the resident run executor", () => {
     resetResidentPlanPortfolioMemory();
     const resolveChoice = legalAction(
-      "runner.resolve_choice",
+      "rn",
       "runner",
       "resolve_choice",
       "Base-Link-Karte fuer Trace nutzen",
@@ -31127,7 +31034,7 @@ describe("plan-bound Trace Base-Link continuation", () => {
     delete priorInput.playerView.pendingChoice;
     priorInput.legalActions = [];
     priorInput.playerView.legalActions = [];
-    const runPlanInstanceId = "plan:runner.contest_remote:r1";
+    const runPlanInstanceId = "pdl5beuqtdrahr4fqagyng1zk5";
     rememberResidentPlanPortfolio(priorInput, {
       schemaVersion: "resident-plan-portfolio-v2",
       side: "runner",
@@ -31136,6 +31043,7 @@ describe("plan-bound Trace Base-Link continuation", () => {
       executorInstanceId: runPlanInstanceId,
       instances: [
         {
+ ...choicePlanFixture("runner.contest_remote", "r1", 69),
           instanceId: runPlanInstanceId,
           side: "runner",
           moduleId: "runner.contest_remote",
@@ -31205,7 +31113,7 @@ describe("plan-bound Trace success-cancel continuation", () => {
   it("keeps the exact success-cancel choice inside the resident run executor", () => {
     resetResidentPlanPortfolioMemory();
     const resolveChoice = legalAction(
-      "runner.resolve_choice",
+      "rn",
       "runner",
       "resolve_choice",
       "Trace-Erfolgseffekt canceln",
@@ -31298,7 +31206,7 @@ describe("plan-bound Trace success-cancel continuation", () => {
     delete priorInput.playerView.pendingChoice;
     priorInput.legalActions = [];
     priorInput.playerView.legalActions = [];
-    const runPlanInstanceId = "plan:runner.pressure_central:rd";
+    const runPlanInstanceId = "p38stoh90qlansmp2rmcijavgw";
     rememberResidentPlanPortfolio(priorInput, {
       schemaVersion: "resident-plan-portfolio-v2",
       side: "runner",
@@ -31307,6 +31215,7 @@ describe("plan-bound Trace success-cancel continuation", () => {
       executorInstanceId: runPlanInstanceId,
       instances: [
         {
+ ...choicePlanFixture("runner.pressure_central", "rd", 70),
           instanceId: runPlanInstanceId,
           side: "runner",
           moduleId: "runner.pressure_central",
@@ -31397,7 +31306,7 @@ describe("match_f291a822af543d48 Corp Ambush continuation", () => {
       },
     );
     const install = legalAction(
-      `corp.install_card.${source.instanceId}.new_remote.${source.instanceId}`,
+      `cc.${source.instanceId}.new_remote.${source.instanceId}`,
       "corp",
       "install_card",
       "Install Vacant Soulkiller in a new remote",
@@ -31445,19 +31354,15 @@ describe("match_f291a822af543d48 Corp Ambush continuation", () => {
     });
     const installedPortfolio = residentPlanPortfolioSnapshot(first);
     expect(installedPortfolio).toMatchObject({
-      rootForegroundInstanceId: expect.stringContaining(
-        "plan:corp.ambush_and_bluff:",
-      ),
-      executorInstanceId: expect.stringContaining(
-        "plan:corp.ambush_and_bluff:",
-      ),
+      rootForegroundInstanceId: planReferenceMatching(installedPortfolio?.instances, "corp.ambush_and_bluff"),
+      executorInstanceId: planReferenceMatching(installedPortfolio?.instances, "corp.ambush_and_bluff"),
       turnPlanExecutionLease: {
         currentBinding: { actionId: install.actionId },
       },
     });
 
     const advance = legalAction(
-      `corp.advance_card.${source.instanceId}.${source.instanceId}`,
+      `c2.${source.instanceId}.${source.instanceId}`,
       "corp",
       "advance_card",
       "Advance Vacant Soulkiller",
@@ -31468,7 +31373,7 @@ describe("match_f291a822af543d48 Corp Ambush continuation", () => {
       },
     );
     const installSupport = legalAction(
-      `corp.install_card.${support.instanceId}.r3.${support.instanceId}`,
+      `cc.${support.instanceId}.r3.${support.instanceId}`,
       "corp",
       "install_card",
       "Install Lesley Major in Remote 3",
@@ -31503,7 +31408,7 @@ describe("match_f291a822af543d48 Corp Ambush continuation", () => {
       },
     );
     const advanceVirusTestSite = legalAction(
-      `corp.advance_card.${virusTestSite.instanceId}.${virusTestSite.instanceId}`,
+      `c2.${virusTestSite.instanceId}.${virusTestSite.instanceId}`,
       "corp",
       "advance_card",
       "Advance Virus Test Site",
@@ -31514,7 +31419,7 @@ describe("match_f291a822af543d48 Corp Ambush continuation", () => {
       },
     );
     const advanceVaporOps = legalAction(
-      `corp.advance_card.${vaporOps.instanceId}.${vaporOps.instanceId}`,
+      `c2.${vaporOps.instanceId}.${vaporOps.instanceId}`,
       "corp",
       "advance_card",
       "Advance Vapor Ops",
@@ -32231,4 +32136,88 @@ function bindTestChoiceOffer(input: AiDecisionInput, action: LegalAction): void 
     maxSelections: choice.maxSelections,
     optionIds: choice.options.map((option) => option.id),
   }];
+}
+
+function planReferenceMatching(
+  instances: readonly PlanInstance[] | undefined,
+  moduleId: PlanInstance["moduleId"],
+  dedupeFragment?: string,
+) {
+  return expect.toBeOneOf(
+    (instances ?? [])
+      .filter((instance) =>
+        instance.moduleId === moduleId &&
+        (dedupeFragment === undefined || instance.dedupeKey.includes(dedupeFragment)),
+      )
+      .map((instance) => instance.instanceId),
+  );
+}
+
+function committedRunFixture(
+  input: AiDecisionInput,
+  rootPlanInstanceId: string,
+  moduleId: PlanModuleId,
+  actionType: LegalAction["type"],
+  actionId: string,
+) {
+  const stateIdentity = buildPlanningStateIdentity(input);
+  const rules = buildPlanningRulesContext({
+    rulesBaseline: CURRENT_RULES_BASELINE, formatProfileId: "test-format", cardPoolSnapshotId: "test-pool",
+  });
+  const action: LegalAction = {
+    ...legalAction(actionId, input.side, actionType, "Bound historical run action", { credits: 0, clicks: 0 }),
+    timingPoint: input.playerView.timingPoint,
+    expiresAtStateVersion: stateIdentity.stateVersion,
+  };
+  const invocation = buildCanonicalLegalActionInvocation({
+    stateIdentity, semanticActionType: actionType === "continue_run" ? "run.continue" : "run.start",
+    boundTargets: [{ slotId: "server", ordering: "single", values: [{ kind: "server", id: "r1" }] }],
+  });
+  const currentBinding = {
+    actionId, stateVersion: stateIdentity.stateVersion,
+    invocationKey: invocation.invocationKey, semanticActionSetFingerprint: "fixture-historical-run-action-set",
+  };
+  const plan: TurnPlan = {
+    schemaVersion: TURN_PLANNING_CONTRACT_SCHEMA_VERSION,
+    planId: "fixture-run-plan", side: input.side, turnKey: `${input.side}:1`,
+    stateIdentity, planningRulesFingerprint: rules.fingerprint,
+    evaluationRegistryVersion: TURN_PLAN_EVALUATION_REGISTRY_VERSION,
+    phases: [{
+      phaseId: "fixture-run-phase",
+      root: { planInstanceId: rootPlanInstanceId, moduleId, milestoneId: "run_started", provenance: "resident" },
+      rootAssessmentFingerprint: "fixture-run-assessment", entryFrameKey: "fixture-run-frame",
+      entryConditions: [], completionCondition: { code: "run_completed" }, supportLeaves: [],
+      nodes: [{ nodeId: "fixture-run-node", invocation, executionBinding: currentBinding, expectedStateDeltaCodes: ["run_started"] }],
+      protectedValueClaimIds: [], transition: { kind: "turn_end" },
+    }],
+    cursor: { phaseIndex: 0, nodeIndex: 0 }, priorityObligations: [], campaignValueClaims: [],
+    priorityCoverage: { requiredObligationIds: [], satisfiedObligationIds: [], violatedObligationIds: [], deferredObligationIds: [] },
+  };
+  const turnPlanCommitment = createTurnPlanCommitment({
+    plan, rulesContext: rules, runtimeInstanceId: "runner-turn-planner-runtime-v1",
+    nodeExpectations: [executionExpectationFromLegalAction({ nodeId: "fixture-run-node", legalAction: action, expectedStateDeltaCodes: ["run_started"] })],
+  });
+  return {
+    turnPlanCommitment,
+    turnPlanExecutionLease: {
+      leaseId: "fixture-run-lease", commitmentId: turnPlanCommitment.commitmentId, sourcePlanId: turnPlanCommitment.sourcePlanId,
+      phaseId: "fixture-run-phase", nodeId: "fixture-run-node", routeKey: turnPlanCommitment.nextExpectedTransition.routeKey,
+      stateIdentity, currentBinding, actionType, expectationId: turnPlanCommitment.nextExpectedTransition.expectationId,
+    },
+  };
+}
+
+function choicePlanFixture(moduleId: PlanModuleId, dedupeKey: string, stateVersion: number): PlanInstance {
+  return instantiatePlanProposal({
+    moduleId, moduleVersion: "1", dedupeKey,
+    side: moduleId.startsWith("corp.") ? "corp" : "runner",
+    strategyLineIds: [], executionClass: "bounded_sequence",
+    initialViability: "ready", persistencePolicy: "locked_sequence",
+    retentionPolicy: {
+      blockedStateVersionTtl: 8, dormantStateVersionTtl: 4, completedHistoryStateVersionTtl: 2,
+      abandonWhenTargetMissing: true, protectedWhileNeedOpen: true, protectedWhileCommitted: true,
+    },
+    phase: "resolve_bound_choice", milestone: "bound_choice_resolved", moduleState: {},
+    blockers: [], resumeConditions: [], completionConditions: [], abandonmentConditions: [], evidenceRefs: [],
+  }, stateVersion);
 }

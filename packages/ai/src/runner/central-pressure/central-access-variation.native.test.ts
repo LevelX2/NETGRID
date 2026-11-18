@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import {
   applyAction,
   createGameAfterSetup,
@@ -123,8 +124,8 @@ function variedAccess(state: GameState) {
       candidate.weight,
     ]),
   ).toEqual([
-    ["runner.start_run.hq", 1],
-    ["runner.start_run.rd", 1],
+    ["rs.hq", 1],
+    ["rs.rd", 1],
   ]);
 
   const result = applySimulationEngineSelection(
@@ -151,7 +152,7 @@ it("varies equal access lines across paired seeds and binds the actual run owner
     );
     expect(fixed).toMatchObject({
       selectionKind: "direct",
-      actionId: "runner.start_run.hq",
+      actionId: "rs.hq",
     });
 
     const result = variedAccess(state);
@@ -189,11 +190,11 @@ it("varies equal access lines across paired seeds and binds the actual run owner
       }),
     ).toMatchObject({
       selectionKind: "direct",
-      actionId: "runner.access_card",
+      actionId: "r0",
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:runner.pressure_central:central%3A" + serverId,
+            planInstanceIdForProposal({ moduleId: "runner.pressure_central", dedupeKey: `central:${serverId}` }),
           selectedPlan: { moduleId: "runner.convert_run_window" },
         },
       },
@@ -222,7 +223,7 @@ it("chooses the clearly safer R&D route directly when HQ has ICE", () => {
   });
   expect(decision).toMatchObject({
     selectionKind: "direct",
-    actionId: "runner.start_run.rd",
+    actionId: "rs.rd",
   });
   expect(state.aiTurnPlanRandomCounter ?? 0).toBe(0);
 });

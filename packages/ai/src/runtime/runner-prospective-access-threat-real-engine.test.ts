@@ -131,20 +131,20 @@ it("uses observed expose knowledge to reject sacrificing sole coverage to a paya
     "known_access_effect_prospective_rez_cost:2",
   );
   const unsafeTarget = evaluateRunnerRunTargets({ input: i }).find(
-    (target) => target.actionId === "runner.start_run.r1",
+    (target) => target.actionId === "rs.r1",
   )!;
   expect(unsafeTarget).toBeDefined();
   expect(unsafeTarget.accessPayoffContestable).toBe(false);
   expect(unsafeTarget.accessPayoffRequiresFunding).toBeUndefined();
   const decision = chooseAiAction(i);
-  expect(decision.actionId).not.toBe("runner.start_run.r1");
+  expect(decision.actionId).not.toBe("rs.r1");
   expect(i.legalActions.some((a) => a.actionId === decision.actionId)).toBe(
     true,
   );
   expect(decision.fallbackUsed).toBe(false);
   expect(
     decision.decisionDebug?.actionAlternatives?.find(
-      (a) => a.actionId === "runner.start_run.r1",
+      (a) => a.actionId === "rs.r1",
     )?.excluded,
   ).toBe(true);
   expect(JSON.stringify([i.playerView, i.legalActions])).toBe(before);

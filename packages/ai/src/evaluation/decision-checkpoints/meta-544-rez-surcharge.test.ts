@@ -50,11 +50,11 @@ for (const [game, index] of [[2, 259], [13, 198]] as const) {
         evidenceCodes: expect.arrayContaining(["terminal_remote_coverage:r1"]),
       });
       expect(decision.decisionDebug?.actionAlternatives).toContainEqual(expect.objectContaining({
-        actionId: "runner.start_run.hq",
-        whyNot: expect.arrayContaining(["candidate_plan:plan:runner.pressure_central:central%3Ahq:ready"]),
+        actionId: "rs.hq",
+        whyNot: expect.arrayContaining(["candidate_plan:pa7nez1ioecg7mf06q1uwqq57o:ready"]),
       }));
     } else {
-      expect(decision.actionId).toBe("runner.start_run.hq");
+      expect(decision.actionId).toBe("rs.hq");
       expect(plan?.selectedPlan?.moduleId).toBe("runner.pressure_central");
     }
     const action = input.legalActions.find(a => a.actionId === decision.actionId)!;

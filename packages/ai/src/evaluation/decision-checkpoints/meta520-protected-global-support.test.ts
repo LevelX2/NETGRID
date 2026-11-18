@@ -82,9 +82,11 @@ it("quotes protected placement but keeps the native scoring slot free, rezzes gl
     payload: { serverId: "new_remote" },
   });
   expect(chosen.fallbackUsed).toBe(false);
-  expect(chosen.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toContain(
-    "plan:corp.defend_servers:",
-  );
+  expect(
+    chosen.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === chosen.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+    )?.moduleId,
+  ).toBe("corp.defend_servers");
   expect(chosen.decisionDebug?.planFirstDecision?.route).toMatchObject({
     actionId: selectedAction.actionId,
     stateVersion: state.stateVersion,
@@ -112,9 +114,11 @@ it("quotes protected placement but keeps the native scoring slot free, rezzes gl
     nextInput.legalActions.find((a) => a.actionId === rez.actionId),
   ).toMatchObject({ type: "rez_card", source });
   expect(rez.fallbackUsed).toBe(false);
-  expect(rez.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toContain(
-    "plan:corp.defend_servers:",
-  );
+  expect(
+    rez.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === rez.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+    )?.moduleId,
+  ).toBe("corp.defend_servers");
   if (!rez.actionId) throw Error("native_rez_action_missing");
   result = applyAction(installed, {
     matchId: state.matchId,

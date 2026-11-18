@@ -112,7 +112,7 @@ function canonicalDefinition(id: number): CardDefinition {
 
 function action(type = "play_operation"): LegalAction {
   return {
-    actionId: "corp.play_operation.operation_1",
+    actionId: "ci.operation_1",
     side: "corp",
     type,
     label: "Play operation",

@@ -121,7 +121,7 @@ describe("Department rest-turn funding with a new Remote protection need", () =>
       stateIdentity,
       signal,
       actionId: signal.actionIds[0]!,
-      planInstanceId: "plan:corp.economy:native-bank-cycle",
+      planInstanceId: "pbvzi7n89vb00w56yjo6nh4puo",
     };
     const quote = corpHostedBankTurnPlanningQuote(params)!;
     expect(quote.campaignQuote).toMatchObject({
@@ -182,7 +182,14 @@ describe("Department rest-turn funding with a new Remote protection need", () =>
       expect(p?.selectedPlan?.moduleId).toBe("corp.economy");
       if (newRemoteOnly) {
         expect(action.payload?.hostedCreditAddAmount).toBe(3);
-        expect(p?.rootPlanInstanceId).toContain("economy-hosted-bank-cycle");
+        expect(
+          p?.portfolio.find(
+            (instance) => instance.instanceId === p?.rootPlanInstanceId,
+          ),
+        ).toMatchObject({
+          moduleId: "corp.economy",
+          dedupeKey: expect.stringContaining("economy-hosted-bank-cycle"),
+        });
       } else {
         expect(action.payload?.hostedCreditTakeAmount).toBe(3);
         const load = input.legalActions.find(

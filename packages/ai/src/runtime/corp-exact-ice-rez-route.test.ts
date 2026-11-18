@@ -123,9 +123,9 @@ describe("exact Corp ICE rez route", () => {
         decisionDebug: {
           planFirstDecision: {
             rootPlanInstanceId:
-              "plan:corp.defend_servers:server-defense-portfolio",
+              "penw02zfrkklof54c2nuye5att",
             leafExecutorInstanceId:
-              "plan:corp.defend_servers:server-defense-portfolio",
+              "penw02zfrkklof54c2nuye5att",
           },
         },
       });
@@ -315,9 +315,9 @@ describe("exact Corp ICE rez route", () => {
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           leafExecutorInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
         },
       },
     });
@@ -400,9 +400,9 @@ describe("exact Corp ICE rez route", () => {
         decisionDebug: {
           planFirstDecision: {
             rootPlanInstanceId:
-              "plan:corp.defend_servers:server-defense-portfolio",
+              "penw02zfrkklof54c2nuye5att",
             leafExecutorInstanceId:
-              "plan:corp.defend_servers:server-defense-portfolio",
+              "penw02zfrkklof54c2nuye5att",
           },
         },
       });
@@ -452,13 +452,13 @@ describe("exact Corp ICE rez route", () => {
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           leafExecutorInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           selectedStep: {
-            planInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+            planInstanceId: "penw02zfrkklof54c2nuye5att",
             stepId:
-              "plan:corp.defend_servers:server-defense-portfolio:allocate",
+              "penw02zfrkklof54c2nuye5att:allocate",
           },
         },
       },
@@ -925,9 +925,9 @@ describe("exact Corp ICE rez route", () => {
         planKind: "corp.defend_servers",
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           leafExecutorInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           route: {
             actionId: fixture.engineAction.actionId,
             semanticActionType: "corp_window.rez",
@@ -1001,9 +1001,9 @@ describe("exact Corp ICE rez route", () => {
         planKind: "corp.defend_servers",
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           leafExecutorInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           route: {
             actionId: fixture.engineAction.actionId,
             semanticActionType: "corp_window.rez",
@@ -1103,9 +1103,9 @@ describe("exact Corp ICE rez route", () => {
         planKind: "corp.defend_servers",
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           leafExecutorInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           route: {
             actionId: fixture.engineAction.actionId,
             semanticActionType: "corp_window.rez",
@@ -1173,9 +1173,9 @@ describe("exact Corp ICE rez route", () => {
         planKind: "corp.defend_servers",
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           leafExecutorInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           route: {
             actionId: fixture.engineAction.actionId,
             semanticActionType: "corp_window.rez",
@@ -1400,10 +1400,10 @@ describe("exact Corp ICE rez route", () => {
         planKind: "corp.defend_servers",
         planFirstDecision: {
           rootPlanInstanceId: expect.stringContaining(
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           ),
           leafExecutorInstanceId: expect.stringContaining(
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           ),
           route: {
             actionId: fixture.engineAction.actionId,

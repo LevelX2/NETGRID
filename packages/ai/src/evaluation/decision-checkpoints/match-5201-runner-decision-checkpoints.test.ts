@@ -20,7 +20,7 @@ describe("match 5201 runner decision checkpoints", () => {
       }
       cp.expectation = {
         ...cp.expectation,
-        acceptableActions: [{ actionId: "runner.draw_card" }],
+        acceptableActions: [{ actionId: "r8" }],
         planExecution: {
           acceptablePlanKinds: ["runner.defense_and_recovery"],
           acceptableCapabilities: ["build_required_hand_buffer"],
@@ -41,7 +41,7 @@ describe("match 5201 runner decision checkpoints", () => {
         portfolio.instances.some(
           (instance) =>
             instance.instanceId ===
-            "plan:runner.rig_and_coverage:coverage%3Abreaker_wall%3Arun%3Arunner.start_run.r1",
+            "peva6bp6lh8hz7bnk1xotgorx4",
         ),
       ).toBe(true);
       const state = structuredClone(cp.engine.testOnlyGameState);

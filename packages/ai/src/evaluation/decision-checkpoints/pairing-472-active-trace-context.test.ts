@@ -50,13 +50,13 @@ function restore(
   restoreResidentPlanPortfolioMemorySnapshot(captured.input, previousPortfolio);
 }
 
-const root = "plan:runner.pressure_central:central%3Ahq";
-const executor = "plan:runner.convert_run_window:run%3A162";
+const root = "pa7nez1ioecg7mf06q1uwqq57o";
+const executor = "p9nnvsnhbvwzjnsl1u4k0c830z";
 
 function expectContinuation(input: AiDecisionInput) {
   const decision = chooseAiAction(input);
   expect(decision).toMatchObject({
-    actionId: "runner.continue_run",
+    actionId: "r5",
     fallbackUsed: false,
     timeoutUsed: false,
   });
@@ -93,7 +93,7 @@ describe("pairing 472: active-run quotes retain current Engine trace support", (
   it("continues the actual warm HQ start after Corp declines without changing credits or rig", () => {
     const before = checkpoint(162);
     restore(before);
-    expect(chooseAiAction(before.input).actionId).toBe("runner.start_run.hq");
+    expect(chooseAiAction(before.input).actionId).toBe("rs.hq");
     expectContinuation(checkpoint(164).input);
   });
 
@@ -115,7 +115,7 @@ describe("pairing 472: active-run quotes retain current Engine trace support", (
         runnerRunRiskContractReassessment(captured.input, origin)?.decision,
       ).toBe("prefer_jack_out");
       expect(chooseAiAction(captured.input)).toMatchObject({
-        actionId: "runner.jack_out",
+        actionId: "rd",
         fallbackUsed: false,
         timeoutUsed: false,
       });

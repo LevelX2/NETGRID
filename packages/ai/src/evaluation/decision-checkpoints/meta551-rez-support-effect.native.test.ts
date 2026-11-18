@@ -103,8 +103,10 @@ describe("native action ICE rez-support current effect", () => {
       const { action, observedActionId, result } = decide(key);
       expect(action.actionId).toBe(observedActionId);
       expect(
-        result.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-      ).toMatch(/^plan:corp.defend_servers:/);
+        result.decisionDebug?.planFirstDecision?.portfolio.find(
+          (instance) => instance.instanceId === result.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+        )?.moduleId,
+      ).toBe("corp.defend_servers");
     },
   );
   it.each([

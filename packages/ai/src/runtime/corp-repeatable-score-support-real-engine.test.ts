@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import {
   applyAction,
   createGameAfterSetup,
@@ -118,7 +119,7 @@ it("executes two native activations with one rez and exact choices under the sam
         s.root.includes(target!),
       )!;
       expect(portfolio.executorInstanceId).toBe(
-        executor!.replace("%3Anew_remote", `%3A${installedServer.id}`),
+        planInstanceIdForProposal({ moduleId: "corp.score_agenda", dedupeKey: `agenda:${target}:${installedServer.id}` }),
       );
       executor = portfolio.executorInstanceId;
     }

@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import { chooseAiAction } from "../ai-runtime-public-entrypoints";
@@ -44,8 +45,8 @@ describe("meta 461 current-turn pump survives the future path projection", () =>
         fallbackUsed: false,
         decisionDebug: {
           planFirstDecision: {
-            rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-            leafExecutorInstanceId: `plan:runner.convert_run_window:run%3A${input.playerView.run!.runId}`,
+            rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+            leafExecutorInstanceId: planInstanceIdForProposal({ moduleId: "runner.convert_run_window", dedupeKey: `run:${input.playerView.run!.runId}` }),
             route: {
               actionId: pump.actionId,
               stateVersion: input.playerView.stateVersion,

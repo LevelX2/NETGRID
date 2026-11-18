@@ -42,7 +42,7 @@ it("binds the latest access-tax rez to the real HQ destination of the Archives r
   expect(decision.actionId).toBe(action.actionId);
   const plan = decision.decisionDebug!.planFirstDecision!;
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:corp.defend_servers:server-defense-portfolio",
+    "penw02zfrkklof54c2nuye5att",
   );
   expect(plan.leafExecutorInstanceId).toBe(plan.rootPlanInstanceId);
   expect(plan.route).toMatchObject({

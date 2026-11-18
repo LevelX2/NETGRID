@@ -402,8 +402,7 @@ export function assessCorpEconomyFundingRoute(
   const exactIncrementalScoreFunding =
     signal.kind === "parent_funding" &&
     signal.needId.startsWith("score-support:") &&
-    signal.parentPlanInstanceId?.startsWith("plan:corp.score_agenda:") ===
-      true &&
+    signal.parentPlanModuleId === "corp.score_agenda" &&
     signal.delegatedPriorityClass !== undefined &&
     signal.urgentForScore === true &&
     signal.scoreFundingMilestone?.deadline === "multi_turn" &&
@@ -429,8 +428,7 @@ export function assessCorpEconomyFundingRoute(
     signal.kind === "parent_funding" &&
     (signal.needId.startsWith("ambush-funding:") ||
       signal.needId.startsWith("ambush-defense-funding:")) &&
-    signal.parentPlanInstanceId?.startsWith("plan:corp.ambush_and_bluff:") ===
-      true &&
+    signal.parentPlanModuleId === "corp.ambush_and_bluff" &&
     signal.parentNeedId === signal.needId &&
     signal.delegatedPriorityClass === undefined &&
     (signal.parentPriorityClass === "P5" ||

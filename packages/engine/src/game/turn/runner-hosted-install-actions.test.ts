@@ -48,7 +48,7 @@ describe("runner hosted install action builders", () => {
 
       expect(action).toMatchObject({
         actionId:
-          "runner.install_card.runner_hosted_program.runner_hosted_program.runner_daemon_host",
+          "rc.runner_hosted_program.runner_hosted_program.runner_daemon_host",
         side: "runner",
         type: "install_card",
         label: "Hosted Program in Daemon Host hosten",

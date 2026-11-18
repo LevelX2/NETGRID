@@ -36,10 +36,10 @@ it.each([
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.actionId).toBe(bank.actionId);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       selectedPlan: {
         moduleId: "runner.credit_bank",
-        parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+        parentInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
         parentNeedId: "run-support:remote:r1",
       },
       route: {
@@ -68,7 +68,7 @@ it("preserves the funded run and holds the bank once the concrete need is gone",
     cp.runtime,
   );
   const decision = chooseAiAction(cp.input);
-  expect(decision.actionId).toBe("runner.start_run.r1");
+  expect(decision.actionId).toBe("rs.r1");
   expect(
     decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
   ).toBe("runner.contest_remote");

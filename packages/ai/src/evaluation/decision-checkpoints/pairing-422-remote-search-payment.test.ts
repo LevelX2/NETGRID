@@ -46,7 +46,7 @@ it("does not open an unfunded historical temporary search or accept its off-bran
   );
   const before = JSON.stringify(input);
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("runner.gain_credit");
+  expect(decision.actionId).toBe("rb");
   expect(decision.fallbackUsed).toBe(false);
   expect(
     residentPlanPortfolioSnapshot(input)?.pendingRunnerCostPenaltySupportOrigin,

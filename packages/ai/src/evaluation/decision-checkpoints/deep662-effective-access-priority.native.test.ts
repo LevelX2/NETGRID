@@ -43,7 +43,7 @@ it("does not demote a real HQ access route to the physical Archives information 
     (h) => h.actionId === route.actionId,
   )!;
   expect(head.rootPlanInstanceId).toBe(
-    "plan:runner.pressure_central:central%3Aarchives",
+    "p22f66p721g9dgs7gsawwpf6hs",
   );
   expect(head).toMatchObject({
     assessment: { effectivePriorityClass: "P4" },

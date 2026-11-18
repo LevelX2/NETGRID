@@ -39,7 +39,7 @@ describe("match MRGSG exact decision checkpoints", () => {
       }
       state.runner.credits = 10;
       fixture.expectation = {
-        acceptableActions: [{ actionId: "runner.start_run.r1" }],
+        acceptableActions: [{ actionId: "rs.r1" }],
         planExecution: {
           acceptablePlanKinds: ["runner.contest_remote"],
           acceptableCapabilities: ["contest_remote"],

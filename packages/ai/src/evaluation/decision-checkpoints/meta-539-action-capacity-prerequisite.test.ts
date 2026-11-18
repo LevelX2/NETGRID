@@ -59,7 +59,7 @@ it("publishes every agenda bound to the same actual action-capacity action", () 
   const first = candidates.find(
     (c) =>
       c.actionId ===
-      "corp.play_operation.c359.c359",
+      "ci.c359.c359",
   )!;
   const expected = [
     ...new Set(

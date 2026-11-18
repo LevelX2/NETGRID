@@ -48,7 +48,7 @@ describe("Disgruntled Ice Technician run-window checkpoint", () => {
       expectationId: "fnv1a:43abb6cc",
       currentBinding: {
         actionId:
-          "runner.break_subroutine.c7t.c7t.c7t.c2rx.0.0.48",
+          "r3.c7t.c7t.c7t.c2rx.0.0.48",
         stateVersion: 275,
         semanticActionSetFingerprint: "fnv1a:5911b86e",
         invocationKey: "fnv1a:95cb89ce",
@@ -63,8 +63,8 @@ describe("Disgruntled Ice Technician run-window checkpoint", () => {
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     const actionId =
-      "runner.trigger_ability.c10h.c10h.227";
-    const planInstanceId = "plan:runner.convert_run_window:run%3A273";
+      "rx.c10h.c10h.227";
+    const planInstanceId = "p8xoag81ubjl0frj7q8x82e7y8";
     expect(result.selectedAction).toMatchObject({
       actionId,
       source: "c10h",

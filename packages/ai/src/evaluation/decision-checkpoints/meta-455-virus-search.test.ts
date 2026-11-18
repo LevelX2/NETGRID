@@ -135,8 +135,10 @@ it("retains an affordable bound search despite an unaffordable breaker in hand",
   expect(decision.actionId).toBe(search.actionId);
   expect(decision.fallbackUsed).toBe(false);
   expect(
-    decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toContain("runner.rig_and_coverage");
+    decision.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    )?.moduleId,
+  ).toBe("runner.rig_and_coverage");
   expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({
     actionId: search.actionId,
     stateVersion: 59,

@@ -58,7 +58,7 @@ describe.each([
     restoreAiRuntimeCheckpoint(capture.input, deckSnapshotId!, capture.runtime);
 
     const decision = chooseAiAction(capture.input as AiDecisionInput);
-    expect(decision.actionId).toBe("corp.draw_card");
+    expect(decision.actionId).toBe("c8");
     expect(decision.decisionDebug?.planKind).toBe("corp.defend_servers");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
@@ -69,7 +69,7 @@ describe.each([
     expect(
       decision.decisionDebug?.planFirstDecision?.selectedPlan,
     ).toMatchObject({
-      instanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      instanceId: "penw02zfrkklof54c2nuye5att",
       moduleId: "corp.defend_servers",
       executionState: "executor",
     });
@@ -77,7 +77,7 @@ describe.each([
       decision.decisionDebug?.planFirstDecision?.turnPlanning?.selectedLine;
     expect(selectedLine?.cursor).toMatchObject({ phaseIndex: 0, nodeIndex: 0 });
     expect(selectedLine?.phases.at(0)).toMatchObject({
-      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
       rootModuleId: "corp.defend_servers",
       nodes: [{ semanticActionType: "draw.card" }],
     });
@@ -86,7 +86,7 @@ describe.each([
     ).toMatchObject({
       rematerialization: {
         status: "executable",
-        actionId: "corp.draw_card",
+        actionId: "c8",
       },
       observationClass: "scheduled_information_boundary",
     });
@@ -106,7 +106,7 @@ describe.each([
     );
     const decision = chooseAiAction(capture.input);
     expect(decision.actionId).toBe(
-      "corp.install_card.c3kd.r1.c3kd",
+      "cc.c3kd.r1.c3kd",
     );
     expect(decision.fallbackUsed).toBe(false);
     expect(
@@ -118,7 +118,7 @@ describe.each([
     expect(decision.decisionDebug?.actionAlternatives).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          actionId: "corp.draw_card",
+          actionId: "c8",
           excluded: true,
           whyNot: expect.arrayContaining([
             "explicitly_nonproductive:corp.hand_and_agenda_management:corp_exact_draw_projection_exceeds_hand_capacity",

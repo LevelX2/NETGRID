@@ -6290,7 +6290,7 @@
       "schemaVersion": "tactical-plan-v1",
       "memoryId": "match_606a546d0ba02826:corp:corp-ai-v0.9-hard",
       "side": "corp",
-      "planId": "corp.rez_defense:corp.rez_ice.c2th.c2th",
+      "planId": "corp.rez_defense:cq.c2th.c2th",
       "type": "corp.rez_defense",
       "status": "satisfied",
       "target": {
@@ -6298,7 +6298,7 @@
         "id": "rd"
       },
       "selectedStepKind": "rez_outer_ice",
-      "selectedActionId": "corp.rez_ice.c2th.c2th",
+      "selectedActionId": "cq.c2th.c2th",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -6312,7 +6312,7 @@
       "turnKey": "corp:turn:11",
       "interrupt": {
         "portfolioEntryId": "corp.rez_defense:server:rd",
-        "sourcePlanId": "corp.rez_defense:corp.rez_ice.c2th.c2th",
+        "sourcePlanId": "corp.rez_defense:cq.c2th.c2th",
         "planType": "corp.rez_defense",
         "side": "corp",
         "executionClass": "reactive_interrupt",
@@ -6328,7 +6328,7 @@
         "progress": 0.6,
         "selectedStepKind": "rez_outer_ice",
         "actionCandidateIds": [
-          "corp.rez_ice.c2th.c2th"
+          "cq.c2th.c2th"
         ],
         "cadence": {
           "turnKey": "corp:turn:11",
@@ -6342,12 +6342,12 @@
         },
         "updatedAtStateVersion": 129,
         "evidence": [
-          "plan_portfolio_source_plan:corp.rez_defense:corp.rez_ice.c2th.c2th",
+          "plan_portfolio_source_plan:corp.rez_defense:cq.c2th.c2th",
           "plan_portfolio_execution_class:reactive_interrupt",
           "plan_portfolio_role:reactive_interrupt",
           "plan_portfolio_lifecycle:active",
           "plan_portfolio_previous_entry:corp.rez_defense:server:rd",
-          "plan_portfolio_action_progress:corp.rez_ice.c2th.c2th"
+          "plan_portfolio_action_progress:cq.c2th.c2th"
         ]
       },
       "backgrounds": [
@@ -6369,10 +6369,10 @@
           "progress": 0.5,
           "selectedStepKind": "build_remote",
           "actionCandidateIds": [
-            "corp.install_card.c2ot.new_remote.c2ot",
-            "corp.install_card.c2ou.new_remote.c2ou",
-            "corp.install_card.c2rz.new_remote.c2rz",
-            "corp.install_card.c2x9.new_remote.c2x9"
+            "cc.c2ot.new_remote.c2ot",
+            "cc.c2ou.new_remote.c2ou",
+            "cc.c2rz.new_remote.c2rz",
+            "cc.c2x9.new_remote.c2x9"
           ],
           "cadence": {
             "turnKey": "corp:turn:11",
@@ -6453,7 +6453,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:corp.establish_scoring_remote|corp.establish_scoring_remote",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:corp.rez_ice.c2th.c2th"
+        "plan_portfolio_selected_action:cq.c2th.c2th"
       ]
     },
     "strategicIntent": {

@@ -8723,7 +8723,7 @@
         "id": "new_remote"
       },
       "selectedStepKind": "build_rez_reserve",
-      "selectedActionId": "corp.gain_credit",
+      "selectedActionId": "cb",
       "blockedBy": [
         "missing_remote_protection"
       ],
@@ -8756,7 +8756,7 @@
           "progress": 0.6,
           "selectedStepKind": "build_rez_reserve",
           "actionCandidateIds": [
-            "corp.gain_credit"
+            "cb"
           ],
           "cadence": {
             "turnKey": "corp:turn:16",
@@ -8775,7 +8775,7 @@
             "plan_portfolio_role:background",
             "plan_portfolio_lifecycle:active",
             "plan_portfolio_previous_entry:corp.establish_scoring_remote:server:new_remote",
-            "plan_portfolio_action_progress:corp.gain_credit",
+            "plan_portfolio_action_progress:cb",
             "plan_portfolio_carried_without_current_action:true"
           ]
         },
@@ -8835,7 +8835,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:corp.establish_scoring_remote|corp.establish_scoring_remote",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:corp.end_turn"
+        "plan_portfolio_selected_action:c9"
       ]
     },
     "strategicIntent": {

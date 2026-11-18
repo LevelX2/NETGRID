@@ -1567,7 +1567,7 @@ function runnerExactPayOrEndRunAccessRouteActionIds(
     .map((action) => ({
       action,
       indexes: parseSubroutineIndexes(
-        action.payload?.payOrEndRunSubroutineIndexes,
+        action.payOrEndRunSubroutineIndexes,
       ),
       unbrokenSubroutineCount: Number(
         action.payload?.unbrokenSubroutineCount ?? 0,
@@ -1870,11 +1870,9 @@ export function runnerCurrentEncounterRequiresProgramPreservingBreak(
     ) {
       return false;
     }
-    const quotedIds = action.payload.encounterSubroutineIds;
-    const ids =
-      typeof quotedIds === "string" ? quotedIds.split(",").filter(Boolean) : [];
+    const ids = action.encounterSubroutineIds;
     if (
-      typeof quotedIds !== "string" ||
+      !Array.isArray(ids) ||
       new Set(ids).size !== ids.length ||
       ids.length !== action.payload.unbrokenSubroutineCount ||
       ids.some((id) => !subroutines.some((subroutine) => subroutine.id === id))

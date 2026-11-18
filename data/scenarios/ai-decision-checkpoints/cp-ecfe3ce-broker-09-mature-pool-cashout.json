@@ -12673,7 +12673,7 @@
         "label": "R&D Interface"
       },
       "selectedStepKind": "install_development_card",
-      "selectedActionId": "runner.activated_card_ability.c29e.c29e.activated.0",
+      "selectedActionId": "r1.c29e.c29e.activated.0",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -12776,7 +12776,7 @@
         "plan_portfolio_foreground:runner.play_best_hand_card",
         "plan_portfolio_backgrounds:runner.build_credit_bank",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.activated_card_ability.c29e.c29e.activated.0"
+        "plan_portfolio_selected_action:r1.c29e.c29e.activated.0"
       ]
     },
     "strategicIntent": {
@@ -13908,10 +13908,10 @@
     "contractKind": "correctness",
     "acceptableActions": [
       {
-        "actionId": "runner.activated_card_ability.c29d.c29d.activated.441"
+        "actionId": "r1.c29d.c29d.activated.441"
       },
       {
-        "actionId": "runner.trigger_ability"
+        "actionId": "rx"
       }
     ]
   }

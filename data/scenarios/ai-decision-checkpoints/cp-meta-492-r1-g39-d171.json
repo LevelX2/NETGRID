@@ -621,7 +621,7 @@
           "label": "HQ",
           "ice": [
             {
-              "instanceId": "h1ebc9pb",
+              "instanceId": "hhq.i0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -898,7 +898,7 @@
           ],
           "root": [
             {
-              "instanceId": "h3euth4",
+              "instanceId": "hr1.r0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 2,
@@ -920,7 +920,7 @@
           "label": "Remote 2",
           "ice": [
             {
-              "instanceId": "h1wvwpxp",
+              "instanceId": "hr2.i0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -5925,7 +5925,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.gain_credit",
+          "actionId": "rb",
           "side": "runner",
           "type": "gain_credit",
           "label": "1 Credit nehmen",
@@ -5946,7 +5946,7 @@
           }
         },
         {
-          "actionId": "runner.draw_card",
+          "actionId": "r8",
           "side": "runner",
           "type": "draw_card",
           "label": "Karte ziehen",
@@ -5969,7 +5969,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c27d.c27d",
+          "actionId": "rc.c27d.c27d",
           "side": "runner",
           "type": "install_card",
           "label": "WuTech Mem Chip installieren",
@@ -5990,7 +5990,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c22h.c22h",
+          "actionId": "rc.c22h.c22h",
           "side": "runner",
           "type": "install_card",
           "label": "Bodyweight™ Data Crèche installieren",
@@ -6011,7 +6011,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c1ea.c1ea.runner_program_trash_before_install.c1rt.0.0",
+          "actionId": "rc.c1ea.c1ea.runner_program_trash_before_install.c1rt.0.0",
           "side": "runner",
           "type": "install_card",
           "label": "Codecracker mit Programmtrash installieren (Ohne Kartencredits)",
@@ -6036,7 +6036,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c1ea.c1ea.runner_program_trash_before_install.c1rt.1.1",
+          "actionId": "rc.c1ea.c1ea.runner_program_trash_before_install.c1rt.1.1",
           "side": "runner",
           "type": "install_card",
           "label": "Codecracker mit Programmtrash installieren (Mit Zetatech Software Installer: 1 Bit)",
@@ -6061,7 +6061,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c1ea.c1ea.runner_program_trash_before_install.c1rt.2.2",
+          "actionId": "rc.c1ea.c1ea.runner_program_trash_before_install.c1rt.2.2",
           "side": "runner",
           "type": "install_card",
           "label": "Codecracker mit Programmtrash installieren (Mit Zetatech Software Installer: 2 Bits)",
@@ -6086,7 +6086,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c2eh.c2eh",
+          "actionId": "rc.c2eh.c2eh",
           "side": "runner",
           "type": "install_card",
           "label": "The Short Circuit installieren",
@@ -6117,7 +6117,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1wa.c1wa.391",
+          "actionId": "rh.c1wa.c1wa.391",
           "side": "runner",
           "type": "play_event",
           "label": "Jack ’n’ Joe spielen",
@@ -6145,7 +6145,7 @@
           }
         },
         {
-          "actionId": "runner.activated_card_ability.c2bt.c2bt.c262.activated.450.c262",
+          "actionId": "r1.c2bt.c2bt.c262.activated.450.c262",
           "side": "runner",
           "type": "activated_card_ability",
           "label": "Junkyard BBS: oberste Trash-Karte in die Grip nehmen",
@@ -6174,7 +6174,7 @@
           }
         },
         {
-          "actionId": "runner.activated_card_ability.c2ex.c2ex.activated.466",
+          "actionId": "r1.c2ex.c2ex.activated.466",
           "side": "runner",
           "type": "activated_card_ability",
           "label": "Silicon Saloon Franchise: 1 Credit nehmen und 1 Karte ziehen",
@@ -6203,7 +6203,7 @@
           }
         },
         {
-          "actionId": "runner.trigger_ability",
+          "actionId": "rx",
           "side": "runner",
           "type": "trigger_ability",
           "label": "Run-Sperre für 2 Credits entfernen",
@@ -6226,7 +6226,7 @@
           }
         },
         {
-          "actionId": "runner.end_turn",
+          "actionId": "r9",
           "side": "runner",
           "type": "end_turn",
           "label": "Zug beenden",
@@ -8719,7 +8719,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "runner.gain_credit",
+        "actionId": "rb",
         "side": "runner",
         "type": "gain_credit",
         "label": "1 Credit nehmen",
@@ -8740,7 +8740,7 @@
         }
       },
       {
-        "actionId": "runner.draw_card",
+        "actionId": "r8",
         "side": "runner",
         "type": "draw_card",
         "label": "Karte ziehen",
@@ -8763,7 +8763,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c27d.c27d",
+        "actionId": "rc.c27d.c27d",
         "side": "runner",
         "type": "install_card",
         "label": "WuTech Mem Chip installieren",
@@ -8784,7 +8784,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c22h.c22h",
+        "actionId": "rc.c22h.c22h",
         "side": "runner",
         "type": "install_card",
         "label": "Bodyweight™ Data Crèche installieren",
@@ -8805,7 +8805,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c1ea.c1ea.runner_program_trash_before_install.c1rt.0.0",
+        "actionId": "rc.c1ea.c1ea.runner_program_trash_before_install.c1rt.0.0",
         "side": "runner",
         "type": "install_card",
         "label": "Codecracker mit Programmtrash installieren (Ohne Kartencredits)",
@@ -8830,7 +8830,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c1ea.c1ea.runner_program_trash_before_install.c1rt.1.1",
+        "actionId": "rc.c1ea.c1ea.runner_program_trash_before_install.c1rt.1.1",
         "side": "runner",
         "type": "install_card",
         "label": "Codecracker mit Programmtrash installieren (Mit Zetatech Software Installer: 1 Bit)",
@@ -8855,7 +8855,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c1ea.c1ea.runner_program_trash_before_install.c1rt.2.2",
+        "actionId": "rc.c1ea.c1ea.runner_program_trash_before_install.c1rt.2.2",
         "side": "runner",
         "type": "install_card",
         "label": "Codecracker mit Programmtrash installieren (Mit Zetatech Software Installer: 2 Bits)",
@@ -8880,7 +8880,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c2eh.c2eh",
+        "actionId": "rc.c2eh.c2eh",
         "side": "runner",
         "type": "install_card",
         "label": "The Short Circuit installieren",
@@ -8911,7 +8911,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1wa.c1wa.391",
+        "actionId": "rh.c1wa.c1wa.391",
         "side": "runner",
         "type": "play_event",
         "label": "Jack ’n’ Joe spielen",
@@ -8939,7 +8939,7 @@
         }
       },
       {
-        "actionId": "runner.activated_card_ability.c2bt.c2bt.c262.activated.450.c262",
+        "actionId": "r1.c2bt.c2bt.c262.activated.450.c262",
         "side": "runner",
         "type": "activated_card_ability",
         "label": "Junkyard BBS: oberste Trash-Karte in die Grip nehmen",
@@ -8968,7 +8968,7 @@
         }
       },
       {
-        "actionId": "runner.activated_card_ability.c2ex.c2ex.activated.466",
+        "actionId": "r1.c2ex.c2ex.activated.466",
         "side": "runner",
         "type": "activated_card_ability",
         "label": "Silicon Saloon Franchise: 1 Credit nehmen und 1 Karte ziehen",
@@ -8997,7 +8997,7 @@
         }
       },
       {
-        "actionId": "runner.trigger_ability",
+        "actionId": "rx",
         "side": "runner",
         "type": "trigger_ability",
         "label": "Run-Sperre für 2 Credits entfernen",
@@ -9020,7 +9020,7 @@
         }
       },
       {
-        "actionId": "runner.end_turn",
+        "actionId": "r9",
         "side": "runner",
         "type": "end_turn",
         "label": "Zug beenden",
@@ -9074,7 +9074,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 170,
-      "sideSafePlanningFingerprint": "fnv1a:41acd6f6"
+      "sideSafePlanningFingerprint": "fnv1a:cb5ef422"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_last_call_at_rd_1.0.0",
@@ -14994,7 +14994,7 @@
       "stateVersion": 162,
       "instances": [
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "dedupeKey": "standard-turn-completion",
           "moduleId": "runner.complete_turn",
           "moduleVersion": "1",
@@ -15023,7 +15023,7 @@
           "moduleState": {
             "kind": "turn_completion",
             "standardEndTurnActionIds": [
-              "runner.end_turn"
+              "r9"
             ]
           },
           "blockers": [],
@@ -15056,7 +15056,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.credit_bank:c2du",
+          "instanceId": "pdin4oozyixvgjj7nwrfzuxa5j",
           "dedupeKey": "c2du",
           "moduleId": "runner.credit_bank",
           "moduleVersion": "1",
@@ -15151,7 +15151,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.recurring_economy:c2g1",
+          "instanceId": "p5nnjkv24r4ypazzpv4hugqk7k",
           "dedupeKey": "c2g1",
           "moduleId": "runner.recurring_economy",
           "moduleVersion": "1",
@@ -15260,55 +15260,55 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "stateVersion": 162,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.credit_bank:c2du",
+          "instanceId": "pdin4oozyixvgjj7nwrfzuxa5j",
           "stateVersion": 162,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.recurring_economy:c2g1",
+          "instanceId": "p5nnjkv24r4ypazzpv4hugqk7k",
           "stateVersion": 162,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac2bt",
+          "instanceId": "p63s0ijmgg9uonto2uyza36kh2",
           "stateVersion": 162,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac2eh",
+          "instanceId": "p63v1950npz0f2zwayf80ejas5",
           "stateVersion": 162,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.economy:economy-liquidity-development%3Arunner%3A21",
+          "instanceId": "p5nnwot4b8cx2qkb5seh9whsb3",
           "stateVersion": 162,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.economy:runner-portfolio-credit-reserve",
+          "instanceId": "pc7ebuiw5dxhlbzbf1nhcs4p4z",
           "stateVersion": 162,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ard",
+          "instanceId": "pa90fufw9vc5bkshp96ztlryxl",
           "stateVersion": 162,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "stateVersion": 162,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
@@ -15321,7 +15321,7 @@
         "commitmentId": "fnv1a:0ab796dd",
         "sourcePlanId": "fnv1a:aef8bdf9",
         "sourceLineHash": "fnv1a:668ec51a",
-        "sequenceRootPlanInstanceId": "plan:runner.complete_turn:standard-turn-completion",
+        "sequenceRootPlanInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
         "side": "runner",
         "turnKey": "runner:turn:21",
         "planningRulesFingerprint": "fnv1a:697f22b3",
@@ -15338,7 +15338,7 @@
           {
             "phaseId": "fnv1a:e4361946",
             "root": {
-              "planInstanceId": "plan:runner.complete_turn:standard-turn-completion",
+              "planInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
               "moduleId": "runner.complete_turn",
               "milestoneId": "complete_turn_after_productive_routes_exhausted",
               "provenance": "resident"
@@ -15427,7 +15427,7 @@
           "sideSafePlanningFingerprint": "fnv1a:ae7765ed"
         },
         "currentBinding": {
-          "actionId": "runner.end_turn",
+          "actionId": "r9",
           "stateVersion": 162,
           "semanticActionSetFingerprint": "fnv1a:1237c312",
           "invocationKey": "fnv1a:9d7b54d8"
@@ -15435,8 +15435,8 @@
         "actionType": "end_turn",
         "expectationId": "fnv1a:75c18b89"
       },
-      "rootForegroundInstanceId": "plan:runner.complete_turn:standard-turn-completion",
-      "executorInstanceId": "plan:runner.complete_turn:standard-turn-completion"
+      "rootForegroundInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
+      "executorInstanceId": "p2ut8j92he0i09lc4xwtln5iys"
     }
   },
   "validation": {

@@ -4037,7 +4037,7 @@
       "stateVersion": 3,
       "instances": [
         {
-          "instanceId": "plan:corp.defend_servers:server-defense-portfolio",
+          "instanceId": "penw02zfrkklof54c2nuye5att",
           "dedupeKey": "server-defense-portfolio",
           "moduleId": "corp.defend_servers",
           "moduleVersion": "1",
@@ -4068,21 +4068,21 @@
             "signals": [
               {
                 "kind": "generic",
-                "defenseId": "install:rd:corp.install_card.cl1.rd.cl1.0",
+                "defenseId": "install:rd:cc.cl1.rd.cl1.0",
                 "serverId": "rd",
                 "phase": "install_ice",
                 "sourceDefinitionIds": [
                   94
                 ],
                 "actionIds": [
-                  "corp.install_card.cl1.rd.cl1.0"
+                  "cc.cl1.rd.cl1.0"
                 ],
                 "urgent": true,
                 "installRoute": {
                   "disposition": "funding_only",
                   "projection": {
                     "knowledge": "known",
-                    "actionId": "corp.install_card.cl1.rd.cl1.0",
+                    "actionId": "cc.cl1.rd.cl1.0",
                     "sourceCardInstanceId": "cl1",
                     "sourceDefinitionId": 94,
                     "targetServerId": "rd",
@@ -4221,25 +4221,25 @@
                   }
                 },
                 "value": 1,
-                "evidenceCode": "corp_defense_exact_route_funding_required:rd:corp.install_card.cl1.rd.cl1.0"
+                "evidenceCode": "corp_defense_exact_route_funding_required:rd:cc.cl1.rd.cl1.0"
               },
               {
                 "kind": "generic",
-                "defenseId": "install:rd:corp.install_card.cgu.rd.cgu.0",
+                "defenseId": "install:rd:cc.cgu.rd.cgu.0",
                 "serverId": "rd",
                 "phase": "install_ice",
                 "sourceDefinitionIds": [
                   75
                 ],
                 "actionIds": [
-                  "corp.install_card.cgu.rd.cgu.0"
+                  "cc.cgu.rd.cgu.0"
                 ],
                 "urgent": true,
                 "installRoute": {
                   "disposition": "funding_only",
                   "projection": {
                     "knowledge": "known",
-                    "actionId": "corp.install_card.cgu.rd.cgu.0",
+                    "actionId": "cc.cgu.rd.cgu.0",
                     "sourceCardInstanceId": "cgu",
                     "sourceDefinitionId": 75,
                     "targetServerId": "rd",
@@ -4378,25 +4378,25 @@
                   }
                 },
                 "value": 1,
-                "evidenceCode": "corp_defense_exact_route_funding_required:rd:corp.install_card.cgu.rd.cgu.0"
+                "evidenceCode": "corp_defense_exact_route_funding_required:rd:cc.cgu.rd.cgu.0"
               },
               {
                 "kind": "generic",
-                "defenseId": "install:rd:corp.install_card.cmt.rd.cmt.0",
+                "defenseId": "install:rd:cc.cmt.rd.cmt.0",
                 "serverId": "rd",
                 "phase": "install_ice",
                 "sourceDefinitionIds": [
                   102
                 ],
                 "actionIds": [
-                  "corp.install_card.cmt.rd.cmt.0"
+                  "cc.cmt.rd.cmt.0"
                 ],
                 "urgent": true,
                 "installRoute": {
                   "disposition": "productive",
                   "projection": {
                     "knowledge": "known",
-                    "actionId": "corp.install_card.cmt.rd.cmt.0",
+                    "actionId": "cc.cmt.rd.cmt.0",
                     "sourceCardInstanceId": "cmt",
                     "sourceDefinitionId": 102,
                     "targetServerId": "rd",
@@ -4553,21 +4553,21 @@
               },
               {
                 "kind": "generic",
-                "defenseId": "install:rd:corp.install_card.clp.rd.clp.0",
+                "defenseId": "install:rd:cc.clp.rd.clp.0",
                 "serverId": "rd",
                 "phase": "install_ice",
                 "sourceDefinitionIds": [
                   97
                 ],
                 "actionIds": [
-                  "corp.install_card.clp.rd.clp.0"
+                  "cc.clp.rd.clp.0"
                 ],
                 "urgent": true,
                 "installRoute": {
                   "disposition": "funding_only",
                   "projection": {
                     "knowledge": "known",
-                    "actionId": "corp.install_card.clp.rd.clp.0",
+                    "actionId": "cc.clp.rd.clp.0",
                     "sourceCardInstanceId": "clp",
                     "sourceDefinitionId": 97,
                     "targetServerId": "rd",
@@ -4706,7 +4706,7 @@
                   }
                 },
                 "value": 1,
-                "evidenceCode": "corp_defense_exact_route_funding_required:rd:corp.install_card.clp.rd.clp.0"
+                "evidenceCode": "corp_defense_exact_route_funding_required:rd:cc.clp.rd.clp.0"
               }
             ],
             "centralAllocation": {
@@ -4792,7 +4792,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.hand_and_agenda_management:draw-for-score-material",
+          "instanceId": "p13oe6jmk9id0pfdx7x2bne8ui",
           "dedupeKey": "draw-for-score-material",
           "moduleId": "corp.hand_and_agenda_management",
           "moduleVersion": "1",
@@ -4878,19 +4878,19 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:corp.defend_servers:server-defense-portfolio",
+          "instanceId": "penw02zfrkklof54c2nuye5att",
           "stateVersion": 3,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.hand_and_agenda_management:draw-for-score-material",
+          "instanceId": "p13oe6jmk9id0pfdx7x2bne8ui",
           "stateVersion": 3,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.defend_servers:server-defense-portfolio",
+          "instanceId": "penw02zfrkklof54c2nuye5att",
           "stateVersion": 3,
           "reason": "executor_selected",
           "fromExecutionState": "idle",
@@ -4898,15 +4898,15 @@
           "detailCode": "validated_scheduler_selection"
         }
       ],
-      "rootForegroundInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
-      "executorInstanceId": "plan:corp.defend_servers:server-defense-portfolio"
+      "rootForegroundInstanceId": "penw02zfrkklof54c2nuye5att",
+      "executorInstanceId": "penw02zfrkklof54c2nuye5att"
     }
   },
   "expectation": {
     "contractKind": "correctness",
     "acceptableActions": [
       {
-        "actionId": "corp.install_card.cim.hq.cim.0"
+        "actionId": "cc.cim.hq.cim.0"
       }
     ],
     "forbiddenActions": [

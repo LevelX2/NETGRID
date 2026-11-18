@@ -641,7 +641,7 @@ describe("StrategicIntentState contract", () => {
           observedAtStateVersion: 42,
           reason: "phase_change",
           evidenceCodes: ["phase_changed"],
-          actionIds: ["runner.start_run.rd"],
+          actionIds: ["rs.rd"],
         } as never,
       });
     } catch (error) {

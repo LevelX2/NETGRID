@@ -1,4 +1,3 @@
-import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { expect, it } from "vitest";
 import checkpointJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-pairing-422-score-before-reserve-d189.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -30,7 +29,7 @@ it("preserves current terminal R&D defense instead of emptying its bank for a no
   )!;
   expect(score.costs).toEqual([]);
   expect(
-    input.legalActions.find((action) => action.actionId === "corp.gain_credit"),
+    input.legalActions.find((action) => action.actionId === "cb"),
   ).toMatchObject({
     costs: [{ clicks: 1 }],
     payload: { gainCreditsAmount: 1 },
@@ -42,7 +41,7 @@ it("preserves current terminal R&D defense instead of emptying its bank for a no
     runtime,
   );
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("corp.gain_credit");
+  expect(decision.actionId).toBe("cb");
   expect(decision.fallbackUsed).toBe(false);
   const portfolio = residentPlanPortfolioSnapshot(input)!;
   const root = portfolio.instances.find(
@@ -52,10 +51,12 @@ it("preserves current terminal R&D defense instead of emptying its bank for a no
   const scoreOwner = portfolio.instances.find(
     (p) =>
       p.moduleId === "corp.score_agenda" &&
-      referencesDefaultDeckCard(p.instanceId, 408),
+      (p.moduleState as { signal: CorpScoreProjectSignal }).signal
+        .agendaInstanceId === score.source,
   )!;
   expect(scoreOwner.moduleState).toMatchObject({
     signal: {
+      agendaDefinitionId: 408,
       feasible: false,
       evidenceCode: expect.stringContaining(
         "corp_same_turn_score_consumes_funded_defense_reserve",
@@ -101,8 +102,7 @@ it.each([
   if (variant === "more_clicks") input.playerView.own.clicks = 2;
   if (variant === "terminal_score") project.terminalScore = true;
   if (variant === "expired_score") score.expiresAtStateVersion--;
-  if (variant === "ordinary_agenda")
-    project.agendaDefinitionId = 415;
+  if (variant === "ordinary_agenda") project.agendaDefinitionId = 415;
   const candidates = buildActionSemanticCandidates({
     legalActions: input.legalActions,
     observerSide: "corp",
@@ -123,5 +123,5 @@ it.each([
   }
   expect([
     ...corpBasicCreditsDominatedByCurrentScore(input, candidates, [project]),
-  ]).toEqual(variant === "last_credit" ? ["corp.gain_credit"] : []);
+  ]).toEqual(variant === "last_credit" ? ["cb"] : []);
 });

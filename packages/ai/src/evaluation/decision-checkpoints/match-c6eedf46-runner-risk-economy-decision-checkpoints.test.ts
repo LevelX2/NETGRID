@@ -15,7 +15,7 @@ describe("match C6EEDF46 runner risk and economy checkpoints", () => {
       result.decision?.decisionDebug?.planFirstDecision?.executionOrigin
         ?.rootPlanInstanceId,
     ).toBe(
-      "plan:runner.develop_board_and_hand:card%3Ac262",
+      "p5z2ln29lay17a04vka37ijdpk",
     );
   });
 
@@ -66,7 +66,7 @@ describe("match C6EEDF46 runner risk and economy checkpoints", () => {
     expect(
       result.decision?.decisionDebug?.planFirstDecision?.executionOrigin
         ?.rootPlanInstanceId,
-    ).toBe("plan:runner.economy:runner-portfolio-credit-reserve");
+    ).toBe("pc7ebuiw5dxhlbzbf1nhcs4p4z");
   });
 
   it("does not expose the later damage cards to the historical decision", () => {

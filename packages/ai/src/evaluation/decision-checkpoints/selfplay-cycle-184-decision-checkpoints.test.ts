@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import type { AiDecisionInput, PublicGameEvent } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
@@ -35,16 +36,16 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     const decision = chooseAiAction(capture.input as AiDecisionInput);
 
     expect(decision).toMatchObject({
-      actionId: "runner.jack_out",
+      actionId: "rd",
       reasonCode: "plan_first.runner.convert_run_window",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId: "plan:runner.pressure_central:central%3Ard",
-          leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A39",
+          rootPlanInstanceId: "pa90fufw9vc5bkshp96ztlryxl",
+          leafExecutorInstanceId: "p8l9o3a4wu64kq0q8ujn2ck7ze",
           selectedStep: {
-            planInstanceId: "plan:runner.convert_run_window:run%3A39",
-            parentInstanceId: "plan:runner.pressure_central:central%3Ard",
+            planInstanceId: "p8l9o3a4wu64kq0q8ujn2ck7ze",
+            parentInstanceId: "pa90fufw9vc5bkshp96ztlryxl",
           },
           route: {
             actionType: "jack_out",
@@ -74,15 +75,15 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     const decision = chooseAiAction(capture.input as AiDecisionInput);
 
     expect(decision).toMatchObject({
-      actionId: "runner.gain_credit",
+      actionId: "rb",
       reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:runner.economy:runner-portfolio-credit-reserve",
+            "pc7ebuiw5dxhlbzbf1nhcs4p4z",
           leafExecutorInstanceId:
-            "plan:runner.economy:runner-portfolio-credit-reserve",
+            "pc7ebuiw5dxhlbzbf1nhcs4p4z",
           route: {
             actionType: "gain_credit",
             capabilityId: "gain_general_liquid_credits",
@@ -109,20 +110,20 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     const decision = chooseAiAction(capture.input as AiDecisionInput);
 
     expect(decision).toMatchObject({
-      actionId: "runner.draw_card",
+      actionId: "r8",
       reasonCode: "plan_first.runner.defense_and_recovery",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId: "plan:runner.defense_and_recovery:runner",
-          leafExecutorInstanceId: "plan:runner.defense_and_recovery:runner",
+          rootPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
+          leafExecutorInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
           route: {
             actionType: "draw_card",
             capabilityId: "build_required_hand_buffer",
           },
           portfolio: expect.arrayContaining([
             expect.objectContaining({
-              instanceId: "plan:runner.contest_remote:remote%3Ar4",
+              instanceId: "p1p4yckp6i4g3ary7tvf4z4aeg",
               viability: "blocked",
               evidenceCodes: expect.arrayContaining([
                 "runner_critical_damage_remote_contest_requires_hand_buffer:r4",
@@ -146,20 +147,20 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     const decision = chooseAiAction(capture.input as AiDecisionInput);
 
     expect(decision).toMatchObject({
-      actionId: "runner.draw_card",
+      actionId: "r8",
       reasonCode: "plan_first.runner.defense_and_recovery",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId: "plan:runner.defense_and_recovery:runner",
-          leafExecutorInstanceId: "plan:runner.defense_and_recovery:runner",
+          rootPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
+          leafExecutorInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
           route: {
             actionType: "draw_card",
             capabilityId: "build_required_hand_buffer",
           },
           portfolio: expect.arrayContaining([
             expect.objectContaining({
-              instanceId: "plan:runner.pressure_central:central%3Ard",
+              instanceId: "pa90fufw9vc5bkshp96ztlryxl",
               viability: "blocked",
               evidenceCodes: expect.arrayContaining([
                 "runner_confirmed_damage_central_pressure_requires_hand_buffer:rd",
@@ -249,16 +250,16 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     );
     const decision = chooseAiAction(input as AiDecisionInput);
     expect(decision).toMatchObject({
-      actionId: "runner.start_run.r1",
+      actionId: "rs.r1",
       reasonCode: "plan_first.runner.contest_remote",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+          rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
           leafExecutorInstanceId:
-            "plan:runner.contest_remote:remote%3Ar1",
+            "p1p4xezjcxov79rno40lq3f7rv",
           selectedStep: {
-            planInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+            planInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
           },
           route: { actionType: "start_run", capabilityId: "contest_remote" },
         },
@@ -321,7 +322,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     bindPublicBoardStealQuoteCompanion(capture.input);
     expect(
       evaluateRunnerRunTargets({ input: capture.input }).find(
-        (target) => target.actionId === "runner.start_run.r1",
+        (target) => target.actionId === "rs.r1",
       )?.pathPassability,
     ).toBe("blocked_by_visible_damage_hand_buffer");
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
@@ -332,14 +333,14 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     const decision = chooseAiAction(capture.input as AiDecisionInput);
 
     expect(decision).toMatchObject({
-      actionId: "runner.start_run.r1",
+      actionId: "rs.r1",
       reasonCode: "plan_first.runner.contest_remote",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+          rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
           leafExecutorInstanceId:
-            "plan:runner.contest_remote:remote%3Ar1",
+            "p1p4xezjcxov79rno40lq3f7rv",
           route: {
             actionType: "start_run",
             capabilityId: "contest_remote",
@@ -366,7 +367,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     };
     continuation.legalActions = [
       {
-        actionId: "runner.continue_run",
+        actionId: "r5",
         side: "runner",
         type: "continue_run",
         label: "Run fortsetzen",
@@ -379,7 +380,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
         payload: { serverId: "r1" },
       },
       {
-        actionId: "runner.jack_out",
+        actionId: "rd",
         side: "runner",
         type: "jack_out",
         label: "Jack-out",
@@ -397,19 +398,19 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     );
 
     expect(continuationDecision).toMatchObject({
-      actionId: "runner.continue_run",
+      actionId: "r5",
       reasonCode: "plan_first.runner.convert_run_window",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+          rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
           leafExecutorInstanceId:
-            `plan:runner.convert_run_window:run%3A${continuation.playerView.run.runId}`,
+            planInstanceIdForProposal({ moduleId: "runner.convert_run_window", dedupeKey: `run:${continuation.playerView.run.runId}` }),
           selectedStep: {
-            parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+            parentInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
           },
           route: {
-            actionId: "runner.continue_run",
+            actionId: "r5",
             actionType: "continue_run",
           },
         },
@@ -481,13 +482,13 @@ describe("selfplay cycle 184 decision checkpoints", () => {
       repeatAfterFailedPath as AiDecisionInput,
     );
 
-    expect(repeatDecision.actionId).not.toBe("runner.start_run.r1");
+    expect(repeatDecision.actionId).not.toBe("rs.r1");
     expect(
       repeatDecision.decisionDebug?.planFirstDecision?.dispositions,
     ).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          actionId: "runner.start_run.r1",
+          actionId: "rs.r1",
           disposition: "explicitly_nonproductive",
           ownerModuleId: "runner.contest_remote",
           evidenceCode:

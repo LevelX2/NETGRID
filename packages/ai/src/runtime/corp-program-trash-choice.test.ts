@@ -207,7 +207,7 @@ function fixture(): {
   } as unknown as AiDecisionInput;
   const choice = input.playerView.pendingChoice!;
   const action = {
-    actionId: "corp.resolve_choice",
+    actionId: "cn",
     side: "corp",
     type: "resolve_choice",
     label: "Resolve choice",

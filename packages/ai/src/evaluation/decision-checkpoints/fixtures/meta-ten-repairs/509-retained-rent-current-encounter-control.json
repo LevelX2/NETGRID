@@ -8,7 +8,7 @@
   "creditsAfterRun": 9,
   "rows": [
     {
-      "actionId": "runner.pump_breaker.c6y.c6y.c6y.c2tq.41",
+      "actionId": "rj.c6y.c6y.c6y.c2tq.41",
       "type": "pump_breaker",
       "version": 112,
       "hash": "fnv1a:81ccc3fd",
@@ -18,7 +18,7 @@
       ]
     },
     {
-      "actionId": "runner.break_subroutine.c6y.c6y.c6y.c2tq.0.0.40",
+      "actionId": "r3.c6y.c6y.c6y.c2tq.0.0.40",
       "type": "break_subroutine",
       "version": 113,
       "hash": "fnv1a:4453478a",
@@ -28,7 +28,7 @@
       ]
     },
     {
-      "actionId": "runner.continue_run",
+      "actionId": "r5",
       "type": "continue_run",
       "version": 114,
       "hash": "fnv1a:c8d31b5e",
@@ -38,7 +38,7 @@
       ]
     },
     {
-      "actionId": "runner.continue_run",
+      "actionId": "r5",
       "type": "continue_run",
       "version": 115,
       "hash": "fnv1a:2e431dac",
@@ -48,7 +48,7 @@
       ]
     },
     {
-      "actionId": "corp.decline_rez.rd",
+      "actionId": "c6.rd",
       "type": "decline_rez",
       "version": 116,
       "hash": "fnv1a:f4ff21e6",
@@ -58,7 +58,7 @@
       ]
     },
     {
-      "actionId": "corp.decline_rez",
+      "actionId": "c6",
       "type": "decline_rez",
       "version": 117,
       "hash": "fnv1a:0ce8b27e",
@@ -68,7 +68,7 @@
       ]
     },
     {
-      "actionId": "runner.break_subroutine.c6y.c6y.c6y.clj.0.0.40",
+      "actionId": "r3.c6y.c6y.c6y.clj.0.0.40",
       "type": "break_subroutine",
       "version": 118,
       "hash": "fnv1a:ea327b3d",
@@ -78,7 +78,7 @@
       ]
     },
     {
-      "actionId": "runner.continue_run",
+      "actionId": "r5",
       "type": "continue_run",
       "version": 119,
       "hash": "fnv1a:9ef4cd9a",
@@ -88,7 +88,7 @@
       ]
     },
     {
-      "actionId": "runner.continue_run",
+      "actionId": "r5",
       "type": "continue_run",
       "version": 120,
       "hash": "fnv1a:4d748e73",
@@ -98,7 +98,7 @@
       ]
     },
     {
-      "actionId": "corp.decline_rez.rd",
+      "actionId": "c6.rd",
       "type": "decline_rez",
       "version": 121,
       "hash": "fnv1a:fe54f45e",
@@ -108,7 +108,7 @@
       ]
     },
     {
-      "actionId": "runner.access_card",
+      "actionId": "r0",
       "type": "access_card",
       "version": 122,
       "hash": "fnv1a:9fad90e4",

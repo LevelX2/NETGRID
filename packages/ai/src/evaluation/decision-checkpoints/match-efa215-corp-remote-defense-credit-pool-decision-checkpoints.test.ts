@@ -13,7 +13,7 @@ describe("match EFA215 Corp remote-defense credit-pool decision checkpoints", ()
     const protectedRemote = fixture(projectBabylonCreditPoolJson);
     protectedRemote.expectation.acceptableActions = [
       {
-        actionId: `corp.advance_card.${PROJECT_BABYLON}.${PROJECT_BABYLON}`,
+        actionId: `c2.${PROJECT_BABYLON}.${PROJECT_BABYLON}`,
       },
     ];
     protectedRemote.expectation.planExecution = {

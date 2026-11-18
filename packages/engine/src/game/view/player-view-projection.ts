@@ -358,7 +358,12 @@ export function buildPlayerViewProjection(
           : {}),
         ...(state.run.secretSpendGuessRunAutoPassIceId
           ? {
-              pendingAutoPassIceId: state.run.secretSpendGuessRunAutoPassIceId,
+              pendingAutoPassIceId: visibleCorpCard(
+                state,
+                state.run.secretSpendGuessRunAutoPassIceId,
+                side,
+                "ice",
+              ).instanceId,
             }
           : {}),
         ...(state.run.bypassFirstIceRemaining !== undefined

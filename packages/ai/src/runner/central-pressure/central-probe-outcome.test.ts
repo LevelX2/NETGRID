@@ -40,7 +40,7 @@ describe("central information admission after an observed free stop", () => {
       const serverId =
         transition === "decline" || transition === "hosted" ? "hq" : "rd";
       const target = evaluateRunnerRunTargets({ input }).find(
-        (e) => e.actionId === `runner.start_run.${serverId}`,
+        (e) => e.actionId === `rs.${serverId}`,
       )!;
       expect(runnerRepeatedFreeStopProbeEvidence(input, target)).toContain(
         "free_stop_already_observed",
@@ -76,7 +76,7 @@ describe("central information admission after an observed free stop", () => {
       const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
       const serverId = game === 3 ? "hq" : "rd";
       const target = evaluateRunnerRunTargets({ input }).find(
-        (e) => e.actionId === `runner.start_run.${serverId}`,
+        (e) => e.actionId === `rs.${serverId}`,
       )!;
       expect(runnerRepeatedFreeStopProbeEvidence(input, target)).toContain(
         "free_stop_already_observed",
@@ -109,10 +109,10 @@ describe("central information admission after an observed free stop", () => {
     const input = buildAiDecisionInputDto(fixture().input);
     const targets = evaluateRunnerRunTargets({ input });
     const hq = targets.find(
-      (target) => target.actionId === "runner.start_run.hq",
+      (target) => target.actionId === "rs.hq",
     )!;
     const rd = targets.find(
-      (target) => target.actionId === "runner.start_run.rd",
+      (target) => target.actionId === "rs.rd",
     )!;
     expect(runnerRepeatedFreeStopProbeEvidence(input, hq)).toContain(
       "free_stop_already_observed",
@@ -143,7 +143,7 @@ describe("central information admission after an observed free stop", () => {
     }
     const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
     const target = evaluateRunnerRunTargets({ input }).find(
-      (e) => e.actionId === "runner.start_run.hq",
+      (e) => e.actionId === "rs.hq",
     )!;
     expect(runnerRepeatedFreeStopProbeEvidence(input, target)).toBeUndefined();
   });
@@ -178,7 +178,7 @@ describe("central information admission after an observed free stop", () => {
       }
       const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
       const target = evaluateRunnerRunTargets({ input }).find(
-        (e) => e.actionId === "runner.start_run.rd",
+        (e) => e.actionId === "rs.rd",
       )!;
       expect(
         runnerRepeatedFreeStopProbeEvidence(input, target),
@@ -218,7 +218,7 @@ describe("central information admission after an observed free stop", () => {
     (condition) => {
       const input: AiDecisionInput = fixture().input;
       const target = evaluateRunnerRunTargets({ input }).find(
-        (e) => e.actionId === "runner.start_run.hq",
+        (e) => e.actionId === "rs.hq",
       )!;
       if (condition === "next_turn") input.playerView.turnSerial!++;
       if (condition === "paid_defense" || condition === "untyped_outcome") {

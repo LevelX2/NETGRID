@@ -29,7 +29,7 @@ it("D26 preserves the concrete Sentry-answer draw despite its cleanup trade-off"
   expect(decision.reasonCode).toBe("plan_first.runner.rig_and_coverage");
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
     rootPlanInstanceId:
-      "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry",
+      "pde8a64nmn1hkbrzgi9sbuf6fo",
     selectedStep: { stepId: expect.stringContaining("find:breaker_sentry") },
     route: {
       actionId: action.actionId,

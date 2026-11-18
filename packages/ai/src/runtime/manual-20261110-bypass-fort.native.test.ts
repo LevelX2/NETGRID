@@ -68,12 +68,16 @@ it("keeps the funded bypass-soak route with the Defense owner and its original a
   const result = chooseAiAction(input);
   expect(result.actionId).toBe(f.candidate.actionId);
   expect(result.fallbackUsed).toBeFalsy();
-  expect(result.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toContain(
-    "corp.defend_servers",
-  );
   expect(
-    result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toContain("corp.defend_servers");
+    result.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === result.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+    )?.moduleId,
+  ).toBe("corp.defend_servers");
+  expect(
+    result.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    )?.moduleId,
+  ).toBe("corp.defend_servers");
   resetResidentPlanPortfolioMemory();
 });
 

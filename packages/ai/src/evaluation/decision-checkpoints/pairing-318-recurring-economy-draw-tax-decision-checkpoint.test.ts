@@ -47,15 +47,15 @@ describe("pairing 318 recurring-economy draw-tax checkpoint", () => {
     );
 
     expect(decision).toMatchObject({
-      actionId: "runner.gain_credit",
+      actionId: "rb",
       reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:runner.develop_board_and_hand:card%3Ac1sp",
+            "p3rn7st7ghsxrsvjkhek2d7lci",
           leafExecutorInstanceId:
-            "plan:runner.economy:development-support%3Ac1sp",
+            "p87kpx09485sttvovc3vc1oqf1",
           route: {
             actionType: "gain_credit",
             semanticActionType: "economy.gain_credit",

@@ -55,18 +55,24 @@ it.each([14, 16])(
       stateVersion: input.playerView.stateVersion,
     });
     if (credits === 16) {
-      expect(result.actionId).toBe("runner.start_run.r1");
+      expect(result.actionId).toBe("rs.r1");
       expect(
-        result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-      ).toContain("plan:runner.contest_remote:");
+        result.decisionDebug?.planFirstDecision?.portfolio.find(
+          (instance) => instance.instanceId === result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+        )?.moduleId,
+      ).toBe("runner.contest_remote");
       expect(
-        result.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-      ).toContain("plan:runner.contest_remote:");
+        result.decisionDebug?.planFirstDecision?.portfolio.find(
+          (instance) => instance.instanceId === result.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+        )?.moduleId,
+      ).toBe("runner.contest_remote");
     } else {
-      expect(result.actionId).toBe("runner.gain_credit");
+      expect(result.actionId).toBe("rb");
       expect(
-        result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-      ).toContain("plan:runner.economy:");
+        result.decisionDebug?.planFirstDecision?.portfolio.find(
+          (instance) => instance.instanceId === result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+        )?.moduleId,
+      ).toBe("runner.economy");
     }
   },
 );

@@ -40,7 +40,7 @@ it("does not require a fifth card for another R&D run before the bound four-card
     gap = p.instances
       .filter((x) => x.moduleId === "runner.rig_and_coverage")
       .map((x) => (x.moduleState as any).gap)
-      .find((x) => x.targetRunActionId === "runner.start_run.r3");
+      .find((x) => x.targetRunActionId === "rs.r3");
   expect(gap.priorityClass).toBe("P2");
   expect(gap.directSearchActionIds).toContain(z.actionId);
 });
@@ -126,7 +126,7 @@ it("uses the bound hand reserve through actual Sneak, Heap, Rent and Remote Engi
   }
   expect(referencesDefaultDeckCard(proofs[0].steps[0].action, 322)).toBe(true);
   expect(
-    proofs[0].steps.some((s: any) => s.action === "runner.start_run.r3"),
+    proofs[0].steps.some((s: any) => s.action === "rs.r3"),
   ).toBe(true);
   expect(proofs.map((x) => x.runnerPoints)).toEqual([6, 6]);
   expect(proofs[0].hash).toBe(proofs[1].hash);
@@ -178,7 +178,7 @@ it("retains the actual Remote and confirmed damage hand floor when no draw remai
   expect(
     gaps.some(
       (g) =>
-        g.targetRunActionId === "runner.start_run.r3" &&
+        g.targetRunActionId === "rs.r3" &&
         g.recoveryEvidenceCodes?.some((s: string) =>
           s.endsWith("search_run_and_hand_preparation_do_not_fit"),
         ),

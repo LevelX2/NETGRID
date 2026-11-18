@@ -21,7 +21,7 @@ import {
   validMandatoryInstalledRezCosts,
 } from "./defense-validation";
 const installId =
-  "corp.install_card.c3i.rd.c3i.3";
+  "cc.c3i.rd.c3i.3";
 function fixture() {
   return JSON.parse(
     readFileSync(
@@ -113,11 +113,11 @@ describe("Native point-paid Corp Defense install contract", () => {
     };
     apply("corp", restoredDecision(nativeInput(capture), capture).actionId!);
     expect(state.corp.credits).toBe(4);
-    apply("corp", "corp.gain_credit");
-    apply("corp", "corp.end_turn");
-    apply("runner", "runner.gain_credit");
-    apply("runner", "runner.draw_card");
-    apply("runner", "runner.start_run.rd");
+    apply("corp", "cb");
+    apply("corp", "c9");
+    apply("runner", "rb");
+    apply("runner", "r8");
+    apply("runner", "rs.rd");
     const input = buildAiDecisionInput(state, "corp", {
       difficulty: "hard",
       ownDeckSnapshot: capture.checkpoint.input.ownDeckSnapshot,
@@ -130,10 +130,10 @@ describe("Native point-paid Corp Defense install contract", () => {
     apply("corp", rez.actionId!, rez.selectedChoices);
     expect(state.corp.credits).toBe(5);
     expect(getPlayerView(state, "corp").own.agendaPoints).toBe(1);
-    apply("corp", "corp.decline_rez");
+    apply("corp", "c6");
     apply(
       "runner",
-      "runner.continue_run.0,1",
+      "r5.0,1",
     );
     expect(state.run).toBeUndefined();
   });

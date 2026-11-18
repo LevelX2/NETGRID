@@ -1084,7 +1084,7 @@ function exclusiveClaim(
 ): CampaignValueClaim {
   return {
     claimId,
-    campaignId: "campaign:test",
+    campaignId: "k5mglwc6pmhulz0odyf6rnvdlx",
     ownerModuleId,
     objectiveKey: "score-window",
     componentKey: "score_window_progress",

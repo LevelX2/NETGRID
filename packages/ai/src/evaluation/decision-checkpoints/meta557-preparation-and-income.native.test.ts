@@ -60,7 +60,7 @@ describe("pairing 557 current preparation and post-install income", () => {
         target: { kind: "server", id: "rd" },
       });
       expect(pf?.rootPlanInstanceId).toBe(
-        "plan:runner.pressure_central:central%3Ard",
+        "pa90fufw9vc5bkshp96ztlryxl",
       );
       expect(pf?.leafExecutorInstanceId).toBe(pf?.rootPlanInstanceId);
       expect(pf?.route).toMatchObject({

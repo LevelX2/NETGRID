@@ -98,7 +98,7 @@ describe("AI input DTO Corp rez projection contract", () => {
       runnerCostPenaltySupportContinuation: true,
       runnerCostPenaltySupportWindowId: 91,
       costPenaltySupportWindowId: 91,
-      costPenaltySupportOriginalActionId: "runner.play_event.temple",
+      costPenaltySupportOriginalActionId: "rh.temple",
     };
     const view = playerView(action);
     const input = buildAiDecisionInputDto({
@@ -117,7 +117,7 @@ describe("AI input DTO Corp rez projection contract", () => {
       runnerCostPenaltySupportContinuation: true,
       runnerCostPenaltySupportWindowId: 91,
       costPenaltySupportWindowId: 91,
-      costPenaltySupportOriginalActionId: "runner.play_event.temple",
+      costPenaltySupportOriginalActionId: "rh.temple",
     });
     expect(input.playerView.legalActions[0]?.payload).toMatchObject(
       input.legalActions[0]?.payload ?? {},
@@ -716,7 +716,7 @@ function iceInstallAction(): LegalAction {
 }
 
 function rootRezCreditAction(): LegalAction {
-  const actionId = "corp.rez_card.economy-asset.r1.economy-asset";
+  const actionId = "cp.economy-asset.r1.economy-asset";
   return {
     actionId,
     side: "corp",

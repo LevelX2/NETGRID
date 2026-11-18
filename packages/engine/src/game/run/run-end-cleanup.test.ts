@@ -1181,7 +1181,7 @@ describe("run end cleanup", () => {
 
     resolveBrokenIceVirusCounterChoice(fixture.host, fixture.legalAction, {
       side: "runner",
-      actionId: "runner.resolve_choice",
+      actionId: "rn",
       type: "resolve_choice",
       selectedChoices: {
         selectedOptionIds: ["source_pattel_1_target_ice_1"],
@@ -1251,7 +1251,7 @@ describe("run end cleanup", () => {
 
     resolveBrokenIceVirusCounterChoice(fixture.host, fixture.legalAction, {
       side: "runner",
-      actionId: "runner.resolve_choice",
+      actionId: "rn",
       type: "resolve_choice",
       selectedChoices: {
         selectedOptionIds: [

@@ -16,14 +16,14 @@ describe("plan-first Runner run-lock parent-plan contract", () => {
   it("uses last productive liquidity when a run lock has no pressure route or bound funding need [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const gainCredit = legalAction(
-      "runner.gain_credit",
+      "rb",
       "runner",
       "gain_credit",
       "Gain 1 credit",
       { credits: 0, clicks: 1 },
     );
     const endTurn = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -65,7 +65,7 @@ describe("plan-first Runner run-lock parent-plan contract", () => {
       },
     );
     const gainCredit = legalAction(
-      "runner.gain_credit",
+      "rb",
       "runner",
       "gain_credit",
       "Gain 1 credit",

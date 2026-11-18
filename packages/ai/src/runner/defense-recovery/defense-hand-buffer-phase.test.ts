@@ -17,14 +17,14 @@ import type { RunnerPlanDomain } from "../../plans/runner-tactical-plan-contract
 
 function fixture(tags = 1) {
   const draw = legalAction(
-    "runner.draw_card",
+    "r8",
     "runner",
     "draw_card",
     "Draw a card",
     { credits: 0, clicks: 1 },
   );
   const clear = legalAction(
-    "runner.remove_tag",
+    "rm",
     "runner",
     "remove_tag",
     "Remove a tag",
@@ -87,7 +87,7 @@ describe("Defense hand-buffer phase ownership", () => {
     f.defense.handBufferActionIds = [];
     f.defense.reactionReserveNeed = {
       needId: "runner-defense-reaction-reserve",
-      parentPlanInstanceId: "plan:runner.defense_and_recovery:runner",
+      parentPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
       targetCredits: 8,
       currentCreditsAtRevalidation: 6,
       gap: 2,
@@ -193,7 +193,7 @@ describe("Defense hand-buffer phase ownership", () => {
     (tags) => {
       const f = fixture(tags);
       const meatUpgrade = legalAction(
-        "runner.play_event.meat-upgrade",
+        "rh.meat-upgrade",
         "runner",
         "play_event",
         "Meat Upgrade",

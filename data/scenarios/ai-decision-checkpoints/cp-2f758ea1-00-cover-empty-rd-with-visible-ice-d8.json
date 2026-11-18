@@ -4128,7 +4128,7 @@
       "stateVersion": 6,
       "instances": [
         {
-          "instanceId": "plan:corp.complete_turn:standard-turn-completion",
+          "instanceId": "p6yjycy2qsqgb3jl5pov75ajtq",
           "dedupeKey": "standard-turn-completion",
           "moduleId": "corp.complete_turn",
           "moduleVersion": "1",
@@ -4157,7 +4157,7 @@
           "moduleState": {
             "kind": "turn_completion",
             "standardEndTurnActionIds": [
-              "corp.end_turn"
+              "c9"
             ]
           },
           "blockers": [],
@@ -4190,7 +4190,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac2nb%3Anew_remote",
+          "instanceId": "p8nfpj4fmdaz9u5eos80lre0rg",
           "dedupeKey": "agenda:c2nb:new_remote",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -4224,7 +4224,7 @@
               "agendaPoints": 2,
               "agendaInstanceId": "c2nb",
               "actionIds": [
-                "corp.install_card.c2nb.new_remote.c2nb"
+                "cc.c2nb.new_remote.c2nb"
               ],
               "serverId": "new_remote",
               "phase": "install_agenda",
@@ -4246,7 +4246,7 @@
                 "scoreReserve": {
                   "creditBreakdown": [
                     {
-                      "reserveId": "score_action:corp.install_card.c2nb.new_remote.c2nb",
+                      "reserveId": "score_action:cc.c2nb.new_remote.c2nb",
                       "credits": 0
                     },
                     {
@@ -4266,7 +4266,7 @@
                   "availableCorpClicks": 1,
                   "totalScoreReserveCredits": 3,
                   "hardClickReserve": 0,
-                  "scoreReserveFingerprint": "clicks:0|107:score_action:corp.install_card.c2nb.new_remote.c2nb=0|49:post_score_floor:c2nb=0|54:remaining_advancement:c2nb=3",
+                  "scoreReserveFingerprint": "clicks:0|107:score_action:cc.c2nb.new_remote.c2nb=0|49:post_score_floor:c2nb=0|54:remaining_advancement:c2nb=3",
                   "protection": {
                     "knowledge": "known",
                     "runnerAccessSuccessProbability": {
@@ -4371,25 +4371,25 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:corp.complete_turn:standard-turn-completion",
+          "instanceId": "p6yjycy2qsqgb3jl5pov75ajtq",
           "stateVersion": 6,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.economy:economy-liquidity-development%3Acorp%3A0",
+          "instanceId": "p9qz3p83i1753mqwpm21pozs2k",
           "stateVersion": 6,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac2nb%3Anew_remote",
+          "instanceId": "p8nfpj4fmdaz9u5eos80lre0rg",
           "stateVersion": 6,
           "reason": "retained",
           "detailCode": "within_stale_ttl"
         },
         {
-          "instanceId": "plan:corp.complete_turn:standard-turn-completion",
+          "instanceId": "p6yjycy2qsqgb3jl5pov75ajtq",
           "stateVersion": 6,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
@@ -4397,8 +4397,8 @@
           "detailCode": "validated_scheduler_selection"
         }
       ],
-      "rootForegroundInstanceId": "plan:corp.complete_turn:standard-turn-completion",
-      "executorInstanceId": "plan:corp.complete_turn:standard-turn-completion"
+      "rootForegroundInstanceId": "p6yjycy2qsqgb3jl5pov75ajtq",
+      "executorInstanceId": "p6yjycy2qsqgb3jl5pov75ajtq"
     }
   },
   "expectation": {

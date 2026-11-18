@@ -108,7 +108,7 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
     // current ten-credit reaction reserve incomplete. The remote in 02/05
     // has an unknown root and unrezzed Fang, so it supplies no immediate payoff.
     checkpoint.expectation = {
-      acceptableActions: [{ actionId: "runner.gain_credit" }],
+      acceptableActions: [{ actionId: "rb" }],
       forbiddenActions: [
         { sourceDefinitionId: 358 },
       ],

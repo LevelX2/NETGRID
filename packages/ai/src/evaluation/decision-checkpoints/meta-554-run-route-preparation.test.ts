@@ -119,7 +119,7 @@ it("installs the exact cheaper decoder under the same remote parent at G24/D139"
   expect(action.payload?.runnerProgramTrashBeforeInstall).not.toBe(true);
   expect(plan.selectedPlan?.moduleId).toBe("runner.rig_and_coverage");
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Ar1",
+    "p1p4xezjcxov79rno40lq3f7rv",
   );
   expect(plan.selectedPlan?.parentInstanceId).toBe(plan.rootPlanInstanceId);
 });
@@ -166,7 +166,7 @@ it.each([
       ice.rezzed = false;
     }
     const target = evaluateRunnerRunTargets({ input }).find(
-      (e) => e.actionId === "runner.start_run.r1",
+      (e) => e.actionId === "rs.r1",
     )!;
     if (variant === "known_no_payoff")
       target.knownAccessState = "known_no_current_payoff";
@@ -196,7 +196,7 @@ it("quotes all eight credits and both actions of the native cheaper route", () =
   const cp = fixture(24, 139),
     input = cp.input;
   const target = evaluateRunnerRunTargets({ input }).find(
-    (e) => e.actionId === "runner.start_run.r1",
+    (e) => e.actionId === "rs.r1",
   )!;
   expect(target.pathCost).toBe(16);
   expect(target.accessPayoffContestable).toBe(false);

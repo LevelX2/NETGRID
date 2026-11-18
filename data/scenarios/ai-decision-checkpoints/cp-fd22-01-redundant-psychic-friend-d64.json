@@ -6405,7 +6405,7 @@
         "label": "Omnitech Wet Drive"
       },
       "selectedStepKind": "install_development_card",
-      "selectedActionId": "runner.install_card.cbt.cbt",
+      "selectedActionId": "rc.cbt.cbt",
       "selectedActionType": "install_card",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
@@ -6442,7 +6442,7 @@
         "plan_action_allocation_entries:0",
         "plan_action_allocation_unallocated:0",
         "plan_action_allocation_credit_remainder:6",
-        "plan_portfolio_selected_action:runner.end_turn"
+        "plan_portfolio_selected_action:r9"
       ]
     },
     "strategicIntent": {

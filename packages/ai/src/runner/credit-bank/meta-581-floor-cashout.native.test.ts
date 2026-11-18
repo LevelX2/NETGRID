@@ -81,7 +81,7 @@ it("loads before a recoverable floor payout and funds the same next-turn R&D tar
       );
     }
     let state = f.state;
-    const targetActionId = "runner.start_run.rd";
+    const targetActionId = "rs.rd";
     const targetCredits = 11;
     const steps: {
       side: Side;
@@ -110,7 +110,7 @@ it("loads before a recoverable floor payout and funds the same next-turn R&D tar
       const followingRunnerTurn = side === "runner" && state.turnSerial !== undefined && state.turnSerial > initialTurn;
       const comparisonActionId = input.playerView.own.credits >= targetCredits
         ? targetActionId
-        : oldCashout ? "runner.gain_credit" : cashout?.actionId;
+        : oldCashout ? "rb" : cashout?.actionId;
       const controlled = followingRunnerTurn || (oldCashout && n === 0);
       const decision = controlled
         ? { actionId: followingRunnerTurn ? comparisonActionId : cashout?.actionId }

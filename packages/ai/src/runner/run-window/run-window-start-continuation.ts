@@ -115,12 +115,12 @@ export function resolvePlanBoundRunnerRunStartOrderChoice(
     origin.continuedThroughStateVersion === previous.stateVersion &&
     exactRunStartContinuation &&
     ((origin.sourceActionType === "start_run" &&
-      origin.selectedActionId.startsWith("runner.start_run.")) ||
+      origin.selectedActionId.startsWith("rs.")) ||
       (origin.sourceActionType === "play_event" &&
-        origin.selectedActionId.startsWith("runner.play_event.")) ||
+        origin.selectedActionId.startsWith("rh.")) ||
       (origin.sourceActionType === "activated_card_ability" &&
         origin.selectedActionId.startsWith(
-          "runner.activated_card_ability.",
+          "r1.",
         ))) &&
     origin.sourceStepId.trim().length > 0 &&
     previous.rootForegroundInstanceId === origin.rootPlanInstanceId &&

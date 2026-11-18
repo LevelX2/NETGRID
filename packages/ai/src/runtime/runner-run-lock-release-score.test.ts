@@ -272,7 +272,7 @@ function input(releaseCredits = 2): AiDecisionInput {
 
 function releaseAction(credits = 2): LegalAction {
   return {
-    actionId: "runner.trigger_ability",
+    actionId: "rx",
     side: "runner",
     type: "trigger_ability",
     timingPoint: "runner_action.main",

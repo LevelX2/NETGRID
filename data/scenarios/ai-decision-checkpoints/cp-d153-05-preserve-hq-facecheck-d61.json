@@ -5853,7 +5853,7 @@
         "label": "Livewire's Contacts"
       },
       "selectedStepKind": "install_development_card",
-      "selectedActionId": "runner.play_event.c1wq.c1wq",
+      "selectedActionId": "rh.c1wq.c1wq",
       "selectedActionType": "play_event",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
@@ -5882,7 +5882,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.end_turn"
+        "plan_portfolio_selected_action:r9"
       ]
     },
     "strategicIntent": {

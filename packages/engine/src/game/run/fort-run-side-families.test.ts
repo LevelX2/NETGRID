@@ -512,7 +512,7 @@ describe("fort run side families", () => {
         FortRunSideFamiliesHost["breaker"]["breakAbilityForLegalAction"]
       >;
     const action = {
-      actionId: "runner.break_subroutine.jackhammer",
+      actionId: "r3.jackhammer",
       payload: {},
     } as LegalAction;
 

@@ -281,7 +281,7 @@ describe("buildActionSemanticCandidates", () => {
     const [candidate] = buildActionSemanticCandidates({
       legalActions: [
         legalAction("break_subroutine", 0, {
-          payload: { iceId: "visible-ice", subroutineIndexes: "0,2" },
+          payload: {iceId: "visible-ice"}, subroutineIndexes: [0,2],
         }),
       ],
     });

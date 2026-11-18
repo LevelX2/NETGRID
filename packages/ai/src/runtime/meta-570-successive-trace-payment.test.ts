@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import {
@@ -37,7 +38,7 @@ it("retains the contest owner through rez, two mandatory traces and the selected
   let state: GameState = saved.state;
   const initial = state;
   if (!initial.run) throw new Error("Missing the native run at the checkpoint.");
-  const runExecutor = `plan:runner.convert_run_window:${encodeURIComponent(`run:${initial.run.runId}`)}`;
+  const runExecutor = planInstanceIdForProposal({ moduleId: "runner.convert_run_window", dedupeKey: `run:${initial.run.runId}` });
   const actions: string[] = [];
   const bids: string[][] = [];
   let support = 0;
@@ -69,7 +70,7 @@ it("retains the contest owner through rez, two mandatory traces and the selected
       expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
         stateVersion: 182,
         pendingRunnerCostPenaltySupportOrigin: {
-          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+          rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
           executorInstanceId: runExecutor,
           originalActionId: a.actionId,
           selectedAtStateVersion: 182,
@@ -79,7 +80,7 @@ it("retains the contest owner through rez, two mandatory traces and the selected
       support++;
       expect(d.decisionDebug?.planFirstDecision?.executionOrigin).toMatchObject(
         {
-          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+          rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
           leafPlanInstanceId: runExecutor,
         },
       );

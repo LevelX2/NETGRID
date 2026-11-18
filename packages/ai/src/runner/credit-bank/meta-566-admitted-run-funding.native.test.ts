@@ -60,9 +60,9 @@ it("pays out a mature bank for the admitted HQ funding parent instead of three b
       priorityClass: "P4",
       estimatedPayout: 9,
       runFunding: {
-        parentPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
+        parentPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
         needId: "run-support:central:hq",
-        runActionId: "runner.start_run.hq",
+        runActionId: "rs.hq",
         stateVersion: 121,
         gap: 3,
         routeAssessment: {
@@ -102,7 +102,7 @@ function fundingParams() {
       input,
       deckCapabilities: input.ownDeckCapabilities!,
     }),
-    target = targets.find((t) => t.actionId === "runner.start_run.hq")!,
+    target = targets.find((t) => t.actionId === "rs.hq")!,
     cash = candidates.find(
       (c) =>
         c.planOwnerBinding?.owner === "runner.credit_bank" &&
@@ -182,7 +182,7 @@ it("rejects a quote for another run instead of transferring the funding certific
     quote = p.quoteAfterCashouts;
   p.quoteAfterCashouts = (t, ids) => {
     const z = quote(t, ids);
-    return z ? { ...z, actionId: "runner.start_run.rd" } : undefined;
+    return z ? { ...z, actionId: "rs.rd" } : undefined;
   };
   expect(creditBankReplacesBasicRunFunding(p)).toBeUndefined();
 });

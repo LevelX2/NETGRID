@@ -5234,7 +5234,7 @@
         "label": "Priority Wreck"
       },
       "selectedStepKind": "install_development_card",
-      "selectedActionId": "runner.play_event.c1yi.hq.c1yi",
+      "selectedActionId": "rh.c1yi.hq.c1yi",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -5325,7 +5325,7 @@
             "plan_portfolio_role:background",
             "plan_portfolio_lifecycle:active",
             "plan_portfolio_previous_entry:runner.build_credit_bank:bank:runner_credit_bank",
-            "plan_portfolio_action_progress:runner.activated_card_ability.c29e.c29e.activated.0",
+            "plan_portfolio_action_progress:r1.c29e.c29e.activated.0",
             "plan_portfolio_action_progress_source:selected_mapped_step",
             "plan_portfolio_carried_without_current_action:true",
             "plan_portfolio_carried_without_current_action:true",
@@ -5341,7 +5341,7 @@
         "plan_portfolio_foreground:runner.opportunistic_central_run",
         "plan_portfolio_backgrounds:runner.build_credit_bank",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.play_event.c1yi.hq.c1yi"
+        "plan_portfolio_selected_action:rh.c1yi.hq.c1yi"
       ]
     },
     "strategicIntent": {
@@ -6381,7 +6381,7 @@
       ]
     },
     "runnerRunPlan": {
-      "id": "runner_run_plan:match_9fef30abd4b16341:84:runner:runner.play_event.c1yi.hq.c1yi:hq",
+      "id": "runner_run_plan:match_9fef30abd4b16341:84:runner:rh.c1yi.hq.c1yi:hq",
       "side": "runner",
       "lifecycle": "created",
       "origin": "card_initiated_run",
@@ -6400,7 +6400,7 @@
         "trashPolicy": "trash_if_value_positive",
         "reserveForStealOrTrash": 0
       },
-      "runStartActionId": "runner.play_event.c1yi.hq.c1yi",
+      "runStartActionId": "rh.c1yi.hq.c1yi",
       "sourceTacticalGoalIds": [
         "runner.pressure_good_central_target",
         "runner.find_or_install_primary_breaker",
@@ -6477,7 +6477,7 @@
       "visibilityEvidence": [
         {
           "kind": "legal_action",
-          "ref": "runner.play_event.c1yi.hq.c1yi"
+          "ref": "rh.c1yi.hq.c1yi"
         },
         {
           "kind": "action_semantic_candidate",

@@ -39,13 +39,13 @@ it("keeps the existing free unconfigured Sentry answer instead of buying a secon
       referencesDefaultDeckCard(selected.source, 150),
   ).toBe(false);
   expect(decision.decisionDebug!.planFirstDecision!).toMatchObject({
-    rootPlanInstanceId: "plan:runner.economy:runner-portfolio-credit-reserve",
+    rootPlanInstanceId: "pc7ebuiw5dxhlbzbf1nhcs4p4z",
     selectedPlan: { moduleId: "runner.economy" },
     selectedStep: {
       stepId:
-        "plan:runner.economy:runner-portfolio-credit-reserve:fund:runner-portfolio-credit-reserve",
+        "pc7ebuiw5dxhlbzbf1nhcs4p4z:fund:runner-portfolio-credit-reserve",
     },
-    route: { actionId: "runner.gain_credit", stateVersion: 279 },
+    route: { actionId: "rb", stateVersion: 279 },
   });
 });
 

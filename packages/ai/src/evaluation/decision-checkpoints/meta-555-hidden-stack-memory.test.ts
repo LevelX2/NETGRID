@@ -103,7 +103,7 @@ it("binds the exact hidden Stack target and sufficient MU sacrifice before the r
     runtime,
   );
   const decision = chooseAiAction(next.input);
-  expect(decision.actionId).toBe("runner.resolve_choice");
+  expect(decision.actionId).toBe("rn");
   expect(decision.selectedChoices).toEqual({
     choiceId: next.input.playerView.pendingChoice!.choiceId,
     selectedOptionIds: sacrifices.map((c) => "card_" + c.cardInstanceId),

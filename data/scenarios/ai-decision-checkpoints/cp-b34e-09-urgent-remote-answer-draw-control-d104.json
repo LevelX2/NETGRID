@@ -8429,7 +8429,7 @@
         "label": "Networking"
       },
       "selectedStepKind": "install_development_card",
-      "selectedActionId": "runner.play_event.ca1.ca1",
+      "selectedActionId": "rh.ca1.ca1",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -8457,7 +8457,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.end_turn"
+        "plan_portfolio_selected_action:r9"
       ]
     },
     "strategicIntent": {
@@ -9577,7 +9577,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.play_event.c9l.hq.c9l"
+        "actionId": "rh.c9l.hq.c9l"
       }
     ],
     "planExecution": {

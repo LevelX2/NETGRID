@@ -50,7 +50,7 @@ it("replaces the acceptable redundant program, funds and wins the original remot
   let state: GameState = saved.state;
   const initial = state;
   const heads: string[] = [];
-  const root = "plan:runner.contest_remote:remote%3Ar1";
+  const root = "p1p4xezjcxov79rno40lq3f7rv";
   for (let n = 0; n < 80 && !state.winner; n++) {
     const side = state.activeSide;
     const input =

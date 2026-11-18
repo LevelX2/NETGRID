@@ -42,7 +42,7 @@ it.each([
   expect(action?.type).toBe(type);
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Ar2",
+    "p1p4x83h7yolw2hjtvi0ud06dm",
   );
   if (index === 356) {
     expect(action?.payload?.subroutineIndex).toBe(2);
@@ -86,10 +86,10 @@ it("preserves the same accepted damage budget in the movement phase", () => {
     cp.runtime,
   );
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("runner.continue_run");
+  expect(decision.actionId).toBe("r5");
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Ar2",
+    "p1p4x83h7yolw2hjtvi0ud06dm",
   );
 });
 

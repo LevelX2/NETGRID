@@ -43,7 +43,7 @@ it.each([
       serverId: "r1",
     });
     const parent =
-      "plan:corp.score_agenda:agenda%3Ac2kd%3Ar1";
+      "p9zaxr028shneph2natwhsp7ql";
     expect(
       decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
     ).toBe(parent);
@@ -69,7 +69,7 @@ function facts() {
     first.runtime.residentPlanPortfolio.instances.find(
       (x) =>
         x.moduleId === "corp.score_agenda" &&
-        referencesDefaultDeckCard(x.instanceId, 415, 1),
+        referencesDefaultDeckCard((x.moduleState as unknown as { signal: CorpScoreProjectSignal }).signal.agendaInstanceId ?? "", 415, 1),
     )!.moduleState,
   ) as unknown as { signal: CorpScoreProjectSignal };
   const defense = structuredClone(
@@ -171,7 +171,7 @@ it("retains the complete cost certificate after installing the score target", ()
   expect(a.type).toBe("advance_card");
   expect(a.source).toBe("c2kd");
   const parent =
-    "plan:corp.score_agenda:agenda%3Ac2kd%3Ar1";
+    "p9zaxr028shneph2natwhsp7ql";
   expect(d.decisionDebug?.planFirstDecision?.leafExecutorInstanceId).toBe(
     parent,
   );

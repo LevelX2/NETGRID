@@ -101,7 +101,7 @@ function route(state: GameState, gap: number, bound = true) {
       kind: "parent_funding",
       needId: "fund-exact-score",
       ...(bound
-        ? { parentPlanInstanceId: "plan:corp.score_agenda:exact" }
+        ? { parentPlanInstanceId: "p3r0zxxuomp6ltzg492fos0sab" }
         : {}),
       parentNeedId: "score-credit-gap",
       gap,

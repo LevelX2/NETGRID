@@ -290,7 +290,7 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
         ],
       }),
       rezAction(
-        "corp.rez_ice.quandary-installed",
+        "cq.quandary-installed",
         2,
         {},
         "Quandary rezzen",

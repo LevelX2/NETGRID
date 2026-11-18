@@ -37,7 +37,7 @@ export function resolvePlanBoundCorpDelayedSuccessChoice(
       instance.moduleId === "corp.defend_servers" &&
       instance.side === "corp" &&
       instance.instanceId ===
-        "plan:corp.defend_servers:server-defense-portfolio",
+        "penw02zfrkklof54c2nuye5att",
   );
   const moduleState = executor?.moduleState as
     | {

@@ -311,7 +311,7 @@ describe("access flow execution", () => {
       handleAccessExecution(host, {
         side: "runner",
         type: "access_card",
-        actionId: "runner.access_card",
+        actionId: "r0",
         label: "Access",
         source: "run",
       } as LegalAction),
@@ -323,7 +323,7 @@ describe("access flow execution", () => {
     const legalAction = {
       side: "runner",
       type: "access_card",
-      actionId: "runner.access_card",
+      actionId: "r0",
       label: "Access",
       source: "run",
     } as unknown as LegalAction;
@@ -491,7 +491,7 @@ describe("access flow execution", () => {
     const legalAction = {
       side: "runner",
       type: "access_card",
-      actionId: "runner.access_card",
+      actionId: "r0",
       label: "Access",
       source: "run",
     } as unknown as LegalAction;
@@ -554,7 +554,7 @@ describe("access flow execution", () => {
     const result = handleAccessExecution(host, {
       side: "runner",
       type: "steal_agenda",
-      actionId: "runner.steal_agenda.agenda",
+      actionId: "rt.agenda",
       label: "Steal",
       source: "agenda",
       costs: [] as LegalAction["costs"],
@@ -612,7 +612,7 @@ describe("access flow execution", () => {
     const action = {
       side: "runner",
       type: "steal_agenda",
-      actionId: "runner.steal_agenda.fetal.2",
+      actionId: "rt.fetal.2",
       label: "Steal Fetal AI",
       source: "fetal",
       costs: [{ credits: 2 }],
@@ -645,7 +645,7 @@ describe("access flow execution", () => {
     const legalAction = {
       side: "runner",
       type: "trash_accessed_card",
-      actionId: "runner.trash_accessed_card.asset.3",
+      actionId: "rv.asset.3",
       label: "Trash",
       source: "asset",
     } as unknown as LegalAction;
@@ -724,7 +724,7 @@ describe("access flow execution", () => {
     const legalAction = {
       side: "runner",
       type: "trash_accessed_card",
-      actionId: "runner.trash_accessed_card.operation.mercenary",
+      actionId: "rv.operation.mercenary",
       label: "Mercenary",
       source: "operation",
       costs: [{ credits: 4 }],
@@ -768,7 +768,7 @@ describe("access flow execution", () => {
       {
         side: "runner",
         type: "resolve_choice",
-        actionId: "runner.resolve_choice",
+        actionId: "rn",
         label: "Trash",
         source: "choice",
         payload: { choiceId: state.pendingChoice?.choiceId },
@@ -776,7 +776,7 @@ describe("access flow execution", () => {
       {
         matchId: "match",
         side: "runner",
-        actionId: "runner.resolve_choice",
+        actionId: "rn",
         clientKnownStateVersion: state.pendingChoice!.stateVersion,
         selectedChoices: {
           choiceId: state.pendingChoice!.choiceId,
@@ -861,7 +861,7 @@ describe("access flow execution", () => {
       {
         side: "runner",
         type: "resolve_choice",
-        actionId: "runner.resolve_choice",
+        actionId: "rn",
         label: "Trash agenda",
         source: "choice",
         payload: { choiceId: agendaState.state.pendingChoice?.choiceId },
@@ -869,7 +869,7 @@ describe("access flow execution", () => {
       {
         matchId: "match",
         side: "runner",
-        actionId: "runner.resolve_choice",
+        actionId: "rn",
         clientKnownStateVersion: agendaState.state.pendingChoice!.stateVersion,
         selectedChoices: {
           choiceId: agendaState.state.pendingChoice!.choiceId,
@@ -988,7 +988,7 @@ describe("access flow execution", () => {
     const activation = {
       side: "runner",
       type: "trash_accessed_card",
-      actionId: "runner.trash_accessed_card.agenda.mercenary",
+      actionId: "rv.agenda.mercenary",
       label: "Mercenary",
       source: "agenda",
       costs: [{ credits: 4 }],
@@ -1017,7 +1017,7 @@ describe("access flow execution", () => {
     const resolution = {
       side: "runner",
       type: "resolve_choice",
-      actionId: "runner.resolve_choice",
+      actionId: "rn",
       label: "Trash both",
       source: "choice",
       payload: { choiceId: choice.choiceId },
@@ -1096,7 +1096,7 @@ describe("access flow execution", () => {
     const legalAction = {
       side: "runner",
       type: "access_card",
-      actionId: "runner.access_card",
+      actionId: "r0",
       label: "Access",
       source: "run",
     } as unknown as LegalAction;
@@ -1155,7 +1155,7 @@ describe("access flow execution", () => {
     const legalAction = {
       side: "runner",
       type: "trash_accessed_card",
-      actionId: "runner.trash_accessed_card.operation.0",
+      actionId: "rv.operation.0",
       label: "Trash",
       source: "operation",
       payload: {
@@ -1222,7 +1222,7 @@ describe("access flow execution", () => {
     const result = handleAccessExecution(host, {
       side: "runner",
       type: "decline_trash",
-      actionId: "runner.decline_trash.asset",
+      actionId: "r7.asset",
       label: "Decline",
       source: "asset",
     } as LegalAction);
@@ -1277,7 +1277,7 @@ describe("access flow execution", () => {
     const legalAction = {
       side: "runner",
       type: "access_card",
-      actionId: "runner.access_card",
+      actionId: "r0",
       label: "Access",
       source: "run",
     } as LegalAction;

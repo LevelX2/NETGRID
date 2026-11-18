@@ -23,12 +23,12 @@ it("keeps the central executor and actual access instead of consuming a zero-yie
   );
   const decision = chooseAiAction(capture.input);
   expect(decision).toMatchObject({
-    actionId: "runner.start_run.hq",
+    actionId: "rs.hq",
     fallbackUsed: false,
   });
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-    leafExecutorInstanceId: "plan:runner.pressure_central:central%3Ahq",
+    rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+    leafExecutorInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
   });
 });
 
@@ -44,7 +44,7 @@ it.each([0, 1, 8])(
       referencesDefaultDeckCard(x.actionId, 317),
     )!;
     const basic = evaluations.find(
-      (x) => x.actionId === "runner.start_run.hq",
+      (x) => x.actionId === "rs.hq",
     )!;
     expect(denial.runActionProjection.accessReplacement).toBe(
       "runner_spend_corp_lose_credits",

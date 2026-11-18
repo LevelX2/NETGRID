@@ -32,17 +32,17 @@ describe("match 2f116732 Runner decisions", () => {
   it("D112 converts the visible successful-run reward after the last ICE", () => {
     const { input, decision } = replay(successJson);
     expect(
-      input.legalActions.find((a) => a.actionId === "runner.continue_run")
+      input.legalActions.find((a) => a.actionId === "r5")
         ?.costs,
     ).toEqual([]);
     expect(decision).toMatchObject({
-      actionId: "runner.continue_run",
+      actionId: "r5",
       fallbackUsed: false,
       decisionDebug: {
         planKind: "runner.convert_run_window",
         planFirstDecision: {
           leafExecutorInstanceId:
-            "plan:runner.convert_run_window:run%3A177",
+            "p9nq3zfmsaybnxq9p90fp1kkh9",
           route: { semanticActionType: "run.continue", stateVersion: 191 },
         },
       },
@@ -56,7 +56,7 @@ describe("match 2f116732 Runner decisions", () => {
       (c) => c.type !== "resource",
     );
     const { decision } = replay(capture);
-    expect(decision.actionId).toBe("runner.jack_out");
+    expect(decision.actionId).toBe("rd");
     expect(decision.decisionDebug?.planKind).toBe("runner.convert_run_window");
   });
   it("D112 never turns an unknown root or an unfinished ICE path into a safe reward", () => {
@@ -101,17 +101,17 @@ describe("match 2f116732 Runner decisions", () => {
     expect(
       targets.find(
         (t) =>
-          t.targetServerId === "rd" && t.actionId === "runner.start_run.rd",
+          t.targetServerId === "rd" && t.actionId === "rs.rd",
       )?.prerunReserveQuote?.status,
     ).toBe("blocked");
     expect(decision).toMatchObject({
-      actionId: "runner.start_run.hq",
+      actionId: "rs.hq",
       fallbackUsed: false,
       decisionDebug: {
         planKind: "runner.pressure_central",
         planFirstDecision: {
-          rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-          leafExecutorInstanceId: "plan:runner.pressure_central:central%3Ahq",
+          rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+          leafExecutorInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
           route: { semanticActionType: "run.start", stateVersion: 389 },
         },
       },
@@ -120,7 +120,7 @@ describe("match 2f116732 Runner decisions", () => {
   it("D112 does not pay for the completion reward or ignore a known damage access", () => {
     const paid = structuredClone<unknown>(successJson) as Capture;
     paid.input.legalActions.find(
-      (a) => a.actionId === "runner.continue_run",
+      (a) => a.actionId === "r5",
     )!.costs = [{ credits: 1 }];
     expect(
       runnerCurrentRunHasSafeCompletionReward(paid.input as AiDecisionInput),

@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../ai-runtime-public-entrypoints";
@@ -40,7 +41,7 @@ it("keeps the admitted run-strength ability in the bound deflector break route",
   expect(result.actionId).toBe(boost.actionId);
   expect(result.fallbackUsed).toBe(false);
   expect(result.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
+    rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
     selectedPlan: { moduleId: "runner.convert_run_window" },
     route: {
       actionId: boost.actionId,
@@ -48,8 +49,8 @@ it("keeps the admitted run-strength ability in the bound deflector break route",
       semanticActionType: "breaker.boost_strength",
     },
     executionOrigin: {
-      rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-      leafPlanInstanceId: `plan:runner.convert_run_window:run%3A${input.playerView.run!.runId}`,
+      rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+      leafPlanInstanceId: planInstanceIdForProposal({ moduleId: "runner.convert_run_window", dedupeKey: `run:${input.playerView.run!.runId}` }),
       stateVersion: input.playerView.stateVersion,
     },
   });

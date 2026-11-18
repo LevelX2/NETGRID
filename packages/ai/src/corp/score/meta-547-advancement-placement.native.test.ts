@@ -53,7 +53,7 @@ describe("exact advancement placement from the chosen score parent", () => {
     const first = chooseAiAction(before.input);
     expect(first).toMatchObject({
       actionId:
-        "corp.advance_card.c2mt.c2mt",
+        "c2.c2mt.c2mt",
       fallbackUsed: false,
     });
   });
@@ -124,7 +124,7 @@ describe("exact advancement placement from the chosen score parent", () => {
     });
     const result = chooseAiAction(choice);
     expect(result).toMatchObject({
-      actionId: "corp.resolve_choice",
+      actionId: "cn",
       fallbackUsed: false,
       timeoutUsed: false,
       selectedChoices: { selectedOptionIds: [`placement_${agendaId}_2`] },

@@ -35,7 +35,7 @@ it("normal native Defense binds and executes the exact Archives agenda recovery 
   expect(d.actionId).toBe(source(input).actionId);
   expect(d.fallbackUsed||d.timeoutUsed).toBe(false);
   const plan=d.decisionDebug!.planFirstDecision!;
-  expect(plan.rootPlanInstanceId).toBe("plan:corp.defend_servers:server-defense-portfolio");
+  expect(plan.rootPlanInstanceId).toBe("penw02zfrkklof54c2nuye5att");
   expect(plan.selectedPlan?.moduleId).toBe("corp.defend_servers");
   expect(JSON.stringify([input.playerView,input.legalActions])).toBe(unchanged);
   const p=residentPlanPortfolioSnapshot(input)!;
@@ -52,7 +52,7 @@ it("normal native Defense binds and executes the exact Archives agenda recovery 
   const next={...input,playerView:getPlayerView(op.state,"corp"),legalActions:getLegalActions(op.state,"corp")};
   next.planningStateIdentity=buildPlanningStateIdentity(next);
   const choice=chooseAiAction(next);
-  expect(choice.actionId).toBe("corp.resolve_choice");
+  expect(choice.actionId).toBe("cn");
   expect(choice.selectedChoices).toEqual({choiceId:"v1922_corp_archives_to_hq_342",selectedOptionIds:["card_c2ke"]});
   expect(choice.fallbackUsed||choice.timeoutUsed).toBe(false);
   if(!choice.selectedChoices)throw Error("bound choices required");

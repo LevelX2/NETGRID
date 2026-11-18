@@ -37,7 +37,7 @@ function original() {
 }
 function rd(input: AiDecisionInputWithDeckCapabilities) {
   return evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.rd",
+    (t) => t.actionId === "rs.rd",
   )!;
 }
 
@@ -80,12 +80,12 @@ it("replans the native input through Defense instead of another credit", () => {
   const before = JSON.stringify(input);
   const result = chooseAiAction(input);
   expect(result).toMatchObject({
-    actionId: "runner.draw_card",
+    actionId: "r8",
     fallbackUsed: false,
     timeoutUsed: false,
   });
   expect(result.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.defense_and_recovery:runner",
+    "p1gzjb6yfcv4zbzow512kexs33",
   );
   expect(result.decisionDebug?.planFirstDecision?.route).toMatchObject({
     actionId: result.actionId,
@@ -114,7 +114,7 @@ it.each(["last_click", "empty_stack", "draw_tax", "stale_draw"] as const)(
 it("preserves the independent lethal core-damage rejection on HQ", () => {
   const input = original();
   const hq = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.hq",
+    (t) => t.actionId === "rs.hq",
   )!;
   expect(hq.pathPassability).toBe("blocked_unbreakable");
   const prepared = quoteRunnerRunAfterHandBufferDraws(input, hq);

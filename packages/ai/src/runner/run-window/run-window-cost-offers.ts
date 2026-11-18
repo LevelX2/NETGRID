@@ -37,7 +37,7 @@ export function originalPaymentSelectionReachesWindow(
     | undefined;
   if (
     !run ||
-    origin.originalActionId !== "runner.continue_run" ||
+    origin.originalActionId !== "r5" ||
     executor?.moduleId !== "runner.convert_run_window" ||
     executor.parentInstanceId !== origin.rootPlanInstanceId ||
     previous.rootForegroundInstanceId !== origin.rootPlanInstanceId ||

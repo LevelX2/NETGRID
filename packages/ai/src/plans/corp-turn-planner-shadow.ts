@@ -38,6 +38,7 @@ import {
   type CorpTurnPlanningCoverageReport,
 } from "./corp-turn-planning-coverage";
 import { planInstanceIdForProposal } from "./plan-instance";
+import { comparePlanIdentities } from "./compact-plan-identity";
 import type { PlanModuleId, PlanTargetRef } from "./plan-kernel-types";
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
 import {
@@ -214,7 +215,8 @@ export function prepareCorpTurnPlanner(params: {
           compareValidatedPlanAssessments(
             left.route.assessment,
             right.route.assessment,
-          ) || left.head.candidateId.localeCompare(right.head.candidateId),
+          ) || comparePlanIdentities(left.route.instance, right.route.instance) ||
+          left.head.candidateId.localeCompare(right.head.candidateId),
       )
       .reduce((records, record) => {
         const key = [
@@ -920,7 +922,7 @@ function includeSpecializedCurrentRoutes(params: {
 
   return routes.sort(
     (left, right) =>
-      left.instance.instanceId.localeCompare(right.instance.instanceId) ||
+      comparePlanIdentities(left.instance, right.instance) ||
       left.candidate.actionId.localeCompare(right.candidate.actionId),
   );
 }
@@ -1066,6 +1068,9 @@ function headsForRoute(params: {
       moduleId: params.route.instance.moduleId,
       rootPlanInstanceId,
       rootPlanModuleId,
+      rootPlanDedupeKey: params.portfolio.instances.find(
+        (instance) => instance.instanceId === rootPlanInstanceId,
+      )!.dedupeKey,
       executorPlanInstanceId: params.route.instance.instanceId,
       ...(params.route.instance.parentInstanceId
         ? {
@@ -1821,9 +1826,8 @@ function boundaryForCandidate(
     });
   }
   if (
-    head?.rootPlanInstanceId.startsWith(
-      "plan:corp.economy:economy-visible-liquidity-development%3A",
-    ) &&
+    head?.rootPlanModuleId === "corp.economy" &&
+    head.rootPlanDedupeKey?.startsWith("economy-visible-liquidity-development:") &&
     candidate.semanticActionType === "economy.gain_credit" &&
     candidate.sourceKind === "basic_action"
   ) {

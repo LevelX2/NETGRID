@@ -36,7 +36,7 @@ describe("selfplay cycle 130 decision checkpoints", () => {
     const decision = chooseAiAction(capture.input as AiDecisionInput);
 
     expect(decision).toMatchObject({
-      actionId: "runner.resolve_choice",
+      actionId: "rn",
       selectedChoices: {
         choiceId: "v120_choice_307",
         selectedOptionIds: [
@@ -51,7 +51,7 @@ describe("selfplay cycle 130 decision checkpoints", () => {
       rootPlanInstanceId: "run:305",
       leafExecutorInstanceId: "rules.window_resolution",
       engineWindowAction: {
-        actionId: "runner.resolve_choice",
+        actionId: "rn",
         actionType: "resolve_choice",
       },
     });

@@ -78,7 +78,7 @@ it.each([
     const cp = checkpoint(game);
     expect(Object.values(cp.validation)).toEqual(Array(9).fill(true));
     const result = choose(cp);
-    expect(result.actionId).toBe("corp.resolve_choice");
+    expect(result.actionId).toBe("cn");
     expect(result.selectedChoices).toEqual({
       choiceId: cp.input.playerView.pendingChoice!.choiceId,
       selectedOptionIds: [optionId],

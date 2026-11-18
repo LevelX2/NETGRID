@@ -6,7 +6,7 @@
     "seed": "meta-489-954a6df5fa809681-r2-011",
     "sourceDecision": 138,
     "exactPrefix": "engine-prefix-g11-d138.json",
-    "sourceActionId": "runner.activated_card_ability.c1o9.c1o9.activated.353"
+    "sourceActionId": "r1.c1o9.c1o9.activated.353"
   },
   "input": {
     "matchId": "match_170bea1076615c79",
@@ -641,7 +641,7 @@
           ],
           "root": [
             {
-              "instanceId": "h8wp1t8",
+              "instanceId": "hhq.r0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -792,7 +792,7 @@
           "label": "Remote 1",
           "ice": [
             {
-              "instanceId": "h1jkicx",
+              "instanceId": "hr1.i0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -831,7 +831,7 @@
           ],
           "root": [
             {
-              "instanceId": "h1m2g0ix",
+              "instanceId": "hr1.r0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 1,
@@ -5522,7 +5522,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.resolve_choice",
+          "actionId": "rn",
           "side": "runner",
           "type": "resolve_choice",
           "label": "Stack durchsuchen und Programm installieren",
@@ -9669,7 +9669,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "runner.resolve_choice",
+        "actionId": "rn",
         "side": "runner",
         "type": "resolve_choice",
         "label": "Stack durchsuchen und Programm installieren",
@@ -9753,7 +9753,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 138,
-      "sideSafePlanningFingerprint": "fnv1a:5f4569b4"
+      "sideSafePlanningFingerprint": "fnv1a:f405f2b4"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_ghost_circuit_2.0.0",

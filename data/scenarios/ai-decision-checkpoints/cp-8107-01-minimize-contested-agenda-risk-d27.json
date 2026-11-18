@@ -3846,7 +3846,7 @@
         "id": "r1"
       },
       "selectedStepKind": "protect_remote",
-      "selectedActionId": "corp.install_card.c2th.r1.c2th.1",
+      "selectedActionId": "cc.c2th.r1.c2th.1",
       "blockedBy": [
         "missing_remote_protection"
       ],
@@ -3870,7 +3870,7 @@
       "turnKey": "corp:turn:5",
       "foreground": {
         "portfolioEntryId": "corp.create_score_window:server:r1",
-        "sourcePlanId": "corp.create_score_window:corp.install_card.c2il.r1.c2il",
+        "sourcePlanId": "corp.create_score_window:cc.c2il.r1.c2il",
         "planType": "corp.create_score_window",
         "side": "corp",
         "executionClass": "bounded_sequence",
@@ -3886,7 +3886,7 @@
         "progress": 0.5,
         "selectedStepKind": "find_remote_protection",
         "actionCandidateIds": [
-          "corp.draw_card"
+          "c8"
         ],
         "cadence": {
           "turnKey": "corp:turn:5",
@@ -3899,7 +3899,7 @@
         },
         "updatedAtStateVersion": 45,
         "evidence": [
-          "plan_portfolio_source_plan:corp.create_score_window:corp.install_card.c2il.r1.c2il",
+          "plan_portfolio_source_plan:corp.create_score_window:cc.c2il.r1.c2il",
           "plan_portfolio_execution_class:bounded_sequence",
           "plan_portfolio_role:foreground",
           "plan_portfolio_lifecycle:active"
@@ -3924,7 +3924,7 @@
           "progress": 0.5,
           "selectedStepKind": "find_remote_protection",
           "actionCandidateIds": [
-            "corp.draw_card"
+            "c8"
           ],
           "cadence": {
             "turnKey": "corp:turn:5",
@@ -3963,7 +3963,7 @@
           "progress": 0.5,
           "selectedStepKind": "build_remote",
           "actionCandidateIds": [
-            "corp.install_card.c2xh.new_remote.c2xh"
+            "cc.c2xh.new_remote.c2xh"
           ],
           "cadence": {
             "turnKey": "corp:turn:5",
@@ -4004,7 +4004,7 @@
         "plan_portfolio_foreground:corp.create_score_window",
         "plan_portfolio_backgrounds:corp.establish_scoring_remote|corp.establish_scoring_remote",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:corp.play_operation.c31q.c31q"
+        "plan_portfolio_selected_action:ci.c31q.c31q"
       ]
     },
     "strategicIntent": {
@@ -5038,7 +5038,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "corp.draw_card"
+        "actionId": "c8"
       }
     ],
     "planExecution": {

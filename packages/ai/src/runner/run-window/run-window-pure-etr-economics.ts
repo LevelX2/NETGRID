@@ -75,7 +75,7 @@ export function pureEndRunEncounterPayment(
       next.has(i),
     );
     const indexes = parseSubroutineIndexes(
-      action.payload?.payOrEndRunSubroutineIndexes,
+      action.payOrEndRunSubroutineIndexes,
     );
     const cost = subroutines.reduce((sum, s) => sum + (s.amount ?? 0), 0);
     const immediateCost = nextSubroutines.reduce(
@@ -90,8 +90,9 @@ export function pureEndRunEncounterPayment(
       nextSubroutines.some((s) => !isVisiblePayEndRunSubroutine(s)) ||
       indexes.size !== next.size ||
       [...next].some((index) => !indexes.has(index)) ||
-      action.payload?.payOrEndRunSubroutineIndexes !==
-        [...next].sort((a, b) => a - b).join(",") ||
+      [...next].sort((a, b) => a - b).some(
+        (index, position) => action.payOrEndRunSubroutineIndexes?.[position] !== index,
+      ) ||
       action.payload?.unbrokenSubroutineCount !== next.size ||
       !Number.isSafeInteger(cost) ||
       cost <= 0 ||

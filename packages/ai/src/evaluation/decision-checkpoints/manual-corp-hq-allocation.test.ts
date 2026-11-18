@@ -74,7 +74,7 @@ it.each([
     expect(action?.costs).toEqual([{ clicks: 1, credits: 2 }]);
     expect(decision.evidence).toContain("plan_priority_class:P3");
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
       route: {
         actionId: decision.actionId,
         stateVersion: input.playerView.stateVersion,
@@ -98,9 +98,11 @@ it("keeps the score parent if HQ has no repeat access", () => {
   });
   const decision = chooseAiAction(input);
   expect(decision.actionId).toContain(".new_remote.");
-  expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toMatch(
-    /^plan:corp\.score_agenda:/,
-  );
+  expect(
+    decision.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+    )?.moduleId,
+  ).toBe("corp.score_agenda");
 });
 
 it("keeps immediately effective remote protection in the same priority band", () => {
@@ -110,9 +112,11 @@ it("keeps immediately effective remote protection in the same priority band", ()
   );
   const decision = chooseAiAction(input);
   expect(decision.actionId).toContain(".new_remote.");
-  expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toMatch(
-    /^plan:corp\.score_agenda:/,
-  );
+  expect(
+    decision.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+    )?.moduleId,
+  ).toBe("corp.score_agenda");
   expect(
     decision.evidence?.some((code) =>
       code.includes("score_protection_satisfied"),
@@ -141,7 +145,7 @@ it.each([true, false])(
       expect(head?.payload?.postInstallRezQuoteFinalCredits).toBe(3);
     }
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
       priority: { effectiveClass: "P2" },
       route: {
         actionId: decision.actionId,

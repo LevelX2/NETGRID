@@ -8728,7 +8728,7 @@
         "id": "c2id"
       },
       "selectedStepKind": "install_or_prepare_agenda",
-      "selectedActionId": "corp.install_card.c2id.new_remote.c2id",
+      "selectedActionId": "cc.c2id.new_remote.c2id",
       "selectedActionType": "install_card",
       "scoreConversionDesiredAdvancementCounters": 3,
       "blockedBy": [],
@@ -8835,7 +8835,7 @@
         "progress": 0.6,
         "selectedStepKind": "install_or_prepare_agenda",
         "actionCandidateIds": [
-          "corp.install_card.c2id.new_remote.c2id"
+          "cc.c2id.new_remote.c2id"
         ],
         "creditDemands": [],
         "actionDemands": [
@@ -8986,7 +8986,7 @@
           "plan_action_capacity_route:corp.create_score_window:conversion:c2id:actions:already_sufficient",
           "plan_action_capacity_route_status:already_sufficient",
           "plan_action_capacity_hard_blocker_resolved:false",
-          "plan_portfolio_action_progress:corp.install_card.c2id.new_remote.c2id"
+          "plan_portfolio_action_progress:cc.c2id.new_remote.c2id"
         ]
       },
       "backgrounds": [
@@ -9008,7 +9008,7 @@
           "progress": 0.5,
           "selectedStepKind": "build_remote",
           "actionCandidateIds": [
-            "corp.install_card.ck6.new_remote.ck6"
+            "cc.ck6.new_remote.ck6"
           ],
           "creditDemands": [],
           "actionDemands": [
@@ -9218,7 +9218,7 @@
         "plan_action_allocation_entries:2",
         "plan_action_allocation_unallocated:0",
         "plan_action_allocation_credit_remainder:12",
-        "plan_portfolio_selected_action:corp.install_card.c2id.new_remote.c2id"
+        "plan_portfolio_selected_action:cc.c2id.new_remote.c2id"
       ]
     },
     "strategicIntent": {

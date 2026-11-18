@@ -21,7 +21,7 @@ describe("read-only historical Engine probes", () => {
   it("returns the exact actor-safe successor actions for a completed branch", () => {
     const state = checkpoint();
     const before = hashState(state);
-    const actionId = "corp.gain_credit";
+    const actionId = "cb";
     const applied = applyAction(state, {
       matchId: state.matchId,
       side: "corp",
@@ -94,8 +94,8 @@ describe("read-only historical Engine probes", () => {
       expectedStateHash: before,
       actor: "corp" as const,
       actions: [
-        { actionId: "corp.gain_credit" },
-        { actionId: "corp.gain_credit" },
+        { actionId: "cb" },
+        { actionId: "cb" },
       ],
     };
     const result = probeHistoricalEngineState(request);
@@ -121,7 +121,7 @@ describe("read-only historical Engine probes", () => {
         state,
         expectedStateHash: "wrong",
         actor: "corp",
-        actions: [{ actionId: "corp.gain_credit" }],
+        actions: [{ actionId: "cb" }],
       }),
     ).toMatchObject({
       status: "unavailable",
@@ -132,7 +132,7 @@ describe("read-only historical Engine probes", () => {
         state,
         expectedStateHash: before,
         actor: "corp",
-        actions: [{ actionId: "runner.gain_credit" }],
+        actions: [{ actionId: "rb" }],
       }),
     ).toMatchObject({
       status: "rejected",
@@ -145,7 +145,7 @@ describe("read-only historical Engine probes", () => {
         expectedStateHash: before,
         actor: "corp",
         actions: Array.from({ length: 9 }, () => ({
-          actionId: "corp.gain_credit",
+          actionId: "cb",
         })),
       }),
     ).toMatchObject({ status: "rejected", reason: "invalid_probe_actions" });

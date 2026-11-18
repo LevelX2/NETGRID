@@ -11199,7 +11199,7 @@
       "stateVersion": 241,
       "instances": [
         {
-          "instanceId": "plan:corp.complete_turn:standard-turn-completion",
+          "instanceId": "p6yjycy2qsqgb3jl5pov75ajtq",
           "dedupeKey": "standard-turn-completion",
           "moduleId": "corp.complete_turn",
           "moduleVersion": "1",
@@ -11228,7 +11228,7 @@
           "moduleState": {
             "kind": "turn_completion",
             "standardEndTurnActionIds": [
-              "corp.end_turn"
+              "c9"
             ]
           },
           "blockers": [],
@@ -11261,7 +11261,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.hand_and_agenda_management:draw-for-score-material",
+          "instanceId": "p13oe6jmk9id0pfdx7x2bne8ui",
           "dedupeKey": "draw-for-score-material",
           "moduleId": "corp.hand_and_agenda_management",
           "moduleVersion": "1",
@@ -11284,7 +11284,7 @@
             "kind": "player",
             "id": "corp"
           },
-          "parentInstanceId": "plan:corp.score_agenda:general",
+          "parentInstanceId": "pa1d7j8c33k25iup8n8nyo9r2g",
           "parentNeedId": "score-material:general",
           "openNeedIds": [],
           "phase": "draw_for_plan",
@@ -11293,7 +11293,7 @@
             "kind": "hand",
             "signal": {
               "handPlanId": "draw-for-score-material",
-              "parentPlanInstanceId": "plan:corp.score_agenda:general",
+              "parentPlanInstanceId": "pa1d7j8c33k25iup8n8nyo9r2g",
               "parentNeedId": "score-material:general",
               "phase": "draw_for_plan",
               "agendaCount": 0,
@@ -11358,7 +11358,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:general",
+          "instanceId": "pa1d7j8c33k25iup8n8nyo9r2g",
           "dedupeKey": "general",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -11435,31 +11435,31 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:corp.complete_turn:standard-turn-completion",
+          "instanceId": "p6yjycy2qsqgb3jl5pov75ajtq",
           "stateVersion": 241,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.hand_and_agenda_management:draw-for-score-material",
+          "instanceId": "p13oe6jmk9id0pfdx7x2bne8ui",
           "stateVersion": 241,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:corp.score_agenda:general",
+          "instanceId": "pa1d7j8c33k25iup8n8nyo9r2g",
           "stateVersion": 241,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:corp.economy:economy-liquidity-development%3Acorp%3A32",
+          "instanceId": "py5satuphqshtgaxlw8a7gdsz",
           "stateVersion": 241,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:corp.complete_turn:standard-turn-completion",
+          "instanceId": "p6yjycy2qsqgb3jl5pov75ajtq",
           "stateVersion": 241,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
@@ -11470,7 +11470,7 @@
       "campaigns": [],
       "turnPlanCommitment": {
         "schemaVersion": "turn-plan-commitment-v2",
-        "sequenceRootPlanInstanceId": "plan:corp.complete_turn:standard-turn-completion",
+        "sequenceRootPlanInstanceId": "p6yjycy2qsqgb3jl5pov75ajtq",
         "commitmentId": "fnv1a:d4e4d385",
         "sourcePlanId": "fnv1a:3ab652fe",
         "sourceLineHash": "fnv1a:0fafeb88",
@@ -11490,7 +11490,7 @@
           {
             "phaseId": "fnv1a:0fbfe333",
             "root": {
-              "planInstanceId": "plan:corp.complete_turn:standard-turn-completion",
+              "planInstanceId": "p6yjycy2qsqgb3jl5pov75ajtq",
               "moduleId": "corp.complete_turn",
               "milestoneId": "complete_turn_after_productive_routes_exhausted",
               "provenance": "resident"
@@ -11577,7 +11577,7 @@
           "sideSafePlanningFingerprint": "fnv1a:a246e4ee"
         },
         "currentBinding": {
-          "actionId": "corp.end_turn",
+          "actionId": "c9",
           "stateVersion": 241,
           "semanticActionSetFingerprint": "fnv1a:b84a54da",
           "invocationKey": "fnv1a:c39791ca"
@@ -11585,8 +11585,8 @@
         "actionType": "end_turn",
         "expectationId": "fnv1a:05bb1717"
       },
-      "rootForegroundInstanceId": "plan:corp.complete_turn:standard-turn-completion",
-      "executorInstanceId": "plan:corp.complete_turn:standard-turn-completion"
+      "rootForegroundInstanceId": "p6yjycy2qsqgb3jl5pov75ajtq",
+      "executorInstanceId": "p6yjycy2qsqgb3jl5pov75ajtq"
     }
   },
   "expectation": {

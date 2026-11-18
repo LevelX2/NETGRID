@@ -9330,7 +9330,7 @@
       "schemaVersion": "tactical-plan-v1",
       "memoryId": "match_606a546d0ba02826:corp:corp-ai-v0.9-hard",
       "side": "corp",
-      "planId": "corp.rez_defense:corp.rez_ice.c2xa.c2xa",
+      "planId": "corp.rez_defense:cq.c2xa.c2xa",
       "type": "corp.rez_defense",
       "status": "satisfied",
       "target": {
@@ -9338,7 +9338,7 @@
         "id": "hq"
       },
       "selectedStepKind": "rez_outer_ice",
-      "selectedActionId": "corp.rez_ice.c2xa.c2xa",
+      "selectedActionId": "cq.c2xa.c2xa",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -9369,10 +9369,10 @@
           "progress": 0.5,
           "selectedStepKind": "build_remote",
           "actionCandidateIds": [
-            "corp.install_card.c2ot.new_remote.c2ot",
-            "corp.install_card.c2ou.new_remote.c2ou",
-            "corp.install_card.c2rz.new_remote.c2rz",
-            "corp.install_card.c2x9.new_remote.c2x9"
+            "cc.c2ot.new_remote.c2ot",
+            "cc.c2ou.new_remote.c2ou",
+            "cc.c2rz.new_remote.c2rz",
+            "cc.c2x9.new_remote.c2x9"
           ],
           "cadence": {
             "turnKey": "corp:turn:18",
@@ -9468,7 +9468,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:corp.establish_scoring_remote|corp.establish_scoring_remote",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:corp.end_turn"
+        "plan_portfolio_selected_action:c9"
       ]
     },
     "strategicIntent": {

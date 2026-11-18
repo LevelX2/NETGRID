@@ -876,13 +876,13 @@
               }
             },
             {
-              "instanceId": "h1lt4oxj",
+              "instanceId": "hrd.i2",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
             },
             {
-              "instanceId": "h2cmiqj",
+              "instanceId": "hrd.i3",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -1337,7 +1337,7 @@
               }
             },
             {
-              "instanceId": "h1f5t1vv",
+              "instanceId": "hr2.i1",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -1345,7 +1345,7 @@
           ],
           "root": [
             {
-              "instanceId": "hk9txnf",
+              "instanceId": "hr2.r0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -13013,7 +13013,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.steal_agenda.cdx.cdx.2.62",
+          "actionId": "rt.cdx.cdx.2.62",
           "side": "runner",
           "type": "steal_agenda",
           "label": "Fetal AI stehlen",
@@ -13033,7 +13033,7 @@
           }
         },
         {
-          "actionId": "runner.decline_trash.cdx.2.62",
+          "actionId": "r7.cdx.2.62",
           "side": "runner",
           "type": "decline_trash",
           "label": "Fetal AI nicht stehlen",
@@ -15006,7 +15006,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "runner.steal_agenda.cdx.cdx.2.62",
+        "actionId": "rt.cdx.cdx.2.62",
         "side": "runner",
         "type": "steal_agenda",
         "label": "Fetal AI stehlen",
@@ -15026,7 +15026,7 @@
         }
       },
       {
-        "actionId": "runner.decline_trash.cdx.2.62",
+        "actionId": "r7.cdx.2.62",
         "side": "runner",
         "type": "decline_trash",
         "label": "Fetal AI nicht stehlen",
@@ -15083,7 +15083,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 462,
-      "sideSafePlanningFingerprint": "fnv1a:8ce7c627"
+      "sideSafePlanningFingerprint": "fnv1a:d4c06a7b"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_adb10896_1.1.0",
@@ -21590,7 +21590,7 @@
       "stateVersion": 462,
       "instances": [
         {
-          "instanceId": "plan:runner.contest_remote:remote%3Ar1",
+          "instanceId": "p1p4xezjcxov79rno40lq3f7rv",
           "dedupeKey": "remote:r1",
           "moduleId": "runner.contest_remote",
           "moduleVersion": "1",
@@ -21626,7 +21626,7 @@
               "terminalPatternThreat": true,
               "reachable": true,
               "marginalValue": 1400,
-              "evidenceCode": "runner_terminal_remote_contest_mandatory:r1:runner.start_run.r1",
+              "evidenceCode": "runner_terminal_remote_contest_mandatory:r1:rs.r1",
               "accessCommitment": {
                 "payoff": "trash_affordable",
                 "intendedAction": "trash",
@@ -21724,13 +21724,13 @@
           "updatedAtStateVersion": 462,
           "evidenceRefs": [
             {
-              "code": "runner_terminal_remote_contest_mandatory:r1:runner.start_run.r1",
+              "code": "runner_terminal_remote_contest_mandatory:r1:rs.r1",
               "source": "visible_state"
             }
           ]
         },
         {
-          "instanceId": "plan:runner.convert_run_window:run%3A445",
+          "instanceId": "pd3wrdorii4eg0famfolu2os8n",
           "dedupeKey": "run:445",
           "moduleId": "runner.convert_run_window",
           "moduleVersion": "1",
@@ -21753,7 +21753,7 @@
             "kind": "window",
             "id": "run:445"
           },
-          "parentInstanceId": "plan:runner.contest_remote:remote%3Ar1",
+          "parentInstanceId": "p1p4xezjcxov79rno40lq3f7rv",
           "openNeedIds": [],
           "phase": "execute",
           "milestone": "admitted",
@@ -21762,8 +21762,8 @@
             "signal": {
               "windowId": "run:445",
               "serverId": "r1",
-              "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar1",
-              "leafPlanInstanceId": "plan:runner.convert_run_window:run%3A445",
+              "rootPlanInstanceId": "p1p4xezjcxov79rno40lq3f7rv",
+              "leafPlanInstanceId": "pd3wrdorii4eg0famfolu2os8n",
               "semanticActionTypes": [
                 "access.steal_agenda",
                 "access.decline_trash"
@@ -21857,7 +21857,7 @@
                 ]
               },
               "actionAssessments": {
-                "runner.steal_agenda.cdx.cdx.2.62": {
+                "rt.cdx.cdx.2.62": {
                   "admissible": true,
                   "evidenceCodes": [
                     "runner_access_window_action_plan_admissible",
@@ -21866,7 +21866,7 @@
                     "runner_full_path_commitment_preserved"
                   ]
                 },
-                "runner.decline_trash.cdx.2.62": {
+                "r7.cdx.2.62": {
                   "admissible": true,
                   "value": 1880,
                   "evidenceCodes": [
@@ -21935,7 +21935,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.economy:runner-portfolio-credit-reserve",
+          "instanceId": "pc7ebuiw5dxhlbzbf1nhcs4p4z",
           "dedupeKey": "runner-portfolio-credit-reserve",
           "moduleId": "runner.economy",
           "moduleVersion": "1",
@@ -22040,19 +22040,19 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:runner.contest_remote:remote%3Ar1",
+          "instanceId": "p1p4xezjcxov79rno40lq3f7rv",
           "stateVersion": 462,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.convert_run_window:run%3A445",
+          "instanceId": "pd3wrdorii4eg0famfolu2os8n",
           "stateVersion": 462,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.economy:runner-portfolio-credit-reserve",
+          "instanceId": "pc7ebuiw5dxhlbzbf1nhcs4p4z",
           "stateVersion": 462,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
@@ -22063,7 +22063,7 @@
         "commitmentId": "fnv1a:4d238d84",
         "sourcePlanId": "fnv1a:f2fda9b1",
         "sourceLineHash": "fnv1a:5a549349",
-        "sequenceRootPlanInstanceId": "plan:runner.contest_remote:remote%3Ar1",
+        "sequenceRootPlanInstanceId": "p1p4xezjcxov79rno40lq3f7rv",
         "side": "runner",
         "turnKey": "runner:turn:47",
         "planningRulesFingerprint": "fnv1a:2cdee35c",
@@ -22080,7 +22080,7 @@
           {
             "phaseId": "fnv1a:c280297f",
             "root": {
-              "planInstanceId": "plan:runner.contest_remote:remote%3Ar1",
+              "planInstanceId": "p1p4xezjcxov79rno40lq3f7rv",
               "moduleId": "runner.convert_run_window",
               "milestoneId": "convert_active_run_window",
               "provenance": "resident"
@@ -22175,7 +22175,7 @@
           "sideSafePlanningFingerprint": "fnv1a:e3ebe65a"
         },
         "currentBinding": {
-          "actionId": "runner.decline_trash.cdx.2.62",
+          "actionId": "r7.cdx.2.62",
           "stateVersion": 462,
           "semanticActionSetFingerprint": "fnv1a:9e536b67",
           "invocationKey": "fnv1a:89a8c42e"
@@ -22183,8 +22183,8 @@
         "actionType": "decline_trash",
         "expectationId": "fnv1a:a4bb5f3d"
       },
-      "rootForegroundInstanceId": "plan:runner.contest_remote:remote%3Ar1",
-      "executorInstanceId": "plan:runner.convert_run_window:run%3A445"
+      "rootForegroundInstanceId": "p1p4xezjcxov79rno40lq3f7rv",
+      "executorInstanceId": "pd3wrdorii4eg0famfolu2os8n"
     }
   },
   "validation": {

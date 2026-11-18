@@ -5079,7 +5079,9 @@
           "actionType": "break_subroutine",
           "label": "Pile Driver: Subroutine 1 brechen",
           "breakSubroutineCount": 1,
-          "subroutineIndexes": "0",
+          "subroutineIndexes": [
+            0
+          ],
           "targetIceDefinitionId": 491,
           "targetIceTitle": "Wall of Static",
           "breakSubroutineBaseCost": 3,
@@ -7333,7 +7335,7 @@
       "stateVersion": 113,
       "instances": [
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "dedupeKey": "standard-turn-completion",
           "moduleId": "runner.complete_turn",
           "moduleVersion": "1",
@@ -7362,7 +7364,7 @@
           "moduleState": {
             "kind": "turn_completion",
             "standardEndTurnActionIds": [
-              "runner.end_turn"
+              "r9"
             ]
           },
           "blockers": [],
@@ -7395,7 +7397,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.credit_bank:366",
+          "instanceId": "p27nxf5z010iyjlqr3dgq3ah0w",
           "dedupeKey": "366",
           "moduleId": "runner.credit_bank",
           "moduleVersion": "1",
@@ -7497,7 +7499,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.defense_and_recovery:runner",
+          "instanceId": "p1gzjb6yfcv4zbzow512kexs33",
           "dedupeKey": "runner",
           "moduleId": "runner.defense_and_recovery",
           "moduleVersion": "1",
@@ -7586,7 +7588,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac1ft",
+          "instanceId": "p3qu7a9w28jkv572wdyo2eojbr",
           "dedupeKey": "card:c1ft",
           "moduleId": "runner.develop_board_and_hand",
           "moduleVersion": "1",
@@ -7705,7 +7707,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac1l5",
+          "instanceId": "p3q7nsx0ue9psiuhpyj2cb87qa",
           "dedupeKey": "card:c1l5",
           "moduleId": "runner.develop_board_and_hand",
           "moduleVersion": "1",
@@ -7824,7 +7826,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac261",
+          "instanceId": "p5z2l3bizazy73ljmdph7k9mfx",
           "dedupeKey": "card:c261",
           "moduleId": "runner.develop_board_and_hand",
           "moduleVersion": "1",
@@ -7943,7 +7945,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac263",
+          "instanceId": "p5z2lh1khfor4f5puposb48vwv",
           "dedupeKey": "card:c263",
           "moduleId": "runner.develop_board_and_hand",
           "moduleVersion": "1",
@@ -8062,7 +8064,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac276",
+          "instanceId": "p5z0d8ibivywjsr7j8qqk8yumd",
           "dedupeKey": "card:c276",
           "moduleId": "runner.develop_board_and_hand",
           "moduleVersion": "1",
@@ -8181,7 +8183,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac29e",
+          "instanceId": "p5y4ipj2ez9jw5f7eygbdc23z2",
           "dedupeKey": "card:c29e",
           "moduleId": "runner.develop_board_and_hand",
           "moduleVersion": "1",
@@ -8300,7 +8302,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
+          "instanceId": "p5s1qdgqrafrs3n2kss1t9ct7m",
           "dedupeKey": "coverage:breaker_code_gate",
           "moduleId": "runner.rig_and_coverage",
           "moduleVersion": "1",
@@ -8389,7 +8391,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry",
+          "instanceId": "pde8a64nmn1hkbrzgi9sbuf6fo",
           "dedupeKey": "coverage:breaker_sentry",
           "moduleId": "runner.rig_and_coverage",
           "moduleVersion": "1",
@@ -8479,73 +8481,73 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "stateVersion": 113,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.credit_bank:366",
+          "instanceId": "p27nxf5z010iyjlqr3dgq3ah0w",
           "stateVersion": 113,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.defense_and_recovery:runner",
+          "instanceId": "p1gzjb6yfcv4zbzow512kexs33",
           "stateVersion": 113,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac1ft",
+          "instanceId": "p3qu7a9w28jkv572wdyo2eojbr",
           "stateVersion": 113,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac1l5",
+          "instanceId": "p3q7nsx0ue9psiuhpyj2cb87qa",
           "stateVersion": 113,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac261",
+          "instanceId": "p5z2l3bizazy73ljmdph7k9mfx",
           "stateVersion": 113,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac263",
+          "instanceId": "p5z2lh1khfor4f5puposb48vwv",
           "stateVersion": 113,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac276",
+          "instanceId": "p5z0d8ibivywjsr7j8qqk8yumd",
           "stateVersion": 113,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac29e",
+          "instanceId": "p5y4ipj2ez9jw5f7eygbdc23z2",
           "stateVersion": 113,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
+          "instanceId": "p5s1qdgqrafrs3n2kss1t9ct7m",
           "stateVersion": 113,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry",
+          "instanceId": "pde8a64nmn1hkbrzgi9sbuf6fo",
           "stateVersion": 113,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "stateVersion": 113,
           "reason": "executor_selected",
           "fromExecutionState": "idle",
@@ -8553,11 +8555,11 @@
           "detailCode": "validated_scheduler_selection"
         }
       ],
-      "rootForegroundInstanceId": "plan:runner.complete_turn:standard-turn-completion",
-      "executorInstanceId": "plan:runner.complete_turn:standard-turn-completion",
+      "rootForegroundInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
+      "executorInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
       "turnPlanCommitment": {
         "schemaVersion": "turn-plan-commitment-v2",
-        "sequenceRootPlanInstanceId": "plan:runner.complete_turn:standard-turn-completion",
+        "sequenceRootPlanInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
         "commitmentId": "fnv1a:770be3bc",
         "sourcePlanId": "fnv1a:92cc5f61",
         "sourceLineHash": "fnv1a:2aa364c7",
@@ -8577,7 +8579,7 @@
           {
             "phaseId": "fnv1a:e79c5c7e",
             "root": {
-              "planInstanceId": "plan:runner.complete_turn:standard-turn-completion",
+              "planInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
               "moduleId": "runner.complete_turn",
               "milestoneId": "complete_turn_after_productive_routes_exhausted",
               "provenance": "resident"
@@ -8664,7 +8666,7 @@
           "sideSafePlanningFingerprint": "fnv1a:26304d14"
         },
         "currentBinding": {
-          "actionId": "runner.end_turn",
+          "actionId": "r9",
           "stateVersion": 113,
           "semanticActionSetFingerprint": "fnv1a:1237c312",
           "invocationKey": "fnv1a:be75707a"
@@ -8678,7 +8680,7 @@
     "contractKind": "correctness",
     "acceptableActions": [
       {
-        "actionId": "runner.resolve_choice",
+        "actionId": "rn",
         "type": "resolve_choice"
       }
     ],
@@ -8705,7 +8707,7 @@
     },
     "planExecution": {
       "acceptablePlanIds": [
-        "plan:runner.defense_and_recovery:runner"
+        "p1gzjb6yfcv4zbzow512kexs33"
       ],
       "acceptablePlanKinds": [
         "runner.defense_and_recovery"

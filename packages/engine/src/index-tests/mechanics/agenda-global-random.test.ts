@@ -3152,7 +3152,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     );
     expect(drawActions).toHaveLength(1);
     expect(drawActions[0]).toMatchObject({
-      actionId: "runner.draw_card",
+      actionId: "r8",
       costs: [{ clicks: 1 }],
     });
     expect(drawActions[0]?.payload).toEqual({

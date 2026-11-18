@@ -3253,7 +3253,7 @@
         "label": "Rigged Investments"
       },
       "selectedStepKind": "gain_credits",
-      "selectedActionId": "runner.play_event.c1wq.c1wq",
+      "selectedActionId": "rh.c1wq.c1wq",
       "blockedBy": [
         "missing_credits"
       ],
@@ -3319,7 +3319,7 @@
         "plan_portfolio_foreground:runner.develop_hand_card",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.play_event.c1wq.c1wq"
+        "plan_portfolio_selected_action:rh.c1wq.c1wq"
       ]
     },
     "strategicIntent": {
@@ -4433,7 +4433,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.gain_credit"
+        "actionId": "rb"
       }
     ],
     "forbiddenActions": [

@@ -90,7 +90,7 @@ describe("meta 411 conditional next-encounter full break", () => {
       runtime,
     );
     const result = chooseAiAction(input, { runnerTurnPlannerMode: "cutover" });
-    expect(result.actionId).toBe("runner.start_run.r1");
+    expect(result.actionId).toBe("rs.r1");
     expect(result.fallbackUsed).toBe(false);
     expect(input.legalActions.some((a) => a.actionId === result.actionId)).toBe(
       true,

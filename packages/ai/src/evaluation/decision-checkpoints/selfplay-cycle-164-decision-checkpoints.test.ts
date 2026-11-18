@@ -32,7 +32,7 @@ describe("selfplay cycle 164 decision checkpoints", () => {
       (a) => a.type === "continue_run",
     )!;
     expect(continuation.payload?.unbrokenSubroutineCount).toBe(1);
-    expect(continuation.payload?.encounterSubroutineIds).toBe("0");
+    expect(continuation.encounterSubroutineIds).toEqual(["0"]);
     resetResidentPlanPortfolioMemory();
     restoreAiRuntimeCheckpoint(capture.input, deckSnapshotId!, capture.runtime);
 
@@ -40,14 +40,14 @@ describe("selfplay cycle 164 decision checkpoints", () => {
 
     expect(decision).toMatchObject({
       actionId:
-        "runner.pump_breaker.c1n5.c1n5.c1n5.c2l.348",
+        "rj.c1n5.c1n5.c1n5.c2l.348",
       reasonCode: "plan_first.runner.convert_run_window",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+          rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
           leafExecutorInstanceId:
-            "plan:runner.convert_run_window:run%3A196",
+            "p9nlmml78ptx7h1ghtu23kmpnw",
           route: {
             actionType: "pump_breaker",
             capabilityId: "convert_active_run_window",

@@ -85,14 +85,14 @@ afterEach(resetResidentPlanPortfolioMemory);
 it("SP-565 admits the original free ETR when every paid continuation is inadmissible", () => {
   const r = decisionAt("g15d170");
   expect(r.decision.actionId).toBe(
-    "runner.continue_run.0",
+    "r5.0",
   );
   expect(r.pf.selectedPlan?.moduleId).toBe("runner.convert_run_window");
   expect(r.pf.rootPlanInstanceId).toBe(
-    "plan:runner.pressure_central:central%3Ahq",
+    "pa7nez1ioecg7mf06q1uwqq57o",
   );
   expect(r.pf.leafExecutorInstanceId).toBe(
-    "plan:runner.convert_run_window:run%3A163",
+    "p9nnvzloeg2xwqxtk4u2gou84s",
   );
   const state = applySelected(r);
   expect(state.run).toBeUndefined();
@@ -105,7 +105,7 @@ it("SP-565 retains access when its paid continuation is actually funded and admi
     state.runner.credits = 100;
   });
   expect(r.decision.actionId).toBe(
-    "runner.continue_run.0.0.1",
+    "r5.0.0.1",
   );
   expect(r.pf.selectedPlan?.moduleId).toBe("runner.convert_run_window");
   const state = applySelected(r);
@@ -120,7 +120,7 @@ it.each(["g1d120", "g16d29"])(
       runnerDefenseHandBufferFacts(r.input, [], () => false).minimumHandBuffer,
     ).toBe(4);
     expect(r.input.playerView.own.gripOrHq).toHaveLength(4);
-    expect(r.decision.actionId).toBe("runner.gain_credit");
+    expect(r.decision.actionId).toBe("rb");
     expect(r.pf.selectedPlan?.moduleId).toBe("runner.economy");
     expect(r.pf.route?.capabilityId).toBe("gain_general_liquid_credits");
     const state = applySelected(r);
@@ -159,7 +159,7 @@ it("SP-566 preserves the buffer after the original Stakeout draw without resetti
   });
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.timeoutUsed).not.toBe(true);
-  expect(decision.actionId).toBe("runner.gain_credit");
+  expect(decision.actionId).toBe("rb");
   expect(
     decision.decisionDebug!.planFirstDecision!.selectedPlan?.moduleId,
   ).toBe("runner.economy");

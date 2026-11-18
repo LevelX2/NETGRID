@@ -96,13 +96,13 @@ function play(seed?: string) {
     )!;
     expect(action).toBeDefined();
     if (n === 0) {
-      expect(action.actionId).toBe("runner.start_run.r1");
+      expect(action.actionId).toBe("rs.r1");
       expect(
         decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
       ).toBe("runner.contest_remote");
       expect(
         decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-      ).toBe("plan:runner.contest_remote:remote%3Ar1");
+      ).toBe("p1p4xezjcxov79rno40lq3f7rv");
     }
     if (action.type === "break_subroutine") {
       expect(action.payload?.subroutineIndex).toBe(1);
@@ -111,7 +111,7 @@ function play(seed?: string) {
       );
       expect(
         decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-      ).toBe("plan:runner.contest_remote:remote%3Ar1");
+      ).toBe("p1p4xezjcxov79rno40lq3f7rv");
       expect(JSON.stringify(decision.decisionDebug)).toContain(
         "runner_bound_terminal_random_break_last_chance",
       );
@@ -149,7 +149,7 @@ function play(seed?: string) {
   }
   expect(state.winner).toBeTruthy();
   expect(
-    steps.filter((s) => s.action.startsWith("runner.break_subroutine")),
+    steps.filter((s) => s.action.startsWith("r3")),
   ).toHaveLength(1);
   let replay = initial;
   for (const s of steps) {

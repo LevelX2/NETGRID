@@ -39,7 +39,7 @@ describe("meta 461 counter-bank current-turn conversion", () => {
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.score_agenda:counter-bank%3Ahandoff%3Ac3ge%3Acet%3Ar1%3Anew_remote",
+            "p8amm65beazk299k9hsz1ef04n",
         },
       },
     });
@@ -64,7 +64,7 @@ describe("meta 461 counter-bank current-turn conversion", () => {
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.score_agenda:counter-bank%3Arez-handoff%3Ac3ge%3Acet%3Ar1%3Ar2",
+            "pd6l9zevng4r6vpxqqlgxg1iji",
           route: {
             actionId: rez.actionId,
             stateVersion: input.playerView.stateVersion,
@@ -89,7 +89,7 @@ describe("meta 461 counter-bank current-turn conversion", () => {
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.score_agenda:counter-bank%3Ahandoff%3Ac3gf%3Aceu%3Ar1%3Anew_remote",
+            "p7ld0fn65oafq6l3y1kvzfuk19",
           priority: { effectiveClass: "P1" },
           route: {
             actionId: action.actionId,

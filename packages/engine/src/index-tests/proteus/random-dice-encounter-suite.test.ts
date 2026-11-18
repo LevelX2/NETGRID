@@ -660,7 +660,7 @@ describe("Proteus PRO016 random dice encounter suite", () => {
       (candidate) => candidate.type === "continue_run",
     );
     expect(
-      String(continueAction.payload?.encounterSubroutineIds).split(","),
+      String(continueAction.encounterSubroutineIds).split(","),
     ).toEqual(effectiveSubroutines.map((subroutine) => subroutine.id));
   });
 
@@ -717,7 +717,7 @@ describe("Proteus PRO016 random dice encounter suite", () => {
     // The first tag has already resolved in this authored encounter continuation.
     state.run!.resolvedSubroutineIndexes = [0];
     const continuation = mustAction(state, "runner", (action) => action.type === "continue_run");
-    expect(continuation.payload?.encounterRemainingSubroutineIds).toBe("1,2,3");
+    expect(continuation.encounterRemainingSubroutineIds).toEqual(["1","2","3"]);
     const tagsBefore = state.runner.tags;
     state = applyLegal(state, "runner", continuation.actionId);
     expect(state.runner.tags).toBe(tagsBefore + 1);

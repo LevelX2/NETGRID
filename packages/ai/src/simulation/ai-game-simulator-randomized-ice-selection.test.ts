@@ -203,7 +203,7 @@ describe("AI game simulator Engine-randomized decisions", () => {
                 side: "corp",
                 stateVersion: input.playerView.stateVersion,
                 timingPoint: input.playerView.timingPoint,
-                planStepId: "plan:corp.defend_servers:simulation-near-tie-test",
+                planStepId: "pavviv4jswd6fqm2mgprldti14",
                 candidates: [
                   { actionId: hqIce.actionId, targetServerId: "hq" },
                   { actionId: rdIce.actionId, targetServerId: "rd" },

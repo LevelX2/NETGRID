@@ -1,7 +1,7 @@
 {
   "sourceCommit": "ea879889e76e4906b8573b297e163f9c056d29a1",
   "seed": "57743956d80476579757d696e2ae8f09",
-  "historicalActionId": "runner.break_subroutine.cuh.cuh.cuh.c2t2.0.183",
+  "historicalActionId": "r3.cuh.cuh.cuh.c2t2.0.183",
   "checkpoint": {
     "schemaVersion": "netgrid-ai-decision-checkpoint-replay-v1",
     "provenance": "reconstructed_from_persisted_decision_sources",
@@ -833,7 +833,7 @@
                 }
               },
               {
-                "instanceId": "h141u4jb",
+                "instanceId": "hrd.i1",
                 "known": false,
                 "rezzed": false,
                 "advancementCounters": 0
@@ -1170,7 +1170,7 @@
             },
             "ice": [
               {
-                "instanceId": "h1h2wmjc",
+                "instanceId": "hr1.i0",
                 "known": false,
                 "rezzed": false,
                 "advancementCounters": 0
@@ -1234,19 +1234,19 @@
             },
             "ice": [
               {
-                "instanceId": "h1ffsnku",
+                "instanceId": "hr2.i0",
                 "known": false,
                 "rezzed": false,
                 "advancementCounters": 0
               },
               {
-                "instanceId": "h1ff4dh9",
+                "instanceId": "hr2.i1",
                 "known": false,
                 "rezzed": false,
                 "advancementCounters": 0
               },
               {
-                "instanceId": "hzmfb1f",
+                "instanceId": "hr2.i2",
                 "known": false,
                 "rezzed": false,
                 "advancementCounters": 0
@@ -9215,7 +9215,7 @@
         ],
         "legalActions": [
           {
-            "actionId": "runner.pump_breaker.cuh.cuh.cuh.c2t2.184",
+            "actionId": "rj.cuh.cuh.cuh.c2t2.184",
             "side": "runner",
             "type": "pump_breaker",
             "label": "Big Frackin' Gun: Stärke +1",
@@ -9256,7 +9256,7 @@
             }
           },
           {
-            "actionId": "runner.break_subroutine.cuh.cuh.cuh.c2t2.0.183",
+            "actionId": "r3.cuh.cuh.cuh.c2t2.0.183",
             "side": "runner",
             "type": "break_subroutine",
             "label": "Big Frackin' Gun: Subroutine 1 brechen",
@@ -9289,16 +9289,18 @@
             "payload": {
               "breakerId": "cuh",
               "iceId": "c2t2",
-              "subroutineIndexes": "0",
               "targetIceDefinitionId": 454,
               "cardId": "cuh",
               "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
               "cardImplementationAbilityId": 183,
               "cardImplementationAbilityKey": "break_five_sentry_subroutines"
-            }
+            },
+            "subroutineIndexes": [
+              0
+            ]
           },
           {
-            "actionId": "runner.continue_run.0",
+            "actionId": "r5.0",
             "side": "runner",
             "type": "continue_run",
             "label": "Subroutinen auslösen",
@@ -9311,15 +9313,19 @@
             "payload": {
               "encounterContinue": true,
               "unbrokenSubroutineCount": 1,
-              "encounterSubroutineIds": "0",
-              "encounterRemainingSubroutineIds": "0",
               "encounterRemainingSubroutineCount": 1,
               "encounterFullBreakDamage": 0,
               "encounterWillEndRun": false,
               "encounterSourceWillTrashAtEndOfTurn": false,
               "abilityFamily": "run-access",
               "sourceDefinitionId": 454
-            }
+            },
+            "encounterSubroutineIds": [
+              "0"
+            ],
+            "encounterRemainingSubroutineIds": [
+              "0"
+            ]
           }
         ]
       },
@@ -11468,7 +11474,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.pump_breaker.cuh.cuh.cuh.c2t2.184",
+          "actionId": "rj.cuh.cuh.cuh.c2t2.184",
           "side": "runner",
           "type": "pump_breaker",
           "label": "Big Frackin' Gun: Stärke +1",
@@ -11509,7 +11515,7 @@
           }
         },
         {
-          "actionId": "runner.break_subroutine.cuh.cuh.cuh.c2t2.0.183",
+          "actionId": "r3.cuh.cuh.cuh.c2t2.0.183",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Big Frackin' Gun: Subroutine 1 brechen",
@@ -11542,16 +11548,18 @@
           "payload": {
             "breakerId": "cuh",
             "iceId": "c2t2",
-            "subroutineIndexes": "0",
             "targetIceDefinitionId": 454,
             "cardId": "cuh",
             "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
             "cardImplementationAbilityId": 183,
             "cardImplementationAbilityKey": "break_five_sentry_subroutines"
-          }
+          },
+          "subroutineIndexes": [
+            0
+          ]
         },
         {
-          "actionId": "runner.continue_run.0",
+          "actionId": "r5.0",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen",
@@ -11564,15 +11572,19 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 1,
-            "encounterSubroutineIds": "0",
-            "encounterRemainingSubroutineIds": "0",
             "encounterRemainingSubroutineCount": 1,
             "encounterFullBreakDamage": 0,
             "encounterWillEndRun": false,
             "encounterSourceWillTrashAtEndOfTurn": false,
             "abilityFamily": "run-access",
             "sourceDefinitionId": 454
-          }
+          },
+          "encounterSubroutineIds": [
+            "0"
+          ],
+          "encounterRemainingSubroutineIds": [
+            "0"
+          ]
         }
       ],
       "difficulty": "hard",
@@ -11617,7 +11629,7 @@
       },
       "planningStateIdentity": {
         "stateVersion": 266,
-        "sideSafePlanningFingerprint": "fnv1a:3c85e682"
+        "sideSafePlanningFingerprint": "fnv1a:769ab895"
       },
       "ownDeckSnapshot": {
         "deckSnapshotId": "standard_standard_runner_rd_express_v2_2.0.0",
@@ -18333,7 +18345,7 @@
         "stateVersion": 266,
         "instances": [
           {
-            "instanceId": "plan:runner.convert_run_window:run%3A265",
+            "instanceId": "p8xqhbkzpiuechoo267e6gas23",
             "dedupeKey": "run:265",
             "moduleId": "runner.convert_run_window",
             "moduleVersion": "1",
@@ -18356,7 +18368,7 @@
               "kind": "window",
               "id": "run:265"
             },
-            "parentInstanceId": "plan:runner.pressure_central:central%3Ard",
+            "parentInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
             "openNeedIds": [],
             "phase": "execute",
             "milestone": "admitted",
@@ -18365,8 +18377,8 @@
               "signal": {
                 "windowId": "run:265",
                 "serverId": "rd",
-                "rootPlanInstanceId": "plan:runner.pressure_central:central%3Ard",
-                "leafPlanInstanceId": "plan:runner.convert_run_window:run%3A265",
+                "rootPlanInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
+                "leafPlanInstanceId": "p8xqhbkzpiuechoo267e6gas23",
                 "semanticActionTypes": [
                   "breaker.boost_strength",
                   "breaker.break_subroutine",
@@ -18478,7 +18490,7 @@
                 "encounterIntent": "mitigate_threat",
                 "encounterEvidenceCode": "runner_visible_encounter_requires_mitigation:454",
                 "actionAssessments": {
-                  "runner.pump_breaker.cuh.cuh.cuh.c2t2.137:pump_strength_one": {
+                  "rj.cuh.cuh.cuh.c2t2.137:pump_strength_one": {
                     "admissible": false,
                     "evidenceCodes": [
                       "runner_run_window_action_excluded:pump_cannot_lead_to_useful_break",
@@ -18486,7 +18498,7 @@
                       "pump_direct_break_already_legal:true"
                     ]
                   },
-                  "runner.break_subroutine.cuh.cuh.cuh.c2t2.0.137:break_five_sentry_subroutines": {
+                  "r3.cuh.cuh.cuh.c2t2.0.137:break_five_sentry_subroutines": {
                     "admissible": true,
                     "binding": "current_window",
                     "evidenceCodes": [
@@ -18495,7 +18507,7 @@
                       "runner_run_parent_payoff_preserved:access_bonus"
                     ]
                   },
-                  "runner.continue_run.printed_subroutines_next_encounter_unless_fully_break_damage_net": {
+                  "r5.printed_subroutines_next_encounter_unless_fully_break_damage_net": {
                     "admissible": true,
                     "binding": "current_window",
                     "evidenceCodes": [
@@ -18544,7 +18556,7 @@
             ]
           },
           {
-            "instanceId": "plan:runner.develop_board_and_hand:card%3Ac261",
+            "instanceId": "p5z2l3bizazy73ljmdph7k9mfx",
             "dedupeKey": "card:c261",
             "moduleId": "runner.develop_board_and_hand",
             "moduleVersion": "1",
@@ -18600,21 +18612,21 @@
                   "releaseCondition": "parent_invalidated_or_material_value_lost_or_urgent_preemption"
                 },
                 "fundingRouteActionIds": [
-                  "runner.gain_credit"
+                  "rb"
                 ],
                 "fundingRouteAssessment": {
                   "stateVersion": 51,
-                  "routeId": "development-support:c261:legal_action:runner.gain_credit",
+                  "routeId": "development-support:c261:legal_action:rb",
                   "status": "covered_guaranteed",
                   "reliability": "guaranteed",
                   "horizon": "same_turn",
                   "projectedGap": 0,
                   "totalClickCost": 1,
-                  "firstStepActionId": "runner.gain_credit",
+                  "firstStepActionId": "rb",
                   "evidenceCodes": [
                     "funding_route_count:1",
                     "funding_route_best_status:covered_guaranteed",
-                    "funding_route_best_id:development-support:c261:legal_action:runner.gain_credit",
+                    "funding_route_best_id:development-support:c261:legal_action:rb",
                     "funding_route_status:covered_guaranteed",
                     "funding_route_reliability:guaranteed",
                     "funding_route_horizon:same_turn",
@@ -18630,7 +18642,7 @@
                 "evidenceCodes": [
                   "funding_route_count:1",
                   "funding_route_best_status:covered_guaranteed",
-                  "funding_route_best_id:development-support:c261:legal_action:runner.gain_credit",
+                  "funding_route_best_id:development-support:c261:legal_action:rb",
                   "funding_route_status:covered_guaranteed",
                   "funding_route_reliability:guaranteed",
                   "funding_route_horizon:same_turn",
@@ -18672,7 +18684,7 @@
             "updatedAtStateVersion": 51,
             "evidenceRefs": [
               {
-                "code": "funding_route_best_id:development-support:c261:legal_action:runner.gain_credit",
+                "code": "funding_route_best_id:development-support:c261:legal_action:rb",
                 "source": "visible_state"
               },
               {
@@ -18718,7 +18730,7 @@
             ]
           },
           {
-            "instanceId": "plan:runner.pressure_central:central%3Ard",
+            "instanceId": "pa90fufw9vc5bkshp96ztlryxl",
             "dedupeKey": "central:rd",
             "moduleId": "runner.pressure_central",
             "moduleVersion": "1",
@@ -18760,14 +18772,14 @@
                 "marginalValue": 590,
                 "evidenceCode": "target:rd",
                 "runActionIds": [
-                  "runner.start_run.rd"
+                  "rs.rd"
                 ],
                 "runActionValues": {
-                  "runner.start_run.rd": 0
+                  "rs.rd": 0
                 },
                 "runActionDifferentialPayoffIds": [],
                 "runActionEvidence": {
-                  "runner.start_run.rd": [
+                  "rs.rd": [
                     "run_route_raw_score:590",
                     "run_route_opportunity_cost:0",
                     "run_route_effective_score:590",
@@ -18775,7 +18787,7 @@
                   ]
                 },
                 "runActionRouteDiagnostics": {
-                  "runner.start_run.rd": {
+                  "rs.rd": {
                     "rawRouteScore": 590,
                     "opportunityCost": 0,
                     "effectiveRouteScore": 590
@@ -18895,55 +18907,55 @@
         "completionHistory": [],
         "transitions": [
           {
-            "instanceId": "plan:runner.convert_run_window:run%3A265",
+            "instanceId": "p8xqhbkzpiuechoo267e6gas23",
             "stateVersion": 266,
             "reason": "discovered",
             "detailCode": "new_proposal"
           },
           {
-            "instanceId": "plan:runner.pressure_central:central%3Ard",
+            "instanceId": "pa90fufw9vc5bkshp96ztlryxl",
             "stateVersion": 266,
             "reason": "retained",
             "detailCode": "proposal_still_relevant"
           },
           {
-            "instanceId": "plan:runner.develop_board_and_hand:card%3Ac261",
+            "instanceId": "p5z2l3bizazy73ljmdph7k9mfx",
             "stateVersion": 266,
             "reason": "retained",
             "detailCode": "retention_protected"
           },
           {
-            "instanceId": "plan:runner.develop_board_and_hand:generic%3Adraw-options",
+            "instanceId": "p6hb5l9cujr02om3vqn7gbqr35",
             "stateVersion": 266,
             "reason": "target_disappeared",
             "detailCode": "proposal_missing_target_contract"
           },
           {
-            "instanceId": "plan:runner.economy:economy-liquidity-development%3Arunner%3A41",
+            "instanceId": "p5nj9qakk435jode099y93dkm1",
             "stateVersion": 266,
             "reason": "target_disappeared",
             "detailCode": "proposal_missing_target_contract"
           },
           {
-            "instanceId": "plan:runner.pressure_central:central%3Aarchives",
+            "instanceId": "p22f66p721g9dgs7gsawwpf6hs",
             "stateVersion": 266,
             "reason": "target_disappeared",
             "detailCode": "proposal_missing_target_contract"
           },
           {
-            "instanceId": "plan:runner.pressure_central:central%3Ahq",
+            "instanceId": "pa7nez1ioecg7mf06q1uwqq57o",
             "stateVersion": 266,
             "reason": "target_disappeared",
             "detailCode": "proposal_missing_target_contract"
           },
           {
-            "instanceId": "plan:runner.recurring_economy:c22p",
+            "instanceId": "p5qy927ducdgyddtigvo3ucmta",
             "stateVersion": 266,
             "reason": "target_disappeared",
             "detailCode": "proposal_missing_target_contract"
           },
           {
-            "instanceId": "plan:runner.convert_run_window:run%3A265",
+            "instanceId": "p8xqhbkzpiuechoo267e6gas23",
             "stateVersion": 266,
             "reason": "preempted_by_higher_class",
             "fromExecutionState": "idle",
@@ -18956,7 +18968,7 @@
           "commitmentId": "fnv1a:f3ece484",
           "sourcePlanId": "fnv1a:fd2d18a2",
           "sourceLineHash": "fnv1a:1ff01d64",
-          "sequenceRootPlanInstanceId": "plan:runner.pressure_central:central%3Ard",
+          "sequenceRootPlanInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
           "side": "runner",
           "turnKey": "runner:turn:41",
           "planningRulesFingerprint": "fnv1a:ce3968ab",
@@ -18973,7 +18985,7 @@
             {
               "phaseId": "fnv1a:2e140735",
               "root": {
-                "planInstanceId": "plan:runner.pressure_central:central%3Ard",
+                "planInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
                 "moduleId": "runner.convert_run_window",
                 "milestoneId": "convert_active_run_window",
                 "provenance": "resident"
@@ -19092,7 +19104,7 @@
             "sideSafePlanningFingerprint": "fnv1a:3ca5518a"
           },
           "currentBinding": {
-            "actionId": "runner.break_subroutine.cuh.cuh.cuh.c2t2.0.183",
+            "actionId": "r3.cuh.cuh.cuh.c2t2.0.183",
             "stateVersion": 266,
             "semanticActionSetFingerprint": "fnv1a:cb6a1491",
             "invocationKey": "fnv1a:850392ae"
@@ -19100,13 +19112,13 @@
           "actionType": "break_subroutine",
           "expectationId": "fnv1a:b53da673"
         },
-        "rootForegroundInstanceId": "plan:runner.pressure_central:central%3Ard",
-        "executorInstanceId": "plan:runner.convert_run_window:run%3A265",
+        "rootForegroundInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
+        "executorInstanceId": "p8xqhbkzpiuechoo267e6gas23",
         "pendingRunnerCostPenaltySupportOrigin": {
-          "rootPlanInstanceId": "plan:runner.pressure_central:central%3Ard",
-          "executorInstanceId": "plan:runner.convert_run_window:run%3A265",
-          "sourceStepId": "plan:runner.convert_run_window:run%3A265:convert",
-          "originalActionId": "runner.break_subroutine.cuh.cuh.cuh.c2t2.0.183",
+          "rootPlanInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
+          "executorInstanceId": "p8xqhbkzpiuechoo267e6gas23",
+          "sourceStepId": "p8xqhbkzpiuechoo267e6gas23:convert",
+          "originalActionId": "r3.cuh.cuh.cuh.c2t2.0.183",
           "selectedAtStateVersion": 266
         }
       }

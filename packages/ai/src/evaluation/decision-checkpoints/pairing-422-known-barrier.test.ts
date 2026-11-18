@@ -17,18 +17,18 @@ it("does not waive a known break lock and ETR as a last-chance damage floor", ()
   resetResidentPlanPortfolioMemory();
   restoreAiRuntimeCheckpoint(input, input.ownDeckSnapshot!.deckSnapshotId, runtime);
   const target = evaluateRunnerRunTargets({ input }).find(
-    (entry) => entry.actionId === "runner.start_run.r2",
+    (entry) => entry.actionId === "rs.r2",
   );
   expect(target).toMatchObject({
     pathPassability: "blocked_unbreakable",
     routeQuote: { reachability: "no_access", noAccessReason: "harmful_unbroken_run_effect" },
   });
   const decision = chooseAiAction(input);
-  expect(decision.actionId).not.toBe("runner.start_run.r2");
+  expect(decision.actionId).not.toBe("rs.r2");
   expect(decision.fallbackUsed).toBe(false);
   expect(input.legalActions.some((action) => action.actionId === decision.actionId)).toBe(true);
   expect(decision.decisionDebug?.planFirstDecision?.dispositions).toContainEqual(
-    expect.objectContaining({ actionId: "runner.start_run.r2", ownerModuleId: "runner.contest_remote", disposition: "explicitly_nonproductive" }),
+    expect.objectContaining({ actionId: "rs.r2", ownerModuleId: "runner.contest_remote", disposition: "explicitly_nonproductive" }),
   );
 });
 

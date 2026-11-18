@@ -12105,7 +12105,7 @@
         "id": "r1"
       },
       "selectedStepKind": "gain_credits",
-      "selectedActionId": "runner.activated_card_ability.c29d.c29d.activated.1",
+      "selectedActionId": "r1.c29d.c29d.activated.1",
       "selectedActionType": "activated_card_ability",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
@@ -12156,11 +12156,11 @@
         },
         "updatedAtStateVersion": 338,
         "evidence": [
-          "plan_portfolio_source_plan:runner.contest_remote:r1",
+          "plan_portfolio_source_pdl5beuqtdrahr4fqagyng1zk5",
           "plan_portfolio_execution_class:bounded_sequence",
           "plan_portfolio_role:foreground",
           "plan_portfolio_lifecycle:active",
-          "plan_portfolio_action_progress:runner.activated_card_ability.c29d.c29d.activated.1",
+          "plan_portfolio_action_progress:r1.c29d.c29d.activated.1",
           "plan_portfolio_action_progress_source:selected_mapped_step"
         ]
       },
@@ -12210,7 +12210,7 @@
         "plan_portfolio_foreground:runner.contest_remote",
         "plan_portfolio_backgrounds:runner.build_credit_bank",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.activated_card_ability.c29d.c29d.activated.1"
+        "plan_portfolio_selected_action:r1.c29d.c29d.activated.1"
       ]
     },
     "strategicIntent": {
@@ -13294,7 +13294,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.activated_card_ability.c29e.c29e.activated.441"
+        "actionId": "r1.c29e.c29e.activated.441"
       }
     ],
     "planExecution": {

@@ -2058,14 +2058,7 @@ function breakSubroutineTargetLabel(action: LegalAction): string {
 }
 
 function selectedSubroutineIndexes(action: LegalAction): number[] {
-  const rawIndexes = action.payload?.subroutineIndexes;
-  if (typeof rawIndexes === "string") {
-    const indexes = rawIndexes
-      .split(",")
-      .map((value) => Number(value.trim()))
-      .filter((value) => Number.isInteger(value) && value >= 0);
-    if (indexes.length > 0) return indexes;
-  }
+  if (action.subroutineIndexes?.length) return action.subroutineIndexes.slice();
   const rawIndex = action.payload?.subroutineIndex;
   return typeof rawIndex === "number" &&
     Number.isFinite(rawIndex) &&
@@ -3646,10 +3639,8 @@ function isRunnerPayToContinueOnlyAction(
     Number(action.payload?.payOrTrashProgramSubroutinePayment ?? 0);
   if (!Number.isFinite(payment) || payment <= 0) return false;
   const paidIndexes = new Set([
-    ...commaSeparatedIndexes(action.payload?.payOrEndRunSubroutineIndexes),
-    ...commaSeparatedIndexes(
-      action.payload?.payOrTrashProgramSubroutineIndexes,
-    ),
+    ...(action.payOrEndRunSubroutineIndexes ?? []),
+    ...(action.payOrTrashProgramSubroutineIndexes ?? []),
   ]);
   const unbrokenSubroutineCount = Number(
     action.payload?.unbrokenSubroutineCount ?? 0,
@@ -3659,14 +3650,6 @@ function isRunnerPayToContinueOnlyAction(
     unbrokenSubroutineCount > 0 &&
     paidIndexes.size === unbrokenSubroutineCount
   );
-}
-
-function commaSeparatedIndexes(value: unknown): number[] {
-  if (typeof value !== "string" || !value.trim()) return [];
-  return value
-    .split(",")
-    .map((part) => Number(part.trim()))
-    .filter((index) => Number.isInteger(index) && index >= 0);
 }
 
 function isRunnerRunAbortAction(

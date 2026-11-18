@@ -43,9 +43,10 @@ describe("Crash Everett draw-plan continuation", () => {
         });
         const runnerGrip = ["cvd", "c19l", "c121", "c10h", "c149"];
         const nextBufferCard = "c19m";
-        const runnerStack = [...initial.runner.grip, ...initial.runner.stack].filter(
-          (id) => !runnerGrip.includes(id) && id !== nextBufferCard,
-        );
+        const runnerStack = [
+          ...initial.runner.grip,
+          ...initial.runner.stack,
+        ].filter((id) => !runnerGrip.includes(id) && id !== nextBufferCard);
         runnerStack.push(nextBufferCard);
         applyPostSetupDeckOrder(initial, {
           runnerGrip,
@@ -178,11 +179,13 @@ describe("Crash Everett draw-plan continuation", () => {
       },
     });
     expect(drawDecision).toMatchObject({
-      actionId: expect.stringContaining("runner.draw"),
+      actionId: drawInput.legalActions.find(
+        (action) => action.type === "draw_card",
+      )!.actionId,
       fallbackUsed: false,
     });
     expect(choiceDecision).toMatchObject({
-      actionId: "runner.resolve_choice",
+      actionId: "rn",
       reasonCode: drawDecision.reasonCode,
       fallbackUsed: false,
     });
@@ -248,7 +251,7 @@ describe("Crash Everett draw-plan continuation", () => {
       );
       const taxDecision = chooseRunnerAction(taxInput);
       expect(taxDecision).toMatchObject({
-        actionId: "runner.resolve_choice",
+        actionId: "rn",
         fallbackUsed: false,
       });
       state = applyDecision(state, "runner", taxDecision);
@@ -280,7 +283,7 @@ describe("Crash Everett draw-plan continuation", () => {
       },
     });
     expect(choiceDecision).toMatchObject({
-      actionId: "runner.resolve_choice",
+      actionId: "rn",
       reasonCode: drawDecision.reasonCode,
       fallbackUsed: false,
     });

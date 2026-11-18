@@ -2042,7 +2042,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     const corpBeforeTarget = getPlayerView(wrong, "corp");
     expect(corpBeforeTarget.pendingChoice).toBeUndefined();
     expect(corpBeforeTarget.run?.pendingAutoPassIceId).toBeUndefined();
-    wrong = applyChoice(wrong, "runner", `ice_${iceId}`);
+    wrong = applyChoice(wrong, "runner", "ice_rd.0");
     expect(wrong.timingPoint).toBe("run.approach_ice");
     expect(wrong.activeSide).toBe("corp");
     expect(wrong.run).toMatchObject({
@@ -2051,7 +2051,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       secretSpendGuessRunAutoPassIceId: iceId,
     });
     expect(getPlayerView(wrong, "runner").run?.pendingAutoPassIceId).toBe(
-      iceId,
+      "hrd.i0",
     );
     expect(getPlayerView(wrong, "corp").run?.pendingAutoPassIceId).toBe(iceId);
     expect(

@@ -73,7 +73,7 @@ describe("match 9f8cecdd78b35d0e Corp remote support D78", () => {
     const instance = instantiatePlanProposal(proposal, 60);
     expect(proposal).toMatchObject({
       parentInstanceId:
-        "plan:corp.establish_scoring_remote:strategic-score-remote",
+        "p6vrrjl5fc78gjet2n25nst7pp",
       parentNeedId,
       initialViability: "ready",
     });

@@ -2864,7 +2864,7 @@
         "id": "new_remote"
       },
       "selectedStepKind": "protect_remote",
-      "selectedActionId": "corp.install_card.c2wt.hq.c2wt.0",
+      "selectedActionId": "cc.c2wt.hq.c2wt.0",
       "selectedActionType": "install_card",
       "blockedBy": [
         "central_protection_floor",
@@ -2890,7 +2890,7 @@
       "turnKey": "corp:turn:2",
       "foreground": {
         "portfolioEntryId": "corp.apply_punish_pressure:untargeted",
-        "sourcePlanId": "corp.apply_punish_pressure:corp.install_card.c2ml.new_remote.c2ml",
+        "sourcePlanId": "corp.apply_punish_pressure:cc.c2ml.new_remote.c2ml",
         "planType": "corp.apply_punish_pressure",
         "side": "corp",
         "executionClass": "bounded_sequence",
@@ -2902,7 +2902,7 @@
         "progress": 0.25,
         "selectedStepKind": "apply_punish_pressure",
         "actionCandidateIds": [
-          "corp.install_card.c2ml.new_remote.c2ml"
+          "cc.c2ml.new_remote.c2ml"
         ],
         "cadence": {
           "turnKey": "corp:turn:2",
@@ -2915,7 +2915,7 @@
         },
         "updatedAtStateVersion": 12,
         "evidence": [
-          "plan_portfolio_source_plan:corp.apply_punish_pressure:corp.install_card.c2ml.new_remote.c2ml",
+          "plan_portfolio_source_plan:corp.apply_punish_pressure:cc.c2ml.new_remote.c2ml",
           "plan_portfolio_execution_class:bounded_sequence",
           "plan_portfolio_role:foreground",
           "plan_portfolio_lifecycle:active"
@@ -2940,7 +2940,7 @@
           "progress": 0.5,
           "selectedStepKind": "protect_remote",
           "actionCandidateIds": [
-            "corp.install_card.c2yu.rd.c2yu.0"
+            "cc.c2yu.rd.c2yu.0"
           ],
           "cadence": {
             "turnKey": "corp:turn:2",
@@ -2969,7 +2969,7 @@
         "plan_portfolio_foreground:corp.apply_punish_pressure",
         "plan_portfolio_backgrounds:corp.establish_scoring_remote",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:corp.rez_card.c3h2.hq.c3h2"
+        "plan_portfolio_selected_action:cp.c3h2.hq.c3h2"
       ]
     },
     "strategicIntent": {

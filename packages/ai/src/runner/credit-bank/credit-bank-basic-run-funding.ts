@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { actionClickCost } from "../../runtime/action-cost";
 import type { AiDecisionInput } from "@netgrid/shared";
@@ -52,7 +53,7 @@ export function creditBankReplacesBasicRunFunding(params: {
   );
   if (remainingClicks === undefined) return undefined;
   const needId = `run-support:central:${target.targetServerId}`;
-  const parentPlanInstanceId = `plan:runner.pressure_central:${encodeURIComponent(`central:${target.targetServerId}`)}`;
+  const parentPlanInstanceId = planInstanceIdForProposal({ moduleId: "runner.pressure_central", dedupeKey: `central:${target.targetServerId}` });
   const demand = createRunnerCreditDemand({
     demandId: needId,
     sourcePlanId: parentPlanInstanceId,

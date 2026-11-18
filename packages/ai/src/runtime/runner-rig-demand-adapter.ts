@@ -69,7 +69,7 @@ export function buildRunnerRigDemandProjectionForCoverage(
         ...(gap.requesterPlanInstanceId
           ? { sourcePlanInstanceId: gap.requesterPlanInstanceId }
           : {
-              sourcePlanInstanceId: `plan:runner.rig_and_coverage:${gap.gapId}`,
+              sourcePlanInstanceId: planInstanceIdForProposal({ moduleId: "runner.rig_and_coverage", dedupeKey: gap.gapId }),
             }),
         sourceNeedId: gap.requesterNeedId ?? gap.gapId,
         capabilityId: gap.requiredRole,

@@ -433,7 +433,7 @@ function runMemoryPressuredSneakPreviewCoveragePath() {
   }
   const memoryChoiceDecision = chooseRunnerAction(memoryChoiceInput);
   expect(memoryChoiceDecision).toMatchObject({
-    actionId: "runner.resolve_choice",
+    actionId: "rn",
     selectedChoices: {
       choiceId: memoryChoiceInput.playerView.pendingChoice?.choiceId,
       selectedOptionIds: [`card_${installedInvisibilityId}`],
@@ -624,7 +624,7 @@ function runMemoryPressuredAirportLockerCoveragePath() {
   );
   const memoryChoiceDecision = chooseRunnerAction(memoryChoiceInput);
   expect(memoryChoiceDecision).toMatchObject({
-    actionId: "runner.resolve_choice",
+    actionId: "rn",
     selectedChoices: {
       choiceId: memoryChoiceInput.playerView.pendingChoice?.choiceId,
       selectedOptionIds: [`card_${sacrificeId}`],

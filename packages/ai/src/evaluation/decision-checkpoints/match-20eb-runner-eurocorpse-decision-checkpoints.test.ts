@@ -58,7 +58,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
     const result = runAiDecisionCheckpoint(control);
     expect(result.ok, result.message).toBe(true);
     const bankId =
-      "plan:runner.credit_bank:c1aa";
+      "pblmj20383eaxot3atgspmt6tr";
     expect(
       result.decision?.decisionDebug?.planFirstDecision?.portfolio,
     ).toEqual(
@@ -91,7 +91,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
     const bank = residentPlanPortfolioSnapshot(result.input)!.instances.find(
       (instance) =>
         instance.instanceId ===
-        "plan:runner.credit_bank:c1aa",
+        "pblmj20383eaxot3atgspmt6tr",
     )!;
     expect(bank.moduleState).toMatchObject({
       phase: "hold",
@@ -120,7 +120,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId = "20EB-C02-NO-FOLLOW-UP-CLICK";
         checkpoint.expectation = {
-          forbiddenActions: [{ actionId: "runner.trigger_ability" }],
+          forbiddenActions: [{ actionId: "rx" }],
         };
       },
     );
@@ -143,7 +143,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "20EB-C03-HOSTABLE-EUROCORPSE";
       checkpoint.expectation = {
-        acceptableActions: [{ actionId: "runner.start_run.rd" }],
+        acceptableActions: [{ actionId: "rs.rd" }],
         planExecution: {
           acceptablePlanKinds: ["runner.pressure_central"],
           acceptableCapabilities: ["pressure_rd_information"],
@@ -176,8 +176,8 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
         checkpoint.source.findingId = "20EB-C04-DRAW-BELOW-HAND-LIMIT";
         checkpoint.expectation = {
           acceptableActions: [
-            { actionId: "runner.draw_card" },
-            { actionId: "runner.trigger_ability" },
+            { actionId: "r8" },
+            { actionId: "rx" },
           ],
         };
       },

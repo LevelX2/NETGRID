@@ -14,7 +14,7 @@ describe("Runner decision facts", () => {
       handFrames: 1,
       resourceFrames: 1,
       expectedDecision: {
-        actionId: "runner.resolve_choice",
+        actionId: "rn",
         reasonCode: "plan_first.runner.defense_and_recovery",
         selectedChoices: {
           choiceId: "discard_runner_5",
@@ -27,7 +27,7 @@ describe("Runner decision facts", () => {
       handFrames: 1,
       resourceFrames: 1,
       expectedDecision: {
-        actionId: "runner.start_run.rd",
+        actionId: "rs.rd",
         reasonCode: "plan_first.runner.pressure_central",
       },
     },
@@ -36,7 +36,7 @@ describe("Runner decision facts", () => {
       handFrames: 2,
       resourceFrames: 1,
       expectedDecision: {
-        actionId: "runner.draw_card",
+        actionId: "r8",
         reasonCode: "plan_first.runner.defense_and_recovery",
       },
     },
@@ -46,7 +46,7 @@ describe("Runner decision facts", () => {
       resourceFrames: 2,
       expectedDecision: {
         actionId:
-          "runner.play_event.c3pf.rd.c3pf.702",
+          "rh.c3pf.rd.c3pf.702",
         reasonCode: "plan_first.runner.pressure_central",
       },
     },

@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
@@ -29,13 +30,13 @@ describe("Runner cost/penalty support plan continuation", () => {
         rootPlanInstanceId: previous.rootForegroundInstanceId!,
         executorInstanceId: previous.executorInstanceId!,
         sourceStepId: "211:convert",
-        originalActionId: "runner.continue_run",
+        originalActionId: "r5",
         selectedAtStateVersion: 90,
       };
       const action =
         variant === "continue"
-          ? continuedPaymentAction(93, "runner.continue_run")
-          : supportAction(93, "runner.continue_run");
+          ? continuedPaymentAction(93, "r5")
+          : supportAction(93, "r5");
       const windowId = Number(
         action.payload![
           variant === "continue"
@@ -82,7 +83,7 @@ describe("Runner cost/penalty support plan continuation", () => {
             actionType: "decline_rez",
             runnerCostPenaltySupportWindowOpened: true,
             runnerCostPenaltySupportWindowId: windowId,
-            runnerCostPenaltySupportOriginalActionId: "runner.continue_run",
+            runnerCostPenaltySupportOriginalActionId: "r5",
             targetIceDefinitionId: 449,
           },
         },
@@ -122,7 +123,7 @@ describe("Runner cost/penalty support plan continuation", () => {
   it("preserves the run owner when a zero-cost movement starts an encounter-tax payment", () => {
     const action = {
       ...paymentAction(90),
-      actionId: "runner.continue_run",
+      actionId: "r5",
       type: "continue_run",
       source: "game_rule",
       costs: [],
@@ -189,9 +190,9 @@ describe("Runner cost/penalty support plan continuation", () => {
     );
     const originalPortfolio = originalResult.portfolio;
     expect(originalPortfolio.pendingRunnerCostPenaltySupportOrigin).toEqual({
-      rootPlanInstanceId: "plan:runner.rig_and_coverage:rig-root",
-      executorInstanceId: "plan:runner.rig_and_coverage:rig-root",
-      sourceStepId: "plan:runner.rig_and_coverage:rig-root:find",
+      rootPlanInstanceId: "pexuq96ntqvwxa2lhsbue8pj2p",
+      executorInstanceId: "pexuq96ntqvwxa2lhsbue8pj2p",
+      sourceStepId: "pexuq96ntqvwxa2lhsbue8pj2p:find",
       originalActionId: originalAction.actionId,
       selectedAtStateVersion: 90,
     });
@@ -227,8 +228,8 @@ describe("Runner cost/penalty support plan continuation", () => {
       actionId: originalAction.actionId,
       reasonCode: "plan_bound_runner_cost_penalty_support_continuation",
       origin: {
-        rootPlanInstanceId: "plan:runner.rig_and_coverage:rig-root",
-        leafPlanInstanceId: "plan:runner.rig_and_coverage:rig-root",
+        rootPlanInstanceId: "pexuq96ntqvwxa2lhsbue8pj2p",
+        leafPlanInstanceId: "pexuq96ntqvwxa2lhsbue8pj2p",
         side: "runner",
         windowKind: "optional_ability",
         windowId: "91",
@@ -240,7 +241,7 @@ describe("Runner cost/penalty support plan continuation", () => {
 
   it("preserves an exact coverage-search binding while payment support preempts its executor", () => {
     const originalAction = paymentAction(90);
-    const ownerId = "plan:runner.rig_and_coverage:rig-root";
+    const ownerId = "pexuq96ntqvwxa2lhsbue8pj2p";
     const targetCardId = "runner_rent_i_con_3";
     const previous = portfolio(90, "rig-root");
     previous.instances = [
@@ -345,7 +346,7 @@ describe("Runner cost/penalty support plan continuation", () => {
 
   it("preserves an exact targeted-bypass binding while payment support preempts its executor", () => {
     const originalAction = paymentAction(90);
-    const ownerId = "plan:runner.pressure_central:central%3Ahq";
+    const ownerId = "pa7nez1ioecg7mf06q1uwqq57o";
     const previous = portfolio(90, "central:hq");
     previous.rootForegroundInstanceId = ownerId;
     previous.executorInstanceId = ownerId;
@@ -419,7 +420,7 @@ describe("Runner cost/penalty support plan continuation", () => {
     "preserves an exact coverage $phase binding while payment support preempts its executor",
     ({ phase, actionIdsField }) => {
       const originalAction = paymentAction(90);
-      const ownerId = "plan:runner.rig_and_coverage:rig-root";
+      const ownerId = "pexuq96ntqvwxa2lhsbue8pj2p";
       const previous = portfolio(90, "rig-root");
       previous.instances = [
         {
@@ -433,7 +434,7 @@ describe("Runner cost/penalty support plan continuation", () => {
             gap: {
               requiredRole: "breaker_code_gate",
               targetServerId: "rd",
-              targetRunActionId: "runner.start_run.rd",
+              targetRunActionId: "rs.rd",
               [actionIdsField]: [originalAction.actionId],
             },
           },
@@ -474,7 +475,7 @@ describe("Runner cost/penalty support plan continuation", () => {
         gap: {
           requiredRole: "breaker_code_gate",
           targetServerId: "rd",
-          targetRunActionId: "runner.start_run.rd",
+          targetRunActionId: "rs.rd",
           [actionIdsField]: [originalAction.actionId],
         },
       });
@@ -513,9 +514,9 @@ describe("Runner cost/penalty support plan continuation", () => {
     const originalAction = paymentAction(90);
     const previous = portfolio(90, "rig-root");
     previous.pendingRunnerCostPenaltySupportOrigin = {
-      rootPlanInstanceId: "plan:runner.rig_and_coverage:rig-root",
-      executorInstanceId: "plan:runner.rig_and_coverage:rig-root",
-      sourceStepId: "plan:runner.rig_and_coverage:rig-root:find",
+      rootPlanInstanceId: "pexuq96ntqvwxa2lhsbue8pj2p",
+      executorInstanceId: "pexuq96ntqvwxa2lhsbue8pj2p",
+      sourceStepId: "pexuq96ntqvwxa2lhsbue8pj2p:find",
       originalActionId: originalAction.actionId,
       selectedAtStateVersion: 90,
     };
@@ -541,16 +542,16 @@ describe("Runner cost/penalty support plan continuation", () => {
     const originalAction = paymentAction(90);
     const previous = portfolio(90, "rig-root");
     previous.selectedActionOrigin = {
-      rootPlanInstanceId: "plan:runner.rig_and_coverage:rig-root",
-      executorInstanceId: "plan:runner.rig_and_coverage:rig-root",
+      rootPlanInstanceId: "pexuq96ntqvwxa2lhsbue8pj2p",
+      executorInstanceId: "pexuq96ntqvwxa2lhsbue8pj2p",
       selectedActionId: originalAction.actionId,
       selectedAtStateVersion: 90,
       immediateChoicePolicy: "trash_lowest_visible_drawn_card",
     };
     previous.pendingRunnerCostPenaltySupportOrigin = {
-      rootPlanInstanceId: "plan:runner.rig_and_coverage:rig-root",
-      executorInstanceId: "plan:runner.rig_and_coverage:rig-root",
-      sourceStepId: "plan:runner.rig_and_coverage:rig-root:find",
+      rootPlanInstanceId: "pexuq96ntqvwxa2lhsbue8pj2p",
+      executorInstanceId: "pexuq96ntqvwxa2lhsbue8pj2p",
+      sourceStepId: "pexuq96ntqvwxa2lhsbue8pj2p:find",
       originalActionId: originalAction.actionId,
       selectedAtStateVersion: 90,
       windowId: 91,
@@ -697,8 +698,8 @@ describe("Runner cost/penalty support plan continuation", () => {
       expect(
         engineWindowResult.portfolio?.pendingRunnerCostPenaltySupportOrigin,
       ).toEqual({
-        rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-        executorInstanceId: "plan:runner.convert_run_window:run%3Arun_211",
+        rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+        executorInstanceId: "p8ppnipfz9zlcs65p8lztvb68y",
         sourceStepId: "run.encounter_ice:225",
         originalActionId: originalAction.actionId,
         selectedAtStateVersion: 225,
@@ -729,13 +730,13 @@ describe("Runner cost/penalty support plan continuation", () => {
     originalAction.payload = { choiceId, choiceKind: "bid_amount" };
     const previous = directRunRootPortfolio(65);
     previous.selectedActionOrigin = {
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-      executorInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-      selectedActionId: "runner.start_run.r1",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      executorInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      selectedActionId: "rs.r1",
       selectedAtStateVersion: 65,
       immediateChoicePolicy: "resolve_runner_run_start_order",
       continuedThroughStateVersion: 65,
-      sourceStepId: "plan:runner.contest_remote:remote%3Ar1:contest",
+      sourceStepId: "p1p4xezjcxov79rno40lq3f7rv:contest",
       sourceActionType: "start_run",
     };
     const traceInput = traceBidInput(69, [originalAction]);
@@ -837,8 +838,8 @@ describe("Runner cost/penalty support plan continuation", () => {
     expect(
       engineWindowResult.portfolio?.pendingRunnerCostPenaltySupportOrigin,
     ).toEqual({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-      executorInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      executorInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       sourceStepId: "run.encounter_ice:69",
       originalActionId: originalAction.actionId,
       selectedAtStateVersion: 69,
@@ -897,8 +898,8 @@ describe("Runner cost/penalty support plan continuation", () => {
       actionId: support.actionId,
       reasonCode: "plan_bound_runner_cost_penalty_support_action",
       origin: {
-        rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-        leafPlanInstanceId: "plan:runner.convert_run_window:run%3Arun_211",
+        rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+        leafPlanInstanceId: "p8ppnipfz9zlcs65p8lztvb68y",
         side: "runner",
         windowKind: "optional_ability",
         windowId: "91",
@@ -980,9 +981,9 @@ describe("Runner cost/penalty support plan continuation", () => {
     const continuation = continuedPaymentAction(92, "runner.play.other");
     const previous = portfolio(91, "economy-root");
     previous.pendingRunnerCostPenaltySupportOrigin = {
-      rootPlanInstanceId: "plan:runner.rig_and_coverage:rig-root",
-      executorInstanceId: "plan:runner.rig_and_coverage:rig-root",
-      sourceStepId: "plan:runner.rig_and_coverage:rig-root:find",
+      rootPlanInstanceId: "pexuq96ntqvwxa2lhsbue8pj2p",
+      executorInstanceId: "pexuq96ntqvwxa2lhsbue8pj2p",
+      sourceStepId: "pexuq96ntqvwxa2lhsbue8pj2p:find",
       originalActionId: "runner.play.original",
       selectedAtStateVersion: 90,
       windowId: 91,
@@ -1005,9 +1006,9 @@ describe("Runner cost/penalty support plan continuation", () => {
     const support = supportAction(91, "runner.play.original");
     const previous = portfolio(90, "rig-root");
     previous.pendingRunnerCostPenaltySupportOrigin = {
-      rootPlanInstanceId: "plan:runner.rig_and_coverage:rig-root",
-      executorInstanceId: "plan:runner.rig_and_coverage:rig-root",
-      sourceStepId: "plan:runner.rig_and_coverage:rig-root:find",
+      rootPlanInstanceId: "pexuq96ntqvwxa2lhsbue8pj2p",
+      executorInstanceId: "pexuq96ntqvwxa2lhsbue8pj2p",
+      sourceStepId: "pexuq96ntqvwxa2lhsbue8pj2p:find",
       originalActionId: "runner.play.original",
       selectedAtStateVersion: 90,
     };
@@ -1040,8 +1041,8 @@ describe("Runner cost/penalty support plan continuation", () => {
       actionId: "runner.play.original",
       reasonCode: "plan_bound_runner_cost_penalty_support_continuation",
       origin: {
-        rootPlanInstanceId: "plan:runner.rig_and_coverage:rig-root",
-        leafPlanInstanceId: "plan:runner.rig_and_coverage:rig-root",
+        rootPlanInstanceId: "pexuq96ntqvwxa2lhsbue8pj2p",
+        leafPlanInstanceId: "pexuq96ntqvwxa2lhsbue8pj2p",
         side: "runner",
         windowKind: "optional_ability",
         windowId: "91",
@@ -1065,9 +1066,9 @@ describe("Runner cost/penalty support plan continuation", () => {
     const support = supportAction(91, "runner.play.original");
     const previous = portfolio(90, "rig-root");
     previous.pendingRunnerCostPenaltySupportOrigin = {
-      rootPlanInstanceId: "plan:runner.rig_and_coverage:rig-root",
-      executorInstanceId: "plan:runner.rig_and_coverage:rig-root",
-      sourceStepId: "plan:runner.rig_and_coverage:rig-root:find",
+      rootPlanInstanceId: "pexuq96ntqvwxa2lhsbue8pj2p",
+      executorInstanceId: "pexuq96ntqvwxa2lhsbue8pj2p",
+      sourceStepId: "pexuq96ntqvwxa2lhsbue8pj2p:find",
       originalActionId: "runner.play.original",
       selectedAtStateVersion: 90,
     };
@@ -1180,7 +1181,7 @@ function continuedPaymentAction(
 
 function traceBidAction(stateVersion: number): LegalAction {
   return {
-    actionId: "runner.resolve_choice",
+    actionId: "rn",
     type: "resolve_choice",
     side: "runner",
     source: "game_rule",
@@ -1309,7 +1310,10 @@ function planResult(
   actionId: string,
   root: string,
 ): Extract<PlanSchedulerResult, { lane: "plan" }> {
-  const instanceId = `plan:runner.${root.startsWith("rig") ? "rig_and_coverage" : "economy"}:${root}`;
+  const instanceId = planInstanceIdForProposal({
+    moduleId: root.startsWith("rig") ? "runner.rig_and_coverage" : "runner.economy",
+    dedupeKey: root,
+  });
   return {
     lane: "plan",
     route: {
@@ -1336,7 +1340,7 @@ function portfolio(stateVersion: number, root: string): ResidentPlanPortfolio {
   const moduleId = root.startsWith("rig")
     ? "runner.rig_and_coverage"
     : "runner.economy";
-  const instanceId = `plan:${moduleId}:${root}`;
+  const instanceId = planInstanceIdForProposal({ moduleId: moduleId, dedupeKey: root });
   return {
     schemaVersion: "resident-plan-portfolio-v2",
     side: "runner",
@@ -1350,8 +1354,8 @@ function portfolio(stateVersion: number, root: string): ResidentPlanPortfolio {
 }
 
 function runPortfolio(stateVersion: number): ResidentPlanPortfolio {
-  const rootPlanInstanceId = "plan:runner.pressure_central:central%3Ahq";
-  const executorInstanceId = "plan:runner.convert_run_window:run%3Arun_211";
+  const rootPlanInstanceId = "pa7nez1ioecg7mf06q1uwqq57o";
+  const executorInstanceId = "p8ppnipfz9zlcs65p8lztvb68y";
   return {
     schemaVersion: "resident-plan-portfolio-v2",
     side: "runner",
@@ -1388,7 +1392,7 @@ function runPortfolio(stateVersion: number): ResidentPlanPortfolio {
 }
 
 function directRunRootPortfolio(stateVersion: number): ResidentPlanPortfolio {
-  const instanceId = "plan:runner.contest_remote:remote%3Ar1";
+  const instanceId = "p1p4xezjcxov79rno40lq3f7rv";
   return {
     schemaVersion: "resident-plan-portfolio-v2",
     side: "runner",

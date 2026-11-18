@@ -58,11 +58,11 @@ function expectTerminalHqClosure(input: AiDecisionInput) {
   expect(action).toMatchObject({ type: "install_card", payload: { serverId: "hq" } });
   expect(visibleSourceDefinitionsByInstanceId(input.playerView)[action.source]).toBe(456);
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
-    leafExecutorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+    rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
+    leafExecutorInstanceId: "penw02zfrkklof54c2nuye5att",
     priority: { effectiveClass: "P2" },
     selectedStep: {
-      stepId: "plan:corp.defend_servers:server-defense-portfolio:allocate",
+      stepId: "penw02zfrkklof54c2nuye5att:allocate",
     },
   });
 }
@@ -80,19 +80,19 @@ describe("pairing 472: exact terminal central-defense ownership", () => {
     const forgo = chooseAiAction(first.input, {
       persistTacticalPlanMemory: false,
     });
-    expect(forgo.actionId).toBe("corp.forgo_action");
+    expect(forgo.actionId).toBe("ca");
     expect(forgo.fallbackUsed || forgo.timeoutUsed).toBe(false);
 
     const draw = chooseAiAction(checkpoint(109).input, {
       persistTacticalPlanMemory: false,
     });
     expect(draw).toMatchObject({
-      actionId: "corp.draw_card",
+      actionId: "c8",
       fallbackUsed: false,
       timeoutUsed: false,
     });
     expect(draw.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-      "plan:corp.defend_servers:server-defense-portfolio",
+      "penw02zfrkklof54c2nuye5att",
     );
 
     expectTerminalHqClosure(checkpoint(110).input);

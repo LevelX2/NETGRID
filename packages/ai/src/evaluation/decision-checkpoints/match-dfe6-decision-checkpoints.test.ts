@@ -110,7 +110,7 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
     // cannot qualify that alternative for preferential treatment.
     checkpoint.expectation = {
       ...checkpoint.expectation,
-      acceptableActions: [{ actionId: "runner.start_run.hq" }],
+      acceptableActions: [{ actionId: "rs.hq" }],
       planExecution: {
         acceptablePlanKinds: ["runner.pressure_central"],
         acceptableCapabilities: ["pressure_hq_access"],

@@ -20,11 +20,11 @@ it("SP-194 delegates the current terminal-agenda protection provider to Defense"
     runtime,
   );
   const decision = chooseAiAction(input);
-  const defense = "plan:corp.defend_servers:server-defense-portfolio";
+  const defense = "penw02zfrkklof54c2nuye5att";
   const actionId =
-    "corp.install_card.c2q5.r1.c2q5.3";
+    "cc.c2q5.r1.c2q5.3";
   const score =
-    "plan:corp.score_agenda:agenda%3Ac2m5%3Ar1";
+    "p9y017p48zk0rqe2j63iq7peem";
   expect(
     input.legalActions.some((action) => action.actionId === actionId),
   ).toBe(true);
@@ -56,7 +56,7 @@ it("SP-194 delegates the current terminal-agenda protection provider to Defense"
             progressRoots: expect.arrayContaining([
               expect.objectContaining({
                 planInstanceId:
-                  "plan:corp.score_agenda:agenda%3Ac2m5%3Ar1",
+                  "p9y017p48zk0rqe2j63iq7peem",
                 blocked: true,
                 blockerCode: "no_complete_line",
                 witnessKind: "support_head",

@@ -122,7 +122,7 @@ describe("pairing 561 native Trace payment and installed-source memory", () => {
       if (step === 0) expect(hashGameState(state)).toBe(f.payment.stateHash);
       if (step === 1) expect(state.runner.credits).toBe(9);
     }
-    expect(actions[0]).toBe("runner.resolve_choice");
+    expect(actions[0]).toBe("rn");
     expect(actions[1]).toBe(
       f.payment.input.legalActions.find(
         (action) => action.payload?.cardImplementationAbilityId === 272,
@@ -162,7 +162,7 @@ describe("pairing 561 native Trace payment and installed-source memory", () => {
     const input = bid.input;
     const result: Extract<PlanSchedulerResult, { lane: "engine_window" }> = {
       lane: "engine_window",
-      actionId: "runner.resolve_choice",
+      actionId: "rn",
       origin: {
         rootPlanInstanceId: "rules",
         leafPlanInstanceId: "rules.window_resolution",
@@ -225,7 +225,7 @@ describe("pairing 561 native Trace payment and installed-source memory", () => {
     );
     const decision = chooseAiAction(input);
     // Correct facts do not remove the independent unknown-ICE hand reserve.
-    expect(decision.actionId).toBe("runner.draw_card");
+    expect(decision.actionId).toBe("r8");
     expect(
       decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
     ).toBe("runner.defense_and_recovery");

@@ -3054,7 +3054,7 @@
         "label": "Matador"
       },
       "selectedStepKind": "install_development_card",
-      "selectedActionId": "runner.install_card.c76.c76",
+      "selectedActionId": "rc.c76.c76",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -3110,7 +3110,7 @@
         "plan_portfolio_foreground:runner.play_best_hand_card",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.install_card.c76.c76"
+        "plan_portfolio_selected_action:rc.c76.c76"
       ]
     },
     "strategicIntent": {

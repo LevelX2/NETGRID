@@ -5,10 +5,12 @@ import {
   type Side,
 } from "@netgrid/shared";
 import type { RunnerExposeInformationMemoryRecord } from "../runner/expose-information/expose-information-types";
+import { compactCampaignId, comparePlanIdentities, type CampaignIdentity } from "./compact-plan-identity";
 import {
   assertValidPlanInstance,
   deduplicatePlanProposals,
   instantiatePlanProposal,
+  planInstanceIdForProposal,
   planProposalKey,
 } from "./plan-instance";
 import type {
@@ -94,6 +96,7 @@ export type ResidentCorpCampaignPublicOutcome = {
 export type ResidentCorpCampaign = {
   schemaVersion: typeof RESIDENT_CORP_CAMPAIGN_SCHEMA_VERSION;
   campaignId: string;
+  identity: CampaignIdentity;
   kind: "agenda" | "defense" | "opening_rush";
   status:
     | "awaiting_opponent_outcome"
@@ -597,6 +600,11 @@ export function assertResidentPlanPortfolio(
   if (
     portfolio.schemaVersion !== RESIDENT_PLAN_PORTFOLIO_SCHEMA_VERSION ||
     duplicateCount > 0 ||
+    portfolio.instances.some((instance) => instance.side !== portfolio.side) ||
+    portfolio.completionHistory.some((record) =>
+      record.instanceId !== planInstanceIdForProposal(record) ||
+      !record.moduleId.startsWith(`${portfolio.side}.`)
+    ) ||
     executors.length > 1 ||
     executors[0]?.instanceId !== portfolio.executorInstanceId
   ) {
@@ -618,7 +626,11 @@ export function assertResidentPlanPortfolio(
       portfolio.campaigns.some(
         (campaign) =>
           campaign.schemaVersion !== RESIDENT_CORP_CAMPAIGN_SCHEMA_VERSION ||
-          campaign.campaignId.trim().length === 0 ||
+          !campaign.identity ||
+          campaign.identity.ownerModuleId !== campaign.origin.moduleId ||
+          typeof campaign.identity.objectiveKey !== "string" ||
+          !campaign.identity.objectiveKey.trim() ||
+          campaign.campaignId !== compactCampaignId(campaign.identity) ||
           campaign.origin.rootPlanInstanceId.trim().length === 0 ||
           campaign.milestoneId.trim().length === 0 ||
           campaign.createdAtStateVersion > campaign.updatedAtStateVersion ||
@@ -1106,14 +1118,14 @@ function pruneHistory(
     .sort(
       (left, right) =>
         left.terminalAtStateVersion - right.terminalAtStateVersion ||
-        left.instanceId.localeCompare(right.instanceId),
+        comparePlanIdentities(left, right),
     );
 }
 
 function stableInstances(instances: readonly PlanInstance[]): PlanInstance[] {
   return [...instances]
     .map((instance) => structuredClone(instance))
-    .sort((left, right) => left.instanceId.localeCompare(right.instanceId));
+    .sort(comparePlanIdentities);
 }
 
 function transition(
@@ -1157,6 +1169,9 @@ function assertPortfolioInput(
       undefined,
       "Discard legacy or future portfolio snapshots instead of migrating them.",
     );
+  }
+  if (params.previous) {
+    assertResidentPlanPortfolio(params.previous, params.timingPoint);
   }
 }
 

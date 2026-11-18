@@ -38,7 +38,7 @@ it.each([false, true])(
     const drawn = applyAction(state, {
       matchId: state.matchId,
       side: "corp",
-      actionId: "corp.mandatory_draw",
+      actionId: "ce",
       clientKnownStateVersion: state.stateVersion,
     });
     if (!drawn.ok) throw new Error(drawn.error.message);

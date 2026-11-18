@@ -2779,7 +2779,7 @@
         "id": "new_remote"
       },
       "selectedStepKind": "protect_remote",
-      "selectedActionId": "corp.install_card.c31b.hq.c31b.0",
+      "selectedActionId": "cc.c31b.hq.c31b.0",
       "selectedActionType": "install_card",
       "blockedBy": [
         "central_protection_floor",
@@ -2888,7 +2888,7 @@
           "progress": 0.6,
           "selectedStepKind": "protect_remote",
           "actionCandidateIds": [
-            "corp.install_card.c31b.hq.c31b.0"
+            "cc.c31b.hq.c31b.0"
           ],
           "creditDemands": [],
           "actionDemands": [
@@ -3050,7 +3050,7 @@
             "plan_action_capacity_route:corp.establish_scoring_remote:new_remote:actions:already_sufficient",
             "plan_action_capacity_route_status:already_sufficient",
             "plan_action_capacity_hard_blocker_resolved:false",
-            "plan_portfolio_action_progress:corp.install_card.c31b.hq.c31b.0",
+            "plan_portfolio_action_progress:cc.c31b.hq.c31b.0",
             "plan_portfolio_carried_without_current_action:true",
             "plan_action_reservation_requested:1",
             "plan_action_reservation_allocated:1",
@@ -3083,7 +3083,7 @@
         "plan_action_allocation_entries:1",
         "plan_action_allocation_unallocated:0",
         "plan_action_allocation_credit_remainder:6",
-        "plan_portfolio_selected_action:corp.end_turn"
+        "plan_portfolio_selected_action:c9"
       ]
     },
     "strategicIntent": {

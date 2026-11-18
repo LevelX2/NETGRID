@@ -3581,7 +3581,7 @@
         "label": "Cortical Cybermodem"
       },
       "selectedStepKind": "gain_credits",
-      "selectedActionId": "runner.gain_credit",
+      "selectedActionId": "rb",
       "blockedBy": [
         "missing_credits"
       ],
@@ -3639,7 +3639,7 @@
         "plan_portfolio_foreground:runner.develop_hand_card",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.gain_credit"
+        "plan_portfolio_selected_action:rb"
       ]
     },
     "strategicIntent": {

@@ -9153,7 +9153,7 @@
         "label": "Edited Shipping Manifests"
       },
       "selectedStepKind": "install_development_card",
-      "selectedActionId": "runner.draw_card",
+      "selectedActionId": "r8",
       "selectedActionType": "draw_card",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
@@ -9224,7 +9224,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:runner.build_credit_bank",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.end_turn"
+        "plan_portfolio_selected_action:r9"
       ]
     },
     "strategicIntent": {
@@ -10297,7 +10297,7 @@
   "expectation": {
     "forbiddenActions": [
       {
-        "actionId": "runner.activated_card_ability.c2bv.c2bv.activated.0"
+        "actionId": "r1.c2bv.c2bv.activated.0"
       }
     ]
   }

@@ -87,11 +87,9 @@ describe("native cancellable encounter effect payment", () => {
     Object.assign(action.payload!, {
       unbrokenSubroutineCount: 2,
       encounterRemainingSubroutineCount: 2,
-      encounterSubroutineIds: quote.subroutines.map((s) => s.id).join(","),
-      encounterRemainingSubroutineIds: quote.subroutines
-        .map((s) => s.id)
-        .join(","),
     });
+    action.encounterSubroutineIds = quote.subroutines.map((s) => s.id);
+    action.encounterRemainingSubroutineIds = action.encounterSubroutineIds;
     expect(completeCancellableEncounterPayment(input, action)).toBeUndefined();
   });
 
@@ -171,17 +169,17 @@ describe("native cancellable encounter effect payment", () => {
     );
     const decision = chooseAiAction(input);
     expect(decision.actionId).toBe(
-      "runner.continue_run.0",
+      "r5.0",
     );
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.timeoutUsed).toBe(false);
     expect(JSON.stringify(input.playerView)).toBe(before);
     const plan = decision.decisionDebug!.planFirstDecision!;
     expect(plan.rootPlanInstanceId).toBe(
-      "plan:runner.pressure_central:central%3Ahq",
+      "pa7nez1ioecg7mf06q1uwqq57o",
     );
     expect(plan.leafExecutorInstanceId).toBe(
-      "plan:runner.convert_run_window:run%3A318",
+      "p8992dmpg4jyaihxvf0ftbxli4",
     );
     expect(plan.route?.actionId).toBe(decision.actionId);
     expect(plan.route?.stateVersion).toBe(328);

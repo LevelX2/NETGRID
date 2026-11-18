@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import { type AiDecisionInput } from "@netgrid/shared";
 import {
   runnerGuaranteedUrgentRemoteCanSpendToZero,
@@ -102,7 +103,7 @@ export function runnerRunFundingSupport(
   const parentModule = remote
     ? "runner.contest_remote"
     : "runner.pressure_central";
-  const parentPlanInstanceId = `plan:${parentModule}:${encodeURIComponent(dedupeKey)}`;
+  const parentPlanInstanceId = planInstanceIdForProposal({ moduleId: parentModule, dedupeKey: dedupeKey });
   const conditionalTerminalHazardFunding =
     terminalVisibleHazardFundingGap !== undefined &&
     (evaluation.routeQuote?.unknownIceCount ?? 0) > 0;

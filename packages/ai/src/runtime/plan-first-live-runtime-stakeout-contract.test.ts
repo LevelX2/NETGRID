@@ -63,7 +63,7 @@ describe("plan-first Runner composite economy-card ownership", () => {
     const unownedCredit = stakeoutLikeAction();
     unownedCredit.costs = [{ credits: 0, clicks: 0 }];
     const endTurn = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",

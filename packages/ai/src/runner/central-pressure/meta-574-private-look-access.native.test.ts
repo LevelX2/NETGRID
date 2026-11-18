@@ -42,7 +42,7 @@ it("does not grant Mole access to an access-replacing private-look run, retainin
   const look = targets.find(
     (t) => t.runActionProjection.accessReplacement === "private_look_top_rd",
   )!;
-  const direct = targets.find((t) => t.actionId === "runner.start_run.rd")!;
+  const direct = targets.find((t) => t.actionId === "rs.rd")!;
   expect(look).toBeDefined();
   expect(look).toMatchObject({ multiaccessAvailable: false });
   expect(direct).toMatchObject({
@@ -63,12 +63,12 @@ it("selects real hand and credit development instead of the falsely boosted info
   const before = JSON.stringify(input),
     decision = chooseAiAction(input);
   expect(decision).toMatchObject({
-    actionId: "runner.play_event.caa.caa.60",
+    actionId: "rh.caa.caa.60",
     fallbackUsed: false,
     timeoutUsed: false,
   });
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.develop_board_and_hand:card%3Acaa",
+    "pdy3inma15tyzp17wsllsgv0iq",
   );
   expect(input.legalActions.some((a) => a.actionId === decision.actionId)).toBe(
     true,
@@ -103,7 +103,7 @@ it("retains liquid credits for held economic development instead of repeating a 
   );
   const decision = chooseAiAction(input);
   expect(decision).toMatchObject({
-    actionId: "runner.gain_credit",
+    actionId: "rb",
     fallbackUsed: false,
     timeoutUsed: false,
   });
@@ -138,10 +138,10 @@ it("retains an affordable first private look through its exact information route
     timeoutUsed: false,
   });
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.pressure_central:central%3Ard",
+    "pa90fufw9vc5bkshp96ztlryxl",
   );
   const central = residentPlanPortfolioSnapshot(input)!.instances.find(
-    (p) => p.instanceId === "plan:runner.pressure_central:central%3Ard",
+    (p) => p.instanceId === "pa90fufw9vc5bkshp96ztlryxl",
   )!;
   expect(
     (central.moduleState as { signal: { runActionIds: string[] } }).signal
@@ -175,7 +175,7 @@ it("does not treat an installed run-start ability as a passive bonus on another 
   const direct = evaluateRunnerRunTargets({
     input,
     deckCapabilities: input.ownDeckCapabilities!,
-  }).find((t) => t.actionId === "runner.start_run.rd")!;
+  }).find((t) => t.actionId === "rs.rd")!;
   // The real Mole provides 90 immediate access value. Protocol grants no
   // effect at all to this different LegalAction.
   expect(direct.installedRunPayoff).toMatchObject({
@@ -197,13 +197,13 @@ it("does not admit an eight-credit private look through its ordinary-access sibl
   const before = JSON.stringify(input);
   const targets = evaluateRunnerRunTargets({ input, deckCapabilities: input.ownDeckCapabilities! });
   const look = targets.find((t) => t.runActionProjection.accessReplacement === "private_look_top_rd")!;
-  const direct = targets.find((t) => t.actionId === "runner.start_run.rd")!;
+  const direct = targets.find((t) => t.actionId === "rs.rd")!;
   expect(look).toMatchObject({ pathCost: 8, multiaccessAvailable: false });
   expect(runPurposeForEvaluation(look)).toBe("information");
   expect(look.score).toBeGreaterThan(direct.score);
   const decision = chooseAiAction(input);
   const central = residentPlanPortfolioSnapshot(input)!.instances.find(
-    (p) => p.instanceId === "plan:runner.pressure_central:central%3Ard",
+    (p) => p.instanceId === "pa90fufw9vc5bkshp96ztlryxl",
   )!;
   const signal = (central.moduleState as {
     signal: { runActionIds: string[]; runActionExclusions: Record<string, string[]> };

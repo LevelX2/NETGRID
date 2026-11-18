@@ -92,7 +92,7 @@ describe("meta 420 known ambush run admission", () => {
       runtime,
     );
     const result = chooseAiAction(input);
-    expect(result.actionId).not.toBe("runner.start_run.r1");
+    expect(result.actionId).not.toBe("rs.r1");
     expect(input.legalActions.some((a) => a.actionId === result.actionId)).toBe(
       true,
     );
@@ -103,7 +103,7 @@ describe("meta 420 known ambush run admission", () => {
     );
     expect(
       result.decisionDebug?.actionAlternatives
-        ?.find((a) => a.actionId === "runner.start_run.r1")
+        ?.find((a) => a.actionId === "rs.r1")
         ?.whyNot?.join(" "),
     ).toContain("known_access_damage_ambush");
   });
@@ -120,11 +120,11 @@ describe("meta 420 known ambush run admission", () => {
       runtime,
     );
     const result = chooseAiAction(input);
-    expect(result.actionId).toBe("runner.jack_out");
+    expect(result.actionId).toBe("rd");
     expect(result.decisionDebug?.planFirstDecision?.selectedPlan).toMatchObject(
       {
         moduleId: "runner.convert_run_window",
-        parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+        parentInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       },
     );
     expect(result.fallbackUsed).toBe(false);

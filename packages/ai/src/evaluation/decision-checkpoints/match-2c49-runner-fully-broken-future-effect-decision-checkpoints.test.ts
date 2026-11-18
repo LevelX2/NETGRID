@@ -11,7 +11,7 @@ describe("match 2c49 runner fully broken future effect decision checkpoint", () 
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
-    expect(result.decision?.actionId).toBe("runner.jack_out");
+    expect(result.decision?.actionId).toBe("rd");
     expect(
       result.decision?.decisionDebug?.planFirstDecision?.assessmentEvidenceCodes.some(
         (evidence) =>
@@ -21,11 +21,11 @@ describe("match 2c49 runner fully broken future effect decision checkpoint", () 
       ) ?? false,
     ).toBe(false);
     expect(result.decision?.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A89",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      leafExecutorInstanceId: "p8kyx053fdf6jdaq38j06j4jv5",
       selectedStep: {
-        planInstanceId: "plan:runner.convert_run_window:run%3A89",
-        parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+        planInstanceId: "p8kyx053fdf6jdaq38j06j4jv5",
+        parentInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       },
     });
   });

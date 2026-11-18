@@ -148,7 +148,7 @@ describe("match 5F6D runner decision checkpoints", () => {
         forbiddenActions: [
           {
             actionId:
-              "runner.activated_card_ability.c1l5.c1l5.activated.0",
+              "r1.c1l5.c1l5.activated.0",
           },
         ],
       };

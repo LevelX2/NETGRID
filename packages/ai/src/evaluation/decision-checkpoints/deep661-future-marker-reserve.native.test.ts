@@ -66,14 +66,14 @@ it("does not spend the bound full-run reserve on a next-encounter-only marker", 
   });
   const decision = chooseAiAction(input);
   expect(decision.actionId).toBe(
-    "runner.continue_run.0",
+    "r5.0",
   );
   const plan = decision.decisionDebug!.planFirstDecision!;
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:runner.pressure_central:central%3Ard",
+    "pa90fufw9vc5bkshp96ztlryxl",
   );
   expect(plan.leafExecutorInstanceId).toBe(
-    "plan:runner.convert_run_window:run%3A265",
+    "p8xqhbkzpiuechoo267e6gas23",
   );
   expect(plan.route).toMatchObject({
     actionId: decision.actionId,

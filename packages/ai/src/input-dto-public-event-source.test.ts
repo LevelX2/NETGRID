@@ -13,7 +13,7 @@ import {
 describe("AI input DTO public event source binding", () => {
   it("preserves public trace completion bindings while dropping unapproved fields", () => {
     const action = legalAction(
-      "runner.gain_credit",
+      "rb",
       "runner",
       "gain_credit",
       "Gain 1 Credit",
@@ -244,7 +244,7 @@ describe("AI input DTO public event source binding", () => {
 
   it("preserves the structured actor-side source binding and drops unknown fields", () => {
     const action = legalAction(
-      "runner.gain_credit",
+      "rb",
       "runner",
       "gain_credit",
       "Gain 1 Credit",
@@ -293,7 +293,7 @@ describe("AI input DTO public event source binding", () => {
 
   it("preserves the exact Engine-owned payment-support origin in the event tail", () => {
     const action = legalAction(
-      "runner.gain_credit",
+      "rb",
       "runner",
       "gain_credit",
       "Gain 1 Credit",
@@ -342,7 +342,7 @@ describe("AI input DTO public event source binding", () => {
 
   it("preserves Engine-owned agenda access cost facts and drops unknown aliases", () => {
     const action = legalAction(
-      "runner.gain_credit",
+      "rb",
       "runner",
       "gain_credit",
       "Gain 1 Credit",
@@ -398,7 +398,7 @@ describe("AI input DTO public event source binding", () => {
 
   it("preserves the Engine-owned Corp mandatory draw rate for deckout planning", () => {
     const action = legalAction(
-      "corp.gain_credit",
+      "cb",
       "corp",
       "gain_credit",
       "Gain 1 Credit",

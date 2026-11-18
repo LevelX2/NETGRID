@@ -28,16 +28,16 @@ describe("pairing 081 terminal contest reserve", () => {
 
     const decision = chooseAiAction(capture.input as AiDecisionInput);
 
-    expect(decision.actionId).toBe("runner.start_run.r1");
+    expect(decision.actionId).toBe("rs.r1");
     expect(decision.decisionDebug?.planKind).toBe("runner.contest_remote");
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-      leafExecutorInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      leafExecutorInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       selectedStep: {
-        planInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+        planInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       },
       route: {
-        actionId: "runner.start_run.r1",
+        actionId: "rs.r1",
         capabilityId: "contest_remote",
       },
     });

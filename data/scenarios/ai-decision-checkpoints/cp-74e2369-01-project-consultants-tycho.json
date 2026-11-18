@@ -3752,7 +3752,7 @@
         "id": "new_remote"
       },
       "selectedStepKind": "protect_remote",
-      "selectedActionId": "corp.install_card.c2vp.hq.c2vp.0",
+      "selectedActionId": "cc.c2vp.hq.c2vp.0",
       "selectedActionType": "install_card",
       "blockedBy": [
         "central_protection_floor",
@@ -3795,7 +3795,7 @@
           "progress": 0.5,
           "selectedStepKind": "protect_remote",
           "actionCandidateIds": [
-            "corp.install_card.c312.rd.c312.0"
+            "cc.c312.rd.c312.0"
           ],
           "cadence": {
             "turnKey": "corp:turn:3",
@@ -3870,7 +3870,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:corp.establish_scoring_remote|corp.establish_scoring_remote",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:corp.end_turn"
+        "plan_portfolio_selected_action:c9"
       ]
     },
     "strategicIntent": {

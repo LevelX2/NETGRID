@@ -18,9 +18,9 @@ it.each([
     checkpoint: purgeCheckpoint as unknown,
     stateVersion: 232,
     actionId:
-      "corp.advance_card.c2lp.c2lp",
-    leaf: "plan:corp.score_agenda:agenda%3Ac2lp%3Ar1",
-    root: "plan:corp.score_agenda:agenda%3Ac2lp%3Ar1",
+      "c2.c2lp.c2lp",
+    leaf: "pa1o3tqquxh3idj1dz05ipqkos",
+    root: "pa1o3tqquxh3idj1dz05ipqkos",
     semanticActionType: "score.advance_card",
     step: "advance_agenda",
     capability: "advance_score_agenda",
@@ -30,9 +30,9 @@ it.each([
     checkpoint: creditCheckpoint as unknown,
     stateVersion: 152,
     actionId:
-      "corp.play_operation.c31q.c31q.607",
-    leaf: "plan:corp.economy:score-support%3Aagenda%3Ac2k6%3Ar1",
-    root: "plan:corp.score_agenda:agenda%3Ac2k6%3Ar1",
+      "ci.c31q.c31q.607",
+    leaf: "pby4jc1qx064ugd33m8am6umi4",
+    root: "p8lb6gg4bostn5z3b64t0g63d3",
     semanticActionType: "economy.gain_credit",
     step: "fund",
     capability: "develop_or_convert_corp_economy",
@@ -106,7 +106,7 @@ it.each([
       expect(fundingTarget(root)).toBe(12);
       expect(
         fundingTarget(
-          "plan:corp.score_agenda:agenda%3Ac2lp%3Ar1",
+          "pa1o3tqquxh3idj1dz05ipqkos",
         ),
       ).toBe(13);
     }

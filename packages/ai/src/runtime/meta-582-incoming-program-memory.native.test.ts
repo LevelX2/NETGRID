@@ -55,7 +55,7 @@ describe("pairing 582 incoming identical program preserves recurring economy", (
         selected = chooseAiAction(cp.input);
       expect(selected.fallbackUsed).toBe(false);
       expect(selected.timeoutUsed).toBe(false);
-      expect(selected.actionId).toBe("runner.resolve_choice");
+      expect(selected.actionId).toBe("rn");
       expect(selected.selectedChoices).toEqual({
         choiceId: cp.input.playerView.pendingChoice.choiceId,
         selectedOptionIds: [`card_${oldId}`],

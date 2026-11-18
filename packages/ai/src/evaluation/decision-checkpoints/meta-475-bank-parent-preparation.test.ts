@@ -49,9 +49,7 @@ it("withdraws prospective bank funding when the actual remote parent owns ICE pr
   expect(result.fallbackUsed).toBe(false);
   expect(result.timeoutUsed).toBe(false);
   const pf = result.decisionDebug!.planFirstDecision!;
-  expect(pf.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Ar1",
-  );
+  expect(pf.rootPlanInstanceId).toBe("p1p4xezjcxov79rno40lq3f7rv");
   expect(pf.leafExecutorInstanceId).toBe(pf.rootPlanInstanceId);
   expect(pf.selectedPlan!.moduleId).toBe("runner.contest_remote");
   expect(pf.route!.actionId).toBe(action.actionId);
@@ -69,7 +67,9 @@ it("withdraws prospective bank funding when the actual remote parent owns ICE pr
       sourceCardInstanceId: action.source,
       ownerModuleId: "runner.contest_remote",
       serverId: "r1",
-      targetIceInstanceId: "h1w8568f",
+      targetIceInstanceId: input.playerView.servers.find(
+        (server) => server.id === "r1",
+      )!.ice[0]!.instanceId,
       targetIcePosition: 0,
     },
   });
@@ -81,8 +81,7 @@ it("withdraws prospective bank funding when the actual remote parent owns ICE pr
     }),
   ).toBe(engineFacts);
   const bank = residentPlanPortfolioSnapshot(input)!.instances.find(
-    (p) =>
-      p.instanceId === "plan:runner.credit_bank:c29d",
+    (p) => p.instanceId === "pdeck54mcc1lshdzs9k74eyxih",
   )!;
   expect(bank.parentNeedId).toBeUndefined();
   expect(bank.moduleState).toMatchObject({

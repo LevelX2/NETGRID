@@ -4493,7 +4493,7 @@
         "id": "r1"
       },
       "selectedStepKind": "run_target",
-      "selectedActionId": "runner.start_run.r1",
+      "selectedActionId": "rs.r1",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -4521,7 +4521,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.pump_breaker.c1jt.c1jt.c30n"
+        "plan_portfolio_selected_action:rj.c1jt.c1jt.c30n"
       ]
     },
     "strategicIntent": {
@@ -5578,7 +5578,7 @@
       ]
     },
     "runnerRunPlan": {
-      "id": "runner_run_plan:match_23d6dc3849db2566:62:runner:runner.start_run.r1:r1",
+      "id": "runner_run_plan:match_23d6dc3849db2566:62:runner:rs.r1:r1",
       "side": "runner",
       "lifecycle": "adjusted",
       "origin": "basic_start_run",
@@ -5603,7 +5603,7 @@
         "trashPolicy": "trash_if_value_positive",
         "reserveForStealOrTrash": 0
       },
-      "runStartActionId": "runner.start_run.r1",
+      "runStartActionId": "rs.r1",
       "sourceTacticalGoalIds": [
         "runner.draw_or_search_for_setup",
         "runner.build_economy_base",
@@ -5725,7 +5725,7 @@
             "cheapestAccessPreservingSequence": {
               "steps": [
                 {
-                  "actionId": "runner.pump_breaker.c1jt.c1jt.c30n",
+                  "actionId": "rj.c1jt.c1jt.c30n",
                   "actionType": "pump_breaker",
                   "source": "c1jt",
                   "cost": 2
@@ -5777,7 +5777,7 @@
             "cheapestSafeSequence": {
               "steps": [
                 {
-                  "actionId": "runner.pump_breaker.c1jt.c1jt.c30n",
+                  "actionId": "rj.c1jt.c1jt.c30n",
                   "actionType": "pump_breaker",
                   "source": "c1jt",
                   "cost": 2
@@ -5839,7 +5839,7 @@
           {
             "steps": [
               {
-                "actionId": "runner.pump_breaker.c1jt.c1jt.c30n",
+                "actionId": "rj.c1jt.c1jt.c30n",
                 "actionType": "pump_breaker",
                 "source": "c1jt",
                 "cost": 2
@@ -5907,7 +5907,7 @@
       "visibilityEvidence": [
         {
           "kind": "legal_action",
-          "ref": "runner.start_run.r1"
+          "ref": "rs.r1"
         },
         {
           "kind": "action_semantic_candidate",

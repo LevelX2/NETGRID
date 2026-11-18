@@ -98,17 +98,17 @@ describe("target preferences cannot manufacture hand-development capabilities", 
     );
     const decision = chooseAiAction(input);
     const plan = decision.decisionDebug?.planFirstDecision;
-    const root = "plan:runner.pressure_central:central%3Ahq";
+    const root = "pa7nez1ioecg7mf06q1uwqq57o";
     const executor =
-      "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate%3Arun%3Arunner.start_run.hq";
-    expect(decision.actionId).toBe("runner.draw_card");
+      "p9dwwqtm9u3zd1ipcqyqyaojc7";
+    expect(decision.actionId).toBe("r8");
     expect(decision.fallbackUsed).toBe(false);
     expect(plan?.rootPlanInstanceId).toBe(root);
     expect(plan?.leafExecutorInstanceId).toBe(executor);
     expect(plan?.selectedStep?.parentInstanceId).toBe(root);
     expect(plan?.route).toMatchObject({
       planInstanceId: executor,
-      actionId: "runner.draw_card",
+      actionId: "r8",
       stateVersion: checkpoint.stateVersion,
     });
     expect(plan?.executionOrigin).toMatchObject({

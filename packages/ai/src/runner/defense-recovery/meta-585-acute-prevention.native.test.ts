@@ -103,7 +103,7 @@ it("preserves the native ordinary Wilson setup reserve and the original run head
     cp.runtime,
   );
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("runner.start_run.hq");
+  expect(decision.actionId).toBe("rs.hq");
   expect(
     decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
   ).toBe("runner.pressure_central");

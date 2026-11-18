@@ -109,7 +109,7 @@ it.each([undefined, 147])(
     ).toBe(true);
     expect(getPlayerView(s, "runner").pendingChoice).toBeUndefined();
     const d = chooseCorpAction(i);
-    expect(d.actionId).toBe("corp.resolve_choice");
+    expect(d.actionId).toBe("cn");
     expect(d.selectedChoices?.selectedOptionIds).toEqual(["decline"]);
     expect(d.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
       "corp.ambush_and_bluff",

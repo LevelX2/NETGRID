@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import standardDeckCatalog from "../../../../data/decks/standard-deck-catalog-1.0.0.json";
 import profilesData from "../../../../data/decks/deck-format-profiles-0.8.json";
 import profilesData130 from "../../../../data/decks/deck-format-profiles-1.3.0.json";
@@ -392,7 +393,7 @@ describe("R&D Express selfplay runtime regressions", () => {
     );
     expect(state.run?.breach?.queue).toHaveLength(2);
     const runId = state.run!.runId;
-    const root = `plan:runner.convert_run_window:run%3A${runId}`;
+    const root = planInstanceIdForProposal({ moduleId: "runner.convert_run_window", dedupeKey: `run:${runId}` });
     resetResidentPlanPortfolioMemory();
     for (const actionType of [
       "access_card",

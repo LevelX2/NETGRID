@@ -116,8 +116,10 @@ describe("match 52de terminal agenda defense", () => {
     expect(decision.reasonCode).toBe("plan_first.corp.defend_servers");
     expect(decision.fallbackUsed).toBe(false);
     expect(
-      decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-    ).toContain("corp.score_agenda");
+      decision.decisionDebug?.planFirstDecision?.portfolio.find(
+        (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+      )?.moduleId,
+    ).toBe("corp.score_agenda");
   });
   it("retains actor-only checkpoint data", () => {
     const replay = capture();

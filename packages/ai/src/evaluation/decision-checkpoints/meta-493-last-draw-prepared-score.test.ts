@@ -12,7 +12,7 @@ import {
 afterEach(resetResidentPlanPortfolioMemory);
 const installed = "c2nh";
 const newInstall =
-  "corp.install_card.c2md.new_remote.c2md";
+  "cc.c2md.new_remote.c2md";
 function checkpoint() {
   return JSON.parse(
     readFileSync(
@@ -61,10 +61,10 @@ it("funds the already certified terminal continuation instead of opening an unpr
   });
   const result = decide(cp),
     plan = result.decisionDebug!.planFirstDecision!;
-  expect(result.actionId).toBe("corp.gain_credit");
+  expect(result.actionId).toBe("cb");
   expect(plan.selectedPlan?.moduleId).toBe("corp.economy");
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:corp.score_agenda:agenda%3Ac2nh%3Ar1",
+    "p1rgdikfrnp3ndp5yeqlx1qdaa",
   );
   expect(plan.priority?.effectiveClass).toBe("P2");
   expect(plan.leafExecutorInstanceId).toBe(plan.selectedPlan?.instanceId);
@@ -104,7 +104,7 @@ it.each(["stale", "incomplete", "nonterminal", "unfundable"] as const)(
         cp.input.playerView.own.credits + cp.input.playerView.own.clicks + 1;
     const result = decide(cp),
       plan = result.decisionDebug!.planFirstDecision!;
-    expect(result.actionId).toBe("corp.gain_credit");
+    expect(result.actionId).toBe("cb");
     expect(plan.selectedPlan?.moduleId).toBe("corp.economy");
   },
 );

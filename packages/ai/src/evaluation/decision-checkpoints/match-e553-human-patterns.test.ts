@@ -58,7 +58,7 @@ describe("e553 human-pattern historical evidence", () => {
     expect(rd.prerunReserveQuote!.evidence).toContain(
       "prerun_reserve_program_install_investment_credits:5",
     );
-    expect(decision.actionId).toBe("runner.gain_credit");
+    expect(decision.actionId).toBe("rb");
     expect(
       decision.decisionDebug?.planFirstDecision?.selectedPlan,
     ).toMatchObject({
@@ -82,8 +82,8 @@ describe("e553 human-pattern historical evidence", () => {
   });
   it("keeps the early blocked remote and its exact coverage child resident", () => {
     const { decision } = replay(earlyRemoteJson);
-    const parent = "plan:runner.contest_remote:remote%3Ar1";
-    const need = "coverage:breaker_sentry:run:runner.start_run.r1";
+    const parent = "p1p4xezjcxov79rno40lq3f7rv";
+    const need = "coverage:breaker_sentry:run:rs.r1";
     expect(decision.decisionDebug?.planFirstDecision?.portfolio).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ instanceId: parent, openNeedIds: [need] }),
@@ -112,11 +112,11 @@ describe("e553 human-pattern historical evidence", () => {
       selectedPlan: {
         moduleId: "runner.rig_and_coverage",
         phase: "search_answer",
-        parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+        parentInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
         target: { id: "breaker_sentry" },
       },
       executionOrigin: {
-        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+        rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
         stateVersion: input.playerView.stateVersion,
       },
       priority: { effectiveClass: "P4" },
@@ -138,14 +138,14 @@ describe("e553 human-pattern historical evidence", () => {
           (entry) =>
             entry.moduleId === "runner.rig_and_coverage" &&
             entry.parentInstanceId ===
-              "plan:runner.contest_remote:remote%3Ar1",
+              "p1p4xezjcxov79rno40lq3f7rv",
         ),
       ).toBe(false);
     },
   );
   it("keeps liquidity instead of paying for an incomplete matchpoint answer at D147", () => {
     const { input, decision } = replay(lateShellJson);
-    expect(decision.actionId).toBe("runner.draw_card");
+    expect(decision.actionId).toBe("r8");
     expect(
       decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
     ).toBe("runner.defense_and_recovery");

@@ -9,7 +9,7 @@ import {
 } from "./defense-validation";
 
 const route = {
-  actionId: "corp.rez_ice.ice_1",
+  actionId: "cq.ice_1",
   sourceCardInstanceId: "ice_1",
   sourceDefinitionId: syntheticCardDefinitionId("ice_definition"),
   targetServerId: "rd",
@@ -86,7 +86,7 @@ describe("Defense route contracts", () => {
       serverId: "rd",
       phase: "resolve_program_trash",
       sourceDefinitionIds: [syntheticCardDefinitionId("ice_definition")],
-      actionIds: ["corp.resolve_choice"],
+      actionIds: ["cn"],
       urgent: true,
       value: 1000,
       evidenceCode: "program_trash",

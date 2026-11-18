@@ -30,7 +30,7 @@ const recorded = JSON.parse(
   runtime: AiRuntimeCheckpointV1;
 };
 const genetics = "c2k6";
-const actionId = "corp.install_card." + genetics + ".r1." + genetics;
+const actionId = "cc." + genetics + ".r1." + genetics;
 beforeEach(resetResidentPlanPortfolioMemory);
 
 function native() {
@@ -104,9 +104,12 @@ describe("pairing 553 terminal score objective", () => {
     expect(result.fallbackUsed).toBe(false);
     expect(result.actionId).toBe(actionId);
     const pf = result.decisionDebug?.planFirstDecision;
-    expect(pf?.rootPlanInstanceId).toContain(
-      encodeURIComponent("agenda:" + genetics + ":r1"),
-    );
+    expect(pf?.portfolio.find(
+      (instance) => instance.instanceId === pf.rootPlanInstanceId,
+    )).toMatchObject({
+      moduleId: "corp.score_agenda",
+      dedupeKey: `agenda:${genetics}:r1`,
+    });
     expect(pf?.leafExecutorInstanceId).toBe(pf?.rootPlanInstanceId);
     expect(pf?.route).toMatchObject({
       actionId,

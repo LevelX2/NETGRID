@@ -376,7 +376,7 @@
           "label": "HQ",
           "ice": [
             {
-              "instanceId": "h141u4jb",
+              "instanceId": "hhq.i0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -413,13 +413,13 @@
               }
             },
             {
-              "instanceId": "h1nr1wsc",
+              "instanceId": "hhq.i2",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
             },
             {
-              "instanceId": "h1ebc9pb",
+              "instanceId": "hhq.i3",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -4542,7 +4542,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.gain_credit",
+          "actionId": "rb",
           "side": "runner",
           "type": "gain_credit",
           "label": "1 Credit nehmen",
@@ -4563,7 +4563,7 @@
           }
         },
         {
-          "actionId": "runner.draw_card",
+          "actionId": "r8",
           "side": "runner",
           "type": "draw_card",
           "label": "Karte ziehen",
@@ -4586,7 +4586,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c23v.c23v",
+          "actionId": "rc.c23v.c23v",
           "side": "runner",
           "type": "install_card",
           "label": "HQ Interface installieren",
@@ -4607,7 +4607,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1yx.hq.c1yx.403",
+          "actionId": "rh.c1yx.hq.c1yx.403",
           "side": "runner",
           "type": "play_event",
           "label": "Romp through HQ auf HQ",
@@ -4636,7 +4636,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c1fu.c1fu",
+          "actionId": "rc.c1fu.c1fu",
           "side": "runner",
           "type": "install_card",
           "label": "Dwarf installieren",
@@ -4657,7 +4657,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c1fu.c1fu.runner_program_trash_before_install",
+          "actionId": "rc.c1fu.c1fu.runner_program_trash_before_install",
           "side": "runner",
           "type": "install_card",
           "label": "Dwarf mit Programmtrash installieren",
@@ -4679,7 +4679,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1sr.c1sr.375",
+          "actionId": "rh.c1sr.c1sr.375",
           "side": "runner",
           "type": "play_event",
           "label": "Bodyweight™ Synthetic Blood spielen",
@@ -4707,7 +4707,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1yp.hq.c1yp.402",
+          "actionId": "rh.c1yp.hq.c1yp.402",
           "side": "runner",
           "type": "play_event",
           "label": "Private LDL Access auf HQ",
@@ -4736,7 +4736,7 @@
           }
         },
         {
-          "actionId": "runner.activated_card_ability.c29e.c29e.activated.440",
+          "actionId": "r1.c29e.c29e.activated.440",
           "side": "runner",
           "type": "activated_card_ability",
           "label": "Broker: 3 Credits auf Broker legen",
@@ -4764,7 +4764,7 @@
           }
         },
         {
-          "actionId": "runner.activated_card_ability.c29e.c29e.activated.441",
+          "actionId": "r1.c29e.c29e.activated.441",
           "side": "runner",
           "type": "activated_card_ability",
           "label": "Broker: Credits von Broker nehmen",
@@ -4795,7 +4795,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.hq",
+          "actionId": "rs.hq",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf HQ",
@@ -4816,7 +4816,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.rd",
+          "actionId": "rs.rd",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf R&D",
@@ -4837,7 +4837,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.archives",
+          "actionId": "rs.archives",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf Archives",
@@ -4858,7 +4858,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.r1",
+          "actionId": "rs.r1",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf Remote 1",
@@ -4879,7 +4879,7 @@
           }
         },
         {
-          "actionId": "runner.end_turn",
+          "actionId": "r9",
           "side": "runner",
           "type": "end_turn",
           "label": "Zug beenden",
@@ -7009,7 +7009,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "runner.gain_credit",
+        "actionId": "rb",
         "side": "runner",
         "type": "gain_credit",
         "label": "1 Credit nehmen",
@@ -7030,7 +7030,7 @@
         }
       },
       {
-        "actionId": "runner.draw_card",
+        "actionId": "r8",
         "side": "runner",
         "type": "draw_card",
         "label": "Karte ziehen",
@@ -7053,7 +7053,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c23v.c23v",
+        "actionId": "rc.c23v.c23v",
         "side": "runner",
         "type": "install_card",
         "label": "HQ Interface installieren",
@@ -7074,7 +7074,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1yx.hq.c1yx.403",
+        "actionId": "rh.c1yx.hq.c1yx.403",
         "side": "runner",
         "type": "play_event",
         "label": "Romp through HQ auf HQ",
@@ -7103,7 +7103,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c1fu.c1fu",
+        "actionId": "rc.c1fu.c1fu",
         "side": "runner",
         "type": "install_card",
         "label": "Dwarf installieren",
@@ -7124,7 +7124,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c1fu.c1fu.runner_program_trash_before_install",
+        "actionId": "rc.c1fu.c1fu.runner_program_trash_before_install",
         "side": "runner",
         "type": "install_card",
         "label": "Dwarf mit Programmtrash installieren",
@@ -7146,7 +7146,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1sr.c1sr.375",
+        "actionId": "rh.c1sr.c1sr.375",
         "side": "runner",
         "type": "play_event",
         "label": "Bodyweight™ Synthetic Blood spielen",
@@ -7174,7 +7174,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1yp.hq.c1yp.402",
+        "actionId": "rh.c1yp.hq.c1yp.402",
         "side": "runner",
         "type": "play_event",
         "label": "Private LDL Access auf HQ",
@@ -7203,7 +7203,7 @@
         }
       },
       {
-        "actionId": "runner.activated_card_ability.c29e.c29e.activated.440",
+        "actionId": "r1.c29e.c29e.activated.440",
         "side": "runner",
         "type": "activated_card_ability",
         "label": "Broker: 3 Credits auf Broker legen",
@@ -7231,7 +7231,7 @@
         }
       },
       {
-        "actionId": "runner.activated_card_ability.c29e.c29e.activated.441",
+        "actionId": "r1.c29e.c29e.activated.441",
         "side": "runner",
         "type": "activated_card_ability",
         "label": "Broker: Credits von Broker nehmen",
@@ -7262,7 +7262,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.hq",
+        "actionId": "rs.hq",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf HQ",
@@ -7283,7 +7283,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.rd",
+        "actionId": "rs.rd",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf R&D",
@@ -7304,7 +7304,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.archives",
+        "actionId": "rs.archives",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf Archives",
@@ -7325,7 +7325,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.r1",
+        "actionId": "rs.r1",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf Remote 1",
@@ -7346,7 +7346,7 @@
         }
       },
       {
-        "actionId": "runner.end_turn",
+        "actionId": "r9",
         "side": "runner",
         "type": "end_turn",
         "label": "Zug beenden",
@@ -7400,7 +7400,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 141,
-      "sideSafePlanningFingerprint": "fnv1a:10858303"
+      "sideSafePlanningFingerprint": "fnv1a:b1b55b8a"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_redline_riot_1.0.0",
@@ -7843,10 +7843,10 @@
             "buildActionLegal": true,
             "cashOutActionLegal": true,
             "buildActionIds": [
-              "runner.activated_card_ability.c29e.c29e.activated.440"
+              "r1.c29e.c29e.activated.440"
             ],
             "cashOutActionIds": [
-              "runner.activated_card_ability.c29e.c29e.activated.441"
+              "r1.c29e.c29e.activated.441"
             ],
             "estimatedPayout": 6,
             "confidence": "high",
@@ -13237,7 +13237,7 @@
       "stateVersion": 134,
       "instances": [
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "dedupeKey": "standard-turn-completion",
           "moduleId": "runner.complete_turn",
           "moduleVersion": "1",
@@ -13266,7 +13266,7 @@
           "moduleState": {
             "kind": "turn_completion",
             "standardEndTurnActionIds": [
-              "runner.end_turn"
+              "r9"
             ]
           },
           "blockers": [],
@@ -13299,7 +13299,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.credit_bank:c29e",
+          "instanceId": "pdeckcw9fkuryyxs8xionefklm",
           "dedupeKey": "c29e",
           "moduleId": "runner.credit_bank",
           "moduleVersion": "1",
@@ -13394,7 +13394,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac23t",
+          "instanceId": "p5yrklfibnua5iuxev659l1i43",
           "dedupeKey": "card:c23t",
           "moduleId": "runner.develop_board_and_hand",
           "moduleVersion": "1",
@@ -13450,21 +13450,21 @@
                 "releaseCondition": "parent_invalidated_or_material_value_lost_or_urgent_preemption"
               },
               "fundingRouteActionIds": [
-                "runner.play_event.c1z6.c1z6.404"
+                "rh.c1z6.c1z6.404"
               ],
               "fundingRouteAssessment": {
                 "stateVersion": 69,
-                "routeId": "development-support:c23t:legal_action:runner.play_event.c1z6.c1z6.404",
+                "routeId": "development-support:c23t:legal_action:rh.c1z6.c1z6.404",
                 "status": "covered_guaranteed",
                 "reliability": "guaranteed",
                 "horizon": "same_turn",
                 "projectedGap": 0,
                 "totalClickCost": 1,
-                "firstStepActionId": "runner.play_event.c1z6.c1z6.404",
+                "firstStepActionId": "rh.c1z6.c1z6.404",
                 "evidenceCodes": [
                   "funding_route_count:1",
                   "funding_route_best_status:covered_guaranteed",
-                  "funding_route_best_id:development-support:c23t:legal_action:runner.play_event.c1z6.c1z6.404",
+                  "funding_route_best_id:development-support:c23t:legal_action:rh.c1z6.c1z6.404",
                   "funding_route_status:covered_guaranteed",
                   "funding_route_reliability:guaranteed",
                   "funding_route_horizon:same_turn",
@@ -13479,7 +13479,7 @@
               "evidenceCodes": [
                 "funding_route_count:1",
                 "funding_route_best_status:covered_guaranteed",
-                "funding_route_best_id:development-support:c23t:legal_action:runner.play_event.c1z6.c1z6.404",
+                "funding_route_best_id:development-support:c23t:legal_action:rh.c1z6.c1z6.404",
                 "funding_route_status:covered_guaranteed",
                 "funding_route_reliability:guaranteed",
                 "funding_route_horizon:same_turn",
@@ -13532,7 +13532,7 @@
               "source": "visible_state"
             },
             {
-              "code": "funding_route_best_id:development-support:c23t:legal_action:runner.play_event.c1z6.c1z6.404",
+              "code": "funding_route_best_id:development-support:c23t:legal_action:rh.c1z6.c1z6.404",
               "source": "visible_state"
             },
             {
@@ -13565,37 +13565,37 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "stateVersion": 134,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.credit_bank:c29e",
+          "instanceId": "pdeckcw9fkuryyxs8xionefklm",
           "stateVersion": 134,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.convert_run_window:run%3A132",
+          "instanceId": "p9nyortw7fxhyk8iawpkigu9qu",
           "stateVersion": 134,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac23t",
+          "instanceId": "p5yrklfibnua5iuxev659l1i43",
           "stateVersion": 134,
           "reason": "retained",
           "detailCode": "retention_protected"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ard",
+          "instanceId": "pa90fufw9vc5bkshp96ztlryxl",
           "stateVersion": 134,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "stateVersion": 134,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
@@ -13608,7 +13608,7 @@
         "commitmentId": "fnv1a:b86c0904",
         "sourcePlanId": "fnv1a:4b1d015d",
         "sourceLineHash": "fnv1a:e3cf74c0",
-        "sequenceRootPlanInstanceId": "plan:runner.complete_turn:standard-turn-completion",
+        "sequenceRootPlanInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
         "side": "runner",
         "turnKey": "runner:turn:19",
         "planningRulesFingerprint": "fnv1a:697f22b3",
@@ -13625,7 +13625,7 @@
           {
             "phaseId": "fnv1a:06dce3cc",
             "root": {
-              "planInstanceId": "plan:runner.complete_turn:standard-turn-completion",
+              "planInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
               "moduleId": "runner.complete_turn",
               "milestoneId": "complete_turn_after_productive_routes_exhausted",
               "provenance": "resident"
@@ -13714,7 +13714,7 @@
           "sideSafePlanningFingerprint": "fnv1a:26082b2d"
         },
         "currentBinding": {
-          "actionId": "runner.end_turn",
+          "actionId": "r9",
           "stateVersion": 134,
           "semanticActionSetFingerprint": "fnv1a:1237c312",
           "invocationKey": "fnv1a:90ba860a"
@@ -13722,8 +13722,8 @@
         "actionType": "end_turn",
         "expectationId": "fnv1a:ba54c645"
       },
-      "rootForegroundInstanceId": "plan:runner.complete_turn:standard-turn-completion",
-      "executorInstanceId": "plan:runner.complete_turn:standard-turn-completion"
+      "rootForegroundInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
+      "executorInstanceId": "p2ut8j92he0i09lc4xwtln5iys"
     }
   },
   "validation": {

@@ -21,7 +21,7 @@ export type CorpScoreRushRiskAssessment = Readonly<{
 
 /**
  * Evaluates an intentional remote-score risk from public, action-independent
- * facts. corp.score_agenda owns this admission; corp.defend_servers may only
+ * facts. cr owns this admission; corp.defend_servers may only
  * supply the projected server/ICE facts and later execute a selected support
  * step. The shared scoring-window projection evaluates four Runner income
  * actions and applies public run-credit pools to the access path.

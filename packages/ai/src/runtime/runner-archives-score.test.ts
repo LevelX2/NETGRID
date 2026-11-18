@@ -193,21 +193,21 @@ function card(
 }
 
 function startRunArchives(): LegalAction {
-  return action("runner.start_run.archives", "start_run", {
+  return action("rs.archives", "start_run", {
     serverId: "archives",
   });
 }
 
 function gainCredit(): LegalAction {
-  return action("runner.gain_credit", "gain_credit");
+  return action("rb", "gain_credit");
 }
 
 function drawCard(): LegalAction {
-  return action("runner.draw_card", "draw_card");
+  return action("r8", "draw_card");
 }
 
 function endTurn(): LegalAction {
-  return action("runner.end_turn", "end_turn");
+  return action("r9", "end_turn");
 }
 
 function action(

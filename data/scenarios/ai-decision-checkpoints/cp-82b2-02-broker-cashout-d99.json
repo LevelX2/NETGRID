@@ -10582,7 +10582,7 @@
       "stateVersion": 184,
       "instances": [
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "dedupeKey": "standard-turn-completion",
           "moduleId": "runner.complete_turn",
           "moduleVersion": "1",
@@ -10611,7 +10611,7 @@
           "moduleState": {
             "kind": "turn_completion",
             "standardEndTurnActionIds": [
-              "runner.end_turn"
+              "r9"
             ]
           },
           "blockers": [],
@@ -10644,7 +10644,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.credit_bank:366",
+          "instanceId": "p27nxf5z010iyjlqr3dgq3ah0w",
           "dedupeKey": "366",
           "moduleId": "runner.credit_bank",
           "moduleVersion": "1",
@@ -10742,7 +10742,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac1rl",
+          "instanceId": "p3rkbmqp2cwrguh2oxce9a36x7",
           "dedupeKey": "card:c1rl",
           "moduleId": "runner.develop_board_and_hand",
           "moduleVersion": "1",
@@ -10861,7 +10861,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac1t5",
+          "instanceId": "p3rp3coguivoqbey271ano44dm",
           "dedupeKey": "card:c1t5",
           "moduleId": "runner.develop_board_and_hand",
           "moduleVersion": "1",
@@ -10980,7 +10980,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac1u2",
+          "instanceId": "p3rri2nlvp7nem8gb4u86edj2u",
           "dedupeKey": "card:c1u2",
           "moduleId": "runner.develop_board_and_hand",
           "moduleVersion": "1",
@@ -11099,7 +11099,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac1z7",
+          "instanceId": "p3r2x1wzj7vhwzotwibha64kai",
           "dedupeKey": "card:c1z7",
           "moduleId": "runner.develop_board_and_hand",
           "moduleVersion": "1",
@@ -11218,7 +11218,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac29d",
+          "instanceId": "p5y4iioxafd1zw68fqm1eax471",
           "dedupeKey": "card:c29d",
           "moduleId": "runner.develop_board_and_hand",
           "moduleVersion": "1",
@@ -11340,85 +11340,85 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "stateVersion": 184,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.credit_bank:366",
+          "instanceId": "p27nxf5z010iyjlqr3dgq3ah0w",
           "stateVersion": 184,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac1rl",
+          "instanceId": "p3rkbmqp2cwrguh2oxce9a36x7",
           "stateVersion": 184,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac1t5",
+          "instanceId": "p3rp3coguivoqbey271ano44dm",
           "stateVersion": 184,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac1u2",
+          "instanceId": "p3rri2nlvp7nem8gb4u86edj2u",
           "stateVersion": 184,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac1z7",
+          "instanceId": "p3r2x1wzj7vhwzotwibha64kai",
           "stateVersion": 184,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac29d",
+          "instanceId": "p5y4iioxafd1zw68fqm1eax471",
           "stateVersion": 184,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:generic%3Adraw-options",
+          "instanceId": "p6hb5l9cujr02om3vqn7gbqr35",
           "stateVersion": 184,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.economy:economy-liquidity-development%3Arunner%3A25",
+          "instanceId": "p5nnvx8nlj6m9kefmx4yrf37h7",
           "stateVersion": 184,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.economy:runner-portfolio-credit-reserve",
+          "instanceId": "pc7ebuiw5dxhlbzbf1nhcs4p4z",
           "stateVersion": 184,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Aarchives",
+          "instanceId": "p22f66p721g9dgs7gsawwpf6hs",
           "stateVersion": 184,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ahq",
+          "instanceId": "pa7nez1ioecg7mf06q1uwqq57o",
           "stateVersion": 184,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ard",
+          "instanceId": "pa90fufw9vc5bkshp96ztlryxl",
           "stateVersion": 184,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "stateVersion": 184,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
@@ -11428,7 +11428,7 @@
       ],
       "turnPlanCommitment": {
         "schemaVersion": "turn-plan-commitment-v2",
-        "sequenceRootPlanInstanceId": "plan:runner.complete_turn:standard-turn-completion",
+        "sequenceRootPlanInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
         "commitmentId": "fnv1a:08b2675e",
         "sourcePlanId": "fnv1a:4e398ab2",
         "sourceLineHash": "fnv1a:053d2326",
@@ -11448,7 +11448,7 @@
           {
             "phaseId": "fnv1a:478eadc3",
             "root": {
-              "planInstanceId": "plan:runner.complete_turn:standard-turn-completion",
+              "planInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
               "moduleId": "runner.complete_turn",
               "milestoneId": "complete_turn_after_productive_routes_exhausted",
               "provenance": "resident"
@@ -11535,7 +11535,7 @@
           "sideSafePlanningFingerprint": "fnv1a:b787afef"
         },
         "currentBinding": {
-          "actionId": "runner.end_turn",
+          "actionId": "r9",
           "stateVersion": 184,
           "semanticActionSetFingerprint": "fnv1a:1237c312",
           "invocationKey": "fnv1a:fb2cbd3a"
@@ -11543,19 +11543,19 @@
         "actionType": "end_turn",
         "expectationId": "fnv1a:856f3d7a"
       },
-      "rootForegroundInstanceId": "plan:runner.complete_turn:standard-turn-completion",
-      "executorInstanceId": "plan:runner.complete_turn:standard-turn-completion"
+      "rootForegroundInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
+      "executorInstanceId": "p2ut8j92he0i09lc4xwtln5iys"
     }
   },
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.activated_card_ability.c29e.c29e.activated.441"
+        "actionId": "r1.c29e.c29e.activated.441"
       }
     ],
     "forbiddenActions": [
       {
-        "actionId": "runner.gain_credit"
+        "actionId": "rb"
       }
     ],
     "planExecution": {

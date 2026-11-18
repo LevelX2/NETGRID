@@ -26,7 +26,7 @@ const safePreview = {
   requestedBy: "runner",
   side: "runner",
   generatedAt: "2026-07-26T09:00:00.000Z",
-  actionId: "runner.gain_credit",
+  actionId: "rb",
   actionType: "gain_credit",
   actionLabel: "1 Credit nehmen",
   reasonCode: "test.safe_preview",

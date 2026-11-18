@@ -59,19 +59,24 @@ it("does not reserve an unaffordable central route after the native Runner prepa
   const cp = checkpoint(2);
   expect(corpFundedCentralProtectionReserve(cp.input)).toBe(0);
   expect(decide(cp).actionId).toBe(
-    "corp.advance_card.c2i5.c2i5",
+    "c2.c2i5.c2i5",
   );
 });
 it("funds the installed same-turn score and funded central reserve jointly under the same Score parent", () => {
   const cp = checkpoint();
   expect(cp.input.playerView.own).toMatchObject({ credits: 6, clicks: 3 });
   const r = decide(cp);
-  expect(r.actionId).toBe("corp.gain_credit");
+  expect(r.actionId).toBe("cb");
   const p = r.decisionDebug!.planFirstDecision!;
   expect(p.selectedPlan?.moduleId).toBe("corp.economy");
-  expect(p.rootPlanInstanceId).toContain(
-    "plan:corp.score_agenda:agenda%3Ac2i5%3Ar1",
-  );
+  expect(
+    p?.portfolio.find(
+      (instance) => instance.instanceId === p.rootPlanInstanceId,
+    ),
+  ).toMatchObject({
+    moduleId: "corp.score_agenda",
+    dedupeKey: expect.stringContaining("agenda:c2i5:r1"),
+  });
   expect(p.selectedStep?.planInstanceId).toBe(p.leafExecutorInstanceId);
 });
 it("keeps the current advance when the entire score already leaves the funded reserve", () => {
@@ -79,7 +84,7 @@ it("keeps the current advance when the entire score already leaves the funded re
   cp.input.playerView.own.credits = 7;
   const r = decide(cp);
   expect(r.actionId).toBe(
-    "corp.advance_card.c2i5.c2i5",
+    "c2.c2i5.c2i5",
   );
   expect(r.decisionDebug!.planFirstDecision!.selectedPlan?.moduleId).toBe(
     "corp.score_agenda",
@@ -107,7 +112,7 @@ it("keeps the terminal own score ahead of the joint reserve funding", () => {
   cp.input.playerView.own.agendaPoints = 5;
   const r = decide(cp);
   expect(r.actionId).toBe(
-    "corp.advance_card.c2i5.c2i5",
+    "c2.c2i5.c2i5",
   );
   expect(r.decisionDebug!.planFirstDecision!.priority?.effectiveClass).toBe(
     "P1",
@@ -119,11 +124,11 @@ it.each(["missing", "stale", "zero_click"] as const)(
     const cp = checkpoint();
     if (variant === "missing")
       cp.input.legalActions = cp.input.legalActions.filter(
-        (a) => a.actionId !== "corp.gain_credit",
+        (a) => a.actionId !== "cb",
       );
     else {
       const basic = cp.input.legalActions.find(
-        (a) => a.actionId === "corp.gain_credit",
+        (a) => a.actionId === "cb",
       )!;
       if (variant === "stale") basic.expiresAtStateVersion--;
       else basic.costs = [{ clicks: 0 }];

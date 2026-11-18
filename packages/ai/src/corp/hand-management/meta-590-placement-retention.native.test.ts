@@ -41,9 +41,9 @@ it.each([
     );
     const d = chooseAiAction(input),
       root =
-        "plan:corp.hand_and_agenda_management:discard-window%3Adiscard_corp_255%3A255";
+        "p5rzamnhgf4a1pqijqcprw0f6y";
     expect(d).toMatchObject({
-      actionId: "corp.resolve_choice",
+      actionId: "cn",
       fallbackUsed: false,
       timeoutUsed: false,
     });
@@ -63,7 +63,7 @@ it.each([
         moduleId: "corp.hand_and_agenda_management",
         phase: "discard_window",
       },
-      route: { actionId: "corp.resolve_choice", stateVersion: 255 },
+      route: { actionId: "cn", stateVersion: 255 },
     });
     expect(JSON.stringify(input.playerView) === beforeView).toBe(true);
     expect(JSON.stringify(input.legalActions) === beforeLegal).toBe(true);

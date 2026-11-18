@@ -123,7 +123,7 @@ describe("match 41df Corp scoring", () => {
 
   it("funds the known stopping ICE instead of a second non-stopping layer at D13", () => {
     const { decision } = decide(13);
-    expect(decision.actionId).toBe("corp.gain_credit");
+    expect(decision.actionId).toBe("cb");
     expect(decision.reasonCode).toBe("plan_first.corp.economy");
   });
 
@@ -233,10 +233,10 @@ describe("match 41df Corp scoring", () => {
         expect(projects.every((project) => !project.feasible)).toBe(true);
         // A concrete installed central reserve now precedes unsafe emergency
         // installs. The route comparison remains independently observable.
-        expect(selected.actionId).toBe("corp.gain_credit");
+        expect(selected.actionId).toBe("cb");
         expect(decision.evidence).toEqual(
           expect.arrayContaining([
-            "plan_priority_delegated_from:plan:corp.defend_servers:server-defense-portfolio",
+            "plan_priority_delegated_from:penw02zfrkklof54c2nuye5att",
             "plan_assessment_evidence:corp_terminal_central_rez_reserve_required:hq:cgd:gap_4",
           ]),
         );

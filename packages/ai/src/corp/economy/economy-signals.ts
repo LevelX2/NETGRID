@@ -750,6 +750,7 @@ export function corpEconomyDevelopmentCampaigns(
           needId: need.needId,
           gap: need.gap,
           actionIds: quotes.map((quote) => quote.request.payoutActionId),
+          parentPlanModuleId: "corp.economy" as const,
           parentPlanInstanceId: planInstanceIdForProposal({
             moduleId: "corp.economy",
             dedupeKey: signal.needId,
@@ -1363,6 +1364,7 @@ export function corpRequiredEconomyNeeds(
                   ? terminalFundingActionIds
                   : immediateFundingActionIds),
             ),
+            parentPlanModuleId: "corp.score_agenda" as const,
             parentPlanInstanceId: planInstanceIdForProposal({
               moduleId: "corp.score_agenda",
               dedupeKey: project.projectId,
@@ -1398,6 +1400,7 @@ export function corpRequiredEconomyNeeds(
         needId: need.needId,
         gap: need.minimum,
         actionIds: immediateFundingActionIds,
+        parentPlanModuleId: "corp.establish_scoring_remote" as const,
         parentPlanInstanceId: planInstanceIdForProposal({
           moduleId: "corp.establish_scoring_remote",
           dedupeKey: project.projectId,
@@ -1430,6 +1433,7 @@ export function corpRequiredEconomyNeeds(
         needId,
         gap,
         actionIds: immediateFundingActionIds,
+        parentPlanModuleId: "corp.ambush_and_bluff" as const,
         parentPlanInstanceId: planInstanceIdForProposal({
           moduleId: "corp.ambush_and_bluff",
           dedupeKey: ambush.ambushId,
@@ -1459,6 +1463,7 @@ export function corpRequiredEconomyNeeds(
         needId: route.fundingNeedId,
         gap: route.fundingGap,
         actionIds: route.fundingActionIds,
+        parentPlanModuleId: "corp.punish_campaign" as const,
         parentPlanInstanceId: planInstanceIdForProposal({
           moduleId: "corp.punish_campaign",
           dedupeKey: campaign.campaignId,

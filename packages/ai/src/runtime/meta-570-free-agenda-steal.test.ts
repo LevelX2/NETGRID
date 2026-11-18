@@ -95,7 +95,7 @@ it("converts the original free winning access without trashing and running Archi
   expect(after.action.costs).toEqual([]);
   expect(
     after.decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-  ).toBe("plan:runner.pressure_central:central%3Ahq");
+  ).toBe("pa7nez1ioecg7mf06q1uwqq57o");
   expect(getPlayerView(after.state, "runner")).toMatchObject({
     winner: "runner",
     own: { agendaPoints: 8 },

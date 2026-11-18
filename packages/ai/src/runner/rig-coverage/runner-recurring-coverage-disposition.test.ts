@@ -15,7 +15,7 @@ describe("recurring-economy deferral of multipurpose coverage hardware", () => {
     const definitionId = 209;
     const actions = ["bound-memory", "unbound-memory"].map((source) =>
       legalAction(
-        `runner.install_card.${source}`,
+        `rc.${source}`,
         "runner",
         "install_card",
         "Install memory hardware",

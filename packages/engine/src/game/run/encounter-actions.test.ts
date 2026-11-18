@@ -396,7 +396,7 @@ describe("runner encounter action generation", () => {
     ]);
     const pump = result.legalActions[0]!;
     expect(pump.actionId).toBe(
-      "runner.pump_breaker.breaker_1.breaker_1.breaker_1.ice_1.701",
+      "rj.breaker_1.breaker_1.breaker_1.ice_1.701",
     );
     expect(pump.payload).toMatchObject({
       cardId: "breaker_1",
@@ -417,7 +417,7 @@ describe("runner encounter action generation", () => {
     });
     const breaker = result.legalActions[1]!;
     expect(breaker.actionId).toBe(
-      "runner.break_subroutine.breaker_1.breaker_1.breaker_1.ice_1.0.test_sentry_etr.700",
+      "r3.breaker_1.breaker_1.breaker_1.ice_1.0.test_sentry_etr.700",
     );
     expect(breaker.costs).toEqual([{ credits: 1 }]);
     expect(breaker.payload).toMatchObject({
@@ -437,13 +437,7 @@ describe("runner encounter action generation", () => {
       sourceCardInstanceId: "breaker_1",
       sourceAbilityId: 700,
     });
-    expect(result.legalActions[2]!.payload).toMatchObject({
-      encounterContinue: true,
-      sourceDefinitionId: 1886536465,
-      unbrokenSubroutineCount: 1,
-      encounterWillEndRun: true,
-      encounterSubroutineIds: "test_sentry_etr",
-    });
+    expect(result.legalActions[2]!).toMatchObject({encounterSubroutineIds: ["test_sentry_etr"], payload: { encounterContinue: true, sourceDefinitionId: 1886536465, unbrokenSubroutineCount: 1, encounterWillEndRun: true }});
     expect(state).toEqual(before);
   });
 
@@ -466,12 +460,7 @@ describe("runner encounter action generation", () => {
     );
 
     expect(continueRun?.label).toBe("Subroutinen auslösen (Run endet)");
-    expect(continueRun?.payload).toMatchObject({
-      encounterContinue: true,
-      encounterWillEndRun: true,
-      encounterSourceWillTrashAtEndOfTurn: true,
-      encounterSubroutineIds: "test_sentry_etr_and_delayed_self_trash",
-    });
+    expect(continueRun).toMatchObject({encounterSubroutineIds: ["test_sentry_etr_and_delayed_self_trash"], payload: { encounterContinue: true, encounterWillEndRun: true, encounterSourceWillTrashAtEndOfTurn: true }});
   });
 
   it("does not offer break or pump actions for an ineligible breaker", () => {
@@ -606,7 +595,7 @@ describe("runner encounter action generation", () => {
         ? result.legalActions.find(
             (action) =>
               action.type === "break_subroutine" &&
-              action.payload?.subroutineIndexes === breakIndexes,
+              action.subroutineIndexes?.join(",") === breakIndexes,
           )
         : result.legalActions.find(
             (action) =>
@@ -678,8 +667,8 @@ describe("runner encounter action generation", () => {
     );
 
     expect(
-      breakActions.map((action) => action.payload?.subroutineIndexes),
-    ).toEqual(["0", "0,1", "0,1,2", "0,1,2,3", "0,1,2,3,4"]);
+      breakActions.map((action) => action.subroutineIndexes),
+    ).toEqual([[0], [0,1], [0,1,2], [0,1,2,3], [0,1,2,3,4]]);
   });
 
   it("preserves multi-break choices with different subroutine effects", () => {
@@ -708,8 +697,8 @@ describe("runner encounter action generation", () => {
 
     expect(breakActions).toHaveLength(7);
     expect(
-      breakActions.map((action) => action.payload?.subroutineIndexes),
-    ).toEqual(expect.arrayContaining(["0,1", "0,2", "1,2", "0,1,2"]));
+      breakActions.map((action) => action.subroutineIndexes),
+    ).toEqual(expect.arrayContaining([[0,1], [0,2], [1,2], [0,1,2]]));
   });
 
   it("offers paid and unpaid continue actions for pay-or-end-run subroutines", () => {
@@ -747,12 +736,7 @@ describe("runner encounter action generation", () => {
       "Subroutinen auslösen (Runner zahlt 2 Credit)",
     );
     expect(result.legalActions[0]!.costs).toEqual([{ credits: 2 }]);
-    expect(result.legalActions[0]!.payload).toMatchObject({
-      encounterContinue: true,
-      encounterWillEndRun: false,
-      payOrEndRunSubroutineIndexes: "0",
-      payOrEndRunSubroutinePayment: 2,
-    });
+    expect(result.legalActions[0]!).toMatchObject({payOrEndRunSubroutineIndexes: [0], payload: { encounterContinue: true, encounterWillEndRun: false, payOrEndRunSubroutinePayment: 2 }});
     expect(result.legalActions[1]!.payload).toMatchObject({
       encounterContinue: true,
       encounterWillEndRun: true,
@@ -789,15 +773,9 @@ describe("runner encounter action generation", () => {
     expect(continueActions).toHaveLength(2);
     expect(continueActions[0]).toMatchObject({
       costs: [{ credits: 1 }],
-      payload: {
-        encounterSubroutineIds: "first_pay_or_end",
-        payOrEndRunSubroutineIndexes: "0",
-        payOrEndRunSubroutinePayment: 1,
-      },
+      payload: {payOrEndRunSubroutinePayment: 1}, encounterSubroutineIds: ["first_pay_or_end"], payOrEndRunSubroutineIndexes: [0],
     });
-    expect(continueActions[1]?.payload).toMatchObject({
-      encounterSubroutineIds: "first_pay_or_end",
-    });
+    expect(continueActions[1]).toMatchObject({encounterSubroutineIds: ["first_pay_or_end"]});
   });
 
   it("resolves earlier deterministic subroutines before offering payment", () => {
@@ -823,9 +801,9 @@ describe("runner encounter action generation", () => {
     expect(continueActions).toHaveLength(1);
     expect(continueActions[0]).toMatchObject({
       costs: [],
-      payload: { encounterSubroutineIds: "gain_credit" },
+      payload: {}, encounterSubroutineIds: ["gain_credit"],
     });
-    expect(continueActions[0]?.payload).not.toHaveProperty(
+    expect(continueActions[0]).not.toHaveProperty(
       "payOrEndRunSubroutineIndexes",
     );
   });
@@ -852,13 +830,13 @@ describe("runner encounter action generation", () => {
       "jack_out",
       "continue_run",
     ]);
-    expect(result.legalActions[0]!.actionId).toBe("runner.jack_out");
+    expect(result.legalActions[0]!.actionId).toBe("rd");
     expect(result.legalActions[0]!.costs).toEqual([{ credits: 2 }]);
     expect(result.legalActions[0]!.payload).toMatchObject({
       v1922CorpIceAbility: "jack_out_tax_after_passed_rezzed_ice",
       jackOutAdditionalCost: 2,
       sourceDefinitionId: 1886536465,
     });
-    expect(result.legalActions[1]!.actionId).toBe("runner.continue_run");
+    expect(result.legalActions[1]!.actionId).toBe("r5");
   });
 });

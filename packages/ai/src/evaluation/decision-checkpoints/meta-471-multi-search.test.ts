@@ -45,18 +45,18 @@ it("keeps the exact coverage target and fills the grip search with complementary
   const definitions = payload.selectedOptionIds.map(
     (id) => choice.options.find((o) => o.id === id)!.card!.definitionId,
   );
-  expect(decision.actionId).toBe("runner.resolve_choice");
+  expect(decision.actionId).toBe("rn");
   expect(payload.choiceId).toBe(choice.choiceId);
   expect(payload.selectedOptionIds).toHaveLength(5);
   expect(definitions[0]).toBe(34);
   expect(new Set(definitions).size).toBe(5);
   expect(definitions).toContain(31);
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
+    "p5s1qdgqrafrs3n2kss1t9ct7m",
   );
   expect(
     decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toBe("plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate");
+  ).toBe("p5s1qdgqrafrs3n2kss1t9ct7m");
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.timeoutUsed).toBe(false);
 });
@@ -74,7 +74,7 @@ it("preserves the complete offered set while excluding a disabled option", () =>
     selectedOptionIds: string[];
   };
 
-  expect(decision.actionId).toBe("runner.resolve_choice");
+  expect(decision.actionId).toBe("rn");
   expect(payload.choiceId).toBe(choice.choiceId);
   expect(payload.selectedOptionIds).toHaveLength(5);
   expect(payload.selectedOptionIds).not.toContain(disabled.id);

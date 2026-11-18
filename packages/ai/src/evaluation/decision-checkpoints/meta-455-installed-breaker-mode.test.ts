@@ -39,19 +39,19 @@ it("recognizes the public installed mode before requesting another Code-Gate ans
     true,
   );
   expect(decision).toMatchObject({
-    actionId: "runner.gain_credit",
+    actionId: "rb",
     decisionDebug: {
       planFirstDecision: {
         rootPlanInstanceId:
-          "plan:runner.economy:runner-portfolio-credit-reserve",
+          "pc7ebuiw5dxhlbzbf1nhcs4p4z",
         leafExecutorInstanceId:
-          "plan:runner.economy:runner-portfolio-credit-reserve",
+          "pc7ebuiw5dxhlbzbf1nhcs4p4z",
         selectedStep: {
           stepId:
-            "plan:runner.economy:runner-portfolio-credit-reserve:fund:runner-portfolio-credit-reserve",
+            "pc7ebuiw5dxhlbzbf1nhcs4p4z:fund:runner-portfolio-credit-reserve",
         },
         route: {
-          actionId: "runner.gain_credit",
+          actionId: "rb",
           stateVersion: input.playerView.stateVersion,
         },
       },

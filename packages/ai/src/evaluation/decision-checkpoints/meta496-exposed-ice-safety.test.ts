@@ -80,8 +80,8 @@ describe("exposed ICE safety in the selected Run window (SP-520)", () => {
     const selected = chooseAiAction(projected);
     expect(selected.actionId).toBe(input.legalActions[1]!.actionId);
     expect(selected.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A104",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      leafExecutorInstanceId: "p9o0ybqdl0g4jnrccern68xwdj",
     });
     expect(
       selected.decisionDebug?.planFirstDecision?.assessmentEvidenceCodes.join(

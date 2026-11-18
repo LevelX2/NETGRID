@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import {
   applyAction,
   createGameAfterSetup,
@@ -32,7 +33,7 @@ describe("Proteus Hijack plan continuation", () => {
     );
     const hijackId = runnerCard(state, HIJACK).instanceId;
     const targetId = runnerCard(state, INSTALL_TARGET).instanceId;
-    const planInstance = `plan:runner.develop_board_and_hand:card%3A${hijackId}`;
+    const planInstance = planInstanceIdForProposal({ moduleId: "runner.develop_board_and_hand", dedupeKey: `card:${hijackId}` });
     const ownDeckSnapshot = deckSnapshot(runnerDeck);
 
     resetResidentPlanPortfolioMemory();
@@ -146,7 +147,7 @@ describe("Proteus Hijack plan continuation", () => {
     );
     const hijackId = runnerCard(state, HIJACK).instanceId;
     const targetId = runnerCard(state, MEMORY_INSTALL_TARGET).instanceId;
-    const planInstance = `plan:runner.develop_board_and_hand:card%3A${hijackId}`;
+    const planInstance = planInstanceIdForProposal({ moduleId: "runner.develop_board_and_hand", dedupeKey: `card:${hijackId}` });
     const ownDeckSnapshot = deckSnapshot(runnerDeck);
 
     resetResidentPlanPortfolioMemory();
@@ -223,7 +224,7 @@ describe("Proteus Hijack plan continuation", () => {
     if (!memorySelectedChoices)
       throw new Error("Hijack memory choice was not bound");
     expect(memoryDecision).toMatchObject({
-      actionId: "runner.resolve_choice",
+      actionId: "rn",
       fallbackUsed: false,
       decisionDebug: { planKind: "runner.develop_board_and_hand" },
     });

@@ -59,7 +59,7 @@ function fixture(
     runnerDeck: decks.runner!,
     traceRulesProfile: "modern_open",
   });
-  s = apply(s, "corp", "corp.mandatory_draw");
+  s = apply(s, "corp", "ce");
   const f = RealEngineFixtureBuilder.forState(s)
     .withCorpHqSize(0)
     .withCorpCardInHq(62)
@@ -89,8 +89,8 @@ function fixture(
       .ice.at(-1)!;
   }
   s.corp.clicks = 0;
-  s = apply(s, "corp", "corp.end_turn");
-  s = apply(s, "runner", "runner.start_run.hq");
+  s = apply(s, "corp", "c9");
+  s = apply(s, "runner", "rs.hq");
   for (let i = 0; !s.run?.postPassPayOrEndRun && i < 10; i++) {
     const selection = selectAiDecisionSideForState(s);
     if (selection.terminal || !selection.side)

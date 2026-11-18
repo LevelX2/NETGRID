@@ -15,7 +15,7 @@ describe("selfplay 177 Security Purge install targets decision checkpoint", () =
     if (!result.ok) return;
 
     expect(result.decision).toMatchObject({
-      actionId: "corp.resolve_choice",
+      actionId: "cn",
       reasonCode: "plan_first.corp.defend_servers",
       selectedChoices: {
         choiceId: "choice_agenda_purge_install_targets_47",
@@ -25,7 +25,7 @@ describe("selfplay 177 Security Purge install targets decision checkpoint", () =
       },
     });
     const plan = result.decision!.decisionDebug!.planFirstDecision!;
-    const owner = "plan:corp.defend_servers:server-defense-portfolio";
+    const owner = "penw02zfrkklof54c2nuye5att";
     expect(plan).toMatchObject({
       rootPlanInstanceId: owner,
       leafExecutorInstanceId: owner,

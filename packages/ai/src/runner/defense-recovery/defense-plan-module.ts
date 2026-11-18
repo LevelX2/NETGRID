@@ -761,7 +761,7 @@ function validRunnerDefenseCreditNeed(
 ): boolean {
   return (
     need.needId === needId &&
-    need.parentPlanInstanceId === "plan:runner.defense_and_recovery:runner" &&
+    need.parentPlanInstanceId === "p1gzjb6yfcv4zbzow512kexs33" &&
     Number.isSafeInteger(need.targetCredits) &&
     Number.isSafeInteger(need.currentCreditsAtRevalidation) &&
     Number.isSafeInteger(need.gap) &&
@@ -784,7 +784,7 @@ function validPersistentHazardCounterFundingNeed(
 ): boolean {
   const quote = runnerPersistentHazardCounterFundingQuotes(input).find(q => q.counterType === need.counterType);
   return need.needId === "runner-defense-persistent-hazard-counter-funding" &&
-    need.parentPlanInstanceId === "plan:runner.defense_and_recovery:runner" &&
+    need.parentPlanInstanceId === "p1gzjb6yfcv4zbzow512kexs33" &&
     quote !== undefined && quote.observedAmount === need.observedAmount &&
     quote.credits === need.targetCredits &&
     Number.isSafeInteger(need.targetCredits) && Number.isSafeInteger(need.gap) &&

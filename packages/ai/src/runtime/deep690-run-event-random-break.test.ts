@@ -40,7 +40,7 @@ describe("native P690 D115 run-event random-break hand buffer", () => {
   it("rejects the event's H2 route while preserving the basic H3 route", () => {
     const evaluations = hqEvaluations();
     const event = evaluations.find((e) => referencesDefaultDeckCard(e.actionId, 288));
-    const basic = evaluations.find((e) => e.actionId === "runner.start_run.hq");
+    const basic = evaluations.find((e) => e.actionId === "rs.hq");
     expect(event).toMatchObject({
       pathPassability: "blocked_by_random_break_damage_hand_buffer",
       recommendation: "draw_for_damage_buffer",
@@ -80,9 +80,9 @@ describe("native P690 D115 run-event random-break hand buffer", () => {
       value.legalActions.some((a) => a.actionId === selected.actionId),
     ).toBe(true);
     expect(selected.fallbackUsed).toBe(false);
-    expect(selected.actionId).toBe("runner.draw_card");
+    expect(selected.actionId).toBe("r8");
     expect(selected.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-      "plan:runner.defense_and_recovery:runner",
+      "p1gzjb6yfcv4zbzow512kexs33",
     );
     expect(selected.decisionDebug?.planFirstDecision?.route).toMatchObject({
       actionId: selected.actionId,

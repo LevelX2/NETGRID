@@ -41,8 +41,8 @@ it("continues the exact R&D parent when the remaining known damage fits the hand
     decisionDebug: {
       planFirstDecision: {
         selectedStep: {
-          planInstanceId: "plan:runner.convert_run_window:run%3A71",
-          parentInstanceId: "plan:runner.pressure_central:central%3Ard",
+          planInstanceId: "p8lite39yht80qie4exs7eynqm",
+          parentInstanceId: "pa90fufw9vc5bkshp96ztlryxl",
         },
         route: {
           actionId: result.actionId,

@@ -9332,7 +9332,7 @@
     ],
     "acceptableActions": [
       {
-        "actionId": "corp.install_card.c2qv.new_remote.c2qv"
+        "actionId": "cc.c2qv.new_remote.c2qv"
       }
     ],
     "planExecution": {
@@ -9343,7 +9343,7 @@
         "improve_remote_protection_path"
       ],
       "requiredAssessmentEvidence": [
-        "corp_layered_remote_ice_staging:remote:strategic-score-remote:new_remote:corp.install_card.c2qv.new_remote.c2qv:layers_0:unrezzed_0:rez_gap_0"
+        "corp_layered_remote_ice_staging:remote:strategic-score-remote:new_remote:cc.c2qv.new_remote.c2qv:layers_0:unrezzed_0:rez_gap_0"
       ]
     }
   }

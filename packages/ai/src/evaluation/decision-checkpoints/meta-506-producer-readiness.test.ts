@@ -79,7 +79,7 @@ it.each([
     const { input, cp } = native(game, decision);
     expect(input.playerView.own.gripOrHq).toHaveLength(3);
     const result = chooseAiAction(input);
-    expect(result.actionId).toBe("runner.draw_card");
+    expect(result.actionId).toBe("r8");
     expect(result.fallbackUsed).toBe(false);
     expect(
       result.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
@@ -102,7 +102,7 @@ it.each([
 it("keeps the funded basic HQ reserve separate from the blocked paid event at G21/D105", () => {
   const { input } = native(21, 105);
   const offers = evaluateRunnerRunTargets({ input });
-  expect(offers.find((offer) => offer.actionId === "runner.start_run.hq")).toMatchObject({
+  expect(offers.find((offer) => offer.actionId === "rs.hq")).toMatchObject({
     prerunReserveQuote: { status: "satisfied", handBufferGap: 0 },
   });
   const definitions = visibleSourceDefinitionsByInstanceId(input.playerView);

@@ -7,7 +7,7 @@ import {
 } from "./remote-server-threat";
 
 const run: LegalAction = {
-  actionId: "runner.start_run.r1",
+  actionId: "rs.r1",
   type: "start_run",
   side: "runner",
   label: "Run remote",

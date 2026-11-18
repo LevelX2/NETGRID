@@ -121,7 +121,7 @@ describe("transient plan goal/threat signals", () => {
   it("rejects an undeclared action-authority field instead of ignoring it", () => {
     const authorityBearingSignal = {
       ...signal(),
-      actionIds: ["runner.start_run.rd"],
+      actionIds: ["rs.rd"],
     } as unknown as TransientPlanSignal;
 
     let failure: unknown;

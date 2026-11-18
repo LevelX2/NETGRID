@@ -5635,7 +5635,7 @@
       "stateVersion": 55,
       "instances": [
         {
-          "instanceId": "plan:corp.complete_turn:standard-turn-completion",
+          "instanceId": "p6yjycy2qsqgb3jl5pov75ajtq",
           "dedupeKey": "standard-turn-completion",
           "moduleId": "corp.complete_turn",
           "moduleVersion": "1",
@@ -5664,7 +5664,7 @@
           "moduleState": {
             "kind": "turn_completion",
             "standardEndTurnActionIds": [
-              "corp.end_turn"
+              "c9"
             ]
           },
           "blockers": [],
@@ -5697,7 +5697,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.hand_and_agenda_management:draw-for-score-material",
+          "instanceId": "p13oe6jmk9id0pfdx7x2bne8ui",
           "dedupeKey": "draw-for-score-material",
           "moduleId": "corp.hand_and_agenda_management",
           "moduleVersion": "1",
@@ -5720,7 +5720,7 @@
             "kind": "player",
             "id": "corp"
           },
-          "parentInstanceId": "plan:corp.score_agenda:general",
+          "parentInstanceId": "pa1d7j8c33k25iup8n8nyo9r2g",
           "parentNeedId": "score-material:general",
           "openNeedIds": [],
           "phase": "draw_for_plan",
@@ -5729,7 +5729,7 @@
             "kind": "hand",
             "signal": {
               "handPlanId": "draw-for-score-material",
-              "parentPlanInstanceId": "plan:corp.score_agenda:general",
+              "parentPlanInstanceId": "pa1d7j8c33k25iup8n8nyo9r2g",
               "parentNeedId": "score-material:general",
               "phase": "draw_for_plan",
               "agendaCount": 0,
@@ -5794,7 +5794,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Acem%3Anew_remote",
+          "instanceId": "pcbw6ypodhgcwx8fzse6lvzd18",
           "dedupeKey": "agenda:cem:new_remote",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -5830,7 +5830,7 @@
               "agendaPoints": 2,
               "agendaInstanceId": "cem",
               "actionIds": [
-                "corp.install_card.cem.new_remote.cem"
+                "cc.cem.new_remote.cem"
               ],
               "serverId": "new_remote",
               "phase": "install_agenda",
@@ -5852,7 +5852,7 @@
                 "scoreReserve": {
                   "creditBreakdown": [
                     {
-                      "reserveId": "score_action:corp.install_card.cem.new_remote.cem",
+                      "reserveId": "score_action:cc.cem.new_remote.cem",
                       "credits": 0
                     },
                     {
@@ -5872,7 +5872,7 @@
                   "availableCorpClicks": 3,
                   "totalScoreReserveCredits": 4,
                   "hardClickReserve": 0,
-                  "scoreReserveFingerprint": "clicks:0|117:score_action:corp.install_card.cem.new_remote.cem=0|54:post_score_floor:cem=0|59:remaining_advancement:cem=4",
+                  "scoreReserveFingerprint": "clicks:0|117:score_action:cc.cem.new_remote.cem=0|54:post_score_floor:cem=0|59:remaining_advancement:cem=4",
                   "protection": {
                     "knowledge": "known",
                     "runnerAccessSuccessProbability": {
@@ -5966,7 +5966,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Acem%3Ar1",
+          "instanceId": "pavdrwg75mec56ob3sl4i5s0y8",
           "dedupeKey": "agenda:cem:r1",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -6001,7 +6001,7 @@
               "agendaInstanceId": "cem",
               "serverId": "r1",
               "actionIds": [
-                "corp.score_agenda.cem.cem"
+                "cr.cem.cem"
               ],
               "routeSemanticActionTypes": [
                 "score.agenda"
@@ -6022,7 +6022,7 @@
             },
             "choiceContinuation": {
               "family": "corp_scored_agenda_on_score",
-              "selectedActionId": "corp.score_agenda.cem.cem",
+              "selectedActionId": "cr.cem.cem",
               "selectedAtStateVersion": 54,
               "targetCardId": "cem"
             }
@@ -6061,7 +6061,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:general",
+          "instanceId": "pa1d7j8c33k25iup8n8nyo9r2g",
           "dedupeKey": "general",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -6138,37 +6138,37 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:corp.complete_turn:standard-turn-completion",
+          "instanceId": "p6yjycy2qsqgb3jl5pov75ajtq",
           "stateVersion": 55,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.hand_and_agenda_management:draw-for-score-material",
+          "instanceId": "p13oe6jmk9id0pfdx7x2bne8ui",
           "stateVersion": 55,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.score_agenda:general",
+          "instanceId": "pa1d7j8c33k25iup8n8nyo9r2g",
           "stateVersion": 55,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Acem%3Anew_remote",
+          "instanceId": "pcbw6ypodhgcwx8fzse6lvzd18",
           "stateVersion": 55,
           "reason": "retained",
           "detailCode": "retention_protected"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Acem%3Ar1",
+          "instanceId": "pavdrwg75mec56ob3sl4i5s0y8",
           "stateVersion": 55,
           "reason": "retained",
           "detailCode": "within_stale_ttl"
         },
         {
-          "instanceId": "plan:corp.complete_turn:standard-turn-completion",
+          "instanceId": "p6yjycy2qsqgb3jl5pov75ajtq",
           "stateVersion": 55,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
@@ -6176,8 +6176,8 @@
           "detailCode": "validated_scheduler_selection"
         }
       ],
-      "rootForegroundInstanceId": "plan:corp.complete_turn:standard-turn-completion",
-      "executorInstanceId": "plan:corp.complete_turn:standard-turn-completion"
+      "rootForegroundInstanceId": "p6yjycy2qsqgb3jl5pov75ajtq",
+      "executorInstanceId": "p6yjycy2qsqgb3jl5pov75ajtq"
     }
   },
   "expectation": {

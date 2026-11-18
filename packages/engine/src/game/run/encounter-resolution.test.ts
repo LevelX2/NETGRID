@@ -327,11 +327,7 @@ describe("encounter resolution boundary", () => {
     ] as SubroutineDefinition[];
     const legalAction = {
       costs: [{ credits: 1 }],
-      payload: {
-        encounterSubroutineIds: "tesseract_pay",
-        payOrEndRunSubroutineIndexes: "0",
-        payOrEndRunSubroutinePayment: 1,
-      },
+      payload: {payOrEndRunSubroutinePayment: 1}, encounterSubroutineIds: ["tesseract_pay"], payOrEndRunSubroutineIndexes: [0],
     } as unknown as LegalAction;
 
     const result = preparePayOrEndRunSubroutinePayment(

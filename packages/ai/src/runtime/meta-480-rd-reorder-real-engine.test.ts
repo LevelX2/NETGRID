@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import { afterEach, expect, it } from "vitest";
 import {
   applyAction,
@@ -98,7 +99,7 @@ it.each([[exposedTycho], [exposedTwoAgendas]])(
     const { state, input } = reorderWindow(definitions);
     expect(input.playerView.pendingChoice?.selectionOrdering).toBe("ordered");
     const decision = chooseAiAction(input);
-    const owner = `plan:corp.hand_and_agenda_management:${encodeURIComponent(`rd-reorder:${input.playerView.pendingChoice!.choiceId}:${input.playerView.stateVersion}`)}`;
+    const owner = planInstanceIdForProposal({ moduleId: "corp.hand_and_agenda_management", dedupeKey: `rd-reorder:${input.playerView.pendingChoice!.choiceId}:${input.playerView.stateVersion}` });
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       selectedPlan: { moduleId: "corp.hand_and_agenda_management" },
       rootPlanInstanceId: owner,

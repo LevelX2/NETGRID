@@ -6826,7 +6826,7 @@
         "plan_action_allocation_entries:0",
         "plan_action_allocation_unallocated:1",
         "plan_action_allocation_credit_remainder:9",
-        "plan_portfolio_selected_action:runner.gain_credit"
+        "plan_portfolio_selected_action:rb"
       ]
     },
     "strategicIntent": {

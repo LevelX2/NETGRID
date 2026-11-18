@@ -207,9 +207,10 @@ it("lets the Run parent release a native persistent lock after two actual payout
   expect(decision.evidence).toContain(
     "plan_step_capability:pressure_hq_access",
   );
-  expect(residentPlanPortfolioSnapshot(input)?.executorInstanceId).toContain(
-    "runner.pressure_central",
-  );
+  const portfolioBefore = residentPlanPortfolioSnapshot(input);
+  expect(portfolioBefore?.instances.find(
+    (instance) => instance.instanceId === portfolioBefore?.executorInstanceId,
+  )?.moduleId).toBe("runner.pressure_central");
   expect(JSON.stringify(input)).toBe(before);
   state = apply(state, release);
   expect(state.runner.credits).toBe(52);
@@ -224,9 +225,10 @@ it("lets the Run parent release a native persistent lock after two actual payout
   expect(action.type).toBe("start_run");
   expect(followup.reasonCode).toBe("plan_first.runner.pressure_central");
   expect(followup.fallbackUsed).toBe(false);
-  expect(residentPlanPortfolioSnapshot(after)?.executorInstanceId).toContain(
-    "runner.pressure_central",
-  );
+  const portfolioAfter = residentPlanPortfolioSnapshot(after);
+  expect(portfolioAfter?.instances.find(
+    (instance) => instance.instanceId === portfolioAfter?.executorInstanceId,
+  )?.moduleId).toBe("runner.pressure_central");
   state = apply(state, action);
   expect(state.run).toBeDefined();
   expect(
@@ -300,7 +302,7 @@ it.each(["missing", "stale", "unfunded"] as const)(
             value: 1800,
             fundingGap: violation === "unfunded" ? 1 : 0,
             serverId: "hq",
-            parentPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
+            parentPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
           },
         ],
       ),

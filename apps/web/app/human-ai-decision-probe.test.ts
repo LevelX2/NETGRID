@@ -97,7 +97,7 @@ describe("human-side AI decision probe", () => {
     });
     expect(
       humanAiDecisionProbeActionContext({
-        actionId: "runner.play_event.runner_card_1",
+        actionId: "rh.runner_card_1",
         type: "play_event",
         label: "Eigene Karte spielen",
         side: "runner",
@@ -119,7 +119,7 @@ describe("human-side AI decision probe", () => {
       matchVersion: 4,
       stateVersion: 9,
       side: "runner",
-      selectedActionId: "runner.start_run.rd",
+      selectedActionId: "rs.rd",
       selectedActionType: "start_run",
       detail: {
         reasonCode: "plan_first.runner.pressure_central",
@@ -144,7 +144,7 @@ describe("human-side AI decision probe", () => {
       matchVersion: 4,
       stateVersion: 9,
       side: "runner",
-      selectedActionId: "runner.start_run.rd",
+      selectedActionId: "rs.rd",
       selectedActionType: "start_run",
       reasonCode: "plan_first.runner.pressure_central",
       selectedChoices: {

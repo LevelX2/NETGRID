@@ -360,7 +360,7 @@ function eligibleAgenda(subtype: "research" | "gray_ops" | "black_ops"): Visible
 
 function agendaInstall(card: VisibleCard): LegalAction {
   return {
-    actionId: `corp.install_card.${card.instanceId}.r1`, side: "corp",
+    actionId: `cc.${card.instanceId}.r1`, side: "corp",
     type: "install_card", label: "Agenda installieren", source: card.instanceId,
     timingPoint: "corp_action.main", costs: [{ clicks: 1 }], targetRequirements: [],
     visibility: "private_to_actor", expiresAtStateVersion: 1,
@@ -403,7 +403,7 @@ function placementScenario(
     "upgrade",
   );
   const action: LegalAction = {
-    actionId: `corp.install_card.${sourceCard.instanceId}.${serverId}`,
+    actionId: `cc.${sourceCard.instanceId}.${serverId}`,
     side: "corp",
     type: "install_card",
     label: `Karte in ${serverId} installieren`,

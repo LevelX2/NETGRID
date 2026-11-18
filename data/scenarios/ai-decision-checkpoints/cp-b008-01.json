@@ -5401,7 +5401,7 @@
         "id": "rd"
       },
       "selectedStepKind": "probe_central",
-      "selectedActionId": "runner.start_run.rd",
+      "selectedActionId": "rs.rd",
       "blockedBy": [],
       "ttlDecisionsRemaining": 0,
       "planProgressionReason": "previous_plan_considered",
@@ -5493,7 +5493,7 @@
         "plan_portfolio_foreground:runner.opportunistic_central_run",
         "plan_portfolio_backgrounds:runner.build_credit_bank",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.start_run.rd"
+        "plan_portfolio_selected_action:rs.rd"
       ]
     },
     "strategicIntent": {
@@ -6598,7 +6598,7 @@
       ]
     },
     "runnerRunPlan": {
-      "id": "runner_run_plan:match_b0080115bddbce23:102:runner:runner.start_run.rd:rd",
+      "id": "runner_run_plan:match_b0080115bddbce23:102:runner:rs.rd:rd",
       "side": "runner",
       "lifecycle": "created",
       "origin": "basic_start_run",
@@ -6616,7 +6616,7 @@
         "trashPolicy": "trash_if_value_positive",
         "reserveForStealOrTrash": 0
       },
-      "runStartActionId": "runner.start_run.rd",
+      "runStartActionId": "rs.rd",
       "sourceTacticalGoalIds": [
         "runner.pressure_good_central_target",
         "runner.avoid_low_value_risk_runs",
@@ -6829,7 +6829,7 @@
       "visibilityEvidence": [
         {
           "kind": "legal_action",
-          "ref": "runner.start_run.rd"
+          "ref": "rs.rd"
         },
         {
           "kind": "action_semantic_candidate",

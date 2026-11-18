@@ -419,13 +419,13 @@
               }
             },
             {
-              "instanceId": "hzlr0xu",
+              "instanceId": "hhq.i1",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
             },
             {
-              "instanceId": "h1lj538k",
+              "instanceId": "hhq.i2",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -562,7 +562,7 @@
           "label": "Remote 1",
           "ice": [
             {
-              "instanceId": "h49er5n",
+              "instanceId": "hr1.i0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -600,7 +600,7 @@
           ],
           "root": [
             {
-              "instanceId": "hakw4gz",
+              "instanceId": "hr1.r0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -3918,7 +3918,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.resolve_choice",
+          "actionId": "rn",
           "side": "runner",
           "type": "resolve_choice",
           "label": "Runner-Discard wählen",
@@ -6019,7 +6019,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "runner.resolve_choice",
+        "actionId": "rn",
         "side": "runner",
         "type": "resolve_choice",
         "label": "Runner-Discard wählen",
@@ -6089,7 +6089,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 124,
-      "sideSafePlanningFingerprint": "fnv1a:fb5cd32d"
+      "sideSafePlanningFingerprint": "fnv1a:dec985b5"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",
@@ -11551,7 +11551,7 @@
       "stateVersion": 124,
       "instances": [
         {
-          "instanceId": "plan:runner.defense_and_recovery:runner",
+          "instanceId": "p1gzjb6yfcv4zbzow512kexs33",
           "dedupeKey": "runner",
           "moduleId": "runner.defense_and_recovery",
           "moduleVersion": "1",
@@ -11595,7 +11595,7 @@
               "forgoExhaustedStandardCapacity": false,
               "forgoTerminalDeckPressureCapacity": false,
               "discardChoiceBinding": {
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "choiceId": "discard_runner_124",
                 "observedAtStateVersion": 124,
                 "selectedOptionIds": [
@@ -11667,7 +11667,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
+          "instanceId": "p5s1qdgqrafrs3n2kss1t9ct7m",
           "dedupeKey": "coverage:breaker_code_gate",
           "moduleId": "runner.rig_and_coverage",
           "moduleVersion": "1",
@@ -11763,7 +11763,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry",
+          "instanceId": "pde8a64nmn1hkbrzgi9sbuf6fo",
           "dedupeKey": "coverage:breaker_sentry",
           "moduleId": "runner.rig_and_coverage",
           "moduleVersion": "1",
@@ -11859,7 +11859,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_wall",
+          "instanceId": "p6c0cqw460f4dpux5zmx6n3hjf",
           "dedupeKey": "coverage:breaker_wall",
           "moduleId": "runner.rig_and_coverage",
           "moduleVersion": "1",
@@ -11958,37 +11958,37 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:runner.defense_and_recovery:runner",
+          "instanceId": "p1gzjb6yfcv4zbzow512kexs33",
           "stateVersion": 124,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
+          "instanceId": "p5s1qdgqrafrs3n2kss1t9ct7m",
           "stateVersion": 124,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry",
+          "instanceId": "pde8a64nmn1hkbrzgi9sbuf6fo",
           "stateVersion": 124,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_wall",
+          "instanceId": "p6c0cqw460f4dpux5zmx6n3hjf",
           "stateVersion": 124,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "stateVersion": 124,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.defense_and_recovery:runner",
+          "instanceId": "p1gzjb6yfcv4zbzow512kexs33",
           "stateVersion": 124,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
@@ -12001,7 +12001,7 @@
         "commitmentId": "fnv1a:ca5a1974",
         "sourcePlanId": "fnv1a:10dea76c",
         "sourceLineHash": "fnv1a:b1aeca78",
-        "sequenceRootPlanInstanceId": "plan:runner.defense_and_recovery:runner",
+        "sequenceRootPlanInstanceId": "p1gzjb6yfcv4zbzow512kexs33",
         "side": "runner",
         "turnKey": "runner:turn:17",
         "planningRulesFingerprint": "fnv1a:ce3968ab",
@@ -12018,7 +12018,7 @@
           {
             "phaseId": "fnv1a:4d10ab35",
             "root": {
-              "planInstanceId": "plan:runner.defense_and_recovery:runner",
+              "planInstanceId": "p1gzjb6yfcv4zbzow512kexs33",
               "moduleId": "runner.defense_and_recovery",
               "milestoneId": "resolve_plan_bound_runner_discard",
               "provenance": "resident"
@@ -12127,7 +12127,7 @@
           "sideSafePlanningFingerprint": "fnv1a:eecdf81b"
         },
         "currentBinding": {
-          "actionId": "runner.resolve_choice",
+          "actionId": "rn",
           "stateVersion": 124,
           "semanticActionSetFingerprint": "fnv1a:042a1078",
           "invocationKey": "fnv1a:d9818b04"
@@ -12135,8 +12135,8 @@
         "actionType": "resolve_choice",
         "expectationId": "fnv1a:89501ad1"
       },
-      "rootForegroundInstanceId": "plan:runner.defense_and_recovery:runner",
-      "executorInstanceId": "plan:runner.defense_and_recovery:runner"
+      "rootForegroundInstanceId": "p1gzjb6yfcv4zbzow512kexs33",
+      "executorInstanceId": "p1gzjb6yfcv4zbzow512kexs33"
     }
   },
   "validation": {

@@ -50,16 +50,18 @@ function withObservedHqAgenda(input: AiDecisionInputWithDeckCapabilities) {
   return input;
 }
 
-it.each([[g12, "runner.gain_credit", "plan:runner.contest_remote:"]])(
+it.each([[g12, "rb", "runner.contest_remote"]])(
   "binds the proved access route to its parent's exact funding child",
-  (cp, actionPrefix, rootPrefix) => {
+  (cp, expectedActionId, rootModuleId) => {
     const input = inputFor(cp);
     const decision = chooseAiAction(input);
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.timeoutUsed).not.toBe(true);
-    expect(decision.actionId).toContain(actionPrefix);
+    expect(decision.actionId).toBe(expectedActionId);
     const plan = decision.decisionDebug!.planFirstDecision!;
-    expect(plan.rootPlanInstanceId).toContain(rootPrefix);
+    expect(plan.portfolio.find(
+      (instance) => instance.instanceId === plan.rootPlanInstanceId,
+    )?.moduleId).toBe(rootModuleId);
     expect(plan.selectedPlan!.moduleId).toBe("runner.economy");
     expect(plan.route).toMatchObject({
       actionId: decision.actionId,
@@ -80,7 +82,7 @@ it.each([[g12, "runner.gain_credit", "plan:runner.contest_remote:"]])(
 it("keeps the historical HQ card uncertain after a later hidden install", () => {
   const input = inputFor(g9);
   const hq = evaluateRunnerRunTargets({ input }).find(
-    (target) => target.actionId === "runner.start_run.hq",
+    (target) => target.actionId === "rs.hq",
   );
   expect(hq?.accessPayoff).toBe("unknown");
   expect(hq?.accessFacts.knownTargetDefinitionIds).not.toContain(62);
@@ -89,7 +91,7 @@ it("keeps the historical HQ card uncertain after a later hidden install", () => 
 it("includes the known HQ agenda's self-cost before admitting access", () => {
   const input = withObservedHqAgenda(inputFor(g9));
   const hq = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.hq",
+    (t) => t.actionId === "rs.hq",
   )!;
   expect(hq.accessPayoff).toBe("agenda");
   expect(hq.accessFacts.knownTargetDefinitionIds).toContain(

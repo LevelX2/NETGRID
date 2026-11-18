@@ -331,7 +331,7 @@ function executeRunScopedBlackOpsRezHook(
     mechanics: [],
   };
   const legalAction = {
-    actionId: `corp.rez_ice.${cardId}`,
+    actionId: `cq.${cardId}`,
     type: "rez_ice",
     side: "corp",
     label: "Rez",
@@ -794,7 +794,7 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
     const stale = applyAction(state, {
       matchId: state.matchId,
       side: "corp",
-      actionId: `corp.resolve_choice.${state.pendingChoice!.choiceId}`,
+      actionId: `cn.${state.pendingChoice!.choiceId}`,
       clientKnownStateVersion: state.stateVersion - 1,
       selectedChoices: {
         choiceId: state.pendingChoice!.choiceId,

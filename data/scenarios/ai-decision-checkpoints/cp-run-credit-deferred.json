@@ -667,7 +667,7 @@
               }
             },
             {
-              "instanceId": "h1nr1wsc",
+              "instanceId": "hhq.i1",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -710,7 +710,7 @@
               }
             },
             {
-              "instanceId": "h1wvwpxp",
+              "instanceId": "hrd.i1",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -994,7 +994,7 @@
           ],
           "root": [
             {
-              "instanceId": "h1h256xs",
+              "instanceId": "hr1.r0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -8757,7 +8757,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.gain_credit",
+          "actionId": "rb",
           "side": "runner",
           "type": "gain_credit",
           "label": "1 Credit nehmen",
@@ -8778,7 +8778,7 @@
           }
         },
         {
-          "actionId": "runner.draw_card",
+          "actionId": "r8",
           "side": "runner",
           "type": "draw_card",
           "label": "Karte ziehen",
@@ -8801,7 +8801,7 @@
           }
         },
         {
-          "actionId": "runner.trigger_ability.cxd.sentry.cxd.change_icebreaker_subtype",
+          "actionId": "rx.cxd.sentry.cxd.change_icebreaker_subtype",
           "side": "runner",
           "type": "trigger_ability",
           "label": "Morphing Tool: Sentry wÃ¤hlen",
@@ -8824,7 +8824,7 @@
           }
         },
         {
-          "actionId": "runner.trigger_ability.cxd.wall.cxd.change_icebreaker_subtype",
+          "actionId": "rx.cxd.wall.cxd.change_icebreaker_subtype",
           "side": "runner",
           "type": "trigger_ability",
           "label": "Morphing Tool: Wall wÃ¤hlen",
@@ -8847,7 +8847,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.cve.cve.runner_program_trash_before_install",
+          "actionId": "rc.cve.cve.runner_program_trash_before_install",
           "side": "runner",
           "type": "install_card",
           "label": "Corrosion mit Programmtrash installieren",
@@ -8869,7 +8869,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c2c1.c2c1",
+          "actionId": "rc.c2c1.c2c1",
           "side": "runner",
           "type": "install_card",
           "label": "Karl de Veres, Corporate Stooge installieren",
@@ -8900,7 +8900,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.hq",
+          "actionId": "rs.hq",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf HQ",
@@ -8921,7 +8921,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.rd",
+          "actionId": "rs.rd",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf R&D",
@@ -8942,7 +8942,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.archives",
+          "actionId": "rs.archives",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf Archives",
@@ -8963,7 +8963,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.r1",
+          "actionId": "rs.r1",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf Remote 1",
@@ -8984,7 +8984,7 @@
           }
         },
         {
-          "actionId": "runner.end_turn",
+          "actionId": "r9",
           "side": "runner",
           "type": "end_turn",
           "label": "Zug beenden",
@@ -11129,7 +11129,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "runner.gain_credit",
+        "actionId": "rb",
         "side": "runner",
         "type": "gain_credit",
         "label": "1 Credit nehmen",
@@ -11150,7 +11150,7 @@
         }
       },
       {
-        "actionId": "runner.draw_card",
+        "actionId": "r8",
         "side": "runner",
         "type": "draw_card",
         "label": "Karte ziehen",
@@ -11173,7 +11173,7 @@
         }
       },
       {
-        "actionId": "runner.trigger_ability.cxd.sentry.cxd.change_icebreaker_subtype",
+        "actionId": "rx.cxd.sentry.cxd.change_icebreaker_subtype",
         "side": "runner",
         "type": "trigger_ability",
         "label": "Morphing Tool: Sentry wÃ¤hlen",
@@ -11196,7 +11196,7 @@
         }
       },
       {
-        "actionId": "runner.trigger_ability.cxd.wall.cxd.change_icebreaker_subtype",
+        "actionId": "rx.cxd.wall.cxd.change_icebreaker_subtype",
         "side": "runner",
         "type": "trigger_ability",
         "label": "Morphing Tool: Wall wÃ¤hlen",
@@ -11219,7 +11219,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.cve.cve.runner_program_trash_before_install",
+        "actionId": "rc.cve.cve.runner_program_trash_before_install",
         "side": "runner",
         "type": "install_card",
         "label": "Corrosion mit Programmtrash installieren",
@@ -11241,7 +11241,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c2c1.c2c1",
+        "actionId": "rc.c2c1.c2c1",
         "side": "runner",
         "type": "install_card",
         "label": "Karl de Veres, Corporate Stooge installieren",
@@ -11272,7 +11272,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.hq",
+        "actionId": "rs.hq",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf HQ",
@@ -11293,7 +11293,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.rd",
+        "actionId": "rs.rd",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf R&D",
@@ -11314,7 +11314,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.archives",
+        "actionId": "rs.archives",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf Archives",
@@ -11335,7 +11335,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.r1",
+        "actionId": "rs.r1",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf Remote 1",
@@ -11356,7 +11356,7 @@
         }
       },
       {
-        "actionId": "runner.end_turn",
+        "actionId": "r9",
         "side": "runner",
         "type": "end_turn",
         "label": "Zug beenden",
@@ -11410,7 +11410,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 300,
-      "sideSafePlanningFingerprint": "fnv1a:8576453c"
+      "sideSafePlanningFingerprint": "fnv1a:ae1c509b"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_breaker_lab_2026_05_25_1.1.0:simulation",

@@ -2,7 +2,7 @@ import type { DeckDefinition } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import proteusDeckData from "../../../../data/decks/proteus-playtest-decks-2026-05-25.json";
 import { simulateAiGame } from "../simulation";
-import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import type { AiSimulationDecisionCheckpointCapture } from "./ai-simulation-config";
 
 describe("Proteus Fetal AI install plan coverage", () => {
@@ -71,7 +71,7 @@ describe("Proteus Fetal AI install plan coverage", () => {
   }
 
   it("does not donate Fetal AI while the score remote still lacks certified defense [legacy_compare]", () => {
-    let fetalAvailable = false;
+    const fetalAssessmentEvidence = new Set<string>();
     const summary = simulateAiGame({
       seed: "proteus-pilot-qualifier-10",
       maxActions: 23,
@@ -85,13 +85,25 @@ describe("Proteus Fetal AI install plan coverage", () => {
       testOnlyDecisionCheckpointCapture: {
         actionIndices: Array.from({ length: 23 }, (_, index) => index),
         capture: (snapshot) => {
-          if (
-            snapshot.side === "corp" &&
-            snapshot.input.playerView.own.gripOrHq.some(
-              (card) => card.definitionId === 62,
-            )
-          )
-            fetalAvailable = true;
+          if (snapshot.side !== "corp") return;
+          for (const card of snapshot.input.playerView.own.gripOrHq) {
+            if (card.definitionId !== 62) continue;
+            const dedupeKey = `ambush:${card.instanceId}`;
+            const destinations = [
+              "new_remote",
+              ...snapshot.input.playerView.servers.map((server) => server.id),
+            ];
+            for (const key of [
+              dedupeKey,
+              ...destinations.map((server) => `${dedupeKey}:setup:${server}`),
+            ]) {
+              const id = planInstanceIdForProposal({
+                moduleId: "corp.ambush_and_bluff",
+                dedupeKey: key,
+              });
+              fetalAssessmentEvidence.add(`plan_scheduler:assess:validated:${id}`);
+            }
+          }
         },
       },
     });
@@ -102,16 +114,10 @@ describe("Proteus Fetal AI install plan coverage", () => {
     expect(summary.errors).toEqual([]);
     expect(summary.runtimeFailures).toEqual([]);
     expect(summary.replayOk).toBe(true);
-    expect(fetalAvailable, fetalDiagnostic(summary)).toBe(true);
-    const admittedAmbushPrefix =
-      "plan_scheduler:assess:validated:plan:corp.ambush_and_bluff:";
+    expect(fetalAssessmentEvidence.size, fetalDiagnostic(summary)).toBeGreaterThan(0);
     expect(
       summary.actionSequence.some((entry) =>
-        entry.evidence.some(
-          (value) =>
-            value.startsWith(admittedAmbushPrefix) &&
-            referencesDefaultDeckCard(value, 62),
-        ),
+        entry.evidence.some((value) => fetalAssessmentEvidence.has(value)),
       ),
       fetalDiagnostic(summary),
     ).toBe(false);

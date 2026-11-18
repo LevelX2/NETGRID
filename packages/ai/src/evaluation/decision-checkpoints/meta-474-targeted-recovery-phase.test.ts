@@ -48,7 +48,7 @@ it.each([
       // The current finite bank has a profitable first load at P4. Preserve
       // that native route, then isolate the still-published P5 recovery phase.
       const native = chooseAiAction(input);
-      expect(native.actionId).toBe("runner.activated_card_ability.c29e.c29e.activated.440");
+      expect(native.actionId).toBe("r1.c29e.c29e.activated.440");
       expect(
         native.decisionDebug?.planFirstDecision?.priority?.effectiveClass,
       ).toBe("P4");
@@ -65,7 +65,7 @@ it.each([
       );
     }
     const decision = chooseAiAction(input);
-    expect(decision.actionId).toBe("runner.draw_card");
+    expect(decision.actionId).toBe("r8");
     expect(decision.fallbackUsed).toBe(false);
     expect(
       input.legalActions.some(
@@ -89,7 +89,7 @@ it.each([
         drawForAnswerActionIds:
           game === 3
             ? [
-                "runner.play_event.c1xm.c1xm.397",
+                "rh.c1xm.c1xm.397",
                 decision.actionId,
               ]
             : [decision.actionId],

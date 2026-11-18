@@ -46,9 +46,9 @@ it.each([
     expect(decision.fallbackUsed).toBe(false);
     expect(
       decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-    ).toBe("plan:corp.defend_servers:server-defense-portfolio");
+    ).toBe("penw02zfrkklof54c2nuye5att");
     expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-      "plan:corp.defend_servers:server-defense-portfolio",
+      "penw02zfrkklof54c2nuye5att",
     );
     state = applyMatching(
       state,
@@ -132,8 +132,8 @@ it("ends a real temporary Asp encounter against the full four-credit runner trac
   const decision = chooseCorpAction(corpInput(state));
   expect(selectedIceDefinition(state, decision)).toBe(433);
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
-    leafExecutorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+    rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
+    leafExecutorInstanceId: "penw02zfrkklof54c2nuye5att",
   });
   state = applyMatching(
     state,

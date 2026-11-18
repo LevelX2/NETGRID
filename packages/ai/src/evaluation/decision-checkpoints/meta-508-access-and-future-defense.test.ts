@@ -57,8 +57,8 @@ function decide(cp: ReturnType<typeof load>) {
 }
 afterEach(resetResidentPlanPortfolioMemory);
 it.each([
-  ["g1d9", "corp.decline_rez"],
-  ["g4d81", "corp.rez_ice.c30v.c30v"],
+  ["g1d9", "c6"],
+  ["g4d81", "cq.c30v.c30v"],
 ])("keeps current native future-effect ownership for %s", (key, actionId) =>
   expect(decide(load(key)).actionId).toBe(actionId),
 );
@@ -66,10 +66,10 @@ it("uses the public actual HQ access destination on the physical Archives path a
   const cp = load("g29d316"),
     original = structuredClone(cp);
   delete original.input.playerView.run.accessServerOverride;
-  expect(decide(original).actionId).toBe("corp.decline_rez");
+  expect(decide(original).actionId).toBe("c6");
   const decision = decide(cp);
   expect(decision.actionId).toBe(
-    "corp.rez_ice.c2va.c2va",
+    "cq.c2va.c2va",
   );
   let state = load("g29d316-engine") as GameState;
   expect(hashGameState(state)).toBe(cp.stateHash);
@@ -121,7 +121,7 @@ it("binds possible off-server paths to real current own agenda exposure, without
   const action = positive.legalActions.find(
     (a: { actionId: string }) =>
       a.actionId ===
-      "corp.install_card.c2ut.archives.c2ut.2",
+      "cc.c2ut.archives.c2ut.2",
   );
   const candidate = buildActionSemanticCandidates({
     legalActions: [action],

@@ -85,7 +85,7 @@ it.each([
 ])("quotes only an executable, worthwhile preparation: %s", (variant) => {
   const { input } = capture(163);
   const target = evaluateRunnerRunTargets({ input }).find(
-    (e) => e.actionId === "runner.start_run.r1",
+    (e) => e.actionId === "rs.r1",
   )!;
   if (variant === "short_cash") input.playerView.own.credits = 13;
   if (variant === "last_click") input.playerView.own.clicks = 1;
@@ -174,7 +174,7 @@ it("installs the exact cheaper breaker under the remote parent at db3d/163", () 
   const debug = decision.decisionDebug!.planFirstDecision!;
   expect(debug.selectedPlan?.moduleId).toBe("runner.rig_and_coverage");
   expect(debug.selectedPlan?.parentInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Ar1",
+    "p1p4xezjcxov79rno40lq3f7rv",
   );
   expect(debug.selectedStep?.planInstanceId).toBe(debug.leafExecutorInstanceId);
   expect(JSON.stringify(debug)).toContain(
@@ -273,12 +273,12 @@ it("revalidates the installed cheaper breaker and starts the remote only with th
   );
   expect(path.visibleBreakCost).toBe(10);
   const reserve = evaluateRunnerRunTargets({ input: nextInput }).find(
-    (target) => target.actionId === "runner.start_run.r1",
+    (target) => target.actionId === "rs.r1",
   )!.prerunReserveQuote!;
   expect(reserve.status).toBe("blocked");
   expect(reserve.creditGap).toBeGreaterThan(0);
   expect(chooseRunnerAction(nextInput).actionId).not.toBe(
-    "runner.start_run.r1",
+    "rs.r1",
   );
   const preparationReplay = replayEvents(
     initial,

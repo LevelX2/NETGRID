@@ -3927,7 +3927,7 @@
       "stateVersion": 3,
       "instances": [
         {
-          "instanceId": "plan:corp.ambush_and_bluff:ambush%3Acs5",
+          "instanceId": "p7c8xhe1e9mbeluaiqx75uwxl8",
           "dedupeKey": "ambush:cs5",
           "moduleId": "corp.ambush_and_bluff",
           "moduleVersion": "1",
@@ -3963,7 +3963,7 @@
               "sourceDefinitionId": 126,
               "sourceInstanceId": "cs5",
               "actionIds": [
-                "corp.install_card.cs5.new_remote.cs5"
+                "cc.cs5.new_remote.cs5"
               ],
               "serverId": "new_remote",
               "phase": "install",
@@ -3978,7 +3978,7 @@
               "value": 180,
               "evidenceCode": "corp_ambush_preplanned_exact_install:126:new_remote",
               "installRoute": {
-                "actionId": "corp.install_card.cs5.new_remote.cs5",
+                "actionId": "cc.cs5.new_remote.cs5",
                 "creditCost": 0,
                 "fundingGap": 0,
                 "costSource": "legal_action"
@@ -4019,7 +4019,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.ambush_and_bluff:ambush%3Acs5%3Asetup%3Anew_remote",
+          "instanceId": "p1bkdkfqgnwkjgpetupy69987w",
           "dedupeKey": "ambush:cs5:setup:new_remote",
           "moduleId": "corp.ambush_and_bluff",
           "moduleVersion": "1",
@@ -4042,7 +4042,7 @@
             "kind": "server",
             "id": "new_remote"
           },
-          "parentInstanceId": "plan:corp.ambush_and_bluff:ambush%3Acs5",
+          "parentInstanceId": "p7c8xhe1e9mbeluaiqx75uwxl8",
           "parentNeedId": "ambush-setup:cs5:new_remote",
           "openNeedIds": [],
           "phase": "install",
@@ -4055,7 +4055,7 @@
               "sourceDefinitionId": 126,
               "sourceInstanceId": "cs5",
               "actionIds": [
-                "corp.install_card.cs5.new_remote.cs5"
+                "cc.cs5.new_remote.cs5"
               ],
               "serverId": "new_remote",
               "phase": "install",
@@ -4070,7 +4070,7 @@
               "value": 180,
               "evidenceCode": "corp_ambush_preplanned_exact_install:126:new_remote",
               "installRoute": {
-                "actionId": "corp.install_card.cs5.new_remote.cs5",
+                "actionId": "cc.cs5.new_remote.cs5",
                 "creditCost": 0,
                 "fundingGap": 0,
                 "costSource": "legal_action"
@@ -4111,7 +4111,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.ambush_and_bluff:ambush%3Acs6",
+          "instanceId": "p7c8wxncpeevtt3c4lt3qz63k1",
           "dedupeKey": "ambush:cs6",
           "moduleId": "corp.ambush_and_bluff",
           "moduleVersion": "1",
@@ -4147,7 +4147,7 @@
               "sourceDefinitionId": 126,
               "sourceInstanceId": "cs6",
               "actionIds": [
-                "corp.install_card.cs6.new_remote.cs6"
+                "cc.cs6.new_remote.cs6"
               ],
               "serverId": "new_remote",
               "phase": "install",
@@ -4162,7 +4162,7 @@
               "value": 180,
               "evidenceCode": "corp_ambush_preplanned_exact_install:126:new_remote",
               "installRoute": {
-                "actionId": "corp.install_card.cs6.new_remote.cs6",
+                "actionId": "cc.cs6.new_remote.cs6",
                 "creditCost": 0,
                 "fundingGap": 0,
                 "costSource": "legal_action"
@@ -4203,7 +4203,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.ambush_and_bluff:ambush%3Acs6%3Asetup%3Anew_remote",
+          "instanceId": "pahfyalmuzdimal70xq1fqg3lr",
           "dedupeKey": "ambush:cs6:setup:new_remote",
           "moduleId": "corp.ambush_and_bluff",
           "moduleVersion": "1",
@@ -4226,7 +4226,7 @@
             "kind": "server",
             "id": "new_remote"
           },
-          "parentInstanceId": "plan:corp.ambush_and_bluff:ambush%3Acs6",
+          "parentInstanceId": "p7c8wxncpeevtt3c4lt3qz63k1",
           "parentNeedId": "ambush-setup:cs6:new_remote",
           "openNeedIds": [],
           "phase": "install",
@@ -4239,7 +4239,7 @@
               "sourceDefinitionId": 126,
               "sourceInstanceId": "cs6",
               "actionIds": [
-                "corp.install_card.cs6.new_remote.cs6"
+                "cc.cs6.new_remote.cs6"
               ],
               "serverId": "new_remote",
               "phase": "install",
@@ -4254,7 +4254,7 @@
               "value": 180,
               "evidenceCode": "corp_ambush_preplanned_exact_install:126:new_remote",
               "installRoute": {
-                "actionId": "corp.install_card.cs6.new_remote.cs6",
+                "actionId": "cc.cs6.new_remote.cs6",
                 "creditCost": 0,
                 "fundingGap": 0,
                 "costSource": "legal_action"
@@ -4295,7 +4295,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.defend_servers:server-defense-portfolio",
+          "instanceId": "penw02zfrkklof54c2nuye5att",
           "dedupeKey": "server-defense-portfolio",
           "moduleId": "corp.defend_servers",
           "moduleVersion": "1",
@@ -4319,8 +4319,8 @@
             "id": "allocate_server_defense"
           },
           "openNeedIds": [
-            "install:hq:corp.install_card.cgu.hq.cgu.0",
-            "install:rd:corp.install_card.cgu.rd.cgu.0"
+            "install:hq:cc.cgu.hq.cgu.0",
+            "install:rd:cc.cgu.rd.cgu.0"
           ],
           "phase": "defense",
           "milestone": "admitted",
@@ -4329,14 +4329,14 @@
             "signals": [
               {
                 "kind": "generic",
-                "defenseId": "install:hq:corp.install_card.cgu.hq.cgu.0",
+                "defenseId": "install:hq:cc.cgu.hq.cgu.0",
                 "serverId": "hq",
                 "phase": "install_ice",
                 "sourceDefinitionIds": [
                   75
                 ],
                 "actionIds": [
-                  "corp.install_card.cgu.hq.cgu.0"
+                  "cc.cgu.hq.cgu.0"
                 ],
                 "urgent": false,
                 "centralPressure": "material",
@@ -4347,7 +4347,7 @@
                   "rezFundingGap": 1,
                   "projection": {
                     "knowledge": "known",
-                    "actionId": "corp.install_card.cgu.hq.cgu.0",
+                    "actionId": "cc.cgu.hq.cgu.0",
                     "sourceCardInstanceId": "cgu",
                     "sourceDefinitionId": 75,
                     "targetServerId": "hq",
@@ -4531,18 +4531,18 @@
                   }
                 },
                 "value": 1,
-                "evidenceCode": "corp_defense_exact_route_funding_required:hq:corp.install_card.cgu.hq.cgu.0"
+                "evidenceCode": "corp_defense_exact_route_funding_required:hq:cc.cgu.hq.cgu.0"
               },
               {
                 "kind": "generic",
-                "defenseId": "install:rd:corp.install_card.cgu.rd.cgu.0",
+                "defenseId": "install:rd:cc.cgu.rd.cgu.0",
                 "serverId": "rd",
                 "phase": "install_ice",
                 "sourceDefinitionIds": [
                   75
                 ],
                 "actionIds": [
-                  "corp.install_card.cgu.rd.cgu.0"
+                  "cc.cgu.rd.cgu.0"
                 ],
                 "urgent": false,
                 "centralPressure": "material",
@@ -4553,7 +4553,7 @@
                   "rezFundingGap": 1,
                   "projection": {
                     "knowledge": "known",
-                    "actionId": "corp.install_card.cgu.rd.cgu.0",
+                    "actionId": "cc.cgu.rd.cgu.0",
                     "sourceCardInstanceId": "cgu",
                     "sourceDefinitionId": 75,
                     "targetServerId": "rd",
@@ -4737,7 +4737,7 @@
                   }
                 },
                 "value": 1,
-                "evidenceCode": "corp_defense_exact_route_funding_required:rd:corp.install_card.cgu.rd.cgu.0"
+                "evidenceCode": "corp_defense_exact_route_funding_required:rd:cc.cgu.rd.cgu.0"
               }
             ],
             "centralAllocation": {
@@ -4823,7 +4823,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.economy:defense-reserve%3Ahq%3Acgu",
+          "instanceId": "pa68r4q2kezcfejpea71ufx6vu",
           "dedupeKey": "defense-reserve:hq:cgu",
           "moduleId": "corp.economy",
           "moduleVersion": "1",
@@ -4846,8 +4846,8 @@
             "kind": "capability",
             "id": "defense-reserve:hq:cgu"
           },
-          "parentInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
-          "parentNeedId": "install:hq:corp.install_card.cgu.hq.cgu.0",
+          "parentInstanceId": "penw02zfrkklof54c2nuye5att",
+          "parentNeedId": "install:hq:cc.cgu.hq.cgu.0",
           "openNeedIds": [],
           "phase": "economy",
           "milestone": "admitted",
@@ -4858,11 +4858,11 @@
               "needId": "defense-reserve:hq:cgu",
               "gap": 1,
               "actionIds": [
-                "corp.gain_credit"
+                "cb"
               ],
               "immediateDefenseConversion": true,
-              "parentPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
-              "parentNeedId": "install:hq:corp.install_card.cgu.hq.cgu.0",
+              "parentPlanInstanceId": "penw02zfrkklof54c2nuye5att",
+              "parentNeedId": "install:hq:cc.cgu.hq.cgu.0",
               "parentPriorityClass": "P3",
               "incrementalDefenseReserve": {
                 "targetCredits": 6,
@@ -4870,16 +4870,16 @@
                 "iceInstanceId": "cgu"
               },
               "urgentForScore": false,
-              "evidenceCode": "corp_defense_exact_route_funding_required:hq:corp.install_card.cgu.hq.cgu.0",
+              "evidenceCode": "corp_defense_exact_route_funding_required:hq:cc.cgu.hq.cgu.0",
               "fundingRouteAssessment": {
-                "routeId": "defense-reserve:hq:cgu:legal_action:corp.gain_credit",
+                "routeId": "defense-reserve:hq:cgu:legal_action:cb",
                 "status": "covered_guaranteed",
                 "reliability": "guaranteed",
-                "headActionId": "corp.gain_credit",
+                "headActionId": "cb",
                 "evidence": [
                   "funding_route_count:1",
                   "funding_route_best_status:covered_guaranteed",
-                  "funding_route_best_id:defense-reserve:hq:cgu:legal_action:corp.gain_credit",
+                  "funding_route_best_id:defense-reserve:hq:cgu:legal_action:cb",
                   "funding_route_status:covered_guaranteed",
                   "funding_route_reliability:guaranteed",
                   "funding_route_horizon:same_turn",
@@ -4887,7 +4887,8 @@
                   "funding_route_projected_general_credits:6",
                   "funding_route_projected_gap:0"
                 ]
-              }
+              },
+              "parentPlanModuleId": "corp.defend_servers"
             }
           },
           "blockers": [],
@@ -4918,13 +4919,13 @@
           "updatedAtStateVersion": 3,
           "evidenceRefs": [
             {
-              "code": "corp_defense_exact_route_funding_required:hq:corp.install_card.cgu.hq.cgu.0",
+              "code": "corp_defense_exact_route_funding_required:hq:cc.cgu.hq.cgu.0",
               "source": "visible_state"
             }
           ]
         },
         {
-          "instanceId": "plan:corp.economy:defense-reserve%3Ard%3Acgu",
+          "instanceId": "p2n2qhgdxc98kmem3ghy1e9fa7",
           "dedupeKey": "defense-reserve:rd:cgu",
           "moduleId": "corp.economy",
           "moduleVersion": "1",
@@ -4947,8 +4948,8 @@
             "kind": "capability",
             "id": "defense-reserve:rd:cgu"
           },
-          "parentInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
-          "parentNeedId": "install:rd:corp.install_card.cgu.rd.cgu.0",
+          "parentInstanceId": "penw02zfrkklof54c2nuye5att",
+          "parentNeedId": "install:rd:cc.cgu.rd.cgu.0",
           "openNeedIds": [],
           "phase": "economy",
           "milestone": "admitted",
@@ -4959,11 +4960,11 @@
               "needId": "defense-reserve:rd:cgu",
               "gap": 1,
               "actionIds": [
-                "corp.gain_credit"
+                "cb"
               ],
               "immediateDefenseConversion": true,
-              "parentPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
-              "parentNeedId": "install:rd:corp.install_card.cgu.rd.cgu.0",
+              "parentPlanInstanceId": "penw02zfrkklof54c2nuye5att",
+              "parentNeedId": "install:rd:cc.cgu.rd.cgu.0",
               "parentPriorityClass": "P3",
               "incrementalDefenseReserve": {
                 "targetCredits": 6,
@@ -4971,16 +4972,16 @@
                 "iceInstanceId": "cgu"
               },
               "urgentForScore": false,
-              "evidenceCode": "corp_defense_exact_route_funding_required:rd:corp.install_card.cgu.rd.cgu.0",
+              "evidenceCode": "corp_defense_exact_route_funding_required:rd:cc.cgu.rd.cgu.0",
               "fundingRouteAssessment": {
-                "routeId": "defense-reserve:rd:cgu:legal_action:corp.gain_credit",
+                "routeId": "defense-reserve:rd:cgu:legal_action:cb",
                 "status": "covered_guaranteed",
                 "reliability": "guaranteed",
-                "headActionId": "corp.gain_credit",
+                "headActionId": "cb",
                 "evidence": [
                   "funding_route_count:1",
                   "funding_route_best_status:covered_guaranteed",
-                  "funding_route_best_id:defense-reserve:rd:cgu:legal_action:corp.gain_credit",
+                  "funding_route_best_id:defense-reserve:rd:cgu:legal_action:cb",
                   "funding_route_status:covered_guaranteed",
                   "funding_route_reliability:guaranteed",
                   "funding_route_horizon:same_turn",
@@ -4988,7 +4989,8 @@
                   "funding_route_projected_general_credits:6",
                   "funding_route_projected_gap:0"
                 ]
-              }
+              },
+              "parentPlanModuleId": "corp.defend_servers"
             }
           },
           "blockers": [],
@@ -5019,13 +5021,13 @@
           "updatedAtStateVersion": 3,
           "evidenceRefs": [
             {
-              "code": "corp_defense_exact_route_funding_required:rd:corp.install_card.cgu.rd.cgu.0",
+              "code": "corp_defense_exact_route_funding_required:rd:cc.cgu.rd.cgu.0",
               "source": "visible_state"
             }
           ]
         },
         {
-          "instanceId": "plan:corp.economy:economy-liquidity-development%3Acorp%3A0",
+          "instanceId": "p9qz3p83i1753mqwpm21pozs2k",
           "dedupeKey": "economy-liquidity-development:corp:0",
           "moduleId": "corp.economy",
           "moduleVersion": "1",
@@ -5062,7 +5064,7 @@
               "gap": 3,
               "projectedCreditGain": 1,
               "actionIds": [
-                "corp.gain_credit"
+                "cb"
               ],
               "priorityClass": "P6",
               "cadence": {
@@ -5114,7 +5116,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.hand_and_agenda_management:draw-for-score-material",
+          "instanceId": "p13oe6jmk9id0pfdx7x2bne8ui",
           "dedupeKey": "draw-for-score-material",
           "moduleId": "corp.hand_and_agenda_management",
           "moduleVersion": "1",
@@ -5137,7 +5139,7 @@
             "kind": "player",
             "id": "corp"
           },
-          "parentInstanceId": "plan:corp.score_agenda:general",
+          "parentInstanceId": "pa1d7j8c33k25iup8n8nyo9r2g",
           "parentNeedId": "score-material:general",
           "openNeedIds": [],
           "phase": "draw_for_plan",
@@ -5146,7 +5148,7 @@
             "kind": "hand",
             "signal": {
               "handPlanId": "draw-for-score-material",
-              "parentPlanInstanceId": "plan:corp.score_agenda:general",
+              "parentPlanInstanceId": "pa1d7j8c33k25iup8n8nyo9r2g",
               "parentNeedId": "score-material:general",
               "phase": "draw_for_plan",
               "agendaCount": 0,
@@ -5211,7 +5213,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:general",
+          "instanceId": "pa1d7j8c33k25iup8n8nyo9r2g",
           "dedupeKey": "general",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -5288,67 +5290,67 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:corp.ambush_and_bluff:ambush%3Acs5",
+          "instanceId": "p7c8xhe1e9mbeluaiqx75uwxl8",
           "stateVersion": 3,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.ambush_and_bluff:ambush%3Acs5%3Asetup%3Anew_remote",
+          "instanceId": "p1bkdkfqgnwkjgpetupy69987w",
           "stateVersion": 3,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.ambush_and_bluff:ambush%3Acs6",
+          "instanceId": "p7c8wxncpeevtt3c4lt3qz63k1",
           "stateVersion": 3,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.ambush_and_bluff:ambush%3Acs6%3Asetup%3Anew_remote",
+          "instanceId": "pahfyalmuzdimal70xq1fqg3lr",
           "stateVersion": 3,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.defend_servers:server-defense-portfolio",
+          "instanceId": "penw02zfrkklof54c2nuye5att",
           "stateVersion": 3,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.economy:defense-reserve%3Ahq%3Acgu",
+          "instanceId": "pa68r4q2kezcfejpea71ufx6vu",
           "stateVersion": 3,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.economy:defense-reserve%3Ard%3Acgu",
+          "instanceId": "p2n2qhgdxc98kmem3ghy1e9fa7",
           "stateVersion": 3,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.economy:economy-liquidity-development%3Acorp%3A0",
+          "instanceId": "p9qz3p83i1753mqwpm21pozs2k",
           "stateVersion": 3,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.hand_and_agenda_management:draw-for-score-material",
+          "instanceId": "p13oe6jmk9id0pfdx7x2bne8ui",
           "stateVersion": 3,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.score_agenda:general",
+          "instanceId": "pa1d7j8c33k25iup8n8nyo9r2g",
           "stateVersion": 3,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.economy:defense-reserve%3Ahq%3Acgu",
+          "instanceId": "pa68r4q2kezcfejpea71ufx6vu",
           "stateVersion": 3,
           "reason": "executor_selected",
           "fromExecutionState": "idle",
@@ -5356,8 +5358,8 @@
           "detailCode": "validated_scheduler_selection"
         }
       ],
-      "rootForegroundInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
-      "executorInstanceId": "plan:corp.economy:defense-reserve%3Ahq%3Acgu"
+      "rootForegroundInstanceId": "penw02zfrkklof54c2nuye5att",
+      "executorInstanceId": "pa68r4q2kezcfejpea71ufx6vu"
     }
   },
   "expectation": {

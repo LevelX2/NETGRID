@@ -25,7 +25,7 @@ describe("Rent-I-Con versus CODE ROT cycle-seven remediation checkpoints", () =>
         acceptableActions: [
           {
             actionId:
-              "runner.install_card.c1ix.c1ix",
+              "rc.c1ix.c1ix",
           },
         ],
         planExecution: {

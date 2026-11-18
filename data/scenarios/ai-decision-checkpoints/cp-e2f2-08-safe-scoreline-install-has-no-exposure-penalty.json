@@ -8690,7 +8690,7 @@
         "id": "c2id"
       },
       "selectedStepKind": "gain_action_capacity",
-      "selectedActionId": "corp.play_operation.c35b.c35b",
+      "selectedActionId": "ci.c35b.c35b",
       "selectedActionType": "play_operation",
       "scoreConversionDesiredAdvancementCounters": 3,
       "blockedBy": [],
@@ -8735,7 +8735,7 @@
       ],
       "selectedActionCapacityRoute": {
         "schemaVersion": "action-capacity-route-v1",
-        "routeId": "corp.create_score_window:conversion:c2id:actions:legal_action:corp.play_operation.c35b.c35b",
+        "routeId": "corp.create_score_window:conversion:c2id:actions:legal_action:ci.c35b.c35b",
         "demandId": "corp.create_score_window:conversion:c2id:actions",
         "status": "covered_guaranteed",
         "reliability": "guaranteed",
@@ -8754,9 +8754,9 @@
         "totalSourceCountersConsumed": 0,
         "steps": [
           {
-            "stepId": "legal_action:corp.play_operation.c35b.c35b",
+            "stepId": "legal_action:ci.c35b.c35b",
             "kind": "legal_action",
-            "actionId": "corp.play_operation.c35b.c35b",
+            "actionId": "ci.c35b.c35b",
             "ownTurnOffset": 0,
             "restriction": "unrestricted",
             "listedActionCost": 1,
@@ -8772,7 +8772,7 @@
             "sourceDefinitionId": 509,
             "riskTags": [],
             "evidence": [
-              "legal_action:corp.play_operation.c35b.c35b",
+              "legal_action:ci.c35b.c35b",
               "kind:immediate_unrestricted_gain",
               "timing:immediate",
               "restriction:unrestricted",
@@ -8838,7 +8838,7 @@
         "progress": 0.6,
         "selectedStepKind": "gain_action_capacity",
         "actionCandidateIds": [
-          "corp.play_operation.c35b.c35b"
+          "ci.c35b.c35b"
         ],
         "creditDemands": [],
         "actionDemands": [
@@ -8904,7 +8904,7 @@
         "actionCapacityRoutes": [
           {
             "schemaVersion": "action-capacity-route-v1",
-            "routeId": "corp.create_score_window:conversion:c2id:actions:legal_action:corp.play_operation.c35b.c35b",
+            "routeId": "corp.create_score_window:conversion:c2id:actions:legal_action:ci.c35b.c35b",
             "demandId": "corp.create_score_window:conversion:c2id:actions",
             "status": "covered_guaranteed",
             "reliability": "guaranteed",
@@ -8923,9 +8923,9 @@
             "totalSourceCountersConsumed": 0,
             "steps": [
               {
-                "stepId": "legal_action:corp.play_operation.c35b.c35b",
+                "stepId": "legal_action:ci.c35b.c35b",
                 "kind": "legal_action",
-                "actionId": "corp.play_operation.c35b.c35b",
+                "actionId": "ci.c35b.c35b",
                 "ownTurnOffset": 0,
                 "restriction": "unrestricted",
                 "listedActionCost": 1,
@@ -8941,7 +8941,7 @@
                 "sourceDefinitionId": 509,
                 "riskTags": [],
                 "evidence": [
-                  "legal_action:corp.play_operation.c35b.c35b",
+                  "legal_action:ci.c35b.c35b",
                   "kind:immediate_unrestricted_gain",
                   "timing:immediate",
                   "restriction:unrestricted",
@@ -8974,7 +8974,7 @@
         ],
         "selectedActionCapacityRoute": {
           "schemaVersion": "action-capacity-route-v1",
-          "routeId": "corp.create_score_window:conversion:c2id:actions:legal_action:corp.play_operation.c35b.c35b",
+          "routeId": "corp.create_score_window:conversion:c2id:actions:legal_action:ci.c35b.c35b",
           "demandId": "corp.create_score_window:conversion:c2id:actions",
           "status": "covered_guaranteed",
           "reliability": "guaranteed",
@@ -9000,7 +9000,7 @@
             "action_route_projected_compatible:4",
             "action_route_projected_pool:4",
             "action_route_projected_gap:0",
-            "action_capacity_route_step_selected:corp.play_operation.c35b.c35b"
+            "action_capacity_route_step_selected:ci.c35b.c35b"
           ]
         },
         "actionCapacityCoverageResolvesHardBlocker": false,
@@ -9032,10 +9032,10 @@
           "plan_action_reservation_requested:4",
           "plan_action_reservation_allocated:4",
           "plan_action_reservation_remaining:0",
-          "plan_action_capacity_route:corp.create_score_window:conversion:c2id:actions:legal_action:corp.play_operation.c35b.c35b",
+          "plan_action_capacity_route:corp.create_score_window:conversion:c2id:actions:legal_action:ci.c35b.c35b",
           "plan_action_capacity_route_status:covered_guaranteed",
           "plan_action_capacity_hard_blocker_resolved:false",
-          "plan_portfolio_action_progress:corp.play_operation.c35b.c35b"
+          "plan_portfolio_action_progress:ci.c35b.c35b"
         ]
       },
       "backgrounds": [
@@ -9057,7 +9057,7 @@
           "progress": 0.5,
           "selectedStepKind": "build_remote",
           "actionCandidateIds": [
-            "corp.install_card.ck6.new_remote.ck6"
+            "cc.ck6.new_remote.ck6"
           ],
           "creditDemands": [],
           "actionDemands": [
@@ -9250,7 +9250,7 @@
         "plan_action_allocation_entries:2",
         "plan_action_allocation_unallocated:0",
         "plan_action_allocation_credit_remainder:12",
-        "plan_portfolio_selected_action:corp.play_operation.c35b.c35b"
+        "plan_portfolio_selected_action:ci.c35b.c35b"
       ]
     },
     "strategicIntent": {

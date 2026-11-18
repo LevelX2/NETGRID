@@ -37,10 +37,12 @@ describe("public damage source attribution", () => {
       cp.runtime,
     );
     const decision = chooseAiAction(input);
-    expect(decision.actionId).toBe("runner.draw_card");
+    expect(decision.actionId).toBe("r8");
     expect(
-      decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-    ).toContain("runner.defense");
+      decision.decisionDebug?.planFirstDecision?.portfolio.find(
+        (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+      )?.moduleId,
+    ).toBe("runner.defense_and_recovery");
     expect(decision.fallbackUsed).toBe(false);
     expect(
       input.legalActions.some((a: { actionId: string }) => a.actionId === decision.actionId),

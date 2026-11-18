@@ -7152,7 +7152,7 @@
         "plan_action_allocation_entries:1",
         "plan_action_allocation_unallocated:4",
         "plan_action_allocation_credit_remainder:10",
-        "plan_portfolio_selected_action:runner.end_turn"
+        "plan_portfolio_selected_action:r9"
       ]
     },
     "strategicIntent": {

@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { expect, it } from "vitest";
 import captureJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-pairing-432-terminal-steal-d464.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -27,10 +28,10 @@ it("preserves the nonterminal score owner while funding equal-cost exposure alte
   );
   const decision = chooseAiAction(capture.input);
   const agenda = "c2i5";
-  const root = `plan:corp.score_agenda:agenda%3A${agenda}%3Ar1`;
-  const funding = `plan:corp.economy:score-support%3Aagenda%3A${agenda}%3Ar1`;
+  const root = planInstanceIdForProposal({ moduleId: "corp.score_agenda", dedupeKey: `agenda:${agenda}:r1` });
+  const funding = planInstanceIdForProposal({ moduleId: "corp.economy", dedupeKey: `score-support:agenda:${agenda}:r1` });
   const fundingAction =
-    "corp.play_operation.c33r.c33r.616";
+    "ci.c33r.c33r.616";
   expect(decision).toMatchObject({
     actionId: fundingAction,
     fallbackUsed: false,
@@ -64,7 +65,7 @@ it("preserves the nonterminal score owner while funding equal-cost exposure alte
   );
   const terminal = lines.find((line) =>
     line.evidenceCodes.includes(
-      "root_plan_instance:plan:corp.score_agenda:agenda%3Ac2n1%3Ar1",
+      "root_plan_instance:pa259nwrj5iy1ei7hkibktm0rb",
     ),
   );
   expect(coup?.evidenceCodes).toContain("score_route_exposure:known");
@@ -98,7 +99,7 @@ it("preserves the nonterminal score owner while funding equal-cost exposure alte
     portfolio.instances.find(
       (plan) =>
         plan.instanceId ===
-        "plan:corp.score_agenda:agenda%3Ac2n1%3Ar1",
+        "pa259nwrj5iy1ei7hkibktm0rb",
     )?.moduleState,
   ).toMatchObject({
     kind: "score",

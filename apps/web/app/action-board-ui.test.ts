@@ -618,7 +618,11 @@ describe("localized action presentation", () => {
       expect(
         choiceOptionPresentationLabel(
           pendingChoice,
-          { id: "guess_2", label: "2", ...(value !== undefined ? { value } : {}) },
+          {
+            id: "guess_2",
+            label: "2",
+            ...(value !== undefined ? { value } : {}),
+          },
           "en",
         ),
       ).toBe("[missing choice option: generic_bid_amount/guess_2]");
@@ -2120,7 +2124,11 @@ describe("V1.0.5 action board UI helpers", () => {
 
       running.run!.phase = "movement";
       running.timingPoint = "run.movement_rez_window";
-      running.run!.encounteredIce = card("passed", "Haunting Inquisition", "ice");
+      running.run!.encounteredIce = card(
+        "passed",
+        "Haunting Inquisition",
+        "ice",
+      );
       expect(runHeaderIceTitle(running)).toBe("Shock.r");
       shock.known = false;
       expect(runHeaderTargetLabel(running, messages.Board.run.hiddenIce)).toBe(
@@ -2291,10 +2299,10 @@ describe("V1.0.5 action board UI helpers", () => {
         encounterContinue: true,
         encounterWillEndRun: false,
         unbrokenSubroutineCount: 1,
-        payOrEndRunSubroutineIndexes: "0",
         payOrEndRunSubroutinePayment: 1,
       },
       "run.encounter_ice",
+      { payOrEndRunSubroutineIndexes: [0] },
     );
     const payWithDamage = legalAction(
       "runner",
@@ -2305,10 +2313,10 @@ describe("V1.0.5 action board UI helpers", () => {
         encounterContinue: true,
         encounterWillEndRun: false,
         unbrokenSubroutineCount: 2,
-        payOrEndRunSubroutineIndexes: "1",
         payOrEndRunSubroutinePayment: 1,
       },
       "run.encounter_ice",
+      { payOrEndRunSubroutineIndexes: [1] },
     );
     const pump = legalAction(
       "runner",
@@ -2662,9 +2670,9 @@ describe("V1.0.5 action board UI helpers", () => {
       expect(hiddenCard).not.toHaveProperty("trashCost");
     }
 
-    expect(
-      corpRootCardsForDisplay("corp", "r1", [leakedUpgradeA]),
-    ).toEqual([leakedUpgradeA]);
+    expect(corpRootCardsForDisplay("corp", "r1", [leakedUpgradeA])).toEqual([
+      leakedUpgradeA,
+    ]);
   });
 
   it("splits archives into faceup and facedown stacks for runner and corp views", () => {
@@ -3214,9 +3222,7 @@ describe("V1.0.5 action board UI helpers", () => {
         ...view("runner").own,
         rig: [runnerProgram],
       },
-      servers: [
-        { id: "r1", label: "Remote 1", ice: [ice, ice2], root: [bbs] },
-      ],
+      servers: [{ id: "r1", label: "Remote 1", ice: [ice, ice2], root: [bbs] }],
     });
     const fieldChoice: NonNullable<PlayerView["pendingChoice"]> = {
       choiceId: "hunt_club_bbs_choice",
@@ -3279,17 +3285,15 @@ describe("V1.0.5 action board UI helpers", () => {
       minSelections: 1,
       maxSelections: 1,
     };
-    const hiddenSlot = { ...ice, instanceId: "hidden_ice_slot", known: false };
+    const hiddenSlot = { ...ice, instanceId: "hr1.i0", known: false };
     const hiddenSlotBoard = view("runner", {
-      servers: [
-        { id: "r1", label: "Remote 1", ice: [hiddenSlot], root: [] },
-      ],
+      servers: [{ id: "r1", label: "Remote 1", ice: [hiddenSlot], root: [] }],
     });
     const hiddenSlotSingleExposeChoice: NonNullable<
       PlayerView["pendingChoice"]
     > = {
       ...singleExposeChoice,
-      options: [{ id: "card_hidden_ice_slot", label: "Remote 1 ICE 1" }],
+      options: [{ id: "card_hr1.i0", label: "Remote 1 ICE 1" }],
     };
     const reviewChoice: NonNullable<PlayerView["pendingChoice"]> = {
       choiceId: "seeya_expose_review",
@@ -3324,8 +3328,7 @@ describe("V1.0.5 action board UI helpers", () => {
       ...fieldChoice,
       choiceId: "fort_ice_reorder_7",
       side: "corp",
-      source:
-        "corp.start_of_run_redirect.herman_reorder:run_1:herman_1:r1",
+      source: "corp.start_of_run_redirect.herman_reorder:run_1:herman_1:r1",
       prompt: "Wähle die ICE in der neuen Reihenfolge vor diesem Server.",
       options: [
         { id: "card_corp_ice_1", label: "Wall", value: "corp_ice_1" },
@@ -3419,7 +3422,7 @@ describe("V1.0.5 action board UI helpers", () => {
         hiddenSlotBoard,
         hiddenSlot,
       )?.id,
-    ).toBe("card_hidden_ice_slot");
+    ).toBe("card_hr1.i0");
     expect(fieldCardChoiceInfo(fieldChoice, ["card_bbs"])).toMatchObject({
       title: "Feldkarten auswählen",
       counterLabel: "1/0-3",
@@ -5586,11 +5589,11 @@ describe("V1.0.6 resource and card-display helpers", () => {
         {
           breakerId: "pile_driver_1",
           iceId: "ice_1",
-          subroutineIndexes: "0",
           breakSubroutineCount: 1,
           multiBreakSubroutines: true,
         },
         "run.encounter_ice",
+        { subroutineIndexes: [0] },
       ),
       legalAction(
         "runner",
@@ -5600,11 +5603,11 @@ describe("V1.0.6 resource and card-display helpers", () => {
         {
           breakerId: "pile_driver_1",
           iceId: "ice_1",
-          subroutineIndexes: "0,1",
           breakSubroutineCount: 2,
           multiBreakSubroutines: true,
         },
         "run.encounter_ice",
+        { subroutineIndexes: [0,1] },
       ),
       legalAction(
         "runner",
@@ -5614,11 +5617,11 @@ describe("V1.0.6 resource and card-display helpers", () => {
         {
           breakerId: "pile_driver_1",
           iceId: "ice_1",
-          subroutineIndexes: "1",
           breakSubroutineCount: 1,
           multiBreakSubroutines: true,
         },
         "run.encounter_ice",
+        { subroutineIndexes: [1] },
       ),
     ];
     expect(
@@ -5778,9 +5781,9 @@ describe("V1.0.6 resource and card-display helpers", () => {
       {
         breakerId: "breaker_1",
         iceId: "ice_1",
-        subroutineIndexes: "0,1",
       },
       "run.encounter_ice",
+      { subroutineIndexes: [0, 1] },
     );
 
     expect(breakSubroutineActionTooltip(singleBreak, encounteredIce)).toBe(
@@ -5868,6 +5871,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
         choiceKind: "select_option",
       },
       "run.encounter_ice",
+      { subroutineIndexes: [0,1] },
     );
 
     expect(runWindowActions(running, [choiceAction])).toEqual([choiceAction]);
@@ -6571,9 +6575,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(
       retainedAccessRevealEvent([hqReveal, runCleanup], null)?.eventId,
     ).toBe(100);
-    expect(
-      retainedAccessRevealEvent([hqReveal, runCleanup], 100),
-    ).toBeNull();
+    expect(retainedAccessRevealEvent([hqReveal, runCleanup], 100)).toBeNull();
     expect(
       latestRetainableAccessRevealEvent([hqReveal, runCleanup])?.eventId,
     ).toBe(100);
@@ -6766,9 +6768,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(retainedExposeReviewEvent([expose, followUp], null)?.eventId).toBe(
       109,
     );
-    expect(
-      retainedExposeReviewEvent([expose, followUp], 109),
-    ).toBeNull();
+    expect(retainedExposeReviewEvent([expose, followUp], 109)).toBeNull();
     expect(retainedExposeReviewEvent([smarteye], null)).toBeNull();
     expect(
       retainedExposeReviewEvent([expose, smarteyeFinish], null),
@@ -6805,17 +6805,13 @@ describe("V1.0.6 resource and card-display helpers", () => {
       publicRevealKind: "expose",
       exposedCardInstanceIds: "remote_asset,hq_ice",
     });
-    const schematicsWithoutReview = publicEvent(
-      118,
-      "action",
-      {
-        actionType: "access_card",
-        actor: "runner",
-        hiddenZoneAction: "schematics_search_engine_expose_installed_cards",
-        publicRevealKind: "expose",
-        exposedCardInstanceIds: "remote_asset",
-      },
-    );
+    const schematicsWithoutReview = publicEvent(118, "action", {
+      actionType: "access_card",
+      actor: "runner",
+      hiddenZoneAction: "schematics_search_engine_expose_installed_cards",
+      publicRevealKind: "expose",
+      exposedCardInstanceIds: "remote_asset",
+    });
 
     expect(exposedCardInstanceIdsForEvent(exposed)).toEqual([
       "ice_1",
@@ -7027,6 +7023,7 @@ function legalAction(
   label: string,
   payload?: LegalAction["payload"],
   timingPoint: LegalAction["timingPoint"] = "corp_action.main",
+  encounter: Pick<LegalAction, "subroutineIndexes" | "payOrEndRunSubroutineIndexes"> = {},
 ): LegalAction {
   return {
     actionId: `${side}.${type}.${source}.${payload?.serverId ?? ""}.${payload?.cardId ?? ""}`,
@@ -7040,6 +7037,7 @@ function legalAction(
     visibility: "public",
     expiresAtStateVersion: 1,
     ...(payload ? { payload } : {}),
+    ...encounter,
   };
 }
 

@@ -44,7 +44,7 @@ function assess(input: ReturnType<typeof buildAiDecisionInput>) {
   });
   const targets = evaluateRunnerRunTargets({ input });
   const target = targets.find(
-    (t) => t.actionId === "runner.start_run.r2",
+    (t) => t.actionId === "rs.r2",
   )!;
   return {
     candidates,
@@ -113,16 +113,16 @@ it("retains the exact avoidance deficit but admits the cheaper complete fixed-ta
   expect(JSON.stringify(input)).toBe(unchanged);
   expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Ar2",
+    "p1p4x83h7yolw2hjtvi0ud06dm",
   );
-  expect(decision.actionId).toBe("runner.start_run.r2");
+  expect(decision.actionId).toBe("rs.r2");
 });
 it("does not certify the old three-credit prefix while a known trace hazard remains", () => {
   const input = original().checkpoint.input;
   const { target, candidates } = assess(input);
   const route = runnerExactFundingRouteContract(input, candidates, {
     demandId: "native-incomplete-trace-prefix",
-    sourcePlanId: "plan:runner.contest_remote:remote%3Ar2",
+    sourcePlanId: "p1p4x83h7yolw2hjtvi0ud06dm",
     purpose: "current_run",
     priority: "acute_hard_plan_blocker",
     hardness: "hard",
@@ -162,7 +162,7 @@ it.each([
     const initial = state,
       heads: string[] = [];
     let forcedCorpBids = 0;
-    const root = "plan:runner.contest_remote:remote%3Ar2";
+    const root = "p1p4x83h7yolw2hjtvi0ud06dm";
     for (let n = 0; n < 80 && !state.winner; n++) {
       const side = state.activeSide;
       const input = buildAiDecisionInput(state, side, {

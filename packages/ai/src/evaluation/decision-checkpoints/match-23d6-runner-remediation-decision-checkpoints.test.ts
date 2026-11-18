@@ -52,13 +52,13 @@ describe("match 23D6 runner remediation decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "runner.activated_card_ability.c29d.c29d.activated.440",
+              "r1.c29d.c29d.activated.440",
           },
         ],
         forbiddenActions: [
           {
             actionId:
-              "runner.activated_card_ability.c29d.c29d.activated.441",
+              "r1.c29d.c29d.activated.441",
           },
         ],
         planExecution: {
@@ -79,13 +79,13 @@ describe("match 23D6 runner remediation decision checkpoints", () => {
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
         "plan_priority_class:P4",
-        "plan_scheduler:assess:validated:plan:runner.credit_bank:c29d",
+        "plan_scheduler:assess:validated:pdeck54mcc1lshdzs9k74eyxih",
       ]),
     );
     expect(
       result.decision?.decisionDebug?.planFirstDecision?.selectedPlan,
     ).toMatchObject({
-      instanceId: "plan:runner.credit_bank:c29d",
+      instanceId: "pdeck54mcc1lshdzs9k74eyxih",
       moduleId: "runner.credit_bank",
     });
   });
@@ -97,7 +97,7 @@ describe("match 23D6 runner remediation decision checkpoints", () => {
       result.input.legalActions.some(
         (action) =>
           action.actionId ===
-          "runner.install_card.c161.c161",
+          "rc.c161.c161",
       ),
     ).toBe(true);
   });
@@ -116,7 +116,7 @@ describe("match 23D6 runner remediation decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "runner.install_card.c28p.c28p",
+              "rc.c28p.c28p",
           },
         ],
         planExecution: {

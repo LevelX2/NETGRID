@@ -41,8 +41,8 @@ it.each([8, 9])(
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-          leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A78",
+          rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+          leafExecutorInstanceId: "p8liupgidim017mpug1t4bs92t",
           route: {
             actionId: action.actionId,
             stateVersion: input.playerView.stateVersion,
@@ -61,8 +61,8 @@ it("retains a funded damage-mitigation pump under the same run owner", () => {
     fallbackUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A78",
+        rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+        leafExecutorInstanceId: "p8liupgidim017mpug1t4bs92t",
         route: {
           actionId: action.actionId,
           stateVersion: input.playerView.stateVersion,

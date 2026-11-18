@@ -265,7 +265,7 @@
               }
             },
             {
-              "instanceId": "h1lt4oxj",
+              "instanceId": "hrd.i1",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -303,7 +303,7 @@
           "ice": [],
           "root": [
             {
-              "instanceId": "h1xdtdtq",
+              "instanceId": "hr1.r0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 1,
@@ -326,7 +326,7 @@
           "ice": [],
           "root": [
             {
-              "instanceId": "hjzubyg",
+              "instanceId": "hr2.r0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -1624,7 +1624,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.gain_credit",
+          "actionId": "rb",
           "side": "runner",
           "type": "gain_credit",
           "label": "1 Credit nehmen",
@@ -1645,7 +1645,7 @@
           }
         },
         {
-          "actionId": "runner.draw_card",
+          "actionId": "r8",
           "side": "runner",
           "type": "draw_card",
           "label": "Karte ziehen",
@@ -1668,7 +1668,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1ux.c1ux.385",
+          "actionId": "rh.c1ux.c1ux.385",
           "side": "runner",
           "type": "play_event",
           "label": "Gideon’s Pawnshop spielen",
@@ -1697,7 +1697,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c1qy.c1qy",
+          "actionId": "rc.c1qy.c1qy",
           "side": "runner",
           "type": "install_card",
           "label": "Vewy Vewy Quiet installieren",
@@ -1718,7 +1718,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1w3.hq.c1w3.390",
+          "actionId": "rh.c1w3.hq.c1w3.390",
           "side": "runner",
           "type": "play_event",
           "label": "Inside Job auf HQ",
@@ -1748,7 +1748,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1w3.rd.c1w3.390",
+          "actionId": "rh.c1w3.rd.c1w3.390",
           "side": "runner",
           "type": "play_event",
           "label": "Inside Job auf R&D",
@@ -1778,7 +1778,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1w3.archives.c1w3.390",
+          "actionId": "rh.c1w3.archives.c1w3.390",
           "side": "runner",
           "type": "play_event",
           "label": "Inside Job auf Archives",
@@ -1808,7 +1808,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1w3.r1.c1w3.390",
+          "actionId": "rh.c1w3.r1.c1w3.390",
           "side": "runner",
           "type": "play_event",
           "label": "Inside Job auf Remote 1",
@@ -1838,7 +1838,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1w3.r2.c1w3.390",
+          "actionId": "rh.c1w3.r2.c1w3.390",
           "side": "runner",
           "type": "play_event",
           "label": "Inside Job auf Remote 2",
@@ -1868,7 +1868,7 @@
           }
         },
         {
-          "actionId": "runner.activated_card_ability.c2er.c2er.activated.465",
+          "actionId": "r1.c2er.c2er.activated.465",
           "side": "runner",
           "type": "activated_card_ability",
           "label": "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
@@ -1899,7 +1899,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.hq",
+          "actionId": "rs.hq",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf HQ",
@@ -1920,7 +1920,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.rd",
+          "actionId": "rs.rd",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf R&D",
@@ -1941,7 +1941,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.archives",
+          "actionId": "rs.archives",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf Archives",
@@ -1962,7 +1962,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.r1",
+          "actionId": "rs.r1",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf Remote 1",
@@ -1983,7 +1983,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.r2",
+          "actionId": "rs.r2",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf Remote 2",
@@ -2004,7 +2004,7 @@
           }
         },
         {
-          "actionId": "runner.end_turn",
+          "actionId": "r9",
           "side": "runner",
           "type": "end_turn",
           "label": "Zug beenden",
@@ -3277,7 +3277,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "runner.gain_credit",
+        "actionId": "rb",
         "side": "runner",
         "type": "gain_credit",
         "label": "1 Credit nehmen",
@@ -3298,7 +3298,7 @@
         }
       },
       {
-        "actionId": "runner.draw_card",
+        "actionId": "r8",
         "side": "runner",
         "type": "draw_card",
         "label": "Karte ziehen",
@@ -3321,7 +3321,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1ux.c1ux.385",
+        "actionId": "rh.c1ux.c1ux.385",
         "side": "runner",
         "type": "play_event",
         "label": "Gideon’s Pawnshop spielen",
@@ -3350,7 +3350,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c1qy.c1qy",
+        "actionId": "rc.c1qy.c1qy",
         "side": "runner",
         "type": "install_card",
         "label": "Vewy Vewy Quiet installieren",
@@ -3371,7 +3371,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1w3.hq.c1w3.390",
+        "actionId": "rh.c1w3.hq.c1w3.390",
         "side": "runner",
         "type": "play_event",
         "label": "Inside Job auf HQ",
@@ -3401,7 +3401,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1w3.rd.c1w3.390",
+        "actionId": "rh.c1w3.rd.c1w3.390",
         "side": "runner",
         "type": "play_event",
         "label": "Inside Job auf R&D",
@@ -3431,7 +3431,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1w3.archives.c1w3.390",
+        "actionId": "rh.c1w3.archives.c1w3.390",
         "side": "runner",
         "type": "play_event",
         "label": "Inside Job auf Archives",
@@ -3461,7 +3461,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1w3.r1.c1w3.390",
+        "actionId": "rh.c1w3.r1.c1w3.390",
         "side": "runner",
         "type": "play_event",
         "label": "Inside Job auf Remote 1",
@@ -3491,7 +3491,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1w3.r2.c1w3.390",
+        "actionId": "rh.c1w3.r2.c1w3.390",
         "side": "runner",
         "type": "play_event",
         "label": "Inside Job auf Remote 2",
@@ -3521,7 +3521,7 @@
         }
       },
       {
-        "actionId": "runner.activated_card_ability.c2er.c2er.activated.465",
+        "actionId": "r1.c2er.c2er.activated.465",
         "side": "runner",
         "type": "activated_card_ability",
         "label": "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
@@ -3552,7 +3552,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.hq",
+        "actionId": "rs.hq",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf HQ",
@@ -3573,7 +3573,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.rd",
+        "actionId": "rs.rd",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf R&D",
@@ -3594,7 +3594,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.archives",
+        "actionId": "rs.archives",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf Archives",
@@ -3615,7 +3615,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.r1",
+        "actionId": "rs.r1",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf Remote 1",
@@ -3636,7 +3636,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.r2",
+        "actionId": "rs.r2",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf Remote 2",
@@ -3657,7 +3657,7 @@
         }
       },
       {
-        "actionId": "runner.end_turn",
+        "actionId": "r9",
         "side": "runner",
         "type": "end_turn",
         "label": "Zug beenden",
@@ -3711,7 +3711,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 42,
-      "sideSafePlanningFingerprint": "fnv1a:58b21b55"
+      "sideSafePlanningFingerprint": "fnv1a:c831fe07"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_rd_express_1.1.0",
@@ -4066,7 +4066,7 @@
             "cashOutActionLegal": true,
             "buildActionIds": [],
             "cashOutActionIds": [
-              "runner.activated_card_ability.c2er.c2er.activated.465"
+              "r1.c2er.c2er.activated.465"
             ],
             "estimatedPayout": 2,
             "confidence": "high",
@@ -9605,7 +9605,7 @@
       "stateVersion": 36,
       "instances": [
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "dedupeKey": "standard-turn-completion",
           "moduleId": "runner.complete_turn",
           "moduleVersion": "1",
@@ -9634,7 +9634,7 @@
           "moduleState": {
             "kind": "turn_completion",
             "standardEndTurnActionIds": [
-              "runner.end_turn"
+              "r9"
             ]
           },
           "blockers": [],
@@ -9667,7 +9667,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.credit_bank:c2er",
+          "instanceId": "pdik1gkc39ikj8wk76yyoeufqz",
           "dedupeKey": "c2er",
           "moduleId": "runner.credit_bank",
           "moduleVersion": "1",
@@ -9762,7 +9762,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
+          "instanceId": "p5s1qdgqrafrs3n2kss1t9ct7m",
           "dedupeKey": "coverage:breaker_code_gate",
           "moduleId": "runner.rig_and_coverage",
           "moduleVersion": "1",
@@ -9851,7 +9851,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry",
+          "instanceId": "pde8a64nmn1hkbrzgi9sbuf6fo",
           "dedupeKey": "coverage:breaker_sentry",
           "moduleId": "runner.rig_and_coverage",
           "moduleVersion": "1",
@@ -9940,7 +9940,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_wall",
+          "instanceId": "p6c0cqw460f4dpux5zmx6n3hjf",
           "dedupeKey": "coverage:breaker_wall",
           "moduleId": "runner.rig_and_coverage",
           "moduleVersion": "1",
@@ -10032,91 +10032,91 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "stateVersion": 36,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.credit_bank:c2er",
+          "instanceId": "pdik1gkc39ikj8wk76yyoeufqz",
           "stateVersion": 36,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
+          "instanceId": "p5s1qdgqrafrs3n2kss1t9ct7m",
           "stateVersion": 36,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry",
+          "instanceId": "pde8a64nmn1hkbrzgi9sbuf6fo",
           "stateVersion": 36,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_wall",
+          "instanceId": "p6c0cqw460f4dpux5zmx6n3hjf",
           "stateVersion": 36,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:card%3Ac1ux",
+          "instanceId": "p3rrt7ddrj2vv4c5pwr2zko5eg",
           "stateVersion": 36,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:generic%3Adraw-options",
+          "instanceId": "p6hb5l9cujr02om3vqn7gbqr35",
           "stateVersion": 36,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:recovery%3Ac1ux%3Ac1wb",
+          "instanceId": "p3grnqbc8efcgoo4kw6aelbo7g",
           "stateVersion": 36,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.economy:economy-liquidity-development%3Arunner%3A3",
+          "instanceId": "pd33mvvgfoi81yxutcq8pt7qkt",
           "stateVersion": 36,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.economy:runner-portfolio-credit-reserve",
+          "instanceId": "pc7ebuiw5dxhlbzbf1nhcs4p4z",
           "stateVersion": 36,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Aarchives",
+          "instanceId": "p22f66p721g9dgs7gsawwpf6hs",
           "stateVersion": 36,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ahq",
+          "instanceId": "pa7nez1ioecg7mf06q1uwqq57o",
           "stateVersion": 36,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ard",
+          "instanceId": "pa90fufw9vc5bkshp96ztlryxl",
           "stateVersion": 36,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.recurring_economy:c1qy",
+          "instanceId": "p3rkbrtpqdpqmu7co78pi3qkan",
           "stateVersion": 36,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "stateVersion": 36,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
@@ -10129,7 +10129,7 @@
         "commitmentId": "fnv1a:00227cc4",
         "sourcePlanId": "fnv1a:3f7e3534",
         "sourceLineHash": "fnv1a:8718d22d",
-        "sequenceRootPlanInstanceId": "plan:runner.complete_turn:standard-turn-completion",
+        "sequenceRootPlanInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
         "side": "runner",
         "turnKey": "runner:turn:3",
         "planningRulesFingerprint": "fnv1a:ce3968ab",
@@ -10146,7 +10146,7 @@
           {
             "phaseId": "fnv1a:34552fe1",
             "root": {
-              "planInstanceId": "plan:runner.complete_turn:standard-turn-completion",
+              "planInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
               "moduleId": "runner.complete_turn",
               "milestoneId": "complete_turn_after_productive_routes_exhausted",
               "provenance": "resident"
@@ -10235,7 +10235,7 @@
           "sideSafePlanningFingerprint": "fnv1a:ac1e32ad"
         },
         "currentBinding": {
-          "actionId": "runner.end_turn",
+          "actionId": "r9",
           "stateVersion": 36,
           "semanticActionSetFingerprint": "fnv1a:1237c312",
           "invocationKey": "fnv1a:85d87666"
@@ -10243,8 +10243,8 @@
         "actionType": "end_turn",
         "expectationId": "fnv1a:044c970a"
       },
-      "rootForegroundInstanceId": "plan:runner.complete_turn:standard-turn-completion",
-      "executorInstanceId": "plan:runner.complete_turn:standard-turn-completion"
+      "rootForegroundInstanceId": "p2ut8j92he0i09lc4xwtln5iys",
+      "executorInstanceId": "p2ut8j92he0i09lc4xwtln5iys"
     }
   },
   "validation": {

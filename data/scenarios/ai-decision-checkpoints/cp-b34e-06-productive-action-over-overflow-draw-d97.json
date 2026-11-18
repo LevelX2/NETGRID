@@ -7935,7 +7935,7 @@
         "id": "rd"
       },
       "selectedStepKind": "draw_for_answer",
-      "selectedActionId": "runner.draw_card",
+      "selectedActionId": "r8",
       "blockedBy": [
         "missing_breaker_coverage",
         "search_target_not_available"
@@ -7993,7 +7993,7 @@
           "plan_portfolio_role:foreground",
           "plan_portfolio_lifecycle:active",
           "plan_portfolio_previous_entry:runner.opportunistic_central_run:server:rd",
-          "plan_portfolio_action_progress:runner.draw_card",
+          "plan_portfolio_action_progress:r8",
           "plan_portfolio_action_progress_source:selected_mapped_step"
         ]
       },
@@ -8005,7 +8005,7 @@
         "plan_portfolio_foreground:runner.opportunistic_central_run",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.draw_card"
+        "plan_portfolio_selected_action:r8"
       ]
     },
     "strategicIntent": {

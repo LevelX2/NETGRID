@@ -25,8 +25,7 @@ export function corpFreeRezPayoutPreparation(
   const basic = candidates.find((c) => c.actionId === basicFundingActionId);
   const clicks = input.playerView.own.clicks;
   const scoreFunding =
-    signal.parentPlanInstanceId?.startsWith("plan:corp.score_agenda:") ===
-      true &&
+    signal.parentPlanModuleId === "corp.score_agenda" &&
     signal.parentNeedId === signal.needId &&
     signal.delegatedPriorityClass === "P4" &&
     signal.scoreFundingMilestone?.deadline === "multi_turn" &&
@@ -40,7 +39,7 @@ export function corpFreeRezPayoutPreparation(
     signal.immediateDefenseConversion &&
     signal.incrementalDefenseReserve &&
     signal.parentPlanInstanceId ===
-      "plan:corp.defend_servers:server-defense-portfolio";
+      "penw02zfrkklof54c2nuye5att";
   // This reserve pays for already installed ICE before the next Runner turn.
   // Setup may not use more actions before reaching it than the Basic route.
   const defenseSetupFunding =

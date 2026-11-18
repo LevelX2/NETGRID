@@ -320,7 +320,7 @@ describe("pairing 560: purpose-bound preparation and honest protection facts", (
         s.defenseId.startsWith("terminal-central-rez-reserve:rd:"),
       ),
     ).toBe(false);
-    expect(result.actionId).toBe("corp.draw_card");
+    expect(result.actionId).toBe("c8");
     expect(
       result.decisionDebug!.planFirstDecision!.priority?.effectiveClass,
     ).toBe("P2");

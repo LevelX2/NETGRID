@@ -24,7 +24,7 @@ describe("meta 403 pump strength lasts through all subroutines in one encounter"
   it("quotes the live mixed ETR/run-lock route once per encounter", () => {
     const input = captureInput();
     const route = evaluateRunnerRunTargets({ input }).find(
-      (q) => q.actionId === "runner.start_run.r1",
+      (q) => q.actionId === "rs.r1",
     )!;
     expect(route.routeQuote!.guaranteedKnownCost).toBe(9);
     expect(route.routeQuote!.reachability).toBe("guaranteed_access");
@@ -64,7 +64,7 @@ describe("meta 403 pump strength lasts through all subroutines in one encounter"
       runtime.residentPlanPortfolio,
     );
     const result = chooseAiAction(input, { runnerTurnPlannerMode: "cutover" });
-    expect(result.actionId).toBe("runner.start_run.r1");
+    expect(result.actionId).toBe("rs.r1");
     expect(input.legalActions.some((a) => a.actionId === result.actionId)).toBe(
       true,
     );

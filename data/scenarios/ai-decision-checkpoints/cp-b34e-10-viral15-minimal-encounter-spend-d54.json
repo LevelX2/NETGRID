@@ -5927,7 +5927,7 @@
         "label": "Psychic Friend"
       },
       "selectedStepKind": "install_development_card",
-      "selectedActionId": "runner.start_run.rd",
+      "selectedActionId": "rs.rd",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -5991,7 +5991,7 @@
         "plan_portfolio_foreground:runner.play_best_hand_card",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.start_run.rd"
+        "plan_portfolio_selected_action:rs.rd"
       ]
     },
     "strategicIntent": {
@@ -7142,7 +7142,7 @@
       ]
     },
     "runnerRunPlan": {
-      "id": "runner_run_plan:match_b34e724e4cfc0362:89:runner:runner.start_run.rd:rd",
+      "id": "runner_run_plan:match_b34e724e4cfc0362:89:runner:rs.rd:rd",
       "side": "runner",
       "lifecycle": "created",
       "origin": "basic_start_run",
@@ -7160,7 +7160,7 @@
         "trashPolicy": "trash_if_value_positive",
         "reserveForStealOrTrash": 0
       },
-      "runStartActionId": "runner.start_run.rd",
+      "runStartActionId": "rs.rd",
       "sourceTacticalGoalIds": [
         "runner.pressure_good_central_target",
         "runner.avoid_low_value_risk_runs",
@@ -7434,7 +7434,7 @@
       "visibilityEvidence": [
         {
           "kind": "legal_action",
-          "ref": "runner.start_run.rd"
+          "ref": "rs.rd"
         },
         {
           "kind": "action_semantic_candidate",

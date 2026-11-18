@@ -121,7 +121,7 @@ describe("pairing 474: current selected partial defense and exact discounted rez
     ).toBe(true);
     const plan = decision.decisionDebug!.planFirstDecision!;
     expect(plan.rootPlanInstanceId).toBe(
-      "plan:corp.defend_servers:server-defense-portfolio",
+      "penw02zfrkklof54c2nuye5att",
     );
     expect(plan.leafExecutorInstanceId).toBe(plan.rootPlanInstanceId);
     expect(plan.selectedStep!.planInstanceId).toBe(plan.rootPlanInstanceId);

@@ -10,6 +10,7 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate-types
 import { runnerStrategicExchangeRequiresBoundParent } from "../runtime/runner-strategic-exchange";
 import { currentTurnPlanningInvocationVariants } from "./corp-turn-planner-shadow";
 import type { PlanModuleId } from "./plan-kernel-types";
+import { comparePlanIdentities } from "./compact-plan-identity";
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
 import {
   enumerateCurrentPlanSchedulerRoutes,
@@ -740,7 +741,8 @@ function deduplicateHeadRecords<
           compareValidatedPlanAssessments(
             left.route.assessment,
             right.route.assessment,
-          ) || left.head.candidateId.localeCompare(right.head.candidateId),
+          ) || comparePlanIdentities(left.route.instance, right.route.instance) ||
+          left.head.candidateId.localeCompare(right.head.candidateId),
       )
       .reduce((byKey, record) => {
         const key = [

@@ -29,7 +29,7 @@ it("retains counter creation ahead of a transfer operation without an installed 
     cp.runtime,
   );
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("corp.resolve_choice");
+  expect(decision.actionId).toBe("cn");
   expect(decision.selectedChoices).toEqual({
     choiceId: "discard_corp_64",
     selectedOptionIds: ["card_c33x"],

@@ -72,7 +72,7 @@ it("replans the historical turn without funding a false Sentry answer", () => {
   expect(
     decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
   ).not.toContain("breaker_sentry");
-  expect(decision.actionId).toBe("runner.draw_card");
+  expect(decision.actionId).toBe("r8");
   expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({
     actionId: decision.actionId,
     stateVersion: 102,

@@ -1,3 +1,5 @@
+import { instantiatePlanProposal } from "../plans/plan-instance";
+import type { PlanInstance, PlanModuleId } from "../plans/plan-kernel-types";
 import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   applyAction,
@@ -211,7 +213,7 @@ describe("selectedChoicesForDecision", () => {
         source: `runner_program_trash_before_install:${sourceCardInstanceId}:7:payment=ids=runner_installer_1;amounts=0`,
         continuation: {
           family: "runner_program_trash_before_install",
-          originActionId: `runner.install_card.${sourceCardInstanceId}.${sourceCardInstanceId}.runner_program_trash_before_install.runner_installer_1.0`,
+          originActionId: `rc.${sourceCardInstanceId}.${sourceCardInstanceId}.runner_program_trash_before_install.runner_installer_1.0`,
           sourceCardInstanceId,
           sourceCardDefinitionId: 271,
           createdAtStateVersion: 7,
@@ -239,12 +241,12 @@ describe("selectedChoicesForDecision", () => {
       side: "runner",
       stateVersion: 6,
       rootForegroundInstanceId:
-        "plan:runner.rig_and_coverage:breaker_code_gate",
-      executorInstanceId: "plan:runner.rig_and_coverage:breaker_code_gate",
+        "p66rnks1vkgcw2d11pnxw6kb2w",
+      executorInstanceId: "p66rnks1vkgcw2d11pnxw6kb2w",
       selectedActionOrigin: {
-        rootPlanInstanceId: "plan:runner.rig_and_coverage:breaker_code_gate",
-        executorInstanceId: "plan:runner.rig_and_coverage:breaker_code_gate",
-        selectedActionId: `runner.install_card.${sourceCardInstanceId}.${sourceCardInstanceId}.runner_program_trash_before_install.runner_installer_1.0`,
+        rootPlanInstanceId: "p66rnks1vkgcw2d11pnxw6kb2w",
+        executorInstanceId: "p66rnks1vkgcw2d11pnxw6kb2w",
+        selectedActionId: `rc.${sourceCardInstanceId}.${sourceCardInstanceId}.runner_program_trash_before_install.runner_installer_1.0`,
         selectedAtStateVersion: 6,
         immediateChoicePolicy: "resolve_runner_program_trash_before_install",
         sourceCardInstanceId,
@@ -256,7 +258,8 @@ describe("selectedChoicesForDecision", () => {
       },
       instances: [
         {
-          instanceId: "plan:runner.rig_and_coverage:breaker_code_gate",
+ ...choicePlanFixture("runner.rig_and_coverage", "breaker_code_gate", 6),
+          instanceId: "p66rnks1vkgcw2d11pnxw6kb2w",
           moduleId: "runner.rig_and_coverage",
           executionState: "executor",
           moduleState: {
@@ -333,7 +336,7 @@ describe("selectedChoicesForDecision", () => {
           targetAgendaId,
           "0",
           encodeURIComponent(
-            `runner.steal_agenda.${targetAgendaId}.${targetAgendaId}`,
+            `rt.${targetAgendaId}.${targetAgendaId}`,
           ),
           encodeURIComponent(
             `access.agenda_install_as_runner_program:${targetAgendaId}:2`,
@@ -394,11 +397,11 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("materializes delegated hidden-search memory only for the exact parent need", () => {
-    const rootId = "plan:runner.contest_remote:remote%3Ar2";
+    const rootId = "p1p4x83h7yolw2hjtvi0ud06dm";
     const executorId =
-      "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate";
+      "p5s1qdgqrafrs3n2kss1t9ct7m";
     const needId = "coverage:breaker_code_gate";
-    const searchActionId = "runner.play_event.sneak_3.sneak_3.install_program";
+    const searchActionId = "rh.sneak_3.sneak_3.install_program";
     const targetCardId = "rent_i_con_3";
     const sacrificeCardId = "invisibility_1";
     const sourceCardId = "sneak_3";
@@ -451,16 +454,18 @@ describe("selectedChoicesForDecision", () => {
       executorInstanceId: executorId,
       instances: [
         {
+ ...choicePlanFixture("runner.contest_remote", "remote:r2", 6),
           instanceId: rootId,
           moduleId: "runner.contest_remote",
           portfolioRole: "foreground",
-          executionState: "observer",
+          executionState: "idle",
           openNeedIds: [needId],
         },
         {
+ ...choicePlanFixture("runner.rig_and_coverage", "coverage:breaker_code_gate", 6),
           instanceId: executorId,
           moduleId: "runner.rig_and_coverage",
-          portfolioRole: "support",
+          portfolioRole: "background",
           executionState: "executor",
           parentInstanceId: rootId,
           parentNeedId: needId,
@@ -1896,7 +1901,7 @@ describe("selectedChoicesForDecision", () => {
     input.playerView.pendingChoice!.visibility = "public";
     input.playerView.own.stackOrRdCount = rdCount;
     const action = resolveChoiceActionForInput(input);
-    const instanceId = "test:hand-start-draw";
+    const instanceId = "p8ljpo2dae6w0g0kk0949fplay";
     rememberResidentPlanPortfolio(input, {
       schemaVersion: "resident-plan-portfolio-v2",
       side: "corp",
@@ -1905,6 +1910,7 @@ describe("selectedChoicesForDecision", () => {
       executorInstanceId: instanceId,
       instances: [
         {
+ ...choicePlanFixture("corp.hand_and_agenda_management", "test:hand-start-draw", input.playerView.stateVersion),
           instanceId,
           moduleId: "corp.hand_and_agenda_management",
           executionState: "executor",
@@ -2951,11 +2957,12 @@ function rememberResidentScoreChoiceContinuation(
     schemaVersion: "resident-plan-portfolio-v2",
     side: "corp",
     stateVersion: priorInput.playerView.stateVersion,
-    rootForegroundInstanceId: "corp.score_agenda:score-project",
-    executorInstanceId: "corp.score_agenda:score-project",
+    rootForegroundInstanceId: "pb4o6zfj4sjlu8h0yt4k1k7hs2",
+    executorInstanceId: "pb4o6zfj4sjlu8h0yt4k1k7hs2",
     instances: [
       {
-        instanceId: "corp.score_agenda:score-project",
+ ...choicePlanFixture("corp.score_agenda", "score-project", priorInput.playerView.stateVersion),
+        instanceId: "pb4o6zfj4sjlu8h0yt4k1k7hs2",
         moduleId: "corp.score_agenda",
         executionState: "executor",
         moduleState: {
@@ -3001,11 +3008,12 @@ function rememberAgendaPurgeDefenseChoice(
     side: "corp",
     stateVersion: input.playerView.stateVersion,
     rootForegroundInstanceId:
-      "plan:corp.defend_servers:server-defense-portfolio",
-    executorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      "penw02zfrkklof54c2nuye5att",
+    executorInstanceId: "penw02zfrkklof54c2nuye5att",
     instances: [
       {
-        instanceId: "plan:corp.defend_servers:server-defense-portfolio",
+ ...choicePlanFixture("corp.defend_servers", "server-defense-portfolio", input.playerView.stateVersion),
+        instanceId: "penw02zfrkklof54c2nuye5att",
         moduleId: "corp.defend_servers",
         executionState: "executor",
         moduleState: {
@@ -3014,7 +3022,7 @@ function rememberAgendaPurgeDefenseChoice(
             {
               kind: "generic",
               phase: "resolve_install_targets",
-              actionIds: ["corp.resolve_choice"],
+              actionIds: ["cn"],
               choiceResolution: {
                 kind: "agenda_purge_install_targets",
                 choiceId: "choice_multi",
@@ -3049,11 +3057,12 @@ function rememberClassicDeflectorDefenseChoice(
     side: "corp",
     stateVersion: input.playerView.stateVersion,
     rootForegroundInstanceId:
-      "plan:corp.defend_servers:server-defense-portfolio",
-    executorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      "penw02zfrkklof54c2nuye5att",
+    executorInstanceId: "penw02zfrkklof54c2nuye5att",
     instances: [
       {
-        instanceId: "plan:corp.defend_servers:server-defense-portfolio",
+ ...choicePlanFixture("corp.defend_servers", "server-defense-portfolio", input.playerView.stateVersion),
+        instanceId: "penw02zfrkklof54c2nuye5att",
         moduleId: "corp.defend_servers",
         executionState: "executor",
         moduleState: {
@@ -3062,7 +3071,7 @@ function rememberClassicDeflectorDefenseChoice(
             {
               kind: "generic",
               phase: "resolve_run_redirect",
-              actionIds: ["corp.resolve_choice"],
+              actionIds: ["cn"],
               choiceResolution: {
                 kind: "classic_deflector_redirect",
                 choiceId: "choice_multi",
@@ -3111,13 +3120,14 @@ function rememberRunnerInstalledCardLiquidationChoice(
     side: "runner",
     stateVersion: input.playerView.stateVersion,
     rootForegroundInstanceId:
-      "plan:runner.economy:installed-card-liquidation%3Achoice_multi",
+      "pf0rzh5qwfe09ph3fb36iwxlpz",
     executorInstanceId:
-      "plan:runner.economy:installed-card-liquidation%3Achoice_multi",
+      "pf0rzh5qwfe09ph3fb36iwxlpz",
     instances: [
       {
+ ...choicePlanFixture("runner.economy", "installed-card-liquidation:choice_multi", input.playerView.stateVersion),
         instanceId:
-          "plan:runner.economy:installed-card-liquidation%3Achoice_multi",
+          "pf0rzh5qwfe09ph3fb36iwxlpz",
         moduleId: "runner.economy",
         executionState: "executor",
         moduleState: {
@@ -3125,7 +3135,7 @@ function rememberRunnerInstalledCardLiquidationChoice(
           signal: {
             conversionId: "installed-card-liquidation:choice_multi",
             ...source,
-            actionId: "runner.resolve_choice",
+            actionId: "rn",
             choiceId: "choice_multi",
             sourceStateVersion: input.playerView.stateVersion,
             selectedOptionId: source.selectedOptionId,
@@ -3214,7 +3224,7 @@ function rememberResidentCorpDiscardBinding(
   actionId: string,
   selectedOptionIds: string[],
 ): void {
-  const instanceId = "plan:corp.hand_and_agenda_management:discard-window";
+  const instanceId = "p1cpecpxyrmqcpnm1t963w5xd8";
   rememberResidentPlanPortfolio(input, {
     schemaVersion: "resident-plan-portfolio-v2",
     side: "corp",
@@ -3223,6 +3233,7 @@ function rememberResidentCorpDiscardBinding(
     executorInstanceId: instanceId,
     instances: [
       {
+ ...choicePlanFixture("corp.hand_and_agenda_management", "discard-window", input.playerView.stateVersion),
         instanceId,
         moduleId: "corp.hand_and_agenda_management",
         executionState: "executor",
@@ -3253,7 +3264,7 @@ function rememberResidentRunnerDiscardBinding(
   actionId: string,
   selectedOptionIds: string[],
 ): void {
-  const instanceId = "plan:runner.defense_and_recovery:runner";
+  const instanceId = "p1gzjb6yfcv4zbzow512kexs33";
   rememberResidentPlanPortfolio(input, {
     schemaVersion: "resident-plan-portfolio-v2",
     side: "runner",
@@ -3262,6 +3273,7 @@ function rememberResidentRunnerDiscardBinding(
     executorInstanceId: instanceId,
     instances: [
       {
+ ...choicePlanFixture("runner.defense_and_recovery", "runner", input.playerView.stateVersion),
         instanceId,
         moduleId: "runner.defense_and_recovery",
         executionState: "executor",
@@ -3289,7 +3301,7 @@ function rememberResidentCorpDrawFilterBinding(
   actionId: string,
   selectedOptionIds: string[],
 ): void {
-  const instanceId = "plan:corp.hand_and_agenda_management:spg-draw-filter";
+  const instanceId = "pes7wja511pbpylt1kyyr0qjg7";
   rememberResidentPlanPortfolio(input, {
     schemaVersion: "resident-plan-portfolio-v2",
     side: "corp",
@@ -3298,6 +3310,7 @@ function rememberResidentCorpDrawFilterBinding(
     executorInstanceId: instanceId,
     instances: [
       {
+ ...choicePlanFixture("corp.hand_and_agenda_management", "spg-draw-filter", input.playerView.stateVersion),
         instanceId,
         moduleId: "corp.hand_and_agenda_management",
         executionState: "executor",
@@ -3328,7 +3341,7 @@ function rememberResidentCorpHqShuffleBinding(
   actionId: string,
   selectedOptionIds: string[],
 ): void {
-  const instanceId = "plan:corp.hand_and_agenda_management:hq-shuffle";
+  const instanceId = "p2fpe9ixdc55kgyrp1d902661i";
   rememberResidentPlanPortfolio(input, {
     schemaVersion: "resident-plan-portfolio-v2",
     side: "corp",
@@ -3337,6 +3350,7 @@ function rememberResidentCorpHqShuffleBinding(
     executorInstanceId: instanceId,
     instances: [
       {
+ ...choicePlanFixture("corp.hand_and_agenda_management", "hq-shuffle", input.playerView.stateVersion),
         instanceId,
         moduleId: "corp.hand_and_agenda_management",
         executionState: "executor",
@@ -3493,7 +3507,7 @@ function visibleCard(
 
 function resolveChoiceAction(side: "corp" | "runner" = "corp"): LegalAction {
   return {
-    actionId: `${side}.resolve_choice`,
+    actionId: side === "corp" ? "cn" : "rn",
     side,
     type: "resolve_choice",
     label: "Resolve choice",
@@ -3575,4 +3589,19 @@ function unusedDependencies(): Parameters<
     rolesForCardId: () => [],
     effectsForCardId: () => [],
   };
+}
+
+function choicePlanFixture(moduleId: PlanModuleId, dedupeKey: string, stateVersion: number): PlanInstance {
+  return instantiatePlanProposal({
+    moduleId, moduleVersion: "1", dedupeKey,
+    side: moduleId.startsWith("corp.") ? "corp" : "runner",
+    strategyLineIds: [], executionClass: "bounded_sequence",
+    initialViability: "ready", persistencePolicy: "locked_sequence",
+    retentionPolicy: {
+      blockedStateVersionTtl: 8, dormantStateVersionTtl: 4, completedHistoryStateVersionTtl: 2,
+      abandonWhenTargetMissing: true, protectedWhileNeedOpen: true, protectedWhileCommitted: true,
+    },
+    phase: "resolve_bound_choice", milestone: "bound_choice_resolved", moduleState: {},
+    blockers: [], resumeConditions: [], completionConditions: [], abandonmentConditions: [], evidenceRefs: [],
+  }, stateVersion);
 }

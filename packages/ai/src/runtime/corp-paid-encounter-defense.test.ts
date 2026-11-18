@@ -144,9 +144,9 @@ describe("paid encounter defense through normal Engine and plan ownership", () =
         decisionDebug: {
           planFirstDecision: {
             rootPlanInstanceId:
-              "plan:corp.defend_servers:server-defense-portfolio",
+              "penw02zfrkklof54c2nuye5att",
             leafExecutorInstanceId:
-              "plan:corp.defend_servers:server-defense-portfolio",
+              "penw02zfrkklof54c2nuye5att",
             route: { actionId: activation.actionId },
           },
         },

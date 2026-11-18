@@ -118,7 +118,7 @@ describe("pairing 472: actual Engine global ICE discount through the productive 
     expect(state.cardInstances[action.source!]!.definitionId).toBe(fortress);
     expect(chosen).toMatchObject({ fallbackUsed: false, timeoutUsed: false });
     expect(chosen.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
       priority: { effectiveClass: "P3" },
     });
     const rezzed = apply(state, action);

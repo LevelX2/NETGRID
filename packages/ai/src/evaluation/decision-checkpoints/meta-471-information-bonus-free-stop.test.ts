@@ -37,7 +37,7 @@ it.each([false, true])(
       });
     }
     const target = evaluateRunnerRunTargets({ input }).find(
-      (e) => e.actionId === "runner.start_run.hq",
+      (e) => e.actionId === "rs.hq",
     )!;
     expect(target).toMatchObject({
       accessPayoff: passiveMultiaccess ? "access_bonus" : "unknown",
@@ -65,7 +65,7 @@ it.each(["guaranteed_access", "known_agenda", "new_installation"])(
     const cp = fixture();
     const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
     const target = evaluateRunnerRunTargets({ input }).find(
-      (e) => e.actionId === "runner.start_run.hq",
+      (e) => e.actionId === "rs.hq",
     )!;
     if (condition === "guaranteed_access")
       target.routeQuote!.reachability = "guaranteed_access";

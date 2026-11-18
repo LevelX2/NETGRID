@@ -51,7 +51,7 @@ it("finishes the cheaper installed agenda before the prospective equal-point sib
   expect(action.type).toBe("advance_card");
   expect(action.source).toBe("c2kd");
   const parent =
-    "plan:corp.score_agenda:agenda%3Ac2kd%3Ar1";
+    "p9zaxr028shneph2natwhsp7ql";
   const plan = decision.decisionDebug?.planFirstDecision;
   expect(plan?.rootPlanInstanceId).toBe(parent);
   expect(plan?.leafExecutorInstanceId).toBe(parent);

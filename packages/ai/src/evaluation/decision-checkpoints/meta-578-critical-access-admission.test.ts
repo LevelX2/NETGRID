@@ -39,7 +39,7 @@ it.each(["before-earlier-run", "before-run"])(
     const target = evaluateRunnerRunTargets({
       input,
       deckCapabilities: input.ownDeckCapabilities!,
-    }).find((t) => t.actionId === "runner.start_run.rd")!;
+    }).find((t) => t.actionId === "rs.rd")!;
     expect(target.prerunReserveQuote).toMatchObject({
       status: "blocked",
       requiredHandBuffer: 2,
@@ -58,14 +58,16 @@ it.each(["before-earlier-run", "before-run"])(
       result = chooseAiAction(input);
     expect(JSON.stringify(input)).toBe(unchanged);
     expect(result).toMatchObject({ fallbackUsed: false, timeoutUsed: false });
-    expect(result.actionId).not.toBe("runner.start_run.rd");
+    expect(result.actionId).not.toBe("rs.rd");
     expect(
       input.legalActions.find((a) => a.actionId === result.actionId)
         ?.expiresAtStateVersion,
     ).toBe(input.playerView.stateVersion);
-    expect(result.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toMatch(
-      /^plan:runner\.(defense_and_recovery|economy):/,
-    );
+    expect(
+      result.decisionDebug?.planFirstDecision?.portfolio.find(
+        (instance) => instance.instanceId === result.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+      )?.moduleId,
+    ).toMatch(/^runner\.(defense_and_recovery|economy)$/);
   },
 );
 
@@ -85,7 +87,7 @@ it("reopens the empty R&D route when the current hand is buffered", () => {
   const target = evaluateRunnerRunTargets({
     input,
     deckCapabilities: input.ownDeckCapabilities!,
-  }).find((t) => t.actionId === "runner.start_run.rd")!;
+  }).find((t) => t.actionId === "rs.rd")!;
   expect(target.prerunReserveQuote?.status).not.toBe("blocked");
   expect(target.recommendation).toBe("run_now");
 });

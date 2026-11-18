@@ -7864,7 +7864,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.trigger_ability"
+        "plan_portfolio_selected_action:rx"
       ]
     },
     "strategicIntent": {
@@ -8902,12 +8902,12 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.start_run.rd"
+        "actionId": "rs.rd"
       }
     ],
     "forbiddenActions": [
       {
-        "actionId": "runner.start_run.r1"
+        "actionId": "rs.r1"
       }
     ],
     "planExecution": {

@@ -481,19 +481,19 @@
               }
             },
             {
-              "instanceId": "h1qjfwtp",
+              "instanceId": "hrd.i1",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
             },
             {
-              "instanceId": "h11uc4l7",
+              "instanceId": "hrd.i2",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
             },
             {
-              "instanceId": "h1fzy5yq",
+              "instanceId": "hrd.i3",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -628,7 +628,7 @@
           ],
           "root": [
             {
-              "instanceId": "hc8brj6",
+              "instanceId": "hr1.r0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -640,7 +640,7 @@
           "label": "Remote 2",
           "ice": [
             {
-              "instanceId": "h1n7c5wb",
+              "instanceId": "hr2.i0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -5337,7 +5337,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.gain_credit",
+          "actionId": "rb",
           "side": "runner",
           "type": "gain_credit",
           "label": "1 Credit nehmen",
@@ -5358,7 +5358,7 @@
           }
         },
         {
-          "actionId": "runner.draw_card",
+          "actionId": "r8",
           "side": "runner",
           "type": "draw_card",
           "label": "Karte ziehen",
@@ -5381,7 +5381,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1w1.hq.c1w1.390",
+          "actionId": "rh.c1w1.hq.c1w1.390",
           "side": "runner",
           "type": "play_event",
           "label": "Inside Job auf HQ",
@@ -5411,7 +5411,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1w1.rd.c1w1.390",
+          "actionId": "rh.c1w1.rd.c1w1.390",
           "side": "runner",
           "type": "play_event",
           "label": "Inside Job auf R&D",
@@ -5441,7 +5441,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1w1.archives.c1w1.390",
+          "actionId": "rh.c1w1.archives.c1w1.390",
           "side": "runner",
           "type": "play_event",
           "label": "Inside Job auf Archives",
@@ -5471,7 +5471,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1w1.r1.c1w1.390",
+          "actionId": "rh.c1w1.r1.c1w1.390",
           "side": "runner",
           "type": "play_event",
           "label": "Inside Job auf Remote 1",
@@ -5501,7 +5501,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1w1.r2.c1w1.390",
+          "actionId": "rh.c1w1.r2.c1w1.390",
           "side": "runner",
           "type": "play_event",
           "label": "Inside Job auf Remote 2",
@@ -5531,7 +5531,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c1rl.c1rl",
+          "actionId": "rc.c1rl.c1rl",
           "side": "runner",
           "type": "install_card",
           "label": "Worm installieren",
@@ -5552,7 +5552,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c1rl.c1rl.runner_program_trash_before_install",
+          "actionId": "rc.c1rl.c1rl.runner_program_trash_before_install",
           "side": "runner",
           "type": "install_card",
           "label": "Worm mit Programmtrash installieren",
@@ -5574,7 +5574,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c29e.c29e",
+          "actionId": "rc.c29e.c29e",
           "side": "runner",
           "type": "install_card",
           "label": "Broker installieren",
@@ -5605,7 +5605,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c1fu.c1fu",
+          "actionId": "rc.c1fu.c1fu",
           "side": "runner",
           "type": "install_card",
           "label": "Dwarf installieren",
@@ -5626,7 +5626,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c1fu.c1fu.runner_program_trash_before_install",
+          "actionId": "rc.c1fu.c1fu.runner_program_trash_before_install",
           "side": "runner",
           "type": "install_card",
           "label": "Dwarf mit Programmtrash installieren",
@@ -5648,7 +5648,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c1k2.c1k2",
+          "actionId": "rc.c1k2.c1k2",
           "side": "runner",
           "type": "install_card",
           "label": "Loony Goon installieren",
@@ -5669,7 +5669,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c1k2.c1k2.runner_program_trash_before_install",
+          "actionId": "rc.c1k2.c1k2.runner_program_trash_before_install",
           "side": "runner",
           "type": "install_card",
           "label": "Loony Goon mit Programmtrash installieren",
@@ -5691,7 +5691,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.hq",
+          "actionId": "rs.hq",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf HQ",
@@ -5712,7 +5712,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.rd",
+          "actionId": "rs.rd",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf R&D",
@@ -5733,7 +5733,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.archives",
+          "actionId": "rs.archives",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf Archives",
@@ -5754,7 +5754,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.r1",
+          "actionId": "rs.r1",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf Remote 1",
@@ -5775,7 +5775,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.r2",
+          "actionId": "rs.r2",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf Remote 2",
@@ -5796,7 +5796,7 @@
           }
         },
         {
-          "actionId": "runner.end_turn",
+          "actionId": "r9",
           "side": "runner",
           "type": "end_turn",
           "label": "Zug beenden",
@@ -8071,7 +8071,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "runner.gain_credit",
+        "actionId": "rb",
         "side": "runner",
         "type": "gain_credit",
         "label": "1 Credit nehmen",
@@ -8092,7 +8092,7 @@
         }
       },
       {
-        "actionId": "runner.draw_card",
+        "actionId": "r8",
         "side": "runner",
         "type": "draw_card",
         "label": "Karte ziehen",
@@ -8115,7 +8115,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1w1.hq.c1w1.390",
+        "actionId": "rh.c1w1.hq.c1w1.390",
         "side": "runner",
         "type": "play_event",
         "label": "Inside Job auf HQ",
@@ -8145,7 +8145,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1w1.rd.c1w1.390",
+        "actionId": "rh.c1w1.rd.c1w1.390",
         "side": "runner",
         "type": "play_event",
         "label": "Inside Job auf R&D",
@@ -8175,7 +8175,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1w1.archives.c1w1.390",
+        "actionId": "rh.c1w1.archives.c1w1.390",
         "side": "runner",
         "type": "play_event",
         "label": "Inside Job auf Archives",
@@ -8205,7 +8205,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1w1.r1.c1w1.390",
+        "actionId": "rh.c1w1.r1.c1w1.390",
         "side": "runner",
         "type": "play_event",
         "label": "Inside Job auf Remote 1",
@@ -8235,7 +8235,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1w1.r2.c1w1.390",
+        "actionId": "rh.c1w1.r2.c1w1.390",
         "side": "runner",
         "type": "play_event",
         "label": "Inside Job auf Remote 2",
@@ -8265,7 +8265,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c1rl.c1rl",
+        "actionId": "rc.c1rl.c1rl",
         "side": "runner",
         "type": "install_card",
         "label": "Worm installieren",
@@ -8286,7 +8286,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c1rl.c1rl.runner_program_trash_before_install",
+        "actionId": "rc.c1rl.c1rl.runner_program_trash_before_install",
         "side": "runner",
         "type": "install_card",
         "label": "Worm mit Programmtrash installieren",
@@ -8308,7 +8308,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c29e.c29e",
+        "actionId": "rc.c29e.c29e",
         "side": "runner",
         "type": "install_card",
         "label": "Broker installieren",
@@ -8339,7 +8339,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c1fu.c1fu",
+        "actionId": "rc.c1fu.c1fu",
         "side": "runner",
         "type": "install_card",
         "label": "Dwarf installieren",
@@ -8360,7 +8360,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c1fu.c1fu.runner_program_trash_before_install",
+        "actionId": "rc.c1fu.c1fu.runner_program_trash_before_install",
         "side": "runner",
         "type": "install_card",
         "label": "Dwarf mit Programmtrash installieren",
@@ -8382,7 +8382,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c1k2.c1k2",
+        "actionId": "rc.c1k2.c1k2",
         "side": "runner",
         "type": "install_card",
         "label": "Loony Goon installieren",
@@ -8403,7 +8403,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c1k2.c1k2.runner_program_trash_before_install",
+        "actionId": "rc.c1k2.c1k2.runner_program_trash_before_install",
         "side": "runner",
         "type": "install_card",
         "label": "Loony Goon mit Programmtrash installieren",
@@ -8425,7 +8425,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.hq",
+        "actionId": "rs.hq",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf HQ",
@@ -8446,7 +8446,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.rd",
+        "actionId": "rs.rd",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf R&D",
@@ -8467,7 +8467,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.archives",
+        "actionId": "rs.archives",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf Archives",
@@ -8488,7 +8488,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.r1",
+        "actionId": "rs.r1",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf Remote 1",
@@ -8509,7 +8509,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.r2",
+        "actionId": "rs.r2",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf Remote 2",
@@ -8530,7 +8530,7 @@
         }
       },
       {
-        "actionId": "runner.end_turn",
+        "actionId": "r9",
         "side": "runner",
         "type": "end_turn",
         "label": "Zug beenden",
@@ -8584,7 +8584,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 175,
-      "sideSafePlanningFingerprint": "fnv1a:d8f717e3"
+      "sideSafePlanningFingerprint": "fnv1a:feea8ffd"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_redline_riot_1.0.0",
@@ -14433,7 +14433,7 @@
       "stateVersion": 168,
       "instances": [
         {
-          "instanceId": "plan:runner.credit_bank:c29e",
+          "instanceId": "pdeckcw9fkuryyxs8xionefklm",
           "dedupeKey": "c29e",
           "moduleId": "runner.credit_bank",
           "moduleVersion": "1",
@@ -14528,7 +14528,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.defense_and_recovery:runner",
+          "instanceId": "p1gzjb6yfcv4zbzow512kexs33",
           "dedupeKey": "runner",
           "moduleId": "runner.defense_and_recovery",
           "moduleVersion": "1",
@@ -14572,7 +14572,7 @@
               "forgoExhaustedStandardCapacity": false,
               "forgoTerminalDeckPressureCapacity": false,
               "discardChoiceBinding": {
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "choiceId": "discard_runner_168",
                 "observedAtStateVersion": 168,
                 "selectedOptionIds": [
@@ -14651,25 +14651,25 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:runner.credit_bank:c29e",
+          "instanceId": "pdeckcw9fkuryyxs8xionefklm",
           "stateVersion": 168,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.defense_and_recovery:runner",
+          "instanceId": "p1gzjb6yfcv4zbzow512kexs33",
           "stateVersion": 168,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.complete_turn:standard-turn-completion",
+          "instanceId": "p2ut8j92he0i09lc4xwtln5iys",
           "stateVersion": 168,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.defense_and_recovery:runner",
+          "instanceId": "p1gzjb6yfcv4zbzow512kexs33",
           "stateVersion": 168,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
@@ -14682,7 +14682,7 @@
         "commitmentId": "fnv1a:443f39e5",
         "sourcePlanId": "fnv1a:ff7b3ee4",
         "sourceLineHash": "fnv1a:988fe5b6",
-        "sequenceRootPlanInstanceId": "plan:runner.defense_and_recovery:runner",
+        "sequenceRootPlanInstanceId": "p1gzjb6yfcv4zbzow512kexs33",
         "side": "runner",
         "turnKey": "runner:turn:23",
         "planningRulesFingerprint": "fnv1a:697f22b3",
@@ -14699,7 +14699,7 @@
           {
             "phaseId": "fnv1a:21771d5c",
             "root": {
-              "planInstanceId": "plan:runner.defense_and_recovery:runner",
+              "planInstanceId": "p1gzjb6yfcv4zbzow512kexs33",
               "moduleId": "runner.defense_and_recovery",
               "milestoneId": "resolve_plan_bound_runner_discard",
               "provenance": "resident"
@@ -14816,7 +14816,7 @@
           "sideSafePlanningFingerprint": "fnv1a:161c065b"
         },
         "currentBinding": {
-          "actionId": "runner.resolve_choice",
+          "actionId": "rn",
           "stateVersion": 168,
           "semanticActionSetFingerprint": "fnv1a:5deb1015",
           "invocationKey": "fnv1a:5b7f3d9c"
@@ -14824,8 +14824,8 @@
         "actionType": "resolve_choice",
         "expectationId": "fnv1a:75829ae6"
       },
-      "rootForegroundInstanceId": "plan:runner.defense_and_recovery:runner",
-      "executorInstanceId": "plan:runner.defense_and_recovery:runner"
+      "rootForegroundInstanceId": "p1gzjb6yfcv4zbzow512kexs33",
+      "executorInstanceId": "p1gzjb6yfcv4zbzow512kexs33"
     }
   },
   "validation": {

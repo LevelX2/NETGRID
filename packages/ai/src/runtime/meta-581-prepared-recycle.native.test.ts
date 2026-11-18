@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import { isRemoteServerId } from "@netgrid/shared";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
@@ -41,7 +42,7 @@ it.each(cases)("G%i D%i progresses the native certified recycling agenda before 
   expect(action.type).toBe("advance_card");
   expect(action.source).toBe(target.instanceId);
   expect(result.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe("corp.score_agenda");
-  expect(result.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe("plan:corp.score_agenda:"+encodeURIComponent("agenda:"+target.instanceId+":r1"));
+  expect(result.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(planInstanceIdForProposal({ moduleId: "corp.score_agenda", dedupeKey: `agenda:${target.instanceId}:r1` }));
   expect(projects.some(p=>p.routeAssessment==="corp_resident_score_parent_dominates_sibling_route" && !p.feasible)).toBe(true);
   expect(getLegalActions(f.state,"corp").map(a=>a.actionId).sort()).toEqual(input.legalActions.map(a=>a.actionId).sort());
   if(!result.actionId)throw Error("concrete native action required");

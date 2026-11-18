@@ -12306,7 +12306,7 @@
       "stateVersion": 262,
       "instances": [
         {
-          "instanceId": "plan:corp.economy:economy-visible-liquidity-development%3Acorp%3A32",
+          "instanceId": "pbnsnhptr9dgek3wlgz7omote4",
           "dedupeKey": "economy-visible-liquidity-development:corp:32",
           "moduleId": "corp.economy",
           "moduleVersion": "1",
@@ -12343,7 +12343,7 @@
               "gap": 10,
               "projectedCreditGain": 1,
               "actionIds": [
-                "corp.gain_credit"
+                "cb"
               ],
               "priorityClass": "P6",
               "cadence": {
@@ -12395,7 +12395,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Acel%3Ar1",
+          "instanceId": "p7yxlodiop6lk6q584gbpqwldp",
           "dedupeKey": "agenda:cel:r1",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -12429,7 +12429,7 @@
               "agendaPoints": 2,
               "agendaInstanceId": "cel",
               "actionIds": [
-                "corp.install_card.cel.r1.cel"
+                "cc.cel.r1.cel"
               ],
               "serverId": "r1",
               "phase": "install_agenda",
@@ -12451,7 +12451,7 @@
                 "scoreReserve": {
                   "creditBreakdown": [
                     {
-                      "reserveId": "score_action:corp.install_card.cel.r1.cel",
+                      "reserveId": "score_action:cc.cel.r1.cel",
                       "credits": 0
                     },
                     {
@@ -12471,7 +12471,7 @@
                   "availableCorpClicks": 3,
                   "totalScoreReserveCredits": 4,
                   "hardClickReserve": 0,
-                  "scoreReserveFingerprint": "clicks:0|115:score_action:corp.install_card.cel.r1.cel=0|54:post_score_floor:cel=0|59:remaining_advancement:cel=4",
+                  "scoreReserveFingerprint": "clicks:0|115:score_action:cc.cel.r1.cel=0|54:post_score_floor:cel=0|59:remaining_advancement:cel=4",
                   "protection": {
                     "knowledge": "known",
                     "runnerAccessSuccessProbability": {
@@ -12574,7 +12574,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Acel%3Ar2",
+          "instanceId": "p7yxm9zd2cfbzl1n6a6dzqvhqg",
           "dedupeKey": "agenda:cel:r2",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -12608,7 +12608,7 @@
               "agendaPoints": 2,
               "agendaInstanceId": "cel",
               "actionIds": [
-                "corp.install_card.cel.r2.cel"
+                "cc.cel.r2.cel"
               ],
               "serverId": "r2",
               "phase": "install_agenda",
@@ -12630,7 +12630,7 @@
                 "scoreReserve": {
                   "creditBreakdown": [
                     {
-                      "reserveId": "score_action:corp.install_card.cel.r2.cel",
+                      "reserveId": "score_action:cc.cel.r2.cel",
                       "credits": 0
                     },
                     {
@@ -12650,7 +12650,7 @@
                   "availableCorpClicks": 3,
                   "totalScoreReserveCredits": 4,
                   "hardClickReserve": 0,
-                  "scoreReserveFingerprint": "clicks:0|115:score_action:corp.install_card.cel.r2.cel=0|54:post_score_floor:cel=0|59:remaining_advancement:cel=4",
+                  "scoreReserveFingerprint": "clicks:0|115:score_action:cc.cel.r2.cel=0|54:post_score_floor:cel=0|59:remaining_advancement:cel=4",
                   "protection": {
                     "knowledge": "known",
                     "runnerAccessSuccessProbability": {
@@ -12753,7 +12753,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Acel%3Ar3",
+          "instanceId": "p7yxm23o13cpc9ll6jcnzfxpbj",
           "dedupeKey": "agenda:cel:r3",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -12787,7 +12787,7 @@
               "agendaPoints": 2,
               "agendaInstanceId": "cel",
               "actionIds": [
-                "corp.install_card.cel.r3.cel"
+                "cc.cel.r3.cel"
               ],
               "serverId": "r3",
               "phase": "install_agenda",
@@ -12809,7 +12809,7 @@
                 "scoreReserve": {
                   "creditBreakdown": [
                     {
-                      "reserveId": "score_action:corp.install_card.cel.r3.cel",
+                      "reserveId": "score_action:cc.cel.r3.cel",
                       "credits": 0
                     },
                     {
@@ -12829,7 +12829,7 @@
                   "availableCorpClicks": 3,
                   "totalScoreReserveCredits": 4,
                   "hardClickReserve": 0,
-                  "scoreReserveFingerprint": "clicks:0|115:score_action:corp.install_card.cel.r3.cel=0|54:post_score_floor:cel=0|59:remaining_advancement:cel=4",
+                  "scoreReserveFingerprint": "clicks:0|115:score_action:cc.cel.r3.cel=0|54:post_score_floor:cel=0|59:remaining_advancement:cel=4",
                   "protection": {
                     "knowledge": "known",
                     "runnerAccessSuccessProbability": {
@@ -12935,31 +12935,31 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:corp.economy:economy-visible-liquidity-development%3Acorp%3A32",
+          "instanceId": "pbnsnhptr9dgek3wlgz7omote4",
           "stateVersion": 262,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Acel%3Ar1",
+          "instanceId": "p7yxlodiop6lk6q584gbpqwldp",
           "stateVersion": 262,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Acel%3Ar2",
+          "instanceId": "p7yxm9zd2cfbzl1n6a6dzqvhqg",
           "stateVersion": 262,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Acel%3Ar3",
+          "instanceId": "p7yxm23o13cpc9ll6jcnzfxpbj",
           "stateVersion": 262,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.economy:economy-visible-liquidity-development%3Acorp%3A32",
+          "instanceId": "pbnsnhptr9dgek3wlgz7omote4",
           "stateVersion": 262,
           "reason": "executor_selected",
           "fromExecutionState": "idle",
@@ -12967,16 +12967,16 @@
           "detailCode": "validated_scheduler_selection"
         }
       ],
-      "rootForegroundInstanceId": "plan:corp.economy:economy-visible-liquidity-development%3Acorp%3A32",
-      "executorInstanceId": "plan:corp.economy:economy-visible-liquidity-development%3Acorp%3A32",
+      "rootForegroundInstanceId": "pbnsnhptr9dgek3wlgz7omote4",
+      "executorInstanceId": "pbnsnhptr9dgek3wlgz7omote4",
       "campaigns": [
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:agenda:cel:r1",
+          "campaignId": "k4b83125md4hkt5q79vmuuimak",
           "kind": "agenda",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.score_agenda:agenda%3Acel%3Ar1",
+            "rootPlanInstanceId": "p7yxlodiop6lk6q584gbpqwldp",
             "moduleId": "corp.score_agenda",
             "targetServerId": "r1",
             "targetCardInstanceId": "cel"
@@ -13003,15 +13003,19 @@
             "campaign_status:blocked",
             "corp-opponent-campaign-continuity-v1",
             "corp_score_protection_required:r1"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.score_agenda",
+            "objectiveKey": "agenda:cel:r1"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:agenda:cel:r2",
+          "campaignId": "k4b82gdt7esffn51qk9s4svd8x",
           "kind": "agenda",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.score_agenda:agenda%3Acel%3Ar2",
+            "rootPlanInstanceId": "p7yxm9zd2cfbzl1n6a6dzqvhqg",
             "moduleId": "corp.score_agenda",
             "targetServerId": "r2",
             "targetCardInstanceId": "cel"
@@ -13038,15 +13042,19 @@
             "campaign_status:blocked",
             "corp-opponent-campaign-continuity-v1",
             "corp_score_protection_required:r2"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.score_agenda",
+            "objectiveKey": "agenda:cel:r2"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:agenda:cel:r3",
+          "campaignId": "k4b82n7qnfqbmdrh9m9zrjwo36",
           "kind": "agenda",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.score_agenda:agenda%3Acel%3Ar3",
+            "rootPlanInstanceId": "p7yxm23o13cpc9ll6jcnzfxpbj",
             "moduleId": "corp.score_agenda",
             "targetServerId": "r3",
             "targetCardInstanceId": "cel"
@@ -13073,12 +13081,16 @@
             "campaign_status:blocked",
             "corp-opponent-campaign-continuity-v1",
             "corp_score_protection_required:r3"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.score_agenda",
+            "objectiveKey": "agenda:cel:r3"
+          }
         }
       ],
       "turnPlanCommitment": {
         "schemaVersion": "turn-plan-commitment-v2",
-        "sequenceRootPlanInstanceId": "plan:corp.economy:economy-visible-liquidity-development%3Acorp%3A32",
+        "sequenceRootPlanInstanceId": "pbnsnhptr9dgek3wlgz7omote4",
         "commitmentId": "fnv1a:87ed4eb2",
         "sourcePlanId": "fnv1a:957b60c2",
         "sourceLineHash": "fnv1a:12e5c791",
@@ -13098,7 +13110,7 @@
           {
             "phaseId": "fnv1a:6b2d7f7b",
             "root": {
-              "planInstanceId": "plan:corp.economy:economy-visible-liquidity-development%3Acorp%3A32",
+              "planInstanceId": "pbnsnhptr9dgek3wlgz7omote4",
               "moduleId": "corp.economy",
               "milestoneId": "develop_or_convert_corp_economy",
               "provenance": "resident"
@@ -13187,7 +13199,7 @@
           "sideSafePlanningFingerprint": "fnv1a:431218c3"
         },
         "currentBinding": {
-          "actionId": "corp.gain_credit",
+          "actionId": "cb",
           "stateVersion": 262,
           "semanticActionSetFingerprint": "fnv1a:7f0a81db",
           "invocationKey": "fnv1a:cc7ea6c1"
@@ -13205,7 +13217,7 @@
     ],
     "forbiddenActions": [
       {
-        "actionId": "corp.install_card.cfx.rd.cfx.4"
+        "actionId": "cc.cfx.rd.cfx.4"
       }
     ],
     "planExecution": {

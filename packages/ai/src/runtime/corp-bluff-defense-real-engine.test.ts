@@ -134,11 +134,18 @@ it("funds the exact installed decoy ICE before committing the last credit elsewh
   const next = chooseAndApply(state, "corp");
   expect(next.action.type).toBe("gain_credit");
   expect(
-    next.decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toContain("plan:corp.economy:ambush-defense-funding");
+    next.decision.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === next.decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    ),
+  ).toMatchObject({
+    moduleId: "corp.economy",
+    dedupeKey: expect.stringContaining("ambush-defense-funding"),
+  });
   expect(
-    next.decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-  ).toContain("plan:corp.ambush_and_bluff:");
+    next.decision.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === next.decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+    )?.moduleId,
+  ).toBe("corp.ambush_and_bluff");
   expect(next.state.corp.credits).toBe(5);
 });
 it("does not count next-run Bad Publicity as cash extracted by bait ICE", () => {
@@ -162,7 +169,7 @@ it("rezzes funded bait ICE, charges an actual break and only then recycles the b
   expect(first.action.type).toBe("rez_ice");
   expect(
     first.decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toBe("plan:corp.defend_servers:server-defense-portfolio");
+  ).toBe("penw02zfrkklof54c2nuye5att");
   state = first.state;
   const runnerBefore = state.runner.credits;
   let recycled = false;
@@ -180,7 +187,7 @@ it("rezzes funded bait ICE, charges an actual break and only then recycles the b
         next.decision.decisionDebug?.planFirstDecision?.turnPlanning
           ?.consideredLines;
       const decline = lines?.find(
-        (line) => line.firstActionId === "corp.decline_rez.r1",
+        (line) => line.firstActionId === "c6.r1",
       );
       expect(decline?.steps).toHaveLength(1);
       expect(decline?.stopReason).toBe("observation_boundary");
@@ -226,7 +233,7 @@ it("quotes and executes Riddler's paid stop with a publicly selected nonmatching
   expect(paid.action.type).toBe("activated_card_ability");
   expect(
     paid.decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toBe("plan:corp.defend_servers:server-defense-portfolio");
+  ).toBe("penw02zfrkklof54c2nuye5att");
   expect(paid.state.corp.credits).toBe(4);
 });
 it("does not fund stale ICE quotes or consume an independent scoring reserve", () => {
@@ -353,9 +360,9 @@ it("installs the empty-R&D rescue before score funding, then recycles after the 
   ).toBe("corp.ambush_and_bluff");
   expect(recycled.state.corp.rd).toContain(sourceId);
   expect(recycled.state.corp.clicks).toBe(0);
-  state = act(recycled.state, "corp", "corp.end_turn");
-  state = act(state, "runner", "runner.end_turn");
-  state = act(state, "corp", "corp.mandatory_draw");
+  state = act(recycled.state, "corp", "c9");
+  state = act(state, "runner", "r9");
+  state = act(state, "corp", "ce");
   expect(state.corp.hq).toContain(sourceId);
   expect(state.winner).toBeNull();
 });

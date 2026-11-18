@@ -124,46 +124,29 @@ export function preparePayOrEndRunSubroutinePayment(
     ...payOrEndRunIndexesForThisContinue,
     ...payOrTrashProgramIndexesForThisContinue,
   ][0];
-  const expectedSubroutineIds =
-    typeof legalAction?.payload?.encounterSubroutineIds === "string"
-      ? String(legalAction.payload.encounterSubroutineIds)
-      : undefined;
+  const expectedSubroutineIds = legalAction?.encounterSubroutineIds;
   if (expectedSubroutineIds !== undefined) {
     const currentSubroutineIds = encounterSubroutinesForNextContinue(
       host.state,
       iceDefinition,
       run,
       subroutines,
+    ).map((subroutine) => subroutine.id);
+    if (
+      !Array.isArray(expectedSubroutineIds) ||
+      expectedSubroutineIds.length !== currentSubroutineIds.length ||
+      currentSubroutineIds.some(
+        (id, index) => id !== expectedSubroutineIds[index],
+      )
     )
-      .map((subroutine) => subroutine.id)
-      .join(",");
-    if (currentSubroutineIds !== expectedSubroutineIds)
       throw new Error("Die Encounter-Subroutinen sind nicht mehr gueltig.");
   }
-  const paidPayOrEndRunIndexes = new Set<number>();
-  const paidPayOrTrashProgramIndexes = new Set<number>();
-  const payOrEndRunIndexPayload =
-    typeof legalAction?.payload?.payOrEndRunSubroutineIndexes === "string"
-      ? String(legalAction.payload.payOrEndRunSubroutineIndexes)
-      : "";
-  for (const rawIndex of payOrEndRunIndexPayload.split(",")) {
-    if (!rawIndex) continue;
-    const index = Number(rawIndex);
-    if (!Number.isInteger(index) || index < 0)
-      throw new Error("Die Pay-or-End-the-Run-Subroutine ist ungueltig.");
-    paidPayOrEndRunIndexes.add(index);
-  }
-  const payOrTrashProgramIndexPayload =
-    typeof legalAction?.payload?.payOrTrashProgramSubroutineIndexes === "string"
-      ? String(legalAction.payload.payOrTrashProgramSubroutineIndexes)
-      : "";
-  for (const rawIndex of payOrTrashProgramIndexPayload.split(",")) {
-    if (!rawIndex) continue;
-    const index = Number(rawIndex);
-    if (!Number.isInteger(index) || index < 0)
-      throw new Error("Die Pay-or-Trash-Program-Subroutine ist ungueltig.");
-    paidPayOrTrashProgramIndexes.add(index);
-  }
+  const paidPayOrEndRunIndexes = new Set(
+    legalAction?.payOrEndRunSubroutineIndexes,
+  );
+  const paidPayOrTrashProgramIndexes = new Set(
+    legalAction?.payOrTrashProgramSubroutineIndexes,
+  );
   let expectedPayOrEndRunPayment = 0;
   for (const index of paidPayOrEndRunIndexes) {
     const subroutine = subroutines[index];

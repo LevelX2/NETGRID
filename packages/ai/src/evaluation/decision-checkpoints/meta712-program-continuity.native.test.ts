@@ -68,7 +68,7 @@ it("preserves the previously bound historical choice and its plan owner", () => 
   const result = chooseAiAction(input);
   expect(JSON.stringify(input.playerView)).toBe(before);
   expect(result).toMatchObject({
-    actionId: "runner.resolve_choice",
+    actionId: "rn",
     selectedChoices: {
       choiceId: "runner_program_trash_before_install_244",
       selectedOptionIds: ["card_c1ju"],
@@ -78,9 +78,9 @@ it("preserves the previously bound historical choice and its plan owner", () => 
     decisionDebug: {
       planFirstDecision: {
         rootPlanInstanceId:
-          "plan:runner.rig_and_coverage:coverage%3Abreaker_universal%3Aefficiency%3Ard%3Arun%3Arunner.start_run.rd",
+          "pegqo75sg3y86rnv0cxwj4jnrf",
         leafExecutorInstanceId:
-          "plan:runner.rig_and_coverage:coverage%3Abreaker_universal%3Aefficiency%3Ard%3Arun%3Arunner.start_run.rd",
+          "pegqo75sg3y86rnv0cxwj4jnrf",
       },
     },
   });

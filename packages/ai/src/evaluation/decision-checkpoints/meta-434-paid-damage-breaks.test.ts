@@ -25,7 +25,7 @@ it("does not count damage whose breaks the visible path has already paid", () =>
   // 14 credits of strength plus eight breaks at two credits each.
   current.playerView.own.credits = 30;
   const target = evaluateRunnerRunTargets({ input: current }).find(
-    (t) => t.actionId === "runner.start_run.r1",
+    (t) => t.actionId === "rs.r1",
   )!;
   expect(target.pathCost).toBe(30);
   expect(target.pathPassability).toBe("reachable");
@@ -39,7 +39,7 @@ it("does not count damage whose breaks the visible path has already paid", () =>
 it("keeps an actually unfunded known path blocked", () => {
   const current = input();
   const target = evaluateRunnerRunTargets({ input: current }).find(
-    (t) => t.actionId === "runner.start_run.r1",
+    (t) => t.actionId === "rs.r1",
   )!;
   expect(target.pathPassability).not.toBe("reachable");
 });
@@ -60,7 +60,7 @@ it("publishes funding rather than Draw when the exact funded free-break path rem
   );
   current.playerView.own.credits = 13;
   const target = evaluateRunnerRunTargets({ input: current }).find(
-    (t) => t.actionId === "runner.start_run.r1",
+    (t) => t.actionId === "rs.r1",
   )!;
   expect(target.pathCost).toBe(15);
   expect(target.pathPassability).toBe("blocked_unpayable");
@@ -72,7 +72,7 @@ it("still counts the exact damage left after only two paid damage breaks", () =>
   const current = input();
   current.playerView.own.credits = 27;
   const target = evaluateRunnerRunTargets({ input: current }).find(
-    (t) => t.actionId === "runner.start_run.r1",
+    (t) => t.actionId === "rs.r1",
   )!;
   expect(target.pathCost).toBe(26);
   expect(target.pathPassability).toBe("blocked_by_visible_damage_hand_buffer");
@@ -100,7 +100,7 @@ it("keeps the funded legal run bound to the existing contest owner and step", ()
     capture.runtime,
   );
   const result = chooseAiAction(current);
-  expect(result.actionId).toBe("runner.start_run.r1");
+  expect(result.actionId).toBe("rs.r1");
   expect(current.legalActions.some((a) => a.actionId === result.actionId)).toBe(
     true,
   );
@@ -122,7 +122,7 @@ it("does not invent damage breaks when the matching breaker is absent", () => {
     (c) => c.type !== "program",
   );
   const target = evaluateRunnerRunTargets({ input: current }).find(
-    (t) => t.actionId === "runner.start_run.r1",
+    (t) => t.actionId === "rs.r1",
   )!;
   expect(target.pathPassability).not.toBe("reachable");
 });

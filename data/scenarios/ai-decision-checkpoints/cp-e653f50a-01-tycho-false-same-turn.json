@@ -12151,7 +12151,7 @@
         "type": "gain_credit"
       },
       {
-        "actionId": "corp.draw_card"
+        "actionId": "c8"
       },
       {
         "type": "install_card",

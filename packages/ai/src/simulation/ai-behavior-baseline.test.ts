@@ -143,7 +143,7 @@ describe("AI behavior baseline", () => {
     const actionLimitDiagnosis: AiBehaviorActionLimitDiagnosis = {
       classified: true,
       owner: "plan_module",
-      planInstanceId: "plan:runner.contest_remote:r1",
+      planInstanceId: "pdl5beuqtdrahr4fqagyng1zk5",
       stepId: "contest",
       noProgressCluster: "action_limit_runner_remote_contest_blocked",
       noProgressSubcluster: "late_run_step_stall",
@@ -160,7 +160,7 @@ describe("AI behavior baseline", () => {
     expect(baseline.aggregate.unclassifiedActionLimitGames).toBe(0);
     expect(baseline.gate.hardFailures).toContain("action_limit_games:1");
     expect(formatAiBehaviorBaselineReport(baseline)).toContain(
-      "| behavior-test-slot | baseline-seed | yes | plan_module | plan:runner.contest_remote:r1 | contest | action_limit_runner_remote_contest_blocked | late_run_step_stall |",
+      "| behavior-test-slot | baseline-seed | yes | plan_module | pdl5beuqtdrahr4fqagyng1zk5 | contest | action_limit_runner_remote_contest_blocked | late_run_step_stall |",
     );
   });
 

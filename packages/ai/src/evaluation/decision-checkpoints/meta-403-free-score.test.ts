@@ -57,7 +57,7 @@ describe("meta 403 free score retains exact Engine cost evidence", () => {
         ...corpBasicCreditsDominatedByCurrentScore(input, candidates, [
           project,
         ]),
-      ]).toEqual(variant === "current" ? ["corp.gain_credit"] : []);
+      ]).toEqual(variant === "current" ? ["cb"] : []);
     },
   );
   it("admits the real free score instead of stripping its completed advancement counters", () => {

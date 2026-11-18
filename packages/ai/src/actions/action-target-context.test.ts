@@ -63,7 +63,7 @@ describe("applyTargetContextProjection", () => {
     (zoneScope, hostCardId) => {
       const hostedInstallAction = {
         ...action("install_card"),
-        actionId: `runner.install_card.program.${hostCardId}`,
+        actionId: `rc.program.${hostCardId}`,
         side: "runner",
         payload: {
           cardId: "program-to-install",
@@ -89,7 +89,7 @@ describe("applyTargetContextProjection", () => {
       );
 
       expect(hostedInstallAction.actionId).toBe(
-        `runner.install_card.program.${hostCardId}`,
+        `rc.program.${hostCardId}`,
       );
       expect(projected.targetContext?.availableTargets).toEqual([
         expect.objectContaining({

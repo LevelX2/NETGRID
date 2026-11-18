@@ -31,7 +31,7 @@ it("executes the exact bound funding provider before the currently unfunded urge
     capture.runtime,
   );
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("corp.gain_credit");
+  expect(decision.actionId).toBe("cb");
   expect(
     input.legalActions.find((a) => a.actionId === decision.actionId)?.type,
   ).toBe("gain_credit");

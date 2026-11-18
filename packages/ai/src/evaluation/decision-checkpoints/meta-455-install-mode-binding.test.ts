@@ -86,7 +86,7 @@ it("replans the historical Sentry installation with matching owner, mode and leg
   expect(action.payload?.selectedSubtype).toBe("sentry");
   expect(
     decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toBe("plan:runner.rig_and_coverage:coverage%3Abreaker_sentry");
+  ).toBe("pde8a64nmn1hkbrzgi9sbuf6fo");
   expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({
     actionId: action.actionId,
     stateVersion: 95,

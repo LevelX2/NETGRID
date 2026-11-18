@@ -28,14 +28,14 @@ describe("match 4d7b Corp scored-card economy payout", () => {
       acceptableActions: [
         {
           actionId:
-            "corp.install_card.c2s5.new_remote.c2s5",
+            "cc.c2s5.new_remote.c2s5",
         },
       ],
       planExecution: {
         acceptablePlanKinds: ["corp.defend_servers"],
         acceptableCapabilities: ["improve_remote_protection_path"],
         requiredAssessmentEvidence: [
-          "corp_layered_remote_ice_staging:remote:strategic-score-remote:new_remote:corp.install_card.c2s5.new_remote.c2s5:layers_0:unrezzed_0:rez_gap_2",
+          "corp_layered_remote_ice_staging:remote:strategic-score-remote:new_remote:cc.c2s5.new_remote.c2s5:layers_0:unrezzed_0:rez_gap_2",
         ],
       },
     };

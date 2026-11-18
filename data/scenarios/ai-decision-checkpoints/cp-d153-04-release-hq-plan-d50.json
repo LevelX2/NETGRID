@@ -5288,7 +5288,7 @@
         "id": "rd"
       },
       "selectedStepKind": "draw_for_answer",
-      "selectedActionId": "runner.draw_card",
+      "selectedActionId": "r8",
       "selectedActionType": "draw_card",
       "blockedBy": [
         "missing_breaker_coverage",
@@ -5320,7 +5320,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.end_turn.c2ci.c2ci.end_of_runner_turn.0"
+        "plan_portfolio_selected_action:r9.c2ci.c2ci.end_of_runner_turn.0"
       ]
     },
     "strategicIntent": {

@@ -30,7 +30,7 @@ describe("match 7D14 runner decision checkpoints", () => {
         acceptableActions: [{ type: "draw_card" }],
         runTargets: [
           {
-            actionId: "runner.start_run.rd",
+            actionId: "rs.rd",
             pathPassability: "blocked_unpayable",
           },
         ],

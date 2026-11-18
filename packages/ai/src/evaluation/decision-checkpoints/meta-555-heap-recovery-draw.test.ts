@@ -88,19 +88,19 @@ it("admits and materializes the native terminal Coverage draw to a remaining hea
   );
   expect(coverage).toMatchObject({
     viability: "ready",
-    parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+    parentInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
     moduleState: {
       phase: "draw_for_answer",
       gap: {
         deckHasAnswer: true,
-        drawForAnswerActionIds: ["runner.draw_card"],
+        drawForAnswerActionIds: ["r8"],
       },
     },
   });
   expect(pf.turnPlanning?.heads).toContainEqual(
     expect.objectContaining({
       moduleId: "runner.rig_and_coverage",
-      actionId: "runner.draw_card",
+      actionId: "r8",
       rootPlanInstanceId: coverage!.parentInstanceId,
       witnessValid: true,
       assessment: expect.objectContaining({
@@ -111,7 +111,7 @@ it("admits and materializes the native terminal Coverage draw to a remaining hea
   );
   expect(pf.turnPlanning?.consideredLines).toContainEqual(
     expect.objectContaining({
-      firstActionId: "runner.draw_card",
+      firstActionId: "r8",
       priorityClass: "P2",
       stopReason: "observation_boundary",
     }),
@@ -124,7 +124,7 @@ it("admits and materializes the native terminal Coverage draw to a remaining hea
 });
 it("admits draw but keeps direct Stack search and search-engine setup unavailable when all breakers are in Heap", () => {
   const route = support(fixture().input);
-  expect(route.drawForAnswerActionIds).toContain("runner.draw_card");
+  expect(route.drawForAnswerActionIds).toContain("r8");
   expect(route.directSearchActionIds).toEqual([]);
   expect(route.searchEngineSetupActionIds).toEqual([]);
 });
@@ -155,7 +155,7 @@ it.each([
         : 377;
   }
   expect(support(input).drawForAnswerActionIds).not.toContain(
-    "runner.draw_card",
+    "r8",
   );
 });
 

@@ -47,8 +47,8 @@ describe("pairing 425 targeted ICE trash replaces a coverage support need", () =
   it("keeps the real coverage child before the preparation card is drawn", () => {
     const { portfolio } = replay(beforeJson);
     expect(portfolio).toMatchObject({
-      rootForegroundInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-      executorInstanceId: "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry",
+      rootForegroundInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      executorInstanceId: "pde8a64nmn1hkbrzgi9sbuf6fo",
     });
     const executor = portfolio!.instances.find(
       (instance) => instance.instanceId === portfolio!.executorInstanceId,
@@ -62,8 +62,8 @@ describe("pairing 425 targeted ICE trash replaces a coverage support need", () =
   it("executes the exact ICE-trash preparation without inheriting the superseded need", () => {
     const { decision, portfolio } = replay(afterJson);
     expect(portfolio).toMatchObject({
-      rootForegroundInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-      executorInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      rootForegroundInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      executorInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
     });
     const executor = portfolio!.instances.find(
       (instance) => instance.instanceId === portfolio!.executorInstanceId,

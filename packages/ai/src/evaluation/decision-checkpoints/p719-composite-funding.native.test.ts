@@ -33,10 +33,10 @@ it.each([game27, game25])(
     expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
     expect(decision.actionId).toBe(payout.actionId);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       selectedPlan: {
         moduleId: "runner.credit_bank",
-        parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+        parentInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
         parentNeedId: "run-support:remote:r1",
       },
       route: {

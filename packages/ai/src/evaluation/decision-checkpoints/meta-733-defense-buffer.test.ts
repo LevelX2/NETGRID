@@ -27,14 +27,14 @@ it.each([game12, game13])(
     expect(install).toBeDefined();
     const decision = chooseAiAction(input);
     expect(decision).toMatchObject({
-      actionId: "runner.draw_card",
+      actionId: "r8",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId: "plan:runner.defense_and_recovery:runner",
-          leafExecutorInstanceId: "plan:runner.defense_and_recovery:runner",
+          rootPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
+          leafExecutorInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
           route: {
-            actionId: "runner.draw_card",
+            actionId: "r8",
             capabilityId: "build_required_hand_buffer",
             stateVersion: input.playerView.stateVersion,
           },

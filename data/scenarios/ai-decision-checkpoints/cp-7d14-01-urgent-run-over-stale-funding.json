@@ -7909,7 +7909,7 @@
         "label": "Raven Microcyb Owl"
       },
       "selectedStepKind": "gain_credits",
-      "selectedActionId": "runner.gain_credit",
+      "selectedActionId": "rb",
       "blockedBy": [
         "missing_credits"
       ],
@@ -7939,7 +7939,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.end_turn"
+        "plan_portfolio_selected_action:r9"
       ]
     },
     "strategicIntent": {
@@ -9037,7 +9037,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.install_card.c23t.c23t"
+        "actionId": "rc.c23t.c23t"
       }
     ],
     "planExecution": {

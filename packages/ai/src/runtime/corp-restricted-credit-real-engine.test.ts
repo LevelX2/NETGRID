@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import {
   applyAction,
   createGameAfterSetup,
@@ -67,7 +68,7 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
       "end_turn",
     ]);
     const decision = chooseCorpAction(input);
-    expect(decision.actionId).toBe("corp.end_turn");
+    expect(decision.actionId).toBe("c9");
     expect(
       decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
     ).toBe("corp.complete_turn");
@@ -108,8 +109,10 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
         decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
       ).toBe("corp.economy");
       expect(
-        decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-      ).toContain("corp.defend_servers");
+        decision.decisionDebug?.planFirstDecision?.portfolio.find(
+          (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+        )?.moduleId,
+      ).toBe("corp.defend_servers");
       state = apply(state, head);
     }
     expect(state.corp.credits).toBe(0);
@@ -196,8 +199,10 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
         choice.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
       ).toBe("corp.economy");
       expect(
-        choice.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-      ).toContain("corp.defend_servers");
+        choice.decisionDebug?.planFirstDecision?.portfolio.find(
+          (instance) => instance.instanceId === choice.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+        )?.moduleId,
+      ).toBe("corp.defend_servers");
       let next = apply(state, head);
       expect(next.corp.credits).toBe(credits - 1);
       expect(next.cardInstances[contractId(state)]!.advancementCounters).toBe(
@@ -439,7 +444,12 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
     const decision = chooseCorpAction(input);
     expect(decision.actionId).toBe(funding.request.payoutActionId);
     const root = decision.decisionDebug!.planFirstDecision!.rootPlanInstanceId;
-    expect(root).toContain("corp.defend_servers");
+    expect(root).toBe(
+      planInstanceIdForProposal({
+        moduleId: "corp.defend_servers",
+        dedupeKey: "server-defense-portfolio",
+      }),
+    );
     expect(
       decision.decisionDebug!.planFirstDecision!.selectedPlan?.moduleId,
     ).toBe("corp.economy");
@@ -742,8 +752,10 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
     // accepting the economic rez does not authorize overriding that need.
     expect(cashout.type).toBe("draw_card");
     expect(
-      cashoutDecision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-    ).toContain("corp.score_agenda");
+      cashoutDecision.decisionDebug?.planFirstDecision?.portfolio.find(
+        (instance) => instance.instanceId === cashoutDecision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+      )?.moduleId,
+    ).toBe("corp.score_agenda");
     const availablePayout = cashoutInput.legalActions.find(
       (action) =>
         action.source === rez.source &&

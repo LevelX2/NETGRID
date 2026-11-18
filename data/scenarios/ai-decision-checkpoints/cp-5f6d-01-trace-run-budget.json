@@ -4485,7 +4485,9 @@
           "actionType": "break_subroutine",
           "label": "Pile Driver: Subroutine 1 brechen",
           "breakSubroutineCount": 1,
-          "subroutineIndexes": "0",
+          "subroutineIndexes": [
+            0
+          ],
           "targetIceDefinitionId": 450,
           "targetIceTitle": "Data Wall 2.0",
           "breakSubroutineBaseCost": 3,
@@ -5199,7 +5201,9 @@
           "actionType": "break_subroutine",
           "label": "Pile Driver: Subroutine 1 brechen",
           "breakSubroutineCount": 1,
-          "subroutineIndexes": "0",
+          "subroutineIndexes": [
+            0
+          ],
           "targetIceDefinitionId": 450,
           "targetIceTitle": "Data Wall 2.0",
           "breakSubroutineBaseCost": 3,
@@ -5443,7 +5447,9 @@
           "actionType": "break_subroutine",
           "label": "Pile Driver: Subroutine 1 brechen",
           "breakSubroutineCount": 1,
-          "subroutineIndexes": "0",
+          "subroutineIndexes": [
+            0
+          ],
           "targetIceDefinitionId": 450,
           "targetIceTitle": "Data Wall 2.0",
           "breakSubroutineBaseCost": 3,
@@ -6229,7 +6235,7 @@
         "id": "rd"
       },
       "selectedStepKind": "probe_central",
-      "selectedActionId": "runner.start_run.rd",
+      "selectedActionId": "rs.rd",
       "blockedBy": [],
       "ttlDecisionsRemaining": 0,
       "planProgressionReason": "previous_central_probe_satisfied",
@@ -6257,7 +6263,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.continue_run.0"
+        "plan_portfolio_selected_action:r5.0"
       ]
     },
     "strategicIntent": {
@@ -7352,7 +7358,7 @@
       ]
     },
     "runnerRunPlan": {
-      "id": "runner_run_plan:match_5f6d027aecbe34e2:101:runner:runner.start_run.rd:rd",
+      "id": "runner_run_plan:match_5f6d027aecbe34e2:101:runner:rs.rd:rd",
       "side": "runner",
       "lifecycle": "abort_recommended",
       "origin": "basic_start_run",
@@ -7370,7 +7376,7 @@
         "trashPolicy": "trash_if_value_positive",
         "reserveForStealOrTrash": 0
       },
-      "runStartActionId": "runner.start_run.rd",
+      "runStartActionId": "rs.rd",
       "sourceTacticalGoalIds": [
         "runner.pressure_good_central_target",
         "runner.find_or_install_primary_breaker",
@@ -7602,7 +7608,7 @@
       "visibilityEvidence": [
         {
           "kind": "legal_action",
-          "ref": "runner.start_run.rd"
+          "ref": "rs.rd"
         },
         {
           "kind": "action_semantic_candidate",

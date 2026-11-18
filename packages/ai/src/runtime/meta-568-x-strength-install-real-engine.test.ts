@@ -107,7 +107,7 @@ it.each([[78, 6]] as const)(
       postInstallRezQuoteVariableMinValueFinalCredits: cost,
     });
     expect(pf).toMatchObject({
-      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
       selectedPlan: { moduleId: "corp.defend_servers" },
       route: {
         actionId: install.actionId,

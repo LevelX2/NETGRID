@@ -680,9 +680,25 @@ StateVersions.
 
 ### 8.1 Identität und Retention
 
-Der Kernel bildet die technische Instanzidentität aus Modul, Modulversion und
-stabilem `dedupeKey`. Das Modul definiert, welche fachlichen Änderungen eine
-bestehende Instanz fortsetzen und welche eine neue Instanz verlangen.
+Der Kernel bildet die technische Instanzidentität aus dem seitengebundenen
+Modul und dem stabilen, normalisierten `dedupeKey`. Die Referenz ist `p`
+plus der Base36-Darstellung eines kanonischen, domaingetrennten 128-Bit-Hashs.
+Die Modulversion bestimmt weiterhin, ob ein residenter Vertrag ersetzt wird;
+sie verändert die fachliche Zielidentität nicht. Das Modul definiert, welche
+fachlichen Änderungen eine bestehende Instanz fortsetzen und welche eine
+neue Instanz verlangen.
+
+Das Portfolio behält Modul und Deduplizierungsschlüssel als eigene Daten und
+prüft die Referenz gegen beide Felder. Doppelte Referenzen und fehlende oder
+widersprüchliche Bindungen scheitern strukturiert. Kampagnen verwenden die
+getrennte Referenz `k` und ein eigenes typisiertes Tupel aus Owner und Ziel.
+Die Vergabe benötigt keinen veränderlichen globalen Katalog. Rediscovery,
+Retention-Ablauf und erneutes Öffnen liefern für dasselbe Ziel dieselbe
+Referenz. Parent, Need, Executor und Commitment führen diese Referenz im
+bereits match- und seitengebundenen Portfolio weiter. Aus ihren Zeichen
+werden keine Modul-, Ziel- oder Prioritätsregeln abgeleitet. Die Reihenfolge
+gleichwertiger Pläne verwendet ausdrücklich Modul und Deduplizierungsschlüssel.
+[Kanonische Vergabe](../../../packages/ai/src/plans/compact-plan-identity.ts)
 
 Jede Persistence Policy legt fest:
 

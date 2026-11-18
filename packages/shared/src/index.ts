@@ -2694,7 +2694,16 @@ export type TargetRequirement = {
   allowedSides?: Side[];
 };
 
-export type LegalAction = {
+/** The exact encounter scope and array indexes in the current offer. */
+export type EncounterActionTargets = {
+  encounterSubroutineIds?: readonly string[];
+  encounterRemainingSubroutineIds?: readonly string[];
+  subroutineIndexes?: readonly number[];
+  payOrEndRunSubroutineIndexes?: readonly number[];
+  payOrTrashProgramSubroutineIndexes?: readonly number[];
+};
+
+export type LegalAction = EncounterActionTargets & {
   /** Actor-private Engine quote for recovery of unconditional score support. */
   corpScoreRecoveryQuote?: import("./corp-score-recovery-quote").CorpScoreRecoveryQuote;
   actionId: string;

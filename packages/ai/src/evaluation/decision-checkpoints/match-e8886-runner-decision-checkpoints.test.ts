@@ -75,7 +75,7 @@ describe("match E8886 runner decision checkpoints", () => {
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "E8886-C04-RECOVERY-TARGET";
       checkpoint.expectation = {
-        acceptableActions: [{ actionId: "runner.gain_credit" }],
+        acceptableActions: [{ actionId: "rb" }],
         planExecution: {
           acceptablePlanKinds: ["runner.economy"],
           acceptableCapabilities: ["gain_general_liquid_credits"],
@@ -92,21 +92,18 @@ describe("match E8886 runner decision checkpoints", () => {
       result.decision?.decisionDebug?.planFirstDecision?.executionOrigin
         ?.rootPlanInstanceId,
     ).toBe(
-      "plan:runner.develop_board_and_hand:card%3Ac2bt",
+      "p63s0ijmgg9uonto2uyza36kh2",
     );
-    const portfolioItems =
-      result.decision?.decisionDebug?.detailSections?.find(
-        (section) => section.id === "plan_portfolio",
-      )?.items ?? [];
-    expect(
-      portfolioItems.some(
-        (item) =>
-          item.includes("module:runner.develop_board_and_hand") &&
-          item.includes("card%3Ac2bt") &&
-          item.includes("phase:fund") &&
-          item.includes("viability:ready"),
-      ),
-    ).toBe(true);
+    expect(result.decision?.decisionDebug?.planFirstDecision?.portfolio).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          moduleId: "runner.develop_board_and_hand",
+          dedupeKey: expect.stringContaining("card:c2bt"),
+          phase: "fund",
+          viability: "ready",
+        }),
+      ]),
+    );
   });
 
   it("assigns an installed Junkyard top-card recovery action to the development plan", () => {
@@ -141,24 +138,21 @@ describe("match E8886 runner decision checkpoints", () => {
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "E8886-C06-INSTALLED-TOP-RECOVERY";
       checkpoint.expectation = {
-        forbiddenActions: [{ actionId: "runner.end_turn" }],
+        forbiddenActions: [{ actionId: "r9" }],
       };
     });
 
     const result = runAiDecisionCheckpoint(installedRecovery);
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
-    const portfolioItems =
-      result.decision?.decisionDebug?.detailSections?.find(
-        (section) => section.id === "plan_portfolio",
-      )?.items ?? [];
-    expect(
-      portfolioItems.some(
-        (item) =>
-          item.includes("module:runner.develop_board_and_hand") &&
-          item.includes("recovery") &&
-          item.includes("viability:ready"),
-      ),
-    ).toBe(true);
+    expect(result.decision?.decisionDebug?.planFirstDecision?.portfolio).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          moduleId: "runner.develop_board_and_hand",
+          dedupeKey: expect.stringContaining("recovery"),
+          viability: "ready",
+        }),
+      ]),
+    );
   });
 
   it("continues when the same remaining known path is now affordable", () => {
@@ -167,7 +161,7 @@ describe("match E8886 runner decision checkpoints", () => {
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "E8886-C05-FUNDED-CONTINUE";
       checkpoint.expectation = {
-        acceptableActions: [{ actionId: "runner.continue_run" }],
+        acceptableActions: [{ actionId: "r5" }],
       };
     });
 

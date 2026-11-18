@@ -2731,14 +2731,14 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
       maxSelections: 1,
     });
     expect(exposeState.pendingChoice?.options).toContainEqual({
-      id: expect.stringMatching(/^card_h[a-z0-9]{1,7}$/),
+      id: "card_hrd.i0",
       label: "R&D ICE 1",
       value: targetIceId,
     });
     const targetIceOptionId = exposeState.pendingChoice?.options.find(
       (option) => option.value === targetIceId,
     )?.id;
-    expect(targetIceOptionId).toMatch(/^card_h[a-z0-9]{1,7}$/);
+    expect(targetIceOptionId).toBe("card_hrd.i0");
     exposeState = applyChoice(exposeState, "runner", targetIceOptionId ?? "");
     expect(exposeState.pendingChoice?.source).toContain(
       "p3_36.expose_installed_card_review:",

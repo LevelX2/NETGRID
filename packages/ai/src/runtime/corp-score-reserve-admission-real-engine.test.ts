@@ -1,4 +1,5 @@
 import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import standardDeckCatalog from "../../../../data/decks/standard-deck-catalog-1.0.0.json";
 import {
   applyAction,
@@ -223,7 +224,7 @@ function finishNativeScore(
     } else expect(decision.reasonCode).toBe("plan_first.corp.score_agenda");
     if (n === 1) {
       const server = state.corp.servers.find((s) => s.root.includes(target!))!;
-      executor = executor!.replace("%3Anew_remote", `%3A${server.id}`);
+      executor = planInstanceIdForProposal({ moduleId: "corp.score_agenda", dedupeKey: `agenda:${target}:${server.id}` });
     }
     expect(portfolio.executorInstanceId).toBe(executor);
     types.push(action.type);

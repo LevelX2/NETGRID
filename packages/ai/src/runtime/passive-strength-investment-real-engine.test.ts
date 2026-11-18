@@ -238,7 +238,7 @@ describe("canonical passive strength investment", () => {
     );
     // Restore once, then preserve actual in-process commitments. Restoring the
     // final checkpoint alone simulates a restart and falsely passes this case.
-    expect(chooseAiAction(first.input).actionId).toBe("runner.draw_card");
+    expect(chooseAiAction(first.input).actionId).toBe("r8");
     // The new horizon admits the investment before the old extra credit click.
     // Stop at that divergence instead of feeding an obsolete successor state.
     const input = checkpoints[1]!.input;
@@ -529,10 +529,10 @@ describe("canonical passive strength investment", () => {
     expect(
       decision.evidence?.some((e) => e.startsWith("plan_scheduler:route:")),
     ).toBe(true);
-    expect(
-      decision.decisionDebug?.planFirstDecision?.executionOrigin
-        ?.leafPlanInstanceId,
-    ).toContain("runner.develop_board_and_hand");
+    const plan = decision.decisionDebug?.planFirstDecision;
+    expect(plan?.portfolio.find((instance) =>
+      instance.instanceId === plan.executionOrigin?.leafPlanInstanceId,
+    )?.moduleId).toBe("runner.develop_board_and_hand");
   });
 
   it.each(["poor", "no_mu", "matchpoint", "zero_strength"])(
@@ -589,9 +589,7 @@ describe("canonical passive strength investment", () => {
     const pf = decision.decisionDebug!.planFirstDecision!;
     expect(pf.selectedPlan?.moduleId).toBe("runner.develop_board_and_hand");
     expect(pf.route?.actionId).toBe(decision.actionId);
-    expect(pf.executionOrigin?.leafPlanInstanceId).toContain(
-      "runner.develop_board_and_hand",
-    );
+    expect(pf.executionOrigin?.leafPlanInstanceId).toBe(pf.leafExecutorInstanceId);
     const next = apply(state, "runner", decision.actionId!);
     expect(next.runner.rig.programs).toContain(evaluation.cardInstanceId);
     expect(next.runner.credits).toBe(36);

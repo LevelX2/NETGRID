@@ -223,7 +223,7 @@ it("discards the newly drawn duplicate Gate breaker when another copy is install
       }),
     );
   const draw = decide(state);
-  expect(draw.actionId).toBe("runner.draw_card");
+  expect(draw.actionId).toBe("r8");
   const drawn = applyAction(state, {
     matchId: state.matchId,
     side: "runner",

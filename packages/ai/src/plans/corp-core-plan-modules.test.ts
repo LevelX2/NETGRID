@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "./plan-instance";
 import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   assessCorpSpendAgainstScoreFundingMilestones,
@@ -191,7 +192,7 @@ describe("Corp core plan modules", () => {
     )[0]!;
 
     expect(proposal.parentInstanceId).toBe(
-      "plan:corp.establish_scoring_remote:strategic-score-remote",
+      "p6vrrjl5fc78gjet2n25nst7pp",
     );
     expect(proposal.parentNeedId).toBe(remote.need!.needId);
   });
@@ -343,7 +344,7 @@ describe("Corp core plan modules", () => {
 
   it("assigns a paid Classic Deflector redirect through corp.defend_servers", () => {
     const choiceId = "classic_deflector_11";
-    const actionId = "corp.resolve_choice";
+    const actionId = "cn";
     const sourceIceId = "deflector-ice";
     const sourceDefinitionId = syntheticCardDefinitionId("generic-deflector");
     const subroutineId = "generic-deflector.subroutine.1.deflect_run";
@@ -900,8 +901,8 @@ describe("Corp core plan modules", () => {
       .sort(compareValidatedPlanAssessments);
 
     expect(assessments.map((assessment) => assessment.instanceId)).toEqual([
-      "plan:corp.score_agenda:same-turn-closeout",
-      "plan:corp.score_agenda:uncertain-terminal",
+      "p1s6qqyxdjcsrnbj2h3yz2721j",
+      "p9lwe0kug3qij6ewllyl173xx0",
     ]);
     expect(
       assessments.map(
@@ -1400,7 +1401,7 @@ describe("Corp core plan modules", () => {
             actionIds: [gainCredit.actionId],
             immediateDefenseConversion: true,
             parentPlanInstanceId:
-              "plan:corp.defend_servers:server-defense-portfolio",
+              "penw02zfrkklof54c2nuye5att", parentPlanModuleId: "corp.defend_servers" as const,
             parentNeedId: defense.defenseId,
             incrementalDefenseReserve: {
               targetCredits: 2,
@@ -3302,7 +3303,7 @@ describe("Corp core plan modules", () => {
       corpContext,
     );
     expect(proposal.parentInstanceId).toBe(
-      "plan:corp.score_agenda:agenda%3Aagenda-1%3Ar1",
+      "pbdq9qo2j7h919e58ns3d9h9nh",
     );
     expect(proposal.parentNeedId).toBe("score-protection:agenda-1:r1");
     expect(materialized.step).toMatchObject({
@@ -3406,7 +3407,7 @@ describe("Corp core plan modules", () => {
     );
 
     expect(proposal.parentInstanceId).toBe(
-      "plan:corp.score_agenda:agenda%3Aterminal%3Ar1",
+      "p81k7h0zaw0lmfn04r7zb3nnmb",
     );
     expect(proposal.parentNeedId).toBe("score-protection:terminal:r1");
     expect(planAssessment).toMatchObject({
@@ -3553,7 +3554,7 @@ describe("Corp core plan modules", () => {
     );
 
     expect(proposal.parentInstanceId).toBe(
-      "plan:corp.score_agenda:agenda%3Aexposed%3Ar1",
+      "p8d4txvmgrtrabkfrsvn5hwntd",
     );
     expect(planAssessment).toMatchObject({
       priorityValidation: { effectiveClass: "P5" },
@@ -3627,7 +3628,7 @@ describe("Corp core plan modules", () => {
     );
 
     expect(proposal.parentInstanceId).toBe(
-      "plan:corp.score_agenda:agenda%3Aprepared%3Ar1",
+      "pdheuk3dmq8en77un04t20mjw8",
     );
     expect(planAssessment.evidenceCodes).toEqual([
       "prepared_score_parent_needs_staging_layer",
@@ -4492,7 +4493,7 @@ describe("Corp core plan modules", () => {
             needId: "score-support:score-1",
             gap: 5,
             actionIds: ["credit"],
-            parentPlanInstanceId: "plan:corp.score_agenda:score-1",
+            parentPlanInstanceId: "p8t7t4bkn4vru76e26fkeg5wic", parentPlanModuleId: "corp.score_agenda" as const,
             parentNeedId: "score-support:score-1",
             delegatedPriorityClass: "P4",
             urgentForScore: true,
@@ -4517,7 +4518,7 @@ describe("Corp core plan modules", () => {
       }),
     );
 
-    expect(open[0]?.parentInstanceId).toBe("plan:corp.score_agenda:score-1");
+    expect(open[0]?.parentInstanceId).toBe("p8t7t4bkn4vru76e26fkeg5wic");
     expect(open[0]?.parentNeedId).toBe("score-support:score-1");
     expect(satisfied).toEqual([]);
   });
@@ -4662,7 +4663,7 @@ describe("Corp core plan modules", () => {
     (delegatedPriorityClass) => {
       const economy = corpModule("corp.economy");
       const credit = candidate("credit", "gain_credit", "economy.gain_credit");
-      const parentPlanInstanceId = `plan:corp.score_agenda:score-${delegatedPriorityClass}`;
+      const parentPlanInstanceId = planInstanceIdForProposal({ moduleId: "corp.score_agenda", dedupeKey: `score-${delegatedPriorityClass}` });
       const corpContext = context([credit], {
         economyNeeds: [
           {
@@ -4720,7 +4721,7 @@ describe("Corp core plan modules", () => {
     const credit = candidate("credit", "gain_credit", "economy.gain_credit");
     const assessmentValue = (gap: number) => {
       const projectId = `score-gap-${gap}`;
-      const parentPlanInstanceId = `plan:corp.score_agenda:${projectId}`;
+      const parentPlanInstanceId = planInstanceIdForProposal({ moduleId: "corp.score_agenda", dedupeKey: projectId });
       const signal = {
         kind: "parent_funding" as const,
         needId: `score-support:${projectId}`,
@@ -4750,7 +4751,7 @@ describe("Corp core plan modules", () => {
 
   it("keeps an exactly bound score-funding child blocked when no current funding route covers its gap", () => {
     const economy = corpModule("corp.economy");
-    const parentPlanInstanceId = "plan:corp.score_agenda:score-P1";
+    const parentPlanInstanceId = "pe8jbc9q762b0ahqgdez5wtp0o";
     const corpContext = context([], {
       economyNeeds: [
         {
@@ -4800,7 +4801,7 @@ describe("Corp core plan modules", () => {
       needId: "score-funding-missing-priority",
       gap: 1,
       actionIds: [credit.actionId],
-      parentPlanInstanceId: "plan:corp.score_agenda:score-1",
+      parentPlanInstanceId: "p8t7t4bkn4vru76e26fkeg5wic", parentPlanModuleId: "corp.score_agenda" as const,
       urgentForScore: true,
       evidenceCode: "incomplete_score_funding",
     };
@@ -5155,7 +5156,7 @@ describe("Corp core plan modules", () => {
       gap: 5,
       actionIds: [basicCredit.actionId],
       parentPlanInstanceId:
-        "plan:corp.score_agenda:agenda%3Aagenda-1%3Ar1",
+        "pbdq9qo2j7h919e58ns3d9h9nh", parentPlanModuleId: "corp.score_agenda" as const,
       parentNeedId: `score-support:${project.projectId}`,
       scoreFundingMilestone: project.fundingMilestone,
       delegatedPriorityClass: "P2" as const,
@@ -5233,7 +5234,7 @@ describe("Corp core plan modules", () => {
         needId: `score-support:${project.projectId}`,
         parentNeedId: `score-support:${project.projectId}`,
         parentPlanInstanceId:
-          "plan:corp.score_agenda:agenda%3Aagenda-1%3Ar1",
+          "pbdq9qo2j7h919e58ns3d9h9nh", parentPlanModuleId: "corp.score_agenda" as const,
         gap: 5,
         actionIds: [basicCredit.actionId],
         scoreFundingMilestone: milestone,
@@ -5471,7 +5472,7 @@ describe("Corp core plan modules", () => {
       gap: 4,
       actionIds: [basicCredit.actionId],
       immediateDefenseConversion: true,
-      parentPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      parentPlanInstanceId: "penw02zfrkklof54c2nuye5att", parentPlanModuleId: "corp.defend_servers" as const,
       parentNeedId: defenseParent.defenseId,
       parentPriorityClass: "P2" as const,
       incrementalDefenseReserve: {
@@ -5571,7 +5572,7 @@ describe("Corp core plan modules", () => {
       "wrong",
       {
         parentPlanInstanceId:
-          "plan:corp.defend_servers:wrong-defense-portfolio",
+          "p3sjy6onnxlxa4l4aysul1jlr1",
       },
     ],
     ["mismatched gap", { gap: 3 }],
@@ -5697,7 +5698,7 @@ describe("Corp core plan modules", () => {
       gap: Number.POSITIVE_INFINITY,
       actionIds: [basicCredit.actionId],
       immediateDefenseConversion: true,
-      parentPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      parentPlanInstanceId: "penw02zfrkklof54c2nuye5att", parentPlanModuleId: "corp.defend_servers" as const,
       parentNeedId: "install:hq",
       incrementalDefenseReserve: {
         targetCredits: Number.POSITIVE_INFINITY,

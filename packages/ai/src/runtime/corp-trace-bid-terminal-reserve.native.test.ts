@@ -139,7 +139,7 @@ describe("current terminal Corp trace reserve", () => {
     expect(input.playerView.opponent.agendaPoints).toBe(3);
     expect(quote).toMatchObject({
       stateVersion: state.stateVersion,
-      actionId: "corp.resolve_choice",
+      actionId: "cn",
       choiceId: state.pendingChoice!.choiceId,
       optionId: "bid_2",
       amount: 2,

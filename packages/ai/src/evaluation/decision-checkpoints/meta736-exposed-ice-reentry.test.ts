@@ -11,8 +11,8 @@ import { runnerImmediateExposedIceSafetyExit } from "../../runner/run-window/run
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 
-const hqRun = "runner.start_run.hq";
-const rdRun = "runner.start_run.rd";
+const hqRun = "rs.hq";
+const rdRun = "rs.rd";
 
 function nativeReentryFixture(name: string) {
   return JSON.parse(

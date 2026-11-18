@@ -395,7 +395,7 @@
               }
             },
             {
-              "instanceId": "h1jv162s",
+              "instanceId": "hhq.i1",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -469,7 +469,7 @@
               }
             },
             {
-              "instanceId": "h4jecum",
+              "instanceId": "hhq.i4",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -513,7 +513,7 @@
               }
             },
             {
-              "instanceId": "h1o11ihb",
+              "instanceId": "hrd.i1",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -626,7 +626,7 @@
           "label": "Remote 2",
           "ice": [
             {
-              "instanceId": "h49er5n",
+              "instanceId": "hr2.i0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -4918,7 +4918,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.jack_out",
+          "actionId": "rd",
           "side": "runner",
           "type": "jack_out",
           "label": "Jack-out",
@@ -4930,7 +4930,7 @@
           "expiresAtStateVersion": 163
         },
         {
-          "actionId": "runner.continue_run",
+          "actionId": "r5",
           "side": "runner",
           "type": "continue_run",
           "label": "Run fortsetzen",
@@ -7027,7 +7027,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "runner.jack_out",
+        "actionId": "rd",
         "side": "runner",
         "type": "jack_out",
         "label": "Jack-out",
@@ -7039,7 +7039,7 @@
         "expiresAtStateVersion": 163
       },
       {
-        "actionId": "runner.continue_run",
+        "actionId": "r5",
         "side": "runner",
         "type": "continue_run",
         "label": "Run fortsetzen",
@@ -7093,7 +7093,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 163,
-      "sideSafePlanningFingerprint": "fnv1a:da4a179b"
+      "sideSafePlanningFingerprint": "fnv1a:6e618962"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",
@@ -12933,7 +12933,7 @@
       "stateVersion": 163,
       "instances": [
         {
-          "instanceId": "plan:runner.convert_run_window:run%3A162",
+          "instanceId": "p9nnvsnhbvwzjnsl1u4k0c830z",
           "dedupeKey": "run:162",
           "moduleId": "runner.convert_run_window",
           "moduleVersion": "1",
@@ -12956,7 +12956,7 @@
             "kind": "window",
             "id": "run:162"
           },
-          "parentInstanceId": "plan:runner.pressure_central:central%3Ahq",
+          "parentInstanceId": "pa7nez1ioecg7mf06q1uwqq57o",
           "openNeedIds": [],
           "phase": "execute",
           "milestone": "admitted",
@@ -12965,8 +12965,8 @@
             "signal": {
               "windowId": "run:162",
               "serverId": "hq",
-              "rootPlanInstanceId": "plan:runner.pressure_central:central%3Ahq",
-              "leafPlanInstanceId": "plan:runner.convert_run_window:run%3A162",
+              "rootPlanInstanceId": "pa7nez1ioecg7mf06q1uwqq57o",
+              "leafPlanInstanceId": "p9nnvsnhbvwzjnsl1u4k0c830z",
               "semanticActionTypes": [
                 "run.jack_out",
                 "run.continue"
@@ -13075,7 +13075,7 @@
               "safetyIntent": "jack_out",
               "safetyEvidenceCode": "runner_run_risk_contract_degraded:hq",
               "actionAssessments": {
-                "runner.jack_out": {
+                "rd": {
                   "admissible": true,
                   "evidenceCodes": [
                     "runner_run_window_action_plan_admissible",
@@ -13083,7 +13083,7 @@
                     "runner_run_parent_payoff_preserved:access_bonus"
                   ]
                 },
-                "runner.continue_run": {
+                "r5": {
                   "admissible": false,
                   "evidenceCodes": [
                     "run_window_action_outside_exact_phase_route",
@@ -13132,7 +13132,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ahq",
+          "instanceId": "pa7nez1ioecg7mf06q1uwqq57o",
           "dedupeKey": "central:hq",
           "moduleId": "runner.pressure_central",
           "moduleVersion": "1",
@@ -13174,21 +13174,21 @@
               "marginalValue": 14,
               "evidenceCode": "target:hq",
               "runActionIds": [
-                "runner.start_run.hq"
+                "rs.hq"
               ],
               "runActionValues": {
-                "runner.start_run.hq": 0,
-                "runner.play_event.c121.hq.c121.171:on_play_run_with_bad_publicity_aftermath": -25
+                "rs.hq": 0,
+                "rh.c121.hq.c121.171:on_play_run_with_bad_publicity_aftermath": -25
               },
               "runActionDifferentialPayoffIds": [],
               "runActionEvidence": {
-                "runner.start_run.hq": [
+                "rs.hq": [
                   "run_route_raw_score:14",
                   "run_route_opportunity_cost:0",
                   "run_route_effective_score:14",
                   "run_route_relative_value:0"
                 ],
-                "runner.play_event.c121.hq.c121.171:on_play_run_with_bad_publicity_aftermath": [
+                "rh.c121.hq.c121.171:on_play_run_with_bad_publicity_aftermath": [
                   "run_route_raw_score:-11",
                   "run_route_opportunity_cost:0",
                   "run_route_effective_score:-11",
@@ -13207,19 +13207,19 @@
                 ]
               },
               "runActionRouteDiagnostics": {
-                "runner.start_run.hq": {
+                "rs.hq": {
                   "rawRouteScore": 14,
                   "opportunityCost": 0,
                   "effectiveRouteScore": 14
                 },
-                "runner.play_event.c121.hq.c121.171:on_play_run_with_bad_publicity_aftermath": {
+                "rh.c121.hq.c121.171:on_play_run_with_bad_publicity_aftermath": {
                   "rawRouteScore": -11,
                   "opportunityCost": 0,
                   "effectiveRouteScore": -11
                 }
               },
               "runActionExclusions": {
-                "runner.play_event.c121.hq.c121.171:on_play_run_with_bad_publicity_aftermath": [
+                "rh.c121.hq.c121.171:on_play_run_with_bad_publicity_aftermath": [
                   "run_route_excluded:path:reachable",
                   "run_route_excluded:recommendation:run_now",
                   "run_route_excluded:score:-11",
@@ -13371,43 +13371,43 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:runner.convert_run_window:run%3A162",
+          "instanceId": "p9nnvsnhbvwzjnsl1u4k0c830z",
           "stateVersion": 163,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ahq",
+          "instanceId": "pa7nez1ioecg7mf06q1uwqq57o",
           "stateVersion": 163,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:generic%3Adraw-options",
+          "instanceId": "p6hb5l9cujr02om3vqn7gbqr35",
           "stateVersion": 163,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.economy:economy-liquidity-development%3Arunner%3A25",
+          "instanceId": "p5nnvx8nlj6m9kefmx4yrf37h7",
           "stateVersion": 163,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Aarchives",
+          "instanceId": "p22f66p721g9dgs7gsawwpf6hs",
           "stateVersion": 163,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ard",
+          "instanceId": "pa90fufw9vc5bkshp96ztlryxl",
           "stateVersion": 163,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.convert_run_window:run%3A162",
+          "instanceId": "p9nnvsnhbvwzjnsl1u4k0c830z",
           "stateVersion": 163,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
@@ -13420,7 +13420,7 @@
         "commitmentId": "fnv1a:8efbe67a",
         "sourcePlanId": "fnv1a:0d82ce89",
         "sourceLineHash": "fnv1a:fbf6c068",
-        "sequenceRootPlanInstanceId": "plan:runner.pressure_central:central%3Ahq",
+        "sequenceRootPlanInstanceId": "pa7nez1ioecg7mf06q1uwqq57o",
         "side": "runner",
         "turnKey": "runner:turn:25",
         "planningRulesFingerprint": "fnv1a:ce3968ab",
@@ -13437,7 +13437,7 @@
           {
             "phaseId": "fnv1a:90a1c7cb",
             "root": {
-              "planInstanceId": "plan:runner.pressure_central:central%3Ahq",
+              "planInstanceId": "pa7nez1ioecg7mf06q1uwqq57o",
               "moduleId": "runner.convert_run_window",
               "milestoneId": "convert_active_run_window",
               "provenance": "resident"
@@ -13532,7 +13532,7 @@
           "sideSafePlanningFingerprint": "fnv1a:3e35f41c"
         },
         "currentBinding": {
-          "actionId": "runner.jack_out",
+          "actionId": "rd",
           "stateVersion": 163,
           "semanticActionSetFingerprint": "fnv1a:c158793e",
           "invocationKey": "fnv1a:b6a56644"
@@ -13540,8 +13540,8 @@
         "actionType": "jack_out",
         "expectationId": "fnv1a:23eb4f43"
       },
-      "rootForegroundInstanceId": "plan:runner.pressure_central:central%3Ahq",
-      "executorInstanceId": "plan:runner.convert_run_window:run%3A162"
+      "rootForegroundInstanceId": "pa7nez1ioecg7mf06q1uwqq57o",
+      "executorInstanceId": "p9nnvsnhbvwzjnsl1u4k0c830z"
     }
   },
   "validation": {

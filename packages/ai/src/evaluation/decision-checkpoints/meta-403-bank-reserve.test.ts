@@ -52,8 +52,8 @@ describe("meta 403 bank funding materializes the bound run reserve", () => {
       );
       expect(result.fallbackUsed).toBe(false);
       expect(result.decisionDebug?.planFirstDecision).toMatchObject({
-        rootPlanInstanceId: "plan:runner.pressure_central:central%3Ard",
-        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A189",
+        rootPlanInstanceId: "pa90fufw9vc5bkshp96ztlryxl",
+        leafExecutorInstanceId: "p9nja6dky0xmostbarhugukxi4",
       });
     },
   );

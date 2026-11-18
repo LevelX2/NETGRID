@@ -14,7 +14,7 @@ describe("runner basic main actions", () => {
     });
 
     expect(buildRunnerGainCreditAction(state)).toMatchObject({
-      actionId: "runner.gain_credit",
+      actionId: "rb",
       side: "runner",
       type: "gain_credit",
       label: "1 Credit nehmen",
@@ -37,7 +37,7 @@ describe("runner basic main actions", () => {
     const endTurnAction = buildRunnerEndTurnAction(state);
 
     expect(endTurnAction).toMatchObject({
-      actionId: "runner.end_turn",
+      actionId: "r9",
       side: "runner",
       type: "end_turn",
       label: "Zug beenden",
@@ -58,7 +58,7 @@ describe("runner basic main actions", () => {
     const removeTagAction = buildRunnerRemoveTagAction(state);
 
     expect(removeTagAction).toMatchObject({
-      actionId: "runner.remove_tag",
+      actionId: "rm",
       side: "runner",
       type: "remove_tag",
       label: "Tag entfernen",

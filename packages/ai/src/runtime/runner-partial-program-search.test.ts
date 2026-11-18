@@ -218,7 +218,7 @@ it.each([
       state = result.state;
       if (searchActionId && !state.pendingChoice) break;
     }
-    expect(actions[0]).toContain("install_card");
+    expect(actions[0]).toMatch(/^rc\./);
     expect(searchActionId).toBeDefined();
     expect(state.pendingChoice).toBeUndefined();
     expect(state.runner.credits).toBe(

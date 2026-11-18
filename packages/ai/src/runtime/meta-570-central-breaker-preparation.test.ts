@@ -85,7 +85,7 @@ it("installs the held cheaper decoder before the same central run under its exac
   const plan = decision.decisionDebug!.planFirstDecision!;
   expect(plan.selectedPlan?.moduleId).toBe("runner.rig_and_coverage");
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:runner.pressure_central:central%3Ahq",
+    "pa7nez1ioecg7mf06q1uwqq57o",
   );
   expect(plan.selectedPlan?.parentInstanceId).toBe(plan.rootPlanInstanceId);
   expect(plan.route?.actionId).toBe(action.actionId);
@@ -108,7 +108,7 @@ it("installs the held cheaper decoder before the same central run under its exac
     eventTail: installed.state.eventLog,
   });
   const run = chooseAiAction(next);
-  expect(run.actionId).toBe("runner.start_run.hq");
+  expect(run.actionId).toBe("rs.hq");
   expect(run.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
     plan.rootPlanInstanceId,
   );
@@ -156,7 +156,7 @@ it.each([
         c.definitionId === 171,
     );
   const target = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.hq",
+    (t) => t.actionId === "rs.hq",
   )!;
   const prep = runnerSameTurnBreakerPreparation(
     input,
@@ -189,7 +189,7 @@ it("quotes known savings without treating the opaque outer ICE as guaranteed acc
   expect(hidden.definitionId).toBeUndefined();
   hidden.instanceId = "another_opaque_ice";
   const target = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.hq",
+    (t) => t.actionId === "rs.hq",
   )!;
   const prep = runnerSameTurnBreakerPreparation(
     input,

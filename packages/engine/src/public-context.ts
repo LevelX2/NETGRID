@@ -409,9 +409,10 @@ export function publicContextForAction(
     context.breakSubroutineCount = legalAction.payload.breakSubroutineCount;
   }
   if (legalAction.type === "break_subroutine") {
+    if (legalAction.subroutineIndexes)
+      context.subroutineIndexes = legalAction.subroutineIndexes;
     for (const key of [
       "subroutineIndex",
-      "subroutineIndexes",
       "targetIceDefinitionId",
       "targetIceTitle",
       "breakSubroutineBaseCost",

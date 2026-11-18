@@ -14161,7 +14161,7 @@
     "contractKind": "correctness",
     "acceptableActions": [
       {
-        "actionId": "runner.activated_card_ability.c29e.c29e.activated.441"
+        "actionId": "r1.c29e.c29e.activated.441"
       }
     ],
     "planExecution": {

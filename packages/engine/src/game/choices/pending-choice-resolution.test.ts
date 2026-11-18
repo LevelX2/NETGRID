@@ -266,7 +266,7 @@ function stateWithChoice(choiceId: string, source: string): GameState {
 
 function choiceAction(choiceId: string): LegalAction {
   return {
-    actionId: `runner.resolve_choice.${choiceId}`,
+    actionId: `rn.${choiceId}`,
     side: "runner",
     type: "resolve_choice",
     label: "Choice",
@@ -287,7 +287,7 @@ function playerChoice(
   return {
     matchId: "local-demo-match",
     side: "runner",
-    actionId: `runner.resolve_choice.${choiceId}`,
+    actionId: `rn.${choiceId}`,
     clientKnownStateVersion: 0,
     selectedChoices: { choiceId, selectedOptionIds },
   };

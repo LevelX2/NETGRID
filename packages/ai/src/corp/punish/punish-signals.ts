@@ -1,4 +1,5 @@
 import { candidateTargetIds } from "../../actions/action-candidate-facts";
+import { compactCampaignId, compareCampaignIdentities } from "../../plans/compact-plan-identity";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { corpReservedScoreServerIds } from "../../runtime/corp-scoreline/score-hand-support";
 import { immediateCorpLiquidCreditGain } from "../economy/economy-routes";
@@ -65,6 +66,7 @@ export function punishSignals(
   if (!need) return [...quoted, ...preparationAndTrash];
   const development: CorpPunishCampaignSignal = {
     campaignId: PUNISH_PAYOFF_CAMPAIGN_ID,
+    identity: { ownerModuleId: "corp.punish_campaign", objectiveKey: "engine-certified-payoff" },
     phase: "assemble_components",
     sourceDefinitionIds: [],
     actionIds: [],
@@ -135,7 +137,7 @@ function mergeStablePunishRoots(
     });
   }
   return [...merged.values()].sort((left, right) =>
-    left.campaignId.localeCompare(right.campaignId),
+    compareCampaignIdentities(left.identity, right.identity),
   );
 }
 
@@ -641,6 +643,7 @@ function quotedPunishSignal(
     : 0;
   return {
     campaignId,
+    identity: { ownerModuleId: "corp.punish_campaign", objectiveKey: "engine-certified-payoff" },
     phase,
     sourceDefinitionIds: [
       ...new Set(route.steps.map((step) => step.sourceCardDefinitionId)),
@@ -755,7 +758,8 @@ function preparationAndResourceTrashSignals(
       );
       return [
         {
-          campaignId: `punish:resource-trash:${targetId}`,
+          campaignId: compactCampaignId({ ownerModuleId: "corp.punish_campaign", objectiveKey: `resource-trash:${targetId}` }),
+          identity: { ownerModuleId: "corp.punish_campaign", objectiveKey: `resource-trash:${targetId}` },
           phase: "damage",
           sourceDefinitionIds: [],
           actionIds: [candidate.actionId],
@@ -846,7 +850,8 @@ function preparationAndResourceTrashSignals(
         : 150;
     return [
       {
-        campaignId: `punish:prepare:${stableSourceId}:${stablePurpose}`,
+        campaignId: compactCampaignId({ ownerModuleId: "corp.punish_campaign", objectiveKey: `prepare:${stableSourceId}:${stablePurpose}` }),
+        identity: { ownerModuleId: "corp.punish_campaign", objectiveKey: `prepare:${stableSourceId}:${stablePurpose}` },
         phase: "prepare",
         sourceDefinitionIds: candidate.sourceDefinitionId
           ? [candidate.sourceDefinitionId]

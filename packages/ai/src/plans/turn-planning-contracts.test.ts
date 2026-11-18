@@ -167,6 +167,21 @@ describe("turn planning contracts", () => {
     ).not.toBe(buildPlanningStateIdentity(second).sideSafePlanningFingerprint);
   });
 
+  it("binds every typed encounter target to the planning state", () => {
+    const first = decisionInput();
+    first.legalActions[0] = {
+      ...first.legalActions[0]!,
+      type: "break_subroutine",
+      subroutineIndexes: [0, 1],
+    };
+    const second = structuredClone(first);
+    second.legalActions[0]!.subroutineIndexes = [0, 2];
+
+    expect(buildPlanningStateIdentity(first)).not.toEqual(
+      buildPlanningStateIdentity(second),
+    );
+  });
+
   it("permits concrete card, server and ability references but no future actionId", () => {
     const identity = stateIdentity();
     const invocation = buildCanonicalLegalActionInvocation({

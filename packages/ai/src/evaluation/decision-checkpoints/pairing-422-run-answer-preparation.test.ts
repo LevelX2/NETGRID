@@ -63,14 +63,14 @@ it("prepares the exposed heap top for an affordable same-turn buried coverage an
   )!;
   expect(executor.moduleId).toBe("runner.rig_and_coverage");
   expect(executor.parentInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Ar1",
+    "p1p4xezjcxov79rno40lq3f7rv",
   );
   expect(capture.input.playerView.own.clicks).toBe(4);
 });
 
 it("builds the quoted missing hand buffer instead of credits that cannot close it", () => {
   const { decision, portfolio } = replay(handJson);
-  expect(decision.actionId).toBe("runner.draw_card");
+  expect(decision.actionId).toBe("r8");
   expect(decision.fallbackUsed).toBe(false);
   expect(
     portfolio.instances.find(
@@ -83,7 +83,7 @@ it("temporarily exceeds the cleanup limit to finish a funded contest buffer", ()
   const { capture, decision, portfolio } = replay(temporaryHandJson);
   expect(capture.input.playerView.own.maxHandSize).toBe(2);
   expect(capture.input.playerView.own.gripOrHq).toHaveLength(3);
-  expect(decision.actionId).toBe("runner.draw_card");
+  expect(decision.actionId).toBe("r8");
   expect(
     portfolio.instances.find(
       (p) => p.instanceId === portfolio.executorInstanceId,

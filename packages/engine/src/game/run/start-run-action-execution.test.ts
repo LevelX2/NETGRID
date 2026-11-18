@@ -47,7 +47,7 @@ function action(
   payload: NonNullable<LegalAction["payload"]> = { serverId: "hq" },
 ): LegalAction {
   return {
-    actionId: "runner.start_run.hq",
+    actionId: "rs.hq",
     type: "start_run",
     label: "Run HQ",
     side: "runner",

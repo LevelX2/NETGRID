@@ -100,7 +100,7 @@ const pressure: RunnerPressureSignal = {
   reachable: true,
   marginalValue: 100,
   evidenceCode: "test_admitted_hq_access",
-  runActionIds: ["runner.start_run.hq"],
+  runActionIds: ["rs.hq"],
 };
 function signals(state: GameState) {
   const input = inputFor(state);
@@ -143,10 +143,10 @@ describe("SP-350 current Engine post-break trash preparation", () => {
       const currentSignal = {
         ...signal,
         reachable: true,
-        runActionIds: ["runner.start_run.rd"],
+        runActionIds: ["rs.rd"],
       };
       const run = input.legalActions.find(
-        (a: LegalAction) => a.actionId === "runner.start_run.rd",
+        (a: LegalAction) => a.actionId === "rs.rd",
       )!;
       const quote = JSON.parse(run.payload.runnerPostBreakTrashQuoteJson);
       if (condition === "source_removed")
@@ -202,7 +202,7 @@ describe("SP-350 current Engine post-break trash preparation", () => {
     );
     const preparation = chooseAiAction(first.input);
     expect(preparation.actionId).toContain(
-      "runner.install_card.c1qa",
+      "rc.c1qa",
     );
     for (const cp of checkpoints.slice(1)) {
       const decision = chooseAiAction(cp.input);
@@ -253,7 +253,7 @@ describe("SP-350 current Engine post-break trash preparation", () => {
     );
     const input = cp.input;
     const run = input.legalActions.find(
-      (a: LegalAction) => a.actionId === "runner.start_run.hq",
+      (a: LegalAction) => a.actionId === "rs.hq",
     );
     // Exact new Engine addition checked independently against actual applyAction
     // transitions above; the old checkpoint predates this quote projection.
@@ -286,7 +286,7 @@ describe("SP-350 current Engine post-break trash preparation", () => {
     );
     const decision = chooseAiAction(input);
     expect(decision.actionId).toContain(
-      "runner.install_card.c1q9",
+      "rc.c1q9",
     );
     expect(decision.reasonCode).toBe("plan_first.runner.pressure_central");
     expect(decision.fallbackUsed).toBe(false);
@@ -295,7 +295,7 @@ describe("SP-350 current Engine post-break trash preparation", () => {
     const { state, startup, ice } = fixture();
     const input = inputFor(state);
     for (const actions of [input.legalActions, input.playerView.legalActions]) {
-      const raw = actions.find((a) => a.actionId === "runner.start_run.hq")
+      const raw = actions.find((a) => a.actionId === "rs.hq")
         ?.payload?.runnerPostBreakTrashQuoteJson;
       expect(typeof raw).toBe("string");
       expect(JSON.parse(raw as string)).toMatchObject({
@@ -350,7 +350,7 @@ describe("SP-350 current Engine post-break trash preparation", () => {
       state.runner.credits = credits;
       state.runner.clicks = clicks;
       const input = inputFor(state);
-      const runActionId = "runner.start_run.hq";
+      const runActionId = "rs.hq";
       const result = runnerPostBreakTrashPreparationSignals(
         input,
         buildActionSemanticCandidates(input),
@@ -432,13 +432,13 @@ describe("SP-350 current Engine post-break trash preparation", () => {
       const { state } = fixture();
       const input = inputFor(state);
       const run = input.legalActions.find(
-        (a) => a.actionId === "runner.start_run.hq",
+        (a) => a.actionId === "rs.hq",
       )!;
       const quote = JSON.parse(
         run.payload!.runnerPostBreakTrashQuoteJson as string,
       );
       if (condition === "stale_state") quote.stateVersion--;
-      if (condition === "wrong_action") quote.actionId = "runner.start_run.rd";
+      if (condition === "wrong_action") quote.actionId = "rs.rd";
       run.payload!.runnerPostBreakTrashQuoteJson =
         condition === "invalid_json" ? "{" : JSON.stringify(quote);
       expect(() =>
@@ -486,7 +486,7 @@ describe("SP-350 current Engine post-break trash preparation", () => {
       // Isolate this real, already admitted server route; all retained actions
       // are unchanged Engine actions, including the full encounter menu.
       input.legalActions = input.legalActions.filter(
-        (a) => state.run || a.actionId === "runner.start_run.hq",
+        (a) => state.run || a.actionId === "rs.hq",
       );
       input.playerView.legalActions = input.legalActions;
       const decision = chooseAiAction(input);

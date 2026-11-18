@@ -181,10 +181,16 @@ it("requotes each normal activation and closes the three-click damage line", () 
     });
     expect(decision.fallbackUsed).toBe(false);
     const pf = decision.decisionDebug!.planFirstDecision!;
-    expect(pf.rootPlanInstanceId).toContain("corp.punish_campaign");
-    expect(pf.executionOrigin?.leafPlanInstanceId).toContain(
-      "corp.execute_punish_sequence",
-    );
+    expect(
+      pf.portfolio.find(
+        (instance) => instance.instanceId === pf.rootPlanInstanceId,
+      )?.moduleId,
+    ).toBe("corp.punish_campaign");
+    expect(
+      pf?.portfolio.find(
+        (instance) => instance.instanceId === pf.executionOrigin?.leafPlanInstanceId,
+      )?.moduleId,
+    ).toBe("corp.execute_punish_sequence");
     expect(pf.selectedStep?.stepId).toBeTruthy();
     expect(pf.route).toMatchObject({
       actionId: action.actionId,

@@ -43,28 +43,31 @@ it("retains admitted R&D preparation when the remote funding prefix no longer fi
   expect(decision.actionId).toBe(preparation.actionId);
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:runner.pressure_central:central%3Ard",
+    rootPlanInstanceId: "pa90fufw9vc5bkshp96ztlryxl",
     route: { actionId: preparation.actionId, stateVersion: 101 },
   });
   expect(
-    decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toContain(
-    "plan:runner.rig_and_coverage:coverage%3Abreaker_wall%3Aprepare-run",
-  );
+    decision.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    ),
+  ).toMatchObject({
+    moduleId: "runner.rig_and_coverage",
+    dedupeKey: expect.stringContaining("coverage:breaker_wall:prepare-run"),
+  });
 });
 
 it("funds the urgent remote while its two-credit prefix and run still fit", () => {
   const { input, decision } = decide(admittedPreparationCheckpoint);
   expect(input.playerView.own.clicks).toBe(4);
-  expect(decision.actionId).toBe("runner.gain_credit");
+  expect(decision.actionId).toBe("rb");
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+    rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
     leafExecutorInstanceId:
-      "plan:runner.economy:run-support%3Aremote%3Ar1",
+      "p8dvcw6jj6cbaz1qxlt9ksvoh5",
   });
   expect(
     evaluateRunnerRunTargets({ input }).find(
-      (target) => target.actionId === "runner.start_run.r1",
+      (target) => target.actionId === "rs.r1",
     )?.prerunReserveQuote,
   ).toMatchObject({ status: "blocked", creditGap: 2 });
 });
@@ -76,11 +79,11 @@ it("continues the actual paid HQ access instead of derezzing a zero-rez-cost pas
     phase: "movement",
     position: { kind: "server" },
   });
-  expect(decision.actionId).toBe("runner.continue_run");
+  expect(decision.actionId).toBe("r5");
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-    leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A145",
-    route: { actionId: "runner.continue_run", stateVersion: 147 },
+    leafExecutorInstanceId: "p9nrt9qr2388lgyd4a2j3uyfr0",
+    route: { actionId: "r5", stateVersion: 147 },
   });
 });
 
@@ -108,14 +111,17 @@ it.each([5, 6])(
       expect(remote.prerunReserveQuote?.creditGap).toBe(0);
       expect(decision.actionId).toBe(prepare.actionId);
       expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+        rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
         route: { actionId: prepare.actionId, stateVersion: 103 },
       });
       expect(
-        decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-      ).toContain(
-        "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate%3Aprepare-run",
-      );
+        decision.decisionDebug?.planFirstDecision?.portfolio.find(
+          (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+        ),
+      ).toMatchObject({
+        moduleId: "runner.rig_and_coverage",
+        dedupeKey: expect.stringContaining("coverage:breaker_code_gate:prepare-run"),
+      });
     }
     expect(decision.fallbackUsed).toBe(false);
   },
@@ -129,10 +135,10 @@ it("does not undo a prepared R&D mode for a remote whose reserve is still unfund
     )?.selectedSubtype,
   ).toBe("wall");
   expect(input.playerView.own.credits).toBe(3);
-  expect(decision.actionId).toBe("runner.gain_credit");
+  expect(decision.actionId).toBe("rb");
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:runner.economy:runner-portfolio-credit-reserve",
-    route: { actionId: "runner.gain_credit", stateVersion: 103 },
+    rootPlanInstanceId: "pc7ebuiw5dxhlbzbf1nhcs4p4z",
+    route: { actionId: "rb", stateVersion: 103 },
   });
 });

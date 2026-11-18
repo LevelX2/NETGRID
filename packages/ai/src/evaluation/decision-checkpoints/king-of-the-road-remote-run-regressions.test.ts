@@ -55,8 +55,8 @@ describe("King of the Road remote run regressions", () => {
     expect(bypass).toBeDefined();
     expect(selectedAction).toBe(bypass);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-      leafExecutorInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      leafExecutorInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       route: { actionType: "play_event" },
     });
   });
@@ -100,8 +100,8 @@ describe("King of the Road remote run regressions", () => {
       creditsAfterRun: 1,
     });
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-      leafExecutorInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      leafExecutorInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       route: { actionId: bypass?.actionId, actionType: "play_event" },
     });
   });
@@ -117,7 +117,7 @@ describe("King of the Road remote run regressions", () => {
     );
     const targets = evaluateRunnerRunTargets({ input });
     const direct = targets.find(
-      (target) => target.actionId === "runner.start_run.r1",
+      (target) => target.actionId === "rs.r1",
     );
     const bypass = targets.find(
       (target) =>
@@ -208,10 +208,8 @@ describe("King of the Road remote run regressions", () => {
 
     expect(selectedAction?.type).toBe("continue_run");
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar2",
-      leafExecutorInstanceId: expect.stringContaining(
-        "runner.convert_run_window",
-      ),
+      rootPlanInstanceId: "p1p4x83h7yolw2hjtvi0ud06dm",
+      selectedPlan: { moduleId: "runner.convert_run_window" },
       route: { actionType: "continue_run" },
     });
     expect(

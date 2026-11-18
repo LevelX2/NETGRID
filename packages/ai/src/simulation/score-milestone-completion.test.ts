@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import { expect, it } from "vitest";
 import {
   applyAction,
@@ -65,7 +66,7 @@ it("finishes Corporate Coup's five-advance campaign before the second Runner win
     (id) => state.cardInstances[id]?.definitionId === CORPORATE_COUP,
   );
   if (!coup) throw new Error("Missing Corporate Coup in HQ.");
-  const root = `plan:corp.score_agenda:${encodeURIComponent(`agenda:${coup}:r1`)}`;
+  const root = planInstanceIdForProposal({ moduleId: "corp.score_agenda", dedupeKey: `agenda:${coup}:r1` });
   const ownDeckSnapshot = {
     deckSnapshotId: "score-milestone-completion",
     side: "corp" as const,

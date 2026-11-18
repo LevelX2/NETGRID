@@ -12204,7 +12204,7 @@
         "label": "Cortical Cybermodem"
       },
       "selectedStepKind": "gain_credits",
-      "selectedActionId": "runner.gain_credit",
+      "selectedActionId": "rb",
       "blockedBy": [
         "missing_credits"
       ],
@@ -12264,7 +12264,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:runner.build_credit_bank",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.end_turn"
+        "plan_portfolio_selected_action:r9"
       ]
     },
     "strategicIntent": {
@@ -13286,7 +13286,7 @@
         "contest_remote"
       ],
       "requiredAssessmentEvidence": [
-        "runner_terminal_remote_contest_mandatory:r1:runner.start_run.r1"
+        "runner_terminal_remote_contest_mandatory:r1:rs.r1"
       ]
     },
     "acceptableActions": [

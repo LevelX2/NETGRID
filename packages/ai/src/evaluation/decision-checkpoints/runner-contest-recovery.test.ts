@@ -58,9 +58,9 @@ function centralAndRemoteRoutes(input: AiDecisionInputWithDeckCapabilities) {
       ? { deckCapabilities: input.ownDeckCapabilities }
       : {}),
   });
-  const hq = routes.find((route) => route.actionId === "runner.start_run.hq");
+  const hq = routes.find((route) => route.actionId === "rs.hq");
   const remote = routes.find(
-    (route) => route.actionId === "runner.start_run.r1",
+    (route) => route.actionId === "rs.r1",
   );
   if (!hq || !remote) throw new Error("Expected both recorded run routes.");
   return { hq, remote, routes };
@@ -168,13 +168,13 @@ describe("Runner contest recovery", () => {
     input.planningStateIdentity = buildPlanningStateIdentity(input);
     expect(centralAndRemoteRoutes(input).hq).toMatchObject({ pathCost: 7 });
     expect(chooseAiAction(input)).toMatchObject({
-      actionId: "runner.draw_card",
+      actionId: "r8",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
           selectedPlan: { moduleId: "runner.defense_and_recovery" },
           route: {
-            actionId: "runner.draw_card",
+            actionId: "r8",
             stateVersion: view.stateVersion,
           },
         },
@@ -188,7 +188,7 @@ describe("Runner contest recovery", () => {
       const input = capturedInput(efficientBreakerReplay);
       const install = cheaperBreakerInstall(input);
       const hq = evaluateRunnerRunTargets({ input }).find(
-        (route) => route.actionId === "runner.start_run.hq",
+        (route) => route.actionId === "rs.hq",
       );
       if (!hq) throw new Error("Expected the recorded HQ route.");
       expect(hq).toMatchObject({
@@ -261,7 +261,7 @@ describe("Runner contest recovery", () => {
     expect(decision.actionId).toBe(hq.actionId);
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
+      rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
       route: {
         actionId: hq.actionId,
         stepId: expect.stringContaining(":pressure:hq"),
@@ -279,13 +279,13 @@ describe("Runner contest recovery", () => {
 
     const decision = chooseAiAction(input);
     expect(decision).toMatchObject({
-      actionId: "runner.start_run.archives",
+      actionId: "rs.archives",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
           selectedPlan: { moduleId: "runner.pressure_central" },
           route: {
-            actionId: "runner.start_run.archives",
+            actionId: "rs.archives",
             stateVersion: view.stateVersion,
           },
         },
@@ -374,11 +374,11 @@ describe("Runner contest recovery", () => {
       },
     });
     const run = input.legalActions.find(
-      (action) => action.actionId === "runner.start_run.r1",
+      (action) => action.actionId === "rs.r1",
     )!;
     input.legalActions.push({
       ...run,
-      actionId: "runner.start_run." + id,
+      actionId: "rs." + id,
       payload: { ...run.payload, serverId: id },
     });
     const events: PublicGameEvent[] = [
@@ -424,7 +424,7 @@ describe("Runner contest recovery", () => {
       accessPayoffContestable: false,
     });
     expect(chooseAiAction(input)).toMatchObject({
-      actionId: "runner.start_run.hq",
+      actionId: "rs.hq",
       fallbackUsed: false,
     });
   });
@@ -444,7 +444,7 @@ describe("Runner contest recovery", () => {
     );
 
     expect(chooseAiAction(input)).toMatchObject({
-      actionId: "runner.gain_credit",
+      actionId: "rb",
       fallbackUsed: false,
     });
   });
@@ -490,7 +490,7 @@ describe("Runner contest recovery", () => {
       ).toBe(hasReserve);
       const decision = chooseAiAction(input);
       expect(decision.actionId).toBe(
-        hasReserve ? hq.actionId : "runner.start_run.rd",
+        hasReserve ? hq.actionId : "rs.rd",
       );
       expect(decision.fallbackUsed).toBe(false);
     },
@@ -560,7 +560,7 @@ describe("Runner contest recovery", () => {
         (target) => target.actionId === decision.actionId,
       );
       const rd = targets.find(
-        (target) => target.actionId === "runner.start_run.rd",
+        (target) => target.actionId === "rs.rd",
       );
       const rdDebug = decision.decisionDebug?.actionAlternatives?.find(
         (alternative) => alternative.actionId === rd?.actionId,

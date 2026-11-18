@@ -388,7 +388,7 @@ function inputWithVirusCounters(amount: number): AiDecisionInput {
 
 function purgeAction(): LegalAction {
   return {
-    actionId: "corp.purge_virus_counters",
+    actionId: "cl",
     side: "corp",
     type: "purge_virus_counters",
     source: "game_rule",
@@ -400,7 +400,7 @@ function purgeAction(): LegalAction {
 function runnerVirusPurgeAction(): LegalAction {
   return {
     ...purgeAction(),
-    actionId: "corp.purge_runner_virus_counters",
+    actionId: "ck",
     type: "purge_runner_virus_counters",
   } as LegalAction;
 }

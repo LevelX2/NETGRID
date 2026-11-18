@@ -10,13 +10,13 @@
       {
         "matchId": "match_06a5de4a857f08cf",
         "side": "runner",
-        "actionId": "runner.draw_card",
+        "actionId": "r8",
         "clientKnownStateVersion": 158
       },
       {
         "matchId": "match_06a5de4a857f08cf",
         "side": "runner",
-        "actionId": "runner.draw_card",
+        "actionId": "r8",
         "clientKnownStateVersion": 159
       }
     ]
@@ -701,7 +701,7 @@
           ],
           "root": [
             {
-              "instanceId": "h11t5vdz",
+              "instanceId": "hr1.r0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 2,
@@ -1544,7 +1544,7 @@
             "cardDefinitionId": 326,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 28,
-            "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c20i.c20i.410",
+            "runnerCostPenaltySupportOriginalActionId": "rh.c20i.c20i.410",
             "visibility": {
               "class": "public"
             }
@@ -1830,7 +1830,7 @@
             "cardDefinitionId": 35,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 39,
-            "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c7v.c7v",
+            "runnerCostPenaltySupportOriginalActionId": "rc.c7v.c7v",
             "effectKind": "install_card",
             "visibility": {
               "class": "public"
@@ -1935,7 +1935,7 @@
             "targetIceDefinitionId": 473,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 43,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c2x9.0.0.48",
+            "runnerCostPenaltySupportOriginalActionId": "r3.c7v.c7v.c7v.c2x9.0.0.48",
             "targets": {
               "targetIceDefinitionId": 473
             },
@@ -2586,7 +2586,7 @@
             "cardDefinitionId": 41,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 69,
-            "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c96.c96",
+            "runnerCostPenaltySupportOriginalActionId": "rh.c96.c96",
             "visibility": {
               "class": "public"
             }
@@ -3169,7 +3169,7 @@
             "cardDefinitionId": 41,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 92,
-            "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c95.c95",
+            "runnerCostPenaltySupportOriginalActionId": "rh.c95.c95",
             "visibility": {
               "class": "public"
             }
@@ -3465,7 +3465,7 @@
             "cardDefinitionId": 326,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 104,
-            "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c20h.c20h.410",
+            "runnerCostPenaltySupportOriginalActionId": "rh.c20h.c20h.410",
             "visibility": {
               "class": "public"
             }
@@ -3559,7 +3559,7 @@
             "cardDefinitionId": 35,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 107,
-            "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c7t.c7t",
+            "runnerCostPenaltySupportOriginalActionId": "rc.c7t.c7t",
             "effectKind": "install_card",
             "visibility": {
               "class": "public"
@@ -3639,7 +3639,7 @@
             "targetIceDefinitionId": 473,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 110,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7t.c7t.c7t.c2x9.0.0.48",
+            "runnerCostPenaltySupportOriginalActionId": "r3.c7t.c7t.c7t.c2x9.0.0.48",
             "targets": {
               "targetIceDefinitionId": 473
             },
@@ -4009,7 +4009,7 @@
             "cardDefinitionId": 35,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 124,
-            "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c7v.c7v",
+            "runnerCostPenaltySupportOriginalActionId": "rc.c7v.c7v",
             "effectKind": "install_card",
             "visibility": {
               "class": "public"
@@ -4089,7 +4089,7 @@
             "targetIceDefinitionId": 491,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 127,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c319.0.0.48",
+            "runnerCostPenaltySupportOriginalActionId": "r3.c7v.c7v.c7v.c319.0.0.48",
             "targets": {
               "targetIceDefinitionId": 491
             },
@@ -4445,7 +4445,7 @@
             "cardDefinitionId": 326,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 141,
-            "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c20j.c20j.410",
+            "runnerCostPenaltySupportOriginalActionId": "rh.c20j.c20j.410",
             "visibility": {
               "class": "public"
             }
@@ -4539,7 +4539,7 @@
             "cardDefinitionId": 35,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 144,
-            "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c7u.c7u",
+            "runnerCostPenaltySupportOriginalActionId": "rc.c7u.c7u",
             "effectKind": "install_card",
             "visibility": {
               "class": "public"
@@ -4619,7 +4619,7 @@
             "targetIceDefinitionId": 473,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 147,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2x9.0.0.48",
+            "runnerCostPenaltySupportOriginalActionId": "r3.c7u.c7u.c7u.c2x9.0.0.48",
             "targets": {
               "targetIceDefinitionId": 473
             },
@@ -4946,7 +4946,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.gain_credit",
+          "actionId": "rb",
           "side": "runner",
           "type": "gain_credit",
           "label": "1 Credit nehmen",
@@ -4967,7 +4967,7 @@
           }
         },
         {
-          "actionId": "runner.draw_card",
+          "actionId": "r8",
           "side": "runner",
           "type": "draw_card",
           "label": "Karte ziehen",
@@ -4990,7 +4990,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c1qx.c1qx",
+          "actionId": "rc.c1qx.c1qx",
           "side": "runner",
           "type": "install_card",
           "label": "Vewy Vewy Quiet installieren",
@@ -5011,7 +5011,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c275.c275",
+          "actionId": "rc.c275.c275",
           "side": "runner",
           "type": "install_card",
           "label": "Tycho Mem Chip installieren",
@@ -5032,7 +5032,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1sq.c1sq.375",
+          "actionId": "rh.c1sq.c1sq.375",
           "side": "runner",
           "type": "play_event",
           "label": "Bodyweight™ Synthetic Blood spielen",
@@ -5060,7 +5060,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1zm.c1zm.406",
+          "actionId": "rh.c1zm.c1zm.406",
           "side": "runner",
           "type": "play_event",
           "label": "Sneak Preview spielen",
@@ -5087,7 +5087,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c15d.c15d",
+          "actionId": "rc.c15d.c15d",
           "side": "runner",
           "type": "install_card",
           "label": "Airport Locker installieren",
@@ -5118,7 +5118,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1ux.c1ux.385",
+          "actionId": "rh.c1ux.c1ux.385",
           "side": "runner",
           "type": "play_event",
           "label": "Gideon’s Pawnshop spielen",
@@ -5147,7 +5147,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.hq",
+          "actionId": "rs.hq",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf HQ",
@@ -5168,7 +5168,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.rd",
+          "actionId": "rs.rd",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf R&D",
@@ -5189,7 +5189,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.archives",
+          "actionId": "rs.archives",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf Archives",
@@ -5210,7 +5210,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.r1",
+          "actionId": "rs.r1",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf Remote 1",
@@ -5231,7 +5231,7 @@
           }
         },
         {
-          "actionId": "runner.end_turn",
+          "actionId": "r9",
           "side": "runner",
           "type": "end_turn",
           "label": "Zug beenden",
@@ -5531,7 +5531,7 @@
           "cardDefinitionId": 41,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 92,
-          "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c95.c95",
+          "runnerCostPenaltySupportOriginalActionId": "rh.c95.c95",
           "visibility": {
             "class": "public"
           }
@@ -5827,7 +5827,7 @@
           "cardDefinitionId": 326,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 104,
-          "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c20h.c20h.410",
+          "runnerCostPenaltySupportOriginalActionId": "rh.c20h.c20h.410",
           "visibility": {
             "class": "public"
           }
@@ -5921,7 +5921,7 @@
           "cardDefinitionId": 35,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 107,
-          "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c7t.c7t",
+          "runnerCostPenaltySupportOriginalActionId": "rc.c7t.c7t",
           "effectKind": "install_card",
           "visibility": {
             "class": "public"
@@ -6001,7 +6001,7 @@
           "targetIceDefinitionId": 473,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 110,
-          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7t.c7t.c7t.c2x9.0.0.48",
+          "runnerCostPenaltySupportOriginalActionId": "r3.c7t.c7t.c7t.c2x9.0.0.48",
           "targets": {
             "targetIceDefinitionId": 473
           },
@@ -6371,7 +6371,7 @@
           "cardDefinitionId": 35,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 124,
-          "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c7v.c7v",
+          "runnerCostPenaltySupportOriginalActionId": "rc.c7v.c7v",
           "effectKind": "install_card",
           "visibility": {
             "class": "public"
@@ -6451,7 +6451,7 @@
           "targetIceDefinitionId": 491,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 127,
-          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7v.c7v.c7v.c319.0.0.48",
+          "runnerCostPenaltySupportOriginalActionId": "r3.c7v.c7v.c7v.c319.0.0.48",
           "targets": {
             "targetIceDefinitionId": 491
           },
@@ -6807,7 +6807,7 @@
           "cardDefinitionId": 326,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 141,
-          "runnerCostPenaltySupportOriginalActionId": "runner.play_event.c20j.c20j.410",
+          "runnerCostPenaltySupportOriginalActionId": "rh.c20j.c20j.410",
           "visibility": {
             "class": "public"
           }
@@ -6901,7 +6901,7 @@
           "cardDefinitionId": 35,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 144,
-          "runnerCostPenaltySupportOriginalActionId": "runner.install_card.c7u.c7u",
+          "runnerCostPenaltySupportOriginalActionId": "rc.c7u.c7u",
           "effectKind": "install_card",
           "visibility": {
             "class": "public"
@@ -6981,7 +6981,7 @@
           "targetIceDefinitionId": 473,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 147,
-          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c7u.c7u.c7u.c2x9.0.0.48",
+          "runnerCostPenaltySupportOriginalActionId": "r3.c7u.c7u.c7u.c2x9.0.0.48",
           "targets": {
             "targetIceDefinitionId": 473
           },
@@ -7308,7 +7308,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "runner.gain_credit",
+        "actionId": "rb",
         "side": "runner",
         "type": "gain_credit",
         "label": "1 Credit nehmen",
@@ -7329,7 +7329,7 @@
         }
       },
       {
-        "actionId": "runner.draw_card",
+        "actionId": "r8",
         "side": "runner",
         "type": "draw_card",
         "label": "Karte ziehen",
@@ -7352,7 +7352,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c1qx.c1qx",
+        "actionId": "rc.c1qx.c1qx",
         "side": "runner",
         "type": "install_card",
         "label": "Vewy Vewy Quiet installieren",
@@ -7373,7 +7373,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c275.c275",
+        "actionId": "rc.c275.c275",
         "side": "runner",
         "type": "install_card",
         "label": "Tycho Mem Chip installieren",
@@ -7394,7 +7394,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1sq.c1sq.375",
+        "actionId": "rh.c1sq.c1sq.375",
         "side": "runner",
         "type": "play_event",
         "label": "Bodyweight™ Synthetic Blood spielen",
@@ -7422,7 +7422,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1zm.c1zm.406",
+        "actionId": "rh.c1zm.c1zm.406",
         "side": "runner",
         "type": "play_event",
         "label": "Sneak Preview spielen",
@@ -7449,7 +7449,7 @@
         }
       },
       {
-        "actionId": "runner.install_card.c15d.c15d",
+        "actionId": "rc.c15d.c15d",
         "side": "runner",
         "type": "install_card",
         "label": "Airport Locker installieren",
@@ -7480,7 +7480,7 @@
         }
       },
       {
-        "actionId": "runner.play_event.c1ux.c1ux.385",
+        "actionId": "rh.c1ux.c1ux.385",
         "side": "runner",
         "type": "play_event",
         "label": "Gideon’s Pawnshop spielen",
@@ -7509,7 +7509,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.hq",
+        "actionId": "rs.hq",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf HQ",
@@ -7530,7 +7530,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.rd",
+        "actionId": "rs.rd",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf R&D",
@@ -7551,7 +7551,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.archives",
+        "actionId": "rs.archives",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf Archives",
@@ -7572,7 +7572,7 @@
         }
       },
       {
-        "actionId": "runner.start_run.r1",
+        "actionId": "rs.r1",
         "side": "runner",
         "type": "start_run",
         "label": "Run auf Remote 1",
@@ -7593,7 +7593,7 @@
         }
       },
       {
-        "actionId": "runner.end_turn",
+        "actionId": "r9",
         "side": "runner",
         "type": "end_turn",
         "label": "Zug beenden",
@@ -7647,7 +7647,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 160,
-      "sideSafePlanningFingerprint": "fnv1a:2c39d958"
+      "sideSafePlanningFingerprint": "fnv1a:da4b9b94"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_runner_rent_i_con_shellspiel_2026_07_17_1.0.0",

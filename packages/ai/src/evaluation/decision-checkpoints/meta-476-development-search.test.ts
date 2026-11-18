@@ -39,7 +39,7 @@ it.each([3, 30])(
     const { input, cp } = native(game);
     const previous = cp.runtime.residentPlanPortfolio;
     const decision = chooseAiAction(input);
-    expect(decision.actionId).toBe("runner.resolve_choice");
+    expect(decision.actionId).toBe("rn");
     expect(decision.selectedChoices).toEqual({
       choiceId: input.playerView.pendingChoice!.choiceId,
       selectedOptionIds: ["source_stack"],

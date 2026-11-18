@@ -10890,7 +10890,7 @@
       "schemaVersion": "tactical-plan-v1",
       "memoryId": "match_606a546d0ba02826:corp:corp-ai-v0.9-hard",
       "side": "corp",
-      "planId": "corp.create_score_window:corp.advance_card.c2iu.c2iu",
+      "planId": "corp.create_score_window:c2.c2iu.c2iu",
       "type": "corp.create_score_window",
       "status": "progressing",
       "target": {
@@ -10898,7 +10898,7 @@
         "id": "r1"
       },
       "selectedStepKind": "build_rez_reserve",
-      "selectedActionId": "corp.gain_credit",
+      "selectedActionId": "cb",
       "blockedBy": [
         "score_window_contestable"
       ],
@@ -10931,10 +10931,10 @@
           "progress": 0.5,
           "selectedStepKind": "build_remote",
           "actionCandidateIds": [
-            "corp.install_card.c2ot.new_remote.c2ot",
-            "corp.install_card.c2ou.new_remote.c2ou",
-            "corp.install_card.c2rz.new_remote.c2rz",
-            "corp.install_card.c2x9.new_remote.c2x9"
+            "cc.c2ot.new_remote.c2ot",
+            "cc.c2ou.new_remote.c2ou",
+            "cc.c2rz.new_remote.c2rz",
+            "cc.c2x9.new_remote.c2x9"
           ],
           "cadence": {
             "turnKey": "corp:turn:21",
@@ -11044,7 +11044,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:corp.establish_scoring_remote|corp.establish_scoring_remote",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:corp.end_turn"
+        "plan_portfolio_selected_action:c9"
       ]
     },
     "strategicIntent": {
@@ -11884,7 +11884,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "corp.install_card.c31a.new_remote.c31a"
+        "actionId": "cc.c31a.new_remote.c31a"
       }
     ],
     "planExecution": {
@@ -11895,7 +11895,7 @@
         "improve_remote_protection_path"
       ],
       "requiredAssessmentEvidence": [
-        "corp_layered_remote_ice_staging:remote:strategic-score-remote:new_remote:corp.install_card.c31a.new_remote.c31a:layers_0:unrezzed_0:rez_gap_2"
+        "corp_layered_remote_ice_staging:remote:strategic-score-remote:new_remote:cc.c31a.new_remote.c31a:layers_0:unrezzed_0:rez_gap_2"
       ]
     }
   }

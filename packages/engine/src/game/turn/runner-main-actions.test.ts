@@ -23,7 +23,7 @@ describe("runner main action generation", () => {
     const actions = buildRunnerMainActions(testRunnerMainHost(state));
 
     expect(actions.map((candidate) => candidate.actionId)).toEqual([
-      "runner.end_turn",
+      "r9",
     ]);
     expect(JSON.stringify(state)).toBe(before);
   });
@@ -35,12 +35,12 @@ describe("runner main action generation", () => {
     const actions = buildRunnerMainActions(testRunnerMainHost(state));
 
     expect(actions.map((candidate) => candidate.actionId)).toEqual([
-      "runner.gain_credit",
-      "runner.draw_card",
-      "runner.start_run.hq",
-      "runner.start_run.rd",
-      "runner.start_run.archives",
-      "runner.end_turn",
+      "rb",
+      "r8",
+      "rs.hq",
+      "rs.rd",
+      "rs.archives",
+      "r9",
     ]);
     expect(new Set(actions.map((candidate) => candidate.actionId)).size).toBe(
       actions.length,
@@ -56,13 +56,13 @@ describe("runner main action generation", () => {
     const actions = buildRunnerMainActions(testRunnerMainHost(state));
 
     expect(actions.map((candidate) => candidate.actionId)).toEqual([
-      "runner.gain_credit",
-      "runner.draw_card",
-      "runner.remove_tag",
-      "runner.start_run.hq",
-      "runner.start_run.rd",
-      "runner.start_run.archives",
-      "runner.end_turn",
+      "rb",
+      "r8",
+      "rm",
+      "rs.hq",
+      "rs.rd",
+      "rs.archives",
+      "r9",
     ]);
     expect(
       actions.find((candidate) => candidate.type === "remove_tag"),
@@ -178,7 +178,7 @@ describe("runner main action generation", () => {
       },
     });
     expect(actions[0]?.payload?.optionalBonusRun).toBeUndefined();
-    expect(actions[0]?.actionId).toBe("runner.start_run.rd.bonus_run.174");
+    expect(actions[0]?.actionId).toBe("rs.rd.bonus_run.174");
   });
 
   it("gives the immediate Bodyweight decision priority over normal actions and pending run sequences", () => {

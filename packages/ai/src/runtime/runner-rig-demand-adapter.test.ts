@@ -397,7 +397,7 @@ describe("runner rig-demand coverage adapter", () => {
     expect(corollaDemand).toMatchObject({
       ownerModuleId: "runner.develop_board_and_hand",
       sourceKind: "admission_checked_development",
-      sourcePlanInstanceId: "plan:runner.develop_board_and_hand:card%3Acorolla",
+      sourcePlanInstanceId: "pdum14c647e1adjkclr9orxekd",
       sourceNeedId: "sentry",
       horizon: "next_rig_milestone",
       guarantee: "forecast",

@@ -41,10 +41,10 @@ describe("marginal R&D reserve consumption", () => {
     );
     const results = fixtures.map((f) => runtime.chooseAiAction(f.input));
     expect(results.slice(0, 2).map((r) => r.actionId)).toEqual([
-      "runner.gain_credit",
-      "runner.gain_credit",
+      "rb",
+      "rb",
     ]);
-    expect(results[2]!.actionId).toBe("runner.start_run.rd");
+    expect(results[2]!.actionId).toBe("rs.rd");
     for (let i = 0; i < 3; i++) {
       const f = fixtures[i]!,
         r = results[i]!,
@@ -52,7 +52,7 @@ describe("marginal R&D reserve consumption", () => {
       expect(r.fallbackUsed).toBe(false);
       expect(r.timeoutUsed).toBe(false);
       expect(pf.rootPlanInstanceId).toBe(
-        "plan:runner.pressure_central:central%3Ard",
+        "pa90fufw9vc5bkshp96ztlryxl",
       );
       expect(pf.route).toMatchObject({
         actionId: r.actionId,
@@ -69,7 +69,7 @@ describe("marginal R&D reserve consumption", () => {
     const third = observations
       .filter((o) => o.sv === 522)
       .at(-1)!
-      .targets.find((t) => t.actionId === "runner.start_run.rd")!;
+      .targets.find((t) => t.actionId === "rs.rd")!;
     expect(third).toMatchObject({
       recommendation: "run_now",
       creditsAfterRun: 4,

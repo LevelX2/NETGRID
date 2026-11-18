@@ -4306,7 +4306,7 @@
         "id": "r1"
       },
       "selectedStepKind": "run_target",
-      "selectedActionId": "runner.start_run.r1",
+      "selectedActionId": "rs.r1",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_central_probe_satisfied",
@@ -4334,7 +4334,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.steal_agenda.c2i5"
+        "plan_portfolio_selected_action:rt.c2i5"
       ]
     },
     "strategicIntent": {

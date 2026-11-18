@@ -34,7 +34,7 @@ import {
 } from "./runtime-checkpoint";
 
 const cinderella = "c2px";
-const archivesInstall = `corp.install_card.${cinderella}.archives.${cinderella}.0`;
+const archivesInstall = `cc.${cinderella}.archives.${cinderella}.0`;
 
 function inputForDecision(): AiDecisionInputWithDeckCapabilities {
   const source = structuredClone(

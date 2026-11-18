@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
@@ -25,7 +26,7 @@ const read = (name: string) =>
   JSON.parse(
     readFileSync(new URL(`./fixtures/${name}.json`, import.meta.url), "utf8"),
   );
-const root = "plan:runner.pressure_central:central%3Ahq";
+const root = "pa7nez1ioecg7mf06q1uwqq57o";
 const SMARTEYE = 277;
 const BLOCKS = 75;
 const runnerDeck: DeckDefinition = {
@@ -82,9 +83,9 @@ function checkpoint() {
     corpHq: state.corp.hq,
     corpRd: state.corp.rd,
   });
-  state = apply(state, "corp", "corp.mandatory_draw");
+  state = apply(state, "corp", "ce");
   RealEngineFixtureBuilder.forState(state).withCorpHqSize(0);
-  state = apply(state, "corp", "corp.end_turn");
+  state = apply(state, "corp", "c9");
   RealEngineFixtureBuilder.forState(state)
     .withRunnerCredits(20)
     .withRunnerGripSize(5)
@@ -120,7 +121,7 @@ function checkpoint() {
       },
     });
   const start = chooseAiAction(build(state));
-  expect(start.actionId).toBe("runner.start_run.hq");
+  expect(start.actionId).toBe("rs.hq");
   expect(start.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(root);
   state = apply(state, "runner", start.actionId!);
   const expose = chooseAiAction(build(state));
@@ -135,7 +136,7 @@ function checkpoint() {
   expect(
     runtime.residentPlanPortfolio?.runnerExposeInformationMemory,
   ).toHaveLength(1);
-  const leaf = `plan:runner.convert_run_window:run%3A${input.playerView.run!.runId}`;
+  const leaf = planInstanceIdForProposal({ moduleId: "runner.convert_run_window", dedupeKey: `run:${input.playerView.run!.runId}` });
   resetResidentPlanPortfolioMemory();
   return {
     input,

@@ -81,7 +81,7 @@ describe("semantic action signatures", () => {
   });
 
   it("distinguishes different multi-break sets with the same first target", () => {
-    const signatureFor = (subroutineIndexes: string) => {
+    const signatureFor = (subroutineIndexes: readonly number[]) => {
       const [candidate] = buildActionSemanticCandidates({
         legalActions: [
           {
@@ -95,14 +95,15 @@ describe("semantic action signatures", () => {
             costs: [],
             visibility: "public",
             targetRequirements: [],
-            payload: { iceId: "visible-ice", subroutineIndexes },
+            payload: { iceId: "visible-ice" },
+            subroutineIndexes,
           },
         ],
       });
       return semanticActionSignatureFromCandidate(candidate!).signatureKey;
     };
 
-    expect(signatureFor("0,1")).not.toBe(signatureFor("0,2"));
+    expect(signatureFor([0, 1])).not.toBe(signatureFor([0, 2]));
   });
 
   it("bounds hidden-info marker detection to exact tokens", () => {

@@ -5695,7 +5695,7 @@
         "id": "runner_credit_base"
       },
       "selectedStepKind": "gain_credits",
-      "selectedActionId": "runner.gain_credit",
+      "selectedActionId": "rb",
       "selectedActionType": "gain_credit",
       "blockedBy": [],
       "creditDemands": [
@@ -5739,7 +5739,7 @@
       ],
       "selectedFundingRoute": {
         "schemaVersion": "funding-route-v1",
-        "routeId": "runner.build_credit_base:credits:legal_action:runner.gain_credit+legal_action:runner.gain_credit",
+        "routeId": "runner.build_credit_base:credits:legal_action:rb+legal_action:rb",
         "demandId": "runner.build_credit_base:credits",
         "status": "covered_guaranteed",
         "reliability": "guaranteed",
@@ -5752,9 +5752,9 @@
         "totalClickCost": 2,
         "steps": [
           {
-            "stepId": "legal_action:runner.gain_credit",
+            "stepId": "legal_action:rb",
             "kind": "legal_action",
-            "actionId": "runner.gain_credit",
+            "actionId": "rb",
             "ownTurnOffset": 0,
             "clickCost": 1,
             "creditCost": 0,
@@ -5762,7 +5762,7 @@
             "creditRestriction": "general",
             "reliability": "guaranteed",
             "evidence": [
-              "legal_action:runner.gain_credit",
+              "legal_action:rb",
               "kind:immediate_liquid",
               "click_cost:1",
               "credit_cost:0",
@@ -5776,9 +5776,9 @@
             ]
           },
           {
-            "stepId": "legal_action:runner.gain_credit",
+            "stepId": "legal_action:rb",
             "kind": "legal_action",
-            "actionId": "runner.gain_credit",
+            "actionId": "rb",
             "ownTurnOffset": 0,
             "clickCost": 1,
             "creditCost": 0,
@@ -5786,7 +5786,7 @@
             "creditRestriction": "general",
             "reliability": "guaranteed",
             "evidence": [
-              "legal_action:runner.gain_credit",
+              "legal_action:rb",
               "kind:immediate_liquid",
               "click_cost:1",
               "credit_cost:0",
@@ -5905,7 +5905,7 @@
         "fundingRoutes": [
           {
             "schemaVersion": "funding-route-v1",
-            "routeId": "runner.build_credit_base:credits:legal_action:runner.gain_credit+legal_action:runner.gain_credit",
+            "routeId": "runner.build_credit_base:credits:legal_action:rb+legal_action:rb",
             "demandId": "runner.build_credit_base:credits",
             "status": "covered_guaranteed",
             "reliability": "guaranteed",
@@ -5918,9 +5918,9 @@
             "totalClickCost": 2,
             "steps": [
               {
-                "stepId": "legal_action:runner.gain_credit",
+                "stepId": "legal_action:rb",
                 "kind": "legal_action",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "ownTurnOffset": 0,
                 "clickCost": 1,
                 "creditCost": 0,
@@ -5928,7 +5928,7 @@
                 "creditRestriction": "general",
                 "reliability": "guaranteed",
                 "evidence": [
-                  "legal_action:runner.gain_credit",
+                  "legal_action:rb",
                   "kind:immediate_liquid",
                   "click_cost:1",
                   "credit_cost:0",
@@ -5942,9 +5942,9 @@
                 ]
               },
               {
-                "stepId": "legal_action:runner.gain_credit",
+                "stepId": "legal_action:rb",
                 "kind": "legal_action",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "ownTurnOffset": 0,
                 "clickCost": 1,
                 "creditCost": 0,
@@ -5952,7 +5952,7 @@
                 "creditRestriction": "general",
                 "reliability": "guaranteed",
                 "evidence": [
-                  "legal_action:runner.gain_credit",
+                  "legal_action:rb",
                   "kind:immediate_liquid",
                   "click_cost:1",
                   "credit_cost:0",
@@ -5979,7 +5979,7 @@
         ],
         "selectedFundingRoute": {
           "schemaVersion": "funding-route-v1",
-          "routeId": "runner.build_credit_base:credits:legal_action:runner.gain_credit+legal_action:runner.gain_credit",
+          "routeId": "runner.build_credit_base:credits:legal_action:rb+legal_action:rb",
           "demandId": "runner.build_credit_base:credits",
           "status": "covered_guaranteed",
           "reliability": "guaranteed",
@@ -5992,9 +5992,9 @@
           "totalClickCost": 2,
           "steps": [
             {
-              "stepId": "legal_action:runner.gain_credit",
+              "stepId": "legal_action:rb",
               "kind": "legal_action",
-              "actionId": "runner.gain_credit",
+              "actionId": "rb",
               "ownTurnOffset": 0,
               "clickCost": 1,
               "creditCost": 0,
@@ -6002,7 +6002,7 @@
               "creditRestriction": "general",
               "reliability": "guaranteed",
               "evidence": [
-                "legal_action:runner.gain_credit",
+                "legal_action:rb",
                 "kind:immediate_liquid",
                 "click_cost:1",
                 "credit_cost:0",
@@ -6024,7 +6024,7 @@
             "funding_route_projected_credits:6",
             "funding_route_projected_general_credits:6",
             "funding_route_projected_gap:0",
-            "funding_route_step_selected:runner.gain_credit"
+            "funding_route_step_selected:rb"
           ]
         },
         "fundingCoverageResolvesHardBlocker": false,
@@ -6055,10 +6055,10 @@
           "plan_credit_reservation_requested:6",
           "plan_credit_reservation_allocated:4",
           "plan_credit_reservation_shortfall:2",
-          "plan_funding_route:runner.build_credit_base:credits:legal_action:runner.gain_credit+legal_action:runner.gain_credit",
+          "plan_funding_route:runner.build_credit_base:credits:legal_action:rb+legal_action:rb",
           "plan_funding_route_status:covered_guaranteed",
           "plan_funding_hard_blocker_resolved:false",
-          "plan_portfolio_action_progress:runner.gain_credit",
+          "plan_portfolio_action_progress:rb",
           "plan_portfolio_action_progress_source:selected_mapped_step"
         ]
       },
@@ -6078,7 +6078,7 @@
         "plan_action_allocation_entries:1",
         "plan_action_allocation_unallocated:0",
         "plan_action_allocation_credit_remainder:0",
-        "plan_portfolio_selected_action:runner.gain_credit"
+        "plan_portfolio_selected_action:rb"
       ]
     },
     "strategicIntent": {

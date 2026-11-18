@@ -55,9 +55,9 @@ it("develops the real run-income source through its existing owner without spend
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
     stateVersion: input.playerView.stateVersion,
     rootPlanInstanceId:
-      "plan:runner.develop_board_and_hand:card%3Ac2c1",
+      "p63q3sg8szuox8qo9jdm10pc7k",
     leafExecutorInstanceId:
-      "plan:runner.develop_board_and_hand:card%3Ac2c1",
+      "p63q3sg8szuox8qo9jdm10pc7k",
     route: {
       actionId: decision.actionId,
       stateVersion: input.playerView.stateVersion,

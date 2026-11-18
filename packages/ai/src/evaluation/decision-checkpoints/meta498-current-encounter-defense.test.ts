@@ -40,9 +40,9 @@ describe("native current encounter defense (SP-528)", () => {
     expect(decision.actionId).toBe(decline.actionId);
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
       leafExecutorInstanceId:
-        "plan:corp.defend_servers:server-defense-portfolio",
+        "penw02zfrkklof54c2nuye5att",
     });
   });
 });

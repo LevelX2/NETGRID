@@ -59,7 +59,7 @@ function funding(cp: ReturnType<typeof native>, server: string) {
   };
   const targets = evaluateRunnerRunTargets(params);
   const target = targets.find(
-    (t) => t.actionId === "runner.start_run." + server,
+    (t) => t.actionId === "rs." + server,
   )!;
   expect(target).toBeDefined();
   return {
@@ -113,7 +113,7 @@ it.each([
     expect(support?.routeActionIds ?? []).toHaveLength(0);
     const { plan } = decide(cp);
     expect(plan.leafExecutorInstanceId).not.toBe(
-      "plan:runner.economy:run-support%3A" +
+      "p21mj6ii5vzcnss0ouyl58zxii" +
         (server === "hq" ? "central%3Ahq" : "remote%3Ar1"),
     );
   },
@@ -125,17 +125,17 @@ it("uses independent R&D pressure while the remote mixed funding route remains i
   });
   expect(funding(cp, "r1").support?.routeActionIds ?? []).toHaveLength(0);
   const { action, plan } = decide(cp);
-  expect(action.actionId).toBe("runner.start_run.rd");
-  expect(plan.rootPlanInstanceId).toBe("plan:runner.pressure_central:central%3Ard");
+  expect(action.actionId).toBe("rs.rd");
+  expect(plan.rootPlanInstanceId).toBe("pa90fufw9vc5bkshp96ztlryxl");
   expect(plan.leafExecutorInstanceId).toBe(plan.rootPlanInstanceId);
 });
 it("preserves ordinary credit funding when the current hand reserve already fits", () => {
   const cp = native(7, 80);
   expect(funding(cp, "r1").support?.routeActionIds[0]).toBe(
-    "runner.gain_credit",
+    "rb",
   );
   expect(decide(cp).plan.leafExecutorInstanceId).toBe(
-    "plan:runner.economy:run-support%3Aremote%3Ar1",
+    "p8dvcw6jj6cbaz1qxlt9ksvoh5",
   );
 });
 it("credits Panzer Run's own net draw instead of reserving an unnecessary extra action", () => {
@@ -146,10 +146,10 @@ it("credits Panzer Run's own net draw instead of reserving an unnecessary extra 
   expect(support?.routeActionIds[0]).toBe(action.actionId);
   expect(visibleSourceDefinitionsByInstanceId(cp.input.playerView)[action.source]).toBe(46);
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Ar1",
+    "p1p4xezjcxov79rno40lq3f7rv",
   );
   expect(plan.leafExecutorInstanceId).toBe(
-    "plan:runner.economy:run-support%3Aremote%3Ar1",
+    "p8dvcw6jj6cbaz1qxlt9ksvoh5",
   );
 });
 it("preserves the exact four-click Drine, repair and bound-run sequence", () => {
@@ -159,9 +159,9 @@ it("preserves the exact four-click Drine, repair and bound-run sequence", () => 
   expect(support?.routeActionIds[0]).toBe(action.actionId);
   expect(visibleSourceDefinitionsByInstanceId(cp.input.playerView)[action.source]).toBe(40);
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Ar2",
+    "p1p4x83h7yolw2hjtvi0ud06dm",
   );
   expect(plan.leafExecutorInstanceId).toBe(
-    "plan:runner.economy:run-support%3Aremote%3Ar2",
+    "p8dvdhsdwtl1qdd8vrjbusuktw",
   );
 });

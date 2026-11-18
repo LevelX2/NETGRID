@@ -16,7 +16,7 @@ describe("selfplay 176 Runner subtype coverage decision checkpoint", () => {
     // credit to make its three-credit trace response unaffordable, then
     // mistook the missing avoidance cost for an improved prepared path.
     const hq = evaluateRunnerRunTargets({ input: result.input! }).find(
-      (target) => target.actionId === "runner.start_run.hq",
+      (target) => target.actionId === "rs.hq",
     )!;
     expect(hq.routeQuote?.preRunPreparation).toBeUndefined();
     expect(hq.routeQuote?.knownCost).toBe(3);

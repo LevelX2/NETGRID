@@ -36,7 +36,7 @@ describe("match 7BFE exact decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.c37y.new_remote.c37y",
+              "cc.c37y.new_remote.c37y",
           },
         ],
       };
@@ -57,7 +57,7 @@ describe("match 7BFE exact decision checkpoints", () => {
       residentPlanPortfolioSnapshot(result.input)!.instances.find(
         (plan) =>
           plan.instanceId ===
-          "plan:corp.score_agenda:agenda%3Ac2iv%3Ar1",
+          "pxhwbcrlnqy0l5pghzb2u8n91",
       )?.moduleState,
     ).toMatchObject({
       signal: {
@@ -143,7 +143,7 @@ describe("match 7BFE exact decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.c2th.rd.c2th.4",
+              "cc.c2th.rd.c2th.4",
           },
         ],
         planExecution: {

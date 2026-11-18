@@ -42,19 +42,19 @@ describe("selfplay cycle 245 decision checkpoints", () => {
     );
 
     expect(decision).toMatchObject({
-      actionId: "runner.start_run.r2",
+      actionId: "rs.r2",
       reasonCode: "plan_first.runner.contest_remote",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:runner.contest_remote:remote%3Ar2",
+            "p1p4x83h7yolw2hjtvi0ud06dm",
           leafExecutorInstanceId:
-            "plan:runner.contest_remote:remote%3Ar2",
+            "p1p4x83h7yolw2hjtvi0ud06dm",
           dispositions: expect.arrayContaining([
             expect.objectContaining({
               actionId:
-                "runner.play_event.c1wr.c1wr.393",
+                "rh.c1wr.c1wr.393",
               disposition: "explicitly_nonproductive",
               ownerModuleId: "runner.economy",
               evidenceCode:
@@ -92,12 +92,12 @@ describe("selfplay cycle 245 decision checkpoints", () => {
       decision.decisionDebug?.planFirstDecision?.dispositions ?? [];
 
     expect(decision).toMatchObject({
-      actionId: "runner.start_run.r2",
+      actionId: "rs.r2",
       reasonCode: "plan_first.runner.contest_remote",
       fallbackUsed: false,
     });
     expect(
-      dispositions.filter((entry) => entry.actionId === "runner.draw_card"),
+      dispositions.filter((entry) => entry.actionId === "r8"),
     ).toEqual([
       expect.objectContaining({
         disposition: "explicitly_nonproductive",
@@ -131,7 +131,7 @@ describe("selfplay cycle 245 decision checkpoints", () => {
         evidenceCode: "runner_confirmed_damage_draw_tax_tag_unsafe",
       }),
     ]);
-    expect(dispositions.filter((d) => d.actionId === "runner.draw_card")).toHaveLength(1);
+    expect(dispositions.filter((d) => d.actionId === "r8")).toHaveLength(1);
     if (overflow === 0) verifyActualDrawTax(state, jackId);
   });
 });

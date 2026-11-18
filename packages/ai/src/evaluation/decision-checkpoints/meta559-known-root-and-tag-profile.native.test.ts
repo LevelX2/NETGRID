@@ -74,7 +74,7 @@ describe("pairing559: valid known root type reaches terminal threat facts (SP-66
       expect(
         r.decisionDebug!.planFirstDecision!.selectedPlan?.evidenceCodes,
       ).not.toContain(
-        "runner_terminal_remote_contest_mandatory:r1:runner.start_run.r1",
+        "runner_terminal_remote_contest_mandatory:r1:rs.r1",
       );
       expect(runnerTargetHasTerminalContestThreat(input, "r1")).toBe(
         false,

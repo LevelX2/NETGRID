@@ -121,7 +121,7 @@ it("funds the admitted defense installation before spending its operation thresh
     plan = decision.decisionDebug!.planFirstDecision!;
   expect(decision.actionId).toBe(account.actionId);
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:corp.defend_servers:server-defense-portfolio",
+    "penw02zfrkklof54c2nuye5att",
   );
   expect(plan.selectedPlan?.moduleId).toBe("corp.economy");
   expect(decision.fallbackUsed).toBe(false);
@@ -175,7 +175,7 @@ it("keeps funding separate while an independently known central reserve suspends
   expect(account.type).toBe("play_operation");
   expect(referencesDefaultDeckCard(account.source, 493)).toBe(true);
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:corp.economy:economy-immediate-operation%3Ac31p",
+    "pdcamubibo7tjbarb3t4ixoxpi",
   );
   expect(
     plan.dispositions.some(
@@ -202,7 +202,7 @@ it("uses a different canonical liquid-credit operation for the same admitted ins
     decision = chooseAiAction(i);
   expect(referencesDefaultDeckCard(decision.actionId, efficiency)).toBe(true);
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:corp.defend_servers:server-defense-portfolio",
+    "penw02zfrkklof54c2nuye5att",
   );
   expect(
     decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
@@ -242,7 +242,7 @@ it.each([
       plan = decision.decisionDebug?.planFirstDecision;
     expect(
       plan?.rootPlanInstanceId ===
-        "plan:corp.defend_servers:server-defense-portfolio" &&
+        "penw02zfrkklof54c2nuye5att" &&
         plan.selectedPlan?.moduleId === "corp.economy",
     ).toBe(false);
     expect(i.legalActions.some((a) => a.actionId === decision.actionId)).toBe(

@@ -380,7 +380,7 @@ function executedRemoteInstall() {
       },
     },
   ] as AiDecisionInput["eventTail"];
-  const rootId = "plan:corp.establish_scoring_remote:strategic-score-remote";
+  const rootId = "p6vrrjl5fc78gjet2n25nst7pp";
   const previous = {
     side: "corp",
     stateVersion: 9,

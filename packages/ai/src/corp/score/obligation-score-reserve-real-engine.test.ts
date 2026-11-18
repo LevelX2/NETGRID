@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { referencesDefaultDeckCard } from "../../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import standardDeckCatalog from "../../../../../data/decks/standard-deck-catalog-1.0.0.json";
 import { applyAction, createGameAfterSetup, getLegalActions, getPlayerView } from "@netgrid/engine";
@@ -83,7 +84,7 @@ it("binds the exact native obligation conversion cost and credit horizon before 
   const decision = chooseAiAction(input);
   expect(decision.actionId).toBe(action.actionId);
   expect(decision.fallbackUsed).toBe(false);
-  expect(decision.evidence).toContain("plan_step_id:plan:corp.score_agenda:obligation-debt-removal:convert_agenda");
+  expect(decision.evidence).toContain(`plan_step_id:${obligationScorePlanId}:convert_agenda`);
   expect(signalFor(input)).toMatchObject({ sameTurnConversionProof: "engine_quoted_path",
     sameTurnConversionResourceCost: { stateVersion: input.playerView.stateVersion, credits: 12, clicks: 1 },
     sameTurnConversionCreditHorizon: { stateVersion: input.playerView.stateVersion, creditsBeforeScorePayout: 5 } });
@@ -116,13 +117,13 @@ it("funds one missing reserve credit under the same score parent before native r
   const firstInput = inputFor(state), first = chooseAiAction(firstInput);
   const gain = firstInput.legalActions.find((a) => a.actionId === first.actionId)!;
   expect(gain.type).toBe("gain_credit");
-  expect(first.evidence).toContain("plan_first_root:plan:corp.score_agenda:obligation-debt-removal");
+  expect(first.evidence).toContain(`plan_first_root:${obligationScorePlanId}`);
   expect(signalFor(firstInput)).toMatchObject({ feasible: true, fundingGap: 1 });
   state = apply(state, gain);
   const nextInput = inputFor(state), next = chooseAiAction(nextInput);
   const removal = nextInput.legalActions.find((a) => a.actionId === next.actionId)!;
   expect(removal.payload?.obligationDebtAbility).toBe("remove_obligation");
-  expect(next.evidence).toContain("plan_first_root:plan:corp.score_agenda:obligation-debt-removal");
+  expect(next.evidence).toContain(`plan_first_root:${obligationScorePlanId}`);
   state = apply(state, removal);
   expect(state.corp.credits).toBe(5);
   expect(getPlayerView(state, "corp").own.agendaPoints).toBe(4);
@@ -137,3 +138,5 @@ it("keeps a native terminal obligation conversion at P1 even below the reserve",
   expect(end.corp.credits).toBe(4);
   expect(end.winner).toBe("corp");
 });
+
+const obligationScorePlanId = planInstanceIdForProposal({ moduleId: "corp.score_agenda", dedupeKey: "obligation-debt-removal" });

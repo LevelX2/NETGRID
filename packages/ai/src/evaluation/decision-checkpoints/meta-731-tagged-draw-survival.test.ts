@@ -35,7 +35,7 @@ it("binds the real taxed draw to Defense while the existing damage exposure cann
   expect(Object.values(checkpoint.validation)).toEqual(Array(9).fill(true));
   const { input, decision } = decide();
   const draw = input.legalActions.find(
-    (action) => action.actionId === "runner.draw_card",
+    (action) => action.actionId === "r8",
   )!;
   expect(runnerDrawTaxLiabilityProjection(input, draw)).toMatchObject({
     drawCount: 1,
@@ -53,8 +53,8 @@ it("binds the real taxed draw to Defense while the existing damage exposure cann
     fallbackUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:runner.defense_and_recovery:runner",
-        leafExecutorInstanceId: "plan:runner.defense_and_recovery:runner",
+        rootPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
+        leafExecutorInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
         route: {
           actionId: draw.actionId,
           stateVersion: input.playerView.stateVersion,
@@ -104,12 +104,12 @@ it.each([
   "keeps the current-rule tax restriction with %s",
   (_label, adjust) => {
     const { decision } = decide(adjust);
-    expect(decision.actionId).not.toBe("runner.draw_card");
+    expect(decision.actionId).not.toBe("r8");
     expect(
       decision.decisionDebug?.planFirstDecision?.dispositions,
     ).toContainEqual(
       expect.objectContaining({
-        actionId: "runner.draw_card",
+        actionId: "r8",
         ownerModuleId: "runner.defense_and_recovery",
         evidenceCode: "runner_confirmed_damage_draw_tax_tag_unsafe",
       }),

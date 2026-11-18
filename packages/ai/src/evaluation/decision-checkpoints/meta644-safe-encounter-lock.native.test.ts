@@ -62,7 +62,7 @@ function freshlyQuotedSource() {
 it("quotes the native fully known no-break continuation as conditional zero-cost access", () => {
   const input = nativeInput();
   const target = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.r1",
+    (t) => t.actionId === "rs.r1",
   )!;
   expect(target).toMatchObject({
     pathPassability: "reachable",
@@ -87,14 +87,14 @@ it("keeps the native remote-contest owner, action and state binding", () => {
   const result = chooseAiAction(input);
   expect(JSON.stringify(input.playerView)).toBe(before);
   expect(result).toMatchObject({
-    actionId: "runner.start_run.r1",
+    actionId: "rs.r1",
     fallbackUsed: false,
     timeoutUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-        leafExecutorInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-        route: { actionId: "runner.start_run.r1", stateVersion: 190 },
+        rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+        leafExecutorInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+        route: { actionId: "rs.r1", stateVersion: 190 },
       },
     },
   });

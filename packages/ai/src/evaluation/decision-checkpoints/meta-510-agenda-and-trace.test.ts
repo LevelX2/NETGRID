@@ -6,7 +6,7 @@ import {
   getPlayerView,
   hashGameState,
 } from "@netgrid/engine";
-import type { GameState } from "@netgrid/shared";
+import type { GameState, LegalAction } from "@netgrid/shared";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
@@ -76,7 +76,7 @@ it.each(["g13d70", "g22d65", "g29d120", "g38d80"])(
       )!;
     expect(source.rezzed).toBe(true);
     expect(source.effectivePostRezRunQuote).toBeUndefined();
-    expect(decision.actionId).toBe("corp.resolve_choice");
+    expect(decision.actionId).toBe("cn");
     expect(decision.selectedChoices).toEqual({
       choiceId: input.playerView.pendingChoice.choiceId,
       selectedOptionIds: input.playerView.pendingChoice.options.map(
@@ -84,7 +84,7 @@ it.each(["g13d70", "g22d65", "g29d120", "g38d80"])(
       ),
     });
     expect(decision.decisionDebug!.planFirstDecision!.rootPlanInstanceId).toBe(
-      "plan:corp.defend_servers:server-defense-portfolio",
+      "penw02zfrkklof54c2nuye5att",
     );
     const before = load(key + "-engine") as GameState;
     expect(hashGameState(before)).toBe(cp.stateHash);
@@ -190,13 +190,13 @@ it.each([
 
 it("removes imaginary protection and selects the existing funded advance at g7d343", () => {
   const key = "g7d343";
-  const { cp, decision } = assertOwnedDecision(key, "corp.score_agenda");
+  const { cp, input, decision } = assertOwnedDecision(key, "corp.score_agenda");
   const before = load(key + "-before").decision;
   expect(before.decisionDebug.planFirstDecision.selectedPlan.moduleId).toBe(
     "corp.score_agenda",
   );
   expect(decision.actionId).not.toBe(before.actionId);
-  expect(decision.actionId).toMatch(/^corp\.advance_card\./);
+  expect(input.legalActions.find((action: LegalAction) => action.actionId === decision.actionId)?.type).toBe("advance_card");
   const state = load(key + "-engine") as GameState;
   expect(hashGameState(state)).toBe(cp.stateHash);
   expect(
@@ -214,9 +214,13 @@ it("removes imaginary protection and selects the existing funded advance at g7d3
 });
 
 it("preserves the separately owned deckout-flood action at g11d307", () => {
-  const { decision } = assertOwnedDecision("g11d307", "corp.score_agenda");
-  expect(decision.actionId).toBe(
-    "corp.install_card.c2h1.new_remote.c2h1",
+  const { input, decision } = assertOwnedDecision("g11d307", "corp.score_agenda");
+  const state = load("g11d307-engine") as GameState;
+  const selected = input.legalActions.find((action: LegalAction) => action.actionId === decision.actionId);
+  expect(selected).toMatchObject({ type: "install_card", payload: { serverId: "new_remote" } });
+  expect(state.cardInstances[selected!.source]?.definitionId).toBe(400);
+  expect(decision.decisionDebug?.planFirstDecision?.selectedPlan?.dedupeKey).toBe(
+    `agenda:${selected!.source}:new_remote`,
   );
   expect(decision.evidence).toContain(
     "plan_assessment_evidence:corp_deckout_agenda_flood_score_install:new_remote",
@@ -242,7 +246,7 @@ it("preserves the separately owned deckout-flood action at g11d307", () => {
         firstActionId: load("g11d307-before").decision.actionId,
         evidenceCodes: expect.arrayContaining([
           "agenda_line_family:pure_rush",
-          "root_plan_instance:plan:corp.score_agenda:agenda%3Ac2kn%3Anew_remote",
+          "root_plan_instance:pcn8y4ue3kd70r09402sanhrln",
         ]),
       }),
     ]),
@@ -250,9 +254,9 @@ it("preserves the separately owned deckout-flood action at g11d307", () => {
 });
 
 it("keeps a genuinely funded same-turn advancement and score project", () => {
-  const { decision } = assertOwnedDecision("g30d334", "corp.score_agenda");
+  const { input, decision } = assertOwnedDecision("g30d334", "corp.score_agenda");
   expect(decision.actionId).toBe(load("g30d334-before").decision.actionId);
-  expect(decision.actionId).toMatch(/^corp\.advance_card\./);
+  expect(input.legalActions.find((action: LegalAction) => action.actionId === decision.actionId)?.type).toBe("advance_card");
   let state = load("g30d334-engine") as GameState;
   for (const row of load("funded-score-finite-control").rows) {
     expect(hashGameState(state)).toBe(row.beforeHash);

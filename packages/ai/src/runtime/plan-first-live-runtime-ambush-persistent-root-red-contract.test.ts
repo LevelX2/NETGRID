@@ -20,7 +20,7 @@ import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import { createSemanticRuntimeDecisionContext } from "./semantic-runtime-decision-context";
 import type { SemanticRuntimeDecisionContextDependencies } from "./semantic-runtime-decision-context";
 
-const AMBUSH_ROOT_ID = "plan:corp.ambush_and_bluff:ambush%3Avacant-soulkiller";
+const AMBUSH_ROOT_ID = "pepll3z56vr7jpwjh7qempjvwz";
 const AMBUSH_FUNDING_NEED_ID = "ambush-funding:vacant-soulkiller";
 const AMBUSH_SETUP_NEED_ID = "ambush-setup:vacant-soulkiller:new_remote";
 

@@ -3863,7 +3863,7 @@
       "stateVersion": 9,
       "instances": [
         {
-          "instanceId": "plan:runner.convert_run_window:run%3A9",
+          "instanceId": "p862mwqh5bru7wy3uwj163lpi3",
           "dedupeKey": "run:9",
           "moduleId": "runner.convert_run_window",
           "moduleVersion": "1",
@@ -3896,7 +3896,7 @@
               "windowId": "run:9",
               "serverId": "rd",
               "rootPlanInstanceId": "rules.access_window",
-              "leafPlanInstanceId": "plan:runner.convert_run_window:run%3A9",
+              "leafPlanInstanceId": "p862mwqh5bru7wy3uwj163lpi3",
               "semanticActionTypes": [
                 "access.trash_accessed_card",
                 "access.decline_trash"
@@ -3913,14 +3913,14 @@
                 "evidenceCode": "remote_trash_role:economy"
               },
               "actionAssessments": {
-                "runner.trash_accessed_card.c3ge.1": {
+                "rv.c3ge.1": {
                   "admissible": true,
                   "evidenceCodes": [
                     "runner_access_window_action_plan_admissible",
                     "runner_run_window_action:trash_accessed_card"
                   ]
                 },
-                "runner.decline_trash": {
+                "r7": {
                   "admissible": true,
                   "evidenceCodes": [
                     "runner_access_window_action_plan_admissible",
@@ -3967,7 +3967,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.credit_bank:366",
+          "instanceId": "p27nxf5z010iyjlqr3dgq3ah0w",
           "dedupeKey": "366",
           "moduleId": "runner.credit_bank",
           "moduleVersion": "1",
@@ -4061,7 +4061,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.economy:runner-portfolio-credit-reserve",
+          "instanceId": "pc7ebuiw5dxhlbzbf1nhcs4p4z",
           "dedupeKey": "runner-portfolio-credit-reserve",
           "moduleId": "runner.economy",
           "moduleVersion": "1",
@@ -4163,7 +4163,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
+          "instanceId": "p5s1qdgqrafrs3n2kss1t9ct7m",
           "dedupeKey": "coverage:breaker_code_gate",
           "moduleId": "runner.rig_and_coverage",
           "moduleVersion": "1",
@@ -4250,7 +4250,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry",
+          "instanceId": "pde8a64nmn1hkbrzgi9sbuf6fo",
           "dedupeKey": "coverage:breaker_sentry",
           "moduleId": "runner.rig_and_coverage",
           "moduleVersion": "1",
@@ -4337,7 +4337,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_wall",
+          "instanceId": "p6c0cqw460f4dpux5zmx6n3hjf",
           "dedupeKey": "coverage:breaker_wall",
           "moduleId": "runner.rig_and_coverage",
           "moduleVersion": "1",
@@ -4429,49 +4429,49 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:runner.convert_run_window:run%3A9",
+          "instanceId": "p862mwqh5bru7wy3uwj163lpi3",
           "stateVersion": 9,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.credit_bank:366",
+          "instanceId": "p27nxf5z010iyjlqr3dgq3ah0w",
           "stateVersion": 9,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.economy:runner-portfolio-credit-reserve",
+          "instanceId": "pc7ebuiw5dxhlbzbf1nhcs4p4z",
           "stateVersion": 9,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
+          "instanceId": "p5s1qdgqrafrs3n2kss1t9ct7m",
           "stateVersion": 9,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry",
+          "instanceId": "pde8a64nmn1hkbrzgi9sbuf6fo",
           "stateVersion": 9,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_wall",
+          "instanceId": "p6c0cqw460f4dpux5zmx6n3hjf",
           "stateVersion": 9,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.convert_run_window:run%3A8",
+          "instanceId": "p862n3omar755mfpi5s11doxdg",
           "stateVersion": 9,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.convert_run_window:run%3A9",
+          "instanceId": "p862mwqh5bru7wy3uwj163lpi3",
           "stateVersion": 9,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
@@ -4481,7 +4481,7 @@
       ],
       "turnPlanCommitment": {
         "schemaVersion": "turn-plan-commitment-v2",
-        "sequenceRootPlanInstanceId": "plan:runner.convert_run_window:run%3A9",
+        "sequenceRootPlanInstanceId": "p862mwqh5bru7wy3uwj163lpi3",
         "commitmentId": "fnv1a:e1bc48bf",
         "sourcePlanId": "fnv1a:d1386e70",
         "sourceLineHash": "fnv1a:736d49bc",
@@ -4501,7 +4501,7 @@
           {
             "phaseId": "fnv1a:a5e43b0b",
             "root": {
-              "planInstanceId": "plan:runner.convert_run_window:run%3A9",
+              "planInstanceId": "p862mwqh5bru7wy3uwj163lpi3",
               "moduleId": "runner.convert_run_window",
               "milestoneId": "convert_active_run_window",
               "provenance": "resident"
@@ -4595,7 +4595,7 @@
           "sideSafePlanningFingerprint": "fnv1a:d016224a"
         },
         "currentBinding": {
-          "actionId": "runner.trash_accessed_card.c3ge.1",
+          "actionId": "rv.c3ge.1",
           "stateVersion": 9,
           "semanticActionSetFingerprint": "fnv1a:e6161475",
           "invocationKey": "fnv1a:fcb74de9"
@@ -4603,19 +4603,19 @@
         "actionType": "trash_accessed_card",
         "expectationId": "fnv1a:7705182d"
       },
-      "rootForegroundInstanceId": "plan:runner.convert_run_window:run%3A9",
-      "executorInstanceId": "plan:runner.convert_run_window:run%3A9"
+      "rootForegroundInstanceId": "p862mwqh5bru7wy3uwj163lpi3",
+      "executorInstanceId": "p862mwqh5bru7wy3uwj163lpi3"
     }
   },
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.start_run.rd.bonus_run.288"
+        "actionId": "rs.rd.bonus_run.288"
       }
     ],
     "forbiddenActions": [
       {
-        "actionId": "runner.start_run.archives.bonus_run.288"
+        "actionId": "rs.archives.bonus_run.288"
       }
     ],
     "planExecution": {

@@ -8935,7 +8935,7 @@
         "id": "strategy_credit_reserve"
       },
       "selectedStepKind": "gain_credits",
-      "selectedActionId": "corp.gain_credit",
+      "selectedActionId": "cb",
       "selectedActionType": "gain_credit",
       "blockedBy": [
         "missing_credits"
@@ -9190,7 +9190,7 @@
           "progress": 0.6,
           "selectedStepKind": "build_remote",
           "actionCandidateIds": [
-            "corp.install_card.clh.new_remote.clh"
+            "cc.clh.new_remote.clh"
           ],
           "creditDemands": [],
           "actionDemands": [
@@ -9942,7 +9942,7 @@
             "plan_action_capacity_route:corp.establish_scoring_remote:new_remote:actions:already_sufficient",
             "plan_action_capacity_route_status:already_sufficient",
             "plan_action_capacity_hard_blocker_resolved:false",
-            "plan_portfolio_action_progress:corp.install_card.clh.new_remote.clh",
+            "plan_portfolio_action_progress:cc.clh.new_remote.clh",
             "plan_portfolio_carried_without_current_action:true",
             "plan_action_reservation_requested:1",
             "plan_action_reservation_allocated:0",
@@ -10551,7 +10551,7 @@
         "plan_action_allocation_entries:3",
         "plan_action_allocation_unallocated:0",
         "plan_action_allocation_credit_remainder:0",
-        "plan_portfolio_selected_action:corp.end_turn"
+        "plan_portfolio_selected_action:c9"
       ]
     },
     "strategicIntent": {

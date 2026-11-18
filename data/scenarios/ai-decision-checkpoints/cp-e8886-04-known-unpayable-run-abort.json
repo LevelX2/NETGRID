@@ -3841,7 +3841,7 @@
         "label": "Inside Job"
       },
       "selectedStepKind": "install_development_card",
-      "selectedActionId": "runner.play_event.c1w1.rd.c1w1",
+      "selectedActionId": "rh.c1w1.rd.c1w1",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -3905,7 +3905,7 @@
         "plan_portfolio_foreground:runner.play_best_hand_card",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.play_event.c1w1.rd.c1w1"
+        "plan_portfolio_selected_action:rh.c1w1.rd.c1w1"
       ]
     },
     "strategicIntent": {
@@ -4919,7 +4919,7 @@
       ]
     },
     "runnerRunPlan": {
-      "id": "runner_run_plan:match_e8886c6f5a9d0c24:39:runner:runner.play_event.c1w1.rd.c1w1:rd",
+      "id": "runner_run_plan:match_e8886c6f5a9d0c24:39:runner:rh.c1w1.rd.c1w1:rd",
       "side": "runner",
       "lifecycle": "created",
       "origin": "card_initiated_run",
@@ -4937,7 +4937,7 @@
         "trashPolicy": "trash_if_value_positive",
         "reserveForStealOrTrash": 0
       },
-      "runStartActionId": "runner.play_event.c1w1.rd.c1w1",
+      "runStartActionId": "rh.c1w1.rd.c1w1",
       "sourceTacticalGoalIds": [
         "runner.find_or_install_primary_breaker",
         "runner.pressure_good_central_target",
@@ -5132,7 +5132,7 @@
       "visibilityEvidence": [
         {
           "kind": "legal_action",
-          "ref": "runner.play_event.c1w1.rd.c1w1"
+          "ref": "rh.c1w1.rd.c1w1"
         },
         {
           "kind": "action_semantic_candidate",
@@ -5158,12 +5158,12 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.jack_out"
+        "actionId": "rd"
       }
     ],
     "forbiddenActions": [
       {
-        "actionId": "runner.continue_run"
+        "actionId": "r5"
       }
     ]
   }

@@ -2377,7 +2377,7 @@
               "action": {
                 "matchId": "ai-sim_ai-renticon-code-rot-20260718-002_local_runner_rent_i_con_shellspiel_2026_07_17_local_corp_code_rot_bitte_eintreten_2026_07_16",
                 "side": "runner",
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "clientKnownStateVersion": 0,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_runner_0",
@@ -2388,7 +2388,7 @@
                 "idempotencyKey": "ai-sim-0"
               },
               "legalAction": {
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "side": "runner",
                 "type": "resolve_choice",
                 "label": "Runner-Starthand",
@@ -2462,7 +2462,7 @@
               "action": {
                 "matchId": "ai-sim_ai-renticon-code-rot-20260718-002_local_runner_rent_i_con_shellspiel_2026_07_17_local_corp_code_rot_bitte_eintreten_2026_07_16",
                 "side": "corp",
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "clientKnownStateVersion": 1,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_corp_1",
@@ -2473,7 +2473,7 @@
                 "idempotencyKey": "ai-sim-1"
               },
               "legalAction": {
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "side": "corp",
                 "type": "resolve_choice",
                 "label": "Korp-Starthand",
@@ -2530,12 +2530,12 @@
               "action": {
                 "matchId": "ai-sim_ai-renticon-code-rot-20260718-002_local_runner_rent_i_con_shellspiel_2026_07_17_local_corp_code_rot_bitte_eintreten_2026_07_16",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 2,
                 "idempotencyKey": "ai-sim-2"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -2587,12 +2587,12 @@
               "action": {
                 "matchId": "ai-sim_ai-renticon-code-rot-20260718-002_local_runner_rent_i_con_shellspiel_2026_07_17_local_corp_code_rot_bitte_eintreten_2026_07_16",
                 "side": "corp",
-                "actionId": "corp.install_card.c2rx.hq.c2rx.0",
+                "actionId": "cc.c2rx.hq.c2rx.0",
                 "clientKnownStateVersion": 3,
                 "idempotencyKey": "ai-sim-3"
               },
               "legalAction": {
-                "actionId": "corp.install_card.c2rx.hq.c2rx.0",
+                "actionId": "cc.c2rx.hq.c2rx.0",
                 "side": "corp",
                 "type": "install_card",
                 "label": "ICE vor HQ installieren",
@@ -2658,12 +2658,12 @@
               "action": {
                 "matchId": "ai-sim_ai-renticon-code-rot-20260718-002_local_runner_rent_i_con_shellspiel_2026_07_17_local_corp_code_rot_bitte_eintreten_2026_07_16",
                 "side": "corp",
-                "actionId": "corp.install_card.c2ry.rd.c2ry.0",
+                "actionId": "cc.c2ry.rd.c2ry.0",
                 "clientKnownStateVersion": 4,
                 "idempotencyKey": "ai-sim-4"
               },
               "legalAction": {
-                "actionId": "corp.install_card.c2ry.rd.c2ry.0",
+                "actionId": "cc.c2ry.rd.c2ry.0",
                 "side": "corp",
                 "type": "install_card",
                 "label": "ICE vor R&D installieren",
@@ -2936,7 +2936,7 @@
         "id": "new_remote"
       },
       "selectedStepKind": "protect_remote",
-      "selectedActionId": "corp.install_card.c2ry.rd.c2ry.0",
+      "selectedActionId": "cc.c2ry.rd.c2ry.0",
       "blockedBy": [
         "central_protection_floor",
         "missing_remote_protection"
@@ -2961,7 +2961,7 @@
       "turnKey": "corp:turn:1",
       "foreground": {
         "portfolioEntryId": "corp.apply_punish_pressure:untargeted",
-        "sourcePlanId": "corp.apply_punish_pressure:corp.install_card.c2t9.archives.c2t9.0",
+        "sourcePlanId": "corp.apply_punish_pressure:cc.c2t9.archives.c2t9.0",
         "planType": "corp.apply_punish_pressure",
         "side": "corp",
         "executionClass": "bounded_sequence",
@@ -2973,7 +2973,7 @@
         "progress": 0.25,
         "selectedStepKind": "apply_punish_pressure",
         "actionCandidateIds": [
-          "corp.install_card.c2t9.archives.c2t9.0"
+          "cc.c2t9.archives.c2t9.0"
         ],
         "cadence": {
           "turnKey": "corp:turn:1",
@@ -2986,7 +2986,7 @@
         },
         "updatedAtStateVersion": 4,
         "evidence": [
-          "plan_portfolio_source_plan:corp.apply_punish_pressure:corp.install_card.c2t9.archives.c2t9.0",
+          "plan_portfolio_source_plan:corp.apply_punish_pressure:cc.c2t9.archives.c2t9.0",
           "plan_portfolio_execution_class:bounded_sequence",
           "plan_portfolio_role:foreground",
           "plan_portfolio_lifecycle:active",
@@ -3012,10 +3012,10 @@
           "progress": 0.6,
           "selectedStepKind": "protect_remote",
           "actionCandidateIds": [
-            "corp.install_card.c2ry.rd.c2ry.0",
-            "corp.install_card.c2t9.rd.c2t9.0",
-            "corp.install_card.c2v2.rd.c2v2.0",
-            "corp.install_card.c2v3.rd.c2v3.0"
+            "cc.c2ry.rd.c2ry.0",
+            "cc.c2t9.rd.c2t9.0",
+            "cc.c2v2.rd.c2v2.0",
+            "cc.c2v3.rd.c2v3.0"
           ],
           "cadence": {
             "turnKey": "corp:turn:1",
@@ -3034,7 +3034,7 @@
             "plan_portfolio_role:background",
             "plan_portfolio_lifecycle:active",
             "plan_portfolio_previous_entry:corp.establish_scoring_remote:server:new_remote",
-            "plan_portfolio_action_progress:corp.install_card.c2ry.rd.c2ry.0"
+            "plan_portfolio_action_progress:cc.c2ry.rd.c2ry.0"
           ]
         }
       ],
@@ -3045,7 +3045,7 @@
         "plan_portfolio_foreground:corp.apply_punish_pressure",
         "plan_portfolio_backgrounds:corp.establish_scoring_remote",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:corp.install_card.c2ry.rd.c2ry.0"
+        "plan_portfolio_selected_action:cc.c2ry.rd.c2ry.0"
       ]
     },
     "strategicIntent": {
@@ -3980,7 +3980,7 @@
     ],
     "planExecution": {
       "acceptablePlanIds": [
-        "plan:corp.defend_servers:server-defense-portfolio"
+        "penw02zfrkklof54c2nuye5att"
       ],
       "acceptablePlanKinds": [
         "corp.defend_servers"

@@ -34,14 +34,14 @@ it("SP-250 binds the legal configurable breaker installation to the missing deco
     fallbackUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+        rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
         route: {
           actionId: install.actionId,
           stateVersion: 281,
           capabilityId: "install_breaker_code_gate",
         },
         leafExecutorInstanceId:
-          "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
+          "p5s1qdgqrafrs3n2kss1t9ct7m",
       },
     },
   });

@@ -86,10 +86,16 @@ describe("native same-turn cheaper breaker replacement", () => {
     expect(decision.timeoutUsed).toBe(false);
     expect(decision.actionId).toBe(install!.actionId);
     const plan = decision.decisionDebug?.planFirstDecision;
-    expect(plan?.rootPlanInstanceId).toMatch(/^plan:runner\.contest_remote:/);
-    expect(plan?.leafExecutorInstanceId).toMatch(
-      /^plan:runner\.rig_and_coverage:/,
-    );
+    expect(
+      plan?.portfolio.find(
+        (instance) => instance.instanceId === plan?.rootPlanInstanceId,
+      )?.moduleId,
+    ).toBe("runner.contest_remote");
+    expect(
+      plan?.portfolio.find(
+        (instance) => instance.instanceId === plan?.leafExecutorInstanceId,
+      )?.moduleId,
+    ).toBe("runner.rig_and_coverage");
     expect(plan?.route).toMatchObject({
       actionId: install!.actionId,
       stateVersion: input.playerView.stateVersion,

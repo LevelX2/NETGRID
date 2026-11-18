@@ -37,7 +37,7 @@ it("keeps the currently funded score instead of scattering the last two clicks a
     (a) => a.actionId === decision.actionId,
   )!;
   const parent =
-    "plan:corp.score_agenda:agenda%3Ac2kf%3Ar1";
+    "pdp0dnl8gjc5wqklj39wad44t3";
   expect(action.type).toBe("advance_card");
   expect(action.source).toBe("c2kf");
   expect(decision.fallbackUsed).toBe(false);
@@ -78,7 +78,7 @@ it("preserves the native terminal HQ-defense interrupt ahead of the nonterminal 
     structuredClone(checkpoint.runtime) as unknown as AiRuntimeCheckpointV1,
   );
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("corp.draw_card");
+  expect(decision.actionId).toBe("c8");
   expect(
     decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
   ).toBe("corp.defend_servers");

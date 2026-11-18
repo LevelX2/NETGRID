@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
@@ -9,8 +10,8 @@ import {
   restoreResidentPlanPortfolioMemorySnapshot,
 } from "../../plans/resident-plan-portfolio-memory";
 
-const rootId = "plan:runner.pressure_central:central%3Ard";
-const windowId = "plan:runner.convert_run_window:run%3A164";
+const rootId = "pa90fufw9vc5bkshp96ztlryxl";
+const windowId = "p9nnw6hsp6x6kr30mahq94ljx1";
 const newTarget = "c311";
 const oldTarget = "c2yt";
 const sourceId = "c1pl";
@@ -66,7 +67,7 @@ describe("SP-469: a later approach window after a declined exposure", () => {
     });
     expect(selected.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId: rootId,
-      leafExecutorInstanceId: `plan:runner.expose_information:ice%3A${newTarget}`,
+      leafExecutorInstanceId: planInstanceIdForProposal({ moduleId: "runner.expose_information", dedupeKey: `ice:${newTarget}` }),
       executionOrigin: { rootPlanInstanceId: rootId, stateVersion: 170 },
     });
     expect(selected.fallbackUsed).toBe(false);
@@ -93,7 +94,7 @@ describe("SP-469: a later approach window after a declined exposure", () => {
     expect(selected.actionId).toBe(expose?.actionId);
     expect(selected.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId: rootId,
-      leafExecutorInstanceId: `plan:runner.expose_information:ice%3A${target}`,
+      leafExecutorInstanceId: planInstanceIdForProposal({ moduleId: "runner.expose_information", dedupeKey: `ice:${target}` }),
       executionOrigin: { rootPlanInstanceId: rootId, stateVersion: 173 },
     });
     expect(selected.fallbackUsed).toBe(false);
@@ -145,8 +146,8 @@ describe("SP-469: a later approach window after a declined exposure", () => {
 });
 
 describe("SP-469: nonterminal encounter and automatic movement", () => {
-  const runParent = "plan:runner.convert_run_window:run%3A166";
-  const pressureRoot = "plan:runner.pressure_central:central%3Ahq";
+  const runParent = "p9nnwk7sa6vc2ozjzl0irm1w5j";
+  const pressureRoot = "pa7nez1ioecg7mf06q1uwqq57o";
   const target = "c2ol";
   beforeEach(resetResidentPlanPortfolioMemory);
 
@@ -170,7 +171,7 @@ describe("SP-469: nonterminal encounter and automatic movement", () => {
       },
     ]);
     expect(input.observedTurnPlanAction).toMatchObject({
-      actionId: "runner.continue_run",
+      actionId: "r5",
       source: "game_rule",
       stateVersionBefore: 171,
       stateVersionAfter: 172,
@@ -184,7 +185,7 @@ describe("SP-469: nonterminal encounter and automatic movement", () => {
     expect(selected.actionId).toBe(expose?.actionId);
     expect(selected.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId: pressureRoot,
-      leafExecutorInstanceId: `plan:runner.expose_information:ice%3A${target}`,
+      leafExecutorInstanceId: planInstanceIdForProposal({ moduleId: "runner.expose_information", dedupeKey: `ice:${target}` }),
       executionOrigin: { rootPlanInstanceId: pressureRoot, stateVersion: 172 },
     });
     expect(selected.fallbackUsed).toBe(false);
@@ -219,8 +220,8 @@ describe("SP-469: nonterminal encounter and automatic movement", () => {
 });
 
 describe("SP-469: an initial expose child directly under the pressure root", () => {
-  const pressureRoot = "plan:runner.pressure_central:central%3Ahq";
-  const runParent = "plan:runner.convert_run_window:run%3A83";
+  const pressureRoot = "pa7nez1ioecg7mf06q1uwqq57o";
+  const runParent = "p8kyvvo2wpum48feskb3wkarmj";
   const target = "c2rz";
   beforeEach(resetResidentPlanPortfolioMemory);
 
@@ -246,7 +247,7 @@ describe("SP-469: an initial expose child directly under the pressure root", () 
     expect(selected.actionId).toBe(decline?.actionId);
     expect(selected.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId: pressureRoot,
-      leafExecutorInstanceId: `plan:runner.expose_information:ice%3A${target}`,
+      leafExecutorInstanceId: planInstanceIdForProposal({ moduleId: "runner.expose_information", dedupeKey: `ice:${target}` }),
       selectedStep: { parentInstanceId: runParent },
     });
     expect(selected.fallbackUsed).toBe(false);

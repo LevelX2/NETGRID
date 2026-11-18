@@ -170,8 +170,10 @@ describe("hardened decision contracts on real Engine inputs", () => {
         ?.source,
     ).toBe(rasminWithIce.source);
     expect(
-      eligible.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-    ).toMatch(/^plan:corp\.defend_servers:/);
+      eligible.decisionDebug?.planFirstDecision?.portfolio.find(
+        (instance) => instance.instanceId === eligible.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+      )?.moduleId,
+    ).toBe("corp.defend_servers");
     // Existing funded central ICE is not a missing-ICE search reason.
     // The eligible defensive upgrade wins without an invented agenda-search parent.
     expect(
@@ -184,7 +186,7 @@ describe("hardened decision contracts on real Engine inputs", () => {
         (section) => section.id === "plan_portfolio",
       )?.items,
     ).not.toContain(
-      "plan:corp.defend_servers:server-defense-portfolio|evidence:corp_missing_concrete_defense_draw:rd|source:visible_state",
+      "pd9yivlpfftxr2bt4err26srvo",
     );
   });
 

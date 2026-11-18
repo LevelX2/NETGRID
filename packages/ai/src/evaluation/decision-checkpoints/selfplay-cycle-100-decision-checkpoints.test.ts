@@ -52,9 +52,9 @@ describe("selfplay cycle 100 decision checkpoints", () => {
     });
     expect(decision.decisionDebug?.planKind).toBe("corp.defend_servers");
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
       leafExecutorInstanceId:
-        "plan:corp.defend_servers:server-defense-portfolio",
+        "penw02zfrkklof54c2nuye5att",
       route: {
         actionId: selectedAction?.actionId,
         actionType: "rez_ice",
@@ -81,8 +81,8 @@ describe("selfplay cycle 100 decision checkpoints", () => {
       payload: { serverId: "archives" },
     });
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.pressure_central:central%3Aarchives",
-      leafExecutorInstanceId: "plan:runner.pressure_central:central%3Aarchives",
+      rootPlanInstanceId: "p22f66p721g9dgs7gsawwpf6hs",
+      leafExecutorInstanceId: "p22f66p721g9dgs7gsawwpf6hs",
       route: {
         actionId: selectedAction?.actionId,
         actionType: "start_run",
@@ -127,9 +127,9 @@ describe("selfplay cycle 100 decision checkpoints", () => {
     });
     expect(selectedAction?.actionId).not.toBe(cashout!.actionId);
     const root =
-      "plan:corp.score_agenda:agenda%3Acel%3Ar1";
+      "p7yxlodiop6lk6q584gbpqwldp";
     const executor =
-      "plan:corp.economy:score-support%3Aagenda%3Acel%3Ar1";
+      "p1uo1vyc0dph2d6kedvd58hdp0";
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId: root,
       leafExecutorInstanceId: executor,

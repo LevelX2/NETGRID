@@ -8204,7 +8204,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "corp.gain_credit",
+          "actionId": "cb",
           "side": "corp",
           "type": "gain_credit",
           "label": "1 Credit nehmen",
@@ -8225,7 +8225,7 @@
           }
         },
         {
-          "actionId": "corp.draw_card",
+          "actionId": "c8",
           "side": "corp",
           "type": "draw_card",
           "label": "Karte ziehen",
@@ -8241,7 +8241,7 @@
           "expiresAtStateVersion": 233
         },
         {
-          "actionId": "corp.play_operation.cny.cny.c3z.1.c3z",
+          "actionId": "ci.cny.cny.c3z.1.c3z",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Puzzle rezzen (X=1)",
@@ -8268,7 +8268,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.c3z.2.c3z",
+          "actionId": "ci.cny.cny.c3z.2.c3z",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Puzzle rezzen (X=2)",
@@ -8295,7 +8295,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.c3z.3.c3z",
+          "actionId": "ci.cny.cny.c3z.3.c3z",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Puzzle rezzen (X=3)",
@@ -8322,7 +8322,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.c3z.4.c3z",
+          "actionId": "ci.cny.cny.c3z.4.c3z",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Puzzle rezzen (X=4)",
@@ -8349,7 +8349,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.c3z.5.c3z",
+          "actionId": "ci.cny.cny.c3z.5.c3z",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Puzzle rezzen (X=5)",
@@ -8376,7 +8376,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.c3z.6.c3z",
+          "actionId": "ci.cny.cny.c3z.6.c3z",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Puzzle rezzen (X=6)",
@@ -8403,7 +8403,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.c3z.7.c3z",
+          "actionId": "ci.cny.cny.c3z.7.c3z",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Puzzle rezzen (X=7)",
@@ -8430,7 +8430,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.c3z.8.c3z",
+          "actionId": "ci.cny.cny.c3z.8.c3z",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Puzzle rezzen (X=8)",
@@ -8457,7 +8457,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.c3z.9.c3z",
+          "actionId": "ci.cny.cny.c3z.9.c3z",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Puzzle rezzen (X=9)",
@@ -8484,7 +8484,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg5.1.cg5",
+          "actionId": "ci.cny.cny.cg5.1.cg5",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=1)",
@@ -8511,7 +8511,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg5.2.cg5",
+          "actionId": "ci.cny.cny.cg5.2.cg5",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=2)",
@@ -8538,7 +8538,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg5.3.cg5",
+          "actionId": "ci.cny.cny.cg5.3.cg5",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=3)",
@@ -8565,7 +8565,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg5.4.cg5",
+          "actionId": "ci.cny.cny.cg5.4.cg5",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=4)",
@@ -8592,7 +8592,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg5.5.cg5",
+          "actionId": "ci.cny.cny.cg5.5.cg5",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=5)",
@@ -8619,7 +8619,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg5.6.cg5",
+          "actionId": "ci.cny.cny.cg5.6.cg5",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=6)",
@@ -8646,7 +8646,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg5.7.cg5",
+          "actionId": "ci.cny.cny.cg5.7.cg5",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=7)",
@@ -8673,7 +8673,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg5.8.cg5",
+          "actionId": "ci.cny.cny.cg5.8.cg5",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=8)",
@@ -8700,7 +8700,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg5.9.cg5",
+          "actionId": "ci.cny.cny.cg5.9.cg5",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=9)",
@@ -8727,7 +8727,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg6.1.cg6",
+          "actionId": "ci.cny.cny.cg6.1.cg6",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=1)",
@@ -8754,7 +8754,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg6.2.cg6",
+          "actionId": "ci.cny.cny.cg6.2.cg6",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=2)",
@@ -8781,7 +8781,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg6.3.cg6",
+          "actionId": "ci.cny.cny.cg6.3.cg6",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=3)",
@@ -8808,7 +8808,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg6.4.cg6",
+          "actionId": "ci.cny.cny.cg6.4.cg6",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=4)",
@@ -8835,7 +8835,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg6.5.cg6",
+          "actionId": "ci.cny.cny.cg6.5.cg6",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=5)",
@@ -8862,7 +8862,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg6.6.cg6",
+          "actionId": "ci.cny.cny.cg6.6.cg6",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=6)",
@@ -8889,7 +8889,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg6.7.cg6",
+          "actionId": "ci.cny.cny.cg6.7.cg6",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=7)",
@@ -8916,7 +8916,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg6.8.cg6",
+          "actionId": "ci.cny.cny.cg6.8.cg6",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=8)",
@@ -8943,7 +8943,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg6.9.cg6",
+          "actionId": "ci.cny.cny.cg6.9.cg6",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=9)",
@@ -8970,7 +8970,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg7.1.cg7",
+          "actionId": "ci.cny.cny.cg7.1.cg7",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=1)",
@@ -8997,7 +8997,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg7.2.cg7",
+          "actionId": "ci.cny.cny.cg7.2.cg7",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=2)",
@@ -9024,7 +9024,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg7.3.cg7",
+          "actionId": "ci.cny.cny.cg7.3.cg7",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=3)",
@@ -9051,7 +9051,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg7.4.cg7",
+          "actionId": "ci.cny.cny.cg7.4.cg7",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=4)",
@@ -9078,7 +9078,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg7.5.cg7",
+          "actionId": "ci.cny.cny.cg7.5.cg7",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=5)",
@@ -9105,7 +9105,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg7.6.cg7",
+          "actionId": "ci.cny.cny.cg7.6.cg7",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=6)",
@@ -9132,7 +9132,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg7.7.cg7",
+          "actionId": "ci.cny.cny.cg7.7.cg7",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=7)",
@@ -9159,7 +9159,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg7.8.cg7",
+          "actionId": "ci.cny.cny.cg7.8.cg7",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=8)",
@@ -9186,7 +9186,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cg7.9.cg7",
+          "actionId": "ci.cny.cny.cg7.9.cg7",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=9)",
@@ -9213,7 +9213,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cgf.1.cgf",
+          "actionId": "ci.cny.cny.cgf.1.cgf",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Colonel Failure rezzen (X=1)",
@@ -9240,7 +9240,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cgf.2.cgf",
+          "actionId": "ci.cny.cny.cgf.2.cgf",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Colonel Failure rezzen (X=2)",
@@ -9267,7 +9267,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cgf.3.cgf",
+          "actionId": "ci.cny.cny.cgf.3.cgf",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Colonel Failure rezzen (X=3)",
@@ -9294,7 +9294,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cgf.4.cgf",
+          "actionId": "ci.cny.cny.cgf.4.cgf",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Colonel Failure rezzen (X=4)",
@@ -9321,7 +9321,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cgf.5.cgf",
+          "actionId": "ci.cny.cny.cgf.5.cgf",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Colonel Failure rezzen (X=5)",
@@ -9348,7 +9348,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cgf.6.cgf",
+          "actionId": "ci.cny.cny.cgf.6.cgf",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Colonel Failure rezzen (X=6)",
@@ -9375,7 +9375,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cgf.7.cgf",
+          "actionId": "ci.cny.cny.cgf.7.cgf",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Colonel Failure rezzen (X=7)",
@@ -9402,7 +9402,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cgf.8.cgf",
+          "actionId": "ci.cny.cny.cgf.8.cgf",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Colonel Failure rezzen (X=8)",
@@ -9429,7 +9429,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cgf.9.cgf",
+          "actionId": "ci.cny.cny.cgf.9.cgf",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Colonel Failure rezzen (X=9)",
@@ -9456,7 +9456,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cgl.1.cgl",
+          "actionId": "ci.cny.cny.cgl.1.cgl",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Coyote rezzen (X=1)",
@@ -9483,7 +9483,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cgl.2.cgl",
+          "actionId": "ci.cny.cny.cgl.2.cgl",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Coyote rezzen (X=2)",
@@ -9510,7 +9510,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cgl.3.cgl",
+          "actionId": "ci.cny.cny.cgl.3.cgl",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Coyote rezzen (X=3)",
@@ -9537,7 +9537,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cgl.4.cgl",
+          "actionId": "ci.cny.cny.cgl.4.cgl",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Coyote rezzen (X=4)",
@@ -9564,7 +9564,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cgl.5.cgl",
+          "actionId": "ci.cny.cny.cgl.5.cgl",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Coyote rezzen (X=5)",
@@ -9591,7 +9591,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cgl.6.cgl",
+          "actionId": "ci.cny.cny.cgl.6.cgl",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Coyote rezzen (X=6)",
@@ -9618,7 +9618,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cgl.7.cgl",
+          "actionId": "ci.cny.cny.cgl.7.cgl",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Coyote rezzen (X=7)",
@@ -9645,7 +9645,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cgl.8.cgl",
+          "actionId": "ci.cny.cny.cgl.8.cgl",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Coyote rezzen (X=8)",
@@ -9672,7 +9672,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cny.cny.cgl.9.cgl",
+          "actionId": "ci.cny.cny.cgl.9.cgl",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Coyote rezzen (X=9)",
@@ -9699,7 +9699,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.c3z.1.c3z",
+          "actionId": "ci.cnx.cnx.c3z.1.c3z",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Puzzle rezzen (X=1)",
@@ -9726,7 +9726,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.c3z.2.c3z",
+          "actionId": "ci.cnx.cnx.c3z.2.c3z",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Puzzle rezzen (X=2)",
@@ -9753,7 +9753,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.c3z.3.c3z",
+          "actionId": "ci.cnx.cnx.c3z.3.c3z",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Puzzle rezzen (X=3)",
@@ -9780,7 +9780,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.c3z.4.c3z",
+          "actionId": "ci.cnx.cnx.c3z.4.c3z",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Puzzle rezzen (X=4)",
@@ -9807,7 +9807,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.c3z.5.c3z",
+          "actionId": "ci.cnx.cnx.c3z.5.c3z",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Puzzle rezzen (X=5)",
@@ -9834,7 +9834,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.c3z.6.c3z",
+          "actionId": "ci.cnx.cnx.c3z.6.c3z",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Puzzle rezzen (X=6)",
@@ -9861,7 +9861,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.c3z.7.c3z",
+          "actionId": "ci.cnx.cnx.c3z.7.c3z",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Puzzle rezzen (X=7)",
@@ -9888,7 +9888,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.c3z.8.c3z",
+          "actionId": "ci.cnx.cnx.c3z.8.c3z",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Puzzle rezzen (X=8)",
@@ -9915,7 +9915,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.c3z.9.c3z",
+          "actionId": "ci.cnx.cnx.c3z.9.c3z",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Puzzle rezzen (X=9)",
@@ -9942,7 +9942,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg5.1.cg5",
+          "actionId": "ci.cnx.cnx.cg5.1.cg5",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=1)",
@@ -9969,7 +9969,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg5.2.cg5",
+          "actionId": "ci.cnx.cnx.cg5.2.cg5",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=2)",
@@ -9996,7 +9996,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg5.3.cg5",
+          "actionId": "ci.cnx.cnx.cg5.3.cg5",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=3)",
@@ -10023,7 +10023,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg5.4.cg5",
+          "actionId": "ci.cnx.cnx.cg5.4.cg5",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=4)",
@@ -10050,7 +10050,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg5.5.cg5",
+          "actionId": "ci.cnx.cnx.cg5.5.cg5",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=5)",
@@ -10077,7 +10077,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg5.6.cg5",
+          "actionId": "ci.cnx.cnx.cg5.6.cg5",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=6)",
@@ -10104,7 +10104,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg5.7.cg5",
+          "actionId": "ci.cnx.cnx.cg5.7.cg5",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=7)",
@@ -10131,7 +10131,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg5.8.cg5",
+          "actionId": "ci.cnx.cnx.cg5.8.cg5",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=8)",
@@ -10158,7 +10158,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg5.9.cg5",
+          "actionId": "ci.cnx.cnx.cg5.9.cg5",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=9)",
@@ -10185,7 +10185,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg6.1.cg6",
+          "actionId": "ci.cnx.cnx.cg6.1.cg6",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=1)",
@@ -10212,7 +10212,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg6.2.cg6",
+          "actionId": "ci.cnx.cnx.cg6.2.cg6",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=2)",
@@ -10239,7 +10239,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg6.3.cg6",
+          "actionId": "ci.cnx.cnx.cg6.3.cg6",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=3)",
@@ -10266,7 +10266,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg6.4.cg6",
+          "actionId": "ci.cnx.cnx.cg6.4.cg6",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=4)",
@@ -10293,7 +10293,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg6.5.cg6",
+          "actionId": "ci.cnx.cnx.cg6.5.cg6",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=5)",
@@ -10320,7 +10320,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg6.6.cg6",
+          "actionId": "ci.cnx.cnx.cg6.6.cg6",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=6)",
@@ -10347,7 +10347,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg6.7.cg6",
+          "actionId": "ci.cnx.cnx.cg6.7.cg6",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=7)",
@@ -10374,7 +10374,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg6.8.cg6",
+          "actionId": "ci.cnx.cnx.cg6.8.cg6",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=8)",
@@ -10401,7 +10401,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg6.9.cg6",
+          "actionId": "ci.cnx.cnx.cg6.9.cg6",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=9)",
@@ -10428,7 +10428,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg7.1.cg7",
+          "actionId": "ci.cnx.cnx.cg7.1.cg7",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=1)",
@@ -10455,7 +10455,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg7.2.cg7",
+          "actionId": "ci.cnx.cnx.cg7.2.cg7",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=2)",
@@ -10482,7 +10482,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg7.3.cg7",
+          "actionId": "ci.cnx.cnx.cg7.3.cg7",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=3)",
@@ -10509,7 +10509,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg7.4.cg7",
+          "actionId": "ci.cnx.cnx.cg7.4.cg7",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=4)",
@@ -10536,7 +10536,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg7.5.cg7",
+          "actionId": "ci.cnx.cnx.cg7.5.cg7",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=5)",
@@ -10563,7 +10563,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg7.6.cg7",
+          "actionId": "ci.cnx.cnx.cg7.6.cg7",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=6)",
@@ -10590,7 +10590,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg7.7.cg7",
+          "actionId": "ci.cnx.cnx.cg7.7.cg7",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=7)",
@@ -10617,7 +10617,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg7.8.cg7",
+          "actionId": "ci.cnx.cnx.cg7.8.cg7",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=8)",
@@ -10644,7 +10644,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cg7.9.cg7",
+          "actionId": "ci.cnx.cnx.cg7.9.cg7",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Chihuahua rezzen (X=9)",
@@ -10671,7 +10671,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cgf.1.cgf",
+          "actionId": "ci.cnx.cnx.cgf.1.cgf",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Colonel Failure rezzen (X=1)",
@@ -10698,7 +10698,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cgf.2.cgf",
+          "actionId": "ci.cnx.cnx.cgf.2.cgf",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Colonel Failure rezzen (X=2)",
@@ -10725,7 +10725,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cgf.3.cgf",
+          "actionId": "ci.cnx.cnx.cgf.3.cgf",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Colonel Failure rezzen (X=3)",
@@ -10752,7 +10752,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cgf.4.cgf",
+          "actionId": "ci.cnx.cnx.cgf.4.cgf",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Colonel Failure rezzen (X=4)",
@@ -10779,7 +10779,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cgf.5.cgf",
+          "actionId": "ci.cnx.cnx.cgf.5.cgf",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Colonel Failure rezzen (X=5)",
@@ -10806,7 +10806,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cgf.6.cgf",
+          "actionId": "ci.cnx.cnx.cgf.6.cgf",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Colonel Failure rezzen (X=6)",
@@ -10833,7 +10833,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cgf.7.cgf",
+          "actionId": "ci.cnx.cnx.cgf.7.cgf",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Colonel Failure rezzen (X=7)",
@@ -10860,7 +10860,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cgf.8.cgf",
+          "actionId": "ci.cnx.cnx.cgf.8.cgf",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Colonel Failure rezzen (X=8)",
@@ -10887,7 +10887,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cgf.9.cgf",
+          "actionId": "ci.cnx.cnx.cgf.9.cgf",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Colonel Failure rezzen (X=9)",
@@ -10914,7 +10914,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cgl.1.cgl",
+          "actionId": "ci.cnx.cnx.cgl.1.cgl",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Coyote rezzen (X=1)",
@@ -10941,7 +10941,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cgl.2.cgl",
+          "actionId": "ci.cnx.cnx.cgl.2.cgl",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Coyote rezzen (X=2)",
@@ -10968,7 +10968,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cgl.3.cgl",
+          "actionId": "ci.cnx.cnx.cgl.3.cgl",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Coyote rezzen (X=3)",
@@ -10995,7 +10995,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cgl.4.cgl",
+          "actionId": "ci.cnx.cnx.cgl.4.cgl",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Coyote rezzen (X=4)",
@@ -11022,7 +11022,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cgl.5.cgl",
+          "actionId": "ci.cnx.cnx.cgl.5.cgl",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Coyote rezzen (X=5)",
@@ -11049,7 +11049,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cgl.6.cgl",
+          "actionId": "ci.cnx.cnx.cgl.6.cgl",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Coyote rezzen (X=6)",
@@ -11076,7 +11076,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cgl.7.cgl",
+          "actionId": "ci.cnx.cnx.cgl.7.cgl",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Coyote rezzen (X=7)",
@@ -11103,7 +11103,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cgl.8.cgl",
+          "actionId": "ci.cnx.cnx.cgl.8.cgl",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Coyote rezzen (X=8)",
@@ -11130,7 +11130,7 @@
           }
         },
         {
-          "actionId": "corp.play_operation.cnx.cnx.cgl.9.cgl",
+          "actionId": "ci.cnx.cnx.cgl.9.cgl",
           "side": "corp",
           "type": "play_operation",
           "label": "Emergency Rig: Coyote rezzen (X=9)",
@@ -11157,7 +11157,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c2j2.new_remote.c2j2",
+          "actionId": "cc.c2j2.new_remote.c2j2",
           "side": "corp",
           "type": "install_card",
           "label": "Karte in neuem Remote installieren",
@@ -11188,7 +11188,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c2j2.r1.c2j2",
+          "actionId": "cc.c2j2.r1.c2j2",
           "side": "corp",
           "type": "install_card",
           "label": "Karte in Remote 1 installieren",
@@ -11219,7 +11219,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c2j2.r2.c2j2",
+          "actionId": "cc.c2j2.r2.c2j2",
           "side": "corp",
           "type": "install_card",
           "label": "Karte in Remote 2 installieren",
@@ -11250,7 +11250,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.cgd.new_remote.cgd",
+          "actionId": "cc.cgd.new_remote.cgd",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor neuem Remote installieren",
@@ -11282,7 +11282,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.cgd.hq.cgd.3",
+          "actionId": "cc.cgd.hq.cgd.3",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor HQ installieren",
@@ -11319,7 +11319,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.cgd.rd.cgd.3",
+          "actionId": "cc.cgd.rd.cgd.3",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor R&D installieren",
@@ -11356,7 +11356,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.cgd.archives.cgd.0",
+          "actionId": "cc.cgd.archives.cgd.0",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor Archives installieren",
@@ -11392,7 +11392,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.cgd.r1.cgd.2",
+          "actionId": "cc.cgd.r1.cgd.2",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor Remote 1 installieren",
@@ -11429,7 +11429,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.cgd.r2.cgd.2",
+          "actionId": "cc.cgd.r2.cgd.2",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor Remote 2 installieren",
@@ -11466,7 +11466,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c2j1.new_remote.c2j1",
+          "actionId": "cc.c2j1.new_remote.c2j1",
           "side": "corp",
           "type": "install_card",
           "label": "Karte in neuem Remote installieren",
@@ -11497,7 +11497,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c2j1.r1.c2j1",
+          "actionId": "cc.c2j1.r1.c2j1",
           "side": "corp",
           "type": "install_card",
           "label": "Karte in Remote 1 installieren",
@@ -11528,7 +11528,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.c2j1.r2.c2j1",
+          "actionId": "cc.c2j1.r2.c2j1",
           "side": "corp",
           "type": "install_card",
           "label": "Karte in Remote 2 installieren",
@@ -11559,7 +11559,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.clh.new_remote.clh",
+          "actionId": "cc.clh.new_remote.clh",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor neuem Remote installieren",
@@ -11590,7 +11590,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.clh.hq.clh.3",
+          "actionId": "cc.clh.hq.clh.3",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor HQ installieren",
@@ -11626,7 +11626,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.clh.rd.clh.3",
+          "actionId": "cc.clh.rd.clh.3",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor R&D installieren",
@@ -11662,7 +11662,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.clh.archives.clh.0",
+          "actionId": "cc.clh.archives.clh.0",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor Archives installieren",
@@ -11697,7 +11697,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.clh.r1.clh.2",
+          "actionId": "cc.clh.r1.clh.2",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor Remote 1 installieren",
@@ -11733,7 +11733,7 @@
           }
         },
         {
-          "actionId": "corp.install_card.clh.r2.clh.2",
+          "actionId": "cc.clh.r2.clh.2",
           "side": "corp",
           "type": "install_card",
           "label": "ICE vor Remote 2 installieren",
@@ -11769,7 +11769,7 @@
           }
         },
         {
-          "actionId": "corp.end_turn",
+          "actionId": "c9",
           "side": "corp",
           "type": "end_turn",
           "label": "Zug beenden",
@@ -13989,7 +13989,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "corp.gain_credit",
+        "actionId": "cb",
         "side": "corp",
         "type": "gain_credit",
         "label": "1 Credit nehmen",
@@ -14010,7 +14010,7 @@
         }
       },
       {
-        "actionId": "corp.draw_card",
+        "actionId": "c8",
         "side": "corp",
         "type": "draw_card",
         "label": "Karte ziehen",
@@ -14026,7 +14026,7 @@
         "expiresAtStateVersion": 233
       },
       {
-        "actionId": "corp.play_operation.cny.cny.c3z.1.c3z",
+        "actionId": "ci.cny.cny.c3z.1.c3z",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Puzzle rezzen (X=1)",
@@ -14053,7 +14053,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.c3z.2.c3z",
+        "actionId": "ci.cny.cny.c3z.2.c3z",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Puzzle rezzen (X=2)",
@@ -14080,7 +14080,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.c3z.3.c3z",
+        "actionId": "ci.cny.cny.c3z.3.c3z",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Puzzle rezzen (X=3)",
@@ -14107,7 +14107,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.c3z.4.c3z",
+        "actionId": "ci.cny.cny.c3z.4.c3z",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Puzzle rezzen (X=4)",
@@ -14134,7 +14134,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.c3z.5.c3z",
+        "actionId": "ci.cny.cny.c3z.5.c3z",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Puzzle rezzen (X=5)",
@@ -14161,7 +14161,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.c3z.6.c3z",
+        "actionId": "ci.cny.cny.c3z.6.c3z",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Puzzle rezzen (X=6)",
@@ -14188,7 +14188,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.c3z.7.c3z",
+        "actionId": "ci.cny.cny.c3z.7.c3z",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Puzzle rezzen (X=7)",
@@ -14215,7 +14215,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.c3z.8.c3z",
+        "actionId": "ci.cny.cny.c3z.8.c3z",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Puzzle rezzen (X=8)",
@@ -14242,7 +14242,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.c3z.9.c3z",
+        "actionId": "ci.cny.cny.c3z.9.c3z",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Puzzle rezzen (X=9)",
@@ -14269,7 +14269,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg5.1.cg5",
+        "actionId": "ci.cny.cny.cg5.1.cg5",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=1)",
@@ -14296,7 +14296,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg5.2.cg5",
+        "actionId": "ci.cny.cny.cg5.2.cg5",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=2)",
@@ -14323,7 +14323,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg5.3.cg5",
+        "actionId": "ci.cny.cny.cg5.3.cg5",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=3)",
@@ -14350,7 +14350,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg5.4.cg5",
+        "actionId": "ci.cny.cny.cg5.4.cg5",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=4)",
@@ -14377,7 +14377,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg5.5.cg5",
+        "actionId": "ci.cny.cny.cg5.5.cg5",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=5)",
@@ -14404,7 +14404,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg5.6.cg5",
+        "actionId": "ci.cny.cny.cg5.6.cg5",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=6)",
@@ -14431,7 +14431,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg5.7.cg5",
+        "actionId": "ci.cny.cny.cg5.7.cg5",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=7)",
@@ -14458,7 +14458,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg5.8.cg5",
+        "actionId": "ci.cny.cny.cg5.8.cg5",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=8)",
@@ -14485,7 +14485,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg5.9.cg5",
+        "actionId": "ci.cny.cny.cg5.9.cg5",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=9)",
@@ -14512,7 +14512,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg6.1.cg6",
+        "actionId": "ci.cny.cny.cg6.1.cg6",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=1)",
@@ -14539,7 +14539,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg6.2.cg6",
+        "actionId": "ci.cny.cny.cg6.2.cg6",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=2)",
@@ -14566,7 +14566,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg6.3.cg6",
+        "actionId": "ci.cny.cny.cg6.3.cg6",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=3)",
@@ -14593,7 +14593,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg6.4.cg6",
+        "actionId": "ci.cny.cny.cg6.4.cg6",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=4)",
@@ -14620,7 +14620,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg6.5.cg6",
+        "actionId": "ci.cny.cny.cg6.5.cg6",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=5)",
@@ -14647,7 +14647,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg6.6.cg6",
+        "actionId": "ci.cny.cny.cg6.6.cg6",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=6)",
@@ -14674,7 +14674,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg6.7.cg6",
+        "actionId": "ci.cny.cny.cg6.7.cg6",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=7)",
@@ -14701,7 +14701,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg6.8.cg6",
+        "actionId": "ci.cny.cny.cg6.8.cg6",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=8)",
@@ -14728,7 +14728,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg6.9.cg6",
+        "actionId": "ci.cny.cny.cg6.9.cg6",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=9)",
@@ -14755,7 +14755,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg7.1.cg7",
+        "actionId": "ci.cny.cny.cg7.1.cg7",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=1)",
@@ -14782,7 +14782,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg7.2.cg7",
+        "actionId": "ci.cny.cny.cg7.2.cg7",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=2)",
@@ -14809,7 +14809,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg7.3.cg7",
+        "actionId": "ci.cny.cny.cg7.3.cg7",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=3)",
@@ -14836,7 +14836,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg7.4.cg7",
+        "actionId": "ci.cny.cny.cg7.4.cg7",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=4)",
@@ -14863,7 +14863,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg7.5.cg7",
+        "actionId": "ci.cny.cny.cg7.5.cg7",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=5)",
@@ -14890,7 +14890,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg7.6.cg7",
+        "actionId": "ci.cny.cny.cg7.6.cg7",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=6)",
@@ -14917,7 +14917,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg7.7.cg7",
+        "actionId": "ci.cny.cny.cg7.7.cg7",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=7)",
@@ -14944,7 +14944,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg7.8.cg7",
+        "actionId": "ci.cny.cny.cg7.8.cg7",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=8)",
@@ -14971,7 +14971,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cg7.9.cg7",
+        "actionId": "ci.cny.cny.cg7.9.cg7",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=9)",
@@ -14998,7 +14998,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cgf.1.cgf",
+        "actionId": "ci.cny.cny.cgf.1.cgf",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Colonel Failure rezzen (X=1)",
@@ -15025,7 +15025,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cgf.2.cgf",
+        "actionId": "ci.cny.cny.cgf.2.cgf",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Colonel Failure rezzen (X=2)",
@@ -15052,7 +15052,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cgf.3.cgf",
+        "actionId": "ci.cny.cny.cgf.3.cgf",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Colonel Failure rezzen (X=3)",
@@ -15079,7 +15079,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cgf.4.cgf",
+        "actionId": "ci.cny.cny.cgf.4.cgf",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Colonel Failure rezzen (X=4)",
@@ -15106,7 +15106,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cgf.5.cgf",
+        "actionId": "ci.cny.cny.cgf.5.cgf",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Colonel Failure rezzen (X=5)",
@@ -15133,7 +15133,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cgf.6.cgf",
+        "actionId": "ci.cny.cny.cgf.6.cgf",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Colonel Failure rezzen (X=6)",
@@ -15160,7 +15160,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cgf.7.cgf",
+        "actionId": "ci.cny.cny.cgf.7.cgf",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Colonel Failure rezzen (X=7)",
@@ -15187,7 +15187,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cgf.8.cgf",
+        "actionId": "ci.cny.cny.cgf.8.cgf",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Colonel Failure rezzen (X=8)",
@@ -15214,7 +15214,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cgf.9.cgf",
+        "actionId": "ci.cny.cny.cgf.9.cgf",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Colonel Failure rezzen (X=9)",
@@ -15241,7 +15241,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cgl.1.cgl",
+        "actionId": "ci.cny.cny.cgl.1.cgl",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Coyote rezzen (X=1)",
@@ -15268,7 +15268,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cgl.2.cgl",
+        "actionId": "ci.cny.cny.cgl.2.cgl",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Coyote rezzen (X=2)",
@@ -15295,7 +15295,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cgl.3.cgl",
+        "actionId": "ci.cny.cny.cgl.3.cgl",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Coyote rezzen (X=3)",
@@ -15322,7 +15322,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cgl.4.cgl",
+        "actionId": "ci.cny.cny.cgl.4.cgl",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Coyote rezzen (X=4)",
@@ -15349,7 +15349,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cgl.5.cgl",
+        "actionId": "ci.cny.cny.cgl.5.cgl",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Coyote rezzen (X=5)",
@@ -15376,7 +15376,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cgl.6.cgl",
+        "actionId": "ci.cny.cny.cgl.6.cgl",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Coyote rezzen (X=6)",
@@ -15403,7 +15403,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cgl.7.cgl",
+        "actionId": "ci.cny.cny.cgl.7.cgl",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Coyote rezzen (X=7)",
@@ -15430,7 +15430,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cgl.8.cgl",
+        "actionId": "ci.cny.cny.cgl.8.cgl",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Coyote rezzen (X=8)",
@@ -15457,7 +15457,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cny.cny.cgl.9.cgl",
+        "actionId": "ci.cny.cny.cgl.9.cgl",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Coyote rezzen (X=9)",
@@ -15484,7 +15484,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.c3z.1.c3z",
+        "actionId": "ci.cnx.cnx.c3z.1.c3z",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Puzzle rezzen (X=1)",
@@ -15511,7 +15511,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.c3z.2.c3z",
+        "actionId": "ci.cnx.cnx.c3z.2.c3z",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Puzzle rezzen (X=2)",
@@ -15538,7 +15538,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.c3z.3.c3z",
+        "actionId": "ci.cnx.cnx.c3z.3.c3z",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Puzzle rezzen (X=3)",
@@ -15565,7 +15565,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.c3z.4.c3z",
+        "actionId": "ci.cnx.cnx.c3z.4.c3z",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Puzzle rezzen (X=4)",
@@ -15592,7 +15592,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.c3z.5.c3z",
+        "actionId": "ci.cnx.cnx.c3z.5.c3z",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Puzzle rezzen (X=5)",
@@ -15619,7 +15619,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.c3z.6.c3z",
+        "actionId": "ci.cnx.cnx.c3z.6.c3z",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Puzzle rezzen (X=6)",
@@ -15646,7 +15646,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.c3z.7.c3z",
+        "actionId": "ci.cnx.cnx.c3z.7.c3z",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Puzzle rezzen (X=7)",
@@ -15673,7 +15673,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.c3z.8.c3z",
+        "actionId": "ci.cnx.cnx.c3z.8.c3z",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Puzzle rezzen (X=8)",
@@ -15700,7 +15700,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.c3z.9.c3z",
+        "actionId": "ci.cnx.cnx.c3z.9.c3z",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Puzzle rezzen (X=9)",
@@ -15727,7 +15727,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg5.1.cg5",
+        "actionId": "ci.cnx.cnx.cg5.1.cg5",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=1)",
@@ -15754,7 +15754,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg5.2.cg5",
+        "actionId": "ci.cnx.cnx.cg5.2.cg5",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=2)",
@@ -15781,7 +15781,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg5.3.cg5",
+        "actionId": "ci.cnx.cnx.cg5.3.cg5",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=3)",
@@ -15808,7 +15808,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg5.4.cg5",
+        "actionId": "ci.cnx.cnx.cg5.4.cg5",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=4)",
@@ -15835,7 +15835,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg5.5.cg5",
+        "actionId": "ci.cnx.cnx.cg5.5.cg5",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=5)",
@@ -15862,7 +15862,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg5.6.cg5",
+        "actionId": "ci.cnx.cnx.cg5.6.cg5",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=6)",
@@ -15889,7 +15889,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg5.7.cg5",
+        "actionId": "ci.cnx.cnx.cg5.7.cg5",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=7)",
@@ -15916,7 +15916,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg5.8.cg5",
+        "actionId": "ci.cnx.cnx.cg5.8.cg5",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=8)",
@@ -15943,7 +15943,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg5.9.cg5",
+        "actionId": "ci.cnx.cnx.cg5.9.cg5",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=9)",
@@ -15970,7 +15970,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg6.1.cg6",
+        "actionId": "ci.cnx.cnx.cg6.1.cg6",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=1)",
@@ -15997,7 +15997,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg6.2.cg6",
+        "actionId": "ci.cnx.cnx.cg6.2.cg6",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=2)",
@@ -16024,7 +16024,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg6.3.cg6",
+        "actionId": "ci.cnx.cnx.cg6.3.cg6",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=3)",
@@ -16051,7 +16051,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg6.4.cg6",
+        "actionId": "ci.cnx.cnx.cg6.4.cg6",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=4)",
@@ -16078,7 +16078,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg6.5.cg6",
+        "actionId": "ci.cnx.cnx.cg6.5.cg6",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=5)",
@@ -16105,7 +16105,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg6.6.cg6",
+        "actionId": "ci.cnx.cnx.cg6.6.cg6",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=6)",
@@ -16132,7 +16132,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg6.7.cg6",
+        "actionId": "ci.cnx.cnx.cg6.7.cg6",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=7)",
@@ -16159,7 +16159,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg6.8.cg6",
+        "actionId": "ci.cnx.cnx.cg6.8.cg6",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=8)",
@@ -16186,7 +16186,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg6.9.cg6",
+        "actionId": "ci.cnx.cnx.cg6.9.cg6",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=9)",
@@ -16213,7 +16213,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg7.1.cg7",
+        "actionId": "ci.cnx.cnx.cg7.1.cg7",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=1)",
@@ -16240,7 +16240,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg7.2.cg7",
+        "actionId": "ci.cnx.cnx.cg7.2.cg7",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=2)",
@@ -16267,7 +16267,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg7.3.cg7",
+        "actionId": "ci.cnx.cnx.cg7.3.cg7",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=3)",
@@ -16294,7 +16294,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg7.4.cg7",
+        "actionId": "ci.cnx.cnx.cg7.4.cg7",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=4)",
@@ -16321,7 +16321,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg7.5.cg7",
+        "actionId": "ci.cnx.cnx.cg7.5.cg7",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=5)",
@@ -16348,7 +16348,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg7.6.cg7",
+        "actionId": "ci.cnx.cnx.cg7.6.cg7",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=6)",
@@ -16375,7 +16375,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg7.7.cg7",
+        "actionId": "ci.cnx.cnx.cg7.7.cg7",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=7)",
@@ -16402,7 +16402,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg7.8.cg7",
+        "actionId": "ci.cnx.cnx.cg7.8.cg7",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=8)",
@@ -16429,7 +16429,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cg7.9.cg7",
+        "actionId": "ci.cnx.cnx.cg7.9.cg7",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Chihuahua rezzen (X=9)",
@@ -16456,7 +16456,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cgf.1.cgf",
+        "actionId": "ci.cnx.cnx.cgf.1.cgf",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Colonel Failure rezzen (X=1)",
@@ -16483,7 +16483,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cgf.2.cgf",
+        "actionId": "ci.cnx.cnx.cgf.2.cgf",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Colonel Failure rezzen (X=2)",
@@ -16510,7 +16510,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cgf.3.cgf",
+        "actionId": "ci.cnx.cnx.cgf.3.cgf",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Colonel Failure rezzen (X=3)",
@@ -16537,7 +16537,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cgf.4.cgf",
+        "actionId": "ci.cnx.cnx.cgf.4.cgf",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Colonel Failure rezzen (X=4)",
@@ -16564,7 +16564,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cgf.5.cgf",
+        "actionId": "ci.cnx.cnx.cgf.5.cgf",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Colonel Failure rezzen (X=5)",
@@ -16591,7 +16591,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cgf.6.cgf",
+        "actionId": "ci.cnx.cnx.cgf.6.cgf",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Colonel Failure rezzen (X=6)",
@@ -16618,7 +16618,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cgf.7.cgf",
+        "actionId": "ci.cnx.cnx.cgf.7.cgf",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Colonel Failure rezzen (X=7)",
@@ -16645,7 +16645,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cgf.8.cgf",
+        "actionId": "ci.cnx.cnx.cgf.8.cgf",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Colonel Failure rezzen (X=8)",
@@ -16672,7 +16672,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cgf.9.cgf",
+        "actionId": "ci.cnx.cnx.cgf.9.cgf",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Colonel Failure rezzen (X=9)",
@@ -16699,7 +16699,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cgl.1.cgl",
+        "actionId": "ci.cnx.cnx.cgl.1.cgl",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Coyote rezzen (X=1)",
@@ -16726,7 +16726,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cgl.2.cgl",
+        "actionId": "ci.cnx.cnx.cgl.2.cgl",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Coyote rezzen (X=2)",
@@ -16753,7 +16753,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cgl.3.cgl",
+        "actionId": "ci.cnx.cnx.cgl.3.cgl",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Coyote rezzen (X=3)",
@@ -16780,7 +16780,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cgl.4.cgl",
+        "actionId": "ci.cnx.cnx.cgl.4.cgl",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Coyote rezzen (X=4)",
@@ -16807,7 +16807,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cgl.5.cgl",
+        "actionId": "ci.cnx.cnx.cgl.5.cgl",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Coyote rezzen (X=5)",
@@ -16834,7 +16834,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cgl.6.cgl",
+        "actionId": "ci.cnx.cnx.cgl.6.cgl",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Coyote rezzen (X=6)",
@@ -16861,7 +16861,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cgl.7.cgl",
+        "actionId": "ci.cnx.cnx.cgl.7.cgl",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Coyote rezzen (X=7)",
@@ -16888,7 +16888,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cgl.8.cgl",
+        "actionId": "ci.cnx.cnx.cgl.8.cgl",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Coyote rezzen (X=8)",
@@ -16915,7 +16915,7 @@
         }
       },
       {
-        "actionId": "corp.play_operation.cnx.cnx.cgl.9.cgl",
+        "actionId": "ci.cnx.cnx.cgl.9.cgl",
         "side": "corp",
         "type": "play_operation",
         "label": "Emergency Rig: Coyote rezzen (X=9)",
@@ -16942,7 +16942,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c2j2.new_remote.c2j2",
+        "actionId": "cc.c2j2.new_remote.c2j2",
         "side": "corp",
         "type": "install_card",
         "label": "Karte in neuem Remote installieren",
@@ -16973,7 +16973,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c2j2.r1.c2j2",
+        "actionId": "cc.c2j2.r1.c2j2",
         "side": "corp",
         "type": "install_card",
         "label": "Karte in Remote 1 installieren",
@@ -17004,7 +17004,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c2j2.r2.c2j2",
+        "actionId": "cc.c2j2.r2.c2j2",
         "side": "corp",
         "type": "install_card",
         "label": "Karte in Remote 2 installieren",
@@ -17035,7 +17035,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.cgd.new_remote.cgd",
+        "actionId": "cc.cgd.new_remote.cgd",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor neuem Remote installieren",
@@ -17067,7 +17067,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.cgd.hq.cgd.3",
+        "actionId": "cc.cgd.hq.cgd.3",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor HQ installieren",
@@ -17104,7 +17104,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.cgd.rd.cgd.3",
+        "actionId": "cc.cgd.rd.cgd.3",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor R&D installieren",
@@ -17141,7 +17141,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.cgd.archives.cgd.0",
+        "actionId": "cc.cgd.archives.cgd.0",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor Archives installieren",
@@ -17177,7 +17177,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.cgd.r1.cgd.2",
+        "actionId": "cc.cgd.r1.cgd.2",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor Remote 1 installieren",
@@ -17214,7 +17214,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.cgd.r2.cgd.2",
+        "actionId": "cc.cgd.r2.cgd.2",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor Remote 2 installieren",
@@ -17251,7 +17251,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c2j1.new_remote.c2j1",
+        "actionId": "cc.c2j1.new_remote.c2j1",
         "side": "corp",
         "type": "install_card",
         "label": "Karte in neuem Remote installieren",
@@ -17282,7 +17282,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c2j1.r1.c2j1",
+        "actionId": "cc.c2j1.r1.c2j1",
         "side": "corp",
         "type": "install_card",
         "label": "Karte in Remote 1 installieren",
@@ -17313,7 +17313,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.c2j1.r2.c2j1",
+        "actionId": "cc.c2j1.r2.c2j1",
         "side": "corp",
         "type": "install_card",
         "label": "Karte in Remote 2 installieren",
@@ -17344,7 +17344,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.clh.new_remote.clh",
+        "actionId": "cc.clh.new_remote.clh",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor neuem Remote installieren",
@@ -17375,7 +17375,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.clh.hq.clh.3",
+        "actionId": "cc.clh.hq.clh.3",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor HQ installieren",
@@ -17411,7 +17411,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.clh.rd.clh.3",
+        "actionId": "cc.clh.rd.clh.3",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor R&D installieren",
@@ -17447,7 +17447,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.clh.archives.clh.0",
+        "actionId": "cc.clh.archives.clh.0",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor Archives installieren",
@@ -17482,7 +17482,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.clh.r1.clh.2",
+        "actionId": "cc.clh.r1.clh.2",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor Remote 1 installieren",
@@ -17518,7 +17518,7 @@
         }
       },
       {
-        "actionId": "corp.install_card.clh.r2.clh.2",
+        "actionId": "cc.clh.r2.clh.2",
         "side": "corp",
         "type": "install_card",
         "label": "ICE vor Remote 2 installieren",
@@ -17554,7 +17554,7 @@
         }
       },
       {
-        "actionId": "corp.end_turn",
+        "actionId": "c9",
         "side": "corp",
         "type": "end_turn",
         "label": "Zug beenden",
@@ -23044,7 +23044,7 @@
       "stateVersion": 233,
       "instances": [
         {
-          "instanceId": "plan:corp.defend_servers:server-defense-portfolio",
+          "instanceId": "penw02zfrkklof54c2nuye5att",
           "dedupeKey": "server-defense-portfolio",
           "moduleId": "corp.defend_servers",
           "moduleVersion": "1",
@@ -23184,7 +23184,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.economy:economy-visible-liquidity-development%3A20",
+          "instanceId": "pb5guvhgebr2a6dojqde5smch9",
           "dedupeKey": "economy-visible-liquidity-development:20",
           "moduleId": "corp.economy",
           "moduleVersion": "1",
@@ -23221,7 +23221,7 @@
               "gap": 11,
               "projectedCreditGain": 1,
               "actionIds": [
-                "corp.gain_credit"
+                "cb"
               ],
               "priorityClass": "P6",
               "cadence": {
@@ -23273,7 +23273,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.economy:score-support%3Aagenda%3Ac2j1%3Ar1",
+          "instanceId": "p2fv7280dr48t4y3w4nwxcnshs",
           "dedupeKey": "score-support:agenda:c2j1:r1",
           "moduleId": "corp.economy",
           "moduleVersion": "1",
@@ -23296,7 +23296,7 @@
             "kind": "capability",
             "id": "score-support:agenda:c2j1:r1"
           },
-          "parentInstanceId": "plan:corp.score_agenda:agenda%3Ac2j1%3Ar1",
+          "parentInstanceId": "pbfhzbvno7xf28xywnlayd9byb",
           "parentNeedId": "score-support:agenda:c2j1:r1",
           "openNeedIds": [],
           "phase": "economy",
@@ -23308,9 +23308,9 @@
               "needId": "score-support:agenda:c2j1:r1",
               "gap": 14,
               "actionIds": [
-                "corp.gain_credit"
+                "cb"
               ],
-              "parentPlanInstanceId": "plan:corp.score_agenda:agenda%3Ac2j1%3Ar1",
+              "parentPlanInstanceId": "pbfhzbvno7xf28xywnlayd9byb",
               "parentNeedId": "score-support:agenda:c2j1:r1",
               "scoreFundingMilestone": {
                 "kind": "score_credit_milestone",
@@ -23329,14 +23329,14 @@
               "urgentForScore": true,
               "evidenceCode": "corp_score_protection_funding_gap:r1:14",
               "fundingRouteAssessment": {
-                "routeId": "score-support:agenda:c2j1:r1:legal_action:corp.gain_credit",
+                "routeId": "score-support:agenda:c2j1:r1:legal_action:cb",
                 "status": "covered_guaranteed",
                 "reliability": "guaranteed",
-                "headActionId": "corp.gain_credit",
+                "headActionId": "cb",
                 "evidence": [
                   "funding_route_count:1",
                   "funding_route_best_status:covered_guaranteed",
-                  "funding_route_best_id:score-support:agenda:c2j1:r1:legal_action:corp.gain_credit",
+                  "funding_route_best_id:score-support:agenda:c2j1:r1:legal_action:cb",
                   "funding_route_status:covered_guaranteed",
                   "funding_route_reliability:guaranteed",
                   "funding_route_horizon:same_turn",
@@ -23347,7 +23347,8 @@
                   "corp_incremental_score_funding_final_target:23",
                   "corp_incremental_score_funding_incremental_target:10"
                 ]
-              }
+              },
+              "parentPlanModuleId": "corp.score_agenda"
             }
           },
           "blockers": [],
@@ -23384,7 +23385,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.economy:score-support%3Aagenda%3Ac2j2%3Ar1",
+          "instanceId": "p39559tmrm8c45ipbjzwgbe7h3",
           "dedupeKey": "score-support:agenda:c2j2:r1",
           "moduleId": "corp.economy",
           "moduleVersion": "1",
@@ -23407,7 +23408,7 @@
             "kind": "capability",
             "id": "score-support:agenda:c2j2:r1"
           },
-          "parentInstanceId": "plan:corp.score_agenda:agenda%3Ac2j2%3Ar1",
+          "parentInstanceId": "p67hposp6f7x1fw9zv0ogip3z0",
           "parentNeedId": "score-support:agenda:c2j2:r1",
           "openNeedIds": [],
           "phase": "economy",
@@ -23419,9 +23420,9 @@
               "needId": "score-support:agenda:c2j2:r1",
               "gap": 14,
               "actionIds": [
-                "corp.gain_credit"
+                "cb"
               ],
-              "parentPlanInstanceId": "plan:corp.score_agenda:agenda%3Ac2j2%3Ar1",
+              "parentPlanInstanceId": "p67hposp6f7x1fw9zv0ogip3z0",
               "parentNeedId": "score-support:agenda:c2j2:r1",
               "scoreFundingMilestone": {
                 "kind": "score_credit_milestone",
@@ -23440,14 +23441,14 @@
               "urgentForScore": true,
               "evidenceCode": "corp_score_protection_funding_gap:r1:14",
               "fundingRouteAssessment": {
-                "routeId": "score-support:agenda:c2j2:r1:legal_action:corp.gain_credit",
+                "routeId": "score-support:agenda:c2j2:r1:legal_action:cb",
                 "status": "covered_guaranteed",
                 "reliability": "guaranteed",
-                "headActionId": "corp.gain_credit",
+                "headActionId": "cb",
                 "evidence": [
                   "funding_route_count:1",
                   "funding_route_best_status:covered_guaranteed",
-                  "funding_route_best_id:score-support:agenda:c2j2:r1:legal_action:corp.gain_credit",
+                  "funding_route_best_id:score-support:agenda:c2j2:r1:legal_action:cb",
                   "funding_route_status:covered_guaranteed",
                   "funding_route_reliability:guaranteed",
                   "funding_route_horizon:same_turn",
@@ -23458,7 +23459,8 @@
                   "corp_incremental_score_funding_final_target:23",
                   "corp_incremental_score_funding_incremental_target:10"
                 ]
-              }
+              },
+              "parentPlanModuleId": "corp.score_agenda"
             }
           },
           "blockers": [],
@@ -23495,7 +23497,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.establish_scoring_remote:strategic-score-remote",
+          "instanceId": "p6vrrjl5fc78gjet2n25nst7pp",
           "dedupeKey": "strategic-score-remote",
           "moduleId": "corp.establish_scoring_remote",
           "moduleVersion": "2",
@@ -23662,7 +23664,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.hand_and_agenda_management:resolve-hq-overflow%3Acorp%3A30",
+          "instanceId": "pdex90ab2vu3bd87adytz1kpr",
           "dedupeKey": "resolve-hq-overflow:corp:30",
           "moduleId": "corp.hand_and_agenda_management",
           "moduleVersion": "1",
@@ -23697,224 +23699,224 @@
               "handSize": 6,
               "maximumHandSize": 5,
               "actionIds": [
-                "corp.play_operation.cnx.cnx.c3z.1.c3z",
-                "corp.play_operation.cnx.cnx.c3z.2.c3z",
-                "corp.play_operation.cnx.cnx.c3z.3.c3z",
-                "corp.play_operation.cnx.cnx.c3z.4.c3z",
-                "corp.play_operation.cnx.cnx.c3z.5.c3z",
-                "corp.play_operation.cnx.cnx.c3z.6.c3z",
-                "corp.play_operation.cnx.cnx.c3z.7.c3z",
-                "corp.play_operation.cnx.cnx.c3z.8.c3z",
-                "corp.play_operation.cnx.cnx.c3z.9.c3z",
-                "corp.play_operation.cnx.cnx.cg5.1.cg5",
-                "corp.play_operation.cnx.cnx.cg5.2.cg5",
-                "corp.play_operation.cnx.cnx.cg5.3.cg5",
-                "corp.play_operation.cnx.cnx.cg5.4.cg5",
-                "corp.play_operation.cnx.cnx.cg5.5.cg5",
-                "corp.play_operation.cnx.cnx.cg5.6.cg5",
-                "corp.play_operation.cnx.cnx.cg5.7.cg5",
-                "corp.play_operation.cnx.cnx.cg5.8.cg5",
-                "corp.play_operation.cnx.cnx.cg5.9.cg5",
-                "corp.play_operation.cnx.cnx.cg6.1.cg6",
-                "corp.play_operation.cnx.cnx.cg6.2.cg6",
-                "corp.play_operation.cnx.cnx.cg6.3.cg6",
-                "corp.play_operation.cnx.cnx.cg6.4.cg6",
-                "corp.play_operation.cnx.cnx.cg6.5.cg6",
-                "corp.play_operation.cnx.cnx.cg6.6.cg6",
-                "corp.play_operation.cnx.cnx.cg6.7.cg6",
-                "corp.play_operation.cnx.cnx.cg6.8.cg6",
-                "corp.play_operation.cnx.cnx.cg6.9.cg6",
-                "corp.play_operation.cnx.cnx.cg7.1.cg7",
-                "corp.play_operation.cnx.cnx.cg7.2.cg7",
-                "corp.play_operation.cnx.cnx.cg7.3.cg7",
-                "corp.play_operation.cnx.cnx.cg7.4.cg7",
-                "corp.play_operation.cnx.cnx.cg7.5.cg7",
-                "corp.play_operation.cnx.cnx.cg7.6.cg7",
-                "corp.play_operation.cnx.cnx.cg7.7.cg7",
-                "corp.play_operation.cnx.cnx.cg7.8.cg7",
-                "corp.play_operation.cnx.cnx.cg7.9.cg7",
-                "corp.play_operation.cnx.cnx.cgf.1.cgf",
-                "corp.play_operation.cnx.cnx.cgf.2.cgf",
-                "corp.play_operation.cnx.cnx.cgf.3.cgf",
-                "corp.play_operation.cnx.cnx.cgf.4.cgf",
-                "corp.play_operation.cnx.cnx.cgf.5.cgf",
-                "corp.play_operation.cnx.cnx.cgf.6.cgf",
-                "corp.play_operation.cnx.cnx.cgf.7.cgf",
-                "corp.play_operation.cnx.cnx.cgf.8.cgf",
-                "corp.play_operation.cnx.cnx.cgf.9.cgf",
-                "corp.play_operation.cnx.cnx.cgl.1.cgl",
-                "corp.play_operation.cnx.cnx.cgl.2.cgl",
-                "corp.play_operation.cnx.cnx.cgl.3.cgl",
-                "corp.play_operation.cnx.cnx.cgl.4.cgl",
-                "corp.play_operation.cnx.cnx.cgl.5.cgl",
-                "corp.play_operation.cnx.cnx.cgl.6.cgl",
-                "corp.play_operation.cnx.cnx.cgl.7.cgl",
-                "corp.play_operation.cnx.cnx.cgl.8.cgl",
-                "corp.play_operation.cnx.cnx.cgl.9.cgl",
-                "corp.play_operation.cny.cny.c3z.1.c3z",
-                "corp.play_operation.cny.cny.c3z.2.c3z",
-                "corp.play_operation.cny.cny.c3z.3.c3z",
-                "corp.play_operation.cny.cny.c3z.4.c3z",
-                "corp.play_operation.cny.cny.c3z.5.c3z",
-                "corp.play_operation.cny.cny.c3z.6.c3z",
-                "corp.play_operation.cny.cny.c3z.7.c3z",
-                "corp.play_operation.cny.cny.c3z.8.c3z",
-                "corp.play_operation.cny.cny.c3z.9.c3z",
-                "corp.play_operation.cny.cny.cg5.1.cg5",
-                "corp.play_operation.cny.cny.cg5.2.cg5",
-                "corp.play_operation.cny.cny.cg5.3.cg5",
-                "corp.play_operation.cny.cny.cg5.4.cg5",
-                "corp.play_operation.cny.cny.cg5.5.cg5",
-                "corp.play_operation.cny.cny.cg5.6.cg5",
-                "corp.play_operation.cny.cny.cg5.7.cg5",
-                "corp.play_operation.cny.cny.cg5.8.cg5",
-                "corp.play_operation.cny.cny.cg5.9.cg5",
-                "corp.play_operation.cny.cny.cg6.1.cg6",
-                "corp.play_operation.cny.cny.cg6.2.cg6",
-                "corp.play_operation.cny.cny.cg6.3.cg6",
-                "corp.play_operation.cny.cny.cg6.4.cg6",
-                "corp.play_operation.cny.cny.cg6.5.cg6",
-                "corp.play_operation.cny.cny.cg6.6.cg6",
-                "corp.play_operation.cny.cny.cg6.7.cg6",
-                "corp.play_operation.cny.cny.cg6.8.cg6",
-                "corp.play_operation.cny.cny.cg6.9.cg6",
-                "corp.play_operation.cny.cny.cg7.1.cg7",
-                "corp.play_operation.cny.cny.cg7.2.cg7",
-                "corp.play_operation.cny.cny.cg7.3.cg7",
-                "corp.play_operation.cny.cny.cg7.4.cg7",
-                "corp.play_operation.cny.cny.cg7.5.cg7",
-                "corp.play_operation.cny.cny.cg7.6.cg7",
-                "corp.play_operation.cny.cny.cg7.7.cg7",
-                "corp.play_operation.cny.cny.cg7.8.cg7",
-                "corp.play_operation.cny.cny.cg7.9.cg7",
-                "corp.play_operation.cny.cny.cgf.1.cgf",
-                "corp.play_operation.cny.cny.cgf.2.cgf",
-                "corp.play_operation.cny.cny.cgf.3.cgf",
-                "corp.play_operation.cny.cny.cgf.4.cgf",
-                "corp.play_operation.cny.cny.cgf.5.cgf",
-                "corp.play_operation.cny.cny.cgf.6.cgf",
-                "corp.play_operation.cny.cny.cgf.7.cgf",
-                "corp.play_operation.cny.cny.cgf.8.cgf",
-                "corp.play_operation.cny.cny.cgf.9.cgf",
-                "corp.play_operation.cny.cny.cgl.1.cgl",
-                "corp.play_operation.cny.cny.cgl.2.cgl",
-                "corp.play_operation.cny.cny.cgl.3.cgl",
-                "corp.play_operation.cny.cny.cgl.4.cgl",
-                "corp.play_operation.cny.cny.cgl.5.cgl",
-                "corp.play_operation.cny.cny.cgl.6.cgl",
-                "corp.play_operation.cny.cny.cgl.7.cgl",
-                "corp.play_operation.cny.cny.cgl.8.cgl",
-                "corp.play_operation.cny.cny.cgl.9.cgl"
+                "ci.cnx.cnx.c3z.1.c3z",
+                "ci.cnx.cnx.c3z.2.c3z",
+                "ci.cnx.cnx.c3z.3.c3z",
+                "ci.cnx.cnx.c3z.4.c3z",
+                "ci.cnx.cnx.c3z.5.c3z",
+                "ci.cnx.cnx.c3z.6.c3z",
+                "ci.cnx.cnx.c3z.7.c3z",
+                "ci.cnx.cnx.c3z.8.c3z",
+                "ci.cnx.cnx.c3z.9.c3z",
+                "ci.cnx.cnx.cg5.1.cg5",
+                "ci.cnx.cnx.cg5.2.cg5",
+                "ci.cnx.cnx.cg5.3.cg5",
+                "ci.cnx.cnx.cg5.4.cg5",
+                "ci.cnx.cnx.cg5.5.cg5",
+                "ci.cnx.cnx.cg5.6.cg5",
+                "ci.cnx.cnx.cg5.7.cg5",
+                "ci.cnx.cnx.cg5.8.cg5",
+                "ci.cnx.cnx.cg5.9.cg5",
+                "ci.cnx.cnx.cg6.1.cg6",
+                "ci.cnx.cnx.cg6.2.cg6",
+                "ci.cnx.cnx.cg6.3.cg6",
+                "ci.cnx.cnx.cg6.4.cg6",
+                "ci.cnx.cnx.cg6.5.cg6",
+                "ci.cnx.cnx.cg6.6.cg6",
+                "ci.cnx.cnx.cg6.7.cg6",
+                "ci.cnx.cnx.cg6.8.cg6",
+                "ci.cnx.cnx.cg6.9.cg6",
+                "ci.cnx.cnx.cg7.1.cg7",
+                "ci.cnx.cnx.cg7.2.cg7",
+                "ci.cnx.cnx.cg7.3.cg7",
+                "ci.cnx.cnx.cg7.4.cg7",
+                "ci.cnx.cnx.cg7.5.cg7",
+                "ci.cnx.cnx.cg7.6.cg7",
+                "ci.cnx.cnx.cg7.7.cg7",
+                "ci.cnx.cnx.cg7.8.cg7",
+                "ci.cnx.cnx.cg7.9.cg7",
+                "ci.cnx.cnx.cgf.1.cgf",
+                "ci.cnx.cnx.cgf.2.cgf",
+                "ci.cnx.cnx.cgf.3.cgf",
+                "ci.cnx.cnx.cgf.4.cgf",
+                "ci.cnx.cnx.cgf.5.cgf",
+                "ci.cnx.cnx.cgf.6.cgf",
+                "ci.cnx.cnx.cgf.7.cgf",
+                "ci.cnx.cnx.cgf.8.cgf",
+                "ci.cnx.cnx.cgf.9.cgf",
+                "ci.cnx.cnx.cgl.1.cgl",
+                "ci.cnx.cnx.cgl.2.cgl",
+                "ci.cnx.cnx.cgl.3.cgl",
+                "ci.cnx.cnx.cgl.4.cgl",
+                "ci.cnx.cnx.cgl.5.cgl",
+                "ci.cnx.cnx.cgl.6.cgl",
+                "ci.cnx.cnx.cgl.7.cgl",
+                "ci.cnx.cnx.cgl.8.cgl",
+                "ci.cnx.cnx.cgl.9.cgl",
+                "ci.cny.cny.c3z.1.c3z",
+                "ci.cny.cny.c3z.2.c3z",
+                "ci.cny.cny.c3z.3.c3z",
+                "ci.cny.cny.c3z.4.c3z",
+                "ci.cny.cny.c3z.5.c3z",
+                "ci.cny.cny.c3z.6.c3z",
+                "ci.cny.cny.c3z.7.c3z",
+                "ci.cny.cny.c3z.8.c3z",
+                "ci.cny.cny.c3z.9.c3z",
+                "ci.cny.cny.cg5.1.cg5",
+                "ci.cny.cny.cg5.2.cg5",
+                "ci.cny.cny.cg5.3.cg5",
+                "ci.cny.cny.cg5.4.cg5",
+                "ci.cny.cny.cg5.5.cg5",
+                "ci.cny.cny.cg5.6.cg5",
+                "ci.cny.cny.cg5.7.cg5",
+                "ci.cny.cny.cg5.8.cg5",
+                "ci.cny.cny.cg5.9.cg5",
+                "ci.cny.cny.cg6.1.cg6",
+                "ci.cny.cny.cg6.2.cg6",
+                "ci.cny.cny.cg6.3.cg6",
+                "ci.cny.cny.cg6.4.cg6",
+                "ci.cny.cny.cg6.5.cg6",
+                "ci.cny.cny.cg6.6.cg6",
+                "ci.cny.cny.cg6.7.cg6",
+                "ci.cny.cny.cg6.8.cg6",
+                "ci.cny.cny.cg6.9.cg6",
+                "ci.cny.cny.cg7.1.cg7",
+                "ci.cny.cny.cg7.2.cg7",
+                "ci.cny.cny.cg7.3.cg7",
+                "ci.cny.cny.cg7.4.cg7",
+                "ci.cny.cny.cg7.5.cg7",
+                "ci.cny.cny.cg7.6.cg7",
+                "ci.cny.cny.cg7.7.cg7",
+                "ci.cny.cny.cg7.8.cg7",
+                "ci.cny.cny.cg7.9.cg7",
+                "ci.cny.cny.cgf.1.cgf",
+                "ci.cny.cny.cgf.2.cgf",
+                "ci.cny.cny.cgf.3.cgf",
+                "ci.cny.cny.cgf.4.cgf",
+                "ci.cny.cny.cgf.5.cgf",
+                "ci.cny.cny.cgf.6.cgf",
+                "ci.cny.cny.cgf.7.cgf",
+                "ci.cny.cny.cgf.8.cgf",
+                "ci.cny.cny.cgf.9.cgf",
+                "ci.cny.cny.cgl.1.cgl",
+                "ci.cny.cny.cgl.2.cgl",
+                "ci.cny.cny.cgl.3.cgl",
+                "ci.cny.cny.cgl.4.cgl",
+                "ci.cny.cny.cgl.5.cgl",
+                "ci.cny.cny.cgl.6.cgl",
+                "ci.cny.cny.cgl.7.cgl",
+                "ci.cny.cny.cgl.8.cgl",
+                "ci.cny.cny.cgl.9.cgl"
               ],
               "actionPriorityOrder": [
-                "corp.play_operation.cnx.cnx.c3z.1.c3z",
-                "corp.play_operation.cnx.cnx.c3z.2.c3z",
-                "corp.play_operation.cnx.cnx.c3z.3.c3z",
-                "corp.play_operation.cnx.cnx.c3z.4.c3z",
-                "corp.play_operation.cnx.cnx.c3z.5.c3z",
-                "corp.play_operation.cnx.cnx.c3z.6.c3z",
-                "corp.play_operation.cnx.cnx.c3z.7.c3z",
-                "corp.play_operation.cnx.cnx.c3z.8.c3z",
-                "corp.play_operation.cnx.cnx.c3z.9.c3z",
-                "corp.play_operation.cnx.cnx.cg5.1.cg5",
-                "corp.play_operation.cnx.cnx.cg5.2.cg5",
-                "corp.play_operation.cnx.cnx.cg5.3.cg5",
-                "corp.play_operation.cnx.cnx.cg5.4.cg5",
-                "corp.play_operation.cnx.cnx.cg5.5.cg5",
-                "corp.play_operation.cnx.cnx.cg5.6.cg5",
-                "corp.play_operation.cnx.cnx.cg5.7.cg5",
-                "corp.play_operation.cnx.cnx.cg5.8.cg5",
-                "corp.play_operation.cnx.cnx.cg5.9.cg5",
-                "corp.play_operation.cnx.cnx.cg6.1.cg6",
-                "corp.play_operation.cnx.cnx.cg6.2.cg6",
-                "corp.play_operation.cnx.cnx.cg6.3.cg6",
-                "corp.play_operation.cnx.cnx.cg6.4.cg6",
-                "corp.play_operation.cnx.cnx.cg6.5.cg6",
-                "corp.play_operation.cnx.cnx.cg6.6.cg6",
-                "corp.play_operation.cnx.cnx.cg6.7.cg6",
-                "corp.play_operation.cnx.cnx.cg6.8.cg6",
-                "corp.play_operation.cnx.cnx.cg6.9.cg6",
-                "corp.play_operation.cnx.cnx.cg7.1.cg7",
-                "corp.play_operation.cnx.cnx.cg7.2.cg7",
-                "corp.play_operation.cnx.cnx.cg7.3.cg7",
-                "corp.play_operation.cnx.cnx.cg7.4.cg7",
-                "corp.play_operation.cnx.cnx.cg7.5.cg7",
-                "corp.play_operation.cnx.cnx.cg7.6.cg7",
-                "corp.play_operation.cnx.cnx.cg7.7.cg7",
-                "corp.play_operation.cnx.cnx.cg7.8.cg7",
-                "corp.play_operation.cnx.cnx.cg7.9.cg7",
-                "corp.play_operation.cnx.cnx.cgf.1.cgf",
-                "corp.play_operation.cnx.cnx.cgf.2.cgf",
-                "corp.play_operation.cnx.cnx.cgf.3.cgf",
-                "corp.play_operation.cnx.cnx.cgf.4.cgf",
-                "corp.play_operation.cnx.cnx.cgf.5.cgf",
-                "corp.play_operation.cnx.cnx.cgf.6.cgf",
-                "corp.play_operation.cnx.cnx.cgf.7.cgf",
-                "corp.play_operation.cnx.cnx.cgf.8.cgf",
-                "corp.play_operation.cnx.cnx.cgf.9.cgf",
-                "corp.play_operation.cnx.cnx.cgl.1.cgl",
-                "corp.play_operation.cnx.cnx.cgl.2.cgl",
-                "corp.play_operation.cnx.cnx.cgl.3.cgl",
-                "corp.play_operation.cnx.cnx.cgl.4.cgl",
-                "corp.play_operation.cnx.cnx.cgl.5.cgl",
-                "corp.play_operation.cnx.cnx.cgl.6.cgl",
-                "corp.play_operation.cnx.cnx.cgl.7.cgl",
-                "corp.play_operation.cnx.cnx.cgl.8.cgl",
-                "corp.play_operation.cnx.cnx.cgl.9.cgl",
-                "corp.play_operation.cny.cny.c3z.1.c3z",
-                "corp.play_operation.cny.cny.c3z.2.c3z",
-                "corp.play_operation.cny.cny.c3z.3.c3z",
-                "corp.play_operation.cny.cny.c3z.4.c3z",
-                "corp.play_operation.cny.cny.c3z.5.c3z",
-                "corp.play_operation.cny.cny.c3z.6.c3z",
-                "corp.play_operation.cny.cny.c3z.7.c3z",
-                "corp.play_operation.cny.cny.c3z.8.c3z",
-                "corp.play_operation.cny.cny.c3z.9.c3z",
-                "corp.play_operation.cny.cny.cg5.1.cg5",
-                "corp.play_operation.cny.cny.cg5.2.cg5",
-                "corp.play_operation.cny.cny.cg5.3.cg5",
-                "corp.play_operation.cny.cny.cg5.4.cg5",
-                "corp.play_operation.cny.cny.cg5.5.cg5",
-                "corp.play_operation.cny.cny.cg5.6.cg5",
-                "corp.play_operation.cny.cny.cg5.7.cg5",
-                "corp.play_operation.cny.cny.cg5.8.cg5",
-                "corp.play_operation.cny.cny.cg5.9.cg5",
-                "corp.play_operation.cny.cny.cg6.1.cg6",
-                "corp.play_operation.cny.cny.cg6.2.cg6",
-                "corp.play_operation.cny.cny.cg6.3.cg6",
-                "corp.play_operation.cny.cny.cg6.4.cg6",
-                "corp.play_operation.cny.cny.cg6.5.cg6",
-                "corp.play_operation.cny.cny.cg6.6.cg6",
-                "corp.play_operation.cny.cny.cg6.7.cg6",
-                "corp.play_operation.cny.cny.cg6.8.cg6",
-                "corp.play_operation.cny.cny.cg6.9.cg6",
-                "corp.play_operation.cny.cny.cg7.1.cg7",
-                "corp.play_operation.cny.cny.cg7.2.cg7",
-                "corp.play_operation.cny.cny.cg7.3.cg7",
-                "corp.play_operation.cny.cny.cg7.4.cg7",
-                "corp.play_operation.cny.cny.cg7.5.cg7",
-                "corp.play_operation.cny.cny.cg7.6.cg7",
-                "corp.play_operation.cny.cny.cg7.7.cg7",
-                "corp.play_operation.cny.cny.cg7.8.cg7",
-                "corp.play_operation.cny.cny.cg7.9.cg7",
-                "corp.play_operation.cny.cny.cgf.1.cgf",
-                "corp.play_operation.cny.cny.cgf.2.cgf",
-                "corp.play_operation.cny.cny.cgf.3.cgf",
-                "corp.play_operation.cny.cny.cgf.4.cgf",
-                "corp.play_operation.cny.cny.cgf.5.cgf",
-                "corp.play_operation.cny.cny.cgf.6.cgf",
-                "corp.play_operation.cny.cny.cgf.7.cgf",
-                "corp.play_operation.cny.cny.cgf.8.cgf",
-                "corp.play_operation.cny.cny.cgf.9.cgf",
-                "corp.play_operation.cny.cny.cgl.1.cgl",
-                "corp.play_operation.cny.cny.cgl.2.cgl",
-                "corp.play_operation.cny.cny.cgl.3.cgl",
-                "corp.play_operation.cny.cny.cgl.4.cgl",
-                "corp.play_operation.cny.cny.cgl.5.cgl",
-                "corp.play_operation.cny.cny.cgl.6.cgl",
-                "corp.play_operation.cny.cny.cgl.7.cgl",
-                "corp.play_operation.cny.cny.cgl.8.cgl",
-                "corp.play_operation.cny.cny.cgl.9.cgl"
+                "ci.cnx.cnx.c3z.1.c3z",
+                "ci.cnx.cnx.c3z.2.c3z",
+                "ci.cnx.cnx.c3z.3.c3z",
+                "ci.cnx.cnx.c3z.4.c3z",
+                "ci.cnx.cnx.c3z.5.c3z",
+                "ci.cnx.cnx.c3z.6.c3z",
+                "ci.cnx.cnx.c3z.7.c3z",
+                "ci.cnx.cnx.c3z.8.c3z",
+                "ci.cnx.cnx.c3z.9.c3z",
+                "ci.cnx.cnx.cg5.1.cg5",
+                "ci.cnx.cnx.cg5.2.cg5",
+                "ci.cnx.cnx.cg5.3.cg5",
+                "ci.cnx.cnx.cg5.4.cg5",
+                "ci.cnx.cnx.cg5.5.cg5",
+                "ci.cnx.cnx.cg5.6.cg5",
+                "ci.cnx.cnx.cg5.7.cg5",
+                "ci.cnx.cnx.cg5.8.cg5",
+                "ci.cnx.cnx.cg5.9.cg5",
+                "ci.cnx.cnx.cg6.1.cg6",
+                "ci.cnx.cnx.cg6.2.cg6",
+                "ci.cnx.cnx.cg6.3.cg6",
+                "ci.cnx.cnx.cg6.4.cg6",
+                "ci.cnx.cnx.cg6.5.cg6",
+                "ci.cnx.cnx.cg6.6.cg6",
+                "ci.cnx.cnx.cg6.7.cg6",
+                "ci.cnx.cnx.cg6.8.cg6",
+                "ci.cnx.cnx.cg6.9.cg6",
+                "ci.cnx.cnx.cg7.1.cg7",
+                "ci.cnx.cnx.cg7.2.cg7",
+                "ci.cnx.cnx.cg7.3.cg7",
+                "ci.cnx.cnx.cg7.4.cg7",
+                "ci.cnx.cnx.cg7.5.cg7",
+                "ci.cnx.cnx.cg7.6.cg7",
+                "ci.cnx.cnx.cg7.7.cg7",
+                "ci.cnx.cnx.cg7.8.cg7",
+                "ci.cnx.cnx.cg7.9.cg7",
+                "ci.cnx.cnx.cgf.1.cgf",
+                "ci.cnx.cnx.cgf.2.cgf",
+                "ci.cnx.cnx.cgf.3.cgf",
+                "ci.cnx.cnx.cgf.4.cgf",
+                "ci.cnx.cnx.cgf.5.cgf",
+                "ci.cnx.cnx.cgf.6.cgf",
+                "ci.cnx.cnx.cgf.7.cgf",
+                "ci.cnx.cnx.cgf.8.cgf",
+                "ci.cnx.cnx.cgf.9.cgf",
+                "ci.cnx.cnx.cgl.1.cgl",
+                "ci.cnx.cnx.cgl.2.cgl",
+                "ci.cnx.cnx.cgl.3.cgl",
+                "ci.cnx.cnx.cgl.4.cgl",
+                "ci.cnx.cnx.cgl.5.cgl",
+                "ci.cnx.cnx.cgl.6.cgl",
+                "ci.cnx.cnx.cgl.7.cgl",
+                "ci.cnx.cnx.cgl.8.cgl",
+                "ci.cnx.cnx.cgl.9.cgl",
+                "ci.cny.cny.c3z.1.c3z",
+                "ci.cny.cny.c3z.2.c3z",
+                "ci.cny.cny.c3z.3.c3z",
+                "ci.cny.cny.c3z.4.c3z",
+                "ci.cny.cny.c3z.5.c3z",
+                "ci.cny.cny.c3z.6.c3z",
+                "ci.cny.cny.c3z.7.c3z",
+                "ci.cny.cny.c3z.8.c3z",
+                "ci.cny.cny.c3z.9.c3z",
+                "ci.cny.cny.cg5.1.cg5",
+                "ci.cny.cny.cg5.2.cg5",
+                "ci.cny.cny.cg5.3.cg5",
+                "ci.cny.cny.cg5.4.cg5",
+                "ci.cny.cny.cg5.5.cg5",
+                "ci.cny.cny.cg5.6.cg5",
+                "ci.cny.cny.cg5.7.cg5",
+                "ci.cny.cny.cg5.8.cg5",
+                "ci.cny.cny.cg5.9.cg5",
+                "ci.cny.cny.cg6.1.cg6",
+                "ci.cny.cny.cg6.2.cg6",
+                "ci.cny.cny.cg6.3.cg6",
+                "ci.cny.cny.cg6.4.cg6",
+                "ci.cny.cny.cg6.5.cg6",
+                "ci.cny.cny.cg6.6.cg6",
+                "ci.cny.cny.cg6.7.cg6",
+                "ci.cny.cny.cg6.8.cg6",
+                "ci.cny.cny.cg6.9.cg6",
+                "ci.cny.cny.cg7.1.cg7",
+                "ci.cny.cny.cg7.2.cg7",
+                "ci.cny.cny.cg7.3.cg7",
+                "ci.cny.cny.cg7.4.cg7",
+                "ci.cny.cny.cg7.5.cg7",
+                "ci.cny.cny.cg7.6.cg7",
+                "ci.cny.cny.cg7.7.cg7",
+                "ci.cny.cny.cg7.8.cg7",
+                "ci.cny.cny.cg7.9.cg7",
+                "ci.cny.cny.cgf.1.cgf",
+                "ci.cny.cny.cgf.2.cgf",
+                "ci.cny.cny.cgf.3.cgf",
+                "ci.cny.cny.cgf.4.cgf",
+                "ci.cny.cny.cgf.5.cgf",
+                "ci.cny.cny.cgf.6.cgf",
+                "ci.cny.cny.cgf.7.cgf",
+                "ci.cny.cny.cgf.8.cgf",
+                "ci.cny.cny.cgf.9.cgf",
+                "ci.cny.cny.cgl.1.cgl",
+                "ci.cny.cny.cgl.2.cgl",
+                "ci.cny.cny.cgl.3.cgl",
+                "ci.cny.cny.cgl.4.cgl",
+                "ci.cny.cny.cgl.5.cgl",
+                "ci.cny.cny.cgl.6.cgl",
+                "ci.cny.cny.cgl.7.cgl",
+                "ci.cny.cny.cgl.8.cgl",
+                "ci.cny.cny.cgl.9.cgl"
               ],
               "exactActionRoute": true,
               "concretePurposeCode": "Reduce the known Corp HQ overflow through one exact current non-agenda hand conversion, then observe and revalidate.",
@@ -23963,7 +23965,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac2j1%3Ar1",
+          "instanceId": "pbfhzbvno7xf28xywnlayd9byb",
           "dedupeKey": "agenda:c2j1:r1",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -23999,7 +24001,7 @@
               "agendaPoints": 2,
               "agendaInstanceId": "c2j1",
               "actionIds": [
-                "corp.install_card.c2j1.r1.c2j1"
+                "cc.c2j1.r1.c2j1"
               ],
               "serverId": "r1",
               "phase": "install_agenda",
@@ -24021,7 +24023,7 @@
                 "scoreReserve": {
                   "creditBreakdown": [
                     {
-                      "reserveId": "score_action:corp.install_card.c2j1.r1.c2j1",
+                      "reserveId": "score_action:cc.c2j1.r1.c2j1",
                       "credits": 0
                     },
                     {
@@ -24042,7 +24044,7 @@
                   "availableCorpAgendaPoints": 0,
                   "totalScoreReserveCredits": 4,
                   "hardClickReserve": 0,
-                  "scoreReserveFingerprint": "clicks:0|119:score_action:corp.install_card.c2j1.r1.c2j1=0|56:post_score_floor:c2j1=0|61:remaining_advancement:c2j1=4",
+                  "scoreReserveFingerprint": "clicks:0|119:score_action:cc.c2j1.r1.c2j1=0|56:post_score_floor:c2j1=0|61:remaining_advancement:c2j1=4",
                   "protection": {
                     "knowledge": "known",
                     "runnerAccessSuccessProbability": {
@@ -24167,7 +24169,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac2j1%3Ar2",
+          "instanceId": "pbfhz4zngdnt6fbhxgj8npd7si",
           "dedupeKey": "agenda:c2j1:r2",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -24201,7 +24203,7 @@
               "agendaPoints": 2,
               "agendaInstanceId": "c2j1",
               "actionIds": [
-                "corp.install_card.c2j1.r2.c2j1"
+                "cc.c2j1.r2.c2j1"
               ],
               "serverId": "r2",
               "phase": "install_agenda",
@@ -24223,7 +24225,7 @@
                 "scoreReserve": {
                   "creditBreakdown": [
                     {
-                      "reserveId": "score_action:corp.install_card.c2j1.r2.c2j1",
+                      "reserveId": "score_action:cc.c2j1.r2.c2j1",
                       "credits": 0
                     },
                     {
@@ -24244,7 +24246,7 @@
                   "availableCorpAgendaPoints": 0,
                   "totalScoreReserveCredits": 4,
                   "hardClickReserve": 0,
-                  "scoreReserveFingerprint": "clicks:0|119:score_action:corp.install_card.c2j1.r2.c2j1=0|56:post_score_floor:c2j1=0|61:remaining_advancement:c2j1=4",
+                  "scoreReserveFingerprint": "clicks:0|119:score_action:cc.c2j1.r2.c2j1=0|56:post_score_floor:c2j1=0|61:remaining_advancement:c2j1=4",
                   "protection": {
                     "knowledge": "known",
                     "runnerAccessSuccessProbability": {
@@ -24417,7 +24419,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac2j2%3Ar1",
+          "instanceId": "p67hposp6f7x1fw9zv0ogip3z0",
           "dedupeKey": "agenda:c2j2:r1",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -24453,7 +24455,7 @@
               "agendaPoints": 2,
               "agendaInstanceId": "c2j2",
               "actionIds": [
-                "corp.install_card.c2j2.r1.c2j2"
+                "cc.c2j2.r1.c2j2"
               ],
               "serverId": "r1",
               "phase": "install_agenda",
@@ -24475,7 +24477,7 @@
                 "scoreReserve": {
                   "creditBreakdown": [
                     {
-                      "reserveId": "score_action:corp.install_card.c2j2.r1.c2j2",
+                      "reserveId": "score_action:cc.c2j2.r1.c2j2",
                       "credits": 0
                     },
                     {
@@ -24496,7 +24498,7 @@
                   "availableCorpAgendaPoints": 0,
                   "totalScoreReserveCredits": 4,
                   "hardClickReserve": 0,
-                  "scoreReserveFingerprint": "clicks:0|119:score_action:corp.install_card.c2j2.r1.c2j2=0|56:post_score_floor:c2j2=0|61:remaining_advancement:c2j2=4",
+                  "scoreReserveFingerprint": "clicks:0|119:score_action:cc.c2j2.r1.c2j2=0|56:post_score_floor:c2j2=0|61:remaining_advancement:c2j2=4",
                   "protection": {
                     "knowledge": "known",
                     "runnerAccessSuccessProbability": {
@@ -24621,7 +24623,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac2j2%3Ar2",
+          "instanceId": "p67hp44crgvuw9vlj5etqh1uxd",
           "dedupeKey": "agenda:c2j2:r2",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -24655,7 +24657,7 @@
               "agendaPoints": 2,
               "agendaInstanceId": "c2j2",
               "actionIds": [
-                "corp.install_card.c2j2.r2.c2j2"
+                "cc.c2j2.r2.c2j2"
               ],
               "serverId": "r2",
               "phase": "install_agenda",
@@ -24677,7 +24679,7 @@
                 "scoreReserve": {
                   "creditBreakdown": [
                     {
-                      "reserveId": "score_action:corp.install_card.c2j2.r2.c2j2",
+                      "reserveId": "score_action:cc.c2j2.r2.c2j2",
                       "credits": 0
                     },
                     {
@@ -24698,7 +24700,7 @@
                   "availableCorpAgendaPoints": 0,
                   "totalScoreReserveCredits": 4,
                   "hardClickReserve": 0,
-                  "scoreReserveFingerprint": "clicks:0|119:score_action:corp.install_card.c2j2.r2.c2j2=0|56:post_score_floor:c2j2=0|61:remaining_advancement:c2j2=4",
+                  "scoreReserveFingerprint": "clicks:0|119:score_action:cc.c2j2.r2.c2j2=0|56:post_score_floor:c2j2=0|61:remaining_advancement:c2j2=4",
                   "protection": {
                     "knowledge": "known",
                     "runnerAccessSuccessProbability": {
@@ -24874,79 +24876,79 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:corp.defend_servers:server-defense-portfolio",
+          "instanceId": "penw02zfrkklof54c2nuye5att",
           "stateVersion": 233,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:corp.economy:economy-visible-liquidity-development%3A20",
+          "instanceId": "pb5guvhgebr2a6dojqde5smch9",
           "stateVersion": 233,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.economy:score-support%3Aagenda%3Ac2j1%3Ar1",
+          "instanceId": "p2fv7280dr48t4y3w4nwxcnshs",
           "stateVersion": 233,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.economy:score-support%3Aagenda%3Ac2j2%3Ar1",
+          "instanceId": "p39559tmrm8c45ipbjzwgbe7h3",
           "stateVersion": 233,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.establish_scoring_remote:strategic-score-remote",
+          "instanceId": "p6vrrjl5fc78gjet2n25nst7pp",
           "stateVersion": 233,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:corp.hand_and_agenda_management:resolve-hq-overflow%3Acorp%3A30",
+          "instanceId": "pdex90ab2vu3bd87adytz1kpr",
           "stateVersion": 233,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac2j1%3Ar1",
+          "instanceId": "pbfhzbvno7xf28xywnlayd9byb",
           "stateVersion": 233,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac2j1%3Ar2",
+          "instanceId": "pbfhz4zngdnt6fbhxgj8npd7si",
           "stateVersion": 233,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac2j2%3Ar1",
+          "instanceId": "p67hposp6f7x1fw9zv0ogip3z0",
           "stateVersion": 233,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac2j2%3Ar2",
+          "instanceId": "p67hp44crgvuw9vlj5etqh1uxd",
           "stateVersion": 233,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:corp.complete_turn:standard-turn-completion",
+          "instanceId": "p6yjycy2qsqgb3jl5pov75ajtq",
           "stateVersion": 233,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:corp.hand_and_agenda_management:resolve-hq-overflow%3Acorp%3A28",
+          "instanceId": "pdh76oyd0cal1iti2auhk4xoi",
           "stateVersion": 233,
           "reason": "stale_ttl_expired",
           "detailCode": "stale_ttl_elapsed"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac2j1%3Ar2",
+          "instanceId": "pbfhz4zngdnt6fbhxgj8npd7si",
           "stateVersion": 233,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
@@ -24957,11 +24959,11 @@
       "campaigns": [
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:agenda:c2j1:r1",
+          "campaignId": "k1z9g8cemk80nhsu0ve8ubvyfs",
           "kind": "agenda",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.score_agenda:agenda%3Ac2j1%3Ar1",
+            "rootPlanInstanceId": "pbfhzbvno7xf28xywnlayd9byb",
             "moduleId": "corp.score_agenda",
             "targetServerId": "r1",
             "targetCardInstanceId": "c2j1"
@@ -24992,15 +24994,19 @@
             "corp_score_protection_funding_gap:r1:18",
             "corp_score_protection_funding_gap:r1:19",
             "corp_score_protection_funding_gap:r1:20"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.score_agenda",
+            "objectiveKey": "agenda:c2j1:r1"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:agenda:c2j1:r2",
+          "campaignId": "k1z9fno0ah5b2y4ip4bvj7ps5p",
           "kind": "agenda",
           "status": "continuable",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.score_agenda:agenda%3Ac2j1%3Ar2",
+            "rootPlanInstanceId": "pbfhz4zngdnt6fbhxgj8npd7si",
             "moduleId": "corp.score_agenda",
             "targetServerId": "r2",
             "targetCardInstanceId": "c2j1"
@@ -25034,15 +25040,19 @@
             "corp_last_click_score_install_deferred:r2",
             "corp_score_protection_funding_gap:r2:2",
             "corp_score_protection_funding_gap:r2:3"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.score_agenda",
+            "objectiveKey": "agenda:c2j1:r2"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:agenda:c2j2:r1",
+          "campaignId": "k38f5w5e5jurad1f5lu7o03167",
           "kind": "agenda",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.score_agenda:agenda%3Ac2j2%3Ar1",
+            "rootPlanInstanceId": "p67hposp6f7x1fw9zv0ogip3z0",
             "moduleId": "corp.score_agenda",
             "targetServerId": "r1",
             "targetCardInstanceId": "c2j2"
@@ -25076,15 +25086,19 @@
             "corp_score_protection_funding_gap:r1:20",
             "corp_score_protection_funding_gap:r1:21",
             "corp_score_protection_required:r1"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.score_agenda",
+            "objectiveKey": "agenda:c2j2:r1"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:agenda:c2j2:r2",
+          "campaignId": "k38f5p9dxpl5ejey6es5dc6x0e",
           "kind": "agenda",
           "status": "continuable",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.score_agenda:agenda%3Ac2j2%3Ar2",
+            "rootPlanInstanceId": "p67hp44crgvuw9vlj5etqh1uxd",
             "moduleId": "corp.score_agenda",
             "targetServerId": "r2",
             "targetCardInstanceId": "c2j2"
@@ -25119,15 +25133,19 @@
             "corp_score_protection_funding_gap:r2:2",
             "corp_score_protection_funding_gap:r2:3",
             "corp_score_protection_funding_gap:r2:4"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.score_agenda",
+            "objectiveKey": "agenda:c2j2:r2"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:hq:corp.install_card.cg5.hq.cg5.2",
+          "campaignId": "kejwbiu8vfrcg56z6gwvqq137q",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "hq"
           },
@@ -25149,7 +25167,7 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "181:corp_rez:campaign:corp.defend_servers:install:hq:corp.install_card.cg5.hq.cg5.2",
+              "outcomeId": "181:corp_rez:kejwbiu8vfrcg56z6gwvqq137q",
               "eventId": 181,
               "eventType": "rez_ice",
               "stateVersionAfter": 180,
@@ -25161,7 +25179,7 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "188:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.cg5.hq.cg5.2",
+              "outcomeId": "188:run_declared:kejwbiu8vfrcg56z6gwvqq137q",
               "eventId": 188,
               "eventType": "continue_run",
               "stateVersionAfter": 187,
@@ -25173,7 +25191,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "190:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.cg5.hq.cg5.2",
+              "outcomeId": "190:run_declared:kejwbiu8vfrcg56z6gwvqq137q",
               "eventId": 190,
               "eventType": "continue_run",
               "stateVersionAfter": 189,
@@ -25184,7 +25202,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "197:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.cg5.hq.cg5.2",
+              "outcomeId": "197:run_declared:kejwbiu8vfrcg56z6gwvqq137q",
               "eventId": 197,
               "eventType": "continue_run",
               "stateVersionAfter": 196,
@@ -25204,16 +25222,20 @@
             "campaign_status:blocked",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "corp_agenda_capacity_defense_conversion:hq:corp.install_card.cg5.hq.cg5.2"
-          ]
+            "corp_agenda_capacity_defense_conversion:hq:cc.cg5.hq.cg5.2"
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "install:hq:cc.cg5.hq.cg5.2"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:hq:corp.install_card.cg7.hq.cg7.2",
+          "campaignId": "k2kbjwjx1n61shhc7wwcgfxumy",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "hq"
           },
@@ -25235,7 +25257,7 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "181:corp_rez:campaign:corp.defend_servers:install:hq:corp.install_card.cg7.hq.cg7.2",
+              "outcomeId": "181:corp_rez:k2kbjwjx1n61shhc7wwcgfxumy",
               "eventId": 181,
               "eventType": "rez_ice",
               "stateVersionAfter": 180,
@@ -25247,7 +25269,7 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "188:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.cg7.hq.cg7.2",
+              "outcomeId": "188:run_declared:k2kbjwjx1n61shhc7wwcgfxumy",
               "eventId": 188,
               "eventType": "continue_run",
               "stateVersionAfter": 187,
@@ -25259,7 +25281,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "190:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.cg7.hq.cg7.2",
+              "outcomeId": "190:run_declared:k2kbjwjx1n61shhc7wwcgfxumy",
               "eventId": 190,
               "eventType": "continue_run",
               "stateVersionAfter": 189,
@@ -25270,7 +25292,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "197:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.cg7.hq.cg7.2",
+              "outcomeId": "197:run_declared:k2kbjwjx1n61shhc7wwcgfxumy",
               "eventId": 197,
               "eventType": "continue_run",
               "stateVersionAfter": 196,
@@ -25290,16 +25312,20 @@
             "campaign_status:blocked",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "corp_agenda_capacity_defense_conversion:hq:corp.install_card.cg7.hq.cg7.2"
-          ]
+            "corp_agenda_capacity_defense_conversion:hq:cc.cg7.hq.cg7.2"
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "install:hq:cc.cg7.hq.cg7.2"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:resident-delayed-success:c3iu",
+          "campaignId": "k60qanmpatkovqzz7lsjjfhnwg",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "archives"
           },
@@ -25321,7 +25347,7 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "190:run_declared:campaign:corp.defend_servers:resident-delayed-success:c3iu",
+              "outcomeId": "190:run_declared:k60qanmpatkovqzz7lsjjfhnwg",
               "eventId": 190,
               "eventType": "continue_run",
               "stateVersionAfter": 189,
@@ -25332,7 +25358,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "197:run_declared:campaign:corp.defend_servers:resident-delayed-success:c3iu",
+              "outcomeId": "197:run_declared:k60qanmpatkovqzz7lsjjfhnwg",
               "eventId": 197,
               "eventType": "continue_run",
               "stateVersionAfter": 196,
@@ -25349,15 +25375,19 @@
             "campaign_status:blocked",
             "corp-opponent-campaign-continuity-v1",
             "corp_resident_delayed_success_defense_source_rezzed_on_attacked_server"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "resident-delayed-success:c3iu"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:rez:cfq:corp.rez_ice.cfq.cfq",
+          "campaignId": "kb3xujqrucxc6lj4uma3hxii3e",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "rd",
             "targetCardInstanceId": "cfq"
@@ -25380,7 +25410,7 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "190:run_declared:campaign:corp.defend_servers:rez:cfq:corp.rez_ice.cfq.cfq",
+              "outcomeId": "190:run_declared:kb3xujqrucxc6lj4uma3hxii3e",
               "eventId": 190,
               "eventType": "continue_run",
               "stateVersionAfter": 189,
@@ -25391,7 +25421,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "191:run_declared:campaign:corp.defend_servers:rez:cfq:corp.rez_ice.cfq.cfq",
+              "outcomeId": "191:run_declared:kb3xujqrucxc6lj4uma3hxii3e",
               "eventId": 191,
               "eventType": "start_run",
               "stateVersionAfter": 190,
@@ -25403,7 +25433,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "192:corp_rez:campaign:corp.defend_servers:rez:cfq:corp.rez_ice.cfq.cfq",
+              "outcomeId": "192:corp_rez:kb3xujqrucxc6lj4uma3hxii3e",
               "eventId": 192,
               "eventType": "rez_ice",
               "stateVersionAfter": 191,
@@ -25415,7 +25445,7 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "193:run_declared:campaign:corp.defend_servers:rez:cfq:corp.rez_ice.cfq.cfq",
+              "outcomeId": "193:run_declared:kb3xujqrucxc6lj4uma3hxii3e",
               "eventId": 193,
               "eventType": "continue_run",
               "stateVersionAfter": 192,
@@ -25427,7 +25457,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "194:run_declared:campaign:corp.defend_servers:rez:cfq:corp.rez_ice.cfq.cfq",
+              "outcomeId": "194:run_declared:kb3xujqrucxc6lj4uma3hxii3e",
               "eventId": 194,
               "eventType": "continue_run",
               "stateVersionAfter": 193,
@@ -25439,7 +25469,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "195:run_declared:campaign:corp.defend_servers:rez:cfq:corp.rez_ice.cfq.cfq",
+              "outcomeId": "195:run_declared:kb3xujqrucxc6lj4uma3hxii3e",
               "eventId": 195,
               "eventType": "continue_run",
               "stateVersionAfter": 194,
@@ -25451,7 +25481,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "196:corp_rez:campaign:corp.defend_servers:rez:cfq:corp.rez_ice.cfq.cfq",
+              "outcomeId": "196:corp_rez:kb3xujqrucxc6lj4uma3hxii3e",
               "eventId": 196,
               "eventType": "rez_ice",
               "stateVersionAfter": 195,
@@ -25463,7 +25493,7 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "197:run_declared:campaign:corp.defend_servers:rez:cfq:corp.rez_ice.cfq.cfq",
+              "outcomeId": "197:run_declared:kb3xujqrucxc6lj4uma3hxii3e",
               "eventId": 197,
               "eventType": "continue_run",
               "stateVersionAfter": 196,
@@ -25483,16 +25513,20 @@
             "campaign_status:blocked",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "engine_certified_ice_rez_access_reduction:rd:corp.rez_ice.cfq.cfq"
-          ]
+            "engine_certified_ice_rez_access_reduction:rd:cq.cfq.cfq"
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "rez:cfq:cq.cfq.cfq"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:rez:cge:corp.rez_ice.cge.cge",
+          "campaignId": "k2qtl885uykcr48r27m14f4099",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "hq",
             "targetCardInstanceId": "cge"
@@ -25515,7 +25549,7 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "181:corp_rez:campaign:corp.defend_servers:rez:cge:corp.rez_ice.cge.cge",
+              "outcomeId": "181:corp_rez:k2qtl885uykcr48r27m14f4099",
               "eventId": 181,
               "eventType": "rez_ice",
               "stateVersionAfter": 180,
@@ -25527,7 +25561,7 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "188:run_declared:campaign:corp.defend_servers:rez:cge:corp.rez_ice.cge.cge",
+              "outcomeId": "188:run_declared:k2qtl885uykcr48r27m14f4099",
               "eventId": 188,
               "eventType": "continue_run",
               "stateVersionAfter": 187,
@@ -25539,7 +25573,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "190:run_declared:campaign:corp.defend_servers:rez:cge:corp.rez_ice.cge.cge",
+              "outcomeId": "190:run_declared:k2qtl885uykcr48r27m14f4099",
               "eventId": 190,
               "eventType": "continue_run",
               "stateVersionAfter": 189,
@@ -25550,7 +25584,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "197:run_declared:campaign:corp.defend_servers:rez:cge:corp.rez_ice.cge.cge",
+              "outcomeId": "197:run_declared:k2qtl885uykcr48r27m14f4099",
               "eventId": 197,
               "eventType": "continue_run",
               "stateVersionAfter": 196,
@@ -25570,16 +25604,20 @@
             "campaign_status:blocked",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "engine_certified_ice_rez_qualitative_encounter_defense:hq:corp.rez_ice.cge.cge"
-          ]
+            "engine_certified_ice_rez_qualitative_encounter_defense:hq:cq.cge.cge"
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "rez:cge:cq.cge.cge"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:rez:cgn:corp.rez_ice.cgn.cgn",
+          "campaignId": "k1l7i6ai22gslyqw6aqsw65jdu",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "rd",
             "targetCardInstanceId": "cgn"
@@ -25602,7 +25640,7 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "190:run_declared:campaign:corp.defend_servers:rez:cgn:corp.rez_ice.cgn.cgn",
+              "outcomeId": "190:run_declared:k1l7i6ai22gslyqw6aqsw65jdu",
               "eventId": 190,
               "eventType": "continue_run",
               "stateVersionAfter": 189,
@@ -25613,7 +25651,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "191:run_declared:campaign:corp.defend_servers:rez:cgn:corp.rez_ice.cgn.cgn",
+              "outcomeId": "191:run_declared:k1l7i6ai22gslyqw6aqsw65jdu",
               "eventId": 191,
               "eventType": "start_run",
               "stateVersionAfter": 190,
@@ -25625,7 +25663,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "192:corp_rez:campaign:corp.defend_servers:rez:cgn:corp.rez_ice.cgn.cgn",
+              "outcomeId": "192:corp_rez:k1l7i6ai22gslyqw6aqsw65jdu",
               "eventId": 192,
               "eventType": "rez_ice",
               "stateVersionAfter": 191,
@@ -25637,7 +25675,7 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "193:run_declared:campaign:corp.defend_servers:rez:cgn:corp.rez_ice.cgn.cgn",
+              "outcomeId": "193:run_declared:k1l7i6ai22gslyqw6aqsw65jdu",
               "eventId": 193,
               "eventType": "continue_run",
               "stateVersionAfter": 192,
@@ -25649,7 +25687,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "194:run_declared:campaign:corp.defend_servers:rez:cgn:corp.rez_ice.cgn.cgn",
+              "outcomeId": "194:run_declared:k1l7i6ai22gslyqw6aqsw65jdu",
               "eventId": 194,
               "eventType": "continue_run",
               "stateVersionAfter": 193,
@@ -25661,7 +25699,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "195:run_declared:campaign:corp.defend_servers:rez:cgn:corp.rez_ice.cgn.cgn",
+              "outcomeId": "195:run_declared:k1l7i6ai22gslyqw6aqsw65jdu",
               "eventId": 195,
               "eventType": "continue_run",
               "stateVersionAfter": 194,
@@ -25673,7 +25711,7 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "196:corp_rez:campaign:corp.defend_servers:rez:cgn:corp.rez_ice.cgn.cgn",
+              "outcomeId": "196:corp_rez:k1l7i6ai22gslyqw6aqsw65jdu",
               "eventId": 196,
               "eventType": "rez_ice",
               "stateVersionAfter": 195,
@@ -25685,7 +25723,7 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "197:run_declared:campaign:corp.defend_servers:rez:cgn:corp.rez_ice.cgn.cgn",
+              "outcomeId": "197:run_declared:k1l7i6ai22gslyqw6aqsw65jdu",
               "eventId": 197,
               "eventType": "continue_run",
               "stateVersionAfter": 196,
@@ -25705,8 +25743,12 @@
             "campaign_status:blocked",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "engine_certified_ice_rez_qualitative_encounter_defense:rd:corp.rez_ice.cgn.cgn"
-          ]
+            "engine_certified_ice_rez_qualitative_encounter_defense:rd:cq.cgn.cgn"
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "rez:cgn:cq.cgn.cgn"
+          }
         }
       ],
       "turnPlanCommitment": {
@@ -25714,7 +25756,7 @@
         "commitmentId": "fnv1a:b980514f",
         "sourcePlanId": "fnv1a:87550cde",
         "sourceLineHash": "fnv1a:7c24dcca",
-        "sequenceRootPlanInstanceId": "plan:corp.score_agenda:agenda%3Ac2j1%3Ar2",
+        "sequenceRootPlanInstanceId": "pbfhz4zngdnt6fbhxgj8npd7si",
         "side": "corp",
         "turnKey": "corp:turn:30",
         "planningRulesFingerprint": "fnv1a:99880efa",
@@ -25731,7 +25773,7 @@
           {
             "phaseId": "fnv1a:5f5e1f26",
             "root": {
-              "planInstanceId": "plan:corp.score_agenda:agenda%3Ac2j1%3Ar2",
+              "planInstanceId": "pbfhz4zngdnt6fbhxgj8npd7si",
               "moduleId": "corp.score_agenda",
               "milestoneId": "agenda_advanced",
               "provenance": "resident"
@@ -25793,7 +25835,7 @@
           {
             "phaseId": "fnv1a:aadc1598",
             "root": {
-              "planInstanceId": "plan:corp.score_agenda:agenda%3Ac2j2%3Ar2",
+              "planInstanceId": "p67hp44crgvuw9vlj5etqh1uxd",
               "moduleId": "corp.score_agenda",
               "milestoneId": "agenda_advanced",
               "provenance": "resident"
@@ -25855,7 +25897,7 @@
           {
             "phaseId": "fnv1a:cb524535",
             "root": {
-              "planInstanceId": "plan:corp.score_agenda:agenda%3Ac2j2%3Ar1",
+              "planInstanceId": "p67hposp6f7x1fw9zv0ogip3z0",
               "moduleId": "corp.score_agenda",
               "milestoneId": "score_funding_gap_reduced",
               "provenance": "admitted_support"
@@ -25868,7 +25910,7 @@
             },
             "supportLeaves": [
               {
-                "planInstanceId": "plan:corp.economy:score-support%3Aagenda%3Ac2j2%3Ar1",
+                "planInstanceId": "p39559tmrm8c45ipbjzwgbe7h3",
                 "moduleId": "corp.economy",
                 "parentNeedId": "score-support:agenda:c2j2:r1",
                 "assignmentId": "fnv1a:95e5b604"
@@ -25920,8 +25962,8 @@
         },
         "hardPlanCommitmentIds": [],
         "campaignIds": [
-          "campaign:agenda:c2j1:r2",
-          "campaign:agenda:c2j2:r2"
+          "k1z9fno0ah5b2y4ip4bvj7ps5p",
+          "k38f5p9dxpl5ejey6es5dc6x0e"
         ],
         "quoteIds": [
           "fnv1a:b1c77633",
@@ -25964,7 +26006,7 @@
           "sideSafePlanningFingerprint": "fnv1a:e601f43e"
         },
         "currentBinding": {
-          "actionId": "corp.install_card.c2j1.r2.c2j1",
+          "actionId": "cc.c2j1.r2.c2j1",
           "stateVersion": 233,
           "semanticActionSetFingerprint": "fnv1a:06fd2d91",
           "invocationKey": "fnv1a:86ac38f1"
@@ -25972,8 +26014,8 @@
         "actionType": "install_card",
         "expectationId": "fnv1a:0403dc13"
       },
-      "rootForegroundInstanceId": "plan:corp.score_agenda:agenda%3Ac2j1%3Ar2",
-      "executorInstanceId": "plan:corp.score_agenda:agenda%3Ac2j1%3Ar2"
+      "rootForegroundInstanceId": "pbfhz4zngdnt6fbhxgj8npd7si",
+      "executorInstanceId": "pbfhz4zngdnt6fbhxgj8npd7si"
     }
   },
   "validation": {

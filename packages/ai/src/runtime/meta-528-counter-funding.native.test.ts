@@ -24,9 +24,9 @@ describe("SP-335 native counter funding", () => {
     expect(input.legalActions.some(a => a.payload?.runnerAbility === "remove_runner_trace_counter")).toBe(false);
     restoreAiRuntimeCheckpoint(input, cp.input.ownDeckSnapshot.deckSnapshotId, cp.runtime);
     const chosen = chooseAiAction(input);
-    expect(chosen.actionId).toBe("runner.gain_credit");
+    expect(chosen.actionId).toBe("rb");
     expect(chosen.fallbackUsed).toBe(false);
-    expect(chosen.decisionDebug?.planFirstDecision?.leafExecutorInstanceId).toBe("plan:runner.defense_and_recovery:runner");
+    expect(chosen.decisionDebug?.planFirstDecision?.leafExecutorInstanceId).toBe("p1gzjb6yfcv4zbzow512kexs33");
     expect(chosen.decisionDebug?.planFirstDecision?.selectedPlan?.phase).toBe("fund_persistent_hazard_counter");
     const result = applyAction(state, { matchId: state.matchId, side: "runner", actionId: chosen.actionId!, clientKnownStateVersion: state.stateVersion });
     expect(result.ok).toBe(true);
@@ -46,14 +46,14 @@ describe("SP-335 native counter funding", () => {
       if (!applied.ok) throw Error(applied.error.message);
       state = applied.state;
     };
-    take("runner", "runner.gain_credit"); take("runner", "runner.end_turn");
+    take("runner", "rb"); take("runner", "r9");
     for (const step of corpSegment) take(step.side, step.actionId, step.selectedChoices);
     expect([state.runner.credits, state.runner.clicks, state.runner.tags, state.runner.grip.length]).toEqual([1, 4, 1, 5]);
-    for (const expected of ["runner.gain_credit", "runner.remove_tag", "runner.gain_credit", "counter"] ) {
+    for (const expected of ["rb", "rm", "rb", "counter"] ) {
       const input = buildAiDecisionInput(state, "runner", { difficulty: "hard", ownDeckSnapshot: cp.input.ownDeckSnapshot });
       const result = chooseAiAction(input);
       expect(result.fallbackUsed).toBe(false);
-      expect(result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId).toBe("plan:runner.defense_and_recovery:runner");
+      expect(result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId).toBe("p1gzjb6yfcv4zbzow512kexs33");
       const action = input.legalActions.find(a => a.actionId === result.actionId)!;
       if (expected === "counter") expect(action.payload?.runnerAbility).toBe("remove_runner_trace_counter");
       else expect(result.actionId).toBe(expected);

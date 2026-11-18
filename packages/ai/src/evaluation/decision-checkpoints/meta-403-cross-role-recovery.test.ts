@@ -35,9 +35,9 @@ it("SP-288 installs the visible Code Gate answer that funds the whole mixed ICE 
     fallbackUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+        rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
         leafExecutorInstanceId:
-          "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate%3Aefficiency%3Ar1%3Arun%3Arunner.start_run.r1",
+          "p3irvs1p4ikzay8409i4vxmj0z",
         route: { actionId: install.actionId },
       },
     },
@@ -61,15 +61,15 @@ it("searches cheaper Wall coverage without inventing the absent Code Gate instal
   );
   const result = chooseAiAction(input);
   expect(result).toMatchObject({
-    actionId: "runner.draw_card",
+    actionId: "r8",
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+        rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
         leafExecutorInstanceId:
-          "plan:runner.rig_and_coverage:coverage%3Abreaker_wall%3Aefficiency%3Ar1",
+          "pco521cmfo9gztpetfgjoqpmvp",
         route: {
           capabilityId: "draw_for_answer_breaker_wall",
-          actionId: "runner.draw_card",
+          actionId: "r8",
         },
       },
     },

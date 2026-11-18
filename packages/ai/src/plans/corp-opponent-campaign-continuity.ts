@@ -2,6 +2,14 @@ import { isRemoteServerId } from "@netgrid/shared";
 import type { MatchEventId } from "@netgrid/shared";
 import type { CorpPlanDomain } from "./corp-tactical-plan-contracts";
 import type { AiDecisionInput, PublicGameEvent } from "@netgrid/shared";
+import { PlanResolutionFailure } from "./plan-resolution-failure";
+import {
+  agendaCampaignIdentity,
+  defenseCampaignIdentity,
+  compactCampaignId,
+  compareCampaignIdentities,
+  type CampaignIdentity,
+} from "./compact-plan-identity";
 
 import {
   RESIDENT_CORP_CAMPAIGN_SCHEMA_VERSION,
@@ -15,6 +23,7 @@ export const CORP_OPPONENT_CAMPAIGN_CONTINUITY_VERSION =
 
 export type CorpCampaignDescriptor = {
   campaignId: string;
+  identity: CampaignIdentity;
   kind: ResidentCorpCampaign["kind"];
   moduleId: ResidentCorpCampaign["origin"]["moduleId"];
   rootPlanInstanceId: string;
@@ -52,7 +61,8 @@ export function corpCampaignDescriptors(params: {
     );
     if (!root) continue;
     descriptors.push({
-      campaignId: `campaign:${project.projectId}`,
+      campaignId: compactCampaignId(agendaCampaignIdentity(project.projectId)),
+      identity: agendaCampaignIdentity(project.projectId),
       kind: openingRush ? "opening_rush" : "agenda",
       moduleId: "corp.score_agenda",
       rootPlanInstanceId: root.instanceId,
@@ -89,7 +99,8 @@ export function corpCampaignDescriptors(params: {
     const root = rootInstance(params.portfolio, "corp.defend_servers");
     if (!root) continue;
     descriptors.push({
-      campaignId: `campaign:corp.defend_servers:${need.defenseId}`,
+      campaignId: compactCampaignId(defenseCampaignIdentity(need.defenseId)),
+      identity: defenseCampaignIdentity(need.defenseId),
       kind: "defense",
       moduleId: "corp.defend_servers",
       rootPlanInstanceId: root.instanceId,
@@ -116,6 +127,25 @@ export function reconcileCorpCampaignContinuity(params: {
   descriptors: readonly CorpCampaignDescriptor[];
 }): ResidentCorpCampaign[] {
   if (params.input.side !== "corp") return [];
+  const identityById = new Map<string, string>();
+  for (const campaign of [...params.previous, ...params.descriptors]) {
+    const identity = JSON.stringify(campaign.identity);
+    const previousIdentity = identityById.get(campaign.campaignId);
+    if (
+      !campaign.identity ||
+      campaign.campaignId !== compactCampaignId(campaign.identity) ||
+      (previousIdentity !== undefined && previousIdentity !== identity)
+    ) {
+      throw new PlanResolutionFailure("invalid_plan_identity", {
+        side: "corp", stateVersion: params.input.playerView.stateVersion,
+        timingPoint: params.input.playerView.timingPoint,
+        legalActionTypes: params.input.legalActions.map((action) => action.type),
+        owner: "plan_registry",
+        removalCondition: "Bind every campaign reference to one canonical owner and objective before reconciliation.",
+      });
+    }
+    identityById.set(campaign.campaignId, identity);
+  }
   const descriptorById = new Map(
     params.descriptors.map((descriptor) => [descriptor.campaignId, descriptor]),
   );
@@ -127,7 +157,10 @@ export function reconcileCorpCampaignContinuity(params: {
   );
   const campaignIds = [
     ...new Set([...descriptorById.keys(), ...previousById.keys()]),
-  ].sort();
+  ].sort((left, right) => compareCampaignIdentities(
+    (descriptorById.get(left) ?? previousById.get(left))!.identity,
+    (descriptorById.get(right) ?? previousById.get(right))!.identity,
+  ));
   return campaignIds
     .map((campaignId) => {
       const descriptor = descriptorById.get(campaignId);
@@ -140,7 +173,7 @@ export function reconcileCorpCampaignContinuity(params: {
       );
     })
     .filter((campaign): campaign is ResidentCorpCampaign => campaign !== null)
-    .sort((left, right) => left.campaignId.localeCompare(right.campaignId));
+    .sort((left, right) => compareCampaignIdentities(left.identity, right.identity));
 }
 
 /**
@@ -206,6 +239,7 @@ function reconcileCampaign(
     : {
         schemaVersion: RESIDENT_CORP_CAMPAIGN_SCHEMA_VERSION,
         campaignId: descriptor!.campaignId,
+        identity: structuredClone(descriptor!.identity),
         kind: descriptor!.kind,
         status:
           input.playerView.activeSide === "runner"
@@ -785,7 +819,7 @@ function uniqueDescriptors(
   const byId = new Map<string, CorpCampaignDescriptor>();
   for (const descriptor of [...descriptors].sort(
     (left, right) =>
-      left.campaignId.localeCompare(right.campaignId) ||
+      compareCampaignIdentities(left.identity, right.identity) ||
       Number(right.currentlyAdmitted) - Number(left.currentlyAdmitted) ||
       left.milestoneId.localeCompare(right.milestoneId) ||
       left.evidenceCode.localeCompare(right.evidenceCode),

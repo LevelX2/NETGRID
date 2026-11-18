@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { cardInstanceIdForCopy } from "../../../../engine/src/game/state/card-instance-id";
 import { describe, expect, it } from "vitest";
 
@@ -40,7 +41,7 @@ describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
       acceptableActions: [
         {
           actionId:
-            "corp.rez_card.c37y.r1.c37y",
+            "cp.c37y.r1.c37y",
         },
       ],
       forbiddenActions: [{ type: "draw_card" }],
@@ -59,7 +60,7 @@ describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
       expect(path).toMatchObject({ creditsRequired: 12, clicksRequired: 2 });
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
-        "plan_priority_delegated_from:plan:corp.defend_servers:server-defense-portfolio",
+        "plan_priority_delegated_from:penw02zfrkklof54c2nuye5att",
         "plan_assessment_evidence:corp_terminal_central_rez_reserve_required:rd:c2vq:gap_2",
       ]),
     );
@@ -144,7 +145,7 @@ describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
       [decision, selected, first.state.stateVersion],
     ] as const) {
       const agenda = cardInstanceIdForCopy("corp", 400, 1);
-      const parent = `plan:corp.score_agenda:agenda%3A${agenda}%3A${action.payload!.serverId}`;
+      const parent = planInstanceIdForProposal({ moduleId: "corp.score_agenda", dedupeKey: `agenda:${agenda}:${action.payload!.serverId}` });
       expect(current.decisionDebug?.planFirstDecision).toMatchObject({
         rootPlanInstanceId: parent,
         selectedPlan: {
@@ -202,7 +203,7 @@ describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
       const result = runAiDecisionCheckpoint(checkpoint);
       expect(result.ok, result.message).toBe(true);
       const parent =
-        "plan:corp.score_agenda:agenda%3Ac2h1%3Ar1";
+        "pf1xgcwzno8b3egllyfizfvkj9";
       expect(result.decision?.decisionDebug?.planFirstDecision).toMatchObject({
         rootPlanInstanceId: parent,
         selectedPlan: { parentInstanceId: parent },

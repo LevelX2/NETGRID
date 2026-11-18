@@ -252,6 +252,12 @@ it.each(["origin", "state", "target", "source"] as const)(
       if (variant === "source")
         signal.recoveryChoiceBinding.sourceCardId = "wrong";
     }
+    if (variant === "state") {
+      expect(() => rememberResidentPlanPortfolio(initial, portfolio)).toThrow(
+        /executor_invariant_broken/,
+      );
+      return;
+    }
     rememberResidentPlanPortfolio(initial, portfolio);
     state = apply(
       state,

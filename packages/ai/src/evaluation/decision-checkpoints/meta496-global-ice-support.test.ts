@@ -96,8 +96,10 @@ describe("global ICE support installation admission (SP-207)", () => {
     const selected = chooseAiAction(input);
     expect(selected.actionId).toBe(actionId);
     expect(
-      selected.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-    ).toContain("plan:corp.defend_servers:");
+      selected.decisionDebug?.planFirstDecision?.portfolio.find(
+        (instance) => instance.instanceId === selected.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+      )?.moduleId,
+    ).toBe("corp.defend_servers");
   });
   it.each([
     "targets",

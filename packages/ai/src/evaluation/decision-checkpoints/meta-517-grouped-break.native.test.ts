@@ -130,7 +130,7 @@ it("matches Redecorator's one-credit group against real positive Mastermind core
   });
   const groups = getLegalActions(state, "runner").filter(
     (a) =>
-      a.type === "break_subroutine" && a.payload?.subroutineIndexes === "0,1",
+      a.type === "break_subroutine" && a.subroutineIndexes?.join(",") === "0,1",
   );
   expect(groups).toHaveLength(1);
   expect(groups[0]!.costs.reduce((n, c) => n + (c.credits ?? 0), 0)).toBe(1);
@@ -295,7 +295,7 @@ it("matches the real native Engine group, reaches access without damage and repl
   };
   const groups = getLegalActions(state, "runner").filter(
     (a) =>
-      a.type === "break_subroutine" && a.payload?.subroutineIndexes === "0,1",
+      a.type === "break_subroutine" && a.subroutineIndexes?.join(",") === "0,1",
   );
   expect(groups).toHaveLength(1);
   expect(

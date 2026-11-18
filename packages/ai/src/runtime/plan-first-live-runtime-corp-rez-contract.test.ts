@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import { describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
@@ -34,7 +35,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
       expect.arrayContaining([
         "plan_priority_class:P3",
         "plan_assessment_evidence:corp_engine_certified_immediate_root_rez_credit_conversion",
-        "plan_scheduler:route:corp_window.rez:plan:corp.economy:economy-campaign%3Aeconomy-root",
+        `plan_scheduler:route:corp_window.rez:${planInstanceIdForProposal({ moduleId: "corp.economy", dedupeKey: "economy-campaign:economy-root" })}`,
       ]),
     );
   });
@@ -538,7 +539,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
       expect(decision.evidence).toEqual(
         expect.arrayContaining([
           "plan_module:corp.defend_servers",
-          "plan_scheduler:route:corp_window.decline_rez:plan:corp.defend_servers:server-defense-portfolio",
+          "plan_scheduler:route:corp_window.decline_rez:penw02zfrkklof54c2nuye5att",
         ]),
       );
     },

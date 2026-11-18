@@ -14,7 +14,7 @@ describe("match 802F search-role and remote-probe decision checkpoints", () => {
     // reaction reserve unfinished. That safe current action is independent
     // of the search classification being tested.
     cp.expectation = {
-      acceptableActions: [{ actionId: "runner.gain_credit" }],
+      acceptableActions: [{ actionId: "rb" }],
       planExecution: {
         acceptablePlanKinds: ["runner.defense_and_recovery"],
         acceptableCapabilities: ["build_damage_reaction_reserve"],

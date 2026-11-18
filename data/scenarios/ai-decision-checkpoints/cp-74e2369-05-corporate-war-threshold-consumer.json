@@ -10594,7 +10594,7 @@
         "id": "c2iu"
       },
       "selectedStepKind": "advance_score_card",
-      "selectedActionId": "corp.advance_card.c2iu.c2iu",
+      "selectedActionId": "c2.c2iu.c2iu",
       "selectedActionType": "advance_card",
       "scoreConversionDesiredAdvancementCounters": 3,
       "blockedBy": [],
@@ -10634,7 +10634,7 @@
         "progress": 0.6,
         "selectedStepKind": "advance_score_card",
         "actionCandidateIds": [
-          "corp.advance_card.c2iu.c2iu"
+          "c2.c2iu.c2iu"
         ],
         "cadence": {
           "turnKey": "corp:turn:18",
@@ -10653,7 +10653,7 @@
           "plan_portfolio_role:foreground",
           "plan_portfolio_lifecycle:active",
           "plan_portfolio_previous_entry:corp.create_score_window:card:c2iu",
-          "plan_portfolio_action_progress:corp.advance_card.c2iu.c2iu"
+          "plan_portfolio_action_progress:c2.c2iu.c2iu"
         ]
       },
       "backgrounds": [
@@ -10675,7 +10675,7 @@
           "progress": 0.5,
           "selectedStepKind": "find_remote_protection",
           "actionCandidateIds": [
-            "corp.draw_card"
+            "c8"
           ],
           "cadence": {
             "turnKey": "corp:turn:18",
@@ -10714,7 +10714,7 @@
           "progress": 0.5,
           "selectedStepKind": "protect_remote",
           "actionCandidateIds": [
-            "corp.install_card.c312.rd.c312.0"
+            "cc.c312.rd.c312.0"
           ],
           "cadence": {
             "turnKey": "corp:turn:18",
@@ -10823,7 +10823,7 @@
         "plan_portfolio_foreground:corp.create_score_window",
         "plan_portfolio_backgrounds:corp.establish_scoring_remote|corp.establish_scoring_remote",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:corp.advance_card.c2iu.c2iu"
+        "plan_portfolio_selected_action:c2.c2iu.c2iu"
       ]
     },
     "strategicIntent": {

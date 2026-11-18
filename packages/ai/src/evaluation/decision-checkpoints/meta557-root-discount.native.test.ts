@@ -127,7 +127,11 @@ describe("pairing 557 current root-rez discount funding", () => {
       expect(result.fallbackUsed).toBe(false);
       expect(result.timeoutUsed).toBe(false);
       const pf = result.decisionDebug!.planFirstDecision!;
-      expect(pf.rootPlanInstanceId).toMatch(/^plan:corp.defend_servers:/);
+      expect(
+        pf?.portfolio.find(
+          (instance) => instance.instanceId === pf?.rootPlanInstanceId,
+        )?.moduleId,
+      ).toBe("corp.defend_servers");
       expect(pf.route).toMatchObject({
         actionId: result.actionId,
         stateVersion: f.input.playerView.stateVersion,
@@ -210,6 +214,6 @@ describe("pairing 557 current root-rez discount funding", () => {
     if (kind !== "missing")
       action.payload!.rootRezDiscountedIceQuoteJson = JSON.stringify(quote);
     f.input.planningStateIdentity = buildPlanningStateIdentity(f.input);
-    expect(chooseAiAction(f.input).actionId).toBe("corp.decline_rez");
+    expect(chooseAiAction(f.input).actionId).toBe("c6");
   });
 });

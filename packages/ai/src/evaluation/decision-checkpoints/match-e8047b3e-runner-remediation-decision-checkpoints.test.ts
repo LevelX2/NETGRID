@@ -113,14 +113,19 @@ describe("match e8047b3e Runner remediation checkpoints", () => {
         action.type === "pump_breaker" && action.label.startsWith("Snowball:"),
     );
     expect(snowballPump).toBeDefined();
+    const currentPlan = decision.decisionDebug?.planFirstDecision;
+    const boundContest = currentPlan?.portfolio.find(
+      (instance) => instance.instanceId === currentPlan.rootPlanInstanceId,
+    );
+    expect(boundContest?.moduleId).toBe("runner.contest_remote");
 
     expect(decision).toMatchObject({
-      actionId: "runner.continue_run.0",
+      actionId: "r5.0",
       fallbackUsed: false,
       decisionDebug: {
         planKind: "runner.convert_run_window",
         planFirstDecision: {
-          rootPlanInstanceId: expect.stringContaining("runner.contest_remote"),
+          rootPlanInstanceId: boundContest?.instanceId,
           route: {
             actionType: "continue_run",
           },

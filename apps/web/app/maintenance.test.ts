@@ -201,7 +201,7 @@ describe("Backend 0.5 maintenance UI helpers", () => {
       actionAlternatives: [
         {
           rank: 1,
-          actionId: "runner.gain_credit",
+          actionId: "rb",
           actionType: "gain_credit",
           label: "1 Credit nehmen",
           source: "basic_action",
@@ -244,7 +244,7 @@ describe("Backend 0.5 maintenance UI helpers", () => {
 
     expect(rows).toHaveLength(2);
     expect(rows[0]).toMatchObject({
-      actionId: "runner.gain_credit",
+      actionId: "rb",
       actionType: "gain_credit",
       label: "Credit nehmen",
       selected: true,
@@ -292,7 +292,7 @@ describe("Backend 0.5 maintenance UI helpers", () => {
       side: "runner" as const,
       turn: 3,
       decisionIndex: 3,
-      selectedActionId: "runner.start_run.hq",
+      selectedActionId: "rs.hq",
       selectedActionType: "start_run",
       planKind: "build_rig",
       score: 877.75,
@@ -300,7 +300,7 @@ describe("Backend 0.5 maintenance UI helpers", () => {
       schemaVersion: "ai-decision-trace-v1",
       meta: {},
       detail: {
-        selectedActionId: "runner.start_run.hq",
+        selectedActionId: "rs.hq",
         selectedActionType: "start_run",
         debugSelectedActionType: "install_card",
         debugSelectionMatchesApplied: false,
@@ -317,7 +317,7 @@ describe("Backend 0.5 maintenance UI helpers", () => {
           },
           {
             rank: 2,
-            actionId: "runner.start_run.hq",
+            actionId: "rs.hq",
             actionType: "start_run",
             label: "Run auf HQ",
             source: "basic_action",

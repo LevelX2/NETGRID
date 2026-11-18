@@ -52,7 +52,7 @@ it("continues the admitted terminal unknown-root contest across a nonlethal dama
     d = chooseAiAction(cp.input);
   expect(JSON.stringify(cp.input)).toBe(unchanged);
   expect(d).toMatchObject({
-    actionId: "runner.continue_run",
+    actionId: "r5",
     fallbackUsed: false,
     timeoutUsed: false,
   });

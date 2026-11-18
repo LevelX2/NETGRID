@@ -169,8 +169,7 @@ function validatedEconomyNeeds(
     if (signal.kind !== "parent_funding") return false;
     const scoreFundingNeed = signal.needId.startsWith("score-support:");
     const scoreParentBound =
-      signal.parentPlanInstanceId?.startsWith("plan:corp.score_agenda:") ===
-      true;
+      signal.parentPlanModuleId === "corp.score_agenda";
     const scorePriorityDelegated = signal.delegatedPriorityClass !== undefined;
     if (!scoreFundingNeed && !scoreParentBound && !scorePriorityDelegated)
       return false;
@@ -238,8 +237,7 @@ function validatedEconomyNeeds(
     if (signal.kind !== "parent_funding") return false;
     const ambushFundingShape =
       signal.needId.startsWith("ambush-funding:") ||
-      signal.parentPlanInstanceId?.startsWith("plan:corp.ambush_and_bluff:") ===
-        true;
+      signal.parentPlanModuleId === "corp.ambush_and_bluff";
     if (!ambushFundingShape) return false;
     const defenseFunding = signal.needId.startsWith("ambush-defense-funding:");
     const sourceInstanceId = signal.needId.slice(
@@ -408,8 +406,7 @@ function validatedEconomyNeeds(
       signal.needId.startsWith("defense-reserve:") ||
       signal.immediateDefenseConversion === true ||
       signal.incrementalDefenseReserve !== undefined ||
-      signal.parentPlanInstanceId?.startsWith("plan:corp.defend_servers:") ===
-        true;
+      signal.parentPlanModuleId === "corp.defend_servers";
     if (!isDefenseFundingShape) return false;
     const parentNeed = currentDomain.defenseNeeds.find(
       (need): need is CorpGenericDefenseSignal =>

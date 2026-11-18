@@ -25,7 +25,7 @@ function source() {
     ...buildAiDecisionInputDto(structuredClone(cp.input)),
   };
   const action = input.legalActions.find(
-    (a) => a.actionId === "runner.remove_tag",
+    (a) => a.actionId === "rm",
   )!;
   const candidate = buildActionSemanticCandidates({
     legalActions: [action],
@@ -54,17 +54,17 @@ it("materializes the original defense step rather than failing current route adm
   const before = JSON.stringify(input.playerView);
   const decision = chooseAiAction(input);
   expect(decision).toMatchObject({
-    actionId: "runner.remove_tag",
+    actionId: "rm",
     fallbackUsed: false,
     timeoutUsed: false,
   });
   const plan = decision.decisionDebug!.planFirstDecision!;
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:runner.defense_and_recovery:runner",
+    "p1gzjb6yfcv4zbzow512kexs33",
   );
   expect(plan.leafExecutorInstanceId).toBe(plan.rootPlanInstanceId);
   expect(plan.route).toMatchObject({
-    actionId: "runner.remove_tag",
+    actionId: "rm",
     stateVersion: 304,
   });
   expect(JSON.stringify(input.playerView)).toBe(before);

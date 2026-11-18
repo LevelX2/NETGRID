@@ -7938,7 +7938,7 @@
         "id": "runner_survival_defense"
       },
       "selectedStepKind": "find_survival_answer",
-      "selectedActionId": "runner.draw_card",
+      "selectedActionId": "r8",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -7993,7 +7993,7 @@
           "plan_portfolio_role:reactive_interrupt",
           "plan_portfolio_lifecycle:active",
           "plan_portfolio_previous_entry:runner.survival_defense:capability:runner_survival_defense",
-          "plan_portfolio_action_progress:runner.draw_card",
+          "plan_portfolio_action_progress:r8",
           "plan_portfolio_action_progress_source:selected_mapped_step"
         ]
       },
@@ -8043,7 +8043,7 @@
         "plan_portfolio_foreground:runner.develop_hand_card",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.draw_card"
+        "plan_portfolio_selected_action:r8"
       ]
     },
     "strategicIntent": {
@@ -9198,13 +9198,13 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.draw_card",
+        "actionId": "r8",
         "type": "draw_card"
       }
     ],
     "planExecution": {
       "acceptablePlanIds": [
-        "plan:runner.defense_and_recovery:runner"
+        "p1gzjb6yfcv4zbzow512kexs33"
       ],
       "acceptablePlanKinds": [
         "runner.defense_and_recovery"

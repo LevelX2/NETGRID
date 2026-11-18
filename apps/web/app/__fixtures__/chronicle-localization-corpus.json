@@ -4361,7 +4361,10 @@
         "aiReasonCode": "runner.encounter.break_etr",
         "breakSubroutineBaseCost": 0,
         "breakSubroutineCount": 2,
-        "subroutineIndexes": "0,1",
+        "subroutineIndexes": [
+          0,
+          1
+        ],
         "breakAllMatchingSubroutines": true,
         "breakerEndsRunAfterBreak": true,
         "targetIceTitle": "Banpei"

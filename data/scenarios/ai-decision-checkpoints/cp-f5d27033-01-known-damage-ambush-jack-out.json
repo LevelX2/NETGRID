@@ -3504,7 +3504,7 @@
         "id": "r1"
       },
       "selectedStepKind": "run_target",
-      "selectedActionId": "runner.start_run.r1",
+      "selectedActionId": "rs.r1",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -3553,7 +3553,7 @@
         },
         "updatedAtStateVersion": 23,
         "evidence": [
-          "plan_portfolio_source_plan:runner.contest_remote:r1",
+          "plan_portfolio_source_pdl5beuqtdrahr4fqagyng1zk5",
           "plan_portfolio_execution_class:bounded_sequence",
           "plan_portfolio_role:foreground",
           "plan_portfolio_lifecycle:active",
@@ -3568,7 +3568,7 @@
         "plan_portfolio_foreground:runner.contest_remote",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.start_run.r1"
+        "plan_portfolio_selected_action:rs.r1"
       ]
     },
     "strategicIntent": {
@@ -4603,7 +4603,7 @@
       ]
     },
     "runnerRunPlan": {
-      "id": "runner_run_plan:match_f5d27033a083d6b8:23:runner:runner.start_run.r1:r1",
+      "id": "runner_run_plan:match_f5d27033a083d6b8:23:runner:rs.r1:r1",
       "side": "runner",
       "lifecycle": "created",
       "origin": "basic_start_run",
@@ -4621,7 +4621,7 @@
         "trashPolicy": "trash_if_value_positive",
         "reserveForStealOrTrash": 0
       },
-      "runStartActionId": "runner.start_run.r1",
+      "runStartActionId": "rs.r1",
       "sourceTacticalGoalIds": [
         "runner.find_or_install_primary_breaker",
         "runner.contest_remote_if_score_threat",
@@ -4700,7 +4700,7 @@
       "visibilityEvidence": [
         {
           "kind": "legal_action",
-          "ref": "runner.start_run.r1"
+          "ref": "rs.r1"
         },
         {
           "kind": "action_semantic_candidate",

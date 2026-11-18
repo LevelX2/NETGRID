@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "./plans/plan-instance";
 import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import { afterEach, describe, expect, it } from "vitest";
 import { chooseRunnerAction } from "./index";
@@ -593,7 +594,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         expect.stringContaining(
           "runner_credit_bank_hold_spending_budget_funded",
         ),
-        expect.stringContaining("candidate_plan:plan:runner.credit_bank:"),
+        `candidate_plan:${planInstanceIdForProposal({ moduleId: "runner.credit_bank", dedupeKey: "366" })}:blocked`,
       ]),
     );
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
@@ -1595,7 +1596,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       expect.arrayContaining([
         expect.stringContaining("not_selected_by_plan:"),
         expect.stringContaining(
-          "candidate_plan:plan:runner.pressure_central:central%3Aarchives:ready",
+          "candidate_plan:p22f66p721g9dgs7gsawwpf6hs:ready",
         ),
       ]),
     );
@@ -1673,8 +1674,8 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     expect(
       decision.decisionDebug?.planFirstDecision?.executionOrigin,
     ).toMatchObject({
-      rootPlanInstanceId: "plan:runner.credit_bank:rigged-1",
-      leafPlanInstanceId: "plan:runner.credit_bank:rigged-1",
+      rootPlanInstanceId: "pc27wap6crr7lcn3onawqnjteh",
+      leafPlanInstanceId: "pc27wap6crr7lcn3onawqnjteh",
     });
     expect(actionAlternative(decision, "install-rigged")?.selected).toBe(true);
     expect(JSON.stringify(decision.decisionDebug)).not.toContain(
@@ -1975,7 +1976,12 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       "runner.develop_board_and_hand",
     );
     expect(planFirst?.rootPlanInstanceId).toBe(firstRoot);
-    expect(firstLeaf).toMatch(/^plan:runner\.economy:development-support%3A/);
+    expect(first.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === firstLeaf,
+    )).toMatchObject({
+      moduleId: "runner.economy",
+      dedupeKey: expect.stringMatching(/^development-support:/),
+    });
     expect(planFirst?.leafExecutorInstanceId).toBe(firstRoot);
     expect(planFirst?.route).toMatchObject({
       actionId: "install-interface",
@@ -2172,7 +2178,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     expect(
       planning?.heads.find((head) => head.actionId === "install-interface"),
     ).toMatchObject({
-      executorPlanInstanceId: "plan:runner.pressure_central:central%3Ard",
+      executorPlanInstanceId: "pa90fufw9vc5bkshp96ztlryxl",
       selectedInLine: true,
       rootEligible: false,
       dependencyCandidateIds: [scoreHead?.candidateId],

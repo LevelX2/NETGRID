@@ -35,7 +35,7 @@ function expectKnownDefenseSearch(checkpoint: AiDecisionCheckpointV1): void {
   const noEffectInstallations = checkpoint.expectation.acceptableActions;
   expect(noEffectInstallations).toBeDefined();
   checkpoint.expectation = {
-    acceptableActions: [{ actionId: "corp.draw_card" }],
+    acceptableActions: [{ actionId: "c8" }],
     forbiddenActions: noEffectInstallations!,
     planExecution: {
       acceptablePlanKinds: ["corp.defend_servers"],

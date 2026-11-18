@@ -13,7 +13,7 @@ describe("Witness opportunity projection", () => {
     const witness = buildLegalActionWitness({
       stateVersion: 17,
       legalAction: {
-        actionId: "runner.gain_credit",
+        actionId: "rb",
         side: "runner",
         type: "gain_credit",
         label: "Gain credit",

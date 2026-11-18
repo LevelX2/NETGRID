@@ -395,9 +395,9 @@ describe("run-continuation-execution", () => {
     state.runner.credits = 2;
     const firstAction = action();
     firstAction.costs = [{ credits: 1 }];
+    firstAction.encounterSubroutineIds = ["first_pay_or_end"];
+    firstAction.payOrEndRunSubroutineIndexes = [0];
     firstAction.payload = {
-      encounterSubroutineIds: "first_pay_or_end",
-      payOrEndRunSubroutineIndexes: "0",
       payOrEndRunSubroutinePayment: 1,
     };
     const { host, calls } = hostFor(state, subroutines);
@@ -410,9 +410,7 @@ describe("run-continuation-execution", () => {
     expect(calls).toEqual([]);
 
     const secondAction = action();
-    secondAction.payload = {
-      encounterSubroutineIds: "second_pay_or_end",
-    };
+    secondAction.encounterSubroutineIds = ["second_pay_or_end"];
     continueRun(host, secondAction);
 
     expect(state.runner.credits).toBe(1);
@@ -437,7 +435,7 @@ describe("run-continuation-execution", () => {
     ];
     const state = makeState(subroutines);
     const firstAction = action();
-    firstAction.payload = { encounterSubroutineIds: "gain_credit" };
+    firstAction.encounterSubroutineIds = ["gain_credit"];
     const { host, calls } = hostFor(state, subroutines);
 
     continueRun(host, firstAction);
@@ -465,7 +463,7 @@ describe("run-continuation-execution", () => {
     state.runner.rig.programs = [];
     state.runner.credits = 0;
     const declineAction = action();
-    declineAction.payload = { encounterSubroutineIds: "first_pay_or_end" };
+    declineAction.encounterSubroutineIds = ["first_pay_or_end"];
     const { host, calls } = hostFor(state, subroutines);
 
     continueRun(host, declineAction);

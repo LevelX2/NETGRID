@@ -135,7 +135,7 @@ it("continues under the existing owner and wins through seven actual Engine step
     });
   }
   expect(proofs[0].steps[0]).toMatchObject({
-    action: "runner.continue_run",
+    action: "r5",
     owner: "runner.convert_run_window",
   });
   expect(proofs[0].steps).toHaveLength(7);

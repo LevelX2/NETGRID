@@ -10331,7 +10331,7 @@
       "stateVersion": 195,
       "instances": [
         {
-          "instanceId": "plan:corp.defend_servers:server-defense-portfolio",
+          "instanceId": "penw02zfrkklof54c2nuye5att",
           "dedupeKey": "server-defense-portfolio",
           "moduleId": "corp.defend_servers",
           "moduleVersion": "1",
@@ -10369,7 +10369,7 @@
                   578
                 ],
                 "actionIds": [
-                  "corp.install_card.c3kl.r1.c3kl"
+                  "cc.c3kl.r1.c3kl"
                 ],
                 "urgent": false,
                 "value": 2000,
@@ -10462,7 +10462,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.economy:economy-campaign%3Ac37y",
+          "instanceId": "p2nx5fjaoiz1zqvqtu5806xqr4",
           "dedupeKey": "economy-campaign:c37y",
           "moduleId": "corp.economy",
           "moduleVersion": "1",
@@ -10497,7 +10497,7 @@
               "sourceDefinitionId": 521,
               "phase": "install",
               "actionIds": [
-                "corp.install_card.c37y.new_remote.c37y"
+                "cc.c37y.new_remote.c37y"
               ],
               "cadence": {
                 "kind": "finite_pool",
@@ -10551,7 +10551,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.economy:economy-visible-liquidity-development%3Acorp%3A24",
+          "instanceId": "pbnqdxrd7hx31pouh13r7fyur7",
           "dedupeKey": "economy-visible-liquidity-development:corp:24",
           "moduleId": "corp.economy",
           "moduleVersion": "1",
@@ -10588,7 +10588,7 @@
               "gap": 7,
               "projectedCreditGain": 1,
               "actionIds": [
-                "corp.gain_credit"
+                "cb"
               ],
               "priorityClass": "P6",
               "cadence": {
@@ -10640,7 +10640,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Acet%3Ar1",
+          "instanceId": "p2nbew7o06g3beuckxcs2aivp",
           "dedupeKey": "agenda:cet:r1",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -10674,7 +10674,7 @@
               "agendaPoints": 2,
               "agendaInstanceId": "cet",
               "actionIds": [
-                "corp.advance_card.cet.cet"
+                "c2.cet.cet"
               ],
               "serverId": "r1",
               "phase": "advance_agenda",
@@ -10730,31 +10730,31 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:corp.defend_servers:server-defense-portfolio",
+          "instanceId": "penw02zfrkklof54c2nuye5att",
           "stateVersion": 195,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:corp.economy:economy-campaign%3Ac37y",
+          "instanceId": "p2nx5fjaoiz1zqvqtu5806xqr4",
           "stateVersion": 195,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:corp.economy:economy-visible-liquidity-development%3Acorp%3A24",
+          "instanceId": "pbnqdxrd7hx31pouh13r7fyur7",
           "stateVersion": 195,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Acet%3Ar1",
+          "instanceId": "p2nbew7o06g3beuckxcs2aivp",
           "stateVersion": 195,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:corp.defend_servers:server-defense-portfolio",
+          "instanceId": "penw02zfrkklof54c2nuye5att",
           "stateVersion": 195,
           "reason": "preempted_by_validated_value",
           "fromExecutionState": "idle",
@@ -10762,7 +10762,7 @@
           "detailCode": "validated_scheduler_selection"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Acet%3Ar1",
+          "instanceId": "p2nbew7o06g3beuckxcs2aivp",
           "stateVersion": 195,
           "reason": "preempted_by_validated_value",
           "fromExecutionState": "executor",
@@ -10773,11 +10773,11 @@
       "campaigns": [
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install-defense-support:c3kl:r1",
+          "campaignId": "k5ep5d7pgh1ll8sfxdflrtxs8v",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "r1"
           },
@@ -10803,12 +10803,16 @@
             "campaign_status:blocked",
             "corp-opponent-campaign-continuity-v1",
             "corp_defense_support_install:r1:corp_upgrade_install_placement_fit:reserve_after_action:0"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "install-defense-support:c3kl:r1"
+          }
         }
       ],
       "turnPlanCommitment": {
         "schemaVersion": "turn-plan-commitment-v2",
-        "sequenceRootPlanInstanceId": "plan:corp.score_agenda:agenda%3Acet%3Ar1",
+        "sequenceRootPlanInstanceId": "p2nbew7o06g3beuckxcs2aivp",
         "commitmentId": "fnv1a:5680476d",
         "sourcePlanId": "fnv1a:31549509",
         "sourceLineHash": "fnv1a:dcc432ba",
@@ -10828,7 +10832,7 @@
           {
             "phaseId": "fnv1a:a11f354e",
             "root": {
-              "planInstanceId": "plan:corp.score_agenda:agenda%3Acet%3Ar1",
+              "planInstanceId": "p2nbew7o06g3beuckxcs2aivp",
               "moduleId": "corp.score_agenda",
               "milestoneId": "advance_score_agenda",
               "provenance": "resident"
@@ -10876,7 +10880,7 @@
           {
             "phaseId": "fnv1a:417d4818",
             "root": {
-              "planInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+              "planInstanceId": "penw02zfrkklof54c2nuye5att",
               "moduleId": "corp.defend_servers",
               "milestoneId": "allocate_server_defense",
               "provenance": "resident"
@@ -10979,7 +10983,7 @@
           "sideSafePlanningFingerprint": "fnv1a:1eb6bcf2"
         },
         "currentBinding": {
-          "actionId": "corp.install_card.c3kl.r1.c3kl",
+          "actionId": "cc.c3kl.r1.c3kl",
           "stateVersion": 195,
           "semanticActionSetFingerprint": "fnv1a:992e5d8a",
           "invocationKey": "fnv1a:f938592f"
@@ -10987,14 +10991,14 @@
         "actionType": "install_card",
         "expectationId": "fnv1a:e88558cc"
       },
-      "rootForegroundInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
-      "executorInstanceId": "plan:corp.defend_servers:server-defense-portfolio"
+      "rootForegroundInstanceId": "penw02zfrkklof54c2nuye5att",
+      "executorInstanceId": "penw02zfrkklof54c2nuye5att"
     }
   },
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "corp.advance_card.cet.cet"
+        "actionId": "c2.cet.cet"
       }
     ],
     "forbiddenActions": [

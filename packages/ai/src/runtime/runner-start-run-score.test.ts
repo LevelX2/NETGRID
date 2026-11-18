@@ -52,7 +52,7 @@ describe("runnerHqSuccessWindowSetupAssessment", () => {
 
 function startRun(serverId: string): LegalAction {
   return {
-    actionId: `runner.start_run.${serverId}`,
+    actionId: `rs.${serverId}`,
     side: "runner",
     type: "start_run",
     label: `Run auf ${serverId}`,

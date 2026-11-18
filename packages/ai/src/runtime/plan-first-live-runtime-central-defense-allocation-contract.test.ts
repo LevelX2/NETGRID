@@ -98,7 +98,7 @@ describe("plan-first live Corp central-defense allocation contract", () => {
       (instance) => instance.moduleId === "corp.defend_servers",
     );
     expect(defense).toMatchObject({
-      instanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      instanceId: "penw02zfrkklof54c2nuye5att",
       moduleState: {
         kind: "defense",
         centralAllocation: {
@@ -193,7 +193,7 @@ describe("plan-first live Corp central-defense allocation contract", () => {
       (instance) => instance.moduleId === "corp.defend_servers",
     );
     expect(defenseParent?.instanceId).toBe(
-      "plan:corp.defend_servers:server-defense-portfolio",
+      "penw02zfrkklof54c2nuye5att",
     );
     expect(defenseParent?.moduleState).toMatchObject({
       kind: "defense",

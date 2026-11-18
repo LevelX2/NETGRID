@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -126,7 +127,7 @@ export function finiteBankTurnLiquiditySupport(params: {
     ? {
         actionId: payout.actionId,
         funding: {
-          parentPlanInstanceId: `plan:runner.economy:${encodeURIComponent(need.needId)}`,
+          parentPlanInstanceId: planInstanceIdForProposal({ moduleId: "runner.economy", dedupeKey: need.needId }),
           needId: need.needId,
           stateVersion: input.playerView.stateVersion,
           need,

@@ -71,7 +71,7 @@ it("funds the exact remembered remote before repeating its native unpaid termina
     d = chooseAiAction(input);
   expect(JSON.stringify(input)).toBe(before);
   expect(d).toMatchObject({
-    actionId: "runner.gain_credit",
+    actionId: "rb",
     fallbackUsed: false,
     timeoutUsed: false,
   });
@@ -80,7 +80,7 @@ it("funds the exact remembered remote before repeating its native unpaid termina
       ?.expiresAtStateVersion,
   ).toBe(370);
   expect(d.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Ar3",
+    "p1p4x0bu4pvfpkxrd7jjbdjjah",
   );
 });
 it("does not invent a remembered self-cost after removing its actual observation", () => {
@@ -103,7 +103,7 @@ it.each(["unknown_ice", "lethal", "not_terminal"] as const)(
       input.playerView.opponent.agendaPoints = 0;
     }
     const target = evaluateRunnerRunTargets({ input }).find(
-      (t) => t.actionId === "runner.start_run.r3",
+      (t) => t.actionId === "rs.r3",
     )!;
     if (variant === "unknown_ice") target.routeQuote!.unknownIceCount = 1;
     expect(
@@ -125,7 +125,7 @@ it("retains the already funded nonlethal terminal contest instead of further cre
     f.runtime,
   );
   const target = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.r3",
+    (t) => t.actionId === "rs.r3",
   )!;
   expect(target.routeQuote!.fundingGap).toBe(0);
   expect(runnerTerminalRemoteContestIsDirectlyMandatory(input, target)).toBe(
@@ -135,11 +135,11 @@ it("retains the already funded nonlethal terminal contest instead of further cre
     d = chooseAiAction(input);
   expect(JSON.stringify(input)).toBe(before);
   expect(d).toMatchObject({
-    actionId: "runner.start_run.r3",
+    actionId: "rs.r3",
     fallbackUsed: false,
     timeoutUsed: false,
   });
   expect(d.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Ar3",
+    "p1p4x0bu4pvfpkxrd7jjbdjjah",
   );
 });

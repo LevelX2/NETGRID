@@ -152,7 +152,7 @@ it.each([false, true])(
     expect(d.fallbackUsed).toBe(false);
     const pf = d.decisionDebug?.planFirstDecision;
     expect(pf?.rootPlanInstanceId).toBe(
-      "plan:corp.defend_servers:server-defense-portfolio",
+      "penw02zfrkklof54c2nuye5att",
     );
     expect(pf?.leafExecutorInstanceId).toBe(pf?.rootPlanInstanceId);
     expect(pf?.route).toMatchObject({

@@ -9476,7 +9476,7 @@
         "id": "runner_credit_bank"
       },
       "selectedStepKind": "build_bank_counter",
-      "selectedActionId": "runner.activated_card_ability.c29e.c29e.activated.0",
+      "selectedActionId": "r1.c29e.c29e.activated.0",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_central_probe_satisfied",
@@ -9567,7 +9567,7 @@
             "plan_portfolio_role:background",
             "plan_portfolio_lifecycle:active",
             "plan_portfolio_previous_entry:runner.build_credit_bank:bank:runner_credit_bank",
-            "plan_portfolio_action_progress:runner.activated_card_ability.c29e.c29e.activated.0",
+            "plan_portfolio_action_progress:r1.c29e.c29e.activated.0",
             "plan_portfolio_action_progress_source:selected_mapped_step"
           ]
         }
@@ -9579,7 +9579,7 @@
         "plan_portfolio_foreground:runner.opportunistic_central_run",
         "plan_portfolio_backgrounds:runner.build_credit_bank",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.activated_card_ability.c29e.c29e.activated.0"
+        "plan_portfolio_selected_action:r1.c29e.c29e.activated.0"
       ]
     },
     "strategicIntent": {
@@ -10633,12 +10633,12 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.start_run.r2"
+        "actionId": "rs.r2"
       }
     ],
     "runTargets": [
       {
-        "actionId": "runner.start_run.r2",
+        "actionId": "rs.r2",
         "requiredEvidence": [
           "run_commitment:probe_only"
         ]

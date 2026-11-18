@@ -84,7 +84,7 @@ it("retains the Defense funding parent while loading a profitable two-action ban
   const p = d.decisionDebug!.planFirstDecision!;
   expect(p.selectedPlan?.moduleId).toBe("corp.economy");
   expect(p.rootPlanInstanceId).toBe(
-    "plan:corp.defend_servers:server-defense-portfolio",
+    "penw02zfrkklof54c2nuye5att",
   );
   expect(p.route).toMatchObject({
     actionId: action.actionId,
@@ -106,7 +106,7 @@ it("does not reserve an unfunded no-progress installation but retains its genuin
   });
   expect(funded.unknown).toEqual([]);
   expect(funded.actionIds).toContain(
-    "corp.install_card.c311.hq.c311.5",
+    "cc.c311.hq.c311.5",
   );
 });
 it("retains a veto when the current Engine post-install quote is missing", () => {
@@ -115,7 +115,7 @@ it("retains a veto when the current Engine post-install quote is missing", () =>
     action = input.legalActions.find(
       (a) =>
         a.actionId ===
-        "corp.install_card.c311.hq.c311.5",
+        "cc.c311.hq.c311.5",
     )!;
   delete action.payload!.postInstallRezQuoteComplete;
   const params = windowParams(input, f.runtime.residentPlanPortfolio);

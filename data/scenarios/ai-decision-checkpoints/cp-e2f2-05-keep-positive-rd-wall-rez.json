@@ -6386,7 +6386,7 @@
           "progress": 0.5,
           "selectedStepKind": "build_remote",
           "actionCandidateIds": [
-            "corp.install_card.c319.new_remote.c319"
+            "cc.c319.new_remote.c319"
           ],
           "creditDemands": [],
           "actionDemands": [
@@ -6612,7 +6612,7 @@
         "plan_action_allocation_entries:1",
         "plan_action_allocation_unallocated:0",
         "plan_action_allocation_credit_remainder:23",
-        "plan_portfolio_selected_action:corp.end_turn"
+        "plan_portfolio_selected_action:c9"
       ]
     },
     "strategicIntent": {

@@ -45,7 +45,7 @@ it("retains the admitted HQ access purpose through the original committed run an
   input.playerView.legalActions = input.legalActions;
   resetResidentPlanPortfolioMemory();
   restoreResidentPlanPortfolioMemorySnapshot(input, runtime.residentPlanPortfolio);
-  expect(chooseAiAction(input).actionId).toBe("runner.start_run.hq");
+  expect(chooseAiAction(input).actionId).toBe("rs.hq");
   const p = residentPlanPortfolioSnapshot(input)!;
   const ex = p.instances.find((i) => i.instanceId === p.executorInstanceId)!;
   expect(ex.moduleId).toBe("runner.pressure_central");
@@ -65,7 +65,7 @@ it("retains the admitted HQ access purpose through the original committed run an
     choice.input,
   ) as unknown as AiDecisionInputWithDeckCapabilities;
   const decision = chooseAiAction(final);
-  expect(decision.actionId).toBe("runner.resolve_choice");
+  expect(decision.actionId).toBe("rn");
   expect(decision.selectedChoices).toMatchObject({
     choiceId: final.playerView.pendingChoice!.choiceId,
   });

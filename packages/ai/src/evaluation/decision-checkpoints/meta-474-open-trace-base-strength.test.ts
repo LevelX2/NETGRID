@@ -74,7 +74,7 @@ describe("pairing 474: open Trace base strength is already funded", () => {
     );
     const decision = chooseAiAction(input);
     expect(decision).toMatchObject({
-      actionId: "corp.resolve_choice",
+      actionId: "cn",
       fallbackUsed: false,
       timeoutUsed: false,
       selectedChoices: {

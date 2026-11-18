@@ -26,14 +26,16 @@ it("classifies the reserve-blocked native Remote run while retaining tag recover
   const result = chooseAiAction(cp.input);
   expect(JSON.stringify(cp.input)).toBe(before);
   expect(result).toMatchObject({
-    actionId: "runner.remove_tag",
+    actionId: "rm",
     fallbackUsed: false,
     timeoutUsed: false,
   });
   const plan = result.decisionDebug!.planFirstDecision!;
-  expect(plan.rootPlanInstanceId).toMatch(
-    /^plan:runner\.defense_and_recovery:/,
-  );
+  expect(
+    plan?.portfolio.find(
+      (instance) => instance.instanceId === plan?.rootPlanInstanceId,
+    )?.moduleId,
+  ).toBe("runner.defense_and_recovery");
   expect(plan.route).toMatchObject({
     actionId: result.actionId,
     stateVersion: 14,
@@ -59,7 +61,7 @@ it("does not retain the reserve rejection once the current grip is buffered", ()
     instanceId: "owned-buffer-countercase",
   });
   const remote = evaluateRunnerRunTargets({ input: cp.input }).find(
-    (t) => t.actionId === "runner.start_run.r1",
+    (t) => t.actionId === "rs.r1",
   )!;
   expect(remote.prerunReserveQuote?.status).not.toBe("blocked");
   restoreAiRuntimeCheckpoint(

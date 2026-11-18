@@ -4860,7 +4860,7 @@
         "label": "Running Interference"
       },
       "selectedStepKind": "install_development_card",
-      "selectedActionId": "runner.start_run.hq",
+      "selectedActionId": "rs.hq",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_central_probe_satisfied",
@@ -4924,7 +4924,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.access_card"
+        "plan_portfolio_selected_action:r0"
       ]
     },
     "strategicIntent": {
@@ -6079,7 +6079,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.remove_tag"
+        "actionId": "rm"
       }
     ]
   }

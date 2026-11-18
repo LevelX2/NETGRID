@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { describe, expect, it } from "vitest";
 import searchJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-pairing-430-search-d80.json";
 import choiceJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-pairing-430-search-d81.json";
@@ -45,7 +46,7 @@ describe("pairing 430 coverage search answers the actual ICE category", () => {
       // search route here; the native precedence is checked separately below.
       if (role === "sentry") {
         search.input.legalActions = search.input.legalActions.filter(
-          (action) => action.actionId !== "runner.start_run.rd",
+          (action) => action.actionId !== "rs.rd",
         );
         search.input.playerView.legalActions = search.input.legalActions;
       }
@@ -58,7 +59,7 @@ describe("pairing 430 coverage search answers the actual ICE category", () => {
       );
       const decision = chooseAiAction(search.input);
       expect(decision.actionId).toBe(
-        "runner.activated_card_ability.c2ei.c2ei.activated.464",
+        "r1.c2ei.c2ei.activated.464",
       );
       expect(decision.fallbackUsed).toBe(false);
       expect(
@@ -66,10 +67,10 @@ describe("pairing 430 coverage search answers the actual ICE category", () => {
       ).toBe(`search_answer_breaker_${role}`);
       expect(
         residentPlanPortfolioSnapshot(search.input)?.executorInstanceId,
-      ).toBe(`plan:runner.rig_and_coverage:coverage%3Abreaker_${role}`);
+      ).toBe(planInstanceIdForProposal({ moduleId: "runner.rig_and_coverage", dedupeKey: `coverage:breaker_${role}` }));
       // The selected search action is unchanged, so its historical Engine choice is exact.
       const resolved = chooseAiAction(choice.input);
-      expect(resolved.actionId).toBe("runner.resolve_choice");
+      expect(resolved.actionId).toBe("rn");
       expect(resolved.fallbackUsed).toBe(false);
       expect(resolved.selectedChoices).toMatchObject({
         choiceId: `p3_37_search_stack_to_grip_${stateVersion}`,
@@ -89,7 +90,7 @@ it("preserves the native ready R&D run ahead of optional sentry coverage search"
     search.runtime,
   );
   const decision = chooseAiAction(search.input);
-  expect(decision.actionId).toBe("runner.start_run.rd");
+  expect(decision.actionId).toBe("rs.rd");
   expect(decision.fallbackUsed).toBe(false);
   expect(
     decision.decisionDebug?.planFirstDecision?.priority?.effectiveClass,

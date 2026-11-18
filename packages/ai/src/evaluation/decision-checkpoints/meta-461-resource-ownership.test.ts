@@ -64,8 +64,10 @@ describe("meta461 round6 causal resource ownership", () => {
     expect(a.type).toBe("gain_credit");
     expect(decision.fallbackUsed).toBe(false);
     expect(
-      decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-    ).toContain("corp.score_agenda");
+      decision.decisionDebug?.planFirstDecision?.portfolio.find(
+        (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+      )?.moduleId,
+    ).toBe("corp.score_agenda");
   });
   it("does not rebuild a publicly exposed non-threatening bluff after liquidation", () => {
     const input = fixture("g25-d251"),

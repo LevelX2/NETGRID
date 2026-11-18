@@ -242,16 +242,22 @@ describe("SP-431 Defense-owned current terminal mobile-ICE route", () => {
     const decision = chooseAiAction(input);
     expect(decision.actionId).toBe(action.actionId);
     expect(
-      decision.decisionDebug!.planFirstDecision!.rootPlanInstanceId,
-    ).toContain("corp.defend_servers");
+      decision.decisionDebug!.planFirstDecision!.portfolio.find(
+        (instance) => instance.instanceId === decision.decisionDebug!.planFirstDecision!.rootPlanInstanceId,
+      )?.moduleId,
+    ).toBe("corp.defend_servers");
     expect(
-      rezDecision.decisionDebug!.planFirstDecision!.rootPlanInstanceId,
-    ).toContain("corp.defend_servers");
+      rezDecision.decisionDebug!.planFirstDecision!.portfolio.find(
+        (instance) => instance.instanceId === rezDecision.decisionDebug!.planFirstDecision!.rootPlanInstanceId,
+      )?.moduleId,
+    ).toBe("corp.defend_servers");
     for (const d of [decision, rezDecision]) {
       expect(d.fallbackUsed).toBe(false);
       expect(
-        d.decisionDebug!.planFirstDecision!.leafExecutorInstanceId,
-      ).toContain("corp.defend_servers");
+        d.decisionDebug!.planFirstDecision!.portfolio.find(
+          (instance) => instance.instanceId === d.decisionDebug!.planFirstDecision!.leafExecutorInstanceId,
+        )?.moduleId,
+      ).toBe("corp.defend_servers");
       expect(d.decisionDebug!.planFirstDecision!.selectedStep).toBeDefined();
       expect(d.decisionDebug!.planFirstDecision!.route).toBeDefined();
     }
@@ -302,8 +308,16 @@ describe("SP-431 Defense-owned current terminal mobile-ICE route", () => {
       expect(decision.actionId).toBe(action.actionId);
       expect(decision.fallbackUsed).toBe(false);
       const pf = decision.decisionDebug!.planFirstDecision!;
-      expect(pf.rootPlanInstanceId).toContain("corp.defend_servers");
-      expect(pf.leafExecutorInstanceId).toContain("corp.defend_servers");
+      expect(
+        pf.portfolio.find(
+          (instance) => instance.instanceId === pf.rootPlanInstanceId,
+        )?.moduleId,
+      ).toBe("corp.defend_servers");
+      expect(
+        pf.portfolio.find(
+          (instance) => instance.instanceId === pf.leafExecutorInstanceId,
+        )?.moduleId,
+      ).toBe("corp.defend_servers");
       expect(pf.selectedStep).toBeDefined();
       expect(pf.route).toBeDefined();
       const quote = JSON.parse(

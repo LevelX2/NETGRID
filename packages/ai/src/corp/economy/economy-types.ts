@@ -61,6 +61,7 @@ export type CorpEconomyParentFundingSignal = CorpEconomySignalBase & {
   parentPriorityClass?: PriorityClass;
   immediateDefenseConversion?: boolean;
   parentPlanInstanceId?: string;
+  parentPlanModuleId?: import("../../plans/plan-kernel-types").PlanModuleId;
   parentNeedId?: string;
   scoreFundingMilestone?: CorpScoreFundingMilestone;
   incrementalDefenseReserve?: {

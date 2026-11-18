@@ -17,7 +17,7 @@ export type CorpResidentScoreDefenseBinding = Readonly<{
  * A concrete, empty remote with an Engine-quoted ICE interaction is never a
  * blank scoring target. The exact score-protection probability model may
  * deliberately leave conditional, damaging, taxing, or encounter-disrupting
- * subroutines unquantified, but corp.score_agenda must still preserve the
+ * subroutines unquantified, but cr must still preserve the
  * strictly better server topology instead of opening an empty sibling remote.
  *
  * This is intentionally a reuse/dominance fact, not a claim that the remote

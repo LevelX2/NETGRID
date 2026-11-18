@@ -94,7 +94,7 @@ describe("tag punish ontology conflict detection", () => {
 
 function rezAction(): LegalAction {
   return {
-    actionId: "corp.rez_ice",
+    actionId: "cq",
     side: "corp",
     type: "rez_ice",
     source: "ice-instance",

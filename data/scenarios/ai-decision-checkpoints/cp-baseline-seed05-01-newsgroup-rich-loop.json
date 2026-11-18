@@ -3160,7 +3160,7 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "clientKnownStateVersion": 0,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_runner_0",
@@ -3171,7 +3171,7 @@
                 "idempotencyKey": "ai-sim-0"
               },
               "legalAction": {
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "side": "runner",
                 "type": "resolve_choice",
                 "label": "Runner-Starthand",
@@ -3244,7 +3244,7 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "clientKnownStateVersion": 1,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_corp_1",
@@ -3255,7 +3255,7 @@
                 "idempotencyKey": "ai-sim-1"
               },
               "legalAction": {
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "side": "corp",
                 "type": "resolve_choice",
                 "label": "Korp-Starthand",
@@ -3311,12 +3311,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 2,
                 "idempotencyKey": "ai-sim-2"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -3367,12 +3367,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.install_card.c2xx.rd.c2xx.0",
+                "actionId": "cc.c2xx.rd.c2xx.0",
                 "clientKnownStateVersion": 3,
                 "idempotencyKey": "ai-sim-3"
               },
               "legalAction": {
-                "actionId": "corp.install_card.c2xx.rd.c2xx.0",
+                "actionId": "cc.c2xx.rd.c2xx.0",
                 "side": "corp",
                 "type": "install_card",
                 "label": "ICE vor R&D installieren",
@@ -3437,12 +3437,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.install_card.c2yd.hq.c2yd.0",
+                "actionId": "cc.c2yd.hq.c2yd.0",
                 "clientKnownStateVersion": 4,
                 "idempotencyKey": "ai-sim-4"
               },
               "legalAction": {
-                "actionId": "corp.install_card.c2yd.hq.c2yd.0",
+                "actionId": "cc.c2yd.hq.c2yd.0",
                 "side": "corp",
                 "type": "install_card",
                 "label": "ICE vor HQ installieren",
@@ -3507,12 +3507,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.install_card.c2ul.hq.c2ul.1",
+                "actionId": "cc.c2ul.hq.c2ul.1",
                 "clientKnownStateVersion": 5,
                 "idempotencyKey": "ai-sim-5"
               },
               "legalAction": {
-                "actionId": "corp.install_card.c2ul.hq.c2ul.1",
+                "actionId": "cc.c2ul.hq.c2ul.1",
                 "side": "corp",
                 "type": "install_card",
                 "label": "ICE vor HQ installieren",
@@ -3561,12 +3561,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 6,
                 "idempotencyKey": "ai-sim-6"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -3613,12 +3613,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.start_run.rd",
+                "actionId": "rs.rd",
                 "clientKnownStateVersion": 7,
                 "idempotencyKey": "ai-sim-7"
               },
               "legalAction": {
-                "actionId": "runner.start_run.rd",
+                "actionId": "rs.rd",
                 "side": "runner",
                 "type": "start_run",
                 "label": "Run auf R&D",
@@ -3671,12 +3671,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.rez_ice.c2xx.c2xx",
+                "actionId": "cq.c2xx.c2xx",
                 "clientKnownStateVersion": 8,
                 "idempotencyKey": "ai-sim-8"
               },
               "legalAction": {
-                "actionId": "corp.rez_ice.c2xx.c2xx",
+                "actionId": "cq.c2xx.c2xx",
                 "side": "corp",
                 "type": "rez_ice",
                 "label": "Rex rezzen",
@@ -3733,12 +3733,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.continue_run.0",
+                "actionId": "r5.0",
                 "clientKnownStateVersion": 9,
                 "idempotencyKey": "ai-sim-9"
               },
               "legalAction": {
-                "actionId": "runner.continue_run.0",
+                "actionId": "r5.0",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Subroutinen auslösen",
@@ -3754,14 +3754,16 @@
                   "unbrokenSubroutineCount": 1,
                   "encounterWillEndRun": false,
                   "encounterSourceWillTrashAtEndOfTurn": false,
-                  "encounterSubroutineIds": "0",
                   "traceStarted": true,
                   "traceId": 10,
                   "sourceCardId": "c2xx",
                   "baseTraceStrength": 3,
                   "corpBidMax": 0,
                   "traceSourceRunId": 8
-                }
+                },
+                "encounterSubroutineIds": [
+                  "0"
+                ]
               }
             }
           }
@@ -3804,7 +3806,7 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "clientKnownStateVersion": 10,
                 "selectedChoices": {
                   "choiceId": "10.corp.bid.10",
@@ -3815,7 +3817,7 @@
                 "idempotencyKey": "ai-sim-10"
               },
               "legalAction": {
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "side": "corp",
                 "type": "resolve_choice",
                 "label": "Korp Trace-Bid wählen (Base Trace 3)",
@@ -3897,7 +3899,7 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "clientKnownStateVersion": 11,
                 "selectedChoices": {
                   "choiceId": "10.runner.bid.11",
@@ -3908,7 +3910,7 @@
                 "idempotencyKey": "ai-sim-11"
               },
               "legalAction": {
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "side": "runner",
                 "type": "resolve_choice",
                 "label": "Runner Link-Bid wählen (Trace 3, Link 0)",
@@ -3983,12 +3985,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "clientKnownStateVersion": 12,
                 "idempotencyKey": "ai-sim-12"
               },
               "legalAction": {
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "ICE passieren",
@@ -4003,9 +4005,9 @@
                   "sourceDefinitionId": 476,
                   "unbrokenSubroutineCount": 0,
                   "encounterWillEndRun": false,
-                  "encounterSourceWillTrashAtEndOfTurn": false,
-                  "encounterSubroutineIds": ""
-                }
+                  "encounterSourceWillTrashAtEndOfTurn": false
+                },
+                "encounterSubroutineIds": []
               }
             }
           }
@@ -4035,12 +4037,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "clientKnownStateVersion": 13,
                 "idempotencyKey": "ai-sim-13"
               },
               "legalAction": {
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Run fortsetzen",
@@ -4089,12 +4091,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.access_card",
+                "actionId": "r0",
                 "clientKnownStateVersion": 14,
                 "idempotencyKey": "ai-sim-14"
               },
               "legalAction": {
-                "actionId": "runner.access_card",
+                "actionId": "r0",
                 "side": "runner",
                 "type": "access_card",
                 "label": "Karte accessen",
@@ -4146,12 +4148,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "clientKnownStateVersion": 15,
                 "idempotencyKey": "ai-sim-15"
               },
               "legalAction": {
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "side": "runner",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -4197,12 +4199,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "clientKnownStateVersion": 16,
                 "idempotencyKey": "ai-sim-16"
               },
               "legalAction": {
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "side": "runner",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -4248,12 +4250,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "clientKnownStateVersion": 17,
                 "idempotencyKey": "ai-sim-17"
               },
               "legalAction": {
-                "actionId": "runner.gain_credit",
+                "actionId": "rb",
                 "side": "runner",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -4291,12 +4293,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "clientKnownStateVersion": 18,
                 "idempotencyKey": "ai-sim-18"
               },
               "legalAction": {
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -4330,12 +4332,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 19,
                 "idempotencyKey": "ai-sim-19"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -4377,12 +4379,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 20,
                 "idempotencyKey": "ai-sim-20"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -4428,12 +4430,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 21,
                 "idempotencyKey": "ai-sim-21"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -4479,12 +4481,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 22,
                 "idempotencyKey": "ai-sim-22"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -4522,12 +4524,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 23,
                 "idempotencyKey": "ai-sim-23"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -4577,12 +4579,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.install_card.c1l5.c1l5",
+                "actionId": "rc.c1l5.c1l5",
                 "clientKnownStateVersion": 24,
                 "idempotencyKey": "ai-sim-24"
               },
               "legalAction": {
-                "actionId": "runner.install_card.c1l5.c1l5",
+                "actionId": "rc.c1l5.c1l5",
                 "side": "runner",
                 "type": "install_card",
                 "label": "Newsgroup Filter installieren",
@@ -4665,12 +4667,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 25,
                 "idempotencyKey": "ai-sim-25"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -4765,12 +4767,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 26,
                 "idempotencyKey": "ai-sim-26"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -4851,12 +4853,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.play_event.c1s1.hq.c1s1",
+                "actionId": "rh.c1s1.hq.c1s1",
                 "clientKnownStateVersion": 27,
                 "idempotencyKey": "ai-sim-27"
               },
               "legalAction": {
-                "actionId": "runner.play_event.c1s1.hq.c1s1",
+                "actionId": "rh.c1s1.hq.c1s1",
                 "side": "runner",
                 "type": "play_event",
                 "label": "All-Nighter auf HQ",
@@ -4914,12 +4916,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.rez_ice.c2ul.c2ul",
+                "actionId": "cq.c2ul.c2ul",
                 "clientKnownStateVersion": 28,
                 "idempotencyKey": "ai-sim-28"
               },
               "legalAction": {
-                "actionId": "corp.rez_ice.c2ul.c2ul",
+                "actionId": "cq.c2ul.c2ul",
                 "side": "corp",
                 "type": "rez_ice",
                 "label": "Hunter rezzen",
@@ -4976,12 +4978,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.continue_run.0",
+                "actionId": "r5.0",
                 "clientKnownStateVersion": 29,
                 "idempotencyKey": "ai-sim-29"
               },
               "legalAction": {
-                "actionId": "runner.continue_run.0",
+                "actionId": "r5.0",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Subroutinen auslösen",
@@ -4997,14 +4999,16 @@
                   "unbrokenSubroutineCount": 1,
                   "encounterWillEndRun": false,
                   "encounterSourceWillTrashAtEndOfTurn": false,
-                  "encounterSubroutineIds": "0",
                   "traceStarted": true,
                   "traceId": 30,
                   "sourceCardId": "c2ul",
                   "baseTraceStrength": 5,
                   "corpBidMax": 1,
                   "traceSourceRunId": 28
-                }
+                },
+                "encounterSubroutineIds": [
+                  "0"
+                ]
               }
             }
           }
@@ -5047,7 +5051,7 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "clientKnownStateVersion": 30,
                 "selectedChoices": {
                   "choiceId": "30.corp.bid.30",
@@ -5058,7 +5062,7 @@
                 "idempotencyKey": "ai-sim-30"
               },
               "legalAction": {
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "side": "corp",
                 "type": "resolve_choice",
                 "label": "Korp Trace-Bid wählen (Base Trace 5)",
@@ -5143,7 +5147,7 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "clientKnownStateVersion": 31,
                 "selectedChoices": {
                   "choiceId": "30.runner.bid.31",
@@ -5154,7 +5158,7 @@
                 "idempotencyKey": "ai-sim-31"
               },
               "legalAction": {
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "side": "runner",
                 "type": "resolve_choice",
                 "label": "Runner Link-Bid wählen (Trace 5, Link 0)",
@@ -5229,12 +5233,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "clientKnownStateVersion": 32,
                 "idempotencyKey": "ai-sim-32"
               },
               "legalAction": {
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "ICE passieren",
@@ -5249,9 +5253,9 @@
                   "sourceDefinitionId": 461,
                   "unbrokenSubroutineCount": 0,
                   "encounterWillEndRun": false,
-                  "encounterSourceWillTrashAtEndOfTurn": false,
-                  "encounterSubroutineIds": ""
-                }
+                  "encounterSourceWillTrashAtEndOfTurn": false
+                },
+                "encounterSubroutineIds": []
               }
             }
           }
@@ -5278,12 +5282,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "clientKnownStateVersion": 33,
                 "idempotencyKey": "ai-sim-33"
               },
               "legalAction": {
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Run fortsetzen",
@@ -5318,12 +5322,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.decline_rez",
+                "actionId": "c6",
                 "clientKnownStateVersion": 34,
                 "idempotencyKey": "ai-sim-34"
               },
               "legalAction": {
-                "actionId": "corp.decline_rez",
+                "actionId": "c6",
                 "side": "corp",
                 "type": "decline_rez",
                 "label": "Nicht rezzen",
@@ -5362,12 +5366,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "clientKnownStateVersion": 35,
                 "idempotencyKey": "ai-sim-35"
               },
               "legalAction": {
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Run fortsetzen",
@@ -5417,12 +5421,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.access_card",
+                "actionId": "r0",
                 "clientKnownStateVersion": 36,
                 "idempotencyKey": "ai-sim-36"
               },
               "legalAction": {
-                "actionId": "runner.access_card",
+                "actionId": "r0",
                 "side": "runner",
                 "type": "access_card",
                 "label": "Karte accessen",
@@ -5477,12 +5481,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.trash_accessed_card.c38l.1",
+                "actionId": "rv.c38l.1",
                 "clientKnownStateVersion": 37,
                 "idempotencyKey": "ai-sim-37"
               },
               "legalAction": {
-                "actionId": "runner.trash_accessed_card.c38l.1",
+                "actionId": "rv.c38l.1",
                 "side": "runner",
                 "type": "trash_accessed_card",
                 "label": "Chicago Branch trashen",
@@ -5540,12 +5544,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.start_run.rd.bonus_run.288",
+                "actionId": "rs.rd.bonus_run.288",
                 "clientKnownStateVersion": 38,
                 "idempotencyKey": "ai-sim-38"
               },
               "legalAction": {
-                "actionId": "runner.start_run.rd.bonus_run.288",
+                "actionId": "rs.rd.bonus_run.288",
                 "side": "runner",
                 "type": "start_run",
                 "label": "Bonus-Run auf R&D",
@@ -5607,12 +5611,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.continue_run.0",
+                "actionId": "r5.0",
                 "clientKnownStateVersion": 39,
                 "idempotencyKey": "ai-sim-39"
               },
               "legalAction": {
-                "actionId": "runner.continue_run.0",
+                "actionId": "r5.0",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Subroutinen auslösen",
@@ -5628,14 +5632,16 @@
                   "unbrokenSubroutineCount": 1,
                   "encounterWillEndRun": false,
                   "encounterSourceWillTrashAtEndOfTurn": false,
-                  "encounterSubroutineIds": "0",
                   "traceStarted": true,
                   "traceId": 40,
                   "sourceCardId": "c2xx",
                   "baseTraceStrength": 3,
                   "corpBidMax": 1,
                   "traceSourceRunId": 39
-                }
+                },
+                "encounterSubroutineIds": [
+                  "0"
+                ]
               }
             }
           }
@@ -5678,7 +5684,7 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "clientKnownStateVersion": 40,
                 "selectedChoices": {
                   "choiceId": "40.corp.bid.40",
@@ -5689,7 +5695,7 @@
                 "idempotencyKey": "ai-sim-40"
               },
               "legalAction": {
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "side": "corp",
                 "type": "resolve_choice",
                 "label": "Korp Trace-Bid wählen (Base Trace 3)",
@@ -5772,7 +5778,7 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "clientKnownStateVersion": 41,
                 "selectedChoices": {
                   "choiceId": "40.runner.bid.41",
@@ -5783,7 +5789,7 @@
                 "idempotencyKey": "ai-sim-41"
               },
               "legalAction": {
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "side": "runner",
                 "type": "resolve_choice",
                 "label": "Runner Link-Bid wählen (Trace 3, Link 0)",
@@ -5856,12 +5862,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "clientKnownStateVersion": 42,
                 "idempotencyKey": "ai-sim-42"
               },
               "legalAction": {
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "ICE passieren",
@@ -5876,9 +5882,9 @@
                   "sourceDefinitionId": 476,
                   "unbrokenSubroutineCount": 0,
                   "encounterWillEndRun": false,
-                  "encounterSourceWillTrashAtEndOfTurn": false,
-                  "encounterSubroutineIds": ""
-                }
+                  "encounterSourceWillTrashAtEndOfTurn": false
+                },
+                "encounterSubroutineIds": []
               }
             }
           }
@@ -5908,12 +5914,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "clientKnownStateVersion": 43,
                 "idempotencyKey": "ai-sim-43"
               },
               "legalAction": {
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Run fortsetzen",
@@ -5962,12 +5968,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.access_card",
+                "actionId": "r0",
                 "clientKnownStateVersion": 44,
                 "idempotencyKey": "ai-sim-44"
               },
               "legalAction": {
-                "actionId": "runner.access_card",
+                "actionId": "r0",
                 "side": "runner",
                 "type": "access_card",
                 "label": "Karte accessen",
@@ -6011,12 +6017,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "clientKnownStateVersion": 45,
                 "idempotencyKey": "ai-sim-45"
               },
               "legalAction": {
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -6050,12 +6056,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 46,
                 "idempotencyKey": "ai-sim-46"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -6097,12 +6103,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 47,
                 "idempotencyKey": "ai-sim-47"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -6148,12 +6154,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 48,
                 "idempotencyKey": "ai-sim-48"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -6199,12 +6205,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 49,
                 "idempotencyKey": "ai-sim-49"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -6242,12 +6248,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 50,
                 "idempotencyKey": "ai-sim-50"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -6315,12 +6321,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 51,
                 "idempotencyKey": "ai-sim-51"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -6388,12 +6394,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.remove_tag",
+                "actionId": "rm",
                 "clientKnownStateVersion": 52,
                 "idempotencyKey": "ai-sim-52"
               },
               "legalAction": {
-                "actionId": "runner.remove_tag",
+                "actionId": "rm",
                 "side": "runner",
                 "type": "remove_tag",
                 "label": "Tag entfernen",
@@ -6469,12 +6475,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 53,
                 "idempotencyKey": "ai-sim-53"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -6569,12 +6575,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 54,
                 "idempotencyKey": "ai-sim-54"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -6635,12 +6641,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "clientKnownStateVersion": 55,
                 "idempotencyKey": "ai-sim-55"
               },
               "legalAction": {
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -6674,12 +6680,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 56,
                 "idempotencyKey": "ai-sim-56"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -6730,12 +6736,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.install_card.c2s5.rd.c2s5.1",
+                "actionId": "cc.c2s5.rd.c2s5.1",
                 "clientKnownStateVersion": 57,
                 "idempotencyKey": "ai-sim-57"
               },
               "legalAction": {
-                "actionId": "corp.install_card.c2s5.rd.c2s5.1",
+                "actionId": "cc.c2s5.rd.c2s5.1",
                 "side": "corp",
                 "type": "install_card",
                 "label": "ICE vor R&D installieren",
@@ -6792,12 +6798,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 58,
                 "idempotencyKey": "ai-sim-58"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -6843,12 +6849,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 59,
                 "idempotencyKey": "ai-sim-59"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -6886,12 +6892,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 60,
                 "idempotencyKey": "ai-sim-60"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -6959,12 +6965,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 61,
                 "idempotencyKey": "ai-sim-61"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -7049,12 +7055,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.play_event.c1sr.c1sr",
+                "actionId": "rh.c1sr.c1sr",
                 "clientKnownStateVersion": 62,
                 "idempotencyKey": "ai-sim-62"
               },
               "legalAction": {
-                "actionId": "runner.play_event.c1sr.c1sr",
+                "actionId": "rh.c1sr.c1sr",
                 "side": "runner",
                 "type": "play_event",
                 "label": "Bodyweight™ Synthetic Blood spielen",
@@ -7146,12 +7152,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.install_card.c2ci.c2ci",
+                "actionId": "rc.c2ci.c2ci",
                 "clientKnownStateVersion": 63,
                 "idempotencyKey": "ai-sim-63"
               },
               "legalAction": {
-                "actionId": "runner.install_card.c2ci.c2ci",
+                "actionId": "rc.c2ci.c2ci",
                 "side": "runner",
                 "type": "install_card",
                 "label": "Loan from Chiba installieren",
@@ -7237,12 +7243,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.start_run.rd",
+                "actionId": "rs.rd",
                 "clientKnownStateVersion": 64,
                 "idempotencyKey": "ai-sim-64"
               },
               "legalAction": {
-                "actionId": "runner.start_run.rd",
+                "actionId": "rs.rd",
                 "side": "runner",
                 "type": "start_run",
                 "label": "Run auf R&D",
@@ -7295,12 +7301,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.rez_ice.c2s5.c2s5",
+                "actionId": "cq.c2s5.c2s5",
                 "clientKnownStateVersion": 65,
                 "idempotencyKey": "ai-sim-65"
               },
               "legalAction": {
-                "actionId": "corp.rez_ice.c2s5.c2s5",
+                "actionId": "cq.c2s5.c2s5",
                 "side": "corp",
                 "type": "rez_ice",
                 "label": "Data Wall 2.0 rezzen",
@@ -7363,12 +7369,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.continue_run.0",
+                "actionId": "r5.0",
                 "clientKnownStateVersion": 66,
                 "idempotencyKey": "ai-sim-66"
               },
               "legalAction": {
-                "actionId": "runner.continue_run.0",
+                "actionId": "r5.0",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Subroutinen auslösen (Run endet)",
@@ -7383,8 +7389,7 @@
                   "sourceDefinitionId": 450,
                   "unbrokenSubroutineCount": 1,
                   "encounterWillEndRun": true,
-                  "encounterSourceWillTrashAtEndOfTurn": false,
-                  "encounterSubroutineIds": "0"
+                  "encounterSourceWillTrashAtEndOfTurn": false
                 },
                 "resolvedEffects": [
                   {
@@ -7399,6 +7404,9 @@
                     "subroutineType": "end_the_run",
                     "endedRun": true
                   }
+                ],
+                "encounterSubroutineIds": [
+                  "0"
                 ]
               }
             }
@@ -7459,12 +7467,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.end_turn.c2ci.c2ci.end_of_runner_turn.0",
+                "actionId": "r9.c2ci.c2ci.end_of_runner_turn.0",
                 "clientKnownStateVersion": 67,
                 "idempotencyKey": "ai-sim-67"
               },
               "legalAction": {
-                "actionId": "runner.end_turn.c2ci.c2ci.end_of_runner_turn.0",
+                "actionId": "r9.c2ci.c2ci.end_of_runner_turn.0",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Loan from Chiba trashen und Zug beenden",
@@ -7552,7 +7560,7 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "clientKnownStateVersion": 68,
                 "selectedChoices": {
                   "choiceId": "discard_runner_68",
@@ -7563,7 +7571,7 @@
                 "idempotencyKey": "ai-sim-68"
               },
               "legalAction": {
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "side": "runner",
                 "type": "resolve_choice",
                 "label": "Runner-Discard wählen",
@@ -7623,12 +7631,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 69,
                 "idempotencyKey": "ai-sim-69"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -7675,12 +7683,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.install_card.c3jx.rd.c3jx",
+                "actionId": "cc.c3jx.rd.c3jx",
                 "clientKnownStateVersion": 70,
                 "idempotencyKey": "ai-sim-70"
               },
               "legalAction": {
-                "actionId": "corp.install_card.c3jx.rd.c3jx",
+                "actionId": "cc.c3jx.rd.c3jx",
                 "side": "corp",
                 "type": "install_card",
                 "label": "Karte in R&D installieren",
@@ -7732,12 +7740,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 71,
                 "idempotencyKey": "ai-sim-71"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -7783,12 +7791,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 72,
                 "idempotencyKey": "ai-sim-72"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -7826,12 +7834,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 73,
                 "idempotencyKey": "ai-sim-73"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -7889,12 +7897,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.play_event.c1wa.c1wa",
+                "actionId": "rh.c1wa.c1wa",
                 "clientKnownStateVersion": 74,
                 "idempotencyKey": "ai-sim-74"
               },
               "legalAction": {
-                "actionId": "runner.play_event.c1wa.c1wa",
+                "actionId": "rh.c1wa.c1wa",
                 "side": "runner",
                 "type": "play_event",
                 "label": "Jack 'n' Joe spielen",
@@ -7968,12 +7976,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.install_card.c2bt.c2bt",
+                "actionId": "rc.c2bt.c2bt",
                 "clientKnownStateVersion": 75,
                 "idempotencyKey": "ai-sim-75"
               },
               "legalAction": {
-                "actionId": "runner.install_card.c2bt.c2bt",
+                "actionId": "rc.c2bt.c2bt",
                 "side": "runner",
                 "type": "install_card",
                 "label": "Junkyard BBS installieren",
@@ -8056,12 +8064,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.play_event.c1wq.c1wq",
+                "actionId": "rh.c1wq.c1wq",
                 "clientKnownStateVersion": 76,
                 "idempotencyKey": "ai-sim-76"
               },
               "legalAction": {
-                "actionId": "runner.play_event.c1wq.c1wq",
+                "actionId": "rh.c1wq.c1wq",
                 "side": "runner",
                 "type": "play_event",
                 "label": "Livewire's Contacts spielen",
@@ -8144,12 +8152,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.play_event.c1x7.c1x7",
+                "actionId": "rh.c1x7.c1x7",
                 "clientKnownStateVersion": 77,
                 "idempotencyKey": "ai-sim-77"
               },
               "legalAction": {
-                "actionId": "runner.play_event.c1x7.c1x7",
+                "actionId": "rh.c1x7.c1x7",
                 "side": "runner",
                 "type": "play_event",
                 "label": "Mantis, Fixer-at-Large spielen",
@@ -8228,7 +8236,7 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "clientKnownStateVersion": 78,
                 "selectedChoices": {
                   "choiceId": "p3_37_search_stack_to_grip_78",
@@ -8239,7 +8247,7 @@
                 "idempotencyKey": "ai-sim-78"
               },
               "legalAction": {
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "side": "runner",
                 "type": "resolve_choice",
                 "label": "Stack durchsuchen",
@@ -8327,12 +8335,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "clientKnownStateVersion": 79,
                 "idempotencyKey": "ai-sim-79"
               },
               "legalAction": {
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -8366,12 +8374,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 80,
                 "idempotencyKey": "ai-sim-80"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -8418,12 +8426,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.install_card.c319.new_remote.c319",
+                "actionId": "cc.c319.new_remote.c319",
                 "clientKnownStateVersion": 81,
                 "idempotencyKey": "ai-sim-81"
               },
               "legalAction": {
-                "actionId": "corp.install_card.c319.new_remote.c319",
+                "actionId": "cc.c319.new_remote.c319",
                 "side": "corp",
                 "type": "install_card",
                 "label": "ICE vor neuem Remote installieren",
@@ -8475,12 +8483,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 82,
                 "idempotencyKey": "ai-sim-82"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -8526,12 +8534,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 83,
                 "idempotencyKey": "ai-sim-83"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -8569,12 +8577,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 84,
                 "idempotencyKey": "ai-sim-84"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -8624,12 +8632,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.install_card.c1cp.c1cp",
+                "actionId": "rc.c1cp.c1cp",
                 "clientKnownStateVersion": 85,
                 "idempotencyKey": "ai-sim-85"
               },
               "legalAction": {
-                "actionId": "runner.install_card.c1cp.c1cp",
+                "actionId": "rc.c1cp.c1cp",
                 "side": "runner",
                 "type": "install_card",
                 "label": "Blink installieren",
@@ -8691,12 +8699,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.start_run.rd",
+                "actionId": "rs.rd",
                 "clientKnownStateVersion": 86,
                 "idempotencyKey": "ai-sim-86"
               },
               "legalAction": {
-                "actionId": "runner.start_run.rd",
+                "actionId": "rs.rd",
                 "side": "runner",
                 "type": "start_run",
                 "label": "Run auf R&D",
@@ -8742,12 +8750,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.decline_rez",
+                "actionId": "c6",
                 "clientKnownStateVersion": 87,
                 "idempotencyKey": "ai-sim-87"
               },
               "legalAction": {
-                "actionId": "corp.decline_rez",
+                "actionId": "c6",
                 "side": "corp",
                 "type": "decline_rez",
                 "label": "Nicht rezzen",
@@ -8794,12 +8802,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.break_subroutine.c1cp.c1cp.c2s5.0.0",
+                "actionId": "r3.c1cp.c1cp.c2s5.0.0",
                 "clientKnownStateVersion": 88,
                 "idempotencyKey": "ai-sim-88"
               },
               "legalAction": {
-                "actionId": "runner.break_subroutine.c1cp.c1cp.c2s5.0.0",
+                "actionId": "r3.c1cp.c1cp.c2s5.0.0",
                 "side": "runner",
                 "type": "break_subroutine",
                 "label": "Blink: Subroutine brechen",
@@ -8874,12 +8882,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "clientKnownStateVersion": 89,
                 "idempotencyKey": "ai-sim-89"
               },
               "legalAction": {
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "ICE passieren",
@@ -8894,9 +8902,9 @@
                   "sourceDefinitionId": 450,
                   "unbrokenSubroutineCount": 0,
                   "encounterWillEndRun": false,
-                  "encounterSourceWillTrashAtEndOfTurn": false,
-                  "encounterSubroutineIds": ""
-                }
+                  "encounterSourceWillTrashAtEndOfTurn": false
+                },
+                "encounterSubroutineIds": []
               }
             }
           }
@@ -8929,12 +8937,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.rez_ice.c3jx.rd.c3jx",
+                "actionId": "cq.c3jx.rd.c3jx",
                 "clientKnownStateVersion": 90,
                 "idempotencyKey": "ai-sim-90"
               },
               "legalAction": {
-                "actionId": "corp.rez_ice.c3jx.rd.c3jx",
+                "actionId": "cq.c3jx.rd.c3jx",
                 "side": "corp",
                 "type": "rez_ice",
                 "label": "Olivia Salazar in R&D rezzen",
@@ -8980,12 +8988,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "clientKnownStateVersion": 91,
                 "idempotencyKey": "ai-sim-91"
               },
               "legalAction": {
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Run fortsetzen",
@@ -9043,12 +9051,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.break_subroutine.c1cp.c1cp.c2xx.0.0",
+                "actionId": "r3.c1cp.c1cp.c2xx.0.0",
                 "clientKnownStateVersion": 92,
                 "idempotencyKey": "ai-sim-92"
               },
               "legalAction": {
-                "actionId": "runner.break_subroutine.c1cp.c1cp.c2xx.0.0",
+                "actionId": "r3.c1cp.c1cp.c2xx.0.0",
                 "side": "runner",
                 "type": "break_subroutine",
                 "label": "Blink: Subroutine brechen",
@@ -9137,12 +9145,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.continue_run.0",
+                "actionId": "r5.0",
                 "clientKnownStateVersion": 93,
                 "idempotencyKey": "ai-sim-93"
               },
               "legalAction": {
-                "actionId": "runner.continue_run.0",
+                "actionId": "r5.0",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Subroutinen auslösen",
@@ -9158,14 +9166,16 @@
                   "unbrokenSubroutineCount": 1,
                   "encounterWillEndRun": false,
                   "encounterSourceWillTrashAtEndOfTurn": false,
-                  "encounterSubroutineIds": "0",
                   "traceStarted": true,
                   "traceId": 94,
                   "sourceCardId": "c2xx",
                   "baseTraceStrength": 3,
                   "corpBidMax": 7,
                   "traceSourceRunId": 87
-                }
+                },
+                "encounterSubroutineIds": [
+                  "0"
+                ]
               }
             }
           }
@@ -9208,7 +9218,7 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "clientKnownStateVersion": 94,
                 "selectedChoices": {
                   "choiceId": "94.corp.bid.94",
@@ -9219,7 +9229,7 @@
                 "idempotencyKey": "ai-sim-94"
               },
               "legalAction": {
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "side": "corp",
                 "type": "resolve_choice",
                 "label": "Korp Trace-Bid wählen (Base Trace 3)",
@@ -9310,7 +9320,7 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "clientKnownStateVersion": 95,
                 "selectedChoices": {
                   "choiceId": "94.runner.bid.95",
@@ -9321,7 +9331,7 @@
                 "idempotencyKey": "ai-sim-95"
               },
               "legalAction": {
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "side": "runner",
                 "type": "resolve_choice",
                 "label": "Runner Link-Bid wählen (Trace 3, Link 0)",
@@ -9393,12 +9403,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.draw_card",
+                "actionId": "r8",
                 "clientKnownStateVersion": 96,
                 "idempotencyKey": "ai-sim-96"
               },
               "legalAction": {
-                "actionId": "runner.draw_card",
+                "actionId": "r8",
                 "side": "runner",
                 "type": "draw_card",
                 "label": "Karte ziehen",
@@ -9473,12 +9483,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 97,
                 "idempotencyKey": "ai-sim-97"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -9539,12 +9549,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "clientKnownStateVersion": 98,
                 "idempotencyKey": "ai-sim-98"
               },
               "legalAction": {
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -9578,12 +9588,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 99,
                 "idempotencyKey": "ai-sim-99"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -9631,12 +9641,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.play_operation.c32e.c32e",
+                "actionId": "ci.c32e.c32e",
                 "clientKnownStateVersion": 100,
                 "idempotencyKey": "ai-sim-100"
               },
               "legalAction": {
-                "actionId": "corp.play_operation.c32e.c32e",
+                "actionId": "ci.c32e.c32e",
                 "side": "corp",
                 "type": "play_operation",
                 "label": "Chance Observation spielen",
@@ -9700,7 +9710,7 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "clientKnownStateVersion": 101,
                 "selectedChoices": {
                   "choiceId": "101.corp.bid.101",
@@ -9711,7 +9721,7 @@
                 "idempotencyKey": "ai-sim-101"
               },
               "legalAction": {
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "side": "corp",
                 "type": "resolve_choice",
                 "label": "Korp Trace-Bid wählen (Base Trace 5)",
@@ -9798,7 +9808,7 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "clientKnownStateVersion": 102,
                 "selectedChoices": {
                   "choiceId": "101.runner.bid.102",
@@ -9809,7 +9819,7 @@
                 "idempotencyKey": "ai-sim-102"
               },
               "legalAction": {
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "side": "runner",
                 "type": "resolve_choice",
                 "label": "Runner Link-Bid wählen (Trace 5, Link 0)",
@@ -9878,12 +9888,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.trash_resource.c2bt",
+                "actionId": "cw.c2bt",
                 "clientKnownStateVersion": 103,
                 "idempotencyKey": "ai-sim-103"
               },
               "legalAction": {
-                "actionId": "corp.trash_resource.c2bt",
+                "actionId": "cw.c2bt",
                 "side": "corp",
                 "type": "trash_resource",
                 "label": "Junkyard BBS trashen",
@@ -9944,12 +9954,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 104,
                 "idempotencyKey": "ai-sim-104"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -9987,12 +9997,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 105,
                 "idempotencyKey": "ai-sim-105"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -10033,12 +10043,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.remove_tag",
+                "actionId": "rm",
                 "clientKnownStateVersion": 106,
                 "idempotencyKey": "ai-sim-106"
               },
               "legalAction": {
-                "actionId": "runner.remove_tag",
+                "actionId": "rm",
                 "side": "runner",
                 "type": "remove_tag",
                 "label": "Tag entfernen",
@@ -10114,12 +10124,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 107,
                 "idempotencyKey": "ai-sim-107"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -10214,12 +10224,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 108,
                 "idempotencyKey": "ai-sim-108"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -10314,12 +10324,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 109,
                 "idempotencyKey": "ai-sim-109"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -10380,12 +10390,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "clientKnownStateVersion": 110,
                 "idempotencyKey": "ai-sim-110"
               },
               "legalAction": {
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -10419,12 +10429,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 111,
                 "idempotencyKey": "ai-sim-111"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -10466,12 +10476,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 112,
                 "idempotencyKey": "ai-sim-112"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -10517,12 +10527,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 113,
                 "idempotencyKey": "ai-sim-113"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -10568,12 +10578,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 114,
                 "idempotencyKey": "ai-sim-114"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -10611,12 +10621,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 115,
                 "idempotencyKey": "ai-sim-115"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -10668,12 +10678,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.play_event.c1zv.c1zv",
+                "actionId": "rh.c1zv.c1zv",
                 "clientKnownStateVersion": 116,
                 "idempotencyKey": "ai-sim-116"
               },
               "legalAction": {
-                "actionId": "runner.play_event.c1zv.c1zv",
+                "actionId": "rh.c1zv.c1zv",
                 "side": "runner",
                 "type": "play_event",
                 "label": "Social Engineering spielen",
@@ -10732,7 +10742,7 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "clientKnownStateVersion": 117,
                 "selectedChoices": {
                   "choiceId": "secret_spend_guess_then_targeted_bypass_run_hide_117",
@@ -10743,7 +10753,7 @@
                 "idempotencyKey": "ai-sim-117"
               },
               "legalAction": {
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "side": "runner",
                 "type": "resolve_choice",
                 "label": "Credits geheim verstecken.",
@@ -10816,7 +10826,7 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "clientKnownStateVersion": 118,
                 "selectedChoices": {
                   "choiceId": "secret_spend_guess_then_targeted_bypass_run_guess_118",
@@ -10827,7 +10837,7 @@
                 "idempotencyKey": "ai-sim-118"
               },
               "legalAction": {
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "side": "corp",
                 "type": "resolve_choice",
                 "label": "Versteckte Credits raten.",
@@ -10912,7 +10922,7 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "clientKnownStateVersion": 119,
                 "selectedChoices": {
                   "choiceId": "secret_spend_guess_then_targeted_bypass_run_target_119",
@@ -10923,7 +10933,7 @@
                 "idempotencyKey": "ai-sim-119"
               },
               "legalAction": {
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "side": "runner",
                 "type": "resolve_choice",
                 "label": "Fort und ICE fuer Auto-Pass waehlen.",
@@ -11002,12 +11012,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.continue_run.0",
+                "actionId": "r5.0",
                 "clientKnownStateVersion": 120,
                 "idempotencyKey": "ai-sim-120"
               },
               "legalAction": {
-                "actionId": "runner.continue_run.0",
+                "actionId": "r5.0",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Subroutinen auslösen",
@@ -11023,14 +11033,16 @@
                   "unbrokenSubroutineCount": 1,
                   "encounterWillEndRun": false,
                   "encounterSourceWillTrashAtEndOfTurn": false,
-                  "encounterSubroutineIds": "0",
                   "traceStarted": true,
                   "traceId": 121,
                   "sourceCardId": "c2ul",
                   "baseTraceStrength": 5,
                   "corpBidMax": 7,
                   "traceSourceRunId": 120
-                }
+                },
+                "encounterSubroutineIds": [
+                  "0"
+                ]
               }
             }
           }
@@ -11073,7 +11085,7 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "clientKnownStateVersion": 121,
                 "selectedChoices": {
                   "choiceId": "121.corp.bid.121",
@@ -11084,7 +11096,7 @@
                 "idempotencyKey": "ai-sim-121"
               },
               "legalAction": {
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "side": "corp",
                 "type": "resolve_choice",
                 "label": "Korp Trace-Bid wählen (Base Trace 5)",
@@ -11173,7 +11185,7 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "clientKnownStateVersion": 122,
                 "selectedChoices": {
                   "choiceId": "121.runner.bid.122",
@@ -11184,7 +11196,7 @@
                 "idempotencyKey": "ai-sim-122"
               },
               "legalAction": {
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "side": "runner",
                 "type": "resolve_choice",
                 "label": "Runner Link-Bid wählen (Trace 5, Link 0)",
@@ -11259,12 +11271,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "clientKnownStateVersion": 123,
                 "idempotencyKey": "ai-sim-123"
               },
               "legalAction": {
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "ICE passieren",
@@ -11279,9 +11291,9 @@
                   "sourceDefinitionId": 461,
                   "unbrokenSubroutineCount": 0,
                   "encounterWillEndRun": false,
-                  "encounterSourceWillTrashAtEndOfTurn": false,
-                  "encounterSubroutineIds": ""
-                }
+                  "encounterSourceWillTrashAtEndOfTurn": false
+                },
+                "encounterSubroutineIds": []
               }
             }
           }
@@ -11311,12 +11323,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "clientKnownStateVersion": 124,
                 "idempotencyKey": "ai-sim-124"
               },
               "legalAction": {
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Run fortsetzen",
@@ -11362,12 +11374,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.rez_ice.c2yd.c2yd",
+                "actionId": "cq.c2yd.c2yd",
                 "clientKnownStateVersion": 125,
                 "idempotencyKey": "ai-sim-125"
               },
               "legalAction": {
-                "actionId": "corp.rez_ice.c2yd.c2yd",
+                "actionId": "cq.c2yd.c2yd",
                 "side": "corp",
                 "type": "rez_ice",
                 "label": "Scramble rezzen",
@@ -11413,12 +11425,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "clientKnownStateVersion": 126,
                 "idempotencyKey": "ai-sim-126"
               },
               "legalAction": {
-                "actionId": "runner.continue_run",
+                "actionId": "r5",
                 "side": "runner",
                 "type": "continue_run",
                 "label": "Run fortsetzen",
@@ -11479,12 +11491,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.access_card",
+                "actionId": "r0",
                 "clientKnownStateVersion": 127,
                 "idempotencyKey": "ai-sim-127"
               },
               "legalAction": {
-                "actionId": "runner.access_card",
+                "actionId": "r0",
                 "side": "runner",
                 "type": "access_card",
                 "label": "Karte accessen",
@@ -11544,12 +11556,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.trash_accessed_card.c399.0",
+                "actionId": "rv.c399.0",
                 "clientKnownStateVersion": 128,
                 "idempotencyKey": "ai-sim-128"
               },
               "legalAction": {
-                "actionId": "runner.trash_accessed_card.c399.0",
+                "actionId": "rv.c399.0",
                 "side": "runner",
                 "type": "trash_accessed_card",
                 "label": "Corprunner's Shattered Remains trashen",
@@ -11605,12 +11617,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.draw_card",
+                "actionId": "r8",
                 "clientKnownStateVersion": 129,
                 "idempotencyKey": "ai-sim-129"
               },
               "legalAction": {
-                "actionId": "runner.draw_card",
+                "actionId": "r8",
                 "side": "runner",
                 "type": "draw_card",
                 "label": "Karte ziehen",
@@ -11685,12 +11697,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 130,
                 "idempotencyKey": "ai-sim-130"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -11785,12 +11797,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 131,
                 "idempotencyKey": "ai-sim-131"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -11851,12 +11863,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "clientKnownStateVersion": 132,
                 "idempotencyKey": "ai-sim-132"
               },
               "legalAction": {
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -11890,12 +11902,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 133,
                 "idempotencyKey": "ai-sim-133"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -11937,12 +11949,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 134,
                 "idempotencyKey": "ai-sim-134"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -11997,12 +12009,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.install_card.c2sl.hq.c2sl.2",
+                "actionId": "cc.c2sl.hq.c2sl.2",
                 "clientKnownStateVersion": 135,
                 "idempotencyKey": "ai-sim-135"
               },
               "legalAction": {
-                "actionId": "corp.install_card.c2sl.hq.c2sl.2",
+                "actionId": "cc.c2sl.hq.c2sl.2",
                 "side": "corp",
                 "type": "install_card",
                 "label": "ICE vor HQ installieren",
@@ -12064,12 +12076,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.install_card.c37y.r1.c37y",
+                "actionId": "cc.c37y.r1.c37y",
                 "clientKnownStateVersion": 136,
                 "idempotencyKey": "ai-sim-136"
               },
               "legalAction": {
-                "actionId": "corp.install_card.c37y.r1.c37y",
+                "actionId": "cc.c37y.r1.c37y",
                 "side": "corp",
                 "type": "install_card",
                 "label": "Karte in Remote 1 installieren",
@@ -12113,12 +12125,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 137,
                 "idempotencyKey": "ai-sim-137"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -12186,12 +12198,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.install_card.c2ch.c2ch",
+                "actionId": "rc.c2ch.c2ch",
                 "clientKnownStateVersion": 138,
                 "idempotencyKey": "ai-sim-138"
               },
               "legalAction": {
-                "actionId": "runner.install_card.c2ch.c2ch",
+                "actionId": "rc.c2ch.c2ch",
                 "side": "runner",
                 "type": "install_card",
                 "label": "Loan from Chiba installieren",
@@ -12272,12 +12284,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.draw_card",
+                "actionId": "r8",
                 "clientKnownStateVersion": 139,
                 "idempotencyKey": "ai-sim-139"
               },
               "legalAction": {
-                "actionId": "runner.draw_card",
+                "actionId": "r8",
                 "side": "runner",
                 "type": "draw_card",
                 "label": "Karte ziehen",
@@ -12344,12 +12356,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.play_event.c20i.c20i",
+                "actionId": "rh.c20i.c20i",
                 "clientKnownStateVersion": 140,
                 "idempotencyKey": "ai-sim-140"
               },
               "legalAction": {
-                "actionId": "runner.play_event.c20i.c20i",
+                "actionId": "rh.c20i.c20i",
                 "side": "runner",
                 "type": "play_event",
                 "label": "Temple Microcode Outlet spielen",
@@ -12436,7 +12448,7 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "clientKnownStateVersion": 141,
                 "selectedChoices": {
                   "choiceId": "p3_37_search_stack_to_grip_141",
@@ -12447,7 +12459,7 @@
                 "idempotencyKey": "ai-sim-141"
               },
               "legalAction": {
-                "actionId": "runner.resolve_choice",
+                "actionId": "rn",
                 "side": "runner",
                 "type": "resolve_choice",
                 "label": "Stack durchsuchen",
@@ -12571,12 +12583,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.end_turn.c2ch.c2ch.end_of_runner_turn.0",
+                "actionId": "r9.c2ch.c2ch.end_of_runner_turn.0",
                 "clientKnownStateVersion": 142,
                 "idempotencyKey": "ai-sim-142"
               },
               "legalAction": {
-                "actionId": "runner.end_turn.c2ch.c2ch.end_of_runner_turn.0",
+                "actionId": "r9.c2ch.c2ch.end_of_runner_turn.0",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Loan from Chiba trashen und Zug beenden",
@@ -12646,12 +12658,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 143,
                 "idempotencyKey": "ai-sim-143"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -12693,12 +12705,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 144,
                 "idempotencyKey": "ai-sim-144"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -12744,12 +12756,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 145,
                 "idempotencyKey": "ai-sim-145"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -12795,12 +12807,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "clientKnownStateVersion": 146,
                 "idempotencyKey": "ai-sim-146"
               },
               "legalAction": {
-                "actionId": "corp.gain_credit",
+                "actionId": "cb",
                 "side": "corp",
                 "type": "gain_credit",
                 "label": "1 Credit nehmen",
@@ -12838,12 +12850,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 147,
                 "idempotencyKey": "ai-sim-147"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -12911,12 +12923,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 148,
                 "idempotencyKey": "ai-sim-148"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -13011,12 +13023,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 149,
                 "idempotencyKey": "ai-sim-149"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -13111,12 +13123,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 150,
                 "idempotencyKey": "ai-sim-150"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -13211,12 +13223,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 151,
                 "idempotencyKey": "ai-sim-151"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -13277,12 +13289,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "clientKnownStateVersion": 152,
                 "idempotencyKey": "ai-sim-152"
               },
               "legalAction": {
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -13316,12 +13328,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 153,
                 "idempotencyKey": "ai-sim-153"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -13368,12 +13380,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.install_card.c2ti.new_remote.c2ti",
+                "actionId": "cc.c2ti.new_remote.c2ti",
                 "clientKnownStateVersion": 154,
                 "idempotencyKey": "ai-sim-154"
               },
               "legalAction": {
-                "actionId": "corp.install_card.c2ti.new_remote.c2ti",
+                "actionId": "cc.c2ti.new_remote.c2ti",
                 "side": "corp",
                 "type": "install_card",
                 "label": "ICE vor neuem Remote installieren",
@@ -13424,12 +13436,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.draw_card",
+                "actionId": "c8",
                 "clientKnownStateVersion": 155,
                 "idempotencyKey": "ai-sim-155"
               },
               "legalAction": {
-                "actionId": "corp.draw_card",
+                "actionId": "c8",
                 "side": "corp",
                 "type": "draw_card",
                 "label": "Karte ziehen",
@@ -13502,12 +13514,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.rez_ice.c37y.c37y",
+                "actionId": "cq.c37y.c37y",
                 "clientKnownStateVersion": 156,
                 "idempotencyKey": "ai-sim-156"
               },
               "legalAction": {
-                "actionId": "corp.rez_ice.c37y.c37y",
+                "actionId": "cq.c37y.c37y",
                 "side": "corp",
                 "type": "rez_ice",
                 "label": "Karte in Remote 1 rezzen",
@@ -13618,12 +13630,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.activated_card_ability.c37y.c37y.activated.0",
+                "actionId": "c1.c37y.c37y.activated.0",
                 "clientKnownStateVersion": 157,
                 "idempotencyKey": "ai-sim-157"
               },
               "legalAction": {
-                "actionId": "corp.activated_card_ability.c37y.c37y.activated.0",
+                "actionId": "c1.c37y.c37y.activated.0",
                 "side": "corp",
                 "type": "activated_card_ability",
                 "label": "BBS Whispering Campaign: 2 Credits nehmen",
@@ -13695,12 +13707,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 158,
                 "idempotencyKey": "ai-sim-158"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -13768,12 +13780,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 159,
                 "idempotencyKey": "ai-sim-159"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -13868,12 +13880,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 160,
                 "idempotencyKey": "ai-sim-160"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -13968,12 +13980,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 161,
                 "idempotencyKey": "ai-sim-161"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -14068,12 +14080,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 162,
                 "idempotencyKey": "ai-sim-162"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -14134,12 +14146,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "clientKnownStateVersion": 163,
                 "idempotencyKey": "ai-sim-163"
               },
               "legalAction": {
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -14173,12 +14185,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 164,
                 "idempotencyKey": "ai-sim-164"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -14229,12 +14241,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.install_card.c2xy.rd.c2xy.2",
+                "actionId": "cc.c2xy.rd.c2xy.2",
                 "clientKnownStateVersion": 165,
                 "idempotencyKey": "ai-sim-165"
               },
               "legalAction": {
-                "actionId": "corp.install_card.c2xy.rd.c2xy.2",
+                "actionId": "cc.c2xy.rd.c2xy.2",
                 "side": "corp",
                 "type": "install_card",
                 "label": "ICE vor R&D installieren",
@@ -14331,12 +14343,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.activated_card_ability.c37y.c37y.activated.0",
+                "actionId": "c1.c37y.c37y.activated.0",
                 "clientKnownStateVersion": 166,
                 "idempotencyKey": "ai-sim-166"
               },
               "legalAction": {
-                "actionId": "corp.activated_card_ability.c37y.c37y.activated.0",
+                "actionId": "c1.c37y.c37y.activated.0",
                 "side": "corp",
                 "type": "activated_card_ability",
                 "label": "BBS Whispering Campaign: 2 Credits nehmen",
@@ -14456,12 +14468,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.activated_card_ability.c37y.c37y.activated.0",
+                "actionId": "c1.c37y.c37y.activated.0",
                 "clientKnownStateVersion": 167,
                 "idempotencyKey": "ai-sim-167"
               },
               "legalAction": {
-                "actionId": "corp.activated_card_ability.c37y.c37y.activated.0",
+                "actionId": "c1.c37y.c37y.activated.0",
                 "side": "corp",
                 "type": "activated_card_ability",
                 "label": "BBS Whispering Campaign: 2 Credits nehmen",
@@ -14533,12 +14545,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 168,
                 "idempotencyKey": "ai-sim-168"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -14606,12 +14618,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 169,
                 "idempotencyKey": "ai-sim-169"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -14706,12 +14718,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 170,
                 "idempotencyKey": "ai-sim-170"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -14806,12 +14818,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 171,
                 "idempotencyKey": "ai-sim-171"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -14906,12 +14918,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 172,
                 "idempotencyKey": "ai-sim-172"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -14972,12 +14984,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "clientKnownStateVersion": 173,
                 "idempotencyKey": "ai-sim-173"
               },
               "legalAction": {
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -15011,12 +15023,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 174,
                 "idempotencyKey": "ai-sim-174"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -15098,12 +15110,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.activated_card_ability.c37y.c37y.activated.0",
+                "actionId": "c1.c37y.c37y.activated.0",
                 "clientKnownStateVersion": 175,
                 "idempotencyKey": "ai-sim-175"
               },
               "legalAction": {
-                "actionId": "corp.activated_card_ability.c37y.c37y.activated.0",
+                "actionId": "c1.c37y.c37y.activated.0",
                 "side": "corp",
                 "type": "activated_card_ability",
                 "label": "BBS Whispering Campaign: 2 Credits nehmen",
@@ -15223,12 +15235,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.activated_card_ability.c37y.c37y.activated.0",
+                "actionId": "c1.c37y.c37y.activated.0",
                 "clientKnownStateVersion": 176,
                 "idempotencyKey": "ai-sim-176"
               },
               "legalAction": {
-                "actionId": "corp.activated_card_ability.c37y.c37y.activated.0",
+                "actionId": "c1.c37y.c37y.activated.0",
                 "side": "corp",
                 "type": "activated_card_ability",
                 "label": "BBS Whispering Campaign: 2 Credits nehmen",
@@ -15317,12 +15329,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.install_card.c2t1.r1.c2t1.1",
+                "actionId": "cc.c2t1.r1.c2t1.1",
                 "clientKnownStateVersion": 177,
                 "idempotencyKey": "ai-sim-177"
               },
               "legalAction": {
-                "actionId": "corp.install_card.c2t1.r1.c2t1.1",
+                "actionId": "cc.c2t1.r1.c2t1.1",
                 "side": "corp",
                 "type": "install_card",
                 "label": "ICE vor Remote 1 installieren",
@@ -15371,12 +15383,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 178,
                 "idempotencyKey": "ai-sim-178"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -15444,12 +15456,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 179,
                 "idempotencyKey": "ai-sim-179"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -15544,12 +15556,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 180,
                 "idempotencyKey": "ai-sim-180"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -15644,12 +15656,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 181,
                 "idempotencyKey": "ai-sim-181"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -15744,12 +15756,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 182,
                 "idempotencyKey": "ai-sim-182"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -15810,12 +15822,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "clientKnownStateVersion": 183,
                 "idempotencyKey": "ai-sim-183"
               },
               "legalAction": {
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -15849,12 +15861,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 184,
                 "idempotencyKey": "ai-sim-184"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -15905,12 +15917,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.install_card.c2ol.r1.c2ol.2",
+                "actionId": "cc.c2ol.r1.c2ol.2",
                 "clientKnownStateVersion": 185,
                 "idempotencyKey": "ai-sim-185"
               },
               "legalAction": {
-                "actionId": "corp.install_card.c2ol.r1.c2ol.2",
+                "actionId": "cc.c2ol.r1.c2ol.2",
                 "side": "corp",
                 "type": "install_card",
                 "label": "ICE vor Remote 1 installieren",
@@ -16007,12 +16019,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.activated_card_ability.c37y.c37y.activated.0",
+                "actionId": "c1.c37y.c37y.activated.0",
                 "clientKnownStateVersion": 186,
                 "idempotencyKey": "ai-sim-186"
               },
               "legalAction": {
-                "actionId": "corp.activated_card_ability.c37y.c37y.activated.0",
+                "actionId": "c1.c37y.c37y.activated.0",
                 "side": "corp",
                 "type": "activated_card_ability",
                 "label": "BBS Whispering Campaign: 2 Credits nehmen",
@@ -16132,12 +16144,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.activated_card_ability.c37y.c37y.activated.0",
+                "actionId": "c1.c37y.c37y.activated.0",
                 "clientKnownStateVersion": 187,
                 "idempotencyKey": "ai-sim-187"
               },
               "legalAction": {
-                "actionId": "corp.activated_card_ability.c37y.c37y.activated.0",
+                "actionId": "c1.c37y.c37y.activated.0",
                 "side": "corp",
                 "type": "activated_card_ability",
                 "label": "BBS Whispering Campaign: 2 Credits nehmen",
@@ -16209,12 +16221,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 188,
                 "idempotencyKey": "ai-sim-188"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -16282,12 +16294,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 189,
                 "idempotencyKey": "ai-sim-189"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -16382,12 +16394,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 190,
                 "idempotencyKey": "ai-sim-190"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -16482,12 +16494,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 191,
                 "idempotencyKey": "ai-sim-191"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -16582,12 +16594,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 192,
                 "idempotencyKey": "ai-sim-192"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -16648,12 +16660,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "clientKnownStateVersion": 193,
                 "idempotencyKey": "ai-sim-193"
               },
               "legalAction": {
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -16687,12 +16699,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 194,
                 "idempotencyKey": "ai-sim-194"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -16786,12 +16798,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.activated_card_ability.c37y.c37y.activated.0",
+                "actionId": "c1.c37y.c37y.activated.0",
                 "clientKnownStateVersion": 195,
                 "idempotencyKey": "ai-sim-195"
               },
               "legalAction": {
-                "actionId": "corp.activated_card_ability.c37y.c37y.activated.0",
+                "actionId": "c1.c37y.c37y.activated.0",
                 "side": "corp",
                 "type": "activated_card_ability",
                 "label": "BBS Whispering Campaign: 2 Credits nehmen",
@@ -16882,12 +16894,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.draw_card",
+                "actionId": "c8",
                 "clientKnownStateVersion": 196,
                 "idempotencyKey": "ai-sim-196"
               },
               "legalAction": {
-                "actionId": "corp.draw_card",
+                "actionId": "c8",
                 "side": "corp",
                 "type": "draw_card",
                 "label": "Karte ziehen",
@@ -16942,12 +16954,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.install_card.c2p9.r1.c2p9.3",
+                "actionId": "cc.c2p9.r1.c2p9.3",
                 "clientKnownStateVersion": 197,
                 "idempotencyKey": "ai-sim-197"
               },
               "legalAction": {
-                "actionId": "corp.install_card.c2p9.r1.c2p9.3",
+                "actionId": "cc.c2p9.r1.c2p9.3",
                 "side": "corp",
                 "type": "install_card",
                 "label": "ICE vor Remote 1 installieren",
@@ -16996,12 +17008,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 198,
                 "idempotencyKey": "ai-sim-198"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -17053,7 +17065,7 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "clientKnownStateVersion": 199,
                 "selectedChoices": {
                   "choiceId": "discard_corp_199",
@@ -17064,7 +17076,7 @@
                 "idempotencyKey": "ai-sim-199"
               },
               "legalAction": {
-                "actionId": "corp.resolve_choice",
+                "actionId": "cn",
                 "side": "corp",
                 "type": "resolve_choice",
                 "label": "Korp-Discard wählen",
@@ -17158,12 +17170,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 200,
                 "idempotencyKey": "ai-sim-200"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -17258,12 +17270,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 201,
                 "idempotencyKey": "ai-sim-201"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -17358,12 +17370,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 202,
                 "idempotencyKey": "ai-sim-202"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -17458,12 +17470,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "clientKnownStateVersion": 203,
                 "idempotencyKey": "ai-sim-203"
               },
               "legalAction": {
-                "actionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+                "actionId": "r1.c1l5.c1l5.activated.0",
                 "side": "runner",
                 "type": "activated_card_ability",
                 "label": "2 Credits nehmen",
@@ -17524,12 +17536,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "runner",
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "clientKnownStateVersion": 204,
                 "idempotencyKey": "ai-sim-204"
               },
               "legalAction": {
-                "actionId": "runner.end_turn",
+                "actionId": "r9",
                 "side": "runner",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -17563,12 +17575,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "clientKnownStateVersion": 205,
                 "idempotencyKey": "ai-sim-205"
               },
               "legalAction": {
-                "actionId": "corp.mandatory_draw",
+                "actionId": "ce",
                 "side": "corp",
                 "type": "mandatory_draw",
                 "label": "Korp Pflichtkarte ziehen",
@@ -17615,12 +17627,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.install_card.c2l9.r1.c2l9",
+                "actionId": "cc.c2l9.r1.c2l9",
                 "clientKnownStateVersion": 206,
                 "idempotencyKey": "ai-sim-206"
               },
               "legalAction": {
-                "actionId": "corp.install_card.c2l9.r1.c2l9",
+                "actionId": "cc.c2l9.r1.c2l9",
                 "side": "corp",
                 "type": "install_card",
                 "label": "Karte in Remote 1 installieren",
@@ -17674,12 +17686,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.advance_card.c2l9.c2l9",
+                "actionId": "c2.c2l9.c2l9",
                 "clientKnownStateVersion": 207,
                 "idempotencyKey": "ai-sim-207"
               },
               "legalAction": {
-                "actionId": "corp.advance_card.c2l9.c2l9",
+                "actionId": "c2.c2l9.c2l9",
                 "side": "corp",
                 "type": "advance_card",
                 "label": "Netwatch Operations Office in Remote 1 advancen",
@@ -17731,12 +17743,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.advance_card.c2l9.c2l9",
+                "actionId": "c2.c2l9.c2l9",
                 "clientKnownStateVersion": 208,
                 "idempotencyKey": "ai-sim-208"
               },
               "legalAction": {
-                "actionId": "corp.advance_card.c2l9.c2l9",
+                "actionId": "c2.c2l9.c2l9",
                 "side": "corp",
                 "type": "advance_card",
                 "label": "Netwatch Operations Office in Remote 1 advancen",
@@ -17778,12 +17790,12 @@
               "action": {
                 "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
                 "side": "corp",
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "clientKnownStateVersion": 209,
                 "idempotencyKey": "ai-sim-209"
               },
               "legalAction": {
-                "actionId": "corp.end_turn",
+                "actionId": "c9",
                 "side": "corp",
                 "type": "end_turn",
                 "label": "Zug beenden",
@@ -22992,7 +23004,7 @@
         "id": "runner_credit_base"
       },
       "selectedStepKind": "gain_credits",
-      "selectedActionId": "runner.activated_card_ability.c1l5.c1l5.activated.0",
+      "selectedActionId": "r1.c1l5.c1l5.activated.0",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -23012,7 +23024,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.end_turn"
+        "plan_portfolio_selected_action:r9"
       ]
     },
     "strategicIntent": {

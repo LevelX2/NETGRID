@@ -14,6 +14,14 @@ import {
 } from "./corp-opponent-campaign-continuity";
 
 describe("Corp opponent-turn campaign continuity", () => {
+  it("rejects an identity rebound to a different campaign objective before reconciliation", () => {
+    const descriptor = agendaDescriptor();
+    expect(() => reconcileCorpCampaignContinuity({
+      input: decisionInput({ stateVersion: 12, activeSide: "corp" }),
+      previous: [],
+      descriptors: [{ ...descriptor, identity: { ...descriptor.identity, objectiveKey: "different-agenda" } }],
+    })).toThrowError(expect.objectContaining({ code: "invalid_plan_identity" }));
+  });
   it("exposes only newly observed public remote accesses to the score owner", () => {
     const input = decisionInput({
       stateVersion: 15,
@@ -157,7 +165,7 @@ describe("Corp opponent-turn campaign continuity", () => {
       }),
     ).toEqual([
       expect.objectContaining({
-        campaignId: "campaign:project-a",
+        campaignId: "k2093ge6gncdmdeuovfjsts3ey",
         rootPlanInstanceId: "score-project-a",
       }),
     ]);
@@ -568,10 +576,10 @@ function openingRushDescriptor(): CorpCampaignDescriptor {
 
 function agendaDescriptor(): CorpCampaignDescriptor {
   return {
-    campaignId: "campaign:agenda:agenda-1:r1",
+    campaignId: "kbhzdiku4ohast2p12lu30lfh2", identity: {"ownerModuleId":"corp.score_agenda","objectiveKey":"agenda:agenda-1:r1"},
     kind: "agenda",
     moduleId: "corp.score_agenda",
-    rootPlanInstanceId: "plan:corp.score_agenda:agenda%3Aagenda-1%3Ar1",
+    rootPlanInstanceId: "pbdq9qo2j7h919e58ns3d9h9nh",
     originStateVersion: 10,
     milestoneId: "install_agenda",
     targetServerId: "r1",

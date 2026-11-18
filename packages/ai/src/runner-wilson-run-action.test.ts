@@ -37,7 +37,7 @@ describe("Runner Wilson run action utilization", () => {
       "rd",
       "Wilson-Run auf R&D",
     );
-    const runRd = runAction("runner.start_run.rd", "rd");
+    const runRd = runAction("rs.rd", "rd");
     const input = runnerInput({
       credits: 5,
       servers: [server("rd")],
@@ -115,7 +115,7 @@ describe("Runner Wilson run action utilization", () => {
   });
 
   it("prefers the Wilson-only run action for the same planned target", () => {
-    const normalRun = runAction("runner.start_run.rd", "rd", "Run auf R&D");
+    const normalRun = runAction("rs.rd", "rd", "Run auf R&D");
     const wilsonRun = wilsonRunAction(
       "runner.wilson.start_run.rd",
       "rd",
@@ -188,7 +188,7 @@ describe("Runner Wilson run action utilization", () => {
       "rd",
       "Wilson-Run auf R&D",
     );
-    const runRd = runAction("runner.start_run.rd", "rd");
+    const runRd = runAction("rs.rd", "rd");
     const input = runnerInput({
       credits: 8,
       rig: [visibleBreaker("simple-fracter", 597, 2)],
@@ -334,13 +334,13 @@ function wilsonRunAction(
 }
 
 function gainCreditAction(): LegalAction {
-  return legalAction("runner.gain_credit", "gain_credit", "Credit nehmen", {
+  return legalAction("rb", "gain_credit", "Credit nehmen", {
     costs: [{ clicks: 1 }],
   });
 }
 
 function endTurnAction(): LegalAction {
-  return legalAction("runner.end_turn", "end_turn", "Zug beenden", {
+  return legalAction("r9", "end_turn", "Zug beenden", {
     source: "game_rule",
     costs: [],
   });

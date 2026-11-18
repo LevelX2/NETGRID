@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
@@ -364,7 +365,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
     const previous = {
       instances: [
         {
-          instanceId: "plan:corp.ambush_and_bluff:score-decoy",
+          instanceId: "pe5pup97zofoollhlodzvhb7rw",
           moduleId: "corp.ambush_and_bluff",
           moduleState: {
             kind: "ambush",
@@ -441,7 +442,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
     const previous = {
       instances: [
         {
-          instanceId: "plan:corp.ambush_and_bluff:installed-agenda-1",
+          instanceId: "pd88k490ca5o3bqc16bkmlzir0",
           moduleId: "corp.ambush_and_bluff",
           viability: "ready",
           moduleState: {
@@ -467,7 +468,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
           },
         },
         {
-          instanceId: "plan:corp.score_agenda:installed-agenda-1:r1",
+          instanceId: "p7kyljsblpxr66h941uncyboom",
           moduleId: "corp.score_agenda",
           viability: "ready",
           moduleState: {
@@ -493,7 +494,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
     ).toBeUndefined();
     expect(advanceCandidate.actionId).toBe("advance-installed-agenda-1");
     expect(previous.instances[1]).toMatchObject({
-      instanceId: "plan:corp.score_agenda:installed-agenda-1:r1",
+      instanceId: "p7kyljsblpxr66h941uncyboom",
       moduleId: "corp.score_agenda",
       viability: "ready",
     });
@@ -511,7 +512,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
       },
     );
     const advance = legalAction(
-      `corp.advance_card.${source.instanceId}.${source.instanceId}`,
+      `c2.${source.instanceId}.${source.instanceId}`,
       "corp",
       "advance_card",
       "Advance Vacant Soulkiller",
@@ -541,7 +542,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
     const previous = {
       instances: [
         {
-          instanceId: `plan:corp.ambush_and_bluff:ambush%3A${source.instanceId}`,
+          instanceId: planInstanceIdForProposal({ moduleId: "corp.ambush_and_bluff", dedupeKey: `ambush:${source.instanceId}` }),
           moduleId: "corp.ambush_and_bluff",
           viability: "ready",
           moduleState: {
@@ -552,7 +553,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
               sourceDefinitionId: source.definitionId,
               sourceInstanceId: source.instanceId,
               actionIds: [
-                `corp.install_card.${source.instanceId}.new_remote.${source.instanceId}`,
+                `cc.${source.instanceId}.new_remote.${source.instanceId}`,
               ],
               serverId: "new_remote",
               phase: "install",
@@ -975,7 +976,7 @@ function ambushSupportPrevious(
   return {
     instances: [
       {
-        instanceId: `plan:corp.ambush_and_bluff:ambush%3A${trap.instanceId}`,
+        instanceId: planInstanceIdForProposal({ moduleId: "corp.ambush_and_bluff", dedupeKey: `ambush:${trap.instanceId}` }),
         moduleId: "corp.ambush_and_bluff",
         viability: "ready",
         moduleState: {
@@ -1128,7 +1129,7 @@ function installedTrapFixture(options: {
     previous: {
       instances: [
         {
-          instanceId: "plan:corp.ambush_and_bluff:trap-installed",
+          instanceId: "p5k7k9hn2wkixgyrwlb5nrbcav",
           moduleId: "corp.ambush_and_bluff",
           viability: "ready",
           moduleState: {

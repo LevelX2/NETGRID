@@ -45,7 +45,7 @@ it.each([14, 26] as const)(
       input,
       deckCapabilities:
         createDeckCapabilitiesContext().deckCapabilitiesForInput(input),
-      runActionId: "runner.start_run.r1",
+      runActionId: "rs.r1",
       targetServerId: "r1",
     })!.target;
     expect(target.visibleTraceTagHazardUnavoidable).not.toBe(true);

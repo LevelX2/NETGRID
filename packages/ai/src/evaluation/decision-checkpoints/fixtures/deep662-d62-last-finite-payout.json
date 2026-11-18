@@ -463,7 +463,7 @@
                 }
               },
               {
-                "instanceId": "h1lt4oxj",
+                "instanceId": "hhq.i2",
                 "known": false,
                 "rezzed": false,
                 "advancementCounters": 0
@@ -608,7 +608,7 @@
             },
             "ice": [
               {
-                "instanceId": "h1m34ami",
+                "instanceId": "hr1.i0",
                 "known": false,
                 "rezzed": false,
                 "advancementCounters": 0
@@ -2548,7 +2548,7 @@
         ],
         "legalActions": [
           {
-            "actionId": "runner.activated_card_ability.c2eq.c2eq.activated.465",
+            "actionId": "r1.c2eq.c2eq.activated.465",
             "side": "runner",
             "type": "activated_card_ability",
             "label": "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
@@ -2579,7 +2579,7 @@
             }
           },
           {
-            "actionId": "runner.gain_credit",
+            "actionId": "rb",
             "side": "runner",
             "type": "gain_credit",
             "label": "1 Credit nehmen",
@@ -2600,7 +2600,7 @@
             }
           },
           {
-            "actionId": "runner.draw_card",
+            "actionId": "r8",
             "side": "runner",
             "type": "draw_card",
             "label": "Karte ziehen",
@@ -2623,7 +2623,7 @@
             }
           },
           {
-            "actionId": "runner.install_card.c2az.c2az",
+            "actionId": "rc.c2az.c2az",
             "side": "runner",
             "type": "install_card",
             "label": "Fall Guy installieren",
@@ -2654,7 +2654,7 @@
             }
           },
           {
-            "actionId": "runner.play_event.c1zv.c1zv.407",
+            "actionId": "rh.c1zv.c1zv.407",
             "side": "runner",
             "type": "play_event",
             "label": "Social Engineering spielen",
@@ -2682,7 +2682,7 @@
             }
           },
           {
-            "actionId": "runner.install_card.c2ay.c2ay",
+            "actionId": "rc.c2ay.c2ay",
             "side": "runner",
             "type": "install_card",
             "label": "Fall Guy installieren",
@@ -2713,7 +2713,7 @@
             }
           },
           {
-            "actionId": "runner.play_event.c1zt.c1zt.407",
+            "actionId": "rh.c1zt.c1zt.407",
             "side": "runner",
             "type": "play_event",
             "label": "Social Engineering spielen",
@@ -2741,7 +2741,7 @@
             }
           },
           {
-            "actionId": "runner.play_event.c1u9.c1u9.382",
+            "actionId": "rh.c1u9.c1u9.382",
             "side": "runner",
             "type": "play_event",
             "label": "Forged Activation Orders spielen",
@@ -2768,7 +2768,7 @@
             }
           },
           {
-            "actionId": "runner.play_event.c1sp.c1sp.375",
+            "actionId": "rh.c1sp.c1sp.375",
             "side": "runner",
             "type": "play_event",
             "label": "Bodyweight™ Synthetic Blood spielen",
@@ -2801,7 +2801,7 @@
             }
           },
           {
-            "actionId": "runner.start_run.hq",
+            "actionId": "rs.hq",
             "side": "runner",
             "type": "start_run",
             "label": "Run auf HQ",
@@ -2822,7 +2822,7 @@
             }
           },
           {
-            "actionId": "runner.start_run.rd",
+            "actionId": "rs.rd",
             "side": "runner",
             "type": "start_run",
             "label": "Run auf R&D",
@@ -2843,7 +2843,7 @@
             }
           },
           {
-            "actionId": "runner.start_run.archives",
+            "actionId": "rs.archives",
             "side": "runner",
             "type": "start_run",
             "label": "Run auf Archives",
@@ -2864,7 +2864,7 @@
             }
           },
           {
-            "actionId": "runner.start_run.r1",
+            "actionId": "rs.r1",
             "side": "runner",
             "type": "start_run",
             "label": "Run auf Remote 1",
@@ -2885,7 +2885,7 @@
             }
           },
           {
-            "actionId": "runner.end_turn",
+            "actionId": "r9",
             "side": "runner",
             "type": "end_turn",
             "label": "Zug beenden",
@@ -4799,7 +4799,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.activated_card_ability.c2eq.c2eq.activated.465",
+          "actionId": "r1.c2eq.c2eq.activated.465",
           "side": "runner",
           "type": "activated_card_ability",
           "label": "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
@@ -4830,7 +4830,7 @@
           }
         },
         {
-          "actionId": "runner.gain_credit",
+          "actionId": "rb",
           "side": "runner",
           "type": "gain_credit",
           "label": "1 Credit nehmen",
@@ -4851,7 +4851,7 @@
           }
         },
         {
-          "actionId": "runner.draw_card",
+          "actionId": "r8",
           "side": "runner",
           "type": "draw_card",
           "label": "Karte ziehen",
@@ -4874,7 +4874,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c2az.c2az",
+          "actionId": "rc.c2az.c2az",
           "side": "runner",
           "type": "install_card",
           "label": "Fall Guy installieren",
@@ -4905,7 +4905,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1zv.c1zv.407",
+          "actionId": "rh.c1zv.c1zv.407",
           "side": "runner",
           "type": "play_event",
           "label": "Social Engineering spielen",
@@ -4933,7 +4933,7 @@
           }
         },
         {
-          "actionId": "runner.install_card.c2ay.c2ay",
+          "actionId": "rc.c2ay.c2ay",
           "side": "runner",
           "type": "install_card",
           "label": "Fall Guy installieren",
@@ -4964,7 +4964,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1zt.c1zt.407",
+          "actionId": "rh.c1zt.c1zt.407",
           "side": "runner",
           "type": "play_event",
           "label": "Social Engineering spielen",
@@ -4992,7 +4992,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1u9.c1u9.382",
+          "actionId": "rh.c1u9.c1u9.382",
           "side": "runner",
           "type": "play_event",
           "label": "Forged Activation Orders spielen",
@@ -5019,7 +5019,7 @@
           }
         },
         {
-          "actionId": "runner.play_event.c1sp.c1sp.375",
+          "actionId": "rh.c1sp.c1sp.375",
           "side": "runner",
           "type": "play_event",
           "label": "Bodyweight™ Synthetic Blood spielen",
@@ -5052,7 +5052,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.hq",
+          "actionId": "rs.hq",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf HQ",
@@ -5073,7 +5073,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.rd",
+          "actionId": "rs.rd",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf R&D",
@@ -5094,7 +5094,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.archives",
+          "actionId": "rs.archives",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf Archives",
@@ -5115,7 +5115,7 @@
           }
         },
         {
-          "actionId": "runner.start_run.r1",
+          "actionId": "rs.r1",
           "side": "runner",
           "type": "start_run",
           "label": "Run auf Remote 1",
@@ -5136,7 +5136,7 @@
           }
         },
         {
-          "actionId": "runner.end_turn",
+          "actionId": "r9",
           "side": "runner",
           "type": "end_turn",
           "label": "Zug beenden",
@@ -5190,14 +5190,14 @@
       },
       "planningStateIdentity": {
         "stateVersion": 61,
-        "sideSafePlanningFingerprint": "fnv1a:1c2cca10"
+        "sideSafePlanningFingerprint": "fnv1a:931cd792"
       },
       "observedTurnPlanAction": {
         "matchId": "match_dc0dcfdf7bf554f7",
         "side": "runner",
         "stateVersionBefore": 60,
         "stateVersionAfter": 61,
-        "actionId": "runner.play_event.c1w9.c1w9.391",
+        "actionId": "rh.c1w9.c1w9.391",
         "actionType": "play_event",
         "source": "c1w9",
         "boundChoices": []
@@ -5557,7 +5557,7 @@
               "cashOutActionLegal": true,
               "buildActionIds": [],
               "cashOutActionIds": [
-                "runner.activated_card_ability.c2eq.c2eq.activated.465"
+                "r1.c2eq.c2eq.activated.465"
               ],
               "estimatedPayout": 2,
               "confidence": "high",
@@ -10655,7 +10655,7 @@
         "stateVersion": 61,
         "instances": [
           {
-            "instanceId": "plan:runner.credit_bank:c2eq",
+            "instanceId": "pdik19o9yaib81mgcygdsofecq",
             "dedupeKey": "c2eq",
             "moduleId": "runner.credit_bank",
             "moduleVersion": "1",
@@ -10689,7 +10689,7 @@
                 "phase": "hold",
                 "actionIds": [],
                 "rejectedActionIds": [
-                  "runner.activated_card_ability.c2eq.c2eq.activated.465"
+                  "r1.c2eq.c2eq.activated.465"
                 ],
                 "priorityClass": "P5",
                 "currentStoredCredits": 2,
@@ -10750,7 +10750,7 @@
             ]
           },
           {
-            "instanceId": "plan:runner.economy:economy-liquidity-development%3Arunner%3A9",
+            "instanceId": "pd33orsvhdwaw0vbqxnupb5l5z",
             "dedupeKey": "economy-liquidity-development:runner:9",
             "moduleId": "runner.economy",
             "moduleVersion": "1",
@@ -10782,7 +10782,7 @@
                 "kind": "develop_liquidity",
                 "needId": "economy-liquidity-development:runner:9",
                 "actionIds": [
-                  "runner.gain_credit"
+                  "rb"
                 ],
                 "currentCreditsAtRevalidation": 11,
                 "targetCredits": 15,
@@ -10836,7 +10836,7 @@
             ]
           },
           {
-            "instanceId": "plan:runner.pressure_central:central%3Aarchives",
+            "instanceId": "p22f66p721g9dgs7gsawwpf6hs",
             "dedupeKey": "central:archives",
             "moduleId": "runner.pressure_central",
             "moduleVersion": "1",
@@ -10878,14 +10878,14 @@
                 "marginalValue": 60,
                 "evidenceCode": "runner_central_pressure_known_no_current_payoff:archives",
                 "runActionIds": [
-                  "runner.start_run.archives"
+                  "rs.archives"
                 ],
                 "runActionValues": {
-                  "runner.start_run.archives": 0
+                  "rs.archives": 0
                 },
                 "runActionDifferentialPayoffIds": [],
                 "runActionEvidence": {
-                  "runner.start_run.archives": [
+                  "rs.archives": [
                     "run_route_raw_score:160",
                     "run_route_opportunity_cost:0",
                     "run_route_effective_score:160",
@@ -10893,14 +10893,14 @@
                   ]
                 },
                 "runActionRouteDiagnostics": {
-                  "runner.start_run.archives": {
+                  "rs.archives": {
                     "rawRouteScore": 160,
                     "opportunityCost": 0,
                     "effectiveRouteScore": 160
                   }
                 },
                 "runActionExclusions": {
-                  "runner.start_run.archives": [
+                  "rs.archives": [
                     "run_route_excluded:path:reachable",
                     "run_route_excluded:recommendation:run_if_free",
                     "run_route_excluded:score:160",
@@ -11039,7 +11039,7 @@
             ]
           },
           {
-            "instanceId": "plan:runner.pressure_central:central%3Ahq",
+            "instanceId": "pa7nez1ioecg7mf06q1uwqq57o",
             "dedupeKey": "central:hq",
             "moduleId": "runner.pressure_central",
             "moduleVersion": "1",
@@ -11082,11 +11082,11 @@
                 "evidenceCode": "runner_central_information_probe_known_path_not_admitted:hq",
                 "runActionIds": [],
                 "runActionValues": {
-                  "runner.start_run.hq": 0
+                  "rs.hq": 0
                 },
                 "runActionDifferentialPayoffIds": [],
                 "runActionEvidence": {
-                  "runner.start_run.hq": [
+                  "rs.hq": [
                     "run_route_raw_score:120",
                     "run_route_opportunity_cost:0",
                     "run_route_effective_score:120",
@@ -11094,14 +11094,14 @@
                   ]
                 },
                 "runActionRouteDiagnostics": {
-                  "runner.start_run.hq": {
+                  "rs.hq": {
                     "rawRouteScore": 120,
                     "opportunityCost": 0,
                     "effectiveRouteScore": 120
                   }
                 },
                 "runActionExclusions": {
-                  "runner.start_run.hq": [
+                  "rs.hq": [
                     "runner_central_information_probe_known_path_not_admitted:hq"
                   ]
                 },
@@ -11215,7 +11215,7 @@
             ]
           },
           {
-            "instanceId": "plan:runner.pressure_central:central%3Ard",
+            "instanceId": "pa90fufw9vc5bkshp96ztlryxl",
             "dedupeKey": "central:rd",
             "moduleId": "runner.pressure_central",
             "moduleVersion": "1",
@@ -11261,14 +11261,14 @@
                 "runActionDifferentialPayoffIds": [],
                 "runActionEvidence": {},
                 "runActionRouteDiagnostics": {
-                  "runner.start_run.rd": {
+                  "rs.rd": {
                     "rawRouteScore": -460,
                     "opportunityCost": 0,
                     "effectiveRouteScore": -460
                   }
                 },
                 "runActionExclusions": {
-                  "runner.start_run.rd": [
+                  "rs.rd": [
                     "run_route_excluded:path:blocked_unpayable",
                     "run_route_excluded:recommendation:gain_credits_first",
                     "run_route_excluded:score:-460",
@@ -11406,7 +11406,7 @@
             ]
           },
           {
-            "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate%3Aefficiency%3Ard",
+            "instanceId": "p6kkkx2ic02k73x81ca2dpkb8r",
             "dedupeKey": "coverage:breaker_code_gate:efficiency:rd",
             "moduleId": "runner.rig_and_coverage",
             "moduleVersion": "1",
@@ -11439,7 +11439,7 @@
                 "needKind": "cost_ineffective_coverage",
                 "requiredRole": "breaker_code_gate",
                 "targetServerId": "rd",
-                "targetRunActionId": "runner.start_run.rd",
+                "targetRunActionId": "rs.rd",
                 "priorityClass": "P5",
                 "evidenceCode": "cost_ineffective_coverage:rd:12",
                 "deckHasAnswer": true,
@@ -11561,49 +11561,49 @@
         "completionHistory": [],
         "transitions": [
           {
-            "instanceId": "plan:runner.credit_bank:c2eq",
+            "instanceId": "pdik19o9yaib81mgcygdsofecq",
             "stateVersion": 61,
             "reason": "retained",
             "detailCode": "proposal_still_relevant"
           },
           {
-            "instanceId": "plan:runner.economy:economy-liquidity-development%3Arunner%3A9",
+            "instanceId": "pd33orsvhdwaw0vbqxnupb5l5z",
             "stateVersion": 61,
             "reason": "retained",
             "detailCode": "proposal_still_relevant"
           },
           {
-            "instanceId": "plan:runner.pressure_central:central%3Aarchives",
+            "instanceId": "p22f66p721g9dgs7gsawwpf6hs",
             "stateVersion": 61,
             "reason": "retained",
             "detailCode": "proposal_still_relevant"
           },
           {
-            "instanceId": "plan:runner.pressure_central:central%3Ahq",
+            "instanceId": "pa7nez1ioecg7mf06q1uwqq57o",
             "stateVersion": 61,
             "reason": "retained",
             "detailCode": "proposal_still_relevant"
           },
           {
-            "instanceId": "plan:runner.pressure_central:central%3Ard",
+            "instanceId": "pa90fufw9vc5bkshp96ztlryxl",
             "stateVersion": 61,
             "reason": "retained",
             "detailCode": "proposal_still_relevant"
           },
           {
-            "instanceId": "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate%3Aefficiency%3Ard",
+            "instanceId": "p6kkkx2ic02k73x81ca2dpkb8r",
             "stateVersion": 61,
             "reason": "retained",
             "detailCode": "proposal_still_relevant"
           },
           {
-            "instanceId": "plan:runner.develop_board_and_hand:generic%3Adraw-options",
+            "instanceId": "p6hb5l9cujr02om3vqn7gbqr35",
             "stateVersion": 61,
             "reason": "target_disappeared",
             "detailCode": "proposal_missing_target_contract"
           },
           {
-            "instanceId": "plan:runner.economy:economy-liquidity-development%3Arunner%3A9",
+            "instanceId": "pd33orsvhdwaw0vbqxnupb5l5z",
             "stateVersion": 61,
             "reason": "preempted_by_higher_class",
             "fromExecutionState": "idle",
@@ -11616,7 +11616,7 @@
           "commitmentId": "fnv1a:a0ab6aa4",
           "sourcePlanId": "fnv1a:8a47770d",
           "sourceLineHash": "fnv1a:f5613ce9",
-          "sequenceRootPlanInstanceId": "plan:runner.economy:economy-liquidity-development%3Arunner%3A9",
+          "sequenceRootPlanInstanceId": "pd33orsvhdwaw0vbqxnupb5l5z",
           "side": "runner",
           "turnKey": "runner:turn:9",
           "planningRulesFingerprint": "fnv1a:697f22b3",
@@ -11633,7 +11633,7 @@
             {
               "phaseId": "fnv1a:cd0969ff",
               "root": {
-                "planInstanceId": "plan:runner.economy:economy-liquidity-development%3Arunner%3A9",
+                "planInstanceId": "pd33orsvhdwaw0vbqxnupb5l5z",
                 "moduleId": "runner.economy",
                 "milestoneId": "gain_general_liquid_credits",
                 "provenance": "resident"
@@ -11720,7 +11720,7 @@
             "sideSafePlanningFingerprint": "fnv1a:f0dce279"
           },
           "currentBinding": {
-            "actionId": "runner.gain_credit",
+            "actionId": "rb",
             "stateVersion": 61,
             "semanticActionSetFingerprint": "fnv1a:66cb5089",
             "invocationKey": "fnv1a:5ba4d510"
@@ -11728,8 +11728,8 @@
           "actionType": "gain_credit",
           "expectationId": "fnv1a:127517ee"
         },
-        "rootForegroundInstanceId": "plan:runner.economy:economy-liquidity-development%3Arunner%3A9",
-        "executorInstanceId": "plan:runner.economy:economy-liquidity-development%3Arunner%3A9"
+        "rootForegroundInstanceId": "pd33orsvhdwaw0vbqxnupb5l5z",
+        "executorInstanceId": "pd33orsvhdwaw0vbqxnupb5l5z"
       }
     },
     "decisionLocalEngineQuotes": {
@@ -11754,5 +11754,5 @@
       "humanPrivateHandExcluded": true
     }
   },
-  "historicalActionId": "runner.gain_credit"
+  "historicalActionId": "rb"
 }

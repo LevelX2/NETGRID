@@ -199,7 +199,7 @@ describe("turn projection", () => {
     input.playerView.own.credits = 5;
     input.playerView.own.clicks = 1;
     const action: LegalAction = {
-      actionId: "runner.install_card.runner-wall-breaker",
+      actionId: "rc.runner-wall-breaker",
       type: "install_card",
       side: "runner",
       label: "Wall-Breaker installieren",

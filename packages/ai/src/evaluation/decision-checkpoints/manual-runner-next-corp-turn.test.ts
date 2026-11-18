@@ -69,12 +69,12 @@ it.each([
 
     const decision = chooseAiAction(input);
     expect(decision.fallbackUsed).toBe(false);
-    expect(decision.actionId).toBe("runner.draw_card");
+    expect(decision.actionId).toBe("r8");
     expect(decision.evidence).toContain("plan_priority_class:P3");
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.defense_and_recovery:runner",
+      rootPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
       route: {
-        actionId: "runner.draw_card",
+        actionId: "r8",
         stateVersion: input.playerView.stateVersion,
       },
     });
@@ -143,7 +143,7 @@ it("prepares the fifth Grip card at manual D61 when the payoff is known but the 
 
   const decision = chooseAiAction(input);
   expect(decision.fallbackUsed).toBe(false);
-  expect(decision.actionId).toBe("runner.draw_card");
+  expect(decision.actionId).toBe("r8");
   expect(decision.evidence).toContain("plan_priority_class:P3");
 
   // Recheck planning after the basis draw. The captured Grip remains actor-only.
@@ -188,7 +188,7 @@ it("prepares the fifth Grip card at manual D61 when the payoff is known but the 
   );
   const continuation = chooseAiAction(afterDraw);
   expect(continuation.fallbackUsed).toBe(false);
-  expect(continuation.actionId).toBe("runner.start_run.rd");
+  expect(continuation.actionId).toBe("rs.rd");
   expect(
     continuation.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
   ).toBe("runner.pressure_central");
@@ -289,7 +289,7 @@ it("draws to the reachable five-card buffer for a known next-turn payoff", () =>
   const input = withKnownDamage([URBAN]);
   expect(runnerNextCorpTurnThreat(input)?.incomingMeatDamage).toBe(5);
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("runner.draw_card");
+  expect(decision.actionId).toBe("r8");
   expect(decision.evidence).toContain("plan_priority_class:P3");
 });
 
@@ -412,7 +412,7 @@ it("recognizes the optional run that would activate an unaffordable-to-buffer co
     decision.decisionDebug?.planFirstDecision?.dispositions,
   ).toContainEqual(
     expect.objectContaining({
-      actionId: "runner.start_run.rd",
+      actionId: "rs.rd",
       evidenceCode:
         "runner_optional_run_would_enable_known_next_corp_turn_flatline",
     }),
@@ -431,7 +431,7 @@ it("keeps the survival owner for an optional run on empty Archives", () => {
   expect(archives.root).toEqual([]);
   expect(input.legalActions).toContainEqual(
     expect.objectContaining({
-      actionId: "runner.start_run.archives",
+      actionId: "rs.archives",
       expiresAtStateVersion: input.playerView.stateVersion,
     }),
   );
@@ -443,11 +443,11 @@ it("keeps the survival owner for an optional run on empty Archives", () => {
   expect(decision.fallbackUsed).toBe(false);
   expect(
     decision.decisionDebug?.planFirstDecision?.dispositions?.filter(
-      (entry) => entry.actionId === "runner.start_run.archives",
+      (entry) => entry.actionId === "rs.archives",
     ),
   ).toEqual([
     {
-      actionId: "runner.start_run.archives",
+      actionId: "rs.archives",
       disposition: "explicitly_nonproductive",
       ownerModuleId: "runner.defense_and_recovery",
       evidenceCode: "runner_optional_run_would_enable_known_next_corp_turn_flatline",
@@ -577,7 +577,7 @@ it("retains the immediately proven Runner win even with a funded damage threat",
   expect(runnerNextCorpTurnThreat(input)?.incomingMeatDamage).toBe(5);
   input.playerView.opponent.deckCount = 0;
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("runner.end_turn");
+  expect(decision.actionId).toBe("r9");
   expect(decision.evidence).toContain("plan_priority_class:P1");
 });
 
@@ -599,7 +599,7 @@ it("keeps an immediately executable terminal remote contest above the concealed-
     runtime,
   );
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("runner.start_run.r1");
+  expect(decision.actionId).toBe("rs.r1");
   expect(decision.evidence).toContain("plan_priority_class:P2");
 });
 
@@ -706,7 +706,7 @@ it.each([
       "plan_assessment_evidence:runner_next_corp_turn_extend_hand_limit:6",
     );
     if (variant === "clearable tag")
-      expect(decision.actionId).toBe("runner.remove_tag");
+      expect(decision.actionId).toBe("rm");
     if (variant === "buffer already built") {
       expect(runnerNextCorpTurnThreat(input)?.incomingMeatDamage).toBe(5);
       expect(decision.actionId).not.toBe(install.actionId);

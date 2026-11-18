@@ -79,14 +79,14 @@ describe("match 9FEF runner decision checkpoints", () => {
       portfolio.instances.find(
         (instance) =>
           instance.instanceId ===
-          "plan:runner.credit_bank:c29e",
+          "pdeckcw9fkuryyxs8xionefklm",
       )?.moduleState,
     ).toMatchObject({
       phase: "build",
       signal: {
         priorityClass: "P4",
         actionIds: expect.arrayContaining([
-          "runner.activated_card_ability.c29e.c29e.activated.440",
+          "r1.c29e.c29e.activated.440",
         ]),
       },
     });
@@ -120,7 +120,7 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
     // The six liquid credits already fund the successful-HQ-run/Jettison
     // setup. Cashing three stored credits out first would add an unnecessary prefix.
     checkpoint.expectation = {
-      acceptableActions: [{ actionId: "runner.start_run.hq" }],
+      acceptableActions: [{ actionId: "rs.hq" }],
       planExecution: {
         acceptablePlanKinds: ["runner.pressure_central"],
         acceptableCapabilities: ["pressure_hq_access"],
@@ -132,13 +132,13 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
   }
   if (checkpoint.checkpointId === "9FEF-F06-HQ-PROBE-CLASSIFICATION-D109") {
     checkpoint.expectation = {
-      acceptableActions: [{ actionId: "runner.start_run.hq" }],
+      acceptableActions: [{ actionId: "rs.hq" }],
       planExecution: {
         acceptablePlanKinds: ["runner.pressure_central"],
         acceptableCapabilities: ["pressure_hq_information"],
       },
       runTargets: [{
-        actionId: "runner.start_run.hq",
+        actionId: "rs.hq",
         targetServerId: "hq",
         pathPassability: "reachable",
         pathCost: 0,
@@ -148,7 +148,7 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
   }
   if (checkpoint.checkpointId === "9FEF-F04-PROBE-NOT-FUNDING-D88") {
     checkpoint.expectation = {
-      acceptableActions: [{ actionId: "runner.gain_credit" }],
+      acceptableActions: [{ actionId: "rb" }],
       planExecution: {
         acceptablePlanKinds: ["runner.economy"],
         acceptableCapabilities: ["gain_general_liquid_credits"],

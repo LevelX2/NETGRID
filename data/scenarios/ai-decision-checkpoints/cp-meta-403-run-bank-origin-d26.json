@@ -227,13 +227,13 @@
           "label": "HQ",
           "ice": [
             {
-              "instanceId": "h1qjfwtp",
+              "instanceId": "hhq.i0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
             },
             {
-              "instanceId": "h1mwl4ls",
+              "instanceId": "hhq.i1",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -289,7 +289,7 @@
           "label": "Remote 1",
           "ice": [
             {
-              "instanceId": "h1n6kqar",
+              "instanceId": "hr1.i0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -973,7 +973,7 @@
             "cardDefinitionId": 251,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 23,
-            "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c1jt.c1jt.c1jt.c2s5.329",
+            "runnerCostPenaltySupportOriginalActionId": "rj.c1jt.c1jt.c1jt.c2s5.329",
             "visibility": {
               "class": "private_to_side"
             }
@@ -1015,7 +1015,7 @@
             "targetIceDefinitionId": 450,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 25,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2s5.0.0.328",
+            "runnerCostPenaltySupportOriginalActionId": "r3.c1jt.c1jt.c1jt.c2s5.0.0.328",
             "targets": {
               "targetIceDefinitionId": 450
             },
@@ -1027,7 +1027,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.activated_card_ability.c16h.c16h.activated.255",
+          "actionId": "r1.c16h.c16h.activated.255",
           "side": "runner",
           "type": "activated_card_ability",
           "label": "Chiba Bank Account: 4 Credits nehmen",
@@ -1047,7 +1047,7 @@
           "expiresAtStateVersion": 25,
           "payload": {
             "costPenaltySupportWindowId": 25,
-            "costPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2s5.0.0.328",
+            "costPenaltySupportOriginalActionId": "r3.c1jt.c1jt.c1jt.c2s5.0.0.328",
             "costPenaltySupportRunnerCreditTarget": 2,
             "costPenaltySupportAmountDue": 2,
             "costPenaltySupportKind": "cost",
@@ -1061,7 +1061,7 @@
           }
         },
         {
-          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2s5.0.0.328",
+          "actionId": "r3.c1jt.c1jt.c1jt.c2s5.0.0.328",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Ohne weiteren Bank-Support fortfahren: Krash: Subroutine brechen",
@@ -1709,7 +1709,7 @@
           "cardDefinitionId": 251,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 23,
-          "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c1jt.c1jt.c1jt.c2s5.329",
+          "runnerCostPenaltySupportOriginalActionId": "rj.c1jt.c1jt.c1jt.c2s5.329",
           "visibility": {
             "class": "private_to_side"
           }
@@ -1751,7 +1751,7 @@
           "targetIceDefinitionId": 450,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 25,
-          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2s5.0.0.328",
+          "runnerCostPenaltySupportOriginalActionId": "r3.c1jt.c1jt.c1jt.c2s5.0.0.328",
           "targets": {
             "targetIceDefinitionId": 450
           },
@@ -1763,7 +1763,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "runner.activated_card_ability.c16h.c16h.activated.255",
+        "actionId": "r1.c16h.c16h.activated.255",
         "side": "runner",
         "type": "activated_card_ability",
         "label": "Chiba Bank Account: 4 Credits nehmen",
@@ -1783,7 +1783,7 @@
         "expiresAtStateVersion": 25,
         "payload": {
           "costPenaltySupportWindowId": 25,
-          "costPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2s5.0.0.328",
+          "costPenaltySupportOriginalActionId": "r3.c1jt.c1jt.c1jt.c2s5.0.0.328",
           "costPenaltySupportRunnerCreditTarget": 2,
           "costPenaltySupportAmountDue": 2,
           "costPenaltySupportKind": "cost",
@@ -1797,7 +1797,7 @@
         }
       },
       {
-        "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2s5.0.0.328",
+        "actionId": "r3.c1jt.c1jt.c1jt.c2s5.0.0.328",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Ohne weiteren Bank-Support fortfahren: Krash: Subroutine brechen",
@@ -1883,7 +1883,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 25,
-      "sideSafePlanningFingerprint": "fnv1a:929ea788"
+      "sideSafePlanningFingerprint": "fnv1a:74c785d9"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",
@@ -7329,7 +7329,7 @@
       "stateVersion": 24,
       "instances": [
         {
-          "instanceId": "plan:runner.convert_run_window:run%3A21",
+          "instanceId": "p8lbxn6o7jfel7775e28b76ruj",
           "dedupeKey": "run:21",
           "moduleId": "runner.convert_run_window",
           "moduleVersion": "1",
@@ -7352,7 +7352,7 @@
             "kind": "window",
             "id": "run:21"
           },
-          "parentInstanceId": "plan:runner.pressure_central:central%3Ard",
+          "parentInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
           "openNeedIds": [],
           "phase": "execute",
           "milestone": "admitted",
@@ -7361,8 +7361,8 @@
             "signal": {
               "windowId": "run:21",
               "serverId": "rd",
-              "rootPlanInstanceId": "plan:runner.pressure_central:central%3Ard",
-              "leafPlanInstanceId": "plan:runner.convert_run_window:run%3A21",
+              "rootPlanInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
+              "leafPlanInstanceId": "p8lbxn6o7jfel7775e28b76ruj",
               "semanticActionTypes": [
                 "breaker.boost_strength",
                 "breaker.break_subroutine",
@@ -7461,7 +7461,7 @@
               "encounterIntent": "mitigate_threat",
               "encounterEvidenceCode": "runner_visible_encounter_requires_mitigation:450",
               "actionAssessments": {
-                "runner.pump_breaker.c1jt.c1jt.c1jt.c2s5.251:icebreaker_abilities_increase_strength": {
+                "rj.c1jt.c1jt.c1jt.c2s5.251:icebreaker_abilities_increase_strength": {
                   "admissible": false,
                   "evidenceCodes": [
                     "runner_run_window_action_excluded:pump_cannot_lead_to_useful_break",
@@ -7469,7 +7469,7 @@
                     "pump_direct_break_already_legal:true"
                   ]
                 },
-                "runner.break_subroutine.c1jt.c1jt.c1jt.c2s5.0.printed_subroutines_end_the_run.251:icebreaker_abilities_break_subroutine": {
+                "r3.c1jt.c1jt.c1jt.c2s5.0.printed_subroutines_end_the_run.251:icebreaker_abilities_break_subroutine": {
                   "admissible": true,
                   "evidenceCodes": [
                     "runner_encounter_action_plan_admissible",
@@ -7477,7 +7477,7 @@
                     "runner_run_parent_payoff_preserved:access_bonus"
                   ]
                 },
-                "runner.continue_run.printed_subroutines_end_the_run": {
+                "r5.printed_subroutines_end_the_run": {
                   "admissible": true,
                   "evidenceCodes": [
                     "runner_run_window_action_plan_admissible",
@@ -7525,7 +7525,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ard",
+          "instanceId": "pa90fufw9vc5bkshp96ztlryxl",
           "dedupeKey": "central:rd",
           "moduleId": "runner.pressure_central",
           "moduleVersion": "1",
@@ -7567,14 +7567,14 @@
               "marginalValue": 464,
               "evidenceCode": "target:rd",
               "runActionIds": [
-                "runner.start_run.rd"
+                "rs.rd"
               ],
               "runActionValues": {
-                "runner.start_run.rd": 0
+                "rs.rd": 0
               },
               "runActionDifferentialPayoffIds": [],
               "runActionEvidence": {
-                "runner.start_run.rd": [
+                "rs.rd": [
                   "run_route_raw_score:464",
                   "run_route_opportunity_cost:0",
                   "run_route_effective_score:464",
@@ -7582,7 +7582,7 @@
                 ]
               },
               "runActionRouteDiagnostics": {
-                "runner.start_run.rd": {
+                "rs.rd": {
                   "rawRouteScore": 464,
                   "opportunityCost": 0,
                   "effectiveRouteScore": 464
@@ -7696,13 +7696,13 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:runner.convert_run_window:run%3A21",
+          "instanceId": "p8lbxn6o7jfel7775e28b76ruj",
           "stateVersion": 24,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ard",
+          "instanceId": "pa90fufw9vc5bkshp96ztlryxl",
           "stateVersion": 24,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
@@ -7713,7 +7713,7 @@
         "commitmentId": "fnv1a:7ebae6ad",
         "sourcePlanId": "fnv1a:cda7c6aa",
         "sourceLineHash": "fnv1a:3c937f97",
-        "sequenceRootPlanInstanceId": "plan:runner.pressure_central:central%3Ard",
+        "sequenceRootPlanInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
         "side": "runner",
         "turnKey": "runner:turn:3",
         "planningRulesFingerprint": "fnv1a:ce3968ab",
@@ -7730,7 +7730,7 @@
           {
             "phaseId": "fnv1a:f42ec753",
             "root": {
-              "planInstanceId": "plan:runner.pressure_central:central%3Ard",
+              "planInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
               "moduleId": "runner.convert_run_window",
               "milestoneId": "convert_active_run_window",
               "provenance": "resident"
@@ -7851,7 +7851,7 @@
           "sideSafePlanningFingerprint": "fnv1a:0233b3fb"
         },
         "currentBinding": {
-          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2s5.0.0.328",
+          "actionId": "r3.c1jt.c1jt.c1jt.c2s5.0.0.328",
           "stateVersion": 24,
           "semanticActionSetFingerprint": "fnv1a:94ab4cc5",
           "invocationKey": "fnv1a:ec58f51b"
@@ -7859,13 +7859,13 @@
         "actionType": "break_subroutine",
         "expectationId": "fnv1a:888de444"
       },
-      "rootForegroundInstanceId": "plan:runner.pressure_central:central%3Ard",
-      "executorInstanceId": "plan:runner.convert_run_window:run%3A21",
+      "rootForegroundInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
+      "executorInstanceId": "p8lbxn6o7jfel7775e28b76ruj",
       "pendingRunnerCostPenaltySupportOrigin": {
-        "rootPlanInstanceId": "plan:runner.pressure_central:central%3Ard",
-        "executorInstanceId": "plan:runner.convert_run_window:run%3A21",
-        "sourceStepId": "plan:runner.convert_run_window:run%3A21:convert",
-        "originalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2s5.0.0.328",
+        "rootPlanInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
+        "executorInstanceId": "p8lbxn6o7jfel7775e28b76ruj",
+        "sourceStepId": "p8lbxn6o7jfel7775e28b76ruj:convert",
+        "originalActionId": "r3.c1jt.c1jt.c1jt.c2s5.0.0.328",
         "selectedAtStateVersion": 24
       }
     }
@@ -8086,13 +8086,13 @@
           "label": "HQ",
           "ice": [
             {
-              "instanceId": "h1qjfwtp",
+              "instanceId": "hhq.i0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
             },
             {
-              "instanceId": "h1mwl4ls",
+              "instanceId": "hhq.i1",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -8148,7 +8148,7 @@
           "label": "Remote 1",
           "ice": [
             {
-              "instanceId": "h1n6kqar",
+              "instanceId": "hr1.i0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -8832,7 +8832,7 @@
             "cardDefinitionId": 251,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 23,
-            "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c1jt.c1jt.c1jt.c2s5.329",
+            "runnerCostPenaltySupportOriginalActionId": "rj.c1jt.c1jt.c1jt.c2s5.329",
             "visibility": {
               "class": "private_to_side"
             }
@@ -8874,7 +8874,7 @@
             "targetIceDefinitionId": 450,
             "runnerCostPenaltySupportWindowOpened": true,
             "runnerCostPenaltySupportWindowId": 25,
-            "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2s5.0.0.328",
+            "runnerCostPenaltySupportOriginalActionId": "r3.c1jt.c1jt.c1jt.c2s5.0.0.328",
             "targets": {
               "targetIceDefinitionId": 450
             },
@@ -8926,7 +8926,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2s5.0.0.328",
+          "actionId": "r3.c1jt.c1jt.c1jt.c2s5.0.0.328",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Ohne weiteren Bank-Support fortfahren: Krash: Subroutine brechen",
@@ -9574,7 +9574,7 @@
           "cardDefinitionId": 251,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 23,
-          "runnerCostPenaltySupportOriginalActionId": "runner.pump_breaker.c1jt.c1jt.c1jt.c2s5.329",
+          "runnerCostPenaltySupportOriginalActionId": "rj.c1jt.c1jt.c1jt.c2s5.329",
           "visibility": {
             "class": "private_to_side"
           }
@@ -9616,7 +9616,7 @@
           "targetIceDefinitionId": 450,
           "runnerCostPenaltySupportWindowOpened": true,
           "runnerCostPenaltySupportWindowId": 25,
-          "runnerCostPenaltySupportOriginalActionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2s5.0.0.328",
+          "runnerCostPenaltySupportOriginalActionId": "r3.c1jt.c1jt.c1jt.c2s5.0.0.328",
           "targets": {
             "targetIceDefinitionId": 450
           },
@@ -9668,7 +9668,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "runner.break_subroutine.c1jt.c1jt.c1jt.c2s5.0.0.328",
+        "actionId": "r3.c1jt.c1jt.c1jt.c2s5.0.0.328",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Ohne weiteren Bank-Support fortfahren: Krash: Subroutine brechen",
@@ -9754,7 +9754,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 26,
-      "sideSafePlanningFingerprint": "fnv1a:7f179f7a"
+      "sideSafePlanningFingerprint": "fnv1a:101f7506"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",

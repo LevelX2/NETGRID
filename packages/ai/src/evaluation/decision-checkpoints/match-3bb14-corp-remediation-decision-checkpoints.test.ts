@@ -15,7 +15,7 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
       scoredOnlyTimingJson,
       [
         "plan_priority_class:P2",
-        "plan_priority_delegated_from:plan:corp.defend_servers:server-defense-portfolio",
+        "plan_priority_delegated_from:penw02zfrkklof54c2nuye5att",
       ],
     ],
     [
@@ -33,7 +33,7 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
       checkpoint.expectation.acceptableActions = [
         {
           actionId:
-            "corp.install_card.c2yt.rd.c2yt.1",
+            "cc.c2yt.rd.c2yt.1",
         },
       ];
       checkpoint.expectation.planExecution = {
@@ -62,7 +62,7 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
         expect.objectContaining({
           moduleId: "corp.score_agenda",
           instanceId:
-            "plan:corp.score_agenda:agenda%3Ac2nh%3Ar1",
+            "p1rgdikfrnp3ndp5yeqlx1qdaa",
           openNeedIds: expect.arrayContaining([
             "score-protection:agenda:c2nh:r1",
           ]),
@@ -98,7 +98,7 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
   it("keeps the native terminal HQ reserve ahead of the independent Score funding need", () => {
     const checkpoint = fixture(scoredOnlyTimingJson);
     checkpoint.expectation = {
-      acceptableActions: [{ actionId: "corp.gain_credit" }],
+      acceptableActions: [{ actionId: "cb" }],
       planExecution: {
         acceptablePlanKinds: ["corp.economy"],
         acceptableCapabilities: ["develop_or_convert_corp_economy"],
@@ -112,7 +112,7 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
     expect(result.decision?.evidence).toContain("plan_priority_class:P2");
     expect(
       result.decision?.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-    ).toBe("plan:corp.defend_servers:server-defense-portfolio");
+    ).toBe("penw02zfrkklof54c2nuye5att");
   });
 
   it("counts a public Shell-Traders breaker when it is reachable before scoring", () => {

@@ -50,7 +50,7 @@ it("retains the actual current Engine draw fact through the DTO and holds the no
   const score = input.legalActions.find((a) => a.type === "score_agenda")!;
   expect(score.payload).toMatchObject(cp.postFixLegalAction.payload);
   const result = chooseAiAction(input);
-  expect(result.actionId).toBe("corp.end_turn");
+  expect(result.actionId).toBe("c9");
   expect(result.fallbackUsed).toBe(false);
   expect(result.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
     "corp.complete_turn",

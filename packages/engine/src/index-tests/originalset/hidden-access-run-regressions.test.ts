@@ -2991,11 +2991,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       "runner",
       (action) => action.type === "continue_run",
     );
-    expect(dataDartsContinue.payload).toMatchObject({
-      unbrokenSubroutineCount: 2,
-      encounterSubroutineIds:
-        "0,1",
-    });
+    expect(dataDartsContinue).toMatchObject({encounterSubroutineIds: ["0","1"], payload: { unbrokenSubroutineCount: 2 }});
     expect(dataDartsContinue.payload?.encounterWillEndRun).toBe(false);
     state = apply(
       state,
@@ -3354,11 +3350,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       "runner",
       (action) => action.type === "continue_run",
     );
-    expect(continueAction.payload).toMatchObject({
-      unbrokenSubroutineCount: 2,
-      encounterSubroutineIds:
-        "0,1",
-    });
+    expect(continueAction).toMatchObject({encounterSubroutineIds: ["0","1"], payload: { unbrokenSubroutineCount: 2 }});
     expect(continueAction.payload).not.toHaveProperty(
       "payOrEndRunSubroutineIndexes",
     );
@@ -4717,12 +4709,7 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
       "runner",
       (action) => action.type === "continue_run",
     );
-    expect(continueAction.payload).toMatchObject({
-      unbrokenSubroutineCount: 2,
-      encounterSubroutineIds:
-        "0,1",
-      encounterWillEndRun: true,
-    });
+    expect(continueAction).toMatchObject({encounterSubroutineIds: ["0","1"], payload: { unbrokenSubroutineCount: 2, encounterWillEndRun: true }});
     state = apply(
       state,
       "runner",

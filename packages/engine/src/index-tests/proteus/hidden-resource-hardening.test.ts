@@ -556,9 +556,7 @@ describe("PRO011 hidden resource timing hardening", () => {
       const before = structuredClone(state);
       const side = entry === "corp_decline" ? "corp" : "runner";
       const start = getLegalActions(state, side).find(
-        (a) =>
-          a.actionId ===
-          `${side}.${side === "corp" ? "decline_rez" : "continue_run"}`,
+        (a) => a.type === (side === "corp" ? "decline_rez" : "continue_run"),
       )!;
       expect(start).toBeDefined();
       const entered = applyLegal(state, side, start);
@@ -566,7 +564,7 @@ describe("PRO011 hidden resource timing hardening", () => {
       state = entered.state;
       expect(state.runnerCostPenaltySupportWindow?.amountDue).toBe(2);
       expect(state.runnerCostPenaltySupportWindow?.originalActionId).toBe(
-        "runner.continue_run",
+        "r5",
       );
       expect(getLegalActions(state, "corp")).toEqual([]);
       expect(state.run?.nextEncounterJackOutLock).toBe(true);
@@ -574,7 +572,7 @@ describe("PRO011 hidden resource timing hardening", () => {
       if (credits === 1) {
         expect(
           getLegalActions(state, "runner").some(
-            (a) => a.actionId === "runner.continue_run",
+            (a) => a.actionId === "r5",
           ),
         ).toBe(false);
         state = applyLegal(
@@ -584,7 +582,7 @@ describe("PRO011 hidden resource timing hardening", () => {
         ).state;
       }
       const resume = getLegalActions(state, "runner").find(
-        (a) => a.actionId === "runner.continue_run",
+        (a) => a.actionId === "r5",
       );
       expect(resume?.payload?.runnerCostPenaltySupportContinuation).toBe(true);
       state = applyLegal(state, "runner", resume!).state;
@@ -1721,7 +1719,7 @@ describe("PRO011 hidden resource timing hardening", () => {
     resolveEventModificationChoice(corpTurn, corpTurnAction, {
       matchId: corpTurn.matchId,
       side: "runner",
-      actionId: "runner.resolve_choice",
+      actionId: "rn",
       clientKnownStateVersion: firstChoice.stateVersion,
       selectedChoices: {
         choiceId: firstChoice.choiceId,
@@ -1737,7 +1735,7 @@ describe("PRO011 hidden resource timing hardening", () => {
     resolveEventModificationChoice(corpTurn, corpTurnAction, {
       matchId: corpTurn.matchId,
       side: "runner",
-      actionId: "runner.resolve_choice",
+      actionId: "rn",
       clientKnownStateVersion: targetChoice.stateVersion,
       selectedChoices: {
         choiceId: targetChoice.choiceId,

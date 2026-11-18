@@ -48,12 +48,12 @@ it("preserves the terminal central rez claim through the actual conditional scor
     "cp-meta571-r2-g39-conditional-score-reserve",
   );
   const original =
-    "corp.install_card.c2it.r1.c2it";
+    "cc.c2it.r1.c2it";
   expect(decision.actionId).not.toBe(original);
   const project = portfolio.instances.find(
     (p) =>
       p.instanceId ===
-      "plan:corp.score_agenda:agenda%3Ac2it%3Ar1",
+      "p4n7umhkfdmz4r000t61mmpk3j",
   );
   expect(project?.moduleState).toMatchObject({
     signal: {

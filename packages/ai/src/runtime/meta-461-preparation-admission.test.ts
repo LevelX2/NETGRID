@@ -56,7 +56,7 @@ describe("real preparation admission in meta 461", () => {
       (a) => a.type === "play_event" && referencesDefaultDeckCard(a.source, 177),
     )!;
     const targets = evaluateRunnerRunTargets({ input });
-    const target = targets.find((r) => r.actionId === "runner.start_run.hq")!;
+    const target = targets.find((r) => r.actionId === "rs.hq")!;
     expect(
       runnerSameTurnAccessPreparationFitsTarget(
         input,
@@ -320,7 +320,7 @@ describe("preparation preserves an admitted parent after its own spend", () => {
     if (game !== 13) expect(rejected.length).toBeGreaterThan(0);
     const decision = chooseAiAction(input);
     if (game === 13) {
-      expect(decision.actionId).toBe("runner.start_run.rd");
+      expect(decision.actionId).toBe("rs.rd");
       expect(decision.evidence).toContain("plan_priority_class:P3");
     } else expect(rejected).not.toContain(decision.actionId);
     expect(

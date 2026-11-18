@@ -88,9 +88,14 @@ describe("SP-082 score-campaign loss-point checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     expect(result.selectedAction?.type).toBe("gain_credit");
     const planFirst = result.decision?.decisionDebug?.planFirstDecision;
-    expect(planFirst?.rootPlanInstanceId).toMatch(
-      /^plan:corp\.economy:economy-immediate-operation/,
-    );
+    expect(
+      planFirst?.portfolio.find(
+        (instance) => instance.instanceId === planFirst.rootPlanInstanceId,
+      ),
+    ).toMatchObject({
+      moduleId: "corp.economy",
+      dedupeKey: expect.stringMatching(/^economy-immediate-operation:/),
+    });
     const blockedScoreParents = planFirst?.portfolio.filter(
       (instance) =>
         instance.moduleId === "corp.score_agenda" &&

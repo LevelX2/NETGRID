@@ -460,7 +460,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     );
     social = applyChoice(social, "runner", "hide_3");
     social = applyChoice(social, "corp", "guess_2");
-    social = applyChoice(social, "runner", `ice_${socialIceId}`);
+    social = applyChoice(social, "runner", "ice_hq.0");
     expect(social.run?.attackedServerId).toBe("hq");
     expect(social.eventLog.at(-1)?.publicPayload).toMatchObject({
       sourceDefinitionId: 323,
@@ -1751,9 +1751,11 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
         String(action.payload?.breakerId) === droppId,
     );
     expect(droppBreakActions).toHaveLength(1);
-    expect(droppBreakActions[0]?.payload).toMatchObject({
-      subroutineIndexes: "0,1",
-      breakSubroutineCount: 2,
+    expect(droppBreakActions[0]).toMatchObject({
+      subroutineIndexes: [0,
+      1],
+      payload: {
+        breakSubroutineCount: 2,
       multiBreakSubroutines: true,
       breakAllMatchingSubroutines: true,
       breakerEndsRunAfterBreak: true,
@@ -1762,6 +1764,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
       breakSubroutineBaseCost: 0,
       breakSubroutineAdditionalCost: 2,
       breakSubroutineTotalCost: 2,
+    },
     });
     expect(droppBreakActions[0]?.payload?.subroutineIndex).toBeUndefined();
     expect(droppBreakActions[0]?.costs).toEqual([{ credits: 2 }]);
@@ -1805,7 +1808,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
       actionType: "break_subroutine",
       cardDefinitionId: 231,
       targetIceDefinitionId: 451,
-      subroutineIndexes: "0,1",
+      subroutineIndexes: [0, 1],
       breakSubroutineCount: 2,
       breakAllMatchingSubroutines: true,
       breakerEndsRunAfterBreak: true,
@@ -2167,14 +2170,14 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
       visibility: "hidden_info_barrier",
     });
     expect(toolState.pendingChoice?.options).toContainEqual({
-      id: expect.stringMatching(/^card_h[a-z0-9]{1,7}$/),
+      id: "card_hr1.r0",
       label: "Remote 1 Root 1",
       value: mouseTargetId,
     });
     const mouseTargetOptionId = toolState.pendingChoice?.options.find(
       (option) => option.value === mouseTargetId,
     )?.id;
-    expect(mouseTargetOptionId).toMatch(/^card_h[a-z0-9]{1,7}$/);
+    expect(mouseTargetOptionId).toBe("card_hr1.r0");
     expect(
       JSON.stringify(getPlayerView(toolState, "runner").pendingChoice),
     ).not.toMatch(/"value"|simple_upgrade|Simple Upgrade/);

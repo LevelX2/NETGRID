@@ -77,7 +77,7 @@ const services = {
 };
 function preparation(input: AiDecisionInputWithDeckCapabilities) {
   const target = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.r2",
+    (t) => t.actionId === "rs.r2",
   )!;
   return runnerSameTurnBreakerPreparation(
     input,
@@ -116,7 +116,7 @@ it("installs the already funded decoder and wins the terminal remote contest in 
       heads.push(action.type);
       expect(
         decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-      ).toBe("plan:runner.contest_remote:remote%3Ar2");
+      ).toBe("p1p4x83h7yolw2hjtvi0ud06dm");
       expect(
         decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
       ).toBe(step === 0 ? "runner.rig_and_coverage" : "runner.contest_remote");

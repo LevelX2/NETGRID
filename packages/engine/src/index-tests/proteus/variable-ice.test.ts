@@ -1062,7 +1062,7 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
       unbrokenSubroutineCount: 1,
       encounterWillEndRun: false,
     });
-    expect(continueAction.payload?.encounterSubroutineIds).toBe("0");
+    expect(continueAction.encounterSubroutineIds).toEqual(["0"]);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     state = apply(
@@ -1080,9 +1080,7 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
       "runner",
       (action) => action.type === "continue_run",
     );
-    expect(secondTraceAction.payload?.encounterSubroutineIds).toBe(
-      "1",
-    );
+    expect(secondTraceAction.encounterSubroutineIds).toEqual(["1"]);
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       hiddenPayloadMarkers,
     );
@@ -1854,7 +1852,14 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
     );
     state = applyChoice(state, "runner", "hide_3");
     state = applyChoice(state, "corp", "guess_2");
-    return applyChoice(state, "runner", `ice_${iceId}`);
+    const server = state.corp.servers.find((candidate) => candidate.ice.includes(iceId));
+    if (!server) throw new Error("Social Engineering target has no current server");
+    const position = server.ice.indexOf(iceId);
+    const target = state.pendingChoice?.options.find((option) =>
+      option.metadata?.targetServerId === server.id && option.metadata?.targetIcePosition === position,
+    );
+    if (!target) throw new Error("Social Engineering has no exact current target offer");
+    return applyChoice(state, "runner", target.id);
   }
 
   it("resolves Brain Wash brain damage with stale, side, actionId, and ICE revalidation", () => {
@@ -1870,10 +1875,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       "runner",
       (action) => action.type === "continue_run",
     );
-    expect(continueAction.payload).toMatchObject({
-      unbrokenSubroutineCount: 1,
-      encounterSubroutineIds: "0",
-    });
+    expect(continueAction).toMatchObject({encounterSubroutineIds: ["0"], payload: { unbrokenSubroutineCount: 1 }});
 
     expect(
       applyAction(state, {
@@ -1961,9 +1963,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       unbrokenSubroutineCount: 5,
       encounterWillEndRun: true,
     });
-    expect(continueAction.payload?.encounterSubroutineIds).toBe(
-      "0,1,2,3,4",
-    );
+    expect(continueAction.encounterSubroutineIds).toEqual(["0","1","2","3","4"]);
     state = apply(
       state,
       "runner",
@@ -2120,10 +2120,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
           action.costs[0]?.credits === 1 &&
           action.payload?.encounterWillEndRun === false,
       );
-      expect(paidContinue.payload).toMatchObject({
-        payOrEndRunSubroutineIndexes: "0",
-        payOrEndRunSubroutinePayment: 1,
-      });
+      expect(paidContinue).toMatchObject({payOrEndRunSubroutineIndexes: [0], payload: { payOrEndRunSubroutinePayment: 1 }});
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;
       state = apply(
@@ -2273,7 +2270,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       "runner",
       (action) =>
         action.type === "continue_run" &&
-        action.payload?.payOrTrashProgramSubroutineIndexes === "0",
+        action.payOrTrashProgramSubroutineIndexes?.join(",") === "0",
     );
     expect(paid.costs).toEqual([{ credits: 1 }]);
     state = apply(
@@ -2329,7 +2326,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       getLegalActions(state, "runner").some(
         (action) =>
           action.type === "continue_run" &&
-          action.payload?.payOrTrashProgramSubroutineIndexes === "0",
+          action.payOrTrashProgramSubroutineIndexes?.join(",") === "0",
       ),
     ).toBe(false);
     state = apply(
@@ -2376,7 +2373,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       "runner",
       (action) =>
         action.type === "continue_run" &&
-        action.payload?.payOrTrashProgramSubroutineIndexes === "0",
+        action.payOrTrashProgramSubroutineIndexes?.join(",") === "0",
     );
     expect(payWashed.costs).toEqual([{ credits: 1 }]);
     state = apply(
@@ -2409,7 +2406,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       (action) =>
         action.type === "continue_run" &&
         action.payload?.encounterWillEndRun === true &&
-        action.payload?.payOrEndRunSubroutineIndexes === undefined,
+        action.payOrEndRunSubroutineIndexes === undefined,
     );
     state = apply(
       state,
@@ -2447,7 +2444,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       "runner",
       (action) =>
         action.type === "continue_run" &&
-        action.payload?.encounterSubroutineIds === "0,1",
+        action.encounterSubroutineIds?.join(",") === "0,1",
     );
     expect(continueAction.payload?.unbrokenSubroutineCount).toBe(2);
   });

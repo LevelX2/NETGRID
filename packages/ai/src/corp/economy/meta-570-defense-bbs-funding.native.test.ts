@@ -46,7 +46,7 @@ it("funds the native next-runner HQ reserve through free setup without delaying 
   };
   expect(Object.values(saved.validation).every(Boolean)).toBe(true);
   let current = structuredClone(saved.engineState);
-  const parent = "plan:corp.defend_servers:server-defense-portfolio";
+  const parent = "penw02zfrkklof54c2nuye5att";
   for (const [index, type] of [
     "install_card",
     "rez_card",

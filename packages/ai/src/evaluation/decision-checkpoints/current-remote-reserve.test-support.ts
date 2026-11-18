@@ -46,8 +46,8 @@ export function currentRemoteReserveFixture(credits = 21, bank = true) {
     corpDeck,
     agendaPointsToWin: 7,
   });
-  for (const actionId of ["corp.mandatory_draw", "corp.end_turn"]) {
-    if (actionId === "corp.end_turn")
+  for (const actionId of ["ce", "c9"]) {
+    if (actionId === "c9")
       RealEngineFixtureBuilder.forState(state).withCorpHqSize(0);
     const result = applyAction(state, {
       matchId: state.matchId,

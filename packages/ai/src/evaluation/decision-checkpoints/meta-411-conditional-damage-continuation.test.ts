@@ -26,14 +26,14 @@ describe("meta 411 conditional damage continuation", () => {
       runtime,
     );
     const result = chooseAiAction(input, { runnerTurnPlannerMode: "cutover" });
-    expect(result.actionId).toBe("runner.continue_run");
+    expect(result.actionId).toBe("r5");
     expect(result.fallbackUsed).toBe(false);
     expect(input.legalActions.some((a) => a.actionId === result.actionId)).toBe(
       true,
     );
     expect(result.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A445",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      leafExecutorInstanceId: "pd3wrdorii4eg0famfolu2os8n",
     });
   });
 

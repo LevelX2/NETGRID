@@ -69,7 +69,11 @@ describe("pure opponent ICE-install tax at the native Development consumer", () 
       true,
     );
     const plan = decision.decisionDebug?.planFirstDecision;
-    expect(plan?.rootPlanInstanceId).toMatch(/^plan:runner\./);
+    expect(
+      plan?.portfolio.find(
+        (instance) => instance.instanceId === plan?.rootPlanInstanceId,
+      )?.moduleId,
+    ).toMatch(/^runner\./);
     expect(plan?.route?.actionId).toBe(decision.actionId);
     expect(plan?.route?.stateVersion).toBe(input.playerView.stateVersion);
     expect(plan?.route?.purpose).not.toContain("economy_engine");

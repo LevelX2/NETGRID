@@ -40,7 +40,7 @@ describe("runner program trash install action builder", () => {
 
     expect(action).toMatchObject({
       actionId:
-        "runner.install_card.runner_program_trash_target.runner_program_trash_target.runner_program_trash_before_install",
+        "rc.runner_program_trash_target.runner_program_trash_target.runner_program_trash_before_install",
       side: "runner",
       type: "install_card",
       label: "Test Program mit Programmtrash installieren",

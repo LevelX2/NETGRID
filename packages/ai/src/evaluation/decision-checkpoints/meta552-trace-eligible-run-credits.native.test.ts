@@ -78,7 +78,7 @@ describe("native trace eligibility of run-only money", () => {
       f.runtime,
     );
     const d = chooseAiAction(f.input);
-    expect(d.actionId).toBe("runner.draw_card");
+    expect(d.actionId).toBe("r8");
     expect(d.fallbackUsed).toBe(false);
     expect(d.timeoutUsed).toBe(false);
     expect(f.input.legalActions.some((a) => a.actionId === d.actionId)).toBe(
@@ -90,7 +90,7 @@ describe("native trace eligibility of run-only money", () => {
       phase: "build_hand_buffer",
     });
     expect(p?.rootPlanInstanceId).toBe(
-      "plan:runner.defense_and_recovery:runner",
+      "p1gzjb6yfcv4zbzow512kexs33",
     );
     expect(p?.route).toMatchObject({
       actionId: d.actionId,

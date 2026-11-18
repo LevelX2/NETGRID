@@ -117,8 +117,10 @@ describe("Paarung 529 native owner regressions", () => {
       "c7u",
     );
     expect(
-      chosen.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-    ).toContain("plan:runner.shell_traders_pipeline:");
+      chosen.decisionDebug?.planFirstDecision?.portfolio.find(
+        (instance) => instance.instanceId === chosen.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+      )?.moduleId,
+    ).toBe("runner.shell_traders_pipeline");
     expect(chosen.decisionDebug?.planFirstDecision?.selectedPlan?.phase).toBe(
       "progress",
     );
@@ -160,10 +162,10 @@ describe("Paarung 529 native owner regressions", () => {
         input,
       )?.pendingRunnerCostPenaltySupportOrigin;
     expect(pending).toMatchObject({
-      originalActionId: "runner.resolve_choice",
+      originalActionId: "rn",
       selectedAtStateVersion: 204,
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-      executorInstanceId: "plan:runner.convert_run_window:run%3A200",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      executorInstanceId: "p8xlvcehu7tgdpjs14ucm1iv1m",
     });
     let state = take(before, "runner", bid.actionId!, bid.selectedChoices);
     expect(state.runner.credits).toBe(6);
@@ -177,7 +179,7 @@ describe("Paarung 529 native owner regressions", () => {
       (a) => a.actionId === support.actionId,
     )!;
     expect(supportAction.payload?.costPenaltySupportOriginalActionId).toBe(
-      "runner.resolve_choice",
+      "rn",
     );
     expect(supportAction.payload?.costPenaltySupportWindowId).toBe(
       205,
@@ -195,7 +197,7 @@ describe("Paarung 529 native owner regressions", () => {
       ownDeckSnapshot: cp.input.ownDeckSnapshot,
     });
     const continued = chooseAiAction(continuedInput);
-    expect(continued.actionId).toBe("runner.resolve_choice");
+    expect(continued.actionId).toBe("rn");
     expect(continued.selectedChoices?.selectedOptionIds).toEqual(["bid_7"]);
     expect(continued.fallbackUsed).toBe(false);
     expect(

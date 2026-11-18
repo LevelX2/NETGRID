@@ -43,7 +43,7 @@ describe("AI input DTO Corp punish-route quote contract", () => {
       routes: [
         {
           routeId: "route:tag-4-2",
-          campaignId: "campaign:tag-and-bag",
+          campaignId: "k6ctec1rdjn8s4n6f5c03kakmm",
           campaignIdOrigin: "request_binding",
           totalClicks: 3,
           totalActionCredits: 5,
@@ -342,7 +342,7 @@ function completeQuoteSet(head: LegalAction): CorpPunishRouteQuoteSet {
     side: "corp",
     stateVersion: 1,
     timingPoint: "corp_action.main",
-    campaignId: "campaign:tag-and-bag",
+    campaignId: "k6ctec1rdjn8s4n6f5c03kakmm",
     routeId: "route:tag-4-2",
     steps: [
       {
@@ -389,7 +389,7 @@ function completeQuoteSet(head: LegalAction): CorpPunishRouteQuoteSet {
         matchId: request.matchId,
         side: "corp",
         routeId: "route:tag-4-2",
-        campaignId: "campaign:tag-and-bag",
+        campaignId: "k6ctec1rdjn8s4n6f5c03kakmm",
         campaignIdOrigin: "request_binding",
         stateVersion: 1,
         timingPoint: "corp_action.main",

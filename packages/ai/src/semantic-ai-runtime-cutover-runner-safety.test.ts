@@ -1,4 +1,5 @@
 import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
+import { planInstanceIdForProposal } from "./plans/plan-instance";
 import { afterEach, describe, expect, it } from "vitest";
 import { bindSyntheticAgendaStealQuotes } from "./agenda-steal-quotes.test-support";
 import { chooseRunnerAction } from "./index";
@@ -257,15 +258,8 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       { credits: 0 },
       {
         visibility: "private_to_actor",
-        payload: {
-          encounterContinue: true,
-          unbrokenSubroutineCount: 1,
-          encounterWillEndRun: true,
-          sourceDefinitionId: 444,
-          encounterSubroutineIds: crystalWall
-            .effectiveRunQuote!.subroutines.map((subroutine) => subroutine.id)
-            .join(","),
-        },
+        payload: {encounterContinue: true, unbrokenSubroutineCount: 1, encounterWillEndRun: true, sourceDefinitionId: 444}, encounterSubroutineIds: crystalWall
+            .effectiveRunQuote!.subroutines.map((subroutine) => subroutine.id),
       },
     );
     pump.timingPoint = "run.encounter_ice";
@@ -336,15 +330,8 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       { credits: 0 },
       {
         visibility: "private_to_actor",
-        payload: {
-          encounterContinue: true,
-          unbrokenSubroutineCount: 1,
-          encounterWillEndRun: true,
-          sourceDefinitionId: 461,
-          encounterSubroutineIds: hunter
-            .effectiveRunQuote!.subroutines.map((s) => s.id)
-            .join(","),
-        },
+        payload: {encounterContinue: true, unbrokenSubroutineCount: 1, encounterWillEndRun: true, sourceDefinitionId: 461}, encounterSubroutineIds: hunter
+            .effectiveRunQuote!.subroutines.map((s) => s.id),
       },
     );
     pump.timingPoint = "run.encounter_ice";
@@ -469,13 +456,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       { credits: 0 },
       {
         visibility: "private_to_actor",
-        payload: {
-          encounterContinue: true,
-          encounterWillEndRun: false,
-          unbrokenSubroutineCount: 1,
-          encounterSubroutineIds: "outer-canis-major-future-strength",
-          sourceDefinitionId: 437,
-        },
+        payload: {encounterContinue: true, encounterWillEndRun: false, unbrokenSubroutineCount: 1, sourceDefinitionId: 437}, encounterSubroutineIds: ["outer-canis-major-future-strength"],
       },
     );
     pump.timingPoint = "run.encounter_ice";
@@ -610,15 +591,8 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       { credits: 0 },
       {
         visibility: "private_to_actor",
-        payload: {
-          encounterContinue: true,
-          unbrokenSubroutineCount: 1,
-          encounterWillEndRun: true,
-          sourceDefinitionId: 464,
-          encounterSubroutineIds: keeper
-            .effectiveRunQuote!.subroutines.map((s) => s.id)
-            .join(","),
-        },
+        payload: {encounterContinue: true, unbrokenSubroutineCount: 1, encounterWillEndRun: true, sourceDefinitionId: 464}, encounterSubroutineIds: keeper
+            .effectiveRunQuote!.subroutines.map((s) => s.id),
       },
     );
     pump.timingPoint = "run.encounter_ice";
@@ -721,8 +695,8 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     );
     breakCurrent.timingPoint = "run.encounter_ice";
     continueIntoEtr.timingPoint = "run.encounter_ice";
-    continueIntoEtr.payload!.encounterSubroutineIds =
-      currentCrystalWall.effectiveRunQuote!.subroutines[0]!.id;
+    continueIntoEtr.encounterSubroutineIds =
+      [currentCrystalWall.effectiveRunQuote!.subroutines[0]!.id];
     const input = aiInput("runner", [breakCurrent, continueIntoEtr]);
     input.playerView.timingPoint = "run.encounter_ice";
     input.playerView.own.credits = 1;
@@ -831,7 +805,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       expect.arrayContaining([
         "plan_module:runner.economy",
         "plan_step_capability:gain_general_liquid_credits",
-        "plan_priority_delegated_from:plan:runner.develop_board_and_hand:card%3A320",
+        `plan_priority_delegated_from:${planInstanceIdForProposal({moduleId: "runner.develop_board_and_hand", dedupeKey: "card:320"})}`,
       ]),
     );
   });
@@ -1246,10 +1220,9 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     const liveDecision = chooseRunnerAction(input);
 
     expect(liveDecision.actionId).toBe(previewDecision.actionId);
-    expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
-      executorInstanceId: expect.stringContaining(
-        "plan:runner.rig_and_coverage:",
-      ),
-    });
+    const portfolio = residentPlanPortfolioSnapshot(input)!;
+    expect(portfolio.instances.find((instance) =>
+      instance.instanceId === portfolio.executorInstanceId,
+    )?.moduleId).toBe("runner.rig_and_coverage");
   });
 });

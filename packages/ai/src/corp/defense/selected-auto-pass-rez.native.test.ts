@@ -87,19 +87,19 @@ function scenario(
         state.cardInstances[a.source]?.definitionId === SOCIAL,
     )!;
     apply("runner", event.actionId);
-    apply("runner", "runner.resolve_choice", "hide_" + hiddenAmount);
+    apply("runner", "rn", "hide_" + hiddenAmount);
     if (bypass === "guess")
       return { initial, state: () => state, apply, iceId };
     expect(getPlayerView(state, "corp")).not.toHaveProperty(
       "secretSpendGuessRunSecret",
     );
-    apply("corp", "corp.resolve_choice", "guess_3");
+    apply("corp", "cn", "guess_3");
     const target = state.pendingChoice!.options.find(
       (o) => o.value === "hq|" + iceId,
     )!;
-    apply("runner", "runner.resolve_choice", target.id);
+    apply("runner", "rn", target.id);
   } else {
-    apply("runner", "runner.start_run.hq");
+    apply("runner", "rs.hq");
   }
   return { initial, state: () => state, apply, iceId };
 }
@@ -131,14 +131,16 @@ describe("public selected auto-pass and Corp rez", () => {
     const decision = chooseAiAction(actorInput);
     if (decision.selectionKind !== "direct")
       throw new Error("Expected the bound direct rez-window action");
-    expect(decision.actionId).toBe("corp.decline_rez");
+    expect(decision.actionId).toBe("c6");
     expect(decision.fallbackUsed).toBe(false);
     expect(
-      decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-    ).toContain("corp.defend_servers");
+      decision.decisionDebug?.planFirstDecision?.portfolio.find(
+        (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+      )?.moduleId,
+    ).toBe("corp.defend_servers");
     expect(hashState(s.state())).toBe(before);
     s.apply("corp", decision.actionId);
-    s.apply("runner", "runner.continue_run");
+    s.apply("runner", "r5");
     expect(s.state().corp.credits).toBe(10);
     const replay = replayGameEvents(
       s.initial,
@@ -153,7 +155,7 @@ describe("public selected auto-pass and Corp rez", () => {
       getPlayerView(s.state(), "corp").run?.pendingAutoPassIceId,
     ).toBeUndefined();
     const decision = chooseAiAction(input(s.state()));
-    expect(decision.actionId).toContain("corp.rez_ice");
+    expect(decision.actionId).toContain("cq");
     expect(decision.fallbackUsed).toBe(false);
   });
   it("mixes legal secret guesses through the replayable AI RNG domain", () => {
@@ -283,7 +285,7 @@ describe("public selected auto-pass and Corp rez", () => {
       expectation: { acceptableActions: [{ type: "resolve_choice" }] },
     });
     expect(result.ok, result.message).toBe(true);
-    expect(result.decision?.actionId).toBe("corp.resolve_choice");
+    expect(result.decision?.actionId).toBe("cn");
     expect(result.decision?.selectedChoices?.selectedOptionIds).toHaveLength(1);
     expect(hashState(state)).toBe(before);
   });

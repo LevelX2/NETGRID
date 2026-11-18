@@ -28,7 +28,7 @@ it.each([8, 9, 10, 11])(
     const input = structuredClone(checkpoint.input);
     input.playerView.own.credits = credits;
     const target = evaluateRunnerRunTargets({ input }).find(
-      (candidate) => candidate.actionId === "runner.start_run.r1",
+      (candidate) => candidate.actionId === "rs.r1",
     );
     // Wall of Static: six; Ball and Chain's tax: two; inner Data Wall: two.
     expect(target).toMatchObject({
@@ -71,15 +71,15 @@ it.each([
     const action = input.legalActions.find((candidate) =>
       bankAvailable
         ? candidate.actionId ===
-          "runner.activated_card_ability.c29d.c29d.activated.441"
+          "r1.c29d.c29d.activated.441"
         : loanAvailable
           ? candidate.actionId ===
-            "runner.install_card.c2ch.c2ch"
-          : candidate.actionId === "runner.gain_credit",
+            "rc.c2ch.c2ch"
+          : candidate.actionId === "rb",
     )!;
     if (bankAvailable || loanAvailable) {
       const target = evaluateRunnerRunTargets({ input }).find(
-        (candidate) => candidate.actionId === "runner.start_run.r1",
+        (candidate) => candidate.actionId === "rs.r1",
       )!;
       expect(target.pathCost).toBe(10);
       expect(
@@ -92,10 +92,10 @@ it.each([
       decisionDebug: {
         planFirstDecision: {
           selectedStep: {
-            parentInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+            parentInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
             planInstanceId: bankAvailable
-              ? "plan:runner.credit_bank:c29d"
-              : "plan:runner.economy:run-support%3Aremote%3Ar1",
+              ? "pdeck54mcc1lshdzs9k74eyxih"
+              : "p8dvcw6jj6cbaz1qxlt9ksvoh5",
             needId: "run-support:remote:r1",
           },
           route: {
@@ -121,11 +121,11 @@ it("preserves the native debt-free two-credit route when three clicks remain", (
   );
   expect(input.playerView.own.clicks).toBe(3);
   expect(chooseAiAction(input)).toMatchObject({
-    actionId: "runner.gain_credit",
+    actionId: "rb",
     fallbackUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+        rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       },
     },
   });

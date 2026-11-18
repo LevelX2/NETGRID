@@ -84,7 +84,7 @@ it.each(["g3d108", "g4d180"])(
     ).toBe(originalInput);
     expect(hashGameState(f.state)).toBe(originalState);
     const choiceId = f.input.playerView.pendingChoice!.choiceId;
-    const paid = take(f.state, "corp", "corp.resolve_choice", {
+    const paid = take(f.state, "corp", "cn", {
       choiceId,
       selectedOptionIds: ["pay"],
     });
@@ -132,7 +132,7 @@ it("retains the useful penalty on the native unused Rental target after access c
     f.input.playerView.run!.runEndTrashUsedBreakerIdsThisRun,
   ).toBeUndefined();
   const choiceId = f.input.playerView.pendingChoice!.choiceId;
-  const paid = take(f.state, "corp", "corp.resolve_choice", {
+  const paid = take(f.state, "corp", "cn", {
     choiceId,
     selectedOptionIds: ["pay"],
   });

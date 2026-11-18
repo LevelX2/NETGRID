@@ -4351,7 +4351,7 @@
         "id": "hq"
       },
       "selectedStepKind": "probe_central",
-      "selectedActionId": "runner.start_run.hq",
+      "selectedActionId": "rs.hq",
       "blockedBy": [],
       "ttlDecisionsRemaining": 0,
       "planProgressionReason": "previous_plan_considered",
@@ -4407,7 +4407,7 @@
             "plan_portfolio_role:background",
             "plan_portfolio_lifecycle:active",
             "plan_portfolio_previous_entry:runner.build_credit_bank:bank:runner_credit_bank",
-            "plan_portfolio_action_progress:runner.activated_card_ability.c29e.c29e.activated.0",
+            "plan_portfolio_action_progress:r1.c29e.c29e.activated.0",
             "plan_portfolio_action_progress_source:selected_mapped_step",
             "plan_portfolio_carried_without_current_action:true",
             "plan_portfolio_carried_without_current_action:true",
@@ -4426,7 +4426,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:runner.build_credit_bank",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.end_turn"
+        "plan_portfolio_selected_action:r9"
       ]
     },
     "strategicIntent": {

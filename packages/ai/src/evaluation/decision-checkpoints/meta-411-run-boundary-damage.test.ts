@@ -28,14 +28,14 @@ describe("meta 411 future damage belongs to the creating run", () => {
       runtime,
     );
     const result = chooseAiAction(input, { runnerTurnPlannerMode: "cutover" });
-    expect(result.actionId).toBe("runner.continue_run");
+    expect(result.actionId).toBe("r5");
     expect(result.fallbackUsed).toBe(false);
     expect(input.legalActions.some((a) => a.actionId === result.actionId)).toBe(
       true,
     );
     expect(result.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A165",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      leafExecutorInstanceId: "p9nnwdbo834fc41tab1fat3xiu",
     });
   });
 

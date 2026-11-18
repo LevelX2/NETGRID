@@ -104,7 +104,7 @@ describe("meta 410 current remote identity and access purpose", () => {
 
   it("lets the existing contest owner use the payable last-click threat route", () => {
     const result = choose(replacementJson);
-    expect(result.actionId).toBe("runner.start_run.r1");
+    expect(result.actionId).toBe("rs.r1");
     expect(
       result.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
     ).toBe("runner.contest_remote");
@@ -112,7 +112,7 @@ describe("meta 410 current remote identity and access purpose", () => {
 
   it("does not repeat a known trash target whose access conversion declines unchanged costs", () => {
     const result = choose(trashJson);
-    expect(result.actionId).toBe("runner.gain_credit");
+    expect(result.actionId).toBe("rb");
     expect(
       result.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
     ).toBe("runner.economy");
@@ -132,7 +132,7 @@ describe("meta 410 current remote identity and access purpose", () => {
       }),
     ).toBeUndefined();
     const result = choose(agendaJson);
-    expect(result.actionId).toContain("runner.steal_agenda.");
+    expect(result.actionId).toContain("rt.");
     expect(
       result.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
     ).toBe("runner.convert_run_window");

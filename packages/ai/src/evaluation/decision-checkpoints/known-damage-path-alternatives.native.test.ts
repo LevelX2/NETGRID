@@ -106,7 +106,7 @@ function target(state: GameState) {
     profileId: "native-damage-path",
   };
   return evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.hq",
+    (t) => t.actionId === "rs.hq",
   )!;
 }
 

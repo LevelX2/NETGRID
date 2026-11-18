@@ -4229,7 +4229,7 @@
       "stateVersion": 13,
       "instances": [
         {
-          "instanceId": "plan:corp.ambush_and_bluff:ambush%3Ac3et",
+          "instanceId": "p8wzevn3btnq8nm88cipqfniye",
           "dedupeKey": "ambush:c3et",
           "moduleId": "corp.ambush_and_bluff",
           "moduleVersion": "1",
@@ -4265,7 +4265,7 @@
               "sourceDefinitionId": 552,
               "sourceInstanceId": "c3et",
               "actionIds": [
-                "corp.install_card.c3et.new_remote.c3et"
+                "cc.c3et.new_remote.c3et"
               ],
               "serverId": "new_remote",
               "phase": "install",
@@ -4280,7 +4280,7 @@
               "value": 180,
               "evidenceCode": "corp_ambush_preplanned_exact_install:552:new_remote",
               "installRoute": {
-                "actionId": "corp.install_card.c3et.new_remote.c3et",
+                "actionId": "cc.c3et.new_remote.c3et",
                 "creditCost": 0,
                 "fundingGap": 0,
                 "costSource": "legal_action"
@@ -4321,7 +4321,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.ambush_and_bluff:ambush%3Ac3et%3Asetup%3Anew_remote",
+          "instanceId": "p9qagrkacnjiyob9y9f8fxgici",
           "dedupeKey": "ambush:c3et:setup:new_remote",
           "moduleId": "corp.ambush_and_bluff",
           "moduleVersion": "1",
@@ -4344,7 +4344,7 @@
             "kind": "server",
             "id": "new_remote"
           },
-          "parentInstanceId": "plan:corp.ambush_and_bluff:ambush%3Ac3et",
+          "parentInstanceId": "p8wzevn3btnq8nm88cipqfniye",
           "parentNeedId": "ambush-setup:c3et:new_remote",
           "openNeedIds": [],
           "phase": "install",
@@ -4357,7 +4357,7 @@
               "sourceDefinitionId": 552,
               "sourceInstanceId": "c3et",
               "actionIds": [
-                "corp.install_card.c3et.new_remote.c3et"
+                "cc.c3et.new_remote.c3et"
               ],
               "serverId": "new_remote",
               "phase": "install",
@@ -4372,7 +4372,7 @@
               "value": 180,
               "evidenceCode": "corp_ambush_preplanned_exact_install:552:new_remote",
               "installRoute": {
-                "actionId": "corp.install_card.c3et.new_remote.c3et",
+                "actionId": "cc.c3et.new_remote.c3et",
                 "creditCost": 0,
                 "fundingGap": 0,
                 "costSource": "legal_action"
@@ -4413,7 +4413,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.defend_servers:server-defense-portfolio",
+          "instanceId": "penw02zfrkklof54c2nuye5att",
           "dedupeKey": "server-defense-portfolio",
           "moduleId": "corp.defend_servers",
           "moduleVersion": "1",
@@ -4436,7 +4436,7 @@
             "kind": "capability",
             "id": "allocate_server_defense"
           },
-          "parentInstanceId": "plan:corp.score_agenda:agenda%3Acel%3Anew_remote",
+          "parentInstanceId": "p4l08olqbbave9l5oan8upledl",
           "parentNeedId": "score-protection:agenda:cel:new_remote",
           "openNeedIds": [],
           "phase": "defense",
@@ -4446,13 +4446,13 @@
             "signals": [
               {
                 "kind": "score_protection_install",
-                "defenseId": "score-protection-install:agenda:cel:new_remote:corp.install_card.c2th.new_remote.c2th",
+                "defenseId": "score-protection-install:agenda:cel:new_remote:cc.c2th.new_remote.c2th",
                 "serverId": "new_remote",
                 "phase": "install_ice",
                 "parentProjectId": "agenda:cel:new_remote",
                 "parentNeedId": "score-protection:agenda:cel:new_remote",
                 "delegatedPriorityClass": "P4",
-                "actionId": "corp.install_card.c2th.new_remote.c2th",
+                "actionId": "cc.c2th.new_remote.c2th",
                 "sourceCardInstanceId": "c2th",
                 "sourceDefinitionId": 456,
                 "effect": "satisfied",
@@ -4463,7 +4463,7 @@
                 "totalInstallAndRezCredits": 0,
                 "projection": {
                   "knowledge": "known",
-                  "actionId": "corp.install_card.c2th.new_remote.c2th",
+                  "actionId": "cc.c2th.new_remote.c2th",
                   "sourceCardInstanceId": "c2th",
                   "sourceDefinitionId": 456,
                   "targetServerId": "new_remote",
@@ -4473,7 +4473,7 @@
                     "availableCorpClicks": 3,
                     "totalScoreReserveCredits": 4,
                     "hardClickReserve": 0,
-                    "scoreReserveFingerprint": "clicks:0|117:score_action:corp.install_card.cel.new_remote.cel=0|54:post_score_floor:cel=0|59:remaining_advancement:cel=4",
+                    "scoreReserveFingerprint": "clicks:0|117:score_action:cc.cel.new_remote.cel=0|54:post_score_floor:cel=0|59:remaining_advancement:cel=4",
                     "protection": {
                       "knowledge": "known",
                       "runnerAccessSuccessProbability": {
@@ -4524,7 +4524,7 @@
                     "availableCorpClicks": 2,
                     "totalScoreReserveCredits": 4,
                     "hardClickReserve": 0,
-                    "scoreReserveFingerprint": "clicks:0|117:score_action:corp.install_card.cel.new_remote.cel=0|54:post_score_floor:cel=0|59:remaining_advancement:cel=4",
+                    "scoreReserveFingerprint": "clicks:0|117:score_action:cc.cel.new_remote.cel=0|54:post_score_floor:cel=0|59:remaining_advancement:cel=4",
                     "protection": {
                       "knowledge": "known",
                       "runnerAccessSuccessProbability": {
@@ -4698,7 +4698,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.economy:economy-liquidity-development%3Acorp%3A2",
+          "instanceId": "p9qz3bdoj3sz57cnrygemedtv6",
           "dedupeKey": "economy-liquidity-development:corp:2",
           "moduleId": "corp.economy",
           "moduleVersion": "1",
@@ -4735,7 +4735,7 @@
               "gap": 3,
               "projectedCreditGain": 1,
               "actionIds": [
-                "corp.gain_credit"
+                "cb"
               ],
               "priorityClass": "P6",
               "cadence": {
@@ -4787,7 +4787,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.hand_and_agenda_management:resolve-hq-overflow%3Acorp%3A2",
+          "instanceId": "p4azjmobmq8i51sxmj49kkky2s",
           "dedupeKey": "resolve-hq-overflow:corp:2",
           "moduleId": "corp.hand_and_agenda_management",
           "moduleVersion": "1",
@@ -4822,12 +4822,12 @@
               "handSize": 6,
               "maximumHandSize": 5,
               "actionIds": [
-                "corp.play_operation.c31r.c31r",
-                "corp.play_operation.c33p.c33p"
+                "ci.c31r.c31r",
+                "ci.c33p.c33p"
               ],
               "actionPriorityOrder": [
-                "corp.play_operation.c31r.c31r",
-                "corp.play_operation.c33p.c33p"
+                "ci.c31r.c31r",
+                "ci.c33p.c33p"
               ],
               "exactActionRoute": true,
               "concretePurposeCode": "Reduce the known Corp HQ overflow through one exact current non-agenda hand conversion, then observe and revalidate.",
@@ -4876,7 +4876,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Acel%3Anew_remote",
+          "instanceId": "p4l08olqbbave9l5oan8upledl",
           "dedupeKey": "agenda:cel:new_remote",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -4912,7 +4912,7 @@
               "agendaPoints": 2,
               "agendaInstanceId": "cel",
               "actionIds": [
-                "corp.install_card.cel.new_remote.cel"
+                "cc.cel.new_remote.cel"
               ],
               "serverId": "new_remote",
               "phase": "install_agenda",
@@ -4934,7 +4934,7 @@
                 "scoreReserve": {
                   "creditBreakdown": [
                     {
-                      "reserveId": "score_action:corp.install_card.cel.new_remote.cel",
+                      "reserveId": "score_action:cc.cel.new_remote.cel",
                       "credits": 0
                     },
                     {
@@ -4954,7 +4954,7 @@
                   "availableCorpClicks": 3,
                   "totalScoreReserveCredits": 4,
                   "hardClickReserve": 0,
-                  "scoreReserveFingerprint": "clicks:0|117:score_action:corp.install_card.cel.new_remote.cel=0|54:post_score_floor:cel=0|59:remaining_advancement:cel=4",
+                  "scoreReserveFingerprint": "clicks:0|117:score_action:cc.cel.new_remote.cel=0|54:post_score_floor:cel=0|59:remaining_advancement:cel=4",
                   "protection": {
                     "knowledge": "known",
                     "runnerAccessSuccessProbability": {
@@ -5039,7 +5039,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac2il%3Anew_remote",
+          "instanceId": "p73nyzt8ywz5uh5s7ion9zos4j",
           "dedupeKey": "agenda:c2il:new_remote",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -5073,7 +5073,7 @@
               "agendaPoints": 3,
               "agendaInstanceId": "c2il",
               "actionIds": [
-                "corp.install_card.c2il.new_remote.c2il"
+                "cc.c2il.new_remote.c2il"
               ],
               "serverId": "new_remote",
               "phase": "install_agenda",
@@ -5095,7 +5095,7 @@
                 "scoreReserve": {
                   "creditBreakdown": [
                     {
-                      "reserveId": "score_action:corp.install_card.c2il.new_remote.c2il",
+                      "reserveId": "score_action:cc.c2il.new_remote.c2il",
                       "credits": 0
                     },
                     {
@@ -5115,7 +5115,7 @@
                   "availableCorpClicks": 3,
                   "totalScoreReserveCredits": 4,
                   "hardClickReserve": 0,
-                  "scoreReserveFingerprint": "clicks:0|113:score_action:corp.install_card.c2il.new_remote.c2il=0|52:post_score_floor:c2il=0|57:remaining_advancement:c2il=4",
+                  "scoreReserveFingerprint": "clicks:0|113:score_action:cc.c2il.new_remote.c2il=0|52:post_score_floor:c2il=0|57:remaining_advancement:c2il=4",
                   "protection": {
                     "knowledge": "known",
                     "runnerAccessSuccessProbability": {
@@ -5212,49 +5212,49 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:corp.ambush_and_bluff:ambush%3Ac3et",
+          "instanceId": "p8wzevn3btnq8nm88cipqfniye",
           "stateVersion": 13,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.ambush_and_bluff:ambush%3Ac3et%3Asetup%3Anew_remote",
+          "instanceId": "p9qagrkacnjiyob9y9f8fxgici",
           "stateVersion": 13,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.defend_servers:server-defense-portfolio",
+          "instanceId": "penw02zfrkklof54c2nuye5att",
           "stateVersion": 13,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.economy:economy-liquidity-development%3Acorp%3A2",
+          "instanceId": "p9qz3bdoj3sz57cnrygemedtv6",
           "stateVersion": 13,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.hand_and_agenda_management:resolve-hq-overflow%3Acorp%3A2",
+          "instanceId": "p4azjmobmq8i51sxmj49kkky2s",
           "stateVersion": 13,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Acel%3Anew_remote",
+          "instanceId": "p4l08olqbbave9l5oan8upledl",
           "stateVersion": 13,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac2il%3Anew_remote",
+          "instanceId": "p73nyzt8ywz5uh5s7ion9zos4j",
           "stateVersion": 13,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.defend_servers:server-defense-portfolio",
+          "instanceId": "penw02zfrkklof54c2nuye5att",
           "stateVersion": 13,
           "reason": "executor_selected",
           "fromExecutionState": "idle",
@@ -5262,8 +5262,8 @@
           "detailCode": "validated_scheduler_selection"
         }
       ],
-      "rootForegroundInstanceId": "plan:corp.score_agenda:agenda%3Acel%3Anew_remote",
-      "executorInstanceId": "plan:corp.defend_servers:server-defense-portfolio"
+      "rootForegroundInstanceId": "p4l08olqbbave9l5oan8upledl",
+      "executorInstanceId": "penw02zfrkklof54c2nuye5att"
     }
   },
   "expectation": {

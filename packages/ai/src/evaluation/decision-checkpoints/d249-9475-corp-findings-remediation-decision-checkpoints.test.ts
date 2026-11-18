@@ -28,7 +28,7 @@ describe("d249 and 9475 Corp remediation checkpoints", () => {
       checkpoint.expectation.acceptableActions = [
         {
           actionId:
-            "corp.play_operation.c34t.c34t.621",
+            "ci.c34t.c34t.621",
         },
       ];
     }

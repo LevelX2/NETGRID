@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { mergedPublicHistory } from "../../public-event-history";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -1076,7 +1077,7 @@ function runnerCreditBankRunFundingRoute(params: {
         ...(fundedTerminalTarget || remoteFundingRoute
           ? {
               runFunding: {
-                parentPlanInstanceId: `plan:runner.contest_remote:${encodeURIComponent(`remote:${evaluation.targetServerId}`)}`,
+                parentPlanInstanceId: planInstanceIdForProposal({ moduleId: "runner.contest_remote", dedupeKey: `remote:${evaluation.targetServerId}` }),
                 needId: `run-support:remote:${evaluation.targetServerId}`,
                 runActionId: evaluation.actionId,
                 stateVersion: params.input.playerView.stateVersion,

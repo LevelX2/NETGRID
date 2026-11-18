@@ -231,7 +231,7 @@ describe("corp rez costs", () => {
     state.corpBonusAgendaPoints = 1;
     const quote = quoteCorpRootRezCost(state, ACME_ID);
     const action = {
-      actionId: "corp.rez_card.acme_1.rd.acme_1",
+      actionId: "cp.acme_1.rd.acme_1",
       type: "rez_card",
       side: "corp",
       label: "ACME rezzen",

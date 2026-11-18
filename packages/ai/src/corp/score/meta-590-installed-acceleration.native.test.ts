@@ -37,9 +37,9 @@ it("finishes the installed terminal-steal agenda before a speculative defense dr
   );
   const decision = chooseAiAction(input),
     root =
-      "plan:corp.score_agenda:agenda%3Ac2l1%3Ar1";
+      "pdvpqdj4cqkxou94gx0fkps709";
   expect(decision.actionId).toBe(
-    "corp.play_operation.c36u.c36u",
+    "ci.c36u.c36u",
   );
   expect(decision).toMatchObject({ fallbackUsed: false, timeoutUsed: false });
   expect(decision.decisionDebug!.planFirstDecision!).toMatchObject({

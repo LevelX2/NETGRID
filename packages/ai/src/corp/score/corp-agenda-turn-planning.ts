@@ -9,6 +9,7 @@ import type { ActionSemanticCandidate } from "../../action-semantic-candidate-ty
 import { candidateTargetIds } from "../../actions/action-candidate-facts";
 
 import { planInstanceIdForProposal } from "../../plans/plan-instance";
+import { agendaCampaignIdentity, compactCampaignId } from "../../plans/compact-plan-identity";
 import {
   buildCanonicalLegalActionInvocation,
   turnPlanningFingerprint,
@@ -569,7 +570,7 @@ function createLine(
     lineId,
     nodeKeys: nodes.map((node) => node.invocation.invocationKey),
   });
-  const campaignId = `campaign:${params.project.projectId}`;
+  const campaignId = compactCampaignId(agendaCampaignIdentity(params.project.projectId));
   const campaignQuote: CampaignMilestoneQuote = {
     quoteId: afterQuoteId,
     campaignId,

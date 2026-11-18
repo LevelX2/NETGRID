@@ -39,6 +39,7 @@ export function residentPlanPortfolioSnapshot(
         "Discard incompatible resident portfolio state; no v1 migration is supported.",
     });
   }
+  assertResidentPlanPortfolio(snapshot, input.playerView.timingPoint);
   return structuredClone(snapshot);
 }
 
@@ -62,6 +63,7 @@ export function rememberResidentPlanPortfolio(
         "Persist only a current v2 resident portfolio for the matching side.",
     });
   }
+  assertResidentPlanPortfolio(snapshot, input.playerView.timingPoint);
   memory.set(
     memoryKey(input),
     structuredClone(snapshot),

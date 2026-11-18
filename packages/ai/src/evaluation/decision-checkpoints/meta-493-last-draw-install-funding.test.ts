@@ -83,10 +83,15 @@ it("funds the financeable terminal last-draw parent before installation instead 
   });
   const result = decide(cp),
     plan = result.decisionDebug!.planFirstDecision!;
-  expect(result.actionId).toBe("corp.gain_credit");
-  expect(plan.rootPlanInstanceId).toContain(
-    "corp.score_agenda:agenda%3Ac2mt",
-  );
+  expect(result.actionId).toBe("cb");
+  expect(
+    plan?.portfolio.find(
+      (instance) => instance.instanceId === plan.rootPlanInstanceId,
+    ),
+  ).toMatchObject({
+    moduleId: "corp.score_agenda",
+    dedupeKey: expect.stringContaining("agenda:c2mt"),
+  });
   expect(plan.selectedPlan?.moduleId).toBe("corp.economy");
   expect(plan.priority?.effectiveClass).toBe("P2");
   expect(plan.rootPlanInstanceId).not.toBe(plan.selectedPlan?.instanceId);
@@ -109,9 +114,10 @@ it("installs the exact terminal Babylon route after its full three-credit floor 
   const cp = checkpoint();
   cp.input.playerView.own.credits = 3;
   const result = decide(cp);
-  expect(result.actionId).toContain(
-    "install_card.c2mt",
-  );
+  expect(cp.input.legalActions.find((action) => action.actionId === result.actionId)).toMatchObject({
+    type: "install_card",
+    source: "c2mt",
+  });
   expect(result.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
     "corp.score_agenda",
   );

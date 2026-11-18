@@ -79,11 +79,11 @@ it.each([true, false])(
       (a) => a.actionId === result.actionId,
     )!;
     expect(action.actionId).toBe(
-      "runner.activated_card_ability.c29d.c29d.activated.441",
+      "r1.c29d.c29d.activated.441",
     );
     if (loanAvailable) {
       const target = evaluateRunnerRunTargets({ input }).find(
-        (candidate) => candidate.actionId === "runner.start_run.r1",
+        (candidate) => candidate.actionId === "rs.r1",
       )!;
       expect(target.pathCost).toBe(12);
       const funded = structuredClone(input);
@@ -97,9 +97,9 @@ it.each([true, false])(
     }
     expect(result.fallbackUsed).toBe(false);
     expect(result.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       leafExecutorInstanceId:
-        "plan:runner.credit_bank:c29d",
+        "pdeck54mcc1lshdzs9k74eyxih",
     });
     expect(result.decisionDebug?.planFirstDecision?.route).toMatchObject({
       actionId: action.actionId,
@@ -226,8 +226,8 @@ it("uses the paid-for break to preserve the bound hand floor despite an unafford
     fallbackUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A88",
+        rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+        leafExecutorInstanceId: "p8kyx6z8jxbofmjp2gda5k9jn6",
         route: {
           actionId: action.actionId,
           stateVersion: input.playerView.stateVersion,

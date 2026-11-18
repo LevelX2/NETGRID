@@ -3267,7 +3267,7 @@
         "id": "rd"
       },
       "selectedStepKind": "probe_central",
-      "selectedActionId": "runner.start_run.rd",
+      "selectedActionId": "rs.rd",
       "blockedBy": [],
       "ttlDecisionsRemaining": 0,
       "planProgressionReason": "previous_plan_considered",
@@ -3295,7 +3295,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.continue_run.0"
+        "plan_portfolio_selected_action:r5.0"
       ]
     },
     "strategicIntent": {
@@ -4413,7 +4413,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.install_card.c75.c75"
+        "actionId": "rc.c75.c75"
       }
     ],
     "planExecution": {

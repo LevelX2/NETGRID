@@ -260,10 +260,10 @@ it.each(["modern_open", "classic_blind", "classic_blind_corp_ties"] as const)(
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId:
-        "plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
+        "pp3zys3mvrb02r0muk2126s52",
       selectedStep: {
         parentInstanceId:
-          "plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
+          "pp3zys3mvrb02r0muk2126s52",
       },
     });
     expect(JSON.stringify(decision.decisionDebug)).toContain(

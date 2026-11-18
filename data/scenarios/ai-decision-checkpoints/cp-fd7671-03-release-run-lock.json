@@ -9525,7 +9525,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.end_turn"
+        "plan_portfolio_selected_action:r9"
       ]
     },
     "strategicIntent": {
@@ -10554,7 +10554,7 @@
         "contest_remote"
       ],
       "requiredAssessmentEvidence": [
-        "runner_targeted_ice_trash_preflight:r1:h1fzy5yq"
+        "runner_targeted_ice_trash_preflight:r1:hr1.i3"
       ]
     }
   }

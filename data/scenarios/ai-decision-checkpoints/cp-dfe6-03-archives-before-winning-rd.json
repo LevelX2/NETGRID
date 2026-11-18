@@ -7931,7 +7931,7 @@
         "id": "runner_survival_defense"
       },
       "selectedStepKind": "find_survival_answer",
-      "selectedActionId": "runner.draw_card",
+      "selectedActionId": "r8",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -8084,7 +8084,7 @@
         "plan_portfolio_foreground:runner.opportunistic_central_run",
         "plan_portfolio_backgrounds:runner.build_credit_bank",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.draw_card"
+        "plan_portfolio_selected_action:r8"
       ]
     },
     "strategicIntent": {
@@ -9113,7 +9113,7 @@
     "contractKind": "correctness",
     "acceptableActions": [
       {
-        "actionId": "runner.start_run.rd"
+        "actionId": "rs.rd"
       }
     ],
     "forbiddenActions": [

@@ -112,7 +112,7 @@ describe("native access and relative-ICE tag producers", () => {
       traceTagSource: true,
     });
     const action = {
-      actionId: "corp.rez_ice",
+      actionId: "cq",
       side: "corp",
       type: "rez_ice",
       source: "ice-instance",

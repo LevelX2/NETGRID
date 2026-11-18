@@ -61,7 +61,7 @@ describe("native paid Shock.r mitigation retains its future run pool", () => {
       expect(d.timeoutUsed).toBe(false);
       const p = d.decisionDebug!.planFirstDecision!;
       expect(p.rootPlanInstanceId).toBe(
-        "plan:runner.pressure_central:central%3Ard",
+        "pa90fufw9vc5bkshp96ztlryxl",
       );
       expect(p.selectedPlan!.moduleId).toBe("runner.convert_run_window");
       expect(p.route).toMatchObject({

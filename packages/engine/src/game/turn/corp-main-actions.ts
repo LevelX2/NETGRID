@@ -97,7 +97,10 @@ export type CorpMainActionGenerationHost = {
   };
   runner: {
     isConcealedRunnerResource: HostFn<boolean>;
-    hiddenRunnerResourceSlotId: HostFn<string>;
+    hiddenRunnerResourceSlotId: (
+      state: GameState,
+      cardId: CardInstanceId,
+    ) => CardInstanceId;
   };
   install: {
     corpNewDataFortCreationLocked: HostFn<boolean>;
@@ -462,7 +465,7 @@ export function buildCorpMainActions(
     for (const id of state.runner.rig.resources) {
       const hiddenResource = isConcealedRunnerResource(state, id);
       const resourceSlotId = hiddenResource
-        ? hiddenRunnerResourceSlotId(id)
+        ? hiddenRunnerResourceSlotId(state, id)
         : id;
       const definition = hiddenResource ? undefined : definitionFor(state, id);
       actions.push(

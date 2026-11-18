@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 
@@ -513,7 +514,7 @@ function demand(
     demandId: params.demandId,
     ownerModuleId: "runner.rig_and_coverage",
     sourceKind: "resident_plan_need",
-    sourcePlanInstanceId: `plan:runner.rig_and_coverage:${params.demandId}`,
+    sourcePlanInstanceId: planInstanceIdForProposal({ moduleId: "runner.rig_and_coverage", dedupeKey: params.demandId }),
     sourceNeedId: params.demandId,
     capabilityId: params.capabilityId,
     horizon: "next_rig_milestone",

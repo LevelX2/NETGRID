@@ -59,7 +59,7 @@ function discovery(
   const candidate = candidates.find(
     (c) =>
       c.actionId ===
-      "corp.install_card.c25.hq.c25.2",
+      "cc.c25.hq.c25.2",
   )!;
   expect(candidate).toBeDefined();
   return { domain, candidate, candidates };
@@ -135,7 +135,7 @@ describe("pairing 475: local central rez reserve survives unknown global allocat
       const upgrade = candidates.find(
         (c) =>
           c.actionId ===
-          "corp.install_card.c5i.rd.c5i",
+          "cc.c5i.rd.c5i",
       )!;
       expect(upgrade.costProfile.creditCost).toBe(3);
       const placement = corpDefensiveUpgradePlacement(
@@ -160,7 +160,7 @@ describe("pairing 475: local central rez reserve survives unknown global allocat
       runtime,
     );
     const decision = chooseAiAction(input);
-    expect(decision.actionId).toBe("corp.gain_credit");
+    expect(decision.actionId).toBe("cb");
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.timeoutUsed).toBe(false);
     const pf = decision.decisionDebug!.planFirstDecision!;

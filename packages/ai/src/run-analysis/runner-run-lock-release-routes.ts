@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import { isRemoteServerId } from "@netgrid/shared";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
@@ -73,7 +74,7 @@ export function runnerRunLockReleaseRoutes(
       targetCredits: projection.targetCredits,
       fundingGap: projection.fundingGap,
       ...(supportNeedId ? { supportNeedId } : {}),
-      parentPlanInstanceId: `plan:${parentModule}:${encodeURIComponent(dedupeKey)}`,
+      parentPlanInstanceId: planInstanceIdForProposal({ moduleId: parentModule, dedupeKey: dedupeKey }),
       evidenceCode: projection.terminal
         ? "runner_matchpoint_run_lock_release"
         : "runner_viable_followup_run_lock_release",

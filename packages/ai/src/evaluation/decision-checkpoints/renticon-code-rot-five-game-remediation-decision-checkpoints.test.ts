@@ -56,11 +56,11 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
       "funds visible liquidity instead of adding an unproven fourth matchpoint defense layer"
     ) {
       expectBoundTurnPlan(result, {
-        actionId: "corp.gain_credit",
+        actionId: "cb",
         planKind: "corp.economy",
         capability: "develop_or_convert_corp_economy",
         executorInstanceId:
-          "plan:corp.economy:economy-visible-liquidity-development%3A8",
+          "p4gj7mjn9buqqlpbcttnuemgfj",
       });
     }
   });
@@ -99,7 +99,7 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
         actionId: result.selectedAction!.actionId,
         planKind: "corp.defend_servers",
         capability: "allocate_server_defense",
-        executorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+        executorInstanceId: "penw02zfrkklof54c2nuye5att",
       });
     },
   );
@@ -192,7 +192,7 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
         ],
         planExecution: {
           acceptablePlanIds: [
-            "plan:corp.economy:economy-immediate-operation%3Ac33r",
+            "pdc5ziw907bu45fhsncnzfkqwe",
           ],
           acceptablePlanKinds: ["corp.economy"],
           acceptableCapabilities: ["develop_or_convert_corp_economy"],
@@ -206,8 +206,8 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
     const result = expectCheckpointToPass(checkpoint);
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
-        "plan_first_root:plan:corp.economy:economy-immediate-operation%3Ac33r",
-        "plan_first_executor:plan:corp.economy:economy-immediate-operation%3Ac33r",
+        "plan_first_root:pdc5ziw907bu45fhsncnzfkqwe",
+        "plan_first_executor:pdc5ziw907bu45fhsncnzfkqwe",
       ]),
     );
   });
@@ -247,12 +247,12 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
 
     const result = expectCheckpointToPass(checkpoint);
     expectBoundTurnPlan(result, {
-      actionId: "corp.gain_credit",
+      actionId: "cb",
       planKind: "corp.economy",
       capability: "develop_or_convert_corp_economy",
       assessmentEvidence: "corp_engine_certified_basic_liquidity_development",
       executorInstanceId:
-        "plan:corp.economy:economy-visible-liquidity-development%3A8",
+        "p4gj7mjn9buqqlpbcttnuemgfj",
     });
   });
 });

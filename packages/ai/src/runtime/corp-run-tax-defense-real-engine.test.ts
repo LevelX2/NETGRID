@@ -84,7 +84,7 @@ function fixture(
     runnerDeck: decks.runner!,
     traceRulesProfile: "modern_open",
   });
-  s = act(s, "corp", "corp.mandatory_draw");
+  s = act(s, "corp", "ce");
   const f = RealEngineFixtureBuilder.forState(s)
     .withCorpHqSize(0)
     .withCorpCredits(12)
@@ -100,7 +100,7 @@ function fixture(
       kind === "fixed_trace" ? 440 : HOMING,
     );
   s.corp.clicks = 0;
-  s = act(s, "corp", "corp.end_turn");
+  s = act(s, "corp", "c9");
   const start = getLegalActions(s, "runner").find(
     (a) => a.type === "start_run" && a.payload?.serverId === "hq",
   )!;

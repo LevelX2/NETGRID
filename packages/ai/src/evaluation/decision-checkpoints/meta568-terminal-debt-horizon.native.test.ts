@@ -17,7 +17,7 @@ import {
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
 
-const remote = "plan:runner.contest_remote:remote%3Ar1";
+const remote = "p1p4xezjcxov79rno40lq3f7rv";
 function fixture(name = "first-prefix") {
   return JSON.parse(
     readFileSync(
@@ -47,7 +47,7 @@ function facts(input: AiDecisionInputWithDeckCapabilities) {
   });
   const targets = evaluateRunnerRunTargets({ input, deckCapabilities });
   const target = targets.find(
-    (t) => t.actionId === "runner.start_run.r1",
+    (t) => t.actionId === "rs.r1",
   )!;
   const economy = buildRunnerEconomyPosture({ input, deckCapabilities });
   return {
@@ -91,7 +91,7 @@ it("does not certify the first affordable prefix as the whole terminal funding r
     fundingGap: 2,
     reachability: "no_access",
   });
-  expect(support?.routeActionIds).not.toContain("runner.gain_credit");
+  expect(support?.routeActionIds).not.toContain("rb");
   expect(JSON.stringify(input)).toBe(before);
 });
 
@@ -173,7 +173,7 @@ it("keeps an already sufficient Broker payout ahead of debt", () => {
 
 it("requires the same current run binding before certifying any terminal funding", () => {
   const { input } = fixture();
-  input.legalActions.find((a) => a.actionId === "runner.start_run.r1")!
+  input.legalActions.find((a) => a.actionId === "rs.r1")!
     .expiresAtStateVersion--;
   expect(facts(input).support?.routeActionIds ?? []).toEqual([]);
 });

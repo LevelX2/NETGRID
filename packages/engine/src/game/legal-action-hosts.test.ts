@@ -112,7 +112,7 @@ describe("legal-action-hosts", () => {
       .actions.buildMandatoryDrawAction();
 
     expect(action).toMatchObject({
-      actionId: "corp.mandatory_draw",
+      actionId: "ce",
       type: "mandatory_draw",
       side: "corp",
       label: "Korp Pflichtkarte ziehen",

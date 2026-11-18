@@ -41,7 +41,7 @@ describe("match e676 exact decision checkpoints", () => {
       acceptableActions: [
         {
           actionId:
-            "corp.install_card.c2ta.rd.c2ta.2",
+            "cc.c2ta.rd.c2ta.2",
         },
       ],
       forbiddenActions: [{ type: "rez_card", sourceDefinitionId: CHESTER_MIX }],
@@ -49,7 +49,7 @@ describe("match e676 exact decision checkpoints", () => {
         acceptablePlanKinds: ["corp.defend_servers"],
         acceptableCapabilities: ["allocate_server_defense"],
         requiredAssessmentEvidence: [
-          "corp_score_material_capacity_release:rd:corp.install_card.c2ta.rd.c2ta.2",
+          "corp_score_material_capacity_release:rd:cc.c2ta.rd.c2ta.2",
         ],
       },
     };

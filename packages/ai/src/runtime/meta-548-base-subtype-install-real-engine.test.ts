@@ -46,7 +46,7 @@ it.each([
   const predicted = JSON.parse(install.payload!.postInstallEffectiveRunQuoteJson as string);
   expect(predicted.subroutines).toContainEqual(expect.objectContaining({ type: "end_the_run" }));
   expect(install.payload).toMatchObject({ postInstallRezQuoteVariableRezKind: "alternate_subtype", postInstallRezQuoteVariableBaseSubtypesFinalCredits: cost });
-  expect(pf).toMatchObject({ rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio", selectedPlan: { moduleId: "corp.defend_servers" }, route: { actionId: install.actionId, stateVersion: i.playerView.stateVersion } });
+  expect(pf).toMatchObject({ rootPlanInstanceId: "penw02zfrkklof54c2nuye5att", selectedPlan: { moduleId: "corp.defend_servers" }, route: { actionId: install.actionId, stateVersion: i.playerView.stateVersion } });
   expect(decision.fallbackUsed).toBe(false);
   expect(JSON.stringify(i)).toBe(serialized);
   expect(hashState(s)).toBe(before);

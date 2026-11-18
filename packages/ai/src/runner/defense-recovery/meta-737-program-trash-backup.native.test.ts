@@ -128,7 +128,7 @@ it("binds both native backup choices to defense and preserves the program for re
   const { state, target } = fixture();
   expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
   const offer = chooseRunnerAction(input(state));
-  expect(offer.actionId).toBe("runner.resolve_choice");
+  expect(offer.actionId).toBe("rn");
   expect(offer.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
     "runner.defense_and_recovery",
   );
@@ -147,7 +147,7 @@ it("binds both native backup choices to defense and preserves the program for re
     offer.selectedChoices,
   );
   const decision = chooseRunnerAction(input(targets));
-  expect(decision.actionId).toBe("runner.resolve_choice");
+  expect(decision.actionId).toBe("rn");
   expect(
     decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
   ).toBe("runner.defense_and_recovery");

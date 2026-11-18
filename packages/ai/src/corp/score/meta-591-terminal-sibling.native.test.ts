@@ -40,7 +40,7 @@ it("admits a funded protected winning HQ agenda before preserving a nonwinning p
   const before = JSON.stringify(input),
     decision = chooseAiAction(input);
   expect(decision.actionId).toBe(
-    "corp.install_card.c1y.r1.c1y",
+    "cc.c1y.r1.c1y",
   );
   expect(
     decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
@@ -75,7 +75,7 @@ it("retains the current prepared agenda when that agenda already wins", () => {
   );
   const decision = chooseAiAction(input);
   expect(decision.actionId).toBe(
-    "corp.install_card.c1h.r1.c1h",
+    "cc.c1h.r1.c1h",
   );
   expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
 });

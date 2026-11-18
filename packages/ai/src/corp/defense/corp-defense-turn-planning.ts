@@ -16,6 +16,7 @@ import type { ActionSemanticCandidate } from "../../action-semantic-candidate-ty
 import type { PriorityClass } from "../../plans/plan-assessment";
 import { corpGenericDefensePriorityClass } from "../../plans/corp-defense-funding-contract";
 import { planInstanceIdForProposal } from "../../plans/plan-instance";
+import { compactCampaignId, defenseCampaignIdentity } from "../../plans/compact-plan-identity";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { assessFundingOnlyIceStaging } from "./corp-defense-staging-policy";
 import { hasExactNonNegativeCostProfile } from "../../runtime/exact-action-cost-facts";
@@ -322,7 +323,7 @@ export function buildCorpDefenseTurnPlanningSlice(params: {
         beforeProbability.numerator / beforeProbability.denominator -
           probability.numerator / probability.denominator,
       );
-    const campaignId = "campaign:corp.defend_servers";
+    const campaignId = compactCampaignId(defenseCampaignIdentity());
     lines.push({
       lineId,
       defenseId: signal.defenseId,
@@ -522,7 +523,7 @@ function exactDefenseFundingNeed(
       need.needId === expectedNeedId &&
       need.gap === gap &&
       need.parentPlanInstanceId ===
-        "plan:corp.defend_servers:server-defense-portfolio" &&
+        "penw02zfrkklof54c2nuye5att" &&
       need.parentNeedId === signal.defenseId &&
       need.immediateDefenseConversion === true &&
       need.incrementalDefenseReserve?.serverId === signal.serverId &&
@@ -661,7 +662,7 @@ function createDefenseLine(
     disposition: classification.disposition,
     nodes: nodes.map((node) => node.invocation.invocationKey),
   });
-  const campaignId = "campaign:corp.defend_servers";
+  const campaignId = compactCampaignId(defenseCampaignIdentity());
   const beforeQuoteId = turnPlanningFingerprint("defense-before", {
     defenseId: signal.defenseId,
     state: params.stateIdentity.sideSafePlanningFingerprint,
@@ -870,7 +871,7 @@ function createScoreProtectionStagingLine(
     Number(mandatoryAgendaPoints) <= params.input.playerView.own.agendaPoints;
   const defenseValue = rezReadyAfterLine ? 18 : 12;
   const totalValue = defenseValue - fundingGapAfter * 3;
-  const campaignId = "campaign:corp.defend_servers";
+  const campaignId = compactCampaignId(defenseCampaignIdentity());
   const beforeQuoteId = turnPlanningFingerprint("defense-before", {
     defenseId: signal.defenseId,
     state: params.stateIdentity.sideSafePlanningFingerprint,
@@ -1079,7 +1080,7 @@ function createDefenseDrawLine(
     Math.max(0, draw.economyProjection?.netLiquidCreditGain ?? 0) * 2;
   const defenseValue = 12;
   const totalValue = defenseValue + economyValue;
-  const campaignId = "campaign:corp.defend_servers";
+  const campaignId = compactCampaignId(defenseCampaignIdentity());
   const beforeQuoteId = turnPlanningFingerprint("defense-before", {
     defenseId: signal.defenseId,
     state: params.stateIdentity.sideSafePlanningFingerprint,

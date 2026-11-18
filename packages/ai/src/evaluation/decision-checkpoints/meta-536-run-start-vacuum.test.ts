@@ -102,7 +102,7 @@ it("retains the exact native run owner across its certified run-start ordering",
   restore(cp);
   const decision = chooseAiAction(cp.input);
   expect(decision).toMatchObject({
-    actionId: "runner.resolve_choice",
+    actionId: "rn",
     fallbackUsed: false,
     selectedChoices: {
       choiceId: cp.input.playerView.pendingChoice!.choiceId,

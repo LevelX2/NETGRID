@@ -37,7 +37,7 @@ describe("Corp plan-bound rez-or-trash ICE choice", () => {
   let portfolio: ResidentPlanPortfolio;
   let projects: CorpScoreProjectSignal[];
   const candidates = [
-    { actionId: "corp.resolve_choice", semanticActionType: "choice.resolve" },
+    { actionId: "cn", semanticActionType: "choice.resolve" },
   ] as ActionSemanticCandidate[];
   beforeAll(() => {
     const input = currentInput();
@@ -53,7 +53,7 @@ describe("Corp plan-bound rez-or-trash ICE choice", () => {
     projects = portfolio.instances
       .filter((i) => i.moduleId === "corp.score_agenda")
       .map((i) => (i.moduleState as { signal: CorpScoreProjectSignal }).signal);
-    expect(decision.actionId).toBe("corp.resolve_choice");
+    expect(decision.actionId).toBe("cn");
     expect(decision.selectedChoices).toMatchObject({
       choiceId: input.playerView.pendingChoice!.choiceId,
       selectedOptionIds: ["trash_ice"],
@@ -98,7 +98,7 @@ describe("Corp plan-bound rez-or-trash ICE choice", () => {
       { schemaVersion: native.runtime.schemaVersion },
     );
     const decision = chooseAiAction(input);
-    expect(decision.actionId).toBe("corp.resolve_choice");
+    expect(decision.actionId).toBe("cn");
     expect(decision.selectedChoices).toMatchObject({
       selectedOptionIds: ["trash_ice"],
     });

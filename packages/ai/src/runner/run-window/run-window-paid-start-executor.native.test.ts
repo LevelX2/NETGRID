@@ -53,7 +53,9 @@ it("resumes the paid Disgruntled Ice Technician Run under the original R&D owner
   const origin = previous.pendingRunnerCostPenaltySupportOrigin!;
   const before = JSON.stringify(previous);
   const result = engineContinuation(paymentInput, previous);
-  expect(previous.executorInstanceId).toContain("runner.economy");
+  expect(previous.instances.find(
+    (instance) => instance.instanceId === previous.executorInstanceId,
+  )?.moduleId).toBe("runner.economy");
   reconcileSelectedRunnerCostPenaltySupportOrigin(
     paymentInput,
     result,
@@ -79,7 +81,7 @@ it("resumes the paid Disgruntled Ice Technician Run under the original R&D owner
       result.portfolio,
     ),
   ).toMatchObject({
-    actionId: "runner.resolve_choice",
+    actionId: "rn",
     origin: {
       rootPlanInstanceId: origin.rootPlanInstanceId,
       leafPlanInstanceId: origin.executorInstanceId,

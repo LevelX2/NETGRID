@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { AiDecisionInput } from "@netgrid/shared";
@@ -36,7 +37,7 @@ describe("meta489 native plan-owner regressions", () => {
   it("keeps the exact scoring agenda and executes its cheaper current-turn route", () => {
     const input = checkpoint("g10-d129");
     const agenda = "c2it";
-    const parent = `plan:corp.score_agenda:agenda%3A${agenda}%3Ar1`;
+    const parent = planInstanceIdForProposal({ moduleId: "corp.score_agenda", dedupeKey: `agenda:${agenda}:r1` });
     expect(
       corpSameTurnScoreConversionPaths(input).find(
         (path) => path.agendaCardId === agenda,
@@ -47,7 +48,7 @@ describe("meta489 native plan-owner regressions", () => {
       sameTurnGuaranteed: true,
     });
     const selected = chooseAiAction(input);
-    expect(selected.actionId).toBe(`corp.advance_card.${agenda}.${agenda}`);
+    expect(selected.actionId).toBe(`c2.${agenda}.${agenda}`);
     expect(
       input.legalActions.find(
         (action) => action.actionId === selected.actionId,
@@ -77,11 +78,11 @@ describe("meta489 native plan-owner regressions", () => {
     );
     expect(selected.actionId).toBe(expose?.actionId);
     expect(selected.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
+      rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
       leafExecutorInstanceId:
-        "plan:runner.expose_information:ice%3Acgv",
+        "pbq97445607qgijs66ftfj7my5",
       executionOrigin: {
-        rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
+        rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
         stateVersion: 111,
       },
     });

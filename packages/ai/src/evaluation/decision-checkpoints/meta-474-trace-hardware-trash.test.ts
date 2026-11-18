@@ -52,7 +52,7 @@ describe("pairing 474: mandatory Trace hardware target after run end", () => {
     ).toBe(false);
     const decision = chooseAiAction(input);
     expect(decision).toMatchObject({
-      actionId: "corp.resolve_choice",
+      actionId: "cn",
       fallbackUsed: false,
       timeoutUsed: false,
       selectedChoices: {
@@ -64,12 +64,12 @@ describe("pairing 474: mandatory Trace hardware target after run end", () => {
     expect(decision.decisionDebug!.planFirstDecision!).toMatchObject({
       stateVersion: 298,
       lane: "plan",
-      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
       leafExecutorInstanceId:
-        "plan:corp.defend_servers:server-defense-portfolio",
+        "penw02zfrkklof54c2nuye5att",
       selectedStep: {
-        planInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
-        stepId: "plan:corp.defend_servers:server-defense-portfolio:allocate",
+        planInstanceId: "penw02zfrkklof54c2nuye5att",
+        stepId: "penw02zfrkklof54c2nuye5att:allocate",
       },
       route: { actionId: decision.actionId },
     });
@@ -95,7 +95,7 @@ describe("pairing 474: mandatory Trace hardware target after run end", () => {
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       lane: "plan",
       leafExecutorInstanceId:
-        "plan:corp.defend_servers:server-defense-portfolio",
+        "penw02zfrkklof54c2nuye5att",
     });
     expect(decision.fallbackUsed).toBe(false);
   });
@@ -230,7 +230,7 @@ describe("SP-473: a Trace completed after the Runner's link window", () => {
       traceSuccessful: true,
     });
     const decision = chooseAiAction(input);
-    expect(decision.actionId).toBe("corp.resolve_choice");
+    expect(decision.actionId).toBe("cn");
     expect(decision.selectedChoices?.choiceId).toBe(choice.choiceId);
     const selectedOptions = decision.selectedChoices?.selectedOptionIds;
     expect(selectedOptions).toHaveLength(1);
@@ -239,7 +239,7 @@ describe("SP-473: a Trace completed after the Runner's link window", () => {
       selectedOptions[0],
     );
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
     });
     expect(decision.fallbackUsed).toBe(false);
   });

@@ -75,7 +75,7 @@ describe("plan-first Engine-restricted run contract", () => {
     const archivesRun = optionalRestrictedRun("archives");
     const remoteRun = optionalRestrictedRun("r1");
     const decline = legalAction(
-      "runner.trigger_ability.decline_optional_bonus_run",
+      "rx.decline_optional_bonus_run",
       "runner",
       "trigger_ability",
       "Decline optional bonus run",
@@ -123,7 +123,7 @@ describe("plan-first Engine-restricted run contract", () => {
   it("prefers the cost-free restricted run over a click-costing run to the same server", () => {
     resetResidentPlanPortfolioMemory();
     const ordinaryRun = legalAction(
-      "runner.start_run.archives",
+      "rs.archives",
       "runner",
       "start_run",
       "Run Archives",
@@ -134,7 +134,7 @@ describe("plan-first Engine-restricted run contract", () => {
       },
     );
     const restrictedRun = legalAction(
-      "runner.start_run.archives.restricted",
+      "rs.archives.restricted",
       "runner",
       "start_run",
       "Restricted run Archives",
@@ -180,7 +180,7 @@ describe("plan-first Engine-restricted run contract", () => {
     const runHq = wilsonRun("hq");
     const runRemote = wilsonRun("r1");
     const end = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -265,7 +265,7 @@ describe("plan-first Engine-restricted run contract", () => {
   it("ends the turn when the only ordinary Remote run is explicitly nonproductive", () => {
     resetResidentPlanPortfolioMemory();
     const runRemote = legalAction(
-      "runner.start_run.r1",
+      "rs.r1",
       "runner",
       "start_run",
       "Run remote 1",
@@ -273,7 +273,7 @@ describe("plan-first Engine-restricted run contract", () => {
       { payload: { serverId: "r1" } },
     );
     const end = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -321,7 +321,7 @@ describe("plan-first Engine-restricted run contract", () => {
 function wilsonRun(serverId: "hq" | "r1"): LegalAction {
   const sourceId = "c2gp";
   return legalAction(
-    `runner.start_run.${sourceId}.${serverId}.${sourceId}.gain_run_only_action`,
+    `rs.${sourceId}.${serverId}.${sourceId}.gain_run_only_action`,
     "runner",
     "start_run",
     `Wilson run on ${serverId}`,
@@ -353,7 +353,7 @@ function wilsonRun(serverId: "hq" | "r1"): LegalAction {
 
 function restrictedRun(serverId: "archives" | "rd"): LegalAction {
   return legalAction(
-    `runner.start_run.${serverId}.restricted`,
+    `rs.${serverId}.restricted`,
     "runner",
     "start_run",
     `Restricted run ${serverId}`,
@@ -373,7 +373,7 @@ function restrictedRun(serverId: "archives" | "rd"): LegalAction {
 
 function optionalRestrictedRun(serverId: "archives" | "r1"): LegalAction {
   return legalAction(
-    `runner.start_run.${serverId}.optional_restricted`,
+    `rs.${serverId}.optional_restricted`,
     "runner",
     "start_run",
     `Optional restricted run ${serverId}`,

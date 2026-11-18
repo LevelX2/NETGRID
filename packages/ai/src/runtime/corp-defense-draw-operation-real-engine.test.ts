@@ -152,7 +152,7 @@ it.each([DAY, ANNUAL])(
       expect(after.corp.credits).toBe(state.corp.credits + 1);
       expect(after.corp.clicks).toBe(state.corp.clicks - 1);
     } else {
-      expect(decision.actionId).toBe("corp.draw_card");
+      expect(decision.actionId).toBe("c8");
     }
   },
 );
@@ -207,7 +207,11 @@ it("admits a net-one draw operation for the full-hand score-protection parent", 
   expect(decision.actionId).toBe(operationFor(state, i.legalActions, DAY).actionId);
   const plan = decision.decisionDebug?.planFirstDecision;
   expect(plan?.selectedPlan?.moduleId).toBe("corp.defend_servers");
-  expect(plan?.selectedStep?.parentInstanceId).toContain("corp.score_agenda");
+  expect(
+    plan?.portfolio.find(
+      (instance) => instance.instanceId === plan?.selectedStep?.parentInstanceId,
+    )?.moduleId,
+  ).toBe("corp.score_agenda");
   expect(plan?.route).toMatchObject({
     actionId: decision.actionId,
     stateVersion: state.stateVersion,
@@ -221,7 +225,7 @@ it("retains the basic draw when a three-card operation would overflow HQ", () =>
     i = input(state);
   const operation = operationFor(state, i.legalActions, ANNUAL);
   expect(corpOptionalDrawCapacity(i, operation).eligible).toBe(false);
-  expect(chooseCorpAction(i).actionId).toBe("corp.draw_card");
+  expect(chooseCorpAction(i).actionId).toBe("c8");
 });
 it("keeps a terminal score ahead of the admitted defense draw", () => {
   const state = fixture();

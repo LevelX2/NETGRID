@@ -4463,7 +4463,7 @@
         "id": "rd"
       },
       "selectedStepKind": "gain_credits",
-      "selectedActionId": "runner.gain_credit",
+      "selectedActionId": "rb",
       "blockedBy": [],
       "ttlDecisionsRemaining": 1,
       "planProgressionReason": "previous_central_probe_satisfied",
@@ -4526,7 +4526,7 @@
         "plan_portfolio_foreground:runner.opportunistic_central_run",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.gain_credit"
+        "plan_portfolio_selected_action:rb"
       ]
     },
     "strategicIntent": {
@@ -5543,7 +5543,7 @@
   "expectation": {
     "runTargets": [
       {
-        "actionId": "runner.start_run.rd",
+        "actionId": "rs.rd",
         "targetServerId": "rd",
         "pathPassability": "reachable",
         "pathCost": 4,

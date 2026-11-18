@@ -162,7 +162,7 @@ it("does not treat an unavailable restricted-install bit as acute income and pre
       });
       if (action.type === "start_run") runStarted = true;
     }
-    expect(steps.at(-1)?.actionId).toContain("runner.steal_agenda.");
+    expect(steps.at(-1)?.actionId).toContain("rt.");
     let replay = initial;
     for (const step of steps) {
       const result = applyAction(replay, {
@@ -212,7 +212,7 @@ it("does not treat an unavailable restricted-install bit as acute income and pre
     purpose: [20, 219, 75, "cgn", "c1cr", 0],
   });
   expect(after.steps.some((step) =>
-    step.actionId.startsWith("runner.break_subroutine.") &&
+    step.actionId.startsWith("r3.") &&
     step.sourceDefinitionId === 219,
   )).toBe(true);
   expect(
@@ -221,7 +221,7 @@ it("does not treat an unavailable restricted-install bit as acute income and pre
     before.steps.filter((s) => s.side === "corp").map((s) => s.actionId),
   );
   expect(
-    after.steps.find((s) => s.actionId === "runner.start_run.r1")?.module,
+    after.steps.find((s) => s.actionId === "rs.r1")?.module,
   ).toBe("runner.contest_remote");
 }, 30000);
 

@@ -66,7 +66,7 @@ describe("selectedRunnerMemoryCheckpointTrashOptionIds", () => {
     expect(
       context.runnerProgramInstallTrashAssessmentForAction(input, {
         actionId:
-          "runner.install_card.krash.krash.runner_program_trash_before_install.installer.0.0",
+          "rc.krash.krash.runner_program_trash_before_install.installer.0.0",
         side: "runner",
         type: "install_card",
         source: {
@@ -320,7 +320,7 @@ describe("selectedRunnerMemoryCheckpointTrashOptionIds", () => {
         input,
         {
           source:
-            "runner.program_install_memory:access:theorem_proof:0:runner.steal_agenda.theorem_proof.theorem_proof:access.agenda_install_as_runner_program%3Atheorem_proof%3A2",
+            "runner.program_install_memory:access:theorem_proof:0:rt.theorem_proof.theorem_proof:access.agenda_install_as_runner_program%3Atheorem_proof%3A2",
         } as never,
         options,
       ),

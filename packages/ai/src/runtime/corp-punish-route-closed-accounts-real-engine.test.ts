@@ -164,7 +164,7 @@ describe("Closed Accounts decision-local real-Engine punish quote", () => {
     expect(decision.actionId).toBe(fundingAction.actionId);
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.evidence).toContain(
-      "plan_priority_delegated_from:plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
+      "plan_priority_delegated_from:pp3zys3mvrb02r0muk2126s52",
     );
     expect(JSON.stringify(decision.decisionDebug)).toContain(
       "|module:corp.punish_campaign|phase:fund",

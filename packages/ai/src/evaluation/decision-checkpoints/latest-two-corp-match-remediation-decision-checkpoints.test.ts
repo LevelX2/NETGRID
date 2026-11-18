@@ -91,7 +91,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.c3kd.r1.c3kd",
+              "cc.c3kd.r1.c3kd",
           },
         ],
         forbiddenActions: [{ type: "draw_card" }],
@@ -137,7 +137,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.c2il.r1.c2il",
+              "cc.c2il.r1.c2il",
           },
         ],
         planExecution: {
@@ -175,7 +175,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.c2rp.rd.c2rp.0",
+              "cc.c2rp.rd.c2rp.0",
           },
         ],
         planExecution: {
@@ -215,14 +215,14 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.c2qm.hq.c2qm.1",
+              "cc.c2qm.hq.c2qm.1",
           },
         ],
         planExecution: {
           acceptablePlanKinds: ["corp.defend_servers"],
           acceptableCapabilities: ["allocate_server_defense"],
           requiredAssessmentEvidence: [
-            "corp_terminal_central_additional_layer_staging:hq:corp.install_card.c2qm.hq.c2qm.1:rez_gap_2",
+            "corp_terminal_central_additional_layer_staging:hq:cc.c2qm.hq.c2qm.1:rez_gap_2",
           ],
         },
       };

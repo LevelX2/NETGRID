@@ -102,10 +102,10 @@ export function encounterRunRemainderEffectAssessment(
   }
 
   const payOrTrashProgramIndexes = parseSubroutineIndexes(
-    action?.payload?.payOrTrashProgramSubroutineIndexes,
+    action?.payOrTrashProgramSubroutineIndexes,
   );
   const payOrEndRunIndexes = parseSubroutineIndexes(
-    action?.payload?.payOrEndRunSubroutineIndexes,
+    action?.payOrEndRunSubroutineIndexes,
   );
   const payOrTrashProgramPayment = Number(
     action?.payload?.payOrTrashProgramSubroutinePayment ?? 0,

@@ -74,8 +74,10 @@ describe("meta461 paid access ambush rez", () => {
       expect(decision.actionId).toBe(f.rez.actionId);
       expect(decision.fallbackUsed).toBe(false);
       expect(
-        decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-      ).toContain("corp.ambush_and_bluff");
+        decision.decisionDebug?.planFirstDecision?.portfolio.find(
+          (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+        )?.moduleId,
+      ).toBe("corp.ambush_and_bluff");
     },
   );
   it("admits exactly affordable rez and rejects an unfunded quoted cost", () => {

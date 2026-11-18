@@ -44,17 +44,17 @@ describe("match 5F7924 Corp agenda, defense and discard checkpoints", () => {
       1,
     );
     expect(input.playerView.own.clicks).toBe(1);
-    expect(decision.actionId).toBe("corp.draw_card");
+    expect(decision.actionId).toBe("c8");
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId:
-        "plan:corp.score_agenda:agenda%3Ace5%3Ar1",
+        "p4uxobi3f0rweudonfbsy9zy2w",
       selectedPlan: { moduleId: "corp.defend_servers" },
     });
     expect(decision.decisionDebug?.planFirstDecision?.dispositions).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           actionId:
-            "corp.install_card.ce5.r1.ce5",
+            "cc.ce5.r1.ce5",
           disposition: "explicitly_nonproductive",
           evidenceCode: "corp_last_click_score_install_deferred:r1",
         }),
@@ -115,11 +115,11 @@ function expectScoreProtectionDevelopmentContinuation(
   let { input, decision: second } = nextDecision(state, checkpoint);
   if (additionalActions > 0) {
     expect(second.actionId).toBe(
-      "corp.install_card.c2v3.r1.c2v3.1",
+      "cc.c2v3.r1.c2v3.1",
     );
     expect(second.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId:
-        "plan:corp.score_agenda:agenda%3Ace5%3Ar1",
+        "p4uxobi3f0rweudonfbsy9zy2w",
       selectedPlan: { moduleId: "corp.defend_servers" },
     });
     state = applyDecision(state, second);
@@ -128,7 +128,7 @@ function expectScoreProtectionDevelopmentContinuation(
   expectLongScoreHorizonDeferral(input, second);
   const firstPlan = first.decision!.decisionDebug!.planFirstDecision!;
   expect(firstPlan.selectedPlan?.parentInstanceId).toBe(
-    "plan:corp.score_agenda:agenda%3Ace5%3Anew_remote",
+    "pbb2zrbk6mdxuh717p2tkx6ies",
   );
   expect(
     first.selectedAction?.payload?.postInstallRezQuoteProjectedServerId,

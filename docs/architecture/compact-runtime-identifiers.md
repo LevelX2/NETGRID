@@ -20,7 +20,7 @@ Runs, Spiel-Traces, Zahlungs-, Änderungs- und Ersatzfenster sowie
 laufende Ziehvorgänge erhalten beim Öffnen die StateVersion des
 Übergangs. Die Herkunft eines Traces wird gesondert gebunden.
 Öffentliche Effekte tragen ihre Position im Ereignis, beginnend bei null.
-Kartenexemplare verwenden einen kurzen Base36-Schlüssel. SQLite-Schema 10 speichert
+Kartenexemplare verwenden einen kurzen Base36-Schlüssel. SQLite-Schema 11 speichert
 Kartenlisten als Positionen in der Instanztabelle. Verdeckte Slots und
 adressierbare verdeckte Ressourcen haben jeweils einen eigenen kurzen
 Schlüsseltyp. Remotes werden als `r1`, `r2` und entsprechend ihrer
@@ -42,7 +42,10 @@ Aufbau der vollständigen ICE-Sequenz als nullbasierte Base36-Position.
 Gedruckte Herkunft, hinzugefügte Beiträge, Mark-Wiederholungen und
 Run-Kopien haben eigene typisierte Herkunftstupel. Kopien binden diese
 Herkunft auch dann weiter, wenn sich die endgültige Position verschiebt.
-Aktionsangebot, Quote und Engine-Auflösung verwenden dieselbe Folge.
+Aktionsangebot, Quote und Engine-Auflösung verwenden dieselbe Folge. Die
+IDs und Indexmengen für Brechen, Fortsetzen und Auslösen werden als
+typisierte Listen weitergegeben. Die KI prüft damit auch die genaue
+Bindung des Aktionsangebots an den Planungszustand.
 [Encounter-Folge](../../packages/engine/src/game/run/effective-ice-run-subroutines.ts)
 
 Ein Zufallszweck ist ein Tupel aus festem numerischem Code und
@@ -50,7 +53,7 @@ typisierten Argumenten. Spielzufall und KI-Auswahl besitzen getrennte,
 explizit initialisierte Zähler. Die kanonische Seed-Eingabe enthält den
 Seed, das Tupel und den jeweiligen Zähler. Jede Aufzeichnung hält eine
 eigene Kopie des Tupels. Öffentliche Ereignisse geben nur den Zweckcode
-weiter. SQLite-Schema 10 speichert die Tupel unmittelbar in den
+weiter. SQLite-Schema 11 speichert die Tupel unmittelbar in den
 Zufallszeilen.
 [Zweckvertrag](../../packages/shared/src/random-purpose.ts) · [Zufallsvergabe](../../packages/engine/src/game/state/draw-random.ts)
 
@@ -65,23 +68,37 @@ prüfen die anschließenden Übergänge mit dem aktuellen Engine-Vertrag.
 | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `CardDefinitionId`                          | Feste positive Ganzzahl pro Regelkarte. In der CardSpec verankert, über alle Sets einschließlich System-, Katalog- und Testkarten eindeutig. Releasefilter behalten dieselben Nummern.               |
 | `CardInstanceId`                            | Kompakter Base36-Schlüssel pro Kartenexemplar einer Partie. In SQLite referenzieren Kartenlisten die Zeilenposition.                                                                                |
-| Verdeckter Kartenslot                       | Kurzer Base36-Schlüssel mit eigenem Präfix in der jeweiligen Projektion. Bereich und Position binden die Referenz.                                                                                   |
+| Verdeckter Kartenslot                       | Position in der sichtbaren Zone mit eigenem Präfix. Die Engine bindet die Position an das aktuelle Angebot.                                           |
 | Adressierbare Fähigkeit                     | Feste positive Nummer im Fähigkeitsregister. Eine Instanzbindung verwendet Quelleninstanz und Fähigkeitsnummer.                                                                                    |
-| `ActionId`                                  | Laufende positive Nummer im deterministisch erzeugten LegalAction-Satz einer Seite und StateVersion. Die Einreichung beim Server bindet auch Match und MatchVersion.                                 |
+| `MatchActionId`                             | Laufende positive Nummer im projizierten LegalAction-Satz einer Seite und StateVersion. Die Einreichung beim Server bindet auch Match und MatchVersion.                                             |
 | `ChoiceId`, `ChoiceOptionId`                | Nummer der geöffneten Choice innerhalb der Partie und Nummer einer Option innerhalb dieser Choice. Reihenfolge und fachlicher Wert der Option sind eigene Eigenschaften.                             |
 | Server, Run, Trace und Fenster              | Remotes heißen `rN`. Run, Spiel-Trace sowie Zahlungs-, Änderungs- und Ersatzfenster verwenden die Eröffnungs-StateVersion. „Neuer Remote“ ist ein eigenes Installationsziel.                                    |
 | Ereignis, Snapshot, KI-Trace                | Nummern in der jeweiligen Match-Tabelle. Historienreferenzen enthalten den Matchkontext. Eine Diagnosekennung für einen fehlgeschlagenen KI-Versuch bleibt eine Fehlerreferenz.                      |
 | Aufgelöster Effekt, Subroutine              | Effektposition innerhalb des Ereignisses. Unterroutinen tragen die Base36-Position in der endgültigen ICE-Sequenz. Typisierte Herkunftstupel binden gedruckte, hinzugefügte und kopierte Beiträge. |
 | Zufallszweck und wiederholte Speicherfelder | Festes Tupel aus numerischem Zweckcode und typisierten Argumenten. SQLite speichert Karteninstanzlisten und Zufallsaufzeichnungen als schemafeste Zeilen.                                             |
 
-Die internen KI-Plan- und Kampagnenschlüssel enthalten heute Modul- und
-Deduplizierungsmerkmale und binden wiederkehrende Vorschläge an residente
-Instanzen. Die darin verwendeten Karten-, Aktions-
-und Serverbezüge folgen dem kompakten Schema. Eine Umstellung der
-Plan- und Kampagnenidentität ist ein Folgeschritt. Sie setzt voraus, dass
-Portfolio, Parent-/Need-Bindung und Kampagnenfortschritt dieselbe fachliche
-Instanz über Züge und Reopen hinweg wiederfinden.
-[Vergabe der Planinstanz-ID](../../packages/ai/src/plans/plan-instance.ts) · [Kampagnenfortsetzung](../../packages/ai/src/plans/corp-opponent-campaign-continuity.ts)
+`LegalAction.actionId` beginnt mit einem Zeichen für die Seite und einem
+fest vergebenen Zeichen für den Aktionstyp. Quelle und Variantenmerkmale
+ergänzen den Schlüssel, wenn das Angebot sie zur Unterscheidung braucht.
+Der Spieltransport nummeriert das Angebot je Seite. Die Engine löst die
+gewählte Nummer vor der Aktionsanwendung auf.
+[Interner Schlüssel](../../packages/engine/src/game/turn/action-builders.ts) · [Spielangebot](../../packages/engine/src/game/player-offer.ts)
+
+Verdeckte Karten erhalten Referenzen aus der aktuellen Zonenposition. Bei
+einem Server bestimmen Server, ICE oder Root und Position den Slot. Bei
+verdeckten Runner-Ressourcen zählt die Position innerhalb der Ressourcen.
+Die Engine löst eine Auswahl über die aktuelle Version und das konkrete
+Angebot auf und ermittelt erst dabei das private Kartenexemplar.
+[Kartenposition](../../packages/engine/src/game/view/hidden-card-slot.ts) · [Kartenprojektion](../../packages/engine/src/game/view/card-view.ts)
+
+KI-Planinstanzen und Kampagnen erhalten getrennt markierte Base36-IDs aus
+einem deterministischen 128-Bit-Hash. Planmodule, der Deduplizierungsschlüssel
+und das Kampagnenziel sind eigene fachliche Felder. Das Portfolio prüft die
+Bindung zwischen diesen Feldern und der ID. Bei Gleichstand entscheidet die
+fachliche Reihenfolge von Modul und Deduplizierungsschlüssel. Bei gleich
+bewerteten vollständigen Turnlinien entscheidet der deterministische
+Linienfingerabdruck.
+[Plan- und Kampagnenvergabe](../../packages/ai/src/plans/compact-plan-identity.ts) · [Residentes Portfolio](../../packages/ai/src/plans/resident-plan-portfolio.ts)
 
 `printingId` adressiert Drucke, Bilddateien, Bildpakete und Einträge im
 Bildimport. Die numerische Regelkarte verweist über ihre CardSpec auf
@@ -138,18 +155,32 @@ herstellt. [CardSpec und Drucke](central-card-specification-and-registry-target-
 
 ## Speicherung und lokale Matchdaten
 
-SQLite-Schema 10 speichert den aktuellen Engine-Zustand in `game_states`.
+SQLite-Schema 11 speichert den aktuellen Engine-Zustand in `game_states`.
 `matches.record_json` enthält die Match-Metadaten. Vor-Aktionssnapshots binden
 Undo und Replay an ihren jeweiligen Übergang. Full Save, Delta-Save,
 Wiederöffnung und Maintenance verwenden denselben Spielstands-Codec.
+
+SQLite speichert pro öffentlichem Ereignis den Chronikkontext und die
+Summen vor dem Ereignis. Spielupdates, Reconnect und der normale
+menschliche Aktionspfad lesen einen Ausschnitt von bis zu 80 Ereignissen.
+Die Projektion der Spielersicht übernimmt diesen Ausschnitt. Undo
+schneidet die gespeicherten Ereignisse samt Kontext auf die Zielversion
+zurück. Replay, Wartung und KI-Pfade mit dauerhaftem Spielwissen haben
+weiterhin Zugriff auf die vollständige benötigte Historie. Die
+KI-Verbraucher für Wissen, Risiko und Zentralserver-Verteidigung teilen
+eine zusammengeführte, deduplizierte Sicht.
+[Aktionsload](../../apps/server/src/storage-sqlite.ts) · [Spielupdate](../../apps/server/src/multiplayer-payload.ts)
 
 Karteninstanzen werden als schemafeste Zeilen gespeichert. Kartenlisten
 referenzieren die Position der jeweiligen Instanzzeile. Zufallszeilen haben
 die Form `[counter, purpose, value]` mit dem typisierten Zweck-Tupel.
 Die kanonische StateHash-Berechnung verwendet den fachlichen Spielzustand.
 Verläufe besitzen vollständig belegte, lückenlos nummerierte Aufzeichnungen.
-Fehlerhafte Zwecke, Zähler, Zeilen und Versionsbindungen scheitern vor
-Zufallsverbrauch oder Speicherung.
+Innerhalb einer Aktionsauflösung prüft die Engine bereits vorhandene
+Zufallszeilen beim ersten Verbrauch. Jede neue Ziehung hängt eine gültige
+Zeile an. Die Zustandsprüfung kontrolliert am Ende den vollständigen
+Verlauf. Fehlerhafte Zwecke, Zähler und Zeilen scheitern an der jeweiligen
+Verbrauchs- oder Speichergrenze.
 [SQLite-Codec](../../apps/server/src/storage-sqlite.ts) · [Aktionspersistenz](maintenance/action-persistence-contract.md)
 
 Der lokale Betrieb beginnt mit einer frischen Matchdatenbank im aktuellen
@@ -158,3 +189,13 @@ Accountpfad kann dieselbe SQLite-Datei verwenden und wird beim Einrichten
 mitgeprüft. Der Start mit einem unpassenden Matchschema liefert vor dem ersten
 Schreibzugriff eine Storage-Diagnose.
 [Runtime-Pfade](../../apps/server/src/runtime-paths.ts) · [Lokale Datenpfade](../runbooks/netgrid-local-transfer.md)
+
+## Standarddecks und lokaler Start
+
+Der Browser prüft beim Laden der Standarddecks jede Karten-ID als gültige
+numerische Regelkarten-Referenz. Ungültige Katalogdaten zeigen den
+Diagnosecode und die betroffene Stelle im Katalog. Der lokale Starter
+vergleicht die Buildkennung von Server und Webclient mit dem Checkout,
+aus dem das Startskript läuft. Damit erkennt er auch den Fall, dass beide
+laufenden Prozesse denselben älteren Build melden.
+[Lokaler Starter](../../scripts/start-netgrid.ps1)

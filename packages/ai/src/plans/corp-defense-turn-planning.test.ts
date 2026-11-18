@@ -151,7 +151,7 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
       gap: 2,
       actionIds: ["gain-credits"],
       immediateDefenseConversion: true,
-      parentPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      parentPlanInstanceId: "penw02zfrkklof54c2nuye5att", parentPlanModuleId: "corp.defend_servers",
       parentNeedId: defense.defenseId,
       incrementalDefenseReserve: {
         targetCredits: 7,
@@ -217,11 +217,11 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
       "corp.defend_servers",
     ]);
     expect(line.nodes.map((node) => node.planInstanceId)).toEqual([
-      "plan:corp.economy:defense-reserve%3Ard%3Aice-1",
-      "plan:corp.defend_servers:server-defense-portfolio",
+      "pkb9qmfqz08nftxe07cix61nn",
+      "penw02zfrkklof54c2nuye5att",
     ]);
     expect(line.evidenceCodes).toContain(
-      "defense_funding_support_instance:plan:corp.economy:defense-reserve%3Ard%3Aice-1",
+      "defense_funding_support_instance:pkb9qmfqz08nftxe07cix61nn",
     );
     expect(
       line.valueClaims.filter(
@@ -261,7 +261,7 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
       gap: 2,
       actionIds: ["gain-credits"],
       immediateDefenseConversion: true,
-      parentPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      parentPlanInstanceId: "penw02zfrkklof54c2nuye5att", parentPlanModuleId: "corp.defend_servers",
       parentNeedId: defense.defenseId,
       incrementalDefenseReserve: {
         targetCredits: 7,
@@ -355,7 +355,7 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
       gap: 2,
       actionIds: ["gain-credits"],
       immediateDefenseConversion: true,
-      parentPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      parentPlanInstanceId: "penw02zfrkklof54c2nuye5att", parentPlanModuleId: "corp.defend_servers",
       parentNeedId: defense.defenseId,
       incrementalDefenseReserve: {
         targetCredits: 7,
@@ -485,7 +485,7 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
         disposition: "stage_for_later_rez",
         targetServerId: "new_remote",
         supportBinding: {
-          parentPlanInstanceId: "plan:corp.score_agenda:agenda-1",
+          parentPlanInstanceId: "pec2em6rbxev7e1w1qcpuez4fk",
           parentNeedId: "score-protection:agenda-1",
         },
         currentActionId: "install-remote",
@@ -551,7 +551,7 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
       currentActionId: "install-rd",
       disposition: "install_rez_ready",
       supportBinding: {
-        parentPlanInstanceId: "plan:corp.score_agenda:agenda-1",
+        parentPlanInstanceId: "pec2em6rbxev7e1w1qcpuez4fk",
         parentNeedId: "score-protection:agenda-1",
       },
       targetServerId: "rd",
@@ -611,7 +611,7 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
       disposition: "draw_for_ice",
       currentActionId: "draw",
       supportBinding: {
-        parentPlanInstanceId: "plan:corp.score_agenda:agenda-1",
+        parentPlanInstanceId: "pec2em6rbxev7e1w1qcpuez4fk",
         parentNeedId: "score-protection:agenda-1",
       },
       priorityClass: "P4",

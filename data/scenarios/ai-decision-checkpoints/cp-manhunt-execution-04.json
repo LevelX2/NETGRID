@@ -11521,11 +11521,11 @@
       "schemaVersion": "tactical-plan-v1",
       "memoryId": "match_fa11540b1f1e08b6:corp:corp-ai-v0.9-hard",
       "side": "corp",
-      "planId": "corp.apply_punish_pressure:corp.install_card.c38u.r1.c38u",
+      "planId": "corp.apply_punish_pressure:cc.c38u.r1.c38u",
       "type": "corp.apply_punish_pressure",
       "status": "progressing",
       "selectedStepKind": "apply_punish_pressure",
-      "selectedActionId": "corp.install_card.c38u.r1.c38u",
+      "selectedActionId": "cc.c38u.r1.c38u",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -11583,7 +11583,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:corp.establish_scoring_remote",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:corp.end_turn"
+        "plan_portfolio_selected_action:c9"
       ]
     },
     "strategicIntent": {
@@ -12402,7 +12402,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "corp.install_card.c31a.new_remote.c31a"
+        "actionId": "cc.c31a.new_remote.c31a"
       }
     ],
     "planExecution": {
@@ -12413,7 +12413,7 @@
         "improve_remote_protection_path"
       ],
       "requiredAssessmentEvidence": [
-        "corp_layered_remote_ice_staging:remote:strategic-score-remote:new_remote:corp.install_card.c31a.new_remote.c31a:layers_0:unrezzed_0:rez_gap_0"
+        "corp_layered_remote_ice_staging:remote:strategic-score-remote:new_remote:cc.c31a.new_remote.c31a:layers_0:unrezzed_0:rez_gap_0"
       ]
     }
   }

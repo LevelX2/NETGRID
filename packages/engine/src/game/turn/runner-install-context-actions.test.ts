@@ -51,7 +51,7 @@ describe("runner install context action builders", () => {
 
     expect(action).toMatchObject({
       actionId:
-        "runner.install_card.runner_agenda_point_hardware.runner_agenda_point_hardware",
+        "rc.runner_agenda_point_hardware.runner_agenda_point_hardware",
       side: "runner",
       type: "install_card",
       label: "Agenda Cost Hardware installieren",
@@ -99,7 +99,7 @@ describe("runner install context action builders", () => {
 
     expect(action).toMatchObject({
       actionId:
-        "runner.install_card.runner_data_fort_resource.rd.runner_data_fort_resource",
+        "rc.runner_data_fort_resource.rd.runner_data_fort_resource",
       side: "runner",
       type: "install_card",
       label: "Data Fort Resource auf R&D ausrichten",

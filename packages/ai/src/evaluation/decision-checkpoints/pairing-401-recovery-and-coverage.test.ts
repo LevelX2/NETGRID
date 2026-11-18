@@ -89,7 +89,7 @@ describe("pairing 401 source-bound recovery and coverage", () => {
     )!;
     expect(decision).toMatchObject({
       actionId:
-        "runner.play_event.c1ux.c1ux.385",
+        "rh.c1ux.c1ux.385",
       fallbackUsed: false,
     });
     expect(executor.moduleState).toMatchObject({
@@ -113,7 +113,7 @@ describe("pairing 401 source-bound recovery and coverage", () => {
     });
     const choice = chooseAiAction(choiceInput as AiDecisionInput);
     expect(choice).toMatchObject({
-      actionId: "runner.resolve_choice",
+      actionId: "rn",
       fallbackUsed: false,
       selectedChoices: {
         choiceId: "p3_37_search_trash_to_grip_195",
@@ -129,7 +129,7 @@ describe("pairing 401 source-bound recovery and coverage", () => {
     expect(input.playerView.own.gripOrHq).toHaveLength(6);
     expect(input.playerView.own.maxHandSize).toBe(5);
     expect(chooseAiAction(input as AiDecisionInput)).toMatchObject({
-      actionId: "runner.start_run.hq",
+      actionId: "rs.hq",
       fallbackUsed: false,
     });
   });
@@ -141,7 +141,7 @@ describe("pairing 401 source-bound recovery and coverage", () => {
       (instance) => instance.instanceId === portfolio.executorInstanceId,
     )!;
     expect(decision).toMatchObject({
-      actionId: "runner.draw_card",
+      actionId: "r8",
       reasonCode: "plan_first.runner.defense_and_recovery",
       fallbackUsed: false,
     });
@@ -164,7 +164,7 @@ describe("pairing 401 source-bound recovery and coverage", () => {
     const recovery = portfolio.instances.find(
       (instance) =>
         instance.instanceId ===
-        "plan:runner.develop_board_and_hand:recovery%3Ac1ux%3Ac1zm",
+        "p3ggw3dmvvj82saxy786ahiu1s",
     )!;
     expect(recovery).toMatchObject({
       moduleId: "runner.develop_board_and_hand",
@@ -196,10 +196,10 @@ describe("pairing 401 source-bound recovery and coverage", () => {
     const input = restore(installJson);
     chooseAiAction(input as AiDecisionInput);
     const installActionId =
-      "runner.install_card.c7v.c7v";
+      "rc.c7v.c7v";
     const portfolio = residentPlanPortfolioSnapshot(input)!;
     const executorId =
-      "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate";
+      "p5s1qdgqrafrs3n2kss1t9ct7m";
     const executor = portfolio.instances.find(
       (instance) => instance.instanceId === executorId,
     )!;

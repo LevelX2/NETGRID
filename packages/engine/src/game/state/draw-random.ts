@@ -13,6 +13,23 @@ import {
 import { applyCorpDrawReplacementAfterDraw } from "../choices/strategic-planning-group-draw-choice";
 import { mustInstance } from "./card-server-lookup";
 
+// The engine owns the cloned history while an action resolves. The scope is
+// discarded before the result goes back to callers that can mutate GameState.
+const actionRandomPrefixes = new WeakMap<RandomDrawRecord[], number>();
+
+export function withActionRandomHistory<T>(
+  state: GameState,
+  perform: () => T,
+): T {
+  const records = state.randomDrawRecords;
+  actionRandomPrefixes.set(records, -1);
+  try {
+    return perform();
+  } finally {
+    actionRandomPrefixes.delete(records);
+  }
+}
+
 export function mustArrayValue<T>(
   values: T[],
   index: number,
@@ -139,7 +156,7 @@ export function nextRandom(state: GameState, purpose: RandomPurpose): number {
     state.randomCounter,
     "engine",
   );
-  state.randomDrawRecords.push(record);
+  appendRandomRecord(state.randomDrawRecords, record);
   state.randomCounter += 1;
   return record.value;
 }
@@ -205,7 +222,7 @@ export function shuffleIds(
   const shuffled = ids.slice();
   for (let index = shuffled.length - 1; index > 0; index -= 1) {
     const record = createRandomDraw(seed, purpose, random.counter, "engine");
-    random.records.push(record);
+    appendRandomRecord(random.records, record);
     random.counter += 1;
     const swapIndex = Math.floor(record.value * (index + 1));
     const current = mustArrayValue(shuffled, index, "Shuffle index missing.");
@@ -245,7 +262,7 @@ export function recordRandomMarkers(
     throw new Error("Die Anzahl der Zufallsmarker ist ungültig.");
   for (let index = 0; index < amount; index += 1) {
     const record = createRandomDraw(seed, purpose, random.counter, "engine");
-    random.records.push(record);
+    appendRandomRecord(random.records, record);
     random.counter += 1;
   }
 }
@@ -267,8 +284,20 @@ function assertRandomCursor(
     records.length !== counter
   )
     throw new Error("Der Zufallszustand ist nicht replay-konsistent.");
+  if (actionRandomPrefixes.get(records) === counter) return;
   if (!isRandomHistory(counter, records, "engine"))
     throw new Error("Der Zufallsverlauf ist nicht replay-konsistent.");
+  if (actionRandomPrefixes.has(records))
+    actionRandomPrefixes.set(records, counter);
+}
+
+function appendRandomRecord(
+  records: RandomDrawRecord[],
+  record: RandomDrawRecord,
+): void {
+  records.push(record);
+  if (actionRandomPrefixes.has(records))
+    actionRandomPrefixes.set(records, records.length);
 }
 
 export function recordStateRandomMarkers(

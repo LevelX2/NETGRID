@@ -6565,7 +6565,7 @@
         "id": "runner_credit_base"
       },
       "selectedStepKind": "gain_credits",
-      "selectedActionId": "runner.gain_credit",
+      "selectedActionId": "rb",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -6633,7 +6633,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:runner.build_credit_bank",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.end_turn"
+        "plan_portfolio_selected_action:r9"
       ]
     },
     "strategicIntent": {
@@ -7753,7 +7753,7 @@
     "contractKind": "correctness",
     "acceptableActions": [
       {
-        "actionId": "runner.activated_card_ability.c29d.c29d.activated.441"
+        "actionId": "r1.c29d.c29d.activated.441"
       }
     ],
     "planExecution": {

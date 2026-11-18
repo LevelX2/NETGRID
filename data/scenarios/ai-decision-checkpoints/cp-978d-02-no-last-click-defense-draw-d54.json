@@ -5668,7 +5668,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "corp.gain_credit"
+        "actionId": "cb"
       }
     ],
     "planExecution": {

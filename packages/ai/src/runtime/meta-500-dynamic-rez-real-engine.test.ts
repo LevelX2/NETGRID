@@ -120,10 +120,10 @@ it("binds a real Engine dynamic stop to the existing Defense plan and actual rez
   expect(action.source).toBe(ice.instanceId);
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
-    leafExecutorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+    rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
+    leafExecutorInstanceId: "penw02zfrkklof54c2nuye5att",
     selectedStep: {
-      stepId: "plan:corp.defend_servers:server-defense-portfolio:allocate",
+      stepId: "penw02zfrkklof54c2nuye5att:allocate",
     },
     route: {
       actionId: action.actionId,

@@ -39,8 +39,8 @@ describe("persistent hazard counter funding contracts", () => {
   });
   it.each(["stateVersion", "actionId", "counter", "cost", "gap"])("rejects a stale %s at discovery and materialization", key => {
     const i = input(), candidates = buildActionSemanticCandidates({ legalActions: i.legalActions, observerSide: "runner", stateVersion: i.playerView.stateVersion });
-    const need: NonNullable<RunnerDefenseSignals["persistentHazardCounterFundingNeed"]> = { needId: "runner-defense-persistent-hazard-counter-funding", parentPlanInstanceId: "plan:runner.defense_and_recovery:runner",
-      counterType: "trace_tag_counter", observedAmount: 1, targetCredits: 1, currentCreditsAtRevalidation: 0, gap: 1, actionIds: ["runner.gain_credit"],
+    const need: NonNullable<RunnerDefenseSignals["persistentHazardCounterFundingNeed"]> = { needId: "runner-defense-persistent-hazard-counter-funding", parentPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
+      counterType: "trace_tag_counter", observedAmount: 1, targetCredits: 1, currentCreditsAtRevalidation: 0, gap: 1, actionIds: ["rb"],
       revalidation: { stateVersion: i.playerView.stateVersion, status: "defense_parent_open" }, evidenceCode: "runner_persistent_hazard_counter_requires_funding" };
     if (key === "stateVersion") need.revalidation.stateVersion--;
     if (key === "actionId") need.actionIds = ["runner.invented_credit"];
@@ -53,6 +53,6 @@ describe("persistent hazard counter funding contracts", () => {
     const module = createRunnerDefenseModule(), proposal = module.discover(context)[0]!;
     expect(proposal.initialViability).toBe("blocked");
     expect(proposal.blockers[0]?.code).toBe("invalid_persistent_hazard_counter_funding_need");
-    expect(module.materialize({ ...proposal, instanceId: "plan:runner.defense_and_recovery:runner" } as never, {} as never, context).candidates).toEqual([]);
+    expect(module.materialize({ ...proposal, instanceId: "p1gzjb6yfcv4zbzow512kexs33" } as never, {} as never, context).candidates).toEqual([]);
   });
 });

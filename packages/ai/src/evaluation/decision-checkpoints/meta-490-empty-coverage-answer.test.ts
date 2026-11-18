@@ -46,7 +46,7 @@ it.each([
     }
     if (name === "g38-d208") {
       const target = evaluateRunnerRunTargets({ input }).find(
-        (entry) => entry.actionId === "runner.start_run.r1",
+        (entry) => entry.actionId === "rs.r1",
       )!;
       expect(target).toMatchObject({
         pathPassability: "blocked_unpayable",
@@ -77,10 +77,10 @@ it.each([
     const decision = chooseAiAction(input);
     expect(decision.fallbackUsed).toBe(false);
     if (onlyHq) {
-      expect(decision.actionId).toBe("runner.gain_credit");
+      expect(decision.actionId).toBe("rb");
       expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-        rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-        leafExecutorInstanceId: "plan:runner.economy:run-support%3Acentral%3Ahq",
+        rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+        leafExecutorInstanceId: "p3bckraiba865d5xfnzk3r03v0",
         route: {
           actionId: decision.actionId,
           stateVersion: input.playerView.stateVersion,
@@ -88,14 +88,14 @@ it.each([
       });
       return;
     }
-    expect(decision.actionId).toBe("runner.draw_card");
+    expect(decision.actionId).toBe("r8");
     expect(
       input.legalActions.some(
         (action) => action.actionId === decision.actionId,
       ),
     ).toBe(true);
     expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({
-      actionId: "runner.draw_card",
+      actionId: "r8",
       capabilityId: "draw_for_answer_breaker_wall",
       stateVersion: input.playerView.stateVersion,
     });
@@ -112,12 +112,12 @@ it.each([
         answerInHand: false,
         installActionIds: [],
         recoveryMode: "draw_for_known_role",
-        drawForAnswerActionIds: expect.arrayContaining(["runner.draw_card"]),
+        drawForAnswerActionIds: expect.arrayContaining(["r8"]),
       },
     });
     expect(
       decision.decisionDebug?.actionAlternatives?.find(
-        (action) => action.actionId === "runner.draw_card",
+        (action) => action.actionId === "r8",
       )?.excluded,
     ).not.toBe(true);
   },

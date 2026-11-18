@@ -7618,7 +7618,7 @@
         "id": "rd"
       },
       "selectedStepKind": "draw_for_answer",
-      "selectedActionId": "runner.play_event.cab.cab",
+      "selectedActionId": "rh.cab.cab",
       "blockedBy": [
         "missing_breaker_coverage",
         "search_target_not_available"
@@ -7675,7 +7675,7 @@
           "plan_portfolio_execution_class:bounded_sequence",
           "plan_portfolio_role:foreground",
           "plan_portfolio_lifecycle:active",
-          "plan_portfolio_action_progress:runner.play_event.cab.cab",
+          "plan_portfolio_action_progress:rh.cab.cab",
           "plan_portfolio_action_progress_source:selected_mapped_step"
         ]
       },
@@ -7687,7 +7687,7 @@
         "plan_portfolio_foreground:runner.opportunistic_central_run",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.play_event.cab.cab"
+        "plan_portfolio_selected_action:rh.cab.cab"
       ]
     },
     "strategicIntent": {
@@ -8812,7 +8812,7 @@
     ],
     "acceptableActions": [
       {
-        "actionId": "runner.start_run.hq"
+        "actionId": "rs.hq"
       }
     ]
   }

@@ -5635,7 +5635,7 @@
         "label": "Krash"
       },
       "selectedStepKind": "install_development_card",
-      "selectedActionId": "runner.install_card.c1jv.c1jv",
+      "selectedActionId": "rc.c1jv.c1jv",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -5746,7 +5746,7 @@
         "plan_portfolio_foreground:runner.play_best_hand_card",
         "plan_portfolio_backgrounds:runner.build_credit_bank",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.install_card.c1jv.c1jv"
+        "plan_portfolio_selected_action:rc.c1jv.c1jv"
       ]
     },
     "strategicIntent": {
@@ -6784,7 +6784,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.trigger_ability"
+        "actionId": "rx"
       }
     ]
   }

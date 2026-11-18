@@ -256,7 +256,7 @@ describe("deriveOpponentActionCues", () => {
     expect(cues[0]?.title).toBe("Die Korp-KI hat ihre Pflichtkarte gezogen.");
     expect(cues[0]?.description).toBeUndefined();
     expect(cues[0]?.aiExplanation).toBe("Die Korp braucht ihre Pflichtkarte.");
-    expect(JSON.stringify(cues[0])).not.toContain("corp.mandatory_draw");
+    expect(JSON.stringify(cues[0])).not.toContain("ce");
   });
 
   it("shows each resolved City Surveillance choice exactly once", () => {

@@ -137,7 +137,7 @@ it("admits HQ access via empty Archives while rejecting the ordinary Archives ru
   });
   expect(
     decision.decisionDebug?.actionAlternatives
-      ?.find((a) => a.actionId === "runner.start_run.archives")
+      ?.find((a) => a.actionId === "rs.archives")
       ?.whyNot?.join("|"),
   ).toContain("runner_archives_visible_state_has_no_agenda_payoff");
 });
@@ -164,7 +164,7 @@ it.each(["rd", "r1"] as const)(
       cardSemanticProfilesByDefinitionId:
         buildActionCardSemanticProfilesByDefinitionId(),
     });
-    const actionId = "runner.start_run." + serverId;
+    const actionId = "rs." + serverId;
     expect(
       actionCandidates.some((candidate) => candidate.actionId === actionId),
     ).toBe(true);

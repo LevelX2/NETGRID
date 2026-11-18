@@ -2919,7 +2919,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       (action) =>
         action.type === "break_subroutine" &&
         action.payload?.multiBreakSubroutines === true &&
-        action.payload?.subroutineIndexes === "0,1,2,3",
+        action.subroutineIndexes?.join(",") === "0,1,2,3",
     );
     expect(breakAction.costs).toEqual([{ credits: 7 }]);
     expect(breakAction.payload).toMatchObject({

@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { describe, expect, it } from "vitest";
 
 import directRdReplay from "../../../../../data/scenarios/ai-decision-checkpoints/cp-5a983612-d60-central-access-route-replay.json";
@@ -38,7 +39,7 @@ function replayCentralRoute(
 ) {
   const decision = chooseAiAction(input);
   const trace = decision.decisionDebug?.planFirstDecision;
-  const planId = "plan:runner.pressure_central:central%3A" + accessServerId;
+  const planId = planInstanceIdForProposal({ moduleId: "runner.pressure_central", dedupeKey: `central:${accessServerId}` });
   const alternatives = evaluateRunnerRunTargets({
     input,
     ...(input.ownDeckCapabilities
@@ -154,7 +155,7 @@ describe("Runner central routes with the same access destination", () => {
       (action) => action.actionId !== redirect.actionId,
     );
     const rd = evaluateRunnerRunTargets({ input }).find(
-      (target) => target.actionId === "runner.start_run.rd",
+      (target) => target.actionId === "rs.rd",
     );
     expect(rd).toMatchObject({
       routeQuote: { reachability: "guaranteed_access", fundingGap: 0 },

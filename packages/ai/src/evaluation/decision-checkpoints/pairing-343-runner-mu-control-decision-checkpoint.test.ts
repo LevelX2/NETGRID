@@ -38,7 +38,7 @@ describe("pairing 343 Runner strategic MU control checkpoint", () => {
     const portfolio = residentPlanPortfolioSnapshot(capture.input);
 
     expect(decision).toMatchObject({
-      actionId: "runner.start_run.rd",
+      actionId: "rs.rd",
       reasonCode: "plan_first.runner.pressure_central",
       fallbackUsed: false,
     });

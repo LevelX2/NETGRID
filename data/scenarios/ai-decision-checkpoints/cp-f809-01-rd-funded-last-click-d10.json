@@ -4098,7 +4098,7 @@
       "stateVersion": 15,
       "instances": [
         {
-          "instanceId": "plan:corp.defend_servers:server-defense-portfolio",
+          "instanceId": "penw02zfrkklof54c2nuye5att",
           "dedupeKey": "server-defense-portfolio",
           "moduleId": "corp.defend_servers",
           "moduleVersion": "1",
@@ -4129,21 +4129,21 @@
             "signals": [
               {
                 "kind": "generic",
-                "defenseId": "install:rd:corp.install_card.cgu.rd.cgu.0",
+                "defenseId": "install:rd:cc.cgu.rd.cgu.0",
                 "serverId": "rd",
                 "phase": "install_ice",
                 "sourceDefinitionIds": [
                   75
                 ],
                 "actionIds": [
-                  "corp.install_card.cgu.rd.cgu.0"
+                  "cc.cgu.rd.cgu.0"
                 ],
                 "urgent": false,
                 "installRoute": {
                   "disposition": "productive",
                   "projection": {
                     "knowledge": "known",
-                    "actionId": "corp.install_card.cgu.rd.cgu.0",
+                    "actionId": "cc.cgu.rd.cgu.0",
                     "sourceCardInstanceId": "cgu",
                     "sourceDefinitionId": 75,
                     "targetServerId": "rd",
@@ -4357,21 +4357,21 @@
               },
               {
                 "kind": "generic",
-                "defenseId": "install:rd:corp.install_card.ci6.rd.ci6.0",
+                "defenseId": "install:rd:cc.ci6.rd.ci6.0",
                 "serverId": "rd",
                 "phase": "install_ice",
                 "sourceDefinitionIds": [
                   81
                 ],
                 "actionIds": [
-                  "corp.install_card.ci6.rd.ci6.0"
+                  "cc.ci6.rd.ci6.0"
                 ],
                 "urgent": false,
                 "installRoute": {
                   "disposition": "productive",
                   "projection": {
                     "knowledge": "known",
-                    "actionId": "corp.install_card.ci6.rd.ci6.0",
+                    "actionId": "cc.ci6.rd.ci6.0",
                     "sourceCardInstanceId": "ci6",
                     "sourceDefinitionId": 81,
                     "targetServerId": "rd",
@@ -4585,13 +4585,13 @@
               },
               {
                 "kind": "score_protection_install",
-                "defenseId": "score-protection-install:agenda:cem:new_remote:corp.install_card.cgu.new_remote.cgu",
+                "defenseId": "score-protection-install:agenda:cem:new_remote:cc.cgu.new_remote.cgu",
                 "serverId": "new_remote",
                 "phase": "install_ice",
                 "parentProjectId": "agenda:cem:new_remote",
                 "parentNeedId": "score-protection:agenda:cem:new_remote",
                 "delegatedPriorityClass": "P4",
-                "actionId": "corp.install_card.cgu.new_remote.cgu",
+                "actionId": "cc.cgu.new_remote.cgu",
                 "sourceCardInstanceId": "cgu",
                 "sourceDefinitionId": 75,
                 "effect": "satisfied",
@@ -4602,7 +4602,7 @@
                 "totalInstallAndRezCredits": 6,
                 "projection": {
                   "knowledge": "known",
-                  "actionId": "corp.install_card.cgu.new_remote.cgu",
+                  "actionId": "cc.cgu.new_remote.cgu",
                   "sourceCardInstanceId": "cgu",
                   "sourceDefinitionId": 75,
                   "targetServerId": "new_remote",
@@ -4612,7 +4612,7 @@
                     "availableCorpClicks": 2,
                     "totalScoreReserveCredits": 4,
                     "hardClickReserve": 0,
-                    "scoreReserveFingerprint": "clicks:0|117:score_action:corp.install_card.cem.new_remote.cem=0|54:post_score_floor:cem=0|59:remaining_advancement:cem=4",
+                    "scoreReserveFingerprint": "clicks:0|117:score_action:cc.cem.new_remote.cem=0|54:post_score_floor:cem=0|59:remaining_advancement:cem=4",
                     "protection": {
                       "knowledge": "known",
                       "runnerAccessSuccessProbability": {
@@ -4664,7 +4664,7 @@
                     "availableCorpClicks": 1,
                     "totalScoreReserveCredits": 4,
                     "hardClickReserve": 0,
-                    "scoreReserveFingerprint": "clicks:0|117:score_action:corp.install_card.cem.new_remote.cem=0|54:post_score_floor:cem=0|59:remaining_advancement:cem=4",
+                    "scoreReserveFingerprint": "clicks:0|117:score_action:cc.cem.new_remote.cem=0|54:post_score_floor:cem=0|59:remaining_advancement:cem=4",
                     "protection": {
                       "knowledge": "known",
                       "runnerAccessSuccessProbability": {
@@ -4814,13 +4814,13 @@
               },
               {
                 "kind": "score_protection_install",
-                "defenseId": "score-protection-install:agenda:cem:new_remote:corp.install_card.ci6.new_remote.ci6",
+                "defenseId": "score-protection-install:agenda:cem:new_remote:cc.ci6.new_remote.ci6",
                 "serverId": "new_remote",
                 "phase": "install_ice",
                 "parentProjectId": "agenda:cem:new_remote",
                 "parentNeedId": "score-protection:agenda:cem:new_remote",
                 "delegatedPriorityClass": "P4",
-                "actionId": "corp.install_card.ci6.new_remote.ci6",
+                "actionId": "cc.ci6.new_remote.ci6",
                 "sourceCardInstanceId": "ci6",
                 "sourceDefinitionId": 81,
                 "effect": "satisfied",
@@ -4831,7 +4831,7 @@
                 "totalInstallAndRezCredits": 6,
                 "projection": {
                   "knowledge": "known",
-                  "actionId": "corp.install_card.ci6.new_remote.ci6",
+                  "actionId": "cc.ci6.new_remote.ci6",
                   "sourceCardInstanceId": "ci6",
                   "sourceDefinitionId": 81,
                   "targetServerId": "new_remote",
@@ -4841,7 +4841,7 @@
                     "availableCorpClicks": 2,
                     "totalScoreReserveCredits": 4,
                     "hardClickReserve": 0,
-                    "scoreReserveFingerprint": "clicks:0|117:score_action:corp.install_card.cem.new_remote.cem=0|54:post_score_floor:cem=0|59:remaining_advancement:cem=4",
+                    "scoreReserveFingerprint": "clicks:0|117:score_action:cc.cem.new_remote.cem=0|54:post_score_floor:cem=0|59:remaining_advancement:cem=4",
                     "protection": {
                       "knowledge": "known",
                       "runnerAccessSuccessProbability": {
@@ -4893,7 +4893,7 @@
                     "availableCorpClicks": 1,
                     "totalScoreReserveCredits": 4,
                     "hardClickReserve": 0,
-                    "scoreReserveFingerprint": "clicks:0|117:score_action:corp.install_card.cem.new_remote.cem=0|54:post_score_floor:cem=0|59:remaining_advancement:cem=4",
+                    "scoreReserveFingerprint": "clicks:0|117:score_action:cc.cem.new_remote.cem=0|54:post_score_floor:cem=0|59:remaining_advancement:cem=4",
                     "protection": {
                       "knowledge": "known",
                       "runnerAccessSuccessProbability": {
@@ -5138,7 +5138,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.economy:economy-immediate-operation%3Acnh",
+          "instanceId": "pa52joz5qb0zd4veq5jmu9lx1i",
           "dedupeKey": "economy-immediate-operation:cnh",
           "moduleId": "corp.economy",
           "moduleVersion": "1",
@@ -5172,7 +5172,7 @@
               "sourceInstanceId": "cnh",
               "sourceDefinitionId": 105,
               "actionIds": [
-                "corp.play_operation.cnh.cnh"
+                "ci.cnh.cnh"
               ],
               "conversion": {
                 "clickCost": 1,
@@ -5231,7 +5231,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.economy:economy-liquidity-development%3Acorp%3A2",
+          "instanceId": "p9qz3bdoj3sz57cnrygemedtv6",
           "dedupeKey": "economy-liquidity-development:corp:2",
           "moduleId": "corp.economy",
           "moduleVersion": "1",
@@ -5268,7 +5268,7 @@
               "gap": 2,
               "projectedCreditGain": 1,
               "actionIds": [
-                "corp.gain_credit"
+                "cb"
               ],
               "priorityClass": "P6",
               "cadence": {
@@ -5320,7 +5320,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Acem%3Anew_remote",
+          "instanceId": "pcbw6ypodhgcwx8fzse6lvzd18",
           "dedupeKey": "agenda:cem:new_remote",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -5356,7 +5356,7 @@
               "agendaPoints": 2,
               "agendaInstanceId": "cem",
               "actionIds": [
-                "corp.install_card.cem.new_remote.cem"
+                "cc.cem.new_remote.cem"
               ],
               "serverId": "new_remote",
               "phase": "install_agenda",
@@ -5378,7 +5378,7 @@
                 "scoreReserve": {
                   "creditBreakdown": [
                     {
-                      "reserveId": "score_action:corp.install_card.cem.new_remote.cem",
+                      "reserveId": "score_action:cc.cem.new_remote.cem",
                       "credits": 0
                     },
                     {
@@ -5398,7 +5398,7 @@
                   "availableCorpClicks": 2,
                   "totalScoreReserveCredits": 4,
                   "hardClickReserve": 0,
-                  "scoreReserveFingerprint": "clicks:0|117:score_action:corp.install_card.cem.new_remote.cem=0|54:post_score_floor:cem=0|59:remaining_advancement:cem=4",
+                  "scoreReserveFingerprint": "clicks:0|117:score_action:cc.cem.new_remote.cem=0|54:post_score_floor:cem=0|59:remaining_advancement:cem=4",
                   "protection": {
                     "knowledge": "known",
                     "runnerAccessSuccessProbability": {
@@ -5494,37 +5494,37 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:corp.defend_servers:server-defense-portfolio",
+          "instanceId": "penw02zfrkklof54c2nuye5att",
           "stateVersion": 15,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:corp.economy:economy-immediate-operation%3Acnh",
+          "instanceId": "pa52joz5qb0zd4veq5jmu9lx1i",
           "stateVersion": 15,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.economy:economy-liquidity-development%3Acorp%3A2",
+          "instanceId": "p9qz3bdoj3sz57cnrygemedtv6",
           "stateVersion": 15,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Acem%3Anew_remote",
+          "instanceId": "pcbw6ypodhgcwx8fzse6lvzd18",
           "stateVersion": 15,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:corp.economy:score-support%3Aagenda%3Acem%3Anew_remote",
+          "instanceId": "p8v550lp0i12nybk9lgbm357hx",
           "stateVersion": 15,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:corp.economy:economy-immediate-operation%3Acnh",
+          "instanceId": "pa52joz5qb0zd4veq5jmu9lx1i",
           "stateVersion": 15,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
@@ -5532,8 +5532,8 @@
           "detailCode": "validated_scheduler_selection"
         }
       ],
-      "rootForegroundInstanceId": "plan:corp.economy:economy-immediate-operation%3Acnh",
-      "executorInstanceId": "plan:corp.economy:economy-immediate-operation%3Acnh"
+      "rootForegroundInstanceId": "pa52joz5qb0zd4veq5jmu9lx1i",
+      "executorInstanceId": "pa52joz5qb0zd4veq5jmu9lx1i"
     }
   },
   "expectation": {

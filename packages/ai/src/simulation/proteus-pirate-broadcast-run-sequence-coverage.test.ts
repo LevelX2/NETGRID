@@ -28,7 +28,7 @@ describe("Proteus restricted multi-run plan-first coverage", () => {
     });
 
     const rdActionId =
-      "runner.start_run.rd.bonus_run.174";
+      "rs.rd.bonus_run.174";
     const rdCapture = captures.find((snapshot) =>
       snapshot.input.legalActions.some(
         (action) => action.actionId === rdActionId,
@@ -102,7 +102,7 @@ describe("Proteus restricted multi-run plan-first coverage", () => {
     });
 
     const archivesActionId =
-      "runner.start_run.archives.bonus_run.174";
+      "rs.archives.bonus_run.174";
     expect(
       summary.actionSequence.find((entry) =>
         entry.evidence.includes(

@@ -44,7 +44,7 @@ it("uses the already bound affordable stack search before funding an unaffordabl
   expect(p.selectedPlan!.moduleId).toBe("runner.rig_and_coverage");
   expect(p.selectedPlan!.phase).toBe("search_answer");
   expect(p.rootPlanInstanceId).toBe(
-    "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry",
+    "pde8a64nmn1hkbrzgi9sbuf6fo",
   );
   expect(p.route).toMatchObject({
     actionId: search.actionId,

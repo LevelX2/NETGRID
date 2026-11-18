@@ -78,10 +78,10 @@ describe("direct additional-tag punish routes", () => {
     );
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId:
-        "plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
+        "pp3zys3mvrb02r0muk2126s52",
       selectedStep: {
         parentInstanceId:
-          "plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
+          "pp3zys3mvrb02r0muk2126s52",
       },
     });
   });
@@ -143,10 +143,10 @@ describe("direct additional-tag punish routes", () => {
     );
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId:
-        "plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
+        "pp3zys3mvrb02r0muk2126s52",
       selectedStep: {
         parentInstanceId:
-          "plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
+          "pp3zys3mvrb02r0muk2126s52",
       },
     });
     if (!decision.actionId) throw new Error("Missing selected Voucher action.");
@@ -249,7 +249,7 @@ describe("direct additional-tag punish routes", () => {
       }
       expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
         rootPlanInstanceId:
-          "plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
+          "pp3zys3mvrb02r0muk2126s52",
         priority: { effectiveClass: "P1" },
         route: {
           actionId: decision.actionId,
@@ -289,7 +289,7 @@ describe("direct additional-tag punish routes", () => {
       });
       expect(followup.decisionDebug?.planFirstDecision).toMatchObject({
         rootPlanInstanceId:
-          "plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
+          "pp3zys3mvrb02r0muk2126s52",
         priority: { effectiveClass: "P1" },
       });
       const resolved = applyAction(state, {

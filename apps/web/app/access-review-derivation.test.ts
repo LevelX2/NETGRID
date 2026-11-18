@@ -655,7 +655,7 @@ function gypsyView(input: {
 
 function choiceAction(choiceId: string): LegalAction {
   return {
-    actionId: `runner.resolve_choice.${choiceId}`,
+    actionId: `rn.${choiceId}`,
     side: "runner",
     type: "resolve_choice",
     source: "runner",

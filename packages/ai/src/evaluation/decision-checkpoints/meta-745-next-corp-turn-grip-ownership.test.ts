@@ -70,7 +70,7 @@ it.each([
   const guarded = decide(cp, event);
   expect(guarded.dispositions).toEqual([{ ...protection, actionId: guarded.actionId }]);
   expect(guarded.selectedActionId).toBe(
-    label === "bypass" ? "runner.start_run.hq" : "runner.gain_credit",
+    label === "bypass" ? "rs.hq" : "rb",
   );
   expect(
     guarded.plan.turnPlanning!.consideredLines!.some(
@@ -94,7 +94,7 @@ it.each([
   }
   expect(canRefill.dispositions).toEqual([]);
   expect(canRefill.selectedActionId).toBe(canRefill.actionId);
-  expect(canRefill.plan.rootPlanInstanceId).toBe("plan:runner.pressure_central:central%3Ard");
+  expect(canRefill.plan.rootPlanInstanceId).toBe("pa90fufw9vc5bkshp96ztlryxl");
   expect(canRefill.plan.route).toMatchObject({
     actionId: canRefill.actionId,
     stateVersion: cp.input.playerView.stateVersion,
@@ -112,7 +112,7 @@ it("keeps the Coverage rejection when a Grip-neutral search has no useful answer
       evidenceCode: "runner_coverage_search_rejected_without_deck_answer:breaker_sentry@no_server+breaker_wall@no_server",
     },
   ]);
-  expect(guarded.selectedActionId).toBe("runner.gain_credit");
+  expect(guarded.selectedActionId).toBe("rb");
 
   resetResidentPlanPortfolioMemory();
   const canRefill = decide(search, 311, true);
@@ -131,7 +131,7 @@ it("executes a bound mandatory search that returns the spent card count to Grip"
   const ready = decide(boundSearch, 311);
   expect(ready.selectedActionId).toBe(ready.actionId);
   expect(ready.dispositions).toEqual([]);
-  expect(ready.plan.rootPlanInstanceId).toBe("plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate");
+  expect(ready.plan.rootPlanInstanceId).toBe("p5s1qdgqrafrs3n2kss1t9ct7m");
   expect(ready.plan.route).toMatchObject({
     actionId: ready.actionId,
     stateVersion: boundSearch.input.playerView.stateVersion,
@@ -159,7 +159,7 @@ it("credits the mandatory Grip return of an exact heap search on the final actio
     known: true,
   };
   const searchAction: LegalAction = {
-    actionId: `runner.play_event.${instanceId}.${instanceId}.${abilityId}`,
+    actionId: `rh.${instanceId}.${instanceId}.${abilityId}`,
     side: "runner",
     type: "play_event",
     label: "Gideon’s Pawnshop spielen",

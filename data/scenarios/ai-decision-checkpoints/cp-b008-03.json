@@ -6251,7 +6251,7 @@
         "label": "Gypsy™ Schedule Analyzer"
       },
       "selectedStepKind": "install_development_card",
-      "selectedActionId": "runner.play_event.c9e.rd.c9e",
+      "selectedActionId": "rh.c9e.rd.c9e",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -6310,7 +6310,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:runner.build_credit_bank",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.continue_run.0"
+        "plan_portfolio_selected_action:r5.0"
       ]
     },
     "strategicIntent": {

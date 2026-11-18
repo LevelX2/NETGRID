@@ -635,7 +635,7 @@ describe("turn plan commitment", () => {
         hardPlanCommitments: [],
         campaignRequotes: [
           {
-            campaignId: "campaign:score",
+            campaignId: "kdew3x411mv2u8vyg6qn6ko59b",
             status: "valid",
             evidenceCodes: [],
           },
@@ -1008,7 +1008,7 @@ function validContinuationEvidence(): TurnPlanContinuationEvidence {
     ],
     campaignRequotes: [
       {
-        campaignId: "campaign:score",
+        campaignId: "kdew3x411mv2u8vyg6qn6ko59b",
         status: "valid",
         evidenceCodes: [],
       },
@@ -1230,7 +1230,7 @@ function emptyCoverage() {
 function campaignClaim(): CampaignValueClaim {
   return {
     claimId: "claim:score",
-    campaignId: "campaign:score",
+    campaignId: "kdew3x411mv2u8vyg6qn6ko59b",
     ownerModuleId: "corp.economy",
     objectiveKey: "score",
     componentKey: "funding",

@@ -4183,7 +4183,7 @@
         "id": "rd"
       },
       "selectedStepKind": "build_rez_reserve",
-      "selectedActionId": "corp.gain_credit",
+      "selectedActionId": "cb",
       "selectedActionType": "gain_credit",
       "blockedBy": [
         "missing_rez_reserve"
@@ -4453,7 +4453,7 @@
           "progress": 0.5,
           "selectedStepKind": "find_remote_protection",
           "actionCandidateIds": [
-            "corp.draw_card"
+            "c8"
           ],
           "creditDemands": [],
           "fundingRoutes": [],
@@ -4498,7 +4498,7 @@
           "progress": 0.5,
           "selectedStepKind": "protect_remote",
           "actionCandidateIds": [
-            "corp.install_card.ck5.r1.ck5.0"
+            "cc.ck5.r1.ck5.0"
           ],
           "creditDemands": [],
           "fundingRoutes": [],
@@ -4542,7 +4542,7 @@
         "plan_credit_allocation_entries:3",
         "plan_credit_allocation_unallocated:0",
         "plan_click_allocation_unallocated:0",
-        "plan_portfolio_selected_action:corp.end_turn"
+        "plan_portfolio_selected_action:c9"
       ]
     },
     "strategicIntent": {
@@ -5415,7 +5415,7 @@
         "allocate_server_defense"
       ],
       "requiredAssessmentEvidence": [
-        "engine_certified_ice_rez_qualitative_encounter_defense:rd:corp.rez_ice.ck5.ck5"
+        "engine_certified_ice_rez_qualitative_encounter_defense:rd:cq.ck5.ck5"
       ]
     }
   }

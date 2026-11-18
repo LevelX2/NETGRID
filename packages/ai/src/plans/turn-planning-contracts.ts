@@ -314,6 +314,7 @@ export type TurnPlanningHeadCandidate = {
   moduleId: PlanModuleId;
   rootPlanInstanceId: string;
   rootPlanModuleId?: PlanModuleId;
+  rootPlanDedupeKey?: string;
   executorPlanInstanceId?: string;
   executorParentPlanInstanceId?: string;
   executorParentNeedId?: string;
@@ -1235,6 +1236,11 @@ function canonicalLegalActionSemantics(
         effectRef: action.effectRef,
         resolvedEffects: action.resolvedEffects ?? [],
         visibility: action.visibility,
+        encounterSubroutineIds: action.encounterSubroutineIds,
+        encounterRemainingSubroutineIds: action.encounterRemainingSubroutineIds,
+        subroutineIndexes: action.subroutineIndexes,
+        payOrEndRunSubroutineIndexes: action.payOrEndRunSubroutineIndexes,
+        payOrTrashProgramSubroutineIndexes: action.payOrTrashProgramSubroutineIndexes,
         payload: omitNonSemanticIdentifiers(action.payload),
       }),
     )

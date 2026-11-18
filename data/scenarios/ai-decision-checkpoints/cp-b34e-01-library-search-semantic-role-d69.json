@@ -6524,7 +6524,7 @@
         "id": "runner_credit_base"
       },
       "selectedStepKind": "gain_credits",
-      "selectedActionId": "runner.gain_credit",
+      "selectedActionId": "rb",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -6578,7 +6578,7 @@
           "plan_portfolio_execution_class:bounded_sequence",
           "plan_portfolio_role:foreground",
           "plan_portfolio_lifecycle:active",
-          "plan_portfolio_action_progress:runner.gain_credit",
+          "plan_portfolio_action_progress:rb",
           "plan_portfolio_action_progress_source:selected_mapped_step"
         ]
       },
@@ -6590,7 +6590,7 @@
         "plan_portfolio_foreground:runner.build_credit_base",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.gain_credit"
+        "plan_portfolio_selected_action:rb"
       ]
     },
     "strategicIntent": {
@@ -7738,7 +7738,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.install_card.c7l.c7l"
+        "actionId": "rc.c7l.c7l"
       }
     ],
     "planExecution": {

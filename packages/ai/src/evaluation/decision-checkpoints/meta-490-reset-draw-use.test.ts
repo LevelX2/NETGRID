@@ -64,6 +64,8 @@ it("preserves the actual cheaper breaker search under the canonical deck profile
     input.playerView.stateVersion,
   );
   expect(
-    decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toContain("runner.rig_and_coverage");
+    decision.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    )?.moduleId,
+  ).toBe("runner.rig_and_coverage");
 });

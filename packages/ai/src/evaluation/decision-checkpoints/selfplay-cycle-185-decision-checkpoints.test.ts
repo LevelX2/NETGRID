@@ -33,15 +33,15 @@ describe("selfplay cycle 185 decision checkpoints", () => {
 
     expect(decision).toMatchObject({
       actionId:
-        "corp.install_card.c2ie.r2.c2ie",
+        "cc.c2ie.r2.c2ie",
       reasonCode: "plan_first.corp.score_agenda",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.score_agenda:agenda%3Ac2ie%3Ar2",
+            "p9cjat7so2g0t24r7ujibgxn83",
           leafExecutorInstanceId:
-            "plan:corp.score_agenda:agenda%3Ac2ie%3Ar2",
+            "p9cjat7so2g0t24r7ujibgxn83",
           route: {
             actionType: "install_card",
             capabilityId: "install_score_agenda",

@@ -34,10 +34,10 @@ describe("SP-723 persistent counter deferral during the survival hand buffer", (
       restoreAiRuntimeCheckpoint(input, input.ownDeckSnapshot!.deckSnapshotId, cp.runtime);
       restoreResidentPlanPortfolioMemorySnapshot(input, cp.runtime.residentPlanPortfolio);
       const chosen = chooseAiAction(input);
-      expect(chosen.actionId).toBe("runner.draw_card");
+      expect(chosen.actionId).toBe("r8");
       expect(chosen.fallbackUsed).toBe(false);
       const plan = chosen.decisionDebug?.planFirstDecision;
-      expect(plan?.leafExecutorInstanceId).toBe("plan:runner.defense_and_recovery:runner");
+      expect(plan?.leafExecutorInstanceId).toBe("p1gzjb6yfcv4zbzow512kexs33");
       expect(plan?.selectedPlan?.phase).toBe("build_hand_buffer");
       expect(plan?.route?.actionId).toBe(chosen.actionId);
       expect(plan?.route?.stateVersion).toBe(state.stateVersion);

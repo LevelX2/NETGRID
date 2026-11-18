@@ -38,7 +38,7 @@ describe("match FD7671 runner decision checkpoints", () => {
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "FD7671-C01-NO-FOLLOW-UP-CLICK";
       checkpoint.expectation = {
-        forbiddenActions: [{ actionId: "runner.trigger_ability" }],
+        forbiddenActions: [{ actionId: "rx" }],
       };
     });
 
@@ -67,7 +67,7 @@ describe("match FD7671 runner decision checkpoints", () => {
       checkpoint.source.findingId = "FD7671-C02-EARLY-CHECK-BEFORE-COVERAGE";
       checkpoint.expectation = {
         acceptableActions: [
-          { actionId: "runner.start_run.hq" },
+          { actionId: "rs.hq" },
           { type: "gain_credit" },
         ],
         forbiddenActions: [
@@ -75,7 +75,7 @@ describe("match FD7671 runner decision checkpoints", () => {
         ],
         runTargets: [
           {
-            actionId: "runner.start_run.hq",
+            actionId: "rs.hq",
             pathPassability: "reachable",
             recommendation: "run_if_free",
           },
@@ -146,7 +146,7 @@ function expectProspectiveCampaignTrash(
       {
         type: "trash_accessed_card",
         actionId:
-          "runner.trash_accessed_card.c3e5.3",
+          "rv.c3e5.3",
       },
     ],
     planExecution: { acceptablePlanKinds: ["runner.convert_run_window"] },

@@ -1915,10 +1915,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
         action.costs[0]?.credits === 1 &&
         action.payload?.encounterWillEndRun === false,
     );
-    expect(payContinue.payload).toMatchObject({
-      payOrEndRunSubroutineIndexes: "3",
-      payOrEndRunSubroutinePayment: 1,
-    });
+    expect(payContinue).toMatchObject({payOrEndRunSubroutineIndexes: [3], payload: { payOrEndRunSubroutinePayment: 1 }});
     const publicTesseractId = Object.entries(withTesseract.cardInstances).find(
       ([, instance]) =>
         instance.definitionId === 582,
@@ -1959,10 +1956,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
         action.costs.length === 0 &&
         action.payload?.encounterWillEndRun === true,
     );
-    expect(refuseContinue.payload).toMatchObject({
-      unbrokenSubroutineCount: 1,
-      encounterSubroutineIds: "3",
-    });
+    expect(refuseContinue).toMatchObject({encounterSubroutineIds: ["3"], payload: { unbrokenSubroutineCount: 1 }});
     const refused = apply(
       refusing,
       "runner",

@@ -1,4 +1,5 @@
 import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import type { PublicGameEvent, VisibleCard } from "@netgrid/shared";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -96,10 +97,10 @@ describe("runner credit-bank source-bound cadence", () => {
       reasonCode: "plan_first.runner.credit_bank",
       fallbackUsed: false,
       decisionDebug: {
-        planId: expect.stringContaining("broker-2"),
+        planId: planInstanceIdForProposal({ moduleId: "runner.credit_bank", dedupeKey: "broker-2" }),
         planKind: "runner.credit_bank",
         planFirstDecision: {
-          leafExecutorInstanceId: expect.stringContaining("broker-2"),
+          leafExecutorInstanceId: planInstanceIdForProposal({ moduleId: "runner.credit_bank", dedupeKey: "broker-2" }),
           route: { actionId: buildActionId("broker-2") },
         },
       },
@@ -117,7 +118,7 @@ describe("runner credit-bank source-bound cadence", () => {
       reasonCode: "plan_first.runner.credit_bank",
       fallbackUsed: false,
       decisionDebug: {
-        planId: expect.stringContaining("broker-2"),
+        planId: planInstanceIdForProposal({ moduleId: "runner.credit_bank", dedupeKey: "broker-2" }),
       },
     });
   });
@@ -193,13 +194,13 @@ describe("runner credit-bank source-bound cadence", () => {
     });
 
     expect(decision).toMatchObject({
-      actionId: "runner.gain_credit",
+      actionId: "rb",
       reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
     });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_portfolio_blocked_evidence:plan:runner.credit_bank:broker-2:runner_credit_bank_hold_instance_built_this_turn",
+        `plan_portfolio_blocked_evidence:${planInstanceIdForProposal({ moduleId: "runner.credit_bank", dedupeKey: "broker-2" })}:runner_credit_bank_hold_instance_built_this_turn`,
       ]),
     );
   });
@@ -233,9 +234,9 @@ describe("runner credit-bank source-bound cadence", () => {
       event: bankLoadEvent("broker-2", 0),
       includeCashout: true,
     });
-    expect(decision.actionId).toBe("runner.gain_credit");
+    expect(decision.actionId).toBe("rb");
     expect(decision.evidence).toContain(
-      "plan_portfolio_blocked_evidence:plan:runner.credit_bank:broker-2:runner_credit_bank_hold_spending_budget_funded",
+      `plan_portfolio_blocked_evidence:${planInstanceIdForProposal({ moduleId: "runner.credit_bank", dedupeKey: "broker-2" })}:runner_credit_bank_hold_spending_budget_funded`,
     );
   });
 
@@ -307,7 +308,7 @@ describe("runner credit-bank source-bound cadence", () => {
       expect(decision.actionId === install.actionId).toBe(admitted);
       if (!admitted)
         expect(decision.evidence).toContain(
-          "plan_portfolio_blocked_evidence:plan:runner.credit_bank:broker-1:runner_credit_bank_install_deferred_portfolio_budget_funded",
+          `plan_portfolio_blocked_evidence:${planInstanceIdForProposal({ moduleId: "runner.credit_bank", dedupeKey: "broker-1" })}:runner_credit_bank_install_deferred_portfolio_budget_funded`,
         );
     },
   );
@@ -369,7 +370,7 @@ function decide(params: {
 
 function basicCredit() {
   return legalAction(
-    "runner.gain_credit",
+    "rb",
     "runner",
     "gain_credit",
     "Gain 1 Credit",
@@ -451,7 +452,7 @@ function bankBuildAction(instanceId: string) {
 }
 
 function buildActionId(instanceId: string): string {
-  return `runner.activated_card_ability.${instanceId}.${instanceId}.activated.${BROKER}:store_credits`;
+  return `r1.${instanceId}.${instanceId}.activated.${BROKER}:store_credits`;
 }
 
 function bankLoadEvent(

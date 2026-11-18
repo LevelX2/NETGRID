@@ -21,6 +21,7 @@ import {
   type CounterDisplay,
   type ChoiceRequirement,
   type Cost,
+  type EncounterActionTargets,
   type LegalAction,
   type PlayerView,
   type PublicAbilityFamily,
@@ -140,7 +141,6 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "approachIceExposeJackOut",
   "pumpStrengthAmount",
   "subroutineIndex",
-  "subroutineIndexes",
   "placement",
   "iceInstallBaseCost",
   "iceInstallAdditionalCost",
@@ -272,8 +272,6 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "rootReplacement",
   "encounterContinue",
   "unbrokenSubroutineCount",
-  "encounterSubroutineIds",
-  "encounterRemainingSubroutineIds",
   "encounterRemainingSubroutineCount",
   "encounterFullBreakDamage",
   "delayedInstallAbility",
@@ -434,9 +432,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "obligationDebtCreditCost",
   "obligationDebtScoreAgendaPoints",
   "obligationDebtCountBefore",
-  "payOrTrashProgramSubroutineIndexes",
   "payOrTrashProgramSubroutinePayment",
-  "payOrEndRunSubroutineIndexes",
   "payOrEndRunSubroutinePayment",
   ...ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
 ]);
@@ -3638,6 +3634,7 @@ function sanitizeLegalAction(action: LegalAction): LegalAction {
       : undefined;
   return {
     actionId: action.actionId,
+    ...sanitizeSubroutineTargets(action),
     ...(scoreRecoveryQuote
       ? { corpScoreRecoveryQuote: scoreRecoveryQuote }
       : {}),
@@ -3677,6 +3674,40 @@ function sanitizeLegalAction(action: LegalAction): LegalAction {
     expiresAtStateVersion: action.expiresAtStateVersion,
     ...(payload ? { payload } : {}),
   };
+}
+
+function sanitizeSubroutineTargets(
+  action: LegalAction,
+): EncounterActionTargets {
+  const targets: EncounterActionTargets = {};
+  for (const key of [
+    "encounterSubroutineIds",
+    "encounterRemainingSubroutineIds",
+  ] as const) {
+    const ids = action[key];
+    if (ids === undefined) continue;
+    if (
+      !Array.isArray(ids) ||
+      [...ids].some((id) => typeof id !== "string" || id.length === 0)
+    )
+      throw new Error("Invalid Engine encounter subroutine references.");
+    targets[key] = ids.slice();
+  }
+  for (const key of [
+    "subroutineIndexes",
+    "payOrEndRunSubroutineIndexes",
+    "payOrTrashProgramSubroutineIndexes",
+  ] as const) {
+    const indexes = action[key];
+    if (indexes === undefined) continue;
+    if (
+      !Array.isArray(indexes) ||
+      [...indexes].some((index) => !Number.isSafeInteger(index) || index < 0)
+    )
+      throw new Error("Invalid Engine subroutine indexes.");
+    targets[key] = indexes.slice();
+  }
+  return targets;
 }
 
 function sanitizeCost(cost: Cost): Cost {

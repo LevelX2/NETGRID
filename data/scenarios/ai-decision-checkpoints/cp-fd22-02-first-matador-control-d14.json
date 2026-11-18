@@ -3544,7 +3544,7 @@
         "id": "hq"
       },
       "selectedStepKind": "probe_central",
-      "selectedActionId": "runner.start_run.hq",
+      "selectedActionId": "rs.hq",
       "selectedActionType": "start_run",
       "blockedBy": [],
       "actionDemands": [
@@ -3647,7 +3647,7 @@
         "plan_action_allocation_entries:0",
         "plan_action_allocation_unallocated:2",
         "plan_action_allocation_credit_remainder:7",
-        "plan_portfolio_selected_action:runner.continue_run.0"
+        "plan_portfolio_selected_action:r5.0"
       ]
     },
     "strategicIntent": {

@@ -26,7 +26,7 @@ it("keeps both remaining credits after the exact free score instead of erasing t
     agendaPoints: 1,
   });
   expect(
-    input.legalActions.some((a) => a.actionId === "corp.gain_credit"),
+    input.legalActions.some((a) => a.actionId === "cb"),
   ).toBe(true);
   const score = input.legalActions.find((a) => a.type === "score_agenda")!;
   expect(score.costs).toEqual([]);
@@ -128,7 +128,7 @@ it.each([
     ...corpBasicCreditsDominatedByCurrentScore(input, candidates, [project]),
   ]).toEqual(
     ["bounded", "recovery_only", "advance_only"].includes(variant)
-      ? ["corp.gain_credit"]
+      ? ["cb"]
       : [],
   );
 });

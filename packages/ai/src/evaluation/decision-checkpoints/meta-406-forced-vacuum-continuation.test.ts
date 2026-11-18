@@ -52,7 +52,7 @@ it.each(["rez", "pass"])(
       after.input,
     ) as unknown as AiDecisionInputWithDeckCapabilities;
     const choice = chooseAiAction(next);
-    expect(choice.actionId).toBe("runner.resolve_choice");
+    expect(choice.actionId).toBe("rn");
     expect(choice.selectedChoices).toMatchObject({
       choiceId: next.playerView.pendingChoice!.choiceId,
     });

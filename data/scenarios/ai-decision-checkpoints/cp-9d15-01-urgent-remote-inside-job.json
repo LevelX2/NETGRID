@@ -4214,7 +4214,7 @@
         "id": "r1"
       },
       "selectedStepKind": "draw_for_answer",
-      "selectedActionId": "runner.play_event.c1w9.c1w9",
+      "selectedActionId": "rh.c1w9.c1w9",
       "blockedBy": [
         "missing_breaker_coverage",
         "search_target_not_available"
@@ -4266,7 +4266,7 @@
         },
         "updatedAtStateVersion": 38,
         "evidence": [
-          "plan_portfolio_source_plan:runner.contest_remote:r1",
+          "plan_portfolio_source_pdl5beuqtdrahr4fqagyng1zk5",
           "plan_portfolio_execution_class:bounded_sequence",
           "plan_portfolio_role:foreground",
           "plan_portfolio_lifecycle:active"
@@ -4280,7 +4280,7 @@
         "plan_portfolio_foreground:runner.contest_remote",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.play_event.c1w9.c1w9"
+        "plan_portfolio_selected_action:rh.c1w9.c1w9"
       ]
     },
     "strategicIntent": {
@@ -5399,7 +5399,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.play_event.c1w2.r1.c1w2.390"
+        "actionId": "rh.c1w2.r1.c1w2.390"
       }
     ],
     "runTargets": [
@@ -5408,7 +5408,7 @@
           "run_action_projection_bypass_first_ice:true"
         ],
         "targetServerId": "r1",
-        "actionId": "runner.play_event.c1w2.r1.c1w2.390",
+        "actionId": "rh.c1w2.r1.c1w2.390",
         "recommendation": "run_now",
         "pathPassability": "reachable"
       }

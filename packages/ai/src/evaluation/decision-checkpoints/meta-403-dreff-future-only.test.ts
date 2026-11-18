@@ -47,7 +47,7 @@ it("SP-287 binds decline instead of consuming a future-only HQ ICE after success
   });
   const decision = chooseAiAction(input);
   expect(decision).toMatchObject({
-    actionId: "corp.resolve_choice",
+    actionId: "cn",
     fallbackUsed: false,
     selectedChoices: {
       choiceId: choice.choiceId,
@@ -55,9 +55,9 @@ it("SP-287 binds decline instead of consuming a future-only HQ ICE after success
     },
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+        rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
         leafExecutorInstanceId:
-          "plan:corp.defend_servers:server-defense-portfolio",
+          "penw02zfrkklof54c2nuye5att",
       },
     },
   });
@@ -118,9 +118,9 @@ it.each<{ definitionId: number; types: SubroutineType[]; useIce: boolean }>([
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           leafExecutorInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
         },
       },
     });

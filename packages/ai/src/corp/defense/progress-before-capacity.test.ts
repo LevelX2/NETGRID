@@ -20,7 +20,7 @@ const load = () =>
     ),
   );
 const gate =
-  "corp.install_card.c2xb.hq.c2xb.1";
+  "cc.c2xb.hq.c2xb.1";
 function choose(
   f: ReturnType<typeof load>,
   order: "original" | "reverse" | "gate_first" = "original",
@@ -66,7 +66,7 @@ describe("Native defensive progress before zero-tax capacity release", () => {
         executionState: "executor",
       });
       expect(d.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-        "plan:corp.defend_servers:server-defense-portfolio",
+        "penw02zfrkklof54c2nuye5att",
       );
       expect(input.playerView.stateVersion).toBe(83);
       expect(input.legalActions.some((a) => a.actionId === d.actionId)).toBe(

@@ -3739,7 +3739,7 @@
         "label": "Panzer Run"
       },
       "selectedStepKind": "install_development_card",
-      "selectedActionId": "runner.play_event.cab.cab",
+      "selectedActionId": "rh.cab.cab",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -3803,7 +3803,7 @@
         "plan_portfolio_foreground:runner.opportunistic_central_run",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.play_event.cab.cab"
+        "plan_portfolio_selected_action:rh.cab.cab"
       ]
     },
     "strategicIntent": {
@@ -4869,12 +4869,12 @@
     ],
     "runTargets": [
       {
-        "actionId": "runner.start_run.hq",
+        "actionId": "rs.hq",
         "pathPassability": "reachable",
         "recommendation": "run_now"
       },
       {
-        "actionId": "runner.start_run.rd",
+        "actionId": "rs.rd",
         "pathPassability": "reachable",
         "recommendation": "run_now"
       }

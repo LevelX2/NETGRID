@@ -42,7 +42,7 @@ describe("runner install main actions", () => {
         runnerCardDefinition(cardId, "program", "Test Program", 2),
       ),
     ).toMatchObject({
-      actionId: "runner.install_card.runner_program_test.runner_program_test",
+      actionId: "rc.runner_program_test.runner_program_test",
       side: "runner",
       type: "install_card",
       label: "Test Program installieren",
@@ -85,7 +85,7 @@ describe("runner install main actions", () => {
         runnerCardDefinition(cardId, "hardware", "Test Hardware", 3),
       ),
     ).toMatchObject({
-      actionId: "runner.install_card.runner_hardware_test.runner_hardware_test",
+      actionId: "rc.runner_hardware_test.runner_hardware_test",
       side: "runner",
       type: "install_card",
       label: "Test Hardware installieren",
@@ -111,7 +111,7 @@ describe("runner install main actions", () => {
         runnerCardDefinition(cardId, "resource", "Test Resource", 1),
       ),
     ).toMatchObject({
-      actionId: "runner.install_card.runner_resource_test.runner_resource_test",
+      actionId: "rc.runner_resource_test.runner_resource_test",
       side: "runner",
       type: "install_card",
       label: "Test Resource installieren",

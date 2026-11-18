@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -109,13 +110,13 @@ describe("plan-first Corp ambush preplanning contract", () => {
       ),
     ).toBe(false);
     expect(portfolio?.rootForegroundInstanceId).not.toBe(
-      "plan:corp.ambush_and_bluff:ambush%3Afetal-ai",
+      "p9nfdowy6hsws4i18318bwy4m2",
     );
     expect(
       portfolio?.instances.find(
         (instance) =>
           instance.instanceId ===
-          "plan:corp.score_agenda:agenda%3Afetal-ai%3Anew_remote",
+          "p5303hosjbkv04sci8pl08mf26",
       ),
     ).toMatchObject({
       moduleId: "corp.score_agenda",
@@ -161,11 +162,11 @@ describe("plan-first Corp ambush preplanning contract", () => {
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_assessment_evidence:corp_ambush_preplanned_exact_install:62:new_remote:assigned_domain_plan",
-        "plan_first_executor:plan:corp.ambush_and_bluff:ambush%3Afetal-ai%3Asetup%3Anew_remote",
+        `plan_first_executor:${planInstanceIdForProposal({ moduleId: "corp.ambush_and_bluff", dedupeKey: "ambush:fetal-ai:setup:new_remote" })}`,
       ]),
     );
     expect(residentPlanPortfolioSnapshot(input)?.rootForegroundInstanceId).toBe(
-      "plan:corp.ambush_and_bluff:ambush%3Afetal-ai",
+      "p9nfdowy6hsws4i18318bwy4m2",
     );
   });
 
@@ -222,7 +223,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
       portfolio?.instances.find(
         (instance) =>
           instance.instanceId ===
-          "plan:corp.score_agenda:agenda%3Afetal-ai%3Anew_remote",
+          "p5303hosjbkv04sci8pl08mf26",
       ),
     ).toMatchObject({
       moduleId: "corp.score_agenda",
@@ -331,19 +332,19 @@ describe("plan-first Corp ambush preplanning contract", () => {
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_assessment_evidence:corp_ambush_preplanned_exact_install:62:new_remote:assigned_domain_plan",
-        "plan_first_executor:plan:corp.ambush_and_bluff:ambush%3Afetal-ai%3Asetup%3Anew_remote",
+        `plan_first_executor:${planInstanceIdForProposal({ moduleId: "corp.ambush_and_bluff", dedupeKey: "ambush:fetal-ai:setup:new_remote" })}`,
       ]),
     );
 
     const portfolio = residentPlanPortfolioSnapshot(input);
     expect(portfolio?.rootForegroundInstanceId).toBe(
-      "plan:corp.ambush_and_bluff:ambush%3Afetal-ai",
+      "p9nfdowy6hsws4i18318bwy4m2",
     );
     expect(
       portfolio?.instances.some(
         (instance) =>
           instance.instanceId ===
-          "plan:corp.score_agenda:agenda%3Afetal-ai%3Ar1",
+          "pb9ymwmx93vxr8ol9tp2l0jfxm",
       ),
     ).toBe(true);
   });
@@ -605,7 +606,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     expect(portfolio?.transitions).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          instanceId: "plan:corp.ambush_and_bluff:ambush%3Avacant-soulkiller",
+          instanceId: "pepll3z56vr7jpwjh7qempjvwz",
           reason: "target_disappeared",
           detailCode: "proposal_missing_target_contract",
         }),
@@ -698,7 +699,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     });
 
     const mandatoryDraw = legalAction(
-      "corp.mandatory_draw",
+      "ce",
       "corp",
       "mandatory_draw",
       "Pflichtkarte ziehen",
@@ -758,7 +759,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
       reasonCode: "plan_first.corp.ambush_and_bluff",
     });
     const rootInstanceId =
-      "plan:corp.ambush_and_bluff:ambush%3Avacant-soulkiller";
+      "pepll3z56vr7jpwjh7qempjvwz";
     expect(residentPlanPortfolioSnapshot(input)?.rootForegroundInstanceId).toBe(
       rootInstanceId,
     );

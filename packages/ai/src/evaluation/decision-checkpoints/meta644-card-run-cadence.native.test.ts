@@ -137,8 +137,8 @@ it("keeps central-pressure ownership for the native affordable known-agenda run"
     timeoutUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:runner.pressure_central:central%3Ard",
-        leafExecutorInstanceId: "plan:runner.pressure_central:central%3Ard",
+        rootPlanInstanceId: "pa90fufw9vc5bkshp96ztlryxl",
+        leafExecutorInstanceId: "pa90fufw9vc5bkshp96ztlryxl",
         route: { actionId: action!.actionId, stateVersion: 47 },
       },
     },

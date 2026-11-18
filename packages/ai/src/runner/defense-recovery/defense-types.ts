@@ -31,7 +31,7 @@ export type RunnerDefenseSignals = {
   persistentHazardCounterRemovalAvailable: boolean;
   persistentHazardCounterFundingNeed?: {
     needId: "runner-defense-persistent-hazard-counter-funding";
-    parentPlanInstanceId: "plan:runner.defense_and_recovery:runner";
+    parentPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33";
     counterType: string;
     observedAmount: number;
     targetCredits: number;
@@ -70,7 +70,7 @@ export type RunnerDefenseSignals = {
   };
   tagClearFundingNeed?: {
     needId: "runner-defense-tag-clear-funding";
-    parentPlanInstanceId: "plan:runner.defense_and_recovery:runner";
+    parentPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33";
     targetCredits: number;
     currentCreditsAtRevalidation: number;
     gap: number;
@@ -87,7 +87,7 @@ export type RunnerDefenseSignals = {
   };
   reactionReserveNeed?: {
     needId: "runner-defense-reaction-reserve";
-    parentPlanInstanceId: "plan:runner.defense_and_recovery:runner";
+    parentPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33";
     targetCredits: number;
     currentCreditsAtRevalidation: number;
     gap: number;

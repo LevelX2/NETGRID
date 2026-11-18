@@ -33,7 +33,7 @@ function facts(
   const target = evaluateRunnerRunTargets({
     input,
     deckCapabilities: input.ownDeckCapabilities!,
-  }).find((entry) => entry.actionId === "runner.start_run.r1")!;
+  }).find((entry) => entry.actionId === "rs.r1")!;
   const bankAction = input.legalActions.find(
     (action) => action.payload?.cardImplementationTakesHostedCredits === true,
   );
@@ -98,7 +98,7 @@ it("certifies the composite route without installed tag prevention and exposes t
     bank.actionId,
   );
   expect(quote).toMatchObject({
-    parentPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+    parentPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
     needId: "run-support:remote:r1",
     routeActionIds: [bank.actionId],
     routeAssessment: {
@@ -148,7 +148,7 @@ it.each([
     input.playerView.own.gripOrHq = input.playerView.own.gripOrHq.filter(
       (card) => card.definitionId !== 380,
     );
-  if (variant === "wrong_run") target.actionId = "runner.start_run.hq";
+  if (variant === "wrong_run") target.actionId = "rs.hq";
   if (variant === "central_consumer") target.accessTargetKind = "hq";
   if (variant === "stale_bank")
     input.legalActions.find((entry) => entry.actionId === bank.actionId)!

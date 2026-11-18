@@ -35,7 +35,7 @@ function params() {
   const economy = buildRunnerEconomyPosture({ input });
   const targets = evaluateRunnerRunTargets({ input });
   const target = targets.find(
-    (entry) => entry.actionId === "runner.start_run.r1",
+    (entry) => entry.actionId === "rs.r1",
   )!;
   const admission = assessRunnerRunFundingAdmission({
     input,
@@ -77,8 +77,8 @@ it("quotes the complete funded payoff before rejecting an unfunded negative-scor
   const route = creditBankFundsKnownUrgentRun(p);
   expect(JSON.stringify(p)).toBe(before);
   expect(route?.runFunding).toMatchObject({
-    parentPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-    runActionId: "runner.start_run.r1",
+    parentPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+    runActionId: "rs.r1",
     stateVersion: p.input.playerView.stateVersion,
     routeAssessment: {
       status: "covered_guaranteed",

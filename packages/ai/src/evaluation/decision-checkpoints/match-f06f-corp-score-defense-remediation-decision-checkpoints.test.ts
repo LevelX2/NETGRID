@@ -98,7 +98,7 @@ describe("match f06f Corp score and defense remediation checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.cfx.rd.cfx.4",
+              "cc.cfx.rd.cfx.4",
           },
         ],
         planExecution: {

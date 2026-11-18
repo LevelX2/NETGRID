@@ -40,7 +40,7 @@ it("finishes the equally valuable installed agenda through the cheaper complete 
   expect(p.selectionAuthority).toBe("turn_plan_commitment");
   expect(p.selectedPlan!.moduleId).toBe("corp.score_agenda");
   expect(p.rootPlanInstanceId).toBe(
-    "plan:corp.score_agenda:agenda%3Acel%3Ar1",
+    "p7yxlodiop6lk6q584gbpqwldp",
   );
   expect(p.leafExecutorInstanceId).toBe(p.rootPlanInstanceId);
   expect(p.selectedStep!.stepId).toContain(":advance_agenda");

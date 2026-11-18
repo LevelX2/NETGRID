@@ -4469,7 +4469,7 @@
       "stateVersion": 30,
       "instances": [
         {
-          "instanceId": "plan:corp.ambush_and_bluff:ambush%3Ace5",
+          "instanceId": "p7ddawq2xlnb1zuss13wpdodl6",
           "dedupeKey": "ambush:ce5",
           "moduleId": "corp.ambush_and_bluff",
           "moduleVersion": "1",
@@ -4560,7 +4560,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.complete_turn:standard-turn-completion",
+          "instanceId": "p6yjycy2qsqgb3jl5pov75ajtq",
           "dedupeKey": "standard-turn-completion",
           "moduleId": "corp.complete_turn",
           "moduleVersion": "1",
@@ -4589,7 +4589,7 @@
           "moduleState": {
             "kind": "turn_completion",
             "standardEndTurnActionIds": [
-              "corp.end_turn"
+              "c9"
             ]
           },
           "blockers": [],
@@ -4622,7 +4622,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ace5%3Anew_remote",
+          "instanceId": "pbb2zrbk6mdxuh717p2tkx6ies",
           "dedupeKey": "agenda:ce5:new_remote",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -4656,7 +4656,7 @@
               "agendaPoints": 2,
               "agendaInstanceId": "ce5",
               "actionIds": [
-                "corp.install_card.ce5.new_remote.ce5"
+                "cc.ce5.new_remote.ce5"
               ],
               "serverId": "new_remote",
               "phase": "install_agenda",
@@ -4678,7 +4678,7 @@
                 "scoreReserve": {
                   "creditBreakdown": [
                     {
-                      "reserveId": "score_action:corp.install_card.ce5.new_remote.ce5",
+                      "reserveId": "score_action:cc.ce5.new_remote.ce5",
                       "credits": 0
                     },
                     {
@@ -4698,7 +4698,7 @@
                   "availableCorpClicks": 1,
                   "totalScoreReserveCredits": 4,
                   "hardClickReserve": 0,
-                  "scoreReserveFingerprint": "clicks:0|119:score_action:corp.install_card.ce5.new_remote.ce5=0|55:post_score_floor:ce5=0|60:remaining_advancement:ce5=4",
+                  "scoreReserveFingerprint": "clicks:0|119:score_action:cc.ce5.new_remote.ce5=0|55:post_score_floor:ce5=0|60:remaining_advancement:ce5=4",
                   "protection": {
                     "knowledge": "known",
                     "runnerAccessSuccessProbability": {
@@ -4800,7 +4800,7 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac2l9%3Anew_remote",
+          "instanceId": "p1g8mf456bgl5ssubkg48dm8qd",
           "dedupeKey": "agenda:c2l9:new_remote",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
@@ -4834,7 +4834,7 @@
               "agendaPoints": 2,
               "agendaInstanceId": "c2l9",
               "actionIds": [
-                "corp.install_card.c2l9.new_remote.c2l9"
+                "cc.c2l9.new_remote.c2l9"
               ],
               "serverId": "new_remote",
               "phase": "install_agenda",
@@ -4856,7 +4856,7 @@
                 "scoreReserve": {
                   "creditBreakdown": [
                     {
-                      "reserveId": "score_action:corp.install_card.c2l9.new_remote.c2l9",
+                      "reserveId": "score_action:cc.c2l9.new_remote.c2l9",
                       "credits": 0
                     },
                     {
@@ -4876,7 +4876,7 @@
                   "availableCorpClicks": 1,
                   "totalScoreReserveCredits": 5,
                   "hardClickReserve": 0,
-                  "scoreReserveFingerprint": "clicks:0|131:score_action:corp.install_card.c2l9.new_remote.c2l9=0|61:post_score_floor:c2l9=0|66:remaining_advancement:c2l9=5",
+                  "scoreReserveFingerprint": "clicks:0|131:score_action:cc.c2l9.new_remote.c2l9=0|61:post_score_floor:c2l9=0|66:remaining_advancement:c2l9=5",
                   "protection": {
                     "knowledge": "known",
                     "runnerAccessSuccessProbability": {
@@ -4981,37 +4981,37 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:corp.ambush_and_bluff:ambush%3Ace5",
+          "instanceId": "p7ddawq2xlnb1zuss13wpdodl6",
           "stateVersion": 30,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:corp.complete_turn:standard-turn-completion",
+          "instanceId": "p6yjycy2qsqgb3jl5pov75ajtq",
           "stateVersion": 30,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.economy:economy-liquidity-development%3Acorp%3A4",
+          "instanceId": "p9qz4hq43k0rmev8kywad78xg0",
           "stateVersion": 30,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ace5%3Anew_remote",
+          "instanceId": "pbb2zrbk6mdxuh717p2tkx6ies",
           "stateVersion": 30,
           "reason": "retained",
           "detailCode": "within_stale_ttl"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Ac2l9%3Anew_remote",
+          "instanceId": "p1g8mf456bgl5ssubkg48dm8qd",
           "stateVersion": 30,
           "reason": "retained",
           "detailCode": "within_stale_ttl"
         },
         {
-          "instanceId": "plan:corp.complete_turn:standard-turn-completion",
+          "instanceId": "p6yjycy2qsqgb3jl5pov75ajtq",
           "stateVersion": 30,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
@@ -5022,11 +5022,11 @@
       "campaigns": [
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:agenda:ce5:new_remote",
+          "campaignId": "k75vlvqzfiir5bchyn7vmwv2at",
           "kind": "agenda",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.score_agenda:agenda%3Ace5%3Anew_remote",
+            "rootPlanInstanceId": "pbb2zrbk6mdxuh717p2tkx6ies",
             "moduleId": "corp.score_agenda",
             "targetCardInstanceId": "ce5"
           },
@@ -5054,15 +5054,19 @@
             "corp-opponent-campaign-continuity-v1",
             "corp_last_click_score_install_deferred:new_remote",
             "corp_score_protection_required:new_remote"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.score_agenda",
+            "objectiveKey": "agenda:ce5:new_remote"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:agenda:c2l9:new_remote",
+          "campaignId": "k5ymadek76d11039rv16ve9xe2",
           "kind": "agenda",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.score_agenda:agenda%3Ac2l9%3Anew_remote",
+            "rootPlanInstanceId": "p1g8mf456bgl5ssubkg48dm8qd",
             "moduleId": "corp.score_agenda",
             "targetCardInstanceId": "c2l9"
           },
@@ -5090,12 +5094,16 @@
             "corp-opponent-campaign-continuity-v1",
             "corp_last_click_score_install_deferred:new_remote",
             "corp_score_protection_required:new_remote"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.score_agenda",
+            "objectiveKey": "agenda:c2l9:new_remote"
+          }
         }
       ],
       "turnPlanCommitment": {
         "schemaVersion": "turn-plan-commitment-v2",
-        "sequenceRootPlanInstanceId": "plan:corp.complete_turn:standard-turn-completion",
+        "sequenceRootPlanInstanceId": "p6yjycy2qsqgb3jl5pov75ajtq",
         "commitmentId": "fnv1a:589b6681",
         "sourcePlanId": "fnv1a:fd098f1e",
         "sourceLineHash": "fnv1a:f8d4bcc6",
@@ -5115,7 +5123,7 @@
           {
             "phaseId": "fnv1a:1af15312",
             "root": {
-              "planInstanceId": "plan:corp.complete_turn:standard-turn-completion",
+              "planInstanceId": "p6yjycy2qsqgb3jl5pov75ajtq",
               "moduleId": "corp.complete_turn",
               "milestoneId": "complete_turn_after_productive_routes_exhausted",
               "provenance": "resident"
@@ -5202,7 +5210,7 @@
           "sideSafePlanningFingerprint": "fnv1a:1c09afa5"
         },
         "currentBinding": {
-          "actionId": "corp.end_turn",
+          "actionId": "c9",
           "stateVersion": 30,
           "semanticActionSetFingerprint": "fnv1a:b84a54da",
           "invocationKey": "fnv1a:28dd7dfe"
@@ -5210,8 +5218,8 @@
         "actionType": "end_turn",
         "expectationId": "fnv1a:f19d09e6"
       },
-      "rootForegroundInstanceId": "plan:corp.complete_turn:standard-turn-completion",
-      "executorInstanceId": "plan:corp.complete_turn:standard-turn-completion"
+      "rootForegroundInstanceId": "p6yjycy2qsqgb3jl5pov75ajtq",
+      "executorInstanceId": "p6yjycy2qsqgb3jl5pov75ajtq"
     }
   },
   "expectation": {

@@ -402,7 +402,7 @@
               }
             },
             {
-              "instanceId": "h1lj538k",
+              "instanceId": "hhq.i1",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -3982,7 +3982,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.trigger_ability.c10h.c10h.227",
+          "actionId": "rx.c10h.c10h.227",
           "side": "runner",
           "type": "trigger_ability",
           "label": "Disgruntled Ice Technician: ICE derezzen und Run beenden",
@@ -4010,7 +4010,7 @@
           }
         },
         {
-          "actionId": "runner.jack_out",
+          "actionId": "rd",
           "side": "runner",
           "type": "jack_out",
           "label": "Jack-out",
@@ -4022,7 +4022,7 @@
           "expiresAtStateVersion": 113
         },
         {
-          "actionId": "runner.continue_run",
+          "actionId": "r5",
           "side": "runner",
           "type": "continue_run",
           "label": "Run fortsetzen",
@@ -6270,7 +6270,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "runner.trigger_ability.c10h.c10h.227",
+        "actionId": "rx.c10h.c10h.227",
         "side": "runner",
         "type": "trigger_ability",
         "label": "Disgruntled Ice Technician: ICE derezzen und Run beenden",
@@ -6298,7 +6298,7 @@
         }
       },
       {
-        "actionId": "runner.jack_out",
+        "actionId": "rd",
         "side": "runner",
         "type": "jack_out",
         "label": "Jack-out",
@@ -6310,7 +6310,7 @@
         "expiresAtStateVersion": 113
       },
       {
-        "actionId": "runner.continue_run",
+        "actionId": "r5",
         "side": "runner",
         "type": "continue_run",
         "label": "Run fortsetzen",
@@ -6364,14 +6364,14 @@
     },
     "planningStateIdentity": {
       "stateVersion": 113,
-      "sideSafePlanningFingerprint": "fnv1a:506be510"
+      "sideSafePlanningFingerprint": "fnv1a:663d6ded"
     },
     "observedTurnPlanAction": {
       "matchId": "match_a7b9e2cfc344eb6e",
       "side": "runner",
       "stateVersionBefore": 112,
       "stateVersionAfter": 113,
-      "actionId": "runner.continue_run",
+      "actionId": "r5",
       "actionType": "continue_run",
       "source": "game_rule",
       "boundChoices": []
@@ -12259,7 +12259,7 @@
       "stateVersion": 113,
       "instances": [
         {
-          "instanceId": "plan:runner.convert_run_window:run%3A111",
+          "instanceId": "p9o35stfp1b2evq8h4u1jv7k99",
           "dedupeKey": "run:111",
           "moduleId": "runner.convert_run_window",
           "moduleVersion": "1",
@@ -12282,7 +12282,7 @@
             "kind": "window",
             "id": "run:111"
           },
-          "parentInstanceId": "plan:runner.pressure_central:central%3Ard",
+          "parentInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
           "openNeedIds": [],
           "phase": "execute",
           "milestone": "admitted",
@@ -12291,8 +12291,8 @@
             "signal": {
               "windowId": "run:111",
               "serverId": "rd",
-              "rootPlanInstanceId": "plan:runner.pressure_central:central%3Ard",
-              "leafPlanInstanceId": "plan:runner.convert_run_window:run%3A111",
+              "rootPlanInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
+              "leafPlanInstanceId": "p9o35stfp1b2evq8h4u1jv7k99",
               "semanticActionTypes": [
                 "card_ability.trigger",
                 "run.jack_out",
@@ -12397,7 +12397,7 @@
                 ]
               },
               "actionAssessments": {
-                "runner.trigger_ability.c10h.c10h.164:post_pass_derez_fully_broken_ice_end_run": {
+                "rx.c10h.c10h.164:post_pass_derez_fully_broken_ice_end_run": {
                   "admissible": true,
                   "value": 180,
                   "binding": "current_window",
@@ -12409,7 +12409,7 @@
                     "runner_run_target:rd"
                   ]
                 },
-                "runner.jack_out": {
+                "rd": {
                   "admissible": true,
                   "binding": "current_window",
                   "evidenceCodes": [
@@ -12419,7 +12419,7 @@
                     "runner_full_path_commitment_preserved"
                   ]
                 },
-                "runner.continue_run": {
+                "r5": {
                   "admissible": true,
                   "binding": "current_window",
                   "evidenceCodes": [
@@ -12469,7 +12469,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.credit_bank:c1a9",
+          "instanceId": "pblmzwh8iufw7v9nl43sav7gef",
           "dedupeKey": "c1a9",
           "moduleId": "runner.credit_bank",
           "moduleVersion": "1",
@@ -12564,7 +12564,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.economy:runner-portfolio-credit-reserve",
+          "instanceId": "pc7ebuiw5dxhlbzbf1nhcs4p4z",
           "dedupeKey": "runner-portfolio-credit-reserve",
           "moduleId": "runner.economy",
           "moduleVersion": "1",
@@ -12667,7 +12667,7 @@
           ]
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ard",
+          "instanceId": "pa90fufw9vc5bkshp96ztlryxl",
           "dedupeKey": "central:rd",
           "moduleId": "runner.pressure_central",
           "moduleVersion": "1",
@@ -12709,19 +12709,19 @@
               "marginalValue": 430,
               "evidenceCode": "target:rd",
               "runActionIds": [
-                "runner.play_event.c10h.rd.c10h.226",
-                "runner.play_event.c14p.rd.c14p.246",
-                "runner.start_run.rd"
+                "rh.c10h.rd.c10h.226",
+                "rh.c14p.rd.c14p.246",
+                "rs.rd"
               ],
               "runActionValues": {
-                "runner.play_event.c10h.rd.c10h.164:on_play_run_with_post_pass_derez_fully_broken_ice": 0,
-                "runner.play_event.c14p.rd.c14p.183:on_play_run_with_advertisement_bad_publicity": 0,
-                "runner.start_run.rd": 0,
-                "runner.play_event.c10a.rd.c10a.163:on_play_run_replace_access_trash_rezzed_fort_ice_add_tags": -315
+                "rh.c10h.rd.c10h.164:on_play_run_with_post_pass_derez_fully_broken_ice": 0,
+                "rh.c14p.rd.c14p.183:on_play_run_with_advertisement_bad_publicity": 0,
+                "rs.rd": 0,
+                "rh.c10a.rd.c10a.163:on_play_run_replace_access_trash_rezzed_fort_ice_add_tags": -315
               },
               "runActionDifferentialPayoffIds": [],
               "runActionEvidence": {
-                "runner.play_event.c10h.rd.c10h.164:on_play_run_with_post_pass_derez_fully_broken_ice": [
+                "rh.c10h.rd.c10h.164:on_play_run_with_post_pass_derez_fully_broken_ice": [
                   "run_route_raw_score:430",
                   "run_route_opportunity_cost:0",
                   "run_route_effective_score:430",
@@ -12738,7 +12738,7 @@
                   "consumable_run_raw_route_score:430",
                   "consumable_run_effective_route_score:430"
                 ],
-                "runner.play_event.c14p.rd.c14p.183:on_play_run_with_advertisement_bad_publicity": [
+                "rh.c14p.rd.c14p.183:on_play_run_with_advertisement_bad_publicity": [
                   "run_route_raw_score:430",
                   "run_route_opportunity_cost:0",
                   "run_route_effective_score:430",
@@ -12755,13 +12755,13 @@
                   "consumable_run_raw_route_score:430",
                   "consumable_run_effective_route_score:430"
                 ],
-                "runner.start_run.rd": [
+                "rs.rd": [
                   "run_route_raw_score:430",
                   "run_route_opportunity_cost:0",
                   "run_route_effective_score:430",
                   "run_route_relative_value:0"
                 ],
-                "runner.play_event.c10a.rd.c10a.163:on_play_run_replace_access_trash_rezzed_fort_ice_add_tags": [
+                "rh.c10a.rd.c10a.163:on_play_run_replace_access_trash_rezzed_fort_ice_add_tags": [
                   "run_route_raw_score:120",
                   "run_route_opportunity_cost:5",
                   "run_route_effective_score:115",
@@ -12780,29 +12780,29 @@
                 ]
               },
               "runActionRouteDiagnostics": {
-                "runner.play_event.c10h.rd.c10h.164:on_play_run_with_post_pass_derez_fully_broken_ice": {
+                "rh.c10h.rd.c10h.164:on_play_run_with_post_pass_derez_fully_broken_ice": {
                   "rawRouteScore": 430,
                   "opportunityCost": 0,
                   "effectiveRouteScore": 430
                 },
-                "runner.play_event.c14p.rd.c14p.183:on_play_run_with_advertisement_bad_publicity": {
+                "rh.c14p.rd.c14p.183:on_play_run_with_advertisement_bad_publicity": {
                   "rawRouteScore": 430,
                   "opportunityCost": 0,
                   "effectiveRouteScore": 430
                 },
-                "runner.start_run.rd": {
+                "rs.rd": {
                   "rawRouteScore": 430,
                   "opportunityCost": 0,
                   "effectiveRouteScore": 430
                 },
-                "runner.play_event.c10a.rd.c10a.163:on_play_run_replace_access_trash_rezzed_fort_ice_add_tags": {
+                "rh.c10a.rd.c10a.163:on_play_run_replace_access_trash_rezzed_fort_ice_add_tags": {
                   "rawRouteScore": 120,
                   "opportunityCost": 5,
                   "effectiveRouteScore": 115
                 }
               },
               "runActionExclusions": {
-                "runner.play_event.c14p.rd.c14p.183:on_play_run_with_advertisement_bad_publicity": [
+                "rh.c14p.rd.c14p.183:on_play_run_with_advertisement_bad_publicity": [
                   "run_route_excluded:path:reachable",
                   "run_route_excluded:recommendation:run_now",
                   "run_route_excluded:score:430",
@@ -12833,7 +12833,7 @@
                   "visible_trace_end_run_lock_unavoidable:false",
                   "recommendation:run_now"
                 ],
-                "runner.play_event.c10a.rd.c10a.163:on_play_run_replace_access_trash_rezzed_fort_ice_add_tags": [
+                "rh.c10a.rd.c10a.163:on_play_run_replace_access_trash_rezzed_fort_ice_add_tags": [
                   "run_route_excluded:path:reachable",
                   "run_route_excluded:recommendation:gain_credits_first",
                   "run_route_excluded:score:115",
@@ -12977,25 +12977,25 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:runner.convert_run_window:run%3A111",
+          "instanceId": "p9o35stfp1b2evq8h4u1jv7k99",
           "stateVersion": 113,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.credit_bank:c1a9",
+          "instanceId": "pblmzwh8iufw7v9nl43sav7gef",
           "stateVersion": 113,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.economy:runner-portfolio-credit-reserve",
+          "instanceId": "pc7ebuiw5dxhlbzbf1nhcs4p4z",
           "stateVersion": 113,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ard",
+          "instanceId": "pa90fufw9vc5bkshp96ztlryxl",
           "stateVersion": 113,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
@@ -13006,7 +13006,7 @@
         "commitmentId": "fnv1a:9bafe0ff",
         "sourcePlanId": "fnv1a:01c5c523",
         "sourceLineHash": "fnv1a:473c2914",
-        "sequenceRootPlanInstanceId": "plan:runner.pressure_central:central%3Ard",
+        "sequenceRootPlanInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
         "side": "runner",
         "turnKey": "runner:turn:15",
         "planningRulesFingerprint": "fnv1a:ce3968ab",
@@ -13023,7 +13023,7 @@
           {
             "phaseId": "fnv1a:90696b6b",
             "root": {
-              "planInstanceId": "plan:runner.pressure_central:central%3Ard",
+              "planInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
               "moduleId": "runner.convert_run_window",
               "milestoneId": "convert_active_run_window",
               "provenance": "resident"
@@ -13119,7 +13119,7 @@
           "sideSafePlanningFingerprint": "fnv1a:f9598fef"
         },
         "currentBinding": {
-          "actionId": "runner.trigger_ability.c10h.c10h.227",
+          "actionId": "rx.c10h.c10h.227",
           "stateVersion": 113,
           "semanticActionSetFingerprint": "fnv1a:39fa3eee",
           "invocationKey": "fnv1a:057771a5"
@@ -13127,8 +13127,8 @@
         "actionType": "trigger_ability",
         "expectationId": "fnv1a:dca11942"
       },
-      "rootForegroundInstanceId": "plan:runner.pressure_central:central%3Ard",
-      "executorInstanceId": "plan:runner.convert_run_window:run%3A111"
+      "rootForegroundInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
+      "executorInstanceId": "p9o35stfp1b2evq8h4u1jv7k99"
     }
   },
   "decisionLocalEngineQuotes": {

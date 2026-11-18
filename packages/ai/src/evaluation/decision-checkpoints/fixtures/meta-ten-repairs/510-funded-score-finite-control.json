@@ -2,31 +2,31 @@
   "rows": [
     {
       "side": "corp",
-      "actionId": "corp.advance_card.c2km.c2km",
+      "actionId": "c2.c2km.c2km",
       "beforeHash": "fnv1a:d29630c5",
       "afterHash": "fnv1a:8932a960"
     },
     {
       "side": "corp",
-      "actionId": "corp.advance_card.c2km.c2km",
+      "actionId": "c2.c2km.c2km",
       "beforeHash": "fnv1a:8932a960",
       "afterHash": "fnv1a:61952e88"
     },
     {
       "side": "corp",
-      "actionId": "corp.advance_card.c2km.c2km",
+      "actionId": "c2.c2km.c2km",
       "beforeHash": "fnv1a:61952e88",
       "afterHash": "fnv1a:be8e60b0"
     },
     {
       "side": "corp",
-      "actionId": "corp.score_agenda.c2km.c2km",
+      "actionId": "cr.c2km.c2km",
       "beforeHash": "fnv1a:be8e60b0",
       "afterHash": "fnv1a:0a9dc93e"
     },
     {
       "side": "corp",
-      "actionId": "corp.resolve_choice",
+      "actionId": "cn",
       "selectedChoices": {
         "choiceId": "choice_card_implementation_select_rezzed_ice_mark_modifier_337",
         "selectedOptionIds": [
@@ -38,7 +38,7 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.end_turn",
+      "actionId": "c9",
       "beforeHash": "fnv1a:1ccb33fb",
       "afterHash": "fnv1a:1aae3742"
     }

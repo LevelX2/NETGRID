@@ -7825,7 +7825,7 @@
         "label": "Elena Laskova"
       },
       "selectedStepKind": "install_development_card",
-      "selectedActionId": "runner.install_card.cay.cay",
+      "selectedActionId": "rc.cay.cay",
       "blockedBy": [],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
@@ -7853,7 +7853,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:none",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.end_turn"
+        "plan_portfolio_selected_action:r9"
       ]
     },
     "strategicIntent": {
@@ -8973,12 +8973,12 @@
   "expectation": {
     "forbiddenActions": [
       {
-        "actionId": "runner.install_card.cbd.cbd"
+        "actionId": "rc.cbd.cbd"
       }
     ],
     "acceptableActions": [
       {
-        "actionId": "runner.start_run.hq"
+        "actionId": "rs.hq"
       }
     ]
   }

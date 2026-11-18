@@ -173,7 +173,7 @@ describe("native mandatory variable ICE rez", () => {
       const decision = chooseAiAction(input),
         portfolio = residentPlanPortfolioSnapshot(input)!;
       expect(decision.fallbackUsed).toBe(false);
-      expect(decision.actionId).toBe("corp.resolve_choice");
+      expect(decision.actionId).toBe("cn");
       expect(
         decision.decisionDebug!.planFirstDecision!.selectedPlan?.moduleId,
       ).toBe("corp.defend_servers");

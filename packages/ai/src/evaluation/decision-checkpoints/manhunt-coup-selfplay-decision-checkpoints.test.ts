@@ -56,7 +56,7 @@ describe("Manhunt vs. Coup exact selfplay decision checkpoints", () => {
   it("does not expose Corporate War and may instead stage its bound defense", () => {
     const checkpoint = fixture(deckoutCloseoutJson);
     checkpoint.expectation = {
-      acceptableActions: [{ actionId: "corp.gain_credit" }],
+      acceptableActions: [{ actionId: "cb" }],
       forbiddenActions: [
         { type: "install_card", sourceDefinitionId: CORPORATE_WAR },
       ],
@@ -71,7 +71,7 @@ describe("Manhunt vs. Coup exact selfplay decision checkpoints", () => {
     expect(
       result.decision?.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
     ).toBe(
-      "plan:corp.score_agenda:agenda%3Ac2iu%3Ar1",
+      "pcp5j0i0bjrmyiqa675g0xvi8i",
     );
   });
 
@@ -79,7 +79,7 @@ describe("Manhunt vs. Coup exact selfplay decision checkpoints", () => {
     const relaxedClock = mutateFixture(deckoutCloseoutJson, (checkpoint) => {
       moveArchivesCardsToRd(checkpoint, 6);
       checkpoint.expectation = {
-        acceptableActions: [{ actionId: "corp.gain_credit" }],
+        acceptableActions: [{ actionId: "cb" }],
         forbiddenActions: [
           { type: "install_card", sourceDefinitionId: CORPORATE_WAR },
         ],

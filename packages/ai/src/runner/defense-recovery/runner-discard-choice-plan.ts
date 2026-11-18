@@ -176,7 +176,7 @@ function missingRunnerDiscardCoverage(
       ? [actionId]
       : input.legalActions.map((action) => action.actionId),
     owner: "plan_module",
-    planInstanceId: "plan:runner.defense_and_recovery:runner",
+    planInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
     removalCondition,
   });
 }
