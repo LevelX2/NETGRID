@@ -10518,7 +10518,7 @@
         "id": "hq"
       },
       "selectedStepKind": "run_target",
-      "selectedActionId": "runner.draw_card",
+      "selectedActionId": "r8",
       "blockedBy": [
         "missing_breaker_coverage"
       ],
@@ -10589,7 +10589,7 @@
         "plan_portfolio_foreground:none",
         "plan_portfolio_backgrounds:runner.build_credit_bank",
         "plan_portfolio_rejected:0",
-        "plan_portfolio_selected_action:runner.end_turn"
+        "plan_portfolio_selected_action:r9"
       ]
     },
     "strategicIntent": {
@@ -11606,7 +11606,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.play_event.c1u9.c1u9.382"
+        "actionId": "rh.c1u9.c1u9.382"
       }
     ],
     "planExecution": {
@@ -11617,7 +11617,7 @@
         "contest_remote"
       ],
       "requiredAssessmentEvidence": [
-        "runner_targeted_ice_trash_preflight:r1:h32qnf"
+        "runner_targeted_ice_trash_preflight:r1:hr1.i2"
       ]
     }
   }

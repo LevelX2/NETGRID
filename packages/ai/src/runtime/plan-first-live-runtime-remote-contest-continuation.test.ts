@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   sanitizeAiDecisionDebug,
   type LegalActionPayload,
+  type LegalAction,
   type VisibleCard,
 } from "@netgrid/shared";
 
@@ -217,7 +218,7 @@ describe("plan-first Remote contest continuation", () => {
       reasonCode: "plan_first.runner.contest_remote",
     });
     expect(root).toMatchObject({
-      instanceId: "plan:runner.contest_remote:remote%3Ar1",
+      instanceId: "p1p4xezjcxov79rno40lq3f7rv",
       moduleState: { signal: { purpose: "information" } },
     });
 
@@ -243,12 +244,7 @@ describe("plan-first Remote contest continuation", () => {
       "End-the-run-Subroutine auslösen",
       { credits: 0, clicks: 0 },
       {
-        payload: {
-          encounterContinue: true,
-          encounterWillEndRun: true,
-          unbrokenSubroutineCount: 1,
-          encounterSubroutineIds: "terminal-information-end-run",
-        },
+        payload: {encounterContinue: true, encounterWillEndRun: true, unbrokenSubroutineCount: 1}, encounterSubroutineIds: ["terminal-information-end-run"],
       },
     );
     const encounterInput = aiInput("runner", [breakWall, fireEndRun]);
@@ -499,7 +495,7 @@ describe("plan-first Remote contest continuation", () => {
       residentPlanPortfolioSnapshot(input)?.instances.some(
         (instance) =>
           instance.instanceId ===
-          "plan:runner.economy:run-support%3Aremote%3Ar1",
+          "p8dvcw6jj6cbaz1qxlt9ksvoh5",
       ),
     ).toBe(false);
     expect(
@@ -646,7 +642,7 @@ describe("plan-first Remote contest continuation", () => {
       parentNeedId: "coverage:breaker_code_gate:run:run-rd-after-puzzle",
     });
     expect(centralParent).toMatchObject({
-      instanceId: "plan:runner.pressure_central:central%3Ard",
+      instanceId: "pa90fufw9vc5bkshp96ztlryxl",
       moduleState: {
         signal: {
           supportNeedId: "coverage:breaker_code_gate:run:run-rd-after-puzzle",
@@ -747,9 +743,8 @@ describe("plan-first Remote contest continuation", () => {
         encounterContinue: true,
         encounterWillEndRun: false,
         unbrokenSubroutineCount: 2,
-        encounterSubroutineIds:
-          "neural-blade-net-damage,neural-blade-break-prohibition",
       },
+      ["neural-blade-net-damage", "neural-blade-break-prohibition"],
     );
     const encounterInput = aiInput("runner", [pump, fireSubroutines]);
     encounterInput.playerView.stateVersion = 113;
@@ -1026,12 +1021,7 @@ describe("plan-first Remote contest continuation", () => {
       "Subroutine auslösen (Run endet)",
       { credits: 0, clicks: 0 },
       {
-        payload: {
-          encounterContinue: true,
-          encounterWillEndRun: true,
-          unbrokenSubroutineCount: 1,
-          encounterSubroutineIds: "known-filter-end-the-run",
-        },
+        payload: {encounterContinue: true, encounterWillEndRun: true, unbrokenSubroutineCount: 1}, encounterSubroutineIds: ["known-filter-end-the-run"],
       },
     );
     const encounterInput = aiInput("runner", [breakFilter, resolveFilter]);
@@ -1238,15 +1228,7 @@ describe("plan-first Remote contest continuation", () => {
       "Subroutine auslösen (Runner zahlt 1 Credit)",
       { credits: 1, clicks: 0 },
       {
-        payload: {
-          encounterContinue: true,
-          sourceDefinitionId: 96,
-          unbrokenSubroutineCount: 1,
-          encounterWillEndRun: false,
-          encounterSubroutineIds: "match-f5f54fac-snowbank-pay-or-end-run",
-          payOrEndRunSubroutineIndexes: "0",
-          payOrEndRunSubroutinePayment: 1,
-        },
+        payload: {encounterContinue: true, sourceDefinitionId: 96, unbrokenSubroutineCount: 1, encounterWillEndRun: false, payOrEndRunSubroutinePayment: 1}, encounterSubroutineIds: ["match-f5f54fac-snowbank-pay-or-end-run"], payOrEndRunSubroutineIndexes: [0],
       },
     );
     const letSnowbankEndRun = legalAction(
@@ -1256,13 +1238,7 @@ describe("plan-first Remote contest continuation", () => {
       "Subroutine auslösen (Run endet)",
       { credits: 0, clicks: 0 },
       {
-        payload: {
-          encounterContinue: true,
-          sourceDefinitionId: 96,
-          unbrokenSubroutineCount: 1,
-          encounterWillEndRun: true,
-          encounterSubroutineIds: "match-f5f54fac-snowbank-pay-or-end-run",
-        },
+        payload: {encounterContinue: true, sourceDefinitionId: 96, unbrokenSubroutineCount: 1, encounterWillEndRun: true}, encounterSubroutineIds: ["match-f5f54fac-snowbank-pay-or-end-run"],
       },
     );
     const runId = startInput.playerView.stateVersion + 1;
@@ -1821,6 +1797,7 @@ function encounterAction(
   type: "pump_breaker" | "continue_run",
   credits: number,
   payload: LegalActionPayload,
+  encounterSubroutineIds?: LegalAction["encounterSubroutineIds"],
 ) {
   const action = legalAction(
     actionId,
@@ -1831,6 +1808,7 @@ function encounterAction(
     {
       source: type === "continue_run" ? "game_rule" : "loony-goon",
       payload,
+      ...(encounterSubroutineIds ? { encounterSubroutineIds } : {}),
     },
   );
   action.timingPoint = "run.encounter_ice";

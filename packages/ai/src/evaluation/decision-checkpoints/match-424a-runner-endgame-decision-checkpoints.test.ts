@@ -94,7 +94,7 @@ describe("match 424A runner endgame decision checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
 
     const hq = evaluateRunnerRunTargets({ input: result.input }).find(
-      (target) => target.actionId === "runner.start_run.hq",
+      (target) => target.actionId === "rs.hq",
     );
     expect(hq).toMatchObject({
       pathPassability: "blocked_unpayable",
@@ -155,7 +155,7 @@ describe("match 424A runner endgame decision checkpoints", () => {
           acceptablePlanKinds: ["runner.contest_remote"],
           acceptableCapabilities: ["contest_remote"],
           requiredAssessmentEvidence: [
-            "runner_targeted_ice_trash_preflight:r1:h32qnf",
+            "runner_targeted_ice_trash_preflight:r1:hr1.i2",
           ],
         },
       };
@@ -164,7 +164,7 @@ describe("match 424A runner endgame decision checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
 
     const hq = evaluateRunnerRunTargets({ input: result.input }).find(
-      (target) => target.actionId === "runner.start_run.hq",
+      (target) => target.actionId === "rs.hq",
     );
     expect(hq).toMatchObject({
       pathPassability: "blocked_missing_coverage",
@@ -180,7 +180,7 @@ describe("match 424A runner endgame decision checkpoints", () => {
     });
     const result = runAiDecisionCheckpoint(funded);
     const hq = evaluateRunnerRunTargets({ input: result.input }).find(
-      (target) => target.actionId === "runner.start_run.hq",
+      (target) => target.actionId === "rs.hq",
     );
     expect(hq).toMatchObject({
       pathPassability: "reachable",

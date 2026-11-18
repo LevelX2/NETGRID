@@ -62,17 +62,18 @@ describe("SP-286 prospective payment setup for the exact run", () => {
       expect(action.expiresAtStateVersion).toBe(input.playerView.stateVersion);
       expect(result.fallbackUsed).toBe(false);
       expect(result.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-        "plan:runner.contest_remote:remote%3Ar1",
+        "p1p4xezjcxov79rno40lq3f7rv",
       );
-      expect(
-        result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-      ).toContain(executor);
+      const execution = result.decisionDebug!.planFirstDecision!;
+      expect(execution.selectedPlan).toMatchObject({
+        instanceId: execution.leafExecutorInstanceId, moduleId: executor,
+      });
       if (index === 1)
         expect(action.source).toBe(
           "c16h",
         );
       if (index === 2)
-        expect(action.actionId).toBe("runner.start_run.r1");
+        expect(action.actionId).toBe("rs.r1");
     },
   );
 
@@ -119,7 +120,7 @@ describe("SP-286 prospective payment setup for the exact run", () => {
       searchFundingRoutes({
         demand: createRunnerCreditDemand({
           demandId: "bound-run",
-          sourcePlanId: "plan:runner.contest_remote:remote%3Ar1",
+          sourcePlanId: "p1p4xezjcxov79rno40lq3f7rv",
           purpose,
           priority: "acute_hard_plan_blocker",
           hardness: "hard",

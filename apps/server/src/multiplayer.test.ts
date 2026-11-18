@@ -8950,6 +8950,20 @@ describe("MVP 0.2 multiplayer service", () => {
       accessMatch.service,
       accessMatch.matchId,
       accessMatch.runner,
+      (action) => action.type === "continue_run",
+      "v150-family-access-movement",
+    );
+    await submit(
+      accessMatch.service,
+      accessMatch.matchId,
+      accessMatch.corp,
+      (action) => action.type === "decline_rez",
+      "v150-family-access-rez-pass",
+    );
+    await submit(
+      accessMatch.service,
+      accessMatch.matchId,
+      accessMatch.runner,
       (action) =>
         action.type === "access_card" || action.type === "steal_agenda",
       "v150-family-access-access",
@@ -11976,6 +11990,8 @@ describe("MVP 0.2 multiplayer service", () => {
       gameState,
       298,
     );
+    // This case certifies the legal continuation after a known liquidity event.
+    moveRunnerCardToGripForTest(gameState, 595);
     expect(
       getLegalActions(gameState, "runner").some(
         (action) =>
