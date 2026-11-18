@@ -67,7 +67,8 @@ mit genau diesem Präfix. Neue Ereignisse führen es fort; Ergebnisstatistik und
 KI-Traceturns müssen frühere Ereignisblobs nicht erneut laden. Gesamte und
 bereits geladene History-Zähler sind getrennt an die Delta-Baseline gebunden.
 Undo, Replay und explizite vollständige Loads behalten den vollständigen Verlauf.
-Ein Full Save eines begrenzten Records wird abgelehnt.
+Ein Full Save eines begrenzten Records wird abgelehnt. Die Speicherübersicht
+zählt den Chronikkontext in `history_json` zur Nutzlast der Ereignistabelle.
 
 Die PlayerView-Projektion kann ihre öffentliche Historie an der Quelle auslassen.
 Der Live-Server verwendet diese Projektion und setzt nur sein seitensicheres

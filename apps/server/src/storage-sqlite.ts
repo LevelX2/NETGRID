@@ -3441,7 +3441,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       .prepare(
         `WITH
           event_sizes AS (
-            SELECT match_id, COUNT(*) AS event_count, COALESCE(SUM(OCTET_LENGTH(public_payload_json)), 0) AS event_payload_bytes
+            SELECT match_id, COUNT(*) AS event_count, COALESCE(SUM(OCTET_LENGTH(public_payload_json) + OCTET_LENGTH(history_json)), 0) AS event_payload_bytes
             FROM events
             GROUP BY match_id
           ),
@@ -3723,7 +3723,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         key: "events",
         label: "Events",
         table: "events",
-        expression: "COALESCE(SUM(OCTET_LENGTH(public_payload_json)), 0)",
+        expression: "COALESCE(SUM(OCTET_LENGTH(public_payload_json) + OCTET_LENGTH(history_json)), 0)",
       },
       {
         key: "engine_events",
