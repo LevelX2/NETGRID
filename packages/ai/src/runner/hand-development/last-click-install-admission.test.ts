@@ -1,4 +1,4 @@
-import { referencesDefaultDeckCard } from "../../evaluation/decision-checkpoints/compact-card-reference.test-support";
+import type { AiDecisionInput } from "@netgrid/shared";
 import { readFileSync } from "node:fs";
 import { expect, it } from "vitest";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
@@ -24,16 +24,21 @@ it.each([
   "negative_hand",
   "unknown_hand",
 ])("does not admit a last-click install with %s", (variant) => {
-  const input = structuredClone(cp.input);
-  const action = input.legalActions.find(
-    (a: { actionId: string }) =>
-      a.actionId.includes("install_card") &&
-      referencesDefaultDeckCard(a.actionId, 341),
+  const input: AiDecisionInput = structuredClone(cp.input);
+  const source = input.playerView.own.gripOrHq.find(
+    (card) => card.definitionId === 341,
   );
+  expect(source).toBeDefined();
+  const offers = input.legalActions.filter(
+    (action) =>
+      action.type === "install_card" && action.source === source!.instanceId,
+  );
+  expect(offers).toHaveLength(1);
+  const action = offers[0]!;
   const candidate = buildActionSemanticCandidates({
     legalActions: [action],
     observerSide: "runner",
-    stateVersion: 52,
+    stateVersion: input.playerView.stateVersion,
   })[0]!;
   const evaluation = {
     persistentInstallEvaluation: {

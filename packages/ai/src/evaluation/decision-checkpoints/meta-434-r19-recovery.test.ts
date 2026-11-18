@@ -1,7 +1,10 @@
 import { readFileSync } from "node:fs";
 import { expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
-import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
+import {
+  resetResidentPlanPortfolioMemory,
+  residentPlanPortfolioSnapshot,
+} from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
   restoreAiRuntimeCheckpoint,
@@ -36,7 +39,7 @@ it.each([5, 7])(
     const result = chooseAiAction(input);
     expect(result.actionId).not.toBe(recovery.actionId);
     if (maxHandSize === 7) {
-      expect(result.actionId).toBe("runner.draw_card");
+      expect(result.actionId).toBe("r8");
       expect(result.decisionDebug?.planFirstDecision?.portfolio).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
@@ -54,12 +57,15 @@ it.each([5, 7])(
       actionId: result.actionId,
       stateVersion: input.playerView.stateVersion,
     });
-    expect(
-      result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-    ).toContain(
-      maxHandSize === 7
-        ? "plan:runner.develop_board_and_hand:"
-        : "plan:runner.economy:",
+    const executor = residentPlanPortfolioSnapshot(input)!.instances.find(
+      (instance) =>
+        instance.instanceId ===
+        result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
     );
+    expect(executor).toMatchObject({
+      moduleId:
+        maxHandSize === 7 ? "runner.develop_board_and_hand" : "runner.economy",
+      executionState: "executor",
+    });
   },
 );

@@ -4,13 +4,14 @@ import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import {
   resetResidentPlanPortfolioMemory,
+  residentPlanPortfolioSnapshot,
   restoreResidentPlanPortfolioMemorySnapshot,
 } from "../../plans/resident-plan-portfolio-memory";
 import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 
 afterEach(resetResidentPlanPortfolioMemory);
 const actionId =
-  "corp.advance_card.c1a.c1a";
+  "c2.c1a.c1a";
 
 function checkpoint() {
   const cp = JSON.parse(
@@ -61,6 +62,15 @@ it.each([false, true])(
     expect(decision.actionId).toBe(actionId);
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planKind).toBe("corp.score_agenda");
+    const executor = residentPlanPortfolioSnapshot(input)!.instances.find(
+      (instance) =>
+        instance.instanceId ===
+        decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    );
+    expect(executor).toMatchObject({
+      moduleId: "corp.score_agenda",
+      executionState: "executor",
+    });
     const alternatives = decision.decisionDebug?.actionAlternatives ?? [];
     expect(alternatives).toHaveLength(32);
     expect(alternatives.filter((alternative) => alternative.selected)).toEqual([
@@ -69,7 +79,7 @@ it.each([false, true])(
         selected: true,
         actionType: "advance_card",
         whyChosen: expect.arrayContaining([
-          expect.stringContaining("selected_by_plan:plan:corp.score_agenda:"),
+          `selected_by_plan:${executor!.instanceId}`,
           "selected_for_step:advance_score_agenda",
         ]),
       }),
