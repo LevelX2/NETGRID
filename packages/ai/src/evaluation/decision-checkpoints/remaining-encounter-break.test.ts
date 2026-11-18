@@ -29,8 +29,8 @@ it("SP-346 pays the last open ETR without rebudgeting a previously broken subrou
     fallbackUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar2",
-        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A395",
+        rootPlanInstanceId: "p1p4x83h7yolw2hjtvi0ud06dm",
+        leafExecutorInstanceId: "p88qtxmq6zxcw4rwvkgmwcfggn",
         route: { actionId: action.actionId },
       },
     },
@@ -40,14 +40,14 @@ it("SP-346 pays the last open ETR without rebudgeting a previously broken subrou
 it("rejects a missing authoritative remainder instead of counting printed subroutines", () => {
   const input = fixture();
   const continuation = input.legalActions.find((action) => action.type === "continue_run")!;
-  delete continuation.payload!.encounterSubroutineIds;
+  delete continuation.encounterSubroutineIds;
   expect(() => chooseAiAction(input)).toThrow();
 });
 
 it("does not pretend a genuinely open second ETR was already broken", () => {
   const input = fixture();
   const continuation = input.legalActions.find((action) => action.type === "continue_run")!;
-  continuation.payload!.encounterSubroutineIds = "0,1";
+  continuation.encounterSubroutineIds = ["0", "1"];
   continuation.payload!.unbrokenSubroutineCount = 2;
   const otherBreak = structuredClone(input.legalActions.find((action) => action.type === "break_subroutine")!);
   otherBreak.actionId = otherBreak.actionId.replace(".1.1.", ".0.0.");

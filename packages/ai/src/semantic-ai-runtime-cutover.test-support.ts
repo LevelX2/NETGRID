@@ -300,6 +300,11 @@ export function legalAction(
     source?: LegalAction["source"];
     payload?: LegalAction["payload"];
     visibility?: LegalAction["visibility"];
+    subroutineIndexes?: LegalAction["subroutineIndexes"];
+    payOrEndRunSubroutineIndexes?: LegalAction["payOrEndRunSubroutineIndexes"];
+    payOrTrashProgramSubroutineIndexes?: LegalAction["payOrTrashProgramSubroutineIndexes"];
+    encounterSubroutineIds?: LegalAction["encounterSubroutineIds"];
+    encounterRemainingSubroutineIds?: LegalAction["encounterRemainingSubroutineIds"];
   } = {},
 ): LegalAction {
   const source =
@@ -339,6 +344,11 @@ export function legalAction(
       : {}),
   };
   if (options.payload) action.payload = options.payload;
+  if (options.subroutineIndexes) action.subroutineIndexes = options.subroutineIndexes;
+  if (options.payOrEndRunSubroutineIndexes) action.payOrEndRunSubroutineIndexes = options.payOrEndRunSubroutineIndexes;
+  if (options.payOrTrashProgramSubroutineIndexes) action.payOrTrashProgramSubroutineIndexes = options.payOrTrashProgramSubroutineIndexes;
+  if (options.encounterSubroutineIds) action.encounterSubroutineIds = options.encounterSubroutineIds;
+  if (options.encounterRemainingSubroutineIds) action.encounterRemainingSubroutineIds = options.encounterRemainingSubroutineIds;
   return action;
 }
 

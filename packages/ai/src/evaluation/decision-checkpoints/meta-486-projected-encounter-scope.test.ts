@@ -42,7 +42,7 @@ it("SP-459 consumes the real next-encounter lock at Canis before the deeper Keep
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
     expect.objectContaining({
-      actionId: "runner.start_run.hq",
+      actionId: "rs.hq",
       whyNot: expect.arrayContaining([
         "runner_central_information_probe_known_path_not_admitted:hq",
       ]),
@@ -103,8 +103,8 @@ it("SP-460 binds remainder demand to the actual still-open Engine subroutine IDs
   const decision = chooseAiAction(input);
   expect(input.legalActions.some((a) => a.actionId === decision.actionId)).toBe(true);
   expect(decision).toMatchObject({ fallbackUsed: false, decisionDebug: { planFirstDecision: {
-    rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-    leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A257",
+    rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+    leafExecutorInstanceId: "p8xsra75q57j4g52ue8hdzpsby",
   } } });
 });
 
@@ -118,14 +118,14 @@ it("does not require remainder bindings when the quoted ICE has no remainder eff
 
 it("retains a still-open damage effect rather than treating it as already paid", () => {
   const input = fixture(windowCheckpoint), action = input.legalActions.find((a) => a.type === "continue_run")!;
-  action.payload!.encounterSubroutineIds = "0," + lockId;
+  action.encounterSubroutineIds = ["0", lockId];
   action.payload!.unbrokenSubroutineCount = 2;
   expect(encounterRunRemainderEffectAssessment(input).evidence).toContain("run_remainder_effect_subroutines:0,1");
 });
 
 it("rejects a missing Engine remaining-subroutine binding with the existing structured failure", () => {
   const input = fixture(windowCheckpoint), action = input.legalActions.find((a) => a.type === "continue_run")!;
-  delete action.payload!.encounterSubroutineIds;
+  delete action.encounterSubroutineIds;
   expect(() => encounterRunRemainderEffectAssessment(input)).toThrowError(
     expect.objectContaining({ code: "missing_action_semantics", context: expect.objectContaining({ owner: "rules_contract" }) }),
   );

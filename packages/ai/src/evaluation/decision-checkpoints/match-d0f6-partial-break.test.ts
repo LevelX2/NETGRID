@@ -120,8 +120,8 @@ describe("match d0f6 partial-break mitigation", () => {
     if (condition === "full_break")
       continueAction.payload!.encounterFullBreakDamage = 2;
     if (condition === "already_broken") {
-      continueAction.payload!.encounterSubroutineIds =
-        ice.effectiveRunQuote!.subroutines.at(-1)!.id;
+      continueAction.encounterSubroutineIds =
+        [ice.effectiveRunQuote!.subroutines.at(-1)!.id];
       continueAction.payload!.unbrokenSubroutineCount = 1;
     }
     if (condition === "zero_damage")
@@ -226,10 +226,10 @@ describe("match d0f6 partial-break mitigation", () => {
     const action = input.legalActions.find(
       (a) => a.payload?.encounterContinue === true,
     )!;
-    const ids = action.payload!.encounterSubroutineIds;
-    if (typeof ids !== "string")
+    const ids = action.encounterSubroutineIds;
+    if (!Array.isArray(ids))
       throw new Error("Capture is missing exact remaining subroutine IDs.");
-    delete action.payload!.encounterSubroutineIds;
+    delete action.encounterSubroutineIds;
     const assess = () =>
       currentEncounterMitigationForBreaker(
         input,
@@ -238,7 +238,7 @@ describe("match d0f6 partial-break mitigation", () => {
         () => true,
       );
     expect(assess).toThrow("missing_action_semantics");
-    action.payload!.encounterSubroutineIds = ids;
+    action.encounterSubroutineIds = ids;
     delete ice.effectiveRunQuote!.subroutines.find(
       (s) => s.type === "do_damage",
     )!.amount;

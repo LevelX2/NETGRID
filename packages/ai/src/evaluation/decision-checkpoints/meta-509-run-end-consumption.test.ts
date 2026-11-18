@@ -82,7 +82,7 @@ afterEach(resetResidentPlanPortfolioMemory);
 it("retains the native unused universal source at equal complete current path cost", () => {
   const d = decide("g8d112");
   expect(d.actionId).toBe(
-    "runner.pump_breaker.c6y.c6y.c6y.c2tq.41",
+    "rj.c6y.c6y.c6y.c2tq.41",
   );
   const selected = economics(d.input, d.actionId);
   const rent = economics(d.input, load("g8d112-before").decision.actionId);
@@ -101,7 +101,7 @@ it("retains the native unused universal source at equal complete current path co
 it("uses exact offered Pay-or-ETR payment instead of a same-cost newly consumed source", () => {
   const d = decide("g13d22");
   expect(d.actionId).toBe(
-    "runner.continue_run.0.0.1",
+    "r5.0.0.1",
   );
   expect(economics(d.input, d.actionId)).toMatchObject({
     totalCost: 1,
@@ -243,18 +243,18 @@ it("requires exact offered open continuation payment and rejects an unknown inne
   const action = input.legalActions.find(
     (a: { actionId: string }) =>
       a.actionId ===
-      "runner.continue_run.0.0.1",
+      "r5.0.0.1",
   )!;
-  for (const payload of [
-    { ...action.payload, encounterWillEndRun: true },
-    { ...action.payload, payOrEndRunSubroutinePayment: 2 },
-    { ...action.payload, payOrEndRunSubroutineIndexes: "1" },
-    { ...action.payload, payOrEndRunSubroutineIndexes: "0,x" },
+  for (const altered of [
+    { ...action, payload: { ...action.payload, encounterWillEndRun: true } },
+    { ...action, payload: { ...action.payload, payOrEndRunSubroutinePayment: 2 } },
+    { ...action, payOrEndRunSubroutineIndexes: [1] },
   ]) {
-    expect(
-      pureEndRunEncounterPayment(input, { ...action, payload }),
-    ).toBeUndefined();
+    expect(pureEndRunEncounterPayment(input, altered)).toBeUndefined();
   }
+  expect(() => pureEndRunEncounterPayment(input, {
+    ...action, payOrEndRunSubroutineIndexes: [0, NaN],
+  })).toThrow("Invalid Engine subroutine indexes.");
   const state = load("g8d112-engine") as GameState;
   state.cardInstances["clj"]!.rezzed = false;
   state.cardInstances["clj"]!.faceup = false;

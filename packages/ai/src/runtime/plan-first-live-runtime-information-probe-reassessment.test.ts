@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { LegalActionPayload, VisibleCard } from "@netgrid/shared";
+import type { LegalAction, LegalActionPayload, VisibleCard } from "@netgrid/shared";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
@@ -88,8 +88,8 @@ describe("plan-first information-probe reassessment", () => {
           encounterContinue: true,
           encounterWillEndRun: true,
           unbrokenSubroutineCount: 1,
-          encounterSubroutineIds: "quandary-etr",
         },
+        ["quandary-etr"],
       );
       const input = aiInput("runner", [breakIce, endEncounter]);
       input.playerView.stateVersion = 2;
@@ -235,8 +235,8 @@ describe("plan-first information-probe reassessment", () => {
         encounterContinue: true,
         encounterWillEndRun: true,
         unbrokenSubroutineCount: 1,
-        encounterSubroutineIds: "data-wall-2-etr",
       },
+      ["data-wall-2-etr"],
     );
     const encounterInput = aiInput("runner", [pump, endEncounter]);
     encounterInput.playerView.stateVersion = 2;
@@ -360,8 +360,8 @@ describe("plan-first information-probe reassessment", () => {
         encounterContinue: true,
         encounterWillEndRun: true,
         unbrokenSubroutineCount: 1,
-        encounterSubroutineIds: "keeper-after-data-wall-etr",
       },
+      ["keeper-after-data-wall-etr"],
     );
     const secondEncounterInput = aiInput("runner", [
       secondPump,
@@ -499,8 +499,7 @@ describe("plan-first information-probe reassessment", () => {
       encounterContinue: true,
       encounterWillEndRun: true,
       unbrokenSubroutineCount: 1,
-      encounterSubroutineIds: "keeper-etr",
-    });
+    }, ["keeper-etr"]);
     const encounterInput = aiInput("runner", [pump, endEncounter]);
     encounterInput.playerView.stateVersion = 2;
     for (const action of encounterInput.legalActions) {
@@ -579,6 +578,7 @@ function encounterAction(
   type: "pump_breaker" | "break_subroutine" | "continue_run",
   credits: number,
   payload: LegalActionPayload,
+  encounterSubroutineIds?: LegalAction["encounterSubroutineIds"],
 ) {
   const action = legalAction(
     actionId,
@@ -586,7 +586,9 @@ function encounterAction(
     type,
     actionId,
     { credits, clicks: 0 },
-    { source: type === "continue_run" ? "game_rule" : "krash", payload },
+    { source: type === "continue_run" ? "game_rule" : "krash", payload,
+      ...(encounterSubroutineIds ? { encounterSubroutineIds } : {}),
+    },
   );
   action.timingPoint = "run.encounter_ice";
   action.expiresAtStateVersion = 2;

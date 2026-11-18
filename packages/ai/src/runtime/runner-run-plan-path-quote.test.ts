@@ -28,10 +28,8 @@ describe("runner run plan path quote", () => {
         }),
       ],
     });
-    Object.assign(input.legalActions[0]!.payload!, {
-      encounterSubroutineIds: "still-open",
-      unbrokenSubroutineCount: 1,
-    });
+    input.legalActions[0]!.encounterSubroutineIds = ["still-open"];
+    input.legalActions[0]!.payload!.unbrokenSubroutineCount = 1;
 
     const quote = quoteRunnerRunPath(input, runPlan());
     expect(quote.canReachAccess).toBe(true);
@@ -512,17 +510,17 @@ describe("runner run plan path quote", () => {
         breakAction({
           actionId: "pile-driver-break-damage",
           costs: [{ credits: 3 }],
-          subroutineIndexes: "0",
+          subroutineIndexes: [0],
         }),
         breakAction({
           actionId: "pile-driver-break-both",
           costs: [{ credits: 3 }],
-          subroutineIndexes: "0,1",
+          subroutineIndexes: [0,1],
         }),
         breakAction({
           actionId: "pile-driver-break-etr",
           costs: [{ credits: 3 }],
-          subroutineIndexes: "1",
+          subroutineIndexes: [1],
         }),
         continueAction({
           encounterWillEndRun: true,
@@ -990,7 +988,7 @@ function runnerEncounterInput(params: {
       expect(action.payload?.unbrokenSubroutineCount).toBe(ids.length);
       return {
         ...action,
-        payload: { ...action.payload, encounterSubroutineIds: ids.join(",") },
+        payload: {...action.payload}, encounterSubroutineIds: ids,
       };
     }),
     difficulty: "normal",
@@ -1279,19 +1277,18 @@ function breakAction(params: {
   breakerId?: string;
   costs: LegalAction["costs"];
   subroutineIndex?: number;
-  subroutineIndexes?: string;
+  subroutineIndexes?: readonly number[];
 }): LegalAction {
   const breakerId = params.breakerId ?? "codecracker-1";
   return action("break_subroutine", {
     actionId: params.actionId ?? "break-codecracker",
     source: breakerId,
     costs: params.costs,
+    ...(params.subroutineIndexes ? { subroutineIndexes: params.subroutineIndexes } : {}),
     payload: {
       breakerId,
       iceId: "ice-1",
-      ...(params.subroutineIndexes
-        ? { subroutineIndexes: params.subroutineIndexes }
-        : { subroutineIndex: params.subroutineIndex ?? 0 }),
+      ...(!params.subroutineIndexes ? { subroutineIndex: params.subroutineIndex ?? 0 } : {}),
     },
   });
 }
@@ -1318,6 +1315,7 @@ function action(
     actionId: string;
     source: LegalAction["source"];
     costs: LegalAction["costs"];
+    subroutineIndexes?: LegalAction["subroutineIndexes"];
     payload: NonNullable<LegalAction["payload"]>;
   },
 ): LegalAction {
@@ -1329,6 +1327,7 @@ function action(
     source: params.source,
     timingPoint: "run.encounter",
     costs: params.costs,
+    ...(params.subroutineIndexes ? { subroutineIndexes: params.subroutineIndexes } : {}),
     targetRequirements: [],
     visibility: "public",
     expiresAtStateVersion: 86,

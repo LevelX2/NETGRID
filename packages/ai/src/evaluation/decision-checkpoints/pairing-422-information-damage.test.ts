@@ -49,7 +49,7 @@ it("still fails closed when a real encounter omits its remaining-subroutine quot
   const continuation = input.legalActions.find(
     (a) => a.type === "continue_run",
   )!;
-  delete continuation.payload!.encounterSubroutineIds;
+  delete continuation.encounterSubroutineIds;
   expect(() =>
     runnerCurrentEncounterRequiresDamagePreservingBreak(input, undefined),
   ).toThrow("missing_action_semantics");
@@ -147,12 +147,11 @@ it.each([2, 3])(
     const continuation = input.legalActions.find(
       (a) => a.type === "continue_run",
     )!;
+    continuation.encounterSubroutineIds = ["2", "3"];
     Object.assign(continuation.payload!, {
-      encounterSubroutineIds:
-        "2,3",
       unbrokenSubroutineCount: 2,
     });
-    continuation.actionId = `runner.continue_run.${continuation.payload!.encounterSubroutineIds}`;
+    continuation.actionId = `r5.${continuation.encounterSubroutineIds}`;
     input.playerView.legalActions = structuredClone(input.legalActions);
     resetResidentPlanPortfolioMemory();
     restoreAiRuntimeCheckpoint(
@@ -195,9 +194,8 @@ it("keeps the remaining end-the-run barrier after damage subroutines are broken"
     input.playerView.run?.encounteredIce?.effectiveRunQuote;
   expect(encounterQuote).toBeDefined();
   // Resolved damage retains its positions in the full Engine quote.
+  continuation.encounterSubroutineIds = ["2", "3"];
   Object.assign(continuation.payload!, {
-    encounterSubroutineIds:
-      "2,3",
     unbrokenSubroutineCount: 2,
   });
   resetResidentPlanPortfolioMemory();

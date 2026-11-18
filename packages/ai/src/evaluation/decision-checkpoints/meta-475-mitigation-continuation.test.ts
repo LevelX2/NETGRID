@@ -107,11 +107,11 @@ describe("SP-135: the paid mitigation pump keeps its exact break purpose", () =>
       expect(action.expiresAtStateVersion).toBe(input.playerView.stateVersion);
       const plan = decision.decisionDebug!.planFirstDecision!;
       expect(plan.rootPlanInstanceId).toBe(
-        "plan:runner.contest_remote:remote%3Ar1",
+        "p1p4xezjcxov79rno40lq3f7rv",
       );
       expect(plan.selectedPlan?.moduleId).toBe("runner.convert_run_window");
       expect(plan.leafExecutorInstanceId).toBe(
-        "plan:runner.convert_run_window:run%3A348",
+        "p89fxqr6ohtx681gt369mg21g5",
       );
       expect(plan.route?.actionId).toBe(action.actionId);
       expect(plan.route?.stateVersion).toBe(input.playerView.stateVersion);
@@ -195,9 +195,9 @@ describe("SP-135: the paid mitigation pump keeps its exact break purpose", () =>
       (action) =>
         action.type === "continue_run" && action.payload?.encounterContinue,
     )!;
+    continueAction.encounterSubroutineIds = [hardStop.id, damage.id];
     continueAction.payload = {
       ...continueAction.payload,
-      encounterSubroutineIds: [hardStop.id, damage.id].join(","),
       unbrokenSubroutineCount: 2,
     };
     const breaker = input.playerView.own.rig!.find(

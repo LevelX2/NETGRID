@@ -56,8 +56,8 @@ it.each([5, 6])(
     expect(action.expiresAtStateVersion).toBe(input.playerView.stateVersion);
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A387",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      leafExecutorInstanceId: "p88p4obahzd4so5y47hmvj9wag",
       route: {
         actionId: action.actionId,
         stateVersion: input.playerView.stateVersion,
@@ -101,10 +101,10 @@ it("includes mandatory payments outside the next resolution group", () => {
   )!;
   const continuation = input.legalActions.find((a) => a.type === "continue_run")!;
   const quote = input.playerView.run!.encounteredIce!.effectiveRunQuote!;
-  continuation.payload!.encounterRemainingSubroutineIds =
-    quote.subroutines.map(({ id }) => id).join(",");
+  continuation.encounterRemainingSubroutineIds =
+    quote.subroutines.map(({ id }) => id);
   continuation.payload!.encounterRemainingSubroutineCount = quote.subroutines.length;
-  continuation.payload!.encounterSubroutineIds = quote.subroutines[0]!.id;
+  continuation.encounterSubroutineIds = [quote.subroutines[0]!.id];
   continuation.payload!.unbrokenSubroutineCount = 1;
   expect(optionalDamageBreakContinuationPayments(input, action)).toMatchObject([
     { cost: 4 },
@@ -173,7 +173,7 @@ it("still admits optional damage protection when current breaks and the bound re
   expect(action.type).toBe("break_subroutine");
   expect(action.payload?.subroutineIndex).toBe(0);
   expect(decision.evidence).toContain(
-    "plan_first_root:plan:runner.contest_remote:remote%3Ar1",
+    "plan_first_root:p1p4xezjcxov79rno40lq3f7rv",
   );
   expect(decision.fallbackUsed).toBe(false);
 });

@@ -9,8 +9,8 @@ import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-port
 import { resolvePlanBoundRunnerRunProgramSearchChoice } from "../../runner/run-window/run-window-program-search-binding";
 
 const sourceId = "c1o9";
-const root = "plan:runner.contest_remote:remote%3Ar1";
-const leaf = "plan:runner.convert_run_window:run%3A134";
+const root = "p1p4xezjcxov79rno40lq3f7rv";
+const leaf = "p9nyoe3wdsw0j74ikqi7ockkcs";
 const read = (name: string) =>
   JSON.parse(
     readFileSync(new URL(`./fixtures/${name}.json`, import.meta.url), "utf8"),
@@ -75,7 +75,7 @@ describe("native in-run program search (SP-333)", () => {
     selectSource();
     const input = nextSearchInput();
     const decision = chooseAiAction(input);
-    expect(decision.actionId).toBe("runner.resolve_choice");
+    expect(decision.actionId).toBe("rn");
     expect(decision.selectedChoices).toEqual({
       choiceId: "p3_38_search_stack_install_138",
       selectedOptionIds: ["card_c1e9"],
@@ -103,7 +103,7 @@ describe("native in-run program search (SP-333)", () => {
     expect(
       resolvePlanBoundRunnerRunProgramSearchChoice(context, undefined),
     ).toMatchObject({
-      actionId: "runner.resolve_choice",
+      actionId: "rn",
       origin: { rootPlanInstanceId: root, leafPlanInstanceId: leaf },
     });
     input.legalActions.find(
@@ -164,9 +164,9 @@ describe("native in-run program search (SP-333)", () => {
         const continuation = input.legalActions.find(
           (action) => action.type === "continue_run",
         )!;
+        continuation.encounterRemainingSubroutineIds = [endRun.id, damage.id];
         continuation.payload = {
           ...continuation.payload,
-          encounterRemainingSubroutineIds: [endRun.id, damage.id].join(","),
           encounterRemainingSubroutineCount: 2,
         };
       }

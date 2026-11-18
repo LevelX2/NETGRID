@@ -128,9 +128,9 @@ describe("runner Blink encounter break context", () => {
       const action = blinkBreakAction();
       const remaining = openDamage ? ["damage", "next-lock"] : ["next-lock"];
       const continuation = encounterContinue(laterGroup ? ["next-lock"] : remaining);
+      continuation.encounterRemainingSubroutineIds = remaining;
       continuation.payload = {
         ...continuation.payload,
-        encounterRemainingSubroutineIds: remaining.join(","),
         encounterRemainingSubroutineCount: remaining.length,
       };
       const input = aiInput("runner", [action, continuation]);
@@ -216,11 +216,7 @@ function encounterContinue(ids: string[]): LegalAction {
     "Resolve open subroutines",
     { credits: 0 },
     {
-      payload: {
-        encounterContinue: true,
-        encounterSubroutineIds: ids.join(","),
-        unbrokenSubroutineCount: ids.length,
-      },
+      payload: {encounterContinue: true, unbrokenSubroutineCount: ids.length}, encounterSubroutineIds: ids,
     },
   );
 }

@@ -26,8 +26,7 @@ describe("selfplay cycle 096 decision checkpoints", () => {
     const continuation = capture.input.legalActions.find(
       (action) => action.payload?.encounterContinue === true,
     )!;
-    continuation.payload!.encounterSubroutineIds =
-      "0,1";
+    continuation.encounterSubroutineIds = ["0", "1"];
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
     expect(deckSnapshotId).toBeDefined();
     resetResidentPlanPortfolioMemory();
@@ -44,18 +43,18 @@ describe("selfplay cycle 096 decision checkpoints", () => {
     expect(decision.decisionDebug?.planKind).toBe("runner.convert_run_window");
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       selectionAuthority: "turn_plan_commitment",
-      rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A68",
+      rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+      leafExecutorInstanceId: "p8ll66a5jc2dn8k8p49o2bebs8",
       executionOrigin: {
-        rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-        leafPlanInstanceId: "plan:runner.convert_run_window:run%3A68",
+        rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+        leafPlanInstanceId: "p8ll66a5jc2dn8k8p49o2bebs8",
       },
       selectedStep: {
-        planInstanceId: "plan:runner.convert_run_window:run%3A68",
-        parentInstanceId: "plan:runner.pressure_central:central%3Ahq",
+        planInstanceId: "p8ll66a5jc2dn8k8p49o2bebs8",
+        parentInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
       },
       route: {
-        planInstanceId: "plan:runner.convert_run_window:run%3A68",
+        planInstanceId: "p8ll66a5jc2dn8k8p49o2bebs8",
         capabilityId: "convert_active_run_window",
         actionId: selectedAction?.actionId,
         actionType: "break_subroutine",

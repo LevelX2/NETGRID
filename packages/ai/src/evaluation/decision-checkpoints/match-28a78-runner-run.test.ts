@@ -73,8 +73,8 @@ describe("match 28a78 run costs and admission", () => {
     expect(action.type).toBe("break_subroutine");
     expect(action.payload?.subroutineIndex).toBe(1);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
-      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A159",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      leafExecutorInstanceId: "p9nu0ixuj7baoh70y20mjtnp1l",
     });
   });
   it.each([85, 90])(
@@ -88,17 +88,17 @@ describe("match 28a78 run costs and admission", () => {
         status: "blocked",
         creditGap: 11,
       });
-      expect(decision.actionId).not.toBe("runner.start_run.r1");
+      expect(decision.actionId).not.toBe("rs.r1");
       const plan = decision.decisionDebug?.planFirstDecision;
       expect(plan?.route?.actionId).toBe(decision.actionId);
       if (index === 85) {
         expect(plan?.selectedPlan).toMatchObject({
           moduleId: "runner.develop_board_and_hand",
           instanceId:
-            "plan:runner.develop_board_and_hand:card%3Ac1xl",
+            "p3qysouaafvglehouuttnj25h1",
         });
         expect(plan?.executionOrigin?.rootPlanInstanceId).toBe(
-          "plan:runner.develop_board_and_hand:card%3Ac1xl",
+          "p3qysouaafvglehouuttnj25h1",
         );
       } else {
         expect(plan?.selectedPlan?.moduleId).toBe(
@@ -116,7 +116,7 @@ describe("match 28a78 run costs and admission", () => {
         (t) => t.targetServerId === "r1",
       )?.prerunReserveQuote,
     ).toMatchObject({ creditGap: 0 });
-    expect(decision.actionId).toBe("runner.start_run.r1");
+    expect(decision.actionId).toBe("rs.r1");
     expect(
       decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
     ).toBe("runner.contest_remote");
@@ -126,7 +126,7 @@ describe("match 28a78 run costs and admission", () => {
     const action = value.input.legalActions.find(
       (a) => a.type === "continue_run",
     )!;
-    delete action.payload!.encounterSubroutineIds;
+    delete action.encounterSubroutineIds;
     expect(() => replay(value)).toThrow("missing_action_semantics");
   });
   it("does not buy an unaffordable ETR after the first break", () => {
@@ -153,7 +153,7 @@ describe("match 28a78 run costs and admission", () => {
     const action = value.input.legalActions.find(
       (a) => a.type === "continue_run",
     )!;
-    action.payload!.encounterSubroutineIds = "";
+    action.encounterSubroutineIds = [];
     action.payload!.unbrokenSubroutineCount = 0;
     action.payload!.encounterWillEndRun = false;
     const root = activeRunRootPlan(

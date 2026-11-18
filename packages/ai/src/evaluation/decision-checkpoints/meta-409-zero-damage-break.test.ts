@@ -35,11 +35,10 @@ describe("meta 409 zero-damage encounter purpose", () => {
           (a) => a.type === "continue_run",
         )!;
         continuation.actionId =
-          "runner.continue_run.0";
+          "r5.0";
         continuation.payload!.encounterWillEndRun = false;
         continuation.payload!.unbrokenSubroutineCount = 1;
-        continuation.payload!.encounterSubroutineIds =
-          "0";
+        continuation.encounterSubroutineIds = ["0"];
         expected = continuation.actionId;
       }
       resetResidentPlanPortfolioMemory();
@@ -55,11 +54,11 @@ describe("meta 409 zero-damage encounter purpose", () => {
         reasonCode: "plan_first.runner.convert_run_window",
         decisionDebug: {
           planFirstDecision: {
-            rootPlanInstanceId: "plan:runner.contest_remote:remote%3Ar1",
+            rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
             leafExecutorInstanceId:
-              "plan:runner.convert_run_window:run%3A455",
+              "pd3ud8dnm4rxa0w40uezulqgby",
             selectedStep: {
-              planInstanceId: "plan:runner.convert_run_window:run%3A455",
+              planInstanceId: "pd3ud8dnm4rxa0w40uezulqgby",
             },
             route: {
               actionId: expected,

@@ -149,8 +149,8 @@ describe("pairing557 full staged pay-ETR scope (SP-664)", () => {
     );
     for (const a of after) {
       expect(a.payload?.encounterRemainingSubroutineCount).toBe(1);
-      expect(a.payload?.encounterRemainingSubroutineIds).toBe(
-        a.payload?.encounterSubroutineIds,
+      expect(a.encounterRemainingSubroutineIds).toEqual(
+        a.encounterSubroutineIds,
       );
     }
   });
@@ -172,7 +172,7 @@ describe("pairing557 full staged pay-ETR scope (SP-664)", () => {
   it("leaves a partial group explicitly unavailable as a whole-encounter quote without the Engine scope", () => {
     const f = current();
     for (const a of f.input.legalActions) {
-      delete a.payload?.encounterRemainingSubroutineIds;
+      delete a.encounterRemainingSubroutineIds;
       delete a.payload?.encounterRemainingSubroutineCount;
     }
     expect(currentEncounterCompleteSubroutineIndexes(f.input)).toBeUndefined();
@@ -190,17 +190,13 @@ describe("pairing557 full staged pay-ETR scope (SP-664)", () => {
       )) {
         if (kind === "count") a.payload.encounterRemainingSubroutineCount = 1;
         if (kind === "duplicate")
-          a.payload.encounterRemainingSubroutineIds =
-            a.payload.encounterSubroutineIds +
-            "," +
-            a.payload.encounterSubroutineIds;
+          a.encounterRemainingSubroutineIds =
+            [...a.encounterSubroutineIds, ...a.encounterSubroutineIds];
         if (kind === "unknown")
-          a.payload.encounterRemainingSubroutineIds =
-            a.payload.encounterSubroutineIds + ",foreign";
+          a.encounterRemainingSubroutineIds =
+            [...a.encounterSubroutineIds, "foreign"];
         if (kind === "omit-next") {
-          a.payload.encounterRemainingSubroutineIds = String(
-            a.payload.encounterRemainingSubroutineIds,
-          ).split(",")[1];
+          a.encounterRemainingSubroutineIds = [a.encounterRemainingSubroutineIds[1]];
           a.payload.encounterRemainingSubroutineCount = 1;
         }
         if (kind === "stale") a.expiresAtStateVersion--;

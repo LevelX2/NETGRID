@@ -42,8 +42,8 @@ it("keeps six credits instead of pumping to break a lock with no following encou
     fallbackUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3A82",
+        rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+        leafExecutorInstanceId: "p8kyw2m8259x1xx0ftk3rudzhw",
         route: {
           actionId: continuation.actionId,
           stateVersion: input.playerView.stateVersion,
@@ -92,10 +92,10 @@ it("preserves current damage when only the next-encounter lock lacks a target", 
   });
   const continuation = input.legalActions.find((a) => a.type === "continue_run")!;
   const ids = [
-    ...String(continuation.payload!.encounterSubroutineIds).split(",").filter(Boolean),
+    ...continuation.encounterSubroutineIds!,
     "current-damage-boundary",
   ];
-  continuation.payload!.encounterSubroutineIds = ids.join(",");
+  continuation.encounterSubroutineIds = ids;
   continuation.payload!.unbrokenSubroutineCount = ids.length;
   expect(encounterHasImmediateUnbrokenThreat(input)).toBe(true);
 });

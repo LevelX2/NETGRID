@@ -49,10 +49,10 @@ describe("AI input DTO score-conversion contract", () => {
     const action = conversionAction();
     action.side = "runner";
     action.type = "continue_run";
+    action.encounterSubroutineIds = ["damage", "next-lock"];
     action.payload = {
       encounterContinue: true,
       unbrokenSubroutineCount: 2,
-      encounterSubroutineIds: "damage,next-lock",
       encounterFullBreakDamage: 3,
       privateProbe: "discard",
     };
@@ -71,11 +71,7 @@ describe("AI input DTO score-conversion contract", () => {
       input.legalActions[0],
       input.playerView.legalActions[0],
     ]) {
-      expect(projected?.payload).toMatchObject({
-        encounterSubroutineIds: "damage,next-lock",
-        encounterFullBreakDamage: 3,
-        unbrokenSubroutineCount: 2,
-      });
+      expect(projected).toMatchObject({encounterSubroutineIds: ["damage","next-lock"], payload: { encounterFullBreakDamage: 3, unbrokenSubroutineCount: 2 }});
       expect(projected?.payload).not.toHaveProperty("privateProbe");
     }
   });
@@ -119,7 +115,7 @@ describe("AI input DTO score-conversion contract", () => {
 
   it("preserves the actor-private Runner draw projection without changing its action binding", () => {
     const action = conversionAction();
-    action.actionId = "runner.draw_card";
+    action.actionId = "r8";
     action.side = "runner";
     action.type = "draw_card";
     action.source = "basic_action";
@@ -156,7 +152,7 @@ describe("AI input DTO score-conversion contract", () => {
 
   it("preserves the engine-certified Runner agenda-transfer quote", () => {
     const action = conversionAction();
-    action.actionId = "runner.play_event.corruption";
+    action.actionId = "rh.corruption";
     action.side = "runner";
     action.type = "play_event";
     action.source = "corruption";
@@ -475,7 +471,7 @@ describe("AI input DTO score-conversion contract", () => {
       visibility: "public",
       continuation: {
         family: "corp_advancement_counter",
-        originActionId: "corp.play_operation.test",
+        originActionId: "ci.test",
         createdAtStateVersion: 1,
       },
     };
@@ -532,7 +528,7 @@ describe("AI input DTO score-conversion contract", () => {
       visibility: "hidden_info_barrier",
       continuation: {
         family: "runner_post_break_stealth_loss",
-        originActionId: "runner.break_subroutine.pile-driver",
+        originActionId: "r3.pile-driver",
         breakerInstanceId: "pile-driver",
         requiredLoss: 3,
         sourceMode: "any_stealth_cards",
@@ -1212,12 +1208,12 @@ describe("AI input DTO score-conversion contract", () => {
   it("preserves actor-visible encounter subroutine targets", () => {
     const action = runnerSemanticAction();
     action.type = "break_subroutine";
+    action.subroutineIndexes = [1];
     action.payload = {
       ...action.payload,
       breakerId: "runner-breaker",
       iceId: "corp-ice",
       subroutineIndex: 1,
-      subroutineIndexes: "1",
       privateEncounterProbe: "must-not-cross-dto",
     };
     const input = buildAiDecisionInputDto({
@@ -1232,18 +1228,8 @@ describe("AI input DTO score-conversion contract", () => {
       profileId: "runner-encounter-target-dto-test",
     });
 
-    expect(input.legalActions[0]?.payload).toMatchObject({
-      breakerId: "runner-breaker",
-      iceId: "corp-ice",
-      subroutineIndex: 1,
-      subroutineIndexes: "1",
-    });
-    expect(input.playerView.legalActions[0]?.payload).toMatchObject({
-      breakerId: "runner-breaker",
-      iceId: "corp-ice",
-      subroutineIndex: 1,
-      subroutineIndexes: "1",
-    });
+    expect(input.legalActions[0]).toMatchObject({subroutineIndexes: [1], payload: { breakerId: "runner-breaker", iceId: "corp-ice", subroutineIndex: 1 }});
+    expect(input.playerView.legalActions[0]).toMatchObject({subroutineIndexes: [1], payload: { breakerId: "runner-breaker", iceId: "corp-ice", subroutineIndex: 1 }});
     expect(input.legalActions[0]?.payload).not.toHaveProperty(
       "privateEncounterProbe",
     );
