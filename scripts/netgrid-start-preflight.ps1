@@ -60,6 +60,26 @@ function Get-NetgridServerBuildIdentity {
   return $null
 }
 
+function Get-NetgridCheckoutBuildIdentity {
+  param([Parameter(Mandatory = $true)][string]$ProjectRoot)
+
+  $versionPath = Join-Path $ProjectRoot 'packages/shared/src/product-version.ts'
+  try {
+    $versionSource = [IO.File]::ReadAllText($versionPath)
+    $version = [regex]::Match($versionSource, 'export const NETGRID_PRODUCT_VERSION = "([^"\r\n]+)";')
+    $number = (& git -C $ProjectRoot rev-list --count HEAD 2>$null)
+    if ($LASTEXITCODE -ne 0) { throw 'git_count_failed' }
+    $commit = (& git -C $ProjectRoot rev-parse --short=9 HEAD 2>$null)
+    if ($LASTEXITCODE -ne 0) { throw 'git_commit_failed' }
+    if (-not $version.Success -or $number -cnotmatch '^[0-9]+$' -or $commit -cnotmatch '^[0-9a-f]{9,40}$') {
+      throw 'checkout_build_invalid'
+    }
+    return "$($version.Groups[1].Value)/$number/$commit"
+  } catch {
+    throw 'Die Buildkennung des aktuellen Checkouts konnte nicht bestimmt werden (startup_checkout_build_unavailable). Prüfe Git und packages/shared/src/product-version.ts.'
+  }
+}
+
 function Get-NetgridWebStartupStatus {
   param(
     [Parameter(Mandatory = $true)][string]$ServerUrl,

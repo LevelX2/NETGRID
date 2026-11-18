@@ -709,9 +709,9 @@ export function runnerTrashedNodeLastTurn(state: GameState): boolean {
 export function runnerLastTurnInstalledResourceIds(
   state: GameState,
 ): CardInstanceId[] {
-  return (state.runnerTurnFlags?.installedResourceIdsLastTurn ?? [])
-    .filter((cardId) => state.runner.rig.resources.includes(cardId))
-    .sort();
+  return state.runner.rig.resources.filter((cardId) =>
+    state.runnerTurnFlags?.installedResourceIdsLastTurn?.includes(cardId),
+  );
 }
 
 export function resolveRunnerLastTurnInstalledResourceTargetId(

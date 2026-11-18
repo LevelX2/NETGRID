@@ -36,6 +36,35 @@ describe("standard deck catalog state", () => {
     ).toThrowError(StandardDeckCatalogPayloadError);
   });
 
+  it.each(["decks", "snapshots"] as const)(
+    "rejects textual, absent and out-of-range identity/card IDs in %s before ready",
+    async (collection) => {
+      for (const value of [
+        "587",
+        "onr_v1_001_identity",
+        undefined,
+        null,
+        0,
+        -1,
+        1.5,
+        Number.MAX_SAFE_INTEGER + 1,
+      ]) {
+        for (const field of ["identityCardId", "cardId"] as const) {
+          const payload = catalogPayload();
+          const deck = payload.catalog[collection][0]!;
+          if (field === "identityCardId")
+            Object.assign(deck, { identityCardId: value });
+          else Object.assign(deck, { cards: [{ cardId: value, quantity: 1 }] });
+          await expect(
+            requestStandardDeckCatalog(async () => payload),
+          ).rejects.toMatchObject({
+            code: "standard_deck_catalog_card_id_invalid",
+          });
+        }
+      }
+    },
+  );
+
   it("preserves a previously usable catalog when a refresh fails", () => {
     const loading = beginStandardDeckCatalogLoad(
       INITIAL_STANDARD_DECK_CATALOG_STATE,
@@ -191,6 +220,8 @@ function snapshot(side: "runner" | "corp", deckSnapshotId: string) {
   return {
     deckSnapshotId,
     side,
+    identityCardId: side === "runner" ? 587 : 3,
+    cards: [{ cardId: side === "runner" ? 595 : 518, quantity: 1 }],
     validation: { ok: true },
   } as StandardDeckCatalogPayload["catalog"]["snapshots"][number];
 }

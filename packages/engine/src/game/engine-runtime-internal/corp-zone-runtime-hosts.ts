@@ -27,7 +27,7 @@ import {
 } from "../payment";
 import { rezCard as executeRezCard } from "../rez/rez-card";
 import { buildLegalAction } from "../turn/action-builders";
-import { hiddenCardReference } from "../state/card-instance-id";
+import { hiddenVisibleCardId } from "../view/hidden-card-slot";
 
 export function createCorpZoneRuntimeHosts(
   deps: RuntimeDeps,
@@ -260,7 +260,7 @@ export function createCorpZoneRuntimeHosts(
         if (!instance.rezzed) targets.push(cardId);
       }
     }
-    return targets.sort();
+    return targets;
   }
 
   function installedCorpExposureBindings(
@@ -293,9 +293,10 @@ export function createCorpZoneRuntimeHosts(
   }
 
   function exposeInstalledCorpCardChoiceOptionId(
+    state: GameState,
     cardId: CardInstanceId,
   ): string {
-    return `card_${hiddenCardReference(cardId, "h")}`;
+    return `card_${hiddenVisibleCardId(state, cardId)}`;
   }
 
   function startExposeInstalledCorpCardReviewChoice(
@@ -501,11 +502,11 @@ export function createCorpZoneRuntimeHosts(
       rezzed: false,
       zone: { side: "corp", zone: "rd" },
     };
-    state.corp.rd = deps.shuffleStateIds(
-      state,
-      state.corp.rd,
-      [34, sourceDefinitionId, reason === "lifecycle" ? 0 : reason === "access" ? 1 : 2],
-    );
+    state.corp.rd = deps.shuffleStateIds(state, state.corp.rd, [
+      34,
+      sourceDefinitionId,
+      reason === "lifecycle" ? 0 : reason === "access" ? 1 : 2,
+    ]);
     for (const rdCardId of state.corp.rd) {
       state.cardInstances[rdCardId] = {
         ...deps.mustInstance(state.cardInstances, rdCardId),
@@ -604,7 +605,7 @@ export function createCorpZoneRuntimeHosts(
     scope: "inside_data_fort" | "any_installed" = "any_installed",
   ) {
     return exposeInstalledCorpCardTargets(state, scope).map((cardId) => ({
-      id: exposeInstalledCorpCardChoiceOptionId(cardId),
+      id: exposeInstalledCorpCardChoiceOptionId(state, cardId),
       label: exposeInstalledCorpCardLabel(state, cardId),
       value: cardId,
     }));
@@ -618,16 +619,14 @@ export function createCorpZoneRuntimeHosts(
       (candidate) => candidate.id === serverId,
     );
     if (!server) return [];
-    return [...server.root, ...server.ice]
-      .filter((cardId) =>
-        exposeInstalledCorpCardTargets(state, "any_installed").includes(cardId),
-      )
-      .sort();
+    return [...server.root, ...server.ice].filter((cardId) =>
+      exposeInstalledCorpCardTargets(state, "any_installed").includes(cardId),
+    );
   }
 
   function dataFortExposeChoiceOptions(state: GameState, serverId: string) {
     return installedCorpCardIdsInFort(state, serverId).map((cardId) => ({
-      id: exposeInstalledCorpCardChoiceOptionId(cardId),
+      id: exposeInstalledCorpCardChoiceOptionId(state, cardId),
       label: exposeInstalledCorpCardLabel(state, cardId),
       value: cardId,
     }));
@@ -657,7 +656,7 @@ export function createCorpZoneRuntimeHosts(
       throw new Error("Es ist bereits eine Choice offen.");
     const options = multiExposeInstalledCorpCardTargets(state).map(
       (cardId) => ({
-        id: exposeInstalledCorpCardChoiceOptionId(cardId),
+        id: exposeInstalledCorpCardChoiceOptionId(state, cardId),
         label: multiExposeInstalledCorpCardOptionLabel(state, cardId),
         value: cardId,
       }),

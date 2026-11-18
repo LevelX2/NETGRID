@@ -770,7 +770,10 @@ export function createStateRuntimeResolvers(
         "Die Runner-Resource ist fuer diesen Trace nicht mehr legal.",
       );
     const hiddenResource = isConcealedRunnerResource(state, targetCardId);
-    const hiddenResourceSlotId = hiddenRunnerResourceSlotId(targetCardId);
+    const hiddenResourceSlotId = hiddenRunnerResourceSlotId(
+      state,
+      targetCardId,
+    );
     const targetDefinitionId = definitionFor(state, targetCardId).id;
     deps.trashRunnerInstalledCardToHeap(state, targetCardId);
     return {

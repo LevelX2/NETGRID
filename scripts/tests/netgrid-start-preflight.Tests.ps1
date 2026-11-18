@@ -142,6 +142,7 @@ Describe "Neustart bei neuer Buildkennung oder geänderter Netzwerkbindung" {
   BeforeEach {
     $ast = [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $PSScriptRoot '..\start-netgrid.ps1'), [ref]$null, [ref]$null)
     $serverBranch = $ast.Find({ param($node) $node -is [System.Management.Automation.Language.IfStatementAst] -and $node.Clauses[0].Item1.Extent.Text -like '*$serverReadyLanBefore*browserConnectionReady*' }, $true).Extent.Text
+    $checkoutBranch = $ast.Find({ param($node) $node -is [System.Management.Automation.Language.IfStatementAst] -and $node.Clauses[0].Item1.Extent.Text -eq '$serverCheckoutMismatch -and -not $RestartServer' }, $true).Extent.Text
     $webBranch = $ast.Find({ param($node) $node -is [System.Management.Automation.Language.IfStatementAst] -and $node.Clauses[0].Item2.Extent.Text -like '*$webStatusBefore = Get-NetgridWebStartupStatus*' -and $node.Parent -is [System.Management.Automation.Language.NamedBlockAst] }, $true).Extent.Text
     $startWebBranch = $ast.Find({ param($node) $node -is [System.Management.Automation.Language.IfStatementAst] -and $node.Clauses[0].Item2.Extent.Text -like '*Starting web command*' }, $true).Extent.Text
     $script:webStatus = [pscustomobject]@{ BindingMatches = $true; BuildIdentity = '1.0/9323/0505e46af' }
@@ -152,6 +153,7 @@ Describe "Neustart bei neuer Buildkennung oder geänderter Netzwerkbindung" {
     Mock Start-NetgridProcess {}
     $RestartServer = $false
     $RestartWeb = $false
+    $serverCheckoutMismatch = $false
     $serverReadyLanBefore = $true
     $browserConnectionReady = $false
     $serverBuild = '1.0/9323/0505e46af'
@@ -165,6 +167,28 @@ Describe "Neustart bei neuer Buildkennung oder geänderter Netzwerkbindung" {
     $RestartWeb | Should Be $true
     Invoke-Expression $webBranch
     Assert-MockCalled Request-NetgridStartupRestart -Scope It -Times 1 -Exactly
+  }
+  It "startet auch zwei untereinander passende alte Prozesse für den aktuellen Checkout neu" {
+    $serverCheckoutMismatch = $true
+    $browserConnectionReady = $true
+    Invoke-Expression $checkoutBranch
+    $RestartServer | Should Be $true
+    $RestartWeb | Should Be $true
+    Invoke-Expression $serverBranch
+    Invoke-Expression $webBranch
+    Assert-MockCalled Request-NetgridStartupRestart -Scope It -Times 1 -Exactly
+  }
+  It "verwendet den zum Checkout passenden laufenden Server ohne Neustart weiter" {
+    Invoke-Expression $checkoutBranch
+    $RestartServer | Should Be $false
+    $RestartWeb | Should Be $false
+    Assert-MockCalled Request-NetgridStartupRestart -Scope It -Times 0 -Exactly
+  }
+  It "zeigt bei ausdrücklich angefordertem Neustart keinen Checkoutdialog" {
+    $serverCheckoutMismatch = $true
+    $RestartServer = $true
+    Invoke-Expression $checkoutBranch
+    Assert-MockCalled Request-NetgridStartupRestart -Scope It -Times 0 -Exactly
   }
   It "startet bei ausschließlich veralteter Webbindung nur den Webclient neu" {
     $script:webStatus.BindingMatches = $false
@@ -210,5 +234,41 @@ Describe "Neustart bei neuer Buildkennung oder geänderter Netzwerkbindung" {
     Invoke-Expression $startWebBranch
     Assert-MockCalled Stop-PortListeners -Scope It -Times 0 -Exactly
     Assert-MockCalled Start-NetgridProcess -Scope It -Times 0 -Exactly
+  }
+}
+
+Describe "Buildkennung des aktuellen Checkouts" {
+  It "liest die tatsächliche Version, Commitanzahl und Commitkennung des angegebenen Checkouts" {
+    $checkoutRoot = Join-Path $TestDrive 'checkout'
+    $sourceDirectory = Join-Path $checkoutRoot 'packages/shared/src'
+    New-Item -ItemType Directory -Path $sourceDirectory -Force | Out-Null
+    $versionPath = Join-Path $sourceDirectory 'product-version.ts'
+    [IO.File]::WriteAllText($versionPath, 'export const NETGRID_PRODUCT_VERSION = "1.0";')
+    & git -c init.defaultBranch=main init --quiet $checkoutRoot
+    & git -C $checkoutRoot add --all
+    & git -C $checkoutRoot -c user.name=NETGRID-Test -c user.email=netgrid-test@example.invalid commit --quiet -m initial
+    $first = Get-NetgridCheckoutBuildIdentity -ProjectRoot $checkoutRoot
+    $first | Should Match '^1\.0/1/[0-9a-f]{9}$'
+    [IO.File]::WriteAllText($versionPath, 'export const NETGRID_PRODUCT_VERSION = "1.1";')
+    & git -C $checkoutRoot add --all
+    & git -C $checkoutRoot -c user.name=NETGRID-Test -c user.email=netgrid-test@example.invalid commit --quiet -m current
+    $current = Get-NetgridCheckoutBuildIdentity -ProjectRoot $checkoutRoot
+    $current | Should Match '^1\.1/2/[0-9a-f]{9}$'
+    $current | Should Not Be $first
+  }
+  It "verweigert fehlende lokale Buildquellen statt einen beliebigen laufenden Build zu akzeptieren" {
+    { Get-NetgridCheckoutBuildIdentity -ProjectRoot $TestDrive } | Should Throw 'startup_checkout_build_unavailable'
+  }
+  It "verlangt vor dem Browserstart dieselbe Buildkennung für Server, Web und Checkout" {
+    $ast = [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $PSScriptRoot '..\start-netgrid.ps1'), [ref]$null, [ref]$null)
+    $assignment = $ast.Find({ param($node) $node -is [System.Management.Automation.Language.AssignmentStatementAst] -and $node.Left.Extent.Text -eq '$buildsMatch' }, $true).Extent.Text
+    $serverBuildAfter = '1.0/100/123456789'
+    $webStatusAfter = [pscustomobject]@{ BuildIdentity = $serverBuildAfter }
+    $checkoutBuild = '1.0/101/abcdef012'
+    Invoke-Expression $assignment
+    $buildsMatch | Should Be $false
+    $checkoutBuild = $serverBuildAfter
+    Invoke-Expression $assignment
+    $buildsMatch | Should Be $true
   }
 }

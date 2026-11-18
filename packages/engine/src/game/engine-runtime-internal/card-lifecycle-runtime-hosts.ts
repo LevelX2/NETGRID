@@ -690,7 +690,8 @@ export function createCardLifecycleRuntimeHosts(
           deps.forfeitRunnerAgendaForPointCost(state, cardId),
         consumeValuPakProgramInstallAction: (legalAction) =>
           deps.consumeValuPakProgramInstallAction(state, legalAction),
-        hiddenRunnerResourceSlotId,
+        hiddenRunnerResourceSlotId: (cardId) =>
+          hiddenRunnerResourceSlotId(state, cardId),
       },
       corp: {
         expireScoredAgendaInstallRezCreditAbilities: () =>

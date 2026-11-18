@@ -404,7 +404,7 @@ export function hiddenRunnerResourceRevealPayload(
   return {
     hiddenRunnerResource: true,
     hiddenRunnerResourceRevealed: true,
-    hiddenResourceSlotId: hiddenRunnerResourceSlotId(cardId),
+    hiddenResourceSlotId: hiddenRunnerResourceSlotId(state, cardId),
     publicRevealDefinitionId: definition.id,
   };
 }

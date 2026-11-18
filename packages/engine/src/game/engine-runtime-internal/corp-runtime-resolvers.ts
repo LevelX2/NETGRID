@@ -883,7 +883,9 @@ export function createCorpRuntimeResolvers(
         isConcealedRunnerResource(state, cardId);
       return {
         cardInstanceId: cardId,
-        choiceValue: concealed ? hiddenRunnerResourceSlotId(cardId) : cardId,
+        choiceValue: concealed
+          ? hiddenRunnerResourceSlotId(state, cardId)
+          : cardId,
       };
     });
     state.pendingRunnerInstalledMultiTrash = {

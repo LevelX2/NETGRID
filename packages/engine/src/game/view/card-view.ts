@@ -1,6 +1,10 @@
 import { isRemoteServerId } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
-import { hiddenCardReference } from "../state/card-instance-id";
+import {
+  hiddenRunnerResourceSlotId,
+  hiddenVisibleCardId,
+} from "./hidden-card-slot";
+export { hiddenRunnerResourceSlotId } from "./hidden-card-slot";
 // ARCH-6 read-only View-Helfer.
 // Keine State-Mutation, keine LegalAction-Erzeugung, kein Import aus index.ts,
 // keine PublicPayload-Vertragsaenderung.
@@ -1149,7 +1153,7 @@ export function visibleRunnerRigCardForViewer(
     return visibleKnownCardWithReferenceViewer(state, id, viewer);
   const instance = mustInstance(state.cardInstances, id);
   return {
-    instanceId: hiddenRunnerResourceSlotId(id),
+    instanceId: hiddenRunnerResourceSlotId(state, id),
     known: false,
     concealed: true,
     hiddenRunnerResource: true,
@@ -1233,10 +1237,6 @@ export function isConcealedRunnerResource(
   return definition.type === "resource" && cardHasSubtype(definition, "hidden");
 }
 
-export function hiddenRunnerResourceSlotId(id: CardInstanceId): CardInstanceId {
-  return hiddenCardReference(id, "s");
-}
-
 export function resolveHiddenRunnerResourceSlot(
   state: GameState,
   slotId: string,
@@ -1244,7 +1244,7 @@ export function resolveHiddenRunnerResourceSlot(
   return state.runner.rig.resources.find(
     (id) =>
       isConcealedRunnerResource(state, id) &&
-      hiddenRunnerResourceSlotId(id) === slotId,
+      hiddenRunnerResourceSlotId(state, id) === slotId,
   );
 }
 
@@ -1318,7 +1318,7 @@ export function visibleCorpCard(
     (state.corp.archives.includes(id) && instance.faceup);
   if (!visible) {
     return {
-      instanceId: hiddenVisibleCardId(id),
+      instanceId: hiddenVisibleCardId(state, id),
       known: false,
       rezzed: false,
       advancementCounters: area === "root" ? instance.advancementCounters : 0,
@@ -1409,7 +1409,7 @@ function visibleSpecialZoneCard(
   if (instance.zone.side !== "special") return visibleOwnCard(state, id);
   if (canSeeSpecialZoneCard(instance, viewer)) return visibleOwnCard(state, id);
   return {
-    instanceId: hiddenVisibleCardId(id),
+    instanceId: hiddenVisibleCardId(state, id),
     known: false,
   };
 }
@@ -1463,10 +1463,6 @@ function cardCounter(
   counterType: CounterType,
 ): number {
   return mustInstance(state.cardInstances, cardId).counters?.[counterType] ?? 0;
-}
-
-function hiddenVisibleCardId(id: CardInstanceId): CardInstanceId {
-  return hiddenCardReference(id, "h");
 }
 
 export function serverDifficultyIncreaseFromRunCounters(

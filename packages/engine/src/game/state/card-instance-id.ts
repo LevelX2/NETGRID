@@ -23,15 +23,3 @@ export function cardInstanceIdForCopy(
     ? `c${compact.toString(36)}`
     : `c${card.toString(36)}_${copy.toString(36)}`;
 }
-
-export function hiddenCardReference(
-  id: CardInstanceId,
-  prefix: "h" | "s",
-): CardInstanceId {
-  let hash = 0x811c9dc5;
-  for (let index = 0; index < id.length; index += 1) {
-    hash ^= id.charCodeAt(index);
-    hash = Math.imul(hash, 0x01000193);
-  }
-  return `${prefix}${(hash >>> 0).toString(36)}`;
-}
