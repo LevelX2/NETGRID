@@ -32,7 +32,6 @@ describe("Runner TurnPlanner cutover behavior-baseline regressions", () => {
       summary.actionSequence.some(
         (entry) =>
           entry.side === "corp" &&
-          entry.selectedActionId === "corp.play_operation" &&
           entry.actionType === "play_operation" &&
           entry.planKind === "corp.economy" &&
           entry.reasonCode === "plan_first.corp.economy" &&

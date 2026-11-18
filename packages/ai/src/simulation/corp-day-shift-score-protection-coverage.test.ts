@@ -1,3 +1,4 @@
+import type { PlayerAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
@@ -114,24 +115,26 @@ describe("Corp mixed draw score-protection coverage", () => {
       (entry) => entry.stateVersionBefore === 5,
     );
     expect(conversion).toMatchObject({
-      selectedActionId: "corp.play_operation",
       actionType: "play_operation",
       planKind: "corp.economy",
       reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
     expect(continuedEconomy).toMatchObject({
-      selectedActionId: "corp.gain_credit",
       actionType: "gain_credit",
       planKind: "corp.economy",
       reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
-    expect(
-      summary.actionSequence
-        .filter((entry) => [4, 5].includes(entry.stateVersionBefore))
-        .map((entry) => entry.selectedActionId),
-    ).not.toContain(annualReviewsAction?.actionId);
+    const conversionEvent = drawCapture.state.eventLog.find(
+      (event) => event.stateVersionBefore === conversionCapture.state.stateVersion,
+    );
+    const recordedAction = conversionEvent?.privatePayload?.corp?.action as PlayerAction | undefined;
+    expect(recordedAction).toMatchObject({
+      side: "corp", clientKnownStateVersion: conversionCapture.state.stateVersion,
+      actionId: efficiencyAction!.actionId,
+    });
+    expect(recordedAction?.actionId).not.toBe(annualReviewsAction!.actionId);
     expect(
       drawCapture.input.playerView.own.gripOrHq.some(
         (card) => card.instanceId === efficiency.instanceId,

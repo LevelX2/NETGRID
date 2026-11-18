@@ -1,5 +1,5 @@
 import standardDeckCatalog from "../../../../data/decks/standard-deck-catalog-1.0.0.json";
-import type { DeckDefinition } from "@netgrid/shared";
+import type { DeckDefinition, GameEvent, PlayerAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import { assertSemanticObjectSideSafe } from "../diagnostics/semantic-redaction";
@@ -47,7 +47,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
       expect(source).toMatchObject({ side: "runner", fallbackUsed: false });
       expect(choice).toMatchObject({
         side: "runner",
-        selectedActionId: "runner.resolve_choice",
+        selectedActionId: "rn",
         actionType: "resolve_choice",
         planKind: source!.planKind,
         fallbackUsed: false,
@@ -230,7 +230,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
       /^runner_run_start\.order:/,
     );
     const choice = chooseAiAction(choiceInput);
-    expect(choice.actionId).toBe("runner.resolve_choice");
+    expect(choice.actionId).toBe("rn");
     expect(choice.fallbackUsed).toBe(false);
     expect(choice.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
       source.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
@@ -333,7 +333,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
       payload: { serverId: "r1" },
     });
     expect(source.fallbackUsed).toBe(false);
-    const root = "plan:runner.contest_remote:remote%3Ar1";
+    const root = "p1p4xezjcxov79rno40lq3f7rv";
     expect(source.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId: root,
       leafExecutorInstanceId: root,
@@ -377,7 +377,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
       }
       const choice = chooseAiAction(input);
       expect(choice).toMatchObject({
-        actionId: "runner.resolve_choice",
+        actionId: "rn",
         fallbackUsed: false,
       });
       expect(choice.decisionDebug?.planFirstDecision).toMatchObject({
@@ -417,12 +417,18 @@ describe("Last Call at R&D exact choice-window regressions", () => {
 
   it("replays the frozen singleton variant deterministically and resolves its actual start windows legally", () => {
     const captures: AiSimulationDecisionCheckpointCapture[] = [];
+    const appliedChoiceEvents = new Map<number, GameEvent>();
     const first = simulateStandardGame({
       seed: "last-call-panel-fast-advance-batch-01-game-01",
       corpDeckId: "standard_corp_universal_fast_advance",
       runnerCards: singletonKeyCardRegressionCards(),
       runnerDeckHash: "standard-deck:a71c0dcc",
       captures,
+      onCapture: (snapshot) => {
+        const event = snapshot.state.eventLog.at(-1);
+        if (event && captures.some((capture) => capture.state.stateVersion === event.stateVersionBefore))
+          appliedChoiceEvents.set(event.stateVersionBefore, event);
+      },
       capturePredicate: (snapshot) =>
         snapshot.input.playerView.pendingChoice?.source.startsWith(
           "runner_start.order:",
@@ -453,11 +459,18 @@ describe("Last Call at R&D exact choice-window regressions", () => {
         actionType: "resolve_choice",
         fallbackUsed: false,
       });
-      expect(
-        capture.input.legalActions.some(
-          (action) => action.actionId === resolution!.selectedActionId,
-        ),
-      ).toBe(true);
+      const event = appliedChoiceEvents.get(capture.state.stateVersion);
+      expect(event).toBeDefined();
+      const recordedAction = event?.privatePayload?.runner?.action as PlayerAction | undefined;
+      expect(recordedAction).toMatchObject({
+        matchId: capture.state.matchId, side: "runner",
+        clientKnownStateVersion: capture.state.stateVersion,
+      });
+      expect(capture.input.legalActions.some((action) => action.actionId === recordedAction!.actionId)).toBe(true);
+      const applied = applyAction(capture.state, recordedAction!);
+      expect(applied.ok).toBe(true);
+      if (!applied.ok) throw new Error(applied.error.message);
+      expect(applied.stateHash).toBe(event!.stateHashAfter);
     }
   }, 240_000);
 
