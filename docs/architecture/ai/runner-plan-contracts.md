@@ -968,6 +968,12 @@ Coverage-Reconciliation erhält unabhängig weiterhin sinnvolle Breakersuchen;
 vor dem Routenwechsel bleibt eine tatsächlich benötigte Child-Bindung erhalten.
 Die gespeicherten Entscheidungen D159/D160 aus Paarung 425 prüfen beide Seiten
 dieses Übergangs mit den historischen LegalActions und Runtime-Checkpoints.
+
+Öffnet eine gezielte ICE-Vorbereitung ein Zahlungsfenster, behält der
+ursprüngliche Zentral- oder Remoteplan sein gewähltes ICE, auch wenn der
+Einkommensplan eine Bank aktiviert. Bei der Fortsetzung prüft der Owner
+Quellkarte, Aktion und Fenster-ID. Die anschließende Zielauswahl bindet an
+die StateVersion der fortgesetzten Aktion und übernimmt das zuvor gewählte ICE.
 Paarung 557/R1/G18/D320 ergänzt den Zentralfall mit verdrängter Run-Finanzierung: Der aktuelle HQ-Vorbereitungsschritt behält keinen Need des noch nicht neu quotierten Folgeruns. Der Funding-Owner und seine fail-closed Parentprüfung bleiben unverändert.
 
 Die Runpfad-Projektion trennt einen nicht tödlichen Handpufferverstoß von

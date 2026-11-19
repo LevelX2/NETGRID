@@ -275,9 +275,7 @@ describe("Runner targeted ICE disruption plan", () => {
       candidate,
     ]);
     expect(candidate.actionId).toBe("runner.play.jettison-1");
-    expect(portfolio.executorInstanceId).toBe(
-      "pa90fufw9vc5bkshp96ztlryxl",
-    );
+    expect(portfolio.executorInstanceId).toBe("pa90fufw9vc5bkshp96ztlryxl");
     const continuation = (
       portfolio.instances[0]!.moduleState as {
         choiceContinuation: RunnerTargetedIceTrashChoiceContinuation;
@@ -311,6 +309,22 @@ describe("Runner targeted ICE disruption plan", () => {
       choiceId: "trash-rezzed-ice-11",
       selectedOptionIds: ["card_rd-sentry"],
     });
+
+    // Selection at version 8, bank support at 9, resumed event at 10.
+    continuation.plannedAtStateVersion = 8;
+    continuation.selectedAtStateVersion = 8;
+    continuation.engineContinuationAtStateVersion = 10;
+    const resolvePaidChoice = () =>
+      selectedRunnerTargetedIceTrashChoiceOptionId(
+        choiceInput,
+        resolveChoiceAction(),
+        choice,
+        choice.options,
+        portfolio,
+      );
+    expect(resolvePaidChoice()).toBe("card_rd-sentry");
+    continuation.engineContinuationAtStateVersion = 9;
+    expect(resolvePaidChoice).toThrow(/window_origin_missing/);
   });
 
   it("binds an unrezzed ICE effect to the outermost side-safe slot of a material central target", () => {

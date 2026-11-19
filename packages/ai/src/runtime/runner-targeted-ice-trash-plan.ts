@@ -39,6 +39,7 @@ export type RunnerTargetedIceTrashChoiceContinuation =
     family: "runner_targeted_ice_trash";
     selectedActionId: string;
     selectedAtStateVersion: number;
+    engineContinuationAtStateVersion?: number;
   };
 
 export type RunnerTargetedIceTrashPlanTarget = {
