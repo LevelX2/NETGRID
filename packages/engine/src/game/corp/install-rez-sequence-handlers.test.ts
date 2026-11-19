@@ -597,7 +597,8 @@ function expectCanonicalDataFortPrimitiveIdentity(payload: unknown): void {
 describe("corp install rez sequence handlers", () => {
   it("starts Data Fort Reclamation with stable HQ install candidates", () => {
     const host = makeHost({
-      hq: ["operation_1", "asset_1", "ice_1"] as CardInstanceId[],
+      hq: ["operation_1", "asset_1", "ice_1", "trapdoor"] as CardInstanceId[],
+      definitions: { trapdoor: definition(18, "ice", "Trapdoor") },
     });
 
     startHqToNewRemoteInstallRezChoice(
@@ -776,6 +777,27 @@ describe("corp install rez sequence handlers", () => {
     expect(host.legalAction.payload).not.toHaveProperty(
       "cardImplementationSequenceCreatedServerId",
     );
+  });
+
+  it("rejects central-only ICE in a stale Reclamation selection before creating a fort", () => {
+    const host = makeHost({
+      hq: ["ice_1", "trapdoor"],
+      definitions: { trapdoor: definition(18, "ice", "Trapdoor") },
+      scoreArea: ["data_fort_agenda"],
+      scoredKinds: {
+        data_fort_agenda: "score_install_hq_cards_into_new_remote_then_rez",
+      },
+      pendingChoice: selectCardsChoice(
+        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:data_fort_agenda:8",
+        ["ice_1", "trapdoor"],
+      ),
+      playerAction: playerAction(["card_ice_1", "card_trapdoor"]),
+    });
+    const before = structuredClone(host.state);
+    expect(() => handleCorpInstallRezSequenceChoice(host)).toThrow(
+      "corp_ice_install_restriction_violation",
+    );
+    expect(host.state).toEqual(before);
   });
 
   it("rejects invalid Data Fort Reclamation root selections without partial mutation", () => {

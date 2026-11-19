@@ -16,6 +16,10 @@ import {
   hiddenZoneChoicePayload,
   selectedHiddenCardChoiceIds,
 } from "../../choices/hidden-zone-choice";
+import {
+  assertCorpIceInstallAllowed,
+  canInstallCorpIceInServer,
+} from "../../install/corp-ice-install-restrictions";
 import type {
   CorpInstallRezSequenceHandlerHost,
   CorpInstallRezSequenceHandlerResult,
@@ -118,9 +122,15 @@ export function startHqToNewRemoteInstallRezChoice(
   if (host.state.pendingChoice)
     throw new Error("Es ist bereits eine Choice offen.");
   const options = host.state.corp.hq
-    .filter((cardId) =>
-      host.cards.isCorpInstallableCardType(host.cards.definitionFor(cardId)),
-    )
+    .filter((cardId) => {
+      const definition = host.cards.definitionFor(cardId);
+      return definition.type === "ice"
+        ? canInstallCorpIceInServer(definition, {
+            id: "new_remote",
+            kind: "remote",
+          })
+        : host.cards.isCorpInstallableCardType(definition);
+    })
     .sort()
     .map((cardId) => {
       const definition = host.cards.definitionFor(cardId);
@@ -408,8 +418,10 @@ function revalidateNextHqInstall(
   const definition = host.cards.definitionFor(cardId);
   if (!host.cards.isCorpInstallableCardType(definition))
     throw new Error("Eine gewaehlte Data-Fort-Karte ist nicht installierbar.");
-  if (definition.type === "ice")
+  if (definition.type === "ice") {
+    assertCorpIceInstallAllowed(definition, server);
     return { cardId, definition, destination: "ice" };
+  }
   if (!host.cards.canInstallCorpRootCardInServer(definition, server))
     throw new Error(
       "Diese Root-Karte kann nicht in das Data Fort installiert werden.",
@@ -607,6 +619,7 @@ function prevalidateHqToNewRemoteInstallSelection(
     if (!host.cards.isCorpInstallableCardType(definition))
       throw new Error("Eine gewaehlte Karte ist nicht installierbar.");
     if (definition.type === "ice") {
+      assertCorpIceInstallAllowed(definition, simulatedServer);
       simulatedServer.ice.push(cardId);
       selectedCards.push({ cardId, definition, destination: "ice" });
       continue;

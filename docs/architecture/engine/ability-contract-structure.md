@@ -80,6 +80,11 @@ Aufteilung und denselben Endbetrag ausweisen. Ein Aufschlag darf weder als
 Reduktionsbetrag noch als Reduktionsquelle erscheinen. Die Defense-KI prüft
 diese Übereinstimmung vor der Zulassung ihrer Installationsroute.
 
+Data Fort Reclamation prüft bereits beim Angebot verdeckter HQ-Karten, ob
+ein ICE vor einem neuen Remote installiert werden darf. Die Vorausprüfung
+der gewählten Reihenfolge und der einzelne Installationsschritt verwenden
+dieselbe Platzierungsregel wie die normale ICE-Installation.
+
 Die gemeinsame Corp-Installations-/Rez-Zahlung in
 `card-lifecycle-runtime-hosts.ts` verbraucht auch rungebundene Credits.
 Alle temporären Pools sind bereits im angezeigten Guthaben enthalten.
