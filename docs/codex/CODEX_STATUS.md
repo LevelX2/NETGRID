@@ -54,7 +54,10 @@ Corp keine Agenda in HQ und nach dem Pflicht-Rez keinen Credit mehr hatte.
 Mit der neuen Vorbereitung sank die Zahl der aus HQ gestohlenen Agenden
 von 65 auf 56, die verlorenen Agendapunkte von 141 auf 127. In beiden
 Serien kam es in 33 Spielen zu mindestens einem Diebstahl aus HQ.
-Gegen R&D Express gingen sieben Agenden weniger verloren. Die Bilanz des
+Von 50 ins Spiel gekommenen Siren trashte der Runner 48 beim Zugriff auf
+ihren Remote. Die beiden bezahlten Umleitungen betrafen R&D. Runs auf HQ
+gingen von 206 auf 188 zurück. Gegen R&D Express gingen sieben Agenden
+weniger verloren. Die Bilanz des
 Amts stieg von neun auf 13 Siege. Alle Nachspiele endeten regulär mit
 geprüftem Replay (Paarungen 823–832, SP-880, KI-Stand `0f2028ed6`).
 
