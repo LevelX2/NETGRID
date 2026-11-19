@@ -4017,6 +4017,12 @@ Fortsetzung weiterhin fail-closed.
 
 ## 9. `runner.expose_information`
 
+Bei *Ice and Data Special Report* kann die Runner-KI das Event ausspielen und
+anschließend an der optionalen Serverwahl mit `window_origin_missing` stoppen.
+Der Informationsplan bindet die Folgeauswahl
+`expose_installed_cards_fort_select` dann nicht an einen konkreten Server.
+Die Reproduktion gegen Chrome Rush Bureau bot `fort_none` und `fort_r1` an.
+
 Mehrfach-Aufdeckungen liefern aus der Engine gleich lange, gleich geordnete
 `publicRevealDefinitionIds`, `exposedServerIds` und `exposedPositionKeys`.
 Informationsowner und bestehende Belief-Projektion konsumieren diese tatsächlichen

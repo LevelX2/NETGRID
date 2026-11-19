@@ -3,7 +3,7 @@
   "catalogId": "netgrid-standard-decks-1.0.0",
   "version": "1.0.0",
   "status": "active",
-  "curatedAt": "2026-08-20",
+  "curatedAt": "2026-11-19",
   "decks": [
     {
       "standardDeckId": "standard_corp_express_shutdown",
@@ -6186,6 +6186,204 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_black_ops_security_foundry",
+        "sourceDeckVersion": "0.1.0"
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_amt_fuer_umleitungen",
+      "version": "0.1.0",
+      "status": "active",
+      "name": "Amt für Umleitungen",
+      "side": "corp",
+      "identityCardId": 3,
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
+      "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
+      "formatProfileVersion": "1.0.0",
+      "cards": [
+        {
+          "cardId": 66,
+          "quantity": 3
+        },
+        {
+          "cardId": 5,
+          "quantity": 2
+        },
+        {
+          "cardId": 409,
+          "quantity": 2
+        },
+        {
+          "cardId": 62,
+          "quantity": 2
+        },
+        {
+          "cardId": 18,
+          "quantity": 2
+        },
+        {
+          "cardId": 95,
+          "quantity": 3
+        },
+        {
+          "cardId": 491,
+          "quantity": 2
+        },
+        {
+          "cardId": 90,
+          "quantity": 2
+        },
+        {
+          "cardId": 96,
+          "quantity": 2
+        },
+        {
+          "cardId": 87,
+          "quantity": 2
+        },
+        {
+          "cardId": 473,
+          "quantity": 2
+        },
+        {
+          "cardId": 132,
+          "quantity": 3
+        },
+        {
+          "cardId": 573,
+          "quantity": 2
+        },
+        {
+          "cardId": 560,
+          "quantity": 3
+        },
+        {
+          "cardId": 574,
+          "quantity": 2
+        },
+        {
+          "cardId": 507,
+          "quantity": 3
+        },
+        {
+          "cardId": 493,
+          "quantity": 3
+        },
+        {
+          "cardId": 521,
+          "quantity": 2
+        },
+        {
+          "cardId": 503,
+          "quantity": 2
+        },
+        {
+          "cardId": 508,
+          "quantity": 1
+        }
+      ],
+      "source": {
+        "kind": "curated_local_deck",
+        "sourceDeckId": "local_corp_amt_fuer_umleitungen",
+        "sourceDeckVersion": "0.1.0"
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_redaktionsschluss",
+      "version": "0.1.0",
+      "status": "active",
+      "name": "Redaktionsschluss",
+      "side": "runner",
+      "identityCardId": 587,
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
+      "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
+      "formatProfileVersion": "1.0.0",
+      "cards": [
+        {
+          "cardId": 374,
+          "quantity": 3
+        },
+        {
+          "cardId": 178,
+          "quantity": 3
+        },
+        {
+          "cardId": 238,
+          "quantity": 2
+        },
+        {
+          "cardId": 304,
+          "quantity": 2
+        },
+        {
+          "cardId": 185,
+          "quantity": 2
+        },
+        {
+          "cardId": 297,
+          "quantity": 3
+        },
+        {
+          "cardId": 293,
+          "quantity": 3
+        },
+        {
+          "cardId": 306,
+          "quantity": 2
+        },
+        {
+          "cardId": 298,
+          "quantity": 2
+        },
+        {
+          "cardId": 248,
+          "quantity": 2
+        },
+        {
+          "cardId": 226,
+          "quantity": 2
+        },
+        {
+          "cardId": 266,
+          "quantity": 2
+        },
+        {
+          "cardId": 252,
+          "quantity": 1
+        },
+        {
+          "cardId": 326,
+          "quantity": 2
+        },
+        {
+          "cardId": 335,
+          "quantity": 2
+        },
+        {
+          "cardId": 320,
+          "quantity": 3
+        },
+        {
+          "cardId": 309,
+          "quantity": 3
+        },
+        {
+          "cardId": 191,
+          "quantity": 2
+        },
+        {
+          "cardId": 307,
+          "quantity": 3
+        },
+        {
+          "cardId": 351,
+          "quantity": 1
+        }
+      ],
+      "source": {
+        "kind": "curated_local_deck",
+        "sourceDeckId": "local_runner_redaktionsschluss",
         "sourceDeckVersion": "0.1.0"
       }
     }
