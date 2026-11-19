@@ -12,9 +12,12 @@ Normale Aktionen benötigen keine vollständige Hydration aller öffentlichen
 Events, KI-Traces, Receipts, Undo-Historie und Snapshots. Der aktuelle
 Kernzustand ist vollständig. Öffentliche Aktionsloads lesen höchstens 80
 Ereignisse direkt in SQL und je Ereignis höchstens den neuesten KI-Trace.
-In reinen Human-Partien gilt dieselbe Grenze für
-Engine-Ereignisse; KI-Partien behalten die vollständige side-sichere Chronologie
-für ihre bestehenden Beobachtungs- und Belief-Verträge.
+In reinen Human-Partien gilt dieselbe Grenze für Engine-Ereignisse.
+Bei KI-Partien liest und dekodiert der SQLite-Adapter für jede Aktion das
+vollständige interne Engine-Journal. Die KI-Projektion verarbeitet je
+Seite neue Ereignisse auf Basis des bereits projizierten Präfixes. Ihre
+Beobachtungs- und Belief-Verträge erhalten die vollständige seitensichere
+Sicht.
 
 Reconnect, WebSocket-Bootstrap und WebSocket-Präsenz laden den Kernzustand,
 Sessions, Tokens, Lobby, ausstehendes Undo und die öffentliche Chronik mit bis

@@ -111,7 +111,12 @@ strukturierten Entscheidungsfehler.
 Der Live-Pfad hält pro Partie und Seite die bereits in das KI-DTO
 projizierten Ereignisse vor und projiziert nur neue Einträge. Beim
 Wiederöffnen entsteht die Sicht aus der gespeicherten Engine-Historie.
-Undo, Partieabschluss und Schließen des Servers geben die Projektion frei.
+Manuell bestätigtes Undo, Partieabschluss und Schließen des Servers geben
+die Projektion und den laufenden KI-Speicher frei. Automatisch bestätigtes
+Undo gegen eine KI schneidet die Historie zurück und verwirft das
+persistierte Portfolio. Die nächste Projektion prüft das bisherige
+Präfix an der gekürzten Ereignisfolge.
+[Manuelle und automatische Undo-Pfade](../../../apps/server/src/multiplayer.ts)
 
 ### Idempotente Aktionsantworten
 
