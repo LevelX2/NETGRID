@@ -44,6 +44,7 @@ import {
 } from "../../ability-engine/card-implementation-runtime";
 import { startCorpHqCardToRdChoice } from "../hidden-zone/nonsearch-choice-handlers";
 import { resumeSuccessfulRunAccessReplacementAfterTagPrevention } from "../run/run-access-transition";
+import { enterRunStartApproach } from "../run/run-core-execution";
 import { resumePreventableTrashCostContinuation } from "../abilities/trigger-ability-execution";
 import { resumeRunEndCleanupAfterTagPrevention } from "../run/run-end-cleanup";
 import {
@@ -161,33 +162,10 @@ export function createPendingChoiceRuntimeHosts(
     state: GameState,
     legalAction?: LegalAction,
   ): void {
-    const run = state.run;
-    if (run) delete run.runStartInterventions;
-    state.activeSide = "runner";
-    let advancedFromStart = false;
-    const runPhase = run?.phase as
-      | NonNullable<GameState["run"]>["phase"]
-      | "start"
-      | undefined;
-    if (run && runPhase === "start") {
-      const server = deps.mustServer(state, run.attackedServerId);
-      if (server.ice.length > 0) {
-        const iceIndex = server.ice.length - 1;
-        const approachedIceId = server.ice[iceIndex];
-        if (!approachedIceId)
-          throw new Error(
-            "Das angegriffene Fort hat keine ICE an dieser Position.",
-          );
-        run.phase = "approach_ice";
-        run.position = { kind: "ice", serverId: server.id, iceIndex };
-        run.approachedIceId = approachedIceId;
-      } else {
-        run.phase = "approach_ice";
-        run.position = { kind: "server", serverId: server.id };
-      }
-      advancedFromStart = true;
-    }
-    return;
+    enterRunStartApproach(
+      deps.runFlow.runCoreExecutionHost(state),
+      legalAction,
+    );
   }
 
   function originalRunStartServerId(

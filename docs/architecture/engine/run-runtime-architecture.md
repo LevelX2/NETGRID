@@ -247,6 +247,10 @@ ihnen aber nicht zurückimportiert.
 - Successful-Run-Interventionen werden vor Access abgeschlossen. Verzögerte
   Successful Runs behalten ihre Ice- und Source-Referenzen bis zum passenden
   Passed-Ice-Übergang.
+- Nach einer Fort-Entscheidung am Runstart setzt die Engine den Run am
+  tatsächlich angegriffenen Server fort. Bei Siren bestimmt die Umleitung
+  das Ziel, beim Verzicht bleibt es der ursprüngliche Server. In beiden
+  Fällen gelten dessen äußerste ICE-Position, Rez-Fenster und Zugriff.
 - Ein deklaratives `make_run` mit festem Central-Ziel bindet seine
   Erfolgswirkungen über `successfulRunEffectTargetServerId` an dieses Fort.
   Nach einer Deflection zählt das tatsächlich erreichte Fort. Wird das
