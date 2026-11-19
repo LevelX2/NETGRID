@@ -34,6 +34,7 @@ import { buildCorpAmbushPlanSignals } from "../corp/ambush/corp-ambush-plan-sign
 import { corpAvailableRemoteRezCredits } from "../corp/defense/corp-defense-remote-rez-budget";
 import { resolvePlanBoundCorpDelayedSuccessChoice } from "../corp/defense/defense-choice-continuation";
 import { corpClassicDeflectorDefenseChoiceSignal } from "../corp/defense/defense-choice-signals";
+import { corpStartRunRedirectDefenseChoiceSignal } from "../corp/defense/start-run-redirect-choice";
 import {
   buildCorpDefenseNeeds,
   buildCorpDefenseProtectionSignals,
@@ -3745,7 +3746,13 @@ function buildCorpDomain(
     residentScoreAgendaInstanceId,
     centralDefenseAllocation,
   });
-  const classicDeflectorDefenseChoice = corpClassicDeflectorDefenseChoiceSignal(
+  const redirectChoiceSignal =
+    input.playerView.pendingChoice?.source.startsWith(
+      "corp.start_of_run_redirect:",
+    )
+      ? corpStartRunRedirectDefenseChoiceSignal
+      : corpClassicDeflectorDefenseChoiceSignal;
+  const runRedirectDefenseChoice = redirectChoiceSignal(
     input,
     candidates,
     centralDefenseAllocation,
@@ -3814,7 +3821,7 @@ function buildCorpDomain(
     defenseDrawSignals,
     consumedDefenseDrawSignals,
     agendaPurgeDefenseChoice,
-    classicDeflectorDefenseChoice,
+    runRedirectDefenseChoice,
   });
   const { immediateFundingActionIds, terminalFundingActionIds } =
     corpEconomyFundingActionIds(input, candidates);
@@ -4007,6 +4014,9 @@ function resolveEngineWindow(
   if (
     context.input.playerView.pendingChoice?.source.startsWith(
       "card_implementation.classic_deflector:",
+    ) ||
+    context.input.playerView.pendingChoice?.source.startsWith(
+      "corp.start_of_run_redirect:",
     ) ||
     context.input.playerView.pendingChoice?.source.startsWith(
       "card_implementation.corp_choice_rez_or_trash_ice_decision:",

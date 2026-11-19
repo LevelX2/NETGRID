@@ -124,6 +124,15 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
         }>;
       }
     | {
+        kind: "start_run_redirect";
+        choiceId: string;
+        sourceStateVersion: number;
+        runId: RunId;
+        originalServerId: string;
+        selectedOptionId: string;
+        target?: { sourceCardInstanceId: string; sourceDefinitionId: number; serverId: string; creditCost: number };
+      }
+    | {
         kind: "classic_deflector_redirect";
         choiceId: string;
         sourceStateVersion: number;

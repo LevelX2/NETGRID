@@ -1626,6 +1626,13 @@ besitzt. Ohne diesen begrenzten Nachweis bleibt die Reserve bindend; die
 Choice-Auflösung übernimmt nur das gewählte, stategebundene Ziel. Paarung 475,
 Kontrolllauf 7, G39 D318 belegt zwei vorhandene Credits für zwei Credits
 Umleitung von Theorem bei vier Runnerpunkten auf den agendafreien Remote.
+
+Für die Umleitung zu Beginn eines Runs bewertet Defense die von der Engine
+angebotenen Quellen und ihre Kosten. Der offene Run, die gerezzte Quellkarte
+und deren Server binden das Ziel. Defense vergleicht die gefährdeten
+Karten mit denen am Ziel und lässt die Umleitung aus, wenn sie die
+Wertungsreserve aufbrauchen würde oder HQ keine Agenda enthält. Bei der
+Ausführung müssen Run, Fenster, Options-ID, Ziel und Preis weiter passen.
 Umleitungsziele werden am tatsächlich betretenen äußersten bereits gerezzten
 ICE bewertet; ungerezzt darüberliegende ICE sind keine Encounter-Protektion.
 Ein exakt belegter unmittelbarer Stop darf die statische Agendaexposition des

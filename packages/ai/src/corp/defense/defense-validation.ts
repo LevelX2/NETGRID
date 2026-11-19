@@ -1308,8 +1308,55 @@ function validDefenseChoiceResolution(
       );
     case "resolve_install_targets":
       return validAgendaPurgeDefenseChoiceResolution(resolution, signal);
-    case "resolve_run_redirect":
+    case "resolve_run_redirect": {
+      const resolution = defenseRecord(signal.choiceResolution);
+      if (resolution?.kind === "start_run_redirect") {
+        const target = defenseRecord(resolution.target);
+        return (
+          hasOnlyKeys(
+            resolution,
+            new Set([
+              "kind",
+              "choiceId",
+              "sourceStateVersion",
+              "runId",
+              "originalServerId",
+              "selectedOptionId",
+              "target",
+            ]),
+          ) &&
+          nonEmptyString(resolution.choiceId) &&
+          knownNonNegativeInteger(resolution.sourceStateVersion) &&
+          isRunId(resolution.runId) &&
+          nonEmptyString(resolution.originalServerId) &&
+          Array.isArray(signal.actionIds) &&
+          signal.actionIds.length === 1 &&
+          nonEmptyString(signal.actionIds[0]) &&
+          (resolution.target === undefined
+            ? resolution.selectedOptionId === "pass" &&
+              signal.serverId === resolution.originalServerId
+            : target !== undefined &&
+              hasOnlyKeys(
+                target,
+                new Set([
+                  "sourceCardInstanceId",
+                  "sourceDefinitionId",
+                  "serverId",
+                  "creditCost",
+                ]),
+              ) &&
+              nonEmptyString(target.sourceCardInstanceId) &&
+              isCardDefinitionId(target.sourceDefinitionId) &&
+              nonEmptyString(target.serverId) &&
+              target.serverId !== resolution.originalServerId &&
+              target.serverId === signal.serverId &&
+              knownNonNegativeInteger(target.creditCost) &&
+              resolution.selectedOptionId ===
+                `redirect_${target.sourceCardInstanceId}`)
+        );
+      }
       return validClassicDeflectorDefenseChoiceResolution(resolution, signal);
+    }
     default:
       return resolution === undefined;
   }

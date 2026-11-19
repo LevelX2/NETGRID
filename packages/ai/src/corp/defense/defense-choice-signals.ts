@@ -366,7 +366,7 @@ export function corpClassicDeflectorDefenseChoiceSignal(
   const targetExposure = (serverId: string) =>
     entryEffects.get(serverId) === "stops_run"
       ? 0
-      : classicDeflectorServerExposure(input, serverId, centralAllocation);
+      : corpRedirectServerExposure(input, serverId, centralAllocation);
   const redirectTargets = eligibleServerIds
     .filter(
       (serverId) =>
@@ -409,7 +409,7 @@ export function corpClassicDeflectorDefenseChoiceSignal(
     : redirectTargets;
   const selectedServerId = selectableRedirectTargets[0];
   const sourceExposure =
-    classicDeflectorServerExposure(
+    corpRedirectServerExposure(
       input,
       run.attackedServerId,
       centralAllocation,
@@ -579,7 +579,7 @@ function parseClassicDeflectorChoiceContext(
   }
 }
 
-function classicDeflectorServerExposure(
+export function corpRedirectServerExposure(
   input: AiDecisionInput,
   serverId: string,
   centralAllocation: CorpCentralDefenseAllocation | undefined,

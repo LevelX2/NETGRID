@@ -341,6 +341,12 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
 
     let state = applyLegal(before, "runner", runHq.actionId);
     expect(state.pendingChoice?.source).toContain("corp.start_of_run_redirect");
+    expect(getPlayerView(state, "corp").pendingChoice?.options).toContainEqual(
+      expect.objectContaining({
+        value: sirenId,
+        metadata: expect.objectContaining({ creditCost: 1 }),
+      }),
+    );
     expect(state.run?.runStartInterventions).toEqual([
       {
         kind: "start_run_redirect_to_source_fort",

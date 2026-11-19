@@ -16,6 +16,7 @@ import type {
 
 import { corpHostedBankTurnPlanningQuote } from "../corp/economy/hosted-credit-bank-turn-planning";
 import { corpDefensePlanningSignals } from "../corp/defense/defense-plan-module";
+import { planBoundStartRunRedirectSelection } from "../corp/defense/start-run-redirect-choice";
 import type { CorpEconomyNeedSignal } from "../corp/economy/economy-types";
 import { currentCorpCreditObligation } from "./corp-credit-obligation";
 import { scoreMilestoneBoundary } from "../corp/score/score-milestone-boundary";
@@ -2510,6 +2511,13 @@ function planBoundCorpDefenseChoices(
         }>;
       }
     | undefined;
+  if (
+    input.playerView.pendingChoice?.source.startsWith(
+      "corp.start_of_run_redirect:",
+    )
+  ) {
+    return planBoundStartRunRedirectSelection(input, action, moduleState);
+  }
   const trashSignal = moduleState?.signals?.find(
     (s) =>
       s.kind === "generic" &&
