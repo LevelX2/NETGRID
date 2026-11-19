@@ -47,6 +47,17 @@ der Erstfassung durch Fleischschaden im Corp-Zug standen einer Flatline
 durch Netzschaden bei einem Zugriff auf Setup! gegenüber. Ein Einsatz von
 Identity Donor gegen Dead Channel ist im Spielverlauf belegt.
 
+Im Siren-Nachtest spielte das unveränderte Amt 0.2.0 mit der überarbeiteten
+Corp-KI dieselben 50 Seeds. Die reguläre Installation stieg von einem auf
+35 Spiele. Zuvor kam der einzige Einbau aus dem Handmanagement, als die
+Corp keine Agenda in HQ und nach dem Pflicht-Rez keinen Credit mehr hatte.
+Mit der neuen Vorbereitung sank die Zahl der aus HQ gestohlenen Agenden
+von 65 auf 56, die verlorenen Agendapunkte von 141 auf 127. In beiden
+Serien kam es in 33 Spielen zu mindestens einem Diebstahl aus HQ.
+Gegen R&D Express gingen sieben Agenden weniger verloren. Die Bilanz des
+Amts stieg von neun auf 13 Siege. Alle Nachspiele endeten regulär mit
+geprüftem Replay (Paarungen 823–832, SP-880, KI-Stand `0f2028ed6`).
+
 „Dr. Dreffs letzte Visite“ ist als Standarddeck mit 45 Karten,
 20 Agendapunkten und deutscher/englischer Anleitung verfügbar. Version 1.3.0
 enthält je ein Reclamation Project und Corporate Shuffle sowie neu Red
