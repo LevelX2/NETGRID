@@ -1,4 +1,4 @@
-import { isRunId, isTraceId } from "@netgrid/shared";
+import { isRemoteServerId, isRunId, isTraceId } from "@netgrid/shared";
 import { isCardDefinitionId } from "@netgrid/shared";
 import { parseOptionalCardDefinitionIdCsv } from "../../card-definition-id-input";
 import type { AiDecisionInput, VisibleCorpRezCostQuote } from "@netgrid/shared";
@@ -967,6 +967,7 @@ export const GENERIC_DEFENSE_SIGNAL_KEYS = new Set([
   "urgent",
   "visibleAgendaExposureDefense",
   "centralPressure",
+  "protectedCentralServerId",
   "immediateInstallSupport",
   "iceInstallCostSupportActionId",
   "rezWindowVerdict",
@@ -1111,6 +1112,16 @@ export function isValidDefenseSignal(
     return (
       hasOnlyKeys(value, GENERIC_DEFENSE_SIGNAL_KEYS) &&
       genericDefensePhase(value.phase) &&
+      (value.protectedCentralServerId === undefined ||
+        ((value.protectedCentralServerId === "hq" ||
+          value.protectedCentralServerId === "rd") &&
+          value.phase === "install_defense_support" &&
+          value.centralPressure !== undefined &&
+          (value.serverId === "new_remote" || isRemoteServerId(value.serverId)) &&
+          Array.isArray(value.actionIds) &&
+          value.actionIds.length === 1 &&
+          Array.isArray(value.sourceDefinitionIds) &&
+          value.sourceDefinitionIds.length === 1)) &&
       (value.visibleAgendaExposureDefense === undefined ||
         (value.visibleAgendaExposureDefense === true &&
           value.serverId === "archives" &&

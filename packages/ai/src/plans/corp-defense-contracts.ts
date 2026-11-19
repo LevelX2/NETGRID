@@ -41,6 +41,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
   urgent: boolean;
   visibleAgendaExposureDefense?: true;
   centralPressure?: "material" | "acute" | "terminal";
+  protectedCentralServerId?: "hq" | "rd";
   immediateInstallSupport?: boolean;
   iceInstallCostSupportActionId?: string;
   rezWindowVerdict?: "productive" | "nonproductive" | "open";
