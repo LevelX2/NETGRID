@@ -5853,20 +5853,23 @@
     },
     {
       "standardDeckId": "standard_corp_amt_fuer_umleitungen",
-      "sourceDeckVersion": "0.1.0",
-      "sourceDeckHash": "standard-deck:81ec51c9",
-      "sourceAnalysisHash": "deck-analysis:b2367f6b",
-      "sourceAnalysisInputHash": "deck-analysis-input:3a0cb04c",
+      "sourceDeckVersion": "0.2.0",
+      "sourceDeckHash": "standard-deck:35ea95ad",
+      "sourceAnalysisHash": "deck-analysis:f5b4604f",
+      "sourceAnalysisInputHash": "deck-analysis-input:d2f62cb0",
       "reviewedAt": "2026-11-19",
       "analysis": {
         "primaryStrategyIds": [
           "corp.remote_scoring",
-          "corp.overadvance_value",
-          "corp.ambush_bluff"
+          "corp.ice_tax_glacier",
+          "corp.central_stabilize"
         ],
         "secondaryStrategyIds": [
-          "corp.fast_advance",
-          "corp.rush_score"
+          "corp.overadvance_value",
+          "corp.ambush_bluff",
+          "corp.asset_economy",
+          "corp.rush_score",
+          "corp.fast_advance"
         ],
         "reviewStatus": "observe"
       },
@@ -5901,19 +5904,20 @@
               "role": "An unbroken subroutine on HQ or R&D sends the Runner to a remote of your choice."
             },
             {
-              "cardId": 574,
-              "title": "New Galveston City Grid",
-              "role": "Adds two credits to the cost of trashing Siren or Plaza in this fort."
-            },
-            {
               "cardId": 503,
               "title": "Falsified-Transactions Expert",
               "role": "For one credit, move up to three advancement counters from the bait to a freshly installed agenda."
+            },
+            {
+              "cardId": 578,
+              "title": "Red Herrings",
+              "role": "Stealing an agenda from this server costs the Runner five additional credits, even on the run in which they trash Red Herrings."
             }
           ],
           "pilotingTips": [
             "Siren and Plaza each cost three credits to install and rez. Build them on different turns if you also need credits for ICE or a redirect.",
-            "Place Trapdoor over a central after a suitable remote exists. With no rezzed ICE in the destination fort, the Runner arrives past its last piece of ICE."
+            "Place Trapdoor over a central after a suitable remote exists. With no rezzed ICE in the destination fort, the Runner arrives past its last piece of ICE.",
+            "Against early multiaccess, install Red Herrings in the threatened central. Corporate Downsizing scores with three advancement counters and can shuffle other agendas from HQ into R&D."
           ],
           "weaknesses": [
             "Siren has a printed trash cost of zero. A Runner who reaches reception early can dismantle it before the trap is ready.",
@@ -5950,19 +5954,20 @@
               "role": "Kommt die Subroutine an HQ oder R&D durch, schickst du den Runner in einen Remote deiner Wahl."
             },
             {
-              "cardId": 574,
-              "title": "New Galveston City Grid",
-              "role": "Verteuert das Zerstören von Siren oder Plaza in diesem Server um je zwei Credits."
-            },
-            {
               "cardId": 503,
               "title": "Falsified-Transactions Expert",
               "role": "Verschiebt für einen Credit bis zu drei Entwicklungsmarker vom Köder auf eine frisch installierte Agenda."
+            },
+            {
+              "cardId": 578,
+              "title": "Red Herrings",
+              "role": "Der Runner muss fünf zusätzliche Credits bezahlen, um eine Agenda aus diesem Server zu stehlen. Der Aufpreis gilt auch in dem Run, in dem er Red Herrings zerstört."
             }
           ],
           "pilotingTips": [
             "Siren und Plaza kosten beim Installieren je drei Credits für den sofortigen Rez. Baue sie über zwei Züge auf, wenn du zusätzlich ICE oder die Umleitung bezahlen musst.",
-            "Lege Trapdoor vor eine Zentrale, sobald ein passender Remote steht. Liegt dort kein gerezztes ICE, kommt der Runner direkt hinter dem letzten ICE an."
+            "Lege Trapdoor vor eine Zentrale, sobald ein passender Remote steht. Liegt dort kein gerezztes ICE, kommt der Runner direkt hinter dem letzten ICE an.",
+            "Zeigt der Runner früh Mehrfachzugriffe, lege Red Herrings ins bedrohte HQ oder R&D. Mit Corporate Downsizing kannst du nach drei Entwicklungsmarkern punkten und weitere Agenden aus HQ zurück in R&D mischen."
           ],
           "weaknesses": [
             "Siren kostet beim Zugriff zunächst null Credits zum Zerstören. Ein früher Besuch kann den Empfang schließen, bevor die Falle liegt.",
@@ -5973,10 +5978,10 @@
     },
     {
       "standardDeckId": "standard_runner_redaktionsschluss",
-      "sourceDeckVersion": "0.1.0",
-      "sourceDeckHash": "standard-deck:4f77fe13",
-      "sourceAnalysisHash": "deck-analysis:fa304b3f",
-      "sourceAnalysisInputHash": "deck-analysis-input:4aa18bc0",
+      "sourceDeckVersion": "0.2.0",
+      "sourceDeckHash": "standard-deck:7c1a6f6c",
+      "sourceAnalysisHash": "deck-analysis:1bd969f9",
+      "sourceAnalysisInputHash": "deck-analysis-input:7bfbe9c2",
       "reviewedAt": "2026-11-19",
       "analysis": {
         "primaryStrategyIds": [
@@ -5986,6 +5991,7 @@
         ],
         "secondaryStrategyIds": [
           "runner.hq_pressure",
+          "runner.survival_defense",
           "runner.search.breaker",
           "runner.rig_first"
         ],
@@ -6017,11 +6023,6 @@
               "role": "After a successful run, force the Corp to rez as much ICE on that fort as it can afford."
             },
             {
-              "cardId": 304,
-              "title": "Ice and Data’s Guide to the Net",
-              "role": "Exposes the outermost ICE on each fort for zero credits. Compare the cost of defending HQ and R&D before choosing a target."
-            },
-            {
               "cardId": 297,
               "title": "Executive Wiretaps",
               "role": "Access two extra cards on a successful HQ run when the Corp has spent its money elsewhere."
@@ -6030,11 +6031,17 @@
               "cardId": 293,
               "title": "Custodial Position",
               "role": "Takes the same three-card shot at R&D, with a further card from an installed R&D Interface."
+            },
+            {
+              "cardId": 170,
+              "title": "Identity Donor",
+              "role": "Keep it in your grip. When you would suffer meat damage during the Corp’s turn, prevent that damage and give the Corp two bad publicity."
             }
           ],
           "pilotingTips": [
             "Budget for the current encounter using credits already in your pool. The Reporter’s end-of-turn payout funds your next turn.",
-            "False Echo gives the Corp its normal rez effects. If forcing a Snowbank would hand it three credits, weigh that against taking the access and leaving it facedown."
+            "False Echo gives the Corp its normal rez effects. If forcing a Snowbank would hand it three credits, weigh that against taking the access and leaving it facedown.",
+            "Hold Identity Donor against tag-and-damage decks. If the Corp can deal damage twice in a turn, choose which source to prevent."
           ],
           "weaknesses": [
             "A Corp with fully rezzed ICE can dry up both reporting payouts. Livewire’s Contacts, Score! and Chiba Bank Account fund runs in that game.",
@@ -6066,11 +6073,6 @@
               "role": "Erzwingt nach einem erfolgreichen Run bezahlbare ICE-Rezzes auf genau diesem Server."
             },
             {
-              "cardId": 304,
-              "title": "Ice and Data’s Guide to the Net",
-              "role": "Zeigt für null Credits das äußerste ICE jedes Servers. Vergleiche die Rez-Kosten an HQ und R&D, bevor du dein Ziel wählst."
-            },
-            {
               "cardId": 297,
               "title": "Executive Wiretaps",
               "role": "Greift bei Erfolg auf zwei zusätzliche Karten im HQ zu. Ein guter Zeitpunkt ist direkt nach einem teuren Rez am anderen Server."
@@ -6079,11 +6081,17 @@
               "cardId": 293,
               "title": "Custodial Position",
               "role": "Öffnet denselben Dreifachzugriff auf R&D. Ein installiertes R&D Interface bringt eine vierte Karte dazu."
+            },
+            {
+              "cardId": 170,
+              "title": "Identity Donor",
+              "role": "Behalte die Karte im Griff. Bei Fleischschaden im Corp-Zug kannst du den gesamten Schaden dieser Quelle verhindern. Die Corp erhält zwei schlechte Publicity."
             }
           ],
           "pilotingTips": [
             "Bezahle die aktuelle Begegnung mit dem Geld, das jetzt im Pool liegt. Das Honorar des Reporters am Zugende finanziert den nächsten Zug.",
-            "Bei False Echo erhält die Corp alle normalen Rez-Effekte. Würde ein erzwungener Snowbank-Rez ihr drei Credits schenken, kannst du den Zugriff nehmen und das ICE verdeckt lassen."
+            "Bei False Echo erhält die Corp alle normalen Rez-Effekte. Würde ein erzwungener Snowbank-Rez ihr drei Credits schenken, kannst du den Zugriff nehmen und das ICE verdeckt lassen.",
+            "Gegen eine Corp mit Tags und Schadensoperationen lohnt sich Identity Donor auf der Hand. Treffen im selben Zug zwei Schadensquellen, wähle sorgfältig, welche du verhinderst."
           ],
           "weaknesses": [
             "Ist das ICE bereits gerezzt, bleiben die Honorare aus. Dann finanzieren Livewire’s Contacts, Score! und Chiba Bank Account deine Runs.",

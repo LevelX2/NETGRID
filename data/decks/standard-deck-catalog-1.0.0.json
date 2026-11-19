@@ -6191,7 +6191,7 @@
     },
     {
       "standardDeckId": "standard_corp_amt_fuer_umleitungen",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "active",
       "name": "Amt für Umleitungen",
       "side": "corp",
@@ -6207,7 +6207,7 @@
         },
         {
           "cardId": 5,
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": 409,
@@ -6243,7 +6243,7 @@
         },
         {
           "cardId": 473,
-          "quantity": 2
+          "quantity": 3
         },
         {
           "cardId": 132,
@@ -6259,7 +6259,7 @@
         },
         {
           "cardId": 574,
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": 507,
@@ -6275,22 +6275,26 @@
         },
         {
           "cardId": 503,
+          "quantity": 1
+        },
+        {
+          "cardId": 578,
           "quantity": 2
         },
         {
-          "cardId": 508,
+          "cardId": 406,
           "quantity": 1
         }
       ],
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_amt_fuer_umleitungen",
-        "sourceDeckVersion": "0.1.0"
+        "sourceDeckVersion": "0.2.0"
       }
     },
     {
       "standardDeckId": "standard_runner_redaktionsschluss",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "status": "active",
       "name": "Redaktionsschluss",
       "side": "runner",
@@ -6306,11 +6310,11 @@
         },
         {
           "cardId": 178,
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": 238,
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": 304,
@@ -6379,12 +6383,16 @@
         {
           "cardId": 351,
           "quantity": 1
+        },
+        {
+          "cardId": 170,
+          "quantity": 2
         }
       ],
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_runner_redaktionsschluss",
-        "sourceDeckVersion": "0.1.0"
+        "sourceDeckVersion": "0.2.0"
       }
     }
   ]
