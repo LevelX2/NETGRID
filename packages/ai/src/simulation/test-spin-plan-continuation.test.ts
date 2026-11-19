@@ -8,7 +8,7 @@ import {
 import type { AiDecision, DeckDefinition, GameState } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import decks from "../../../../data/decks/proteus-playtest-decks-2026-05-25.json";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { chooseAiAction } from "../index";
 import { buildAiDecisionInput } from "../runtime/ai-decision-input";
 import { buildPlanningStateIdentity } from "../plans/turn-planning-contracts";
@@ -212,7 +212,7 @@ function testSpinFixture(
   state.runner.rig.resources = conferences.map((card) => card.instanceId);
   state.runner.memoryUsed = programs.reduce(
     (total, card) =>
-      total + CARD_DEFINITIONS_BY_ID[card.definitionId]!.memoryCost!,
+      total + planningCardFactsByDefinitionId(card.definitionId)!.memoryCost!,
     0,
   );
   state.runner.memoryLimit = 4;

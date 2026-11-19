@@ -1,5 +1,8 @@
 import { isRemoteServerId } from "@netgrid/shared";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import {
+  planningCardByDefinitionId,
+  planningCardFactsByDefinitionId,
+} from "@netgrid/cards/planning";
 import {
   quoteAgendaDefinitionSelfStealCreditCost,
   visibleRunnerNextTurnPreparationCreditGain,
@@ -11,7 +14,6 @@ import type {
 } from "@netgrid/shared";
 import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { actionClickCost, actionCreditCost } from "../../runtime/action-cost";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 import { randomBreakOrDamageRiskProfileForDefinitionId } from "../../actions/risk-action-projection";
 import { corpGuaranteedOnPlayAdvancementCountersPerTarget } from "../../runtime/corp-canonical-card-facts";
 import { assessBestFundedCorpScoreProtection } from "../../runtime/corp-funded-score-protection";
@@ -30,11 +32,11 @@ function isPlainStealableAgenda(
   card: VisibleCard,
 ): boolean {
   if (!visibleCardIsAgenda(input, card) || !card.definitionId) return false;
-  const spec = cardSpecPlanningCardByDefinitionId(card.definitionId);
+  const spec = planningCardByDefinitionId(card.definitionId);
   return (
     spec !== undefined &&
-    !spec.planning.engine.selfStealCosts?.length &&
-    !spec.planning.engine.accessEffects?.some(
+    !spec.engine.selfStealCosts?.length &&
+    !spec.engine.accessEffects?.some(
       (effect) =>
         effect.kind === "on_access" && effect.sourceZones.includes("installed"),
     )
@@ -299,10 +301,10 @@ function certifiedBareStealCredits(
   installedServerId: string,
 ): number | undefined {
   if (!agenda.definitionId) return undefined;
-  const spec = cardSpecPlanningCardByDefinitionId(agenda.definitionId);
+  const spec = planningCardByDefinitionId(agenda.definitionId);
   if (!spec) return undefined;
   const effects =
-    spec.planning.engine.accessEffects?.filter(
+    spec.engine.accessEffects?.filter(
       (effect) =>
         effect.kind === "on_access" &&
         effect.sourceZones.includes("installed") &&
@@ -364,7 +366,7 @@ function hasOnlyCertifiedRunStops(
   const rez = ice.effectiveRezCostQuote;
   // The shared Defense solver quotes both subtype modes from this exact
   // Engine price binding and the same canonical subroutines.
-  const subroutines = CARD_DEFINITIONS_BY_ID[ice.definitionId]?.subroutines;
+  const subroutines = planningCardFactsByDefinitionId(ice.definitionId)?.subroutines;
   return (
     !ice.rezzed &&
     post?.complete === false &&

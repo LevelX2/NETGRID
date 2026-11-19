@@ -1,4 +1,4 @@
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { VisibleCard } from "@netgrid/shared";
 import { visibleSingleTagAvoidanceCosts } from "../runtime/visible-runner-tag-prevention";
 
@@ -47,8 +47,8 @@ export function quoteInstalledFixedTagAvoidance(
         !rigCards.some((other) => other.hostedOn === card.instanceId)
       ) {
         // A source with other effects would also change the rest of the path.
-        const engine = cardSpecPlanningCardByDefinitionId(card.definitionId)
-          ?.planning.engine;
+        const engine = planningCardByDefinitionId(card.definitionId)
+          ?.engine;
         if (
           engine &&
           Object.keys(engine).every((key) => tagOnlyCardSpecFields.has(key))

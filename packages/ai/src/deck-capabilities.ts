@@ -21,7 +21,7 @@ import type { AiHintActionPlanOwnerBinding } from "./action-plan-owner-contracts
 import { runnerEffectsProvideMultiaccess } from "./runner-canonical-hint-semantics";
 import { exactBankCashOutPayout } from "./actions/action-economy-projection";
 import { icebreakerAbilitiesForDefinition } from "@netgrid/engine";
-import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 
 export const DECK_CAPABILITY_PROFILE_SCHEMA_VERSION =
   "deck-capability-profile-v1" as const;
@@ -720,7 +720,7 @@ function buildBreakerCoverageMatrix(
       (entry) => entry.cardId === card.definitionId,
     );
     if (!breaker) return [];
-    const definition = CARD_DEFINITIONS_BY_ID[breaker.cardId];
+    const definition = planningCardFactsByDefinitionId(breaker.cardId);
     // Only canonical configurable matchers introduce a mode-dependent fact.
     // Other inventory entries retain their existing source/confidence contract.
     if (!definition) return [breaker];

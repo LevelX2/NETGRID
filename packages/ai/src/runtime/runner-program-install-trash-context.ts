@@ -3,7 +3,7 @@ import type {
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import { getStructuredBreakerProfileForCard } from "../breaker-ontology-consumer";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import {
@@ -410,8 +410,8 @@ export function createRunnerProgramInstallTrashContext(
     )
       return false;
     return [member, incoming].every((card) => {
-      const engine = cardSpecPlanningCardByDefinitionId(card.definitionId!)
-        ?.planning.engine;
+      const engine = planningCardByDefinitionId(card.definitionId!)
+        ?.engine;
       return (
         engine !== undefined &&
         (engine.icebreakerAbilities?.length ?? 0) > 0 &&

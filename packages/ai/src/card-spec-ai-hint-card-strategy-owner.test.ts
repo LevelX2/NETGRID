@@ -1,13 +1,13 @@
 import type { CardDefinitionId } from "@netgrid/shared";
 import { ORIGINALSET_V1_CARD_IDS } from "@netgrid/catalog";
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 
 function cardStrategyEntry(cardId: CardDefinitionId) {
-  const entry = cardSpecPlanningCards().find(
-    (candidate) => candidate.definition.id === cardId,
+  const entry = listPlanningCardsWithFacts().find(
+    (candidate) => candidate.facts.id === cardId,
   );
   if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
   return {
@@ -28,8 +28,8 @@ function cardStrategyEntry(cardId: CardDefinitionId) {
 
 describe("CardSpec card-level strategy typed evidence", () => {
   it("compiles all 148 Originalset bindings from typed Engine evidence", () => {
-    const entries = cardSpecPlanningCards().filter((entry) =>
-      ORIGINALSET_V1_CARD_IDS.includes(entry.definition.id),
+    const entries = listPlanningCardsWithFacts().filter((entry) =>
+      ORIGINALSET_V1_CARD_IDS.includes(entry.facts.id),
     );
     expect(
       entries.reduce(
@@ -50,7 +50,7 @@ describe("CardSpec card-level strategy typed evidence", () => {
       )
         continue;
       expect(() =>
-        deriveCardSpecAiHint(cardStrategyEntry(entry.definition.id)),
+        deriveCardSpecAiHint(cardStrategyEntry(entry.facts.id)),
       ).not.toThrow();
     }
   });

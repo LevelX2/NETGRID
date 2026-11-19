@@ -6,7 +6,7 @@ import {
 } from "@netgrid/shared";
 import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import type { CorpAmbushSignal } from "../../plans/corp-tactical-plan-contracts";
 import { corpSameTurnScoreConversionPaths } from "../../plans/tactical-plan-corp-score-conversion";
@@ -486,7 +486,7 @@ function counterBankTargetFromKnownDeck(
     (input as AiDecisionInputWithDeckCapabilities).ownDeckSnapshot?.cards ?? []
   ).flatMap((entry) => {
     if (entry.quantity <= 0) return [];
-    const definition = CARD_DEFINITIONS_BY_ID[entry.cardId];
+    const definition = planningCardFactsByDefinitionId(entry.cardId);
     const requirement = definition?.advancementRequirement;
     return definition?.side === "corp" &&
       definition.type === "agenda" &&
@@ -622,7 +622,7 @@ function agendaAdvancementRequirement(card: VisibleCard): number | undefined {
   const requirement =
     card.advancementRequirement ??
     (card.definitionId
-      ? CARD_DEFINITIONS_BY_ID[card.definitionId]?.advancementRequirement
+      ? planningCardFactsByDefinitionId(card.definitionId)?.advancementRequirement
       : undefined);
   return typeof requirement === "number" &&
     Number.isSafeInteger(requirement) &&

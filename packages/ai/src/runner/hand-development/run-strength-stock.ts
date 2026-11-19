@@ -1,6 +1,6 @@
 import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { AiDecisionInput } from "@netgrid/shared";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import {
   breakerCardBlocksAccessReachability,
   getStructuredBreakerProfileForCard,
@@ -21,8 +21,7 @@ export function assessRunStrengthStock(
   economy: RunnerEconomyPosture,
 ) {
   const mechanic = evaluation.definitionId
-    ? cardSpecPlanningCardByDefinitionId(evaluation.definitionId)?.planning
-        .engine.runnerRunStrengthBoost
+    ? planningCardByDefinitionId(evaluation.definitionId)?.engine.runnerRunStrengthBoost
     : undefined;
   if (!mechanic) return undefined;
   const defer = (reason: string) => ({
@@ -101,7 +100,7 @@ export function assessRunStrengthStock(
       (c) =>
         c.known &&
         c.definitionId &&
-        cardSpecPlanningCardByDefinitionId(c.definitionId)?.planning.engine
+        planningCardByDefinitionId(c.definitionId)?.engine
           .runnerRunStrengthBoost,
     )
   )

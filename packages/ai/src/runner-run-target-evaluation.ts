@@ -8,7 +8,7 @@ import {
 } from "./run-analysis/runner-visible-economy-facts";
 import { runnerPostRunSelfTagHandSafety } from "./run-analysis/runner-self-tag-safety";
 import type { RunnerAccessFacts } from "./access/runner-access-facts";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import { runnerTargetHasTerminalContestThreat } from "./runtime/runner-terminal-contest-threat";
 import { archivesIsKnownWithoutAgenda } from "./runtime/visible-server-agenda-facts";
 import {
@@ -265,8 +265,7 @@ export function assessRunnerRunAfterAccessPreparation(params: {
       !(
         preparation.type === "install_card" &&
         consumedCard?.definitionId !== undefined &&
-        cardSpecPlanningCardByDefinitionId(consumedCard.definitionId)?.planning
-          .engine.tagPreventionSources?.length
+        planningCardByDefinitionId(consumedCard.definitionId)?.engine.tagPreventionSources?.length
       )) ||
     !consumedCard ||
     preparation.expiresAtStateVersion !== params.input.playerView.stateVersion
@@ -2855,8 +2854,8 @@ function installedRunPayoffForTarget(
   for (const card of input.playerView.own.rig ?? []) {
     if (card.known === false) continue;
     if (!card.definitionId) continue;
-    const abilities = cardSpecPlanningCardByDefinitionId(card.definitionId)
-      ?.planning.engine.abilities;
+    const abilities = planningCardByDefinitionId(card.definitionId)
+      ?.engine.abilities;
     // A card whose only mechanics start their own activated runs grants no
     // passive payoff to this different route. Its own effect is evaluated
     // through that exact LegalAction's run projection instead.

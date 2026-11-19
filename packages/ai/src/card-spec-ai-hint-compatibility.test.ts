@@ -1,5 +1,5 @@
 import type { CardDefinitionId } from "@netgrid/shared";
-import { cs06PlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
 import { AI_HINTS_BY_CARD, type AiCardHint } from "./ai-hints";
@@ -712,8 +712,8 @@ describe("CS06 effective AI hint compatibility", () => {
   );
 
   it("keeps payoff use in planning while preserving mechanical damage facts", () => {
-    const source = cs06PlanningCards().find(
-      (entry) => entry.definition.id === 78,
+    const source = listPlanningCardsWithFacts().find(
+      (entry) => entry.facts.id === 78,
     );
     if (!source) throw new Error("missing Digiconda planning fixture");
     const withoutTacticInterpretation = structuredClone(source) as unknown as {
@@ -747,7 +747,7 @@ describe("CS06 effective AI hint compatibility", () => {
   });
 
   it("fails closed for an unknown Engine family or closed ontology value", () => {
-    const source = cs06PlanningCards()[0];
+    const source = listPlanningCardsWithFacts()[0];
     const unknownFamily = structuredClone(source) as unknown as {
       planning: { engine: Record<string, unknown> };
     };

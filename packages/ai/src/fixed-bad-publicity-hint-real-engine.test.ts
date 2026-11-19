@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { CardDefinitionId } from "@netgrid/shared";
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import {
   applyAction,
   createGameAfterSetup,
@@ -18,7 +18,7 @@ import { resetResidentPlanPortfolioMemory } from "./plans/resident-plan-portfoli
 import { runnerStrategicExchangeKinds } from "./runtime/runner-strategic-exchange";
 const id = 166;
 const poisonedWaterSupply = 175;
-const entry = cardSpecPlanningCards().find((c) => c.definition.id === id)!;
+const entry = listPlanningCardsWithFacts().find((c) => c.facts.id === id)!;
 const payoff = {
   kind: "run_tax",
   scope: "corp",
@@ -117,8 +117,8 @@ describe("fixed public bad-publicity effect translation", () => {
   it("translates the typed effect independently of card identity", () => {
     const renamed = {
       ...structuredClone(entry),
-      definition: {
-        ...entry.definition,
+      facts: {
+        ...entry.facts,
         id: 320,
         title: "Synthetic Pressure",
       },

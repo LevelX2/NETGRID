@@ -2,7 +2,7 @@ import { expect, it } from "vitest";
 import type { VisibleCard } from "@netgrid/shared";
 import checkpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-455-r4-g16-d103.json";
 import { buildDeckCapabilityProfileFromInput } from "../../deck-capabilities";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { cardProvidesBreakerCoverage } from "../../plans/tactical-plan-breaker-cards";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
@@ -23,7 +23,7 @@ it.each([
   "uses canonical acquisition coverage for %s",
   (id, wall, gate, sentry) => {
     const card = {
-      ...CARD_DEFINITIONS_BY_ID[id],
+      ...planningCardFactsByDefinitionId(id),
       definitionId: id,
       known: true,
     } as VisibleCard;

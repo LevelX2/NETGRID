@@ -1,4 +1,4 @@
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 import { AI_HINTS_BY_CARD } from "./ai-hints";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
@@ -7,9 +7,9 @@ import { visibleCard } from "./runner-hand-development.test-support";
 
 describe("tag prevention consumption follows the actual typed source cost", () => {
   it.each(
-    cardSpecPlanningCards()
+    listPlanningCardsWithFacts()
       .filter((c) => c.planning.engine.tagPreventionSources !== undefined)
-      .map((c) => [c.definition.id, c] as const),
+      .map((c) => [c.facts.id, c] as const),
   )("keeps canonical and generated semantics for %s", (id, entry) => {
     const sources = entry.planning.engine.tagPreventionSources!;
     const consumed = sources.some(

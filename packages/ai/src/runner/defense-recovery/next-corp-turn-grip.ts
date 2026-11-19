@@ -1,4 +1,4 @@
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { runnerDrawProjectionFor } from "../../actions/action-economy-projection";
@@ -176,8 +176,8 @@ export function nextCorpTurnCapacityInstalls(
       (entry) => entry.instanceId === install.source,
     );
     if (!card?.known || !card.definitionId) return [];
-    const engine = cardSpecPlanningCardByDefinitionId(card.definitionId)
-      ?.planning.engine;
+    const engine = planningCardByDefinitionId(card.definitionId)
+      ?.engine;
     if (
       !engine ||
       (engine.lifecycle?.on_install?.length ?? 0) > 0 ||
@@ -185,8 +185,7 @@ export function nextCorpTurnCapacityInstalls(
         own.rig?.some(
           (installed) =>
             installed.definitionId &&
-            cardSpecPlanningCardByDefinitionId(installed.definitionId)?.planning
-              .engine.hardwareDeck,
+            planningCardByDefinitionId(installed.definitionId)?.engine.hardwareDeck,
         ))
     )
       return [];

@@ -8,7 +8,7 @@ import {
   runnerCandidateSourceDefinitionId,
   runnerInstallSourceInstanceId,
 } from "../../runtime/runner-action-source-facts";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
@@ -466,7 +466,7 @@ export function runnerBreakerUpgradeMemorySupportRoutes(
           entry.known !== false && entry.instanceId === sourceInstanceId,
       );
       const definition = card?.definitionId
-        ? CARD_DEFINITIONS_BY_ID[card.definitionId]
+        ? planningCardFactsByDefinitionId(card.definitionId)
         : undefined;
       const additionalMu = Math.max(
         0,

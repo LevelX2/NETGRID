@@ -1,4 +1,4 @@
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { runnerRunProjectionPreservesNormalAccess } from "../actions/run-action-projection";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
@@ -50,11 +50,11 @@ export function runnerVisibleArchivesWinningRun(
     archives.root.some((card) => {
       const definition =
         card.known && card.definitionId
-          ? cardSpecPlanningCardByDefinitionId(card.definitionId)
+          ? planningCardByDefinitionId(card.definitionId)
           : undefined;
       return (
         !definition ||
-        definition.planning.engine.accessEffects?.some(
+        definition.engine.accessEffects?.some(
           (effect) =>
             effect.kind === "on_access" &&
             effect.sourceZones.includes("archives") &&

@@ -1,6 +1,6 @@
 import {
   canonicalCapabilityId,
-  cardSpecPlanningCardByDefinitionId,
+  planningCardByDefinitionId,
 } from "@netgrid/cards/planning";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
@@ -10,7 +10,7 @@ export function corpSameFortAgendaDiscountProfiles(
   definitionId: number | undefined,
 ): readonly Readonly<{ requiredSubtype?: string; reduction: number }>[] {
   const card = planningCard(definitionId);
-  return (card?.planning.engine.modifiers ?? []).flatMap((modifier) =>
+  return (card?.engine.modifiers ?? []).flatMap((modifier) =>
     modifier.kind === "agenda_difficulty" &&
     modifier.operation === "reduce" &&
     modifier.side === "corp" &&
@@ -39,12 +39,12 @@ export function corpPublicFixedOffServerRunProfiles(
   accessServerId: "hq" | "rd";
 }>[] {
   const card = planningCard(definitionId);
-  if (card?.planning.side !== "runner") return [];
+  if (card?.side !== "runner") return [];
   const result: {
     entryServerId: "hq" | "rd" | "archives";
     accessServerId: "hq" | "rd";
   }[] = [];
-  for (const ability of card.planning.engine.abilities ?? []) {
+  for (const ability of card.engine.abilities ?? []) {
     if (
       ability.kind !== "activated" ||
       ability.timing !== "runner_main" ||
@@ -123,7 +123,7 @@ export type CorpOnPlayCapabilityProfile = Readonly<{
 export function corpFixedOperationPlayCredits(
   definitionId: number | undefined,
 ): number | undefined {
-  const card = planningCard(definitionId)?.planning;
+  const card = planningCard(definitionId);
   if (card?.side !== "corp" || card.cardType !== "operation") return undefined;
   const cost = card.engine.characteristics.playCost;
   return cost?.kind === "fixed" ? cost.credits : undefined;
@@ -133,7 +133,7 @@ export function corpPunishFixedCapabilityCost(
   definitionId: number,
   capabilityId: number,
 ): { clicks: number; credits: number } | undefined {
-  const card = planningCard(definitionId)?.planning;
+  const card = planningCard(definitionId);
   if (card?.side !== "corp") return undefined;
   if (card.cardType === "operation") {
     const credits = corpFixedOperationPlayCredits(definitionId);
@@ -222,9 +222,9 @@ export function corpStartOfTurnOptionalDrawProfile(
   definitionId: number | undefined,
 ): CorpStartOfTurnOptionalDrawProfile | undefined {
   const planning = planningCard(definitionId);
-  const scoredAgenda = planning?.planning.engine.scoredAgenda;
-  return planning?.planning.side === "corp" &&
-    planning.planning.cardType === "agenda" &&
+  const scoredAgenda = planning?.engine.scoredAgenda;
+  return planning?.side === "corp" &&
+    planning.cardType === "agenda" &&
     scoredAgenda?.kind === "corp_start_turn_optional_draw" &&
     positiveSafeInteger(scoredAgenda.drawCount)
     ? {
@@ -238,16 +238,16 @@ export function corpScoredAgendaHqShuffleProfile(
   definitionId: number | undefined,
 ): CorpScoredAgendaHqShuffleProfile | undefined {
   const planning = planningCard(definitionId);
-  const scoredAgenda = planning?.planning.engine.scoredAgenda;
-  const targetPreference = planning?.planning.planningAnnotations?.card?.find(
+  const scoredAgenda = planning?.engine.scoredAgenda;
+  const targetPreference = planning?.planningAnnotations?.card?.find(
     (annotation) =>
       annotation.kind === "target_preference" &&
       annotation.purpose ===
         "choose_hq_agenda_subset_for_reveal_credit_and_shuffle",
   );
   if (
-    planning?.planning.side !== "corp" ||
-    planning.planning.cardType !== "agenda" ||
+    planning?.side !== "corp" ||
+    planning.cardType !== "agenda" ||
     scoredAgenda?.kind !== "shuffle_selected_hq_agendas_into_rd_gain_credits" ||
     scoredAgenda.shuffleSelectedIntoRnd !== true ||
     scoredAgenda.visibility !== "hidden_info_barrier" ||
@@ -261,7 +261,7 @@ export function corpScoredAgendaHqShuffleProfile(
   return {
     capabilityKey: scoredAgenda.capabilityKey,
     sourceCapabilityId: canonicalCapabilityId(
-      planning.planning.cardDefinitionId,
+      planning.cardDefinitionId,
       scoredAgenda.capabilityKey,
     ),
     creditPerAgendaPoint: scoredAgenda.creditPerAgendaPoint,
@@ -274,15 +274,15 @@ export function corpScoredAgendaIceMarkProfile(
   definitionId: number | undefined,
 ): CorpScoredAgendaIceMarkProfile | undefined {
   const planning = planningCard(definitionId);
-  const scoredAgenda = planning?.planning.engine.scoredAgenda;
-  const targetPreference = planning?.planning.planningAnnotations?.card?.find(
+  const scoredAgenda = planning?.engine.scoredAgenda;
+  const targetPreference = planning?.planningAnnotations?.card?.find(
     (annotation) =>
       annotation.kind === "target_preference" &&
       annotation.purpose === "strengthen_and_repeat_best_ice_subroutine",
   );
   if (
-    planning?.planning.side !== "corp" ||
-    planning.planning.cardType !== "agenda" ||
+    planning?.side !== "corp" ||
+    planning.cardType !== "agenda" ||
     scoredAgenda?.kind !== "select_rezzed_ice_mark_modifier" ||
     scoredAgenda.target !== "rezzed_installed_ice" ||
     scoredAgenda.counterType !== "mark" ||
@@ -303,7 +303,7 @@ export function corpScoredAgendaIceMarkProfile(
   return {
     capabilityKey: scoredAgenda.capabilityKey,
     sourceCapabilityId: canonicalCapabilityId(
-      planning.planning.cardDefinitionId,
+      planning.cardDefinitionId,
       scoredAgenda.capabilityKey,
     ),
     visibility: scoredAgenda.visibility,
@@ -317,10 +317,10 @@ export function corpScoredAgendaFreeRezProfile(
   definitionId: number | undefined,
 ): CorpScoredAgendaFreeRezProfile | undefined {
   const planning = planningCard(definitionId);
-  const scoredAgenda = planning?.planning.engine.scoredAgenda;
+  const scoredAgenda = planning?.engine.scoredAgenda;
   if (
-    planning?.planning.side !== "corp" ||
-    planning.planning.cardType !== "agenda" ||
+    planning?.side !== "corp" ||
+    planning.cardType !== "agenda" ||
     scoredAgenda?.kind !== "score_rez_installed_ice_at_no_cost" ||
     scoredAgenda.visibility !== "hidden_info_barrier" ||
     typeof scoredAgenda.capabilityKey !== "string" ||
@@ -331,7 +331,7 @@ export function corpScoredAgendaFreeRezProfile(
   return {
     capabilityKey: scoredAgenda.capabilityKey,
     sourceCapabilityId: canonicalCapabilityId(
-      planning.planning.cardDefinitionId,
+      planning.cardDefinitionId,
       scoredAgenda.capabilityKey,
     ),
     visibility: scoredAgenda.visibility,
@@ -348,8 +348,8 @@ export function corpDefinitionIsMainPhasePassive(
   scoreEffect: "none" | "past" | "unreachable" = "none",
 ): boolean {
   const card = planningCard(definitionId);
-  if (card?.planning.side !== "corp") return false;
-  const engine = card.planning.engine;
+  if (card?.side !== "corp") return false;
+  const engine = card.engine;
   const allowedKeys = new Set([
     "schemaVersion",
     "characteristics",
@@ -382,9 +382,9 @@ export function corpOperationCannotFundWithLastClick(
   definitionId: number | undefined,
 ): boolean {
   const card = planningCard(definitionId);
-  if (card?.planning.side !== "corp" || card.planning.cardType !== "operation")
+  if (card?.side !== "corp" || card.cardType !== "operation")
     return false;
-  const engine = card.planning.engine;
+  const engine = card.engine;
   const keys = new Set([
     "schemaVersion",
     "characteristics",
@@ -412,8 +412,8 @@ export function corpDefinitionHasTraceSource(
   definitionId: number | undefined,
 ): boolean {
   const planning = planningCard(definitionId);
-  if (planning?.planning.side !== "corp") return false;
-  const engine = planning.planning.engine;
+  if (planning?.side !== "corp") return false;
+  const engine = planning.engine;
   return (
     containsMechanicalKind(engine, "trace") ||
     (isRecord(engine.relativeIce) &&
@@ -426,9 +426,9 @@ export function corpDefinitionHasTagSource(
 ): boolean {
   const planning = planningCard(definitionId);
   return (
-    planning?.planning.side === "corp" &&
-    (containsMechanicalKind(planning.planning.engine, "add_tags") ||
-      planning.planning.engine.corpUtility?.kind === "encounter_tag")
+    planning?.side === "corp" &&
+    (containsMechanicalKind(planning.engine, "add_tags") ||
+      planning.engine.corpUtility?.kind === "encounter_tag")
   );
 }
 
@@ -443,12 +443,12 @@ export function corpTraceTagSourceProfile(
 ): CorpTraceTagSourceProfile | undefined {
   const planning = planningCard(definitionId);
   if (
-    planning?.planning.side !== "corp" ||
-    planning.planning.cardType !== "operation"
+    planning?.side !== "corp" ||
+    planning.cardType !== "operation"
   ) {
     return undefined;
   }
-  const ability = (planning.planning.engine.abilities ?? []).find(
+  const ability = (planning.engine.abilities ?? []).find(
     (candidate) =>
       candidate.kind === "on_play" &&
       mechanicalRecordsByKind(candidate.effects, "trace").some(
@@ -464,7 +464,7 @@ export function corpTraceTagSourceProfile(
     ? {
         capabilityKey: ability.capabilityKey,
         sourceCapabilityId: canonicalCapabilityId(
-          planning.planning.cardDefinitionId,
+          planning.cardDefinitionId,
           ability.capabilityKey,
         ),
       }
@@ -476,11 +476,11 @@ export function corpScoredTraceTagSourceProfile(
 ): CorpTraceTagSourceProfile | undefined {
   const planning = planningCard(definitionId);
   if (
-    planning?.planning.side !== "corp" ||
-    planning.planning.cardType !== "agenda"
+    planning?.side !== "corp" ||
+    planning.cardType !== "agenda"
   )
     return undefined;
-  const ability = (planning.planning.engine.abilities ?? []).find(
+  const ability = (planning.engine.abilities ?? []).find(
     (candidate) =>
       candidate.kind === "activated" &&
       candidate.timing === "corp_main" &&
@@ -497,7 +497,7 @@ export function corpScoredTraceTagSourceProfile(
     ? {
         capabilityKey: ability.capabilityKey,
         sourceCapabilityId: canonicalCapabilityId(
-          planning.planning.cardDefinitionId,
+          planning.cardDefinitionId,
           ability.capabilityKey,
         ),
       }
@@ -509,12 +509,12 @@ export function corpDirectTagOperationProfile(
 ): CorpOnPlayCapabilityProfile | undefined {
   const planning = planningCard(definitionId);
   if (
-    planning?.planning.side !== "corp" ||
-    planning.planning.cardType !== "operation"
+    planning?.side !== "corp" ||
+    planning.cardType !== "operation"
   ) {
     return undefined;
   }
-  const utility = planning.planning.engine.corpUtility;
+  const utility = planning.engine.corpUtility;
   if (
     utility?.kind === "encounter_tag" &&
     utility.visibility === "public" &&
@@ -525,12 +525,12 @@ export function corpDirectTagOperationProfile(
     return {
       capabilityKey: utility.capabilityKey,
       sourceCapabilityId: canonicalCapabilityId(
-        planning.planning.cardDefinitionId,
+        planning.cardDefinitionId,
         utility.capabilityKey,
       ),
     };
   }
-  const ability = (planning.planning.engine.abilities ?? []).find(
+  const ability = (planning.engine.abilities ?? []).find(
     (candidate) =>
       candidate.kind === "on_play" &&
       candidate.effects.some(
@@ -544,7 +544,7 @@ export function corpDirectTagOperationProfile(
     ? {
         capabilityKey: ability.capabilityKey,
         sourceCapabilityId: canonicalCapabilityId(
-          planning.planning.cardDefinitionId,
+          planning.cardDefinitionId,
           ability.capabilityKey,
         ),
       }
@@ -556,12 +556,12 @@ export function corpTaggedCreditDenialOperationProfile(
 ): CorpOnPlayCapabilityProfile | undefined {
   const planning = planningCard(definitionId);
   if (
-    planning?.planning.side !== "corp" ||
-    planning.planning.cardType !== "operation"
+    planning?.side !== "corp" ||
+    planning.cardType !== "operation"
   ) {
     return undefined;
   }
-  const ability = (planning.planning.engine.abilities ?? []).find(
+  const ability = (planning.engine.abilities ?? []).find(
     (candidate) =>
       candidate.kind === "on_play" &&
       (containsMechanicalKind(candidate.condition, "runner_is_tagged") ||
@@ -575,7 +575,7 @@ export function corpTaggedCreditDenialOperationProfile(
     ? {
         capabilityKey: ability.capabilityKey,
         sourceCapabilityId: canonicalCapabilityId(
-          planning.planning.cardDefinitionId,
+          planning.cardDefinitionId,
           ability.capabilityKey,
         ),
       }
@@ -586,10 +586,10 @@ export function corpInstalledHardwareTrashOperationProfile(
   definitionId: number | undefined,
 ): CorpOnPlayCapabilityProfile | undefined {
   const planning = planningCard(definitionId);
-  const utility = planning?.planning.engine.corpUtility;
+  const utility = planning?.engine.corpUtility;
   if (
-    planning?.planning.side !== "corp" ||
-    planning.planning.cardType !== "operation" ||
+    planning?.side !== "corp" ||
+    planning.cardType !== "operation" ||
     utility?.kind !== "installed_hardware_trash_by_counter" ||
     utility.excludesSubtype !== "cybernetics" ||
     utility.visibility !== "public"
@@ -599,7 +599,7 @@ export function corpInstalledHardwareTrashOperationProfile(
   return {
     capabilityKey: utility.capabilityKey,
     sourceCapabilityId: canonicalCapabilityId(
-      planning.planning.cardDefinitionId,
+      planning.cardDefinitionId,
       utility.capabilityKey,
     ),
   };
@@ -609,10 +609,10 @@ export function corpArchivesToHqOperationProfile(
   definitionId: number | undefined,
 ): CorpArchivesToHqOperationProfile | undefined {
   const planning = planningCard(definitionId);
-  const utility = planning?.planning.engine.corpUtility;
+  const utility = planning?.engine.corpUtility;
   if (
-    planning?.planning.side !== "corp" ||
-    planning.planning.cardType !== "operation" ||
+    planning?.side !== "corp" ||
+    planning.cardType !== "operation" ||
     utility?.kind !== "corp_archives_to_hq" ||
     utility.visibility !== "hidden_info_barrier" ||
     (utility.maxSelections !== undefined &&
@@ -626,7 +626,7 @@ export function corpArchivesToHqOperationProfile(
   return {
     capabilityKey: utility.capabilityKey,
     sourceCapabilityId: canonicalCapabilityId(
-      planning.planning.cardDefinitionId,
+      planning.cardDefinitionId,
       utility.capabilityKey,
     ),
     maxSelections: utility.maxSelections ?? 1,
@@ -647,10 +647,10 @@ export function corpScoredTaggedMeatDamageProfile(
   definitionId: number | undefined,
 ): CorpTaggedMeatDamageProfile | undefined {
   const card = planningCard(definitionId);
-  const scored = card?.planning.engine.scoredAgenda;
+  const scored = card?.engine.scoredAgenda;
   if (
-    card?.planning.side === "corp" &&
-    card.planning.cardType === "agenda" &&
+    card?.side === "corp" &&
+    card.cardType === "agenda" &&
     scored?.kind === "tagged_runner_meat_damage_reduce_hand_size_on_success" &&
     scored.visibility === "public" &&
     positiveSafeInteger(scored.damageAmount)
@@ -658,7 +658,7 @@ export function corpScoredTaggedMeatDamageProfile(
     return {
       capabilityKey: scored.capabilityKey,
       sourceCapabilityId: canonicalCapabilityId(
-        card.planning.cardDefinitionId,
+        card.cardDefinitionId,
         scored.capabilityKey,
       ),
       damageAmount: scored.damageAmount,
@@ -670,7 +670,7 @@ export function corpScoredTaggedMeatDamageProfile(
 export function corpInstalledTaggedMeatDamageProfile(
   definitionId: number | undefined,
 ): CorpTaggedMeatDamageProfile | undefined {
-  const card = planningCard(definitionId)?.planning;
+  const card = planningCard(definitionId);
   if (
     card?.side !== "corp" ||
     (card.cardType !== "asset" && card.cardType !== "upgrade")
@@ -697,12 +697,12 @@ function taggedMeatDamageProfile(
 ): CorpTaggedMeatDamageProfile | undefined {
   const planning = planningCard(definitionId);
   if (
-    planning?.planning.side !== "corp" ||
-    planning.planning.cardType !== cardType
+    planning?.side !== "corp" ||
+    planning.cardType !== cardType
   ) {
     return undefined;
   }
-  const profiles = (planning.planning.engine.abilities ?? []).flatMap(
+  const profiles = (planning.engine.abilities ?? []).flatMap(
     (ability) => {
       if (cardType === "operation") {
         if (ability.kind !== "on_play") return [];
@@ -725,7 +725,7 @@ function taggedMeatDamageProfile(
               {
                 capabilityKey: ability.capabilityKey,
                 sourceCapabilityId: canonicalCapabilityId(
-                  planning.planning.cardDefinitionId,
+                  planning.cardDefinitionId,
                   ability.capabilityKey,
                 ),
                 damageAmount: effect.amount,
@@ -746,9 +746,9 @@ export function corpTaggedDamagePayoffProfile(
   definitionId: number | undefined,
 ): CorpTaggedDamagePayoffProfile | undefined {
   const planning = planningCard(definitionId);
-  const payoff = planning?.planning.engine.uniqueDirectLongtail;
+  const payoff = planning?.engine.uniqueDirectLongtail;
   if (
-    planning?.planning.side !== "corp" ||
+    planning?.side !== "corp" ||
     payoff?.kind !== "tagged_meat_damage" ||
     !positiveSafeInteger(payoff.requiredRunnerTags) ||
     !positiveSafeInteger(payoff.agendaPointCost) ||
@@ -771,9 +771,9 @@ export function corpGuaranteedOnPlayAdvancementCountersPerTarget(
   definitionId: number | undefined,
 ): number {
   const card = planningCard(definitionId);
-  if (card?.planning.side !== "corp" || card.planning.cardType !== "operation")
+  if (card?.side !== "corp" || card.cardType !== "operation")
     return 0;
-  const abilities = card.planning.engine.abilities;
+  const abilities = card.engine.abilities;
   if (abilities?.length !== 1) return 0;
   const ability = abilities[0]!;
   if (
@@ -799,9 +799,9 @@ export function corpScoreConversionProfile(
   definitionId: number | undefined,
 ): CorpScoreConversionProfile | undefined {
   const planning = planningCard(definitionId);
-  if (planning?.planning.side !== "corp") return undefined;
+  if (planning?.side !== "corp") return undefined;
   const effectKinds = new Set(
-    (planning.planning.engine.abilities ?? []).flatMap((ability) =>
+    (planning.engine.abilities ?? []).flatMap((ability) =>
       ability.effects.map((effect) => effect.kind),
     ),
   );
@@ -810,7 +810,7 @@ export function corpScoreConversionProfile(
     placesAdvancementCounters: effectKinds.has(
       "distribute_advancement_counters",
     ),
-    gainsCorpActions: (planning.planning.engine.abilities ?? []).some(
+    gainsCorpActions: (planning.engine.abilities ?? []).some(
       (ability) =>
         ability.effects.some(
           (effect) =>
@@ -846,7 +846,7 @@ export function corpCandidateProvidesScoreConversion(
 
 function planningCard(definitionId: number | undefined) {
   return definitionId
-    ? cardSpecPlanningCardByDefinitionId(definitionId)
+    ? planningCardByDefinitionId(definitionId)
     : undefined;
 }
 

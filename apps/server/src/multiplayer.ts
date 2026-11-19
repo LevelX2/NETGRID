@@ -9,8 +9,11 @@ import { createHash, randomBytes } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import { setTimeout as yieldToEventLoop } from "node:timers/promises";
 import { UpdateAdmission } from "./update-admission";
+import type { AiDecisionWorkerPool } from "./ai-decision-worker-pool";
+import type { LiveAiQuotes } from "./ai-decision-worker";
 import { probeHistoricalEngineState } from "./maintenance-engine-probe";
 import {
+  AiDecisionChronicle,
   assertValidAiDeckSnapshotForRuntime,
   beliefStateInvariantSignature,
   buildAiDecisionInput,
@@ -23,6 +26,7 @@ import {
   residentPlanPortfolioSnapshot,
   reconstructBeliefState,
   releaseAiMatchRuntime,
+  restoreAiRuntimeCheckpoint,
   restoreResidentPlanPortfolioMemorySnapshot,
   selectAiDecisionSideForState,
   withDecisionLocalCorpPunishRouteQuotes,
@@ -42,7 +46,7 @@ import {
 import { buildEngineDeck, type DeckSnapshot } from "@netgrid/decks";
 import {
   applyAction,
-  bindMatchActionOffer,
+  applyMatchActionOffer,
   applyRandomizedIceInstallSelection,
   applyRandomizedTurnPlanSelection,
   applyRandomizedTraceBidSelection,
@@ -98,6 +102,7 @@ import {
   type AiDifficulty,
   type AiDecisionDebug,
   type AiDecisionInput,
+  type ApplyActionOptions,
   type CorpPunishRouteQuoteSet,
   type DeckPublicMetadata,
   type EngineError,
@@ -424,6 +429,11 @@ export type ActionPersistenceLoadInput = {
   idempotencyKey?: string;
 };
 
+export type ConnectionPersistenceInput = {
+  sessionId: string;
+  kind: "heartbeat" | "time_expired" | "countdown_cancelled";
+};
+
 export type StoredMatch = {
   match: MatchRecord;
   sessions: SessionRecord[];
@@ -717,6 +727,11 @@ export type MultiplayerStorage = {
     input: ActionPersistenceLoadInput,
   ): Promise<StoredMatch | undefined>;
   saveActionDelta?(record: StoredMatch): Promise<void>;
+  loadForConnection?(matchId: string): Promise<StoredMatch | undefined>;
+  saveConnection?(
+    record: StoredMatch,
+    input: ConnectionPersistenceInput,
+  ): Promise<void>;
   list?(): Promise<StoredMatch[]>;
   listStartupReconciliationMetadata?(
     matchIds: readonly string[],
@@ -1200,6 +1215,8 @@ export class MultiplayerService {
    */
   private readonly preparedAiDecisions = new Map<string, PreparedAiDecision>();
   private readonly aiRuntimeMatchIds = new Set<string>();
+  private readonly aiChronicle = new AiDecisionChronicle();
+  private readonly aiDecisionWorkers: AiDecisionWorkerPool | undefined;
 
   constructor(
     private readonly storage: MultiplayerStorage,
@@ -1211,6 +1228,7 @@ export class MultiplayerService {
       allowTestCards?: boolean;
       now?: () => string;
       chooseAiAction?: AiDecisionChooser;
+      aiDecisionWorkers?: AiDecisionWorkerPool;
       buildAiDecisionInput?: AiDecisionInputBuilder;
       applyAction?: EngineActionApplier;
       applyRandomizedIceInstallSelection?: EngineRandomizedIceInstallSelectionApplier;
@@ -1236,6 +1254,7 @@ export class MultiplayerService {
     this.allowTestCards = options.allowTestCards;
     this.now = options.now ?? (() => new Date().toISOString());
     this.chooseAiAction = options.chooseAiAction ?? chooseAiAction;
+    this.aiDecisionWorkers = options.aiDecisionWorkers;
     this.buildAiDecisionInput =
       options.buildAiDecisionInput ?? buildAiDecisionInput;
     this.applyEngineAction = options.applyAction ?? applyAction;
@@ -1306,6 +1325,20 @@ export class MultiplayerService {
     for (const observer of this.persistenceObservers) await observer(record);
   }
 
+  private async persistConnection(
+    record: StoredMatch,
+    input: ConnectionPersistenceInput,
+  ): Promise<void> {
+    if (!this.storage.loadForConnection || !this.storage.saveConnection) {
+      await this.persist(record);
+      return;
+    }
+    ensureMatchResultSnapshot(record);
+    await this.storage.saveConnection(record, input);
+    this.releaseTerminalAiRuntime(record);
+    for (const observer of this.persistenceObservers) await observer(record);
+  }
+
   private releaseTerminalAiRuntime(record: StoredMatch): void {
     if (isTerminalStatus(record.match.status))
       this.releaseAiRuntimeFor(record.match.matchId);
@@ -1313,16 +1346,43 @@ export class MultiplayerService {
 
   private releaseAiRuntimeFor(matchId: string): void {
     releaseAiMatchRuntime(matchId);
+    this.aiChronicle.release(matchId);
     this.preparedAiDecisions.delete(matchId);
     this.aiRuntimeMatchIds.delete(matchId);
   }
 
-  private chooseMatchAiAction(
+  private async chooseMatchAiAction(
     record: StoredMatch,
-    ...args: Parameters<AiDecisionChooser>
-  ): ReturnType<AiDecisionChooser> {
+    input: AiDecisionInputWithDeckCapabilities,
+    state: GameState,
+    persistTacticalPlanMemory = true,
+  ): Promise<AiDecision> {
     this.aiRuntimeMatchIds.add(record.match.matchId);
-    return this.chooseAiAction(...args);
+    const quotes: LiveAiQuotes = {
+      quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
+      quoteRandomizedIceInstallSelection: (request) =>
+        quoteRandomizedIceInstallSelection(state, request),
+      quoteRandomizedTurnPlanSelection: (request) =>
+        quoteRandomizedTurnPlanSelection(state, request),
+      quoteRandomizedTraceBidSelection: (request) =>
+        quoteRandomizedTraceBidSelection(state, request),
+    };
+    if (!this.aiDecisionWorkers)
+      return this.chooseAiAction(input, { ...quotes, persistTacticalPlanMemory });
+
+    const deckSnapshotId = requiredCheckpointDeckSnapshotId(input);
+    const result = await this.aiDecisionWorkers.choose(
+      input,
+      exportAiRuntimeCheckpoint(input, deckSnapshotId),
+      quotes,
+      persistTacticalPlanMemory,
+    );
+    // The per-match lock is held while the worker decides. The Engine
+    // applies the result to the admitted state when a move is submitted.
+    restoreAiRuntimeCheckpoint(input, deckSnapshotId, result.runtime, {
+      preserveLiveCommitment: true,
+    });
+    return result.decision;
   }
 
   /**
@@ -2390,7 +2450,9 @@ export class MultiplayerService {
     },
   ): Promise<ReconnectResult | { error: SafeErrorPayload }> {
     return this.updateAdmission.run(() =>
-      this.reconnectAdmittedMatch(matchId, input),
+      this.withMatchLock(matchId, () =>
+        this.reconnectAdmittedMatch(matchId, input),
+      ),
     );
   }
 
@@ -2398,7 +2460,7 @@ export class MultiplayerService {
     matchId: string,
     input: Parameters<MultiplayerService["reconnectMatch"]>[1],
   ): Promise<ReconnectResult | { error: SafeErrorPayload }> {
-    const record = await this.mustLoad(matchId);
+    const record = await this.loadConnection(matchId);
     if (!record)
       return {
         error: safeError(
@@ -2428,17 +2490,13 @@ export class MultiplayerService {
       };
 
     const now = this.now();
-    record.sessions = record.sessions.map((candidate) =>
-      candidate.sessionId === session.sessionId
-        ? {
-            ...candidate,
-            lastSeenAt: now,
-          }
-        : candidate,
-    );
-    this.syncPlayerClock(record, now);
+    session.lastSeenAt = now;
+    const timeExpired = this.syncPlayerClock(record, now);
     record.match.updatedAt = now;
-    await this.persist(record);
+    await this.persistConnection(record, {
+      sessionId: session.sessionId,
+      kind: timeExpired ? "time_expired" : "heartbeat",
+    });
 
     const payload = this.shouldUseLobbyPayload(record)
       ? this.lobbyPayloadFor(record, input.side)
@@ -2696,7 +2754,7 @@ export class MultiplayerService {
     options?: { allowLobby?: boolean },
   ): Promise<ServicePayload | { error: SafeErrorPayload }> {
     return this.withMatchLock(matchId, async () => {
-      const record = await this.mustLoad(matchId);
+      const record = await this.loadConnection(matchId);
       if (!record)
         return {
           error: safeError(
@@ -2709,10 +2767,15 @@ export class MultiplayerService {
         return {
           error: safeError("unauthorized", "Die Session ist nicht gültig."),
         };
-      session.lastSeenAt = this.now();
-      this.syncPlayerClock(record);
-      if (this.storage instanceof InMemoryMatchStorage)
-        await this.persist(record);
+      const now = this.now();
+      session.lastSeenAt = now;
+      const timeExpired = this.syncPlayerClock(record, now);
+      if (timeExpired || this.storage instanceof InMemoryMatchStorage) {
+        await this.persistConnection(record, {
+          sessionId: session.sessionId,
+          kind: timeExpired ? "time_expired" : "heartbeat",
+        });
+      }
       if (this.shouldUseLobbyPayload(record)) {
         const lobby = this.lobbyPayloadFor(record, side);
         return options?.allowLobby
@@ -2735,7 +2798,7 @@ export class MultiplayerService {
     connected: boolean,
   ): Promise<ServicePayload | { error: SafeErrorPayload }> {
     return this.withMatchLock(matchId, async () => {
-      const record = await this.mustLoad(matchId);
+      const record = await this.loadConnection(matchId);
       if (!record)
         return {
           error: safeError(
@@ -2750,22 +2813,28 @@ export class MultiplayerService {
         };
       session.connected = connected;
       session.lastSeenAt = this.now();
-      this.syncPlayerClock(record);
-      let persistentLifecycleChange = false;
-      if (
+      const timeExpired = this.syncPlayerClock(record, session.lastSeenAt);
+      const countdownCancelled =
         !connected &&
         record.match.status === "countdown" &&
-        record.startLobby
-      ) {
+        record.startLobby !== undefined;
+      if (countdownCancelled) {
         this.cancelCountdownFor(record, side);
-        persistentLifecycleChange = true;
       }
       const persistTransientConnectionState =
         this.storage instanceof InMemoryMatchStorage;
-      if (persistentLifecycleChange || persistTransientConnectionState) {
-        record.match.matchVersion += 1;
+      if (timeExpired || countdownCancelled || persistTransientConnectionState) {
+        const kind = timeExpired
+          ? "time_expired"
+          : countdownCancelled
+            ? "countdown_cancelled"
+            : "heartbeat";
+        if (!timeExpired) record.match.matchVersion += 1;
         record.match.updatedAt = this.now();
-        await this.persist(record);
+        await this.persistConnection(record, {
+          sessionId: session.sessionId,
+          kind,
+        });
       }
       if (this.shouldUseLobbyPayload(record))
         return this.lobbyPayloadFor(record, side);
@@ -3277,8 +3346,8 @@ export class MultiplayerService {
   submitActionOffer(
     input: MatchActionSubmission & { sessionToken: string },
   ): Promise<SubmitActionResult> {
-    return this.applySubmittedAction(input, (state) =>
-      bindMatchActionOffer(state, input),
+    return this.applySubmittedAction(input, (state, options) =>
+      applyMatchActionOffer(state, input, options),
     );
   }
 
@@ -3293,19 +3362,21 @@ export class MultiplayerService {
     selectedTargets?: Record<string, string>;
     selectedChoices?: Record<string, unknown>;
   }): Promise<SubmitActionResult> {
-    return this.applySubmittedAction(input, () => {
-      const { sessionToken: _sessionToken, clientKnownMatchVersion: _version, ...action } = input;
-      return { action };
-    });
+    const {
+      sessionToken: _sessionToken,
+      clientKnownMatchVersion: _version,
+      ...action
+    } = input;
+    return this.applySubmittedAction(input, (state, options) =>
+      applyAction(state, action, options),
+    );
   }
 
   private applySubmittedAction(
     input: Omit<MatchActionSubmission, "actionId" | "selectedChoices" | "selectedTargets"> & {
       sessionToken: string;
     },
-    bind: (state: GameState) =>
-      | { action: PlayerAction }
-      | { errorCode: "ERR_UNKNOWN_ACTION" | "ERR_INVALID_CHOICE" },
+    apply: (state: GameState, options: ApplyActionOptions) => EngineResult,
   ): Promise<SubmitActionResult> {
     return this.withMatchLock(input.matchId, async () => {
       const record = await this.mustLoadForAction(input.matchId, {
@@ -3436,37 +3507,7 @@ export class MultiplayerService {
         };
       }
 
-      const bound = bind(record.gameState);
-      if ("errorCode" in bound) {
-        const receipt = this.receiptFor(
-          record,
-          input.side,
-          input.idempotencyKey,
-          false,
-          bound.errorCode,
-        );
-        record.actionReceipts.push(receipt);
-        await this.persistAction(record);
-        return {
-          ok: false,
-          receipt,
-          error: safeError(
-            bound.errorCode,
-            "Diese Aktion ist nicht legal.",
-            record.gameState,
-            input.side,
-          ),
-          payload: this.payloadFor(record, input.side),
-        };
-      }
-      const snapshot = this.snapshotFor(
-        input.matchId,
-        record.gameState,
-        record.match.matchVersion,
-        preActionStateSnapshotId(record.gameState.stateVersion + 1),
-        false,
-      );
-      const result = applyAction(record.gameState, bound.action, {
+      const result = apply(record.gameState, {
         publicEventsMode: "latest",
       });
       if (!result.ok) {
@@ -3493,8 +3534,15 @@ export class MultiplayerService {
       }
 
       const barrier = isHiddenInfoBarrier(result.event);
-      const undoSnapshot = { ...snapshot, hiddenInfoBarrier: barrier };
-      record.stateSnapshots.push(undoSnapshot);
+      record.stateSnapshots.push(
+        this.snapshotFor(
+          input.matchId,
+          record.gameState,
+          record.match.matchVersion,
+          preActionStateSnapshotId(result.state.stateVersion),
+          barrier,
+        ),
+      );
       record.gameState = result.state;
       record.eventLog.push(toEventRecord(input.matchId, result.event, barrier));
       const receipt = {
@@ -3639,7 +3687,7 @@ export class MultiplayerService {
         (input.mode === "until_human" && record.match.mode !== "ai_vs_ai") ||
         (input.mode === "batch" && record.match.mode === "ai_vs_ai")
           ? await this.runAiUntilNextHuman(record)
-          : this.runAiStep(record);
+          : await this.runAiStep(record);
       this.syncPlayerClock(record);
 
       if (!aiStepResult.ok && aiStepResult.code === "ai_decision_failed") {
@@ -3875,6 +3923,7 @@ export class MultiplayerService {
               record,
               activeAiSide,
             ),
+            chronicle: this.aiChronicle,
           });
           this.restoreResidentPlanPortfolioFor(record, aiInput);
         } catch (error) {
@@ -3890,16 +3939,7 @@ export class MultiplayerService {
             };
           throw error;
         }
-        decision = this.chooseMatchAiAction(record, aiInput, {
-          quoteCorpPunishRoute: (request) =>
-            quoteCorpPunishRoute(record.gameState!, request),
-          quoteRandomizedIceInstallSelection: (request) =>
-            quoteRandomizedIceInstallSelection(record.gameState!, request),
-          quoteRandomizedTurnPlanSelection: (request) =>
-            quoteRandomizedTurnPlanSelection(record.gameState!, request),
-          quoteRandomizedTraceBidSelection: (request) =>
-            quoteRandomizedTraceBidSelection(record.gameState!, request),
-        });
+        decision = await this.chooseMatchAiAction(record, aiInput, record.gameState);
         this.preparedAiDecisions.set(record.match.matchId, {
           stateVersion: record.gameState.stateVersion,
           side: activeAiSide,
@@ -4133,7 +4173,7 @@ export class MultiplayerService {
         record.match.aiControllers?.[opposite(input.targetSide)]?.difficulty ??
         "normal";
       const advisorProfileId = `${input.targetSide}-human-advisor-v0.9-${advisorDifficulty}`;
-      let aiInput: AiDecisionInput;
+      let aiInput: AiDecisionInputWithDeckCapabilities;
       try {
         const ownDeckSnapshot = assertRecordAiDeckSnapshotForRuntime(
           record,
@@ -4149,6 +4189,7 @@ export class MultiplayerService {
             record,
             input.targetSide,
           ),
+          chronicle: this.aiChronicle,
         });
       } catch (error) {
         if (isAiDeckSnapshotRuntimeError(error)) {
@@ -4164,17 +4205,9 @@ export class MultiplayerService {
         }
         throw error;
       }
-      const decision = this.chooseMatchAiAction(record, aiInput, {
-        persistTacticalPlanMemory: false,
-        quoteCorpPunishRoute: (request) =>
-          quoteCorpPunishRoute(record.gameState, request),
-        quoteRandomizedIceInstallSelection: (request) =>
-          quoteRandomizedIceInstallSelection(record.gameState, request),
-        quoteRandomizedTurnPlanSelection: (request) =>
-          quoteRandomizedTurnPlanSelection(record.gameState, request),
-        quoteRandomizedTraceBidSelection: (request) =>
-          quoteRandomizedTraceBidSelection(record.gameState, request),
-      });
+      const decision = await this.chooseMatchAiAction(
+        record, aiInput, record.gameState, false,
+      );
       if (
         decision.selectionKind === "engine_randomized_ice_install_selection" ||
         decision.selectionKind === "engine_randomized_turn_plan_selection" ||
@@ -5342,6 +5375,7 @@ export class MultiplayerService {
   }
 
   closeStorage(): void {
+    this.aiDecisionWorkers?.close();
     for (const matchId of this.aiRuntimeMatchIds)
       this.releaseAiRuntimeFor(matchId);
     this.storage.close?.();
@@ -6234,7 +6268,7 @@ export class MultiplayerService {
       this.aiControllableSide(record);
       count += 1
     ) {
-      if (!this.runAiStep(record).ok) return;
+      if (!(await this.runAiStep(record)).ok) return;
       await yieldToEventLoop(AI_EVENT_LOOP_YIELD_MS);
     }
     if (record.match.aiPacingMode === "fast")
@@ -6255,7 +6289,7 @@ export class MultiplayerService {
       this.aiControllableSide(record);
       count += 1
     ) {
-      const stepResult = this.runAiStep(record);
+      const stepResult = await this.runAiStep(record);
       if (!stepResult.ok) return stepResult;
       lastResult = stepResult;
       state = record.gameState;
@@ -6265,7 +6299,7 @@ export class MultiplayerService {
     return lastResult;
   }
 
-  private runAiStep(record: StoredMatch): AiStepResult {
+  private async runAiStep(record: StoredMatch): Promise<AiStepResult> {
     const state = record.gameState;
     if (
       !state ||
@@ -6300,6 +6334,7 @@ export class MultiplayerService {
           record,
           side,
         );
+        this.aiRuntimeMatchIds.add(record.match.matchId);
         input = this.buildAiDecisionInput(state, side, {
           difficulty: controller?.difficulty ?? "normal",
           profileId:
@@ -6309,6 +6344,7 @@ export class MultiplayerService {
           actionNumber: state.stateVersion,
           ownDeckSnapshot,
           expectedDeckSnapshot: aiDeckSnapshotExpectationFor(record, side),
+          chronicle: this.aiChronicle,
         });
         this.restoreResidentPlanPortfolioFor(record, input);
         decisionInput = input;
@@ -6331,16 +6367,7 @@ export class MultiplayerService {
         };
       }
       try {
-        decision = this.chooseMatchAiAction(record, input, {
-          quoteCorpPunishRoute: (request) =>
-            quoteCorpPunishRoute(state, request),
-          quoteRandomizedIceInstallSelection: (request) =>
-            quoteRandomizedIceInstallSelection(state, request),
-          quoteRandomizedTurnPlanSelection: (request) =>
-            quoteRandomizedTurnPlanSelection(state, request),
-          quoteRandomizedTraceBidSelection: (request) =>
-            quoteRandomizedTraceBidSelection(state, request),
-        });
+        decision = await this.chooseMatchAiAction(record, input, state);
       } catch (error) {
         const diagnosticCode = this.captureAiDecisionFailureAttempt(
           record,
@@ -6699,6 +6726,12 @@ export class MultiplayerService {
       if (!record || record.actionPersistenceBaseline) return record;
     }
     return this.storage.load(matchId, { includeStateSnapshots: false });
+  }
+
+  private async loadConnection(matchId: string): Promise<StoredMatch | undefined> {
+    return this.storage.loadForConnection && this.storage.saveConnection
+      ? this.storage.loadForConnection(matchId)
+      : this.storage.load(matchId);
   }
 
   private authenticate(

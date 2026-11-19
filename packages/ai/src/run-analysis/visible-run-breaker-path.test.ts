@@ -1,6 +1,6 @@
 import type { VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   carryProjectedBreakerStrength,
   effectiveIceForQuote,
@@ -42,7 +42,7 @@ describe("visible run breaker path", () => {
         definitionId: 34,
       } as VisibleCard,
       breakerDefinition:
-        CARD_DEFINITIONS_BY_ID[34],
+        planningCardFactsByDefinitionId(34),
       ice: {
         instanceId: "code-gate",
         definitionId: 590,

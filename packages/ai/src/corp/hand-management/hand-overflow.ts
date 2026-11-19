@@ -5,7 +5,7 @@ import {
 import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 
 import {
   corpIceRezSupportOperationHasPositiveCurrentIncome,
@@ -295,7 +295,7 @@ export function corpHqOverflowCandidateIsExactCurrentConversion(
     (card) => card.instanceId === candidate.sourceCardInstanceId,
   );
   if (isQuotedCorpCounterBankInHq(input, source)) return false;
-  const definition = CARD_DEFINITIONS_BY_ID[candidate.sourceDefinitionId];
+  const definition = planningCardFactsByDefinitionId(candidate.sourceDefinitionId);
   const action = input.legalActions.find(
     (legalAction) => legalAction.actionId === candidate.actionId,
   );

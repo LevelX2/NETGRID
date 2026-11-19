@@ -6,7 +6,7 @@ import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { rootRezCreditOutcomeProjectionStatus } from "../../actions/action-economy-projection";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { type CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
 
 import { type CorpDefenseSignal } from "../../plans/corp-defense-contracts";
@@ -205,7 +205,7 @@ export function corpEconomyDevelopmentCampaigns(
     ) {
       return;
     }
-    const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
+    const definition = planningCardFactsByDefinitionId(card.definitionId);
     const hint = AI_HINTS_BY_CARD.get(card.definitionId);
     const startRezChoice = input.playerView.pendingChoice;
     const startRezOption =
@@ -1249,7 +1249,7 @@ export function corpImmediateOperationThresholdPreparations(
       ) {
         return [];
       }
-      const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
+      const definition = planningCardFactsByDefinitionId(card.definitionId);
       const hint = AI_HINTS_BY_CARD.get(card.definitionId);
       const operationCreditCost = definition?.cost;
       if (

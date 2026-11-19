@@ -9,10 +9,21 @@ Status: aktueller Implementierungsvertrag
 und `actionPersistenceBaseline`. `apps/server/src/storage-sqlite.ts`
 implementiert den begrenzten Aktionsload und den atomaren Delta-Save.
 Normale Aktionen benötigen keine vollständige Hydration aller öffentlichen
-Events, KI-Traces, Receipts und Snapshots. Der aktuelle Kernzustand ist vollständig. Öffentliche Aktionsloads lesen höchstens
-80 Ereignisse direkt in SQL. In reinen Human-Partien gilt dieselbe Grenze für
+Events, KI-Traces, Receipts, Undo-Historie und Snapshots. Der aktuelle
+Kernzustand ist vollständig. Öffentliche Aktionsloads lesen höchstens 80
+Ereignisse direkt in SQL und je Ereignis höchstens den neuesten KI-Trace.
+In reinen Human-Partien gilt dieselbe Grenze für
 Engine-Ereignisse; KI-Partien behalten die vollständige side-sichere Chronologie
 für ihre bestehenden Beobachtungs- und Belief-Verträge.
+
+Reconnect, WebSocket-Bootstrap und WebSocket-Präsenz laden den Kernzustand,
+Sessions, Tokens, Lobby, ausstehendes Undo und die öffentliche Chronik mit bis
+zu 80 Ereignissen samt jeweils neuestem KI-Trace. Der Verbindungsload lädt keine
+Engine-Ereignisse, Receipts, Undo-Historie oder Spielstandssnapshots. Reconnect
+speichert Session und Spieluhr gezielt. Ein unterbrochener Lobby-Countdown
+schreibt die geänderte Lobby, ein Zeitablauf nutzt den atomaren Delta-Save für
+Ergebnis, Ereignis und Tokenwiderruf.
+[Verbindungsload und gezieltes Speichern](../../../apps/server/src/storage-sqlite.ts)
 
 Der aktuelle Spielzustand steht in `game_states`. Die JSON-Metadaten in
 `matches.record_json` enthalten keinen Spielzustand. Zustände und Snapshots
@@ -48,7 +59,7 @@ Fehlgeschlagene KI-Versuche führen ihren Diagnosecode im Fehlerdatensatz.
 Ereignisblobs beziehen ihre ID aus der Tabellenzeile. Öffentliche
 Ereignisblobs beziehen daraus auch StateVersions und StateHash.
 
-Das Match-Schema 11 speichert die typisierten RNG-Tuples und numerische Run-IDs
+Das Match-Schema 12 speichert die typisierten RNG-Tuples und numerische Run-IDs
 und erfordert einen passenden Matchdatenpfad. Ein konfigurierter
 separater Accountpfad kann die Konto-Tabellen einer Datenbank mit Schema 3
 weiterverwenden.
@@ -83,10 +94,15 @@ enthalten; eine neue Entscheidung baut die Chronologie erneut auf.
   validiert weiterhin Seite, StateVersion, Timing, Kosten, Ziele und Choices.
 - Der Delta-Save prüft erwartete Match-/StateVersion und die gespeicherten
   Event-, Receipt- und Trace-Zähler innerhalb derselben SQLite-Transaktion.
+  Beide lesen diese Größen aus `match_journal_counts`. SQLite-Trigger führen
+  sie beim Einfügen und Entfernen von Journalzeilen in derselben Transaktion
+  fort. Das gilt auch für Undo und kaskadierende Löschungen.
   Fehlende Baseline und Versions- oder Präfixdrift erzeugen einen strukturierten
   Storagefehler; vorhandene Historie wird nicht still überschrieben.
-- Persistiert werden aktueller Kernzustand und neue History-Segmente. Undo
-  bleibt ein gesonderter vollständiger Truncate-Pfad.
+- Persistiert werden aktueller Kernzustand und neue History-Segmente. Der
+  Delta-Save bereitet den serialisierten Zustand und neue Snapshots vor der
+  Schreibtransaktion vor. Snapshot-Einfügungen binden den Primärschlüssel.
+  Undo bleibt ein gesonderter vollständiger Truncate-Pfad.
 - Erfolg und Persistence Observer folgen erst nach erfolgreichem Commit.
   Ein Persistenzfehler erzeugt keinen erfolgreichen Aktionsresponse.
 - Öffentliche Replay-Zufallsnachweise enthalten Domäne, Zähler, numerischen

@@ -1,6 +1,6 @@
 import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it, vi } from "vitest";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 
 import type {
   AiDecisionInput,
@@ -430,12 +430,12 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       type: "hardware",
       installCost: 6,
     });
-    const definition = CARD_DEFINITIONS_BY_ID[251]!;
+    const definition = planningCardFactsByDefinitionId(251)!;
     const breaker = visibleCard("krash-1", {
       definitionId: definition.id,
       title: definition.title,
       type: definition.type,
-      subtypes: definition.subtypes,
+      subtypes: definition.subtypes.slice(),
       installCost: definition.installCost!,
       memoryCost: definition.memoryCost!,
       rulesText: definition.rulesText,

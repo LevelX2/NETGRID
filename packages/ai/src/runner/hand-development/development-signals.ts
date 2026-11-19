@@ -8,7 +8,7 @@ import { runnerImmediateAgendaPointGain } from "../../actions/runner-agenda-poin
 
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 
 import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
 
@@ -100,7 +100,7 @@ function runnerUnrepresentedProgramDevelopmentTargets(
     outsideStackByDefinition.set(card.definitionId, instances);
   }
   return deckSnapshot.cards.flatMap((entry) => {
-    const definition = CARD_DEFINITIONS_BY_ID[entry.cardId];
+    const definition = planningCardFactsByDefinitionId(entry.cardId);
     const plausibleStackCopies =
       entry.quantity - (outsideStackByDefinition.get(entry.cardId)?.size ?? 0);
     return definition?.type === "program" &&
@@ -155,7 +155,7 @@ function runnerStrategicProgramSearchTargets(
       : undefined;
   return unrepresented
     .flatMap((definitionId): RunnerStrategicProgramSearchTarget[] => {
-      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
+      const definition = planningCardFactsByDefinitionId(definitionId);
       if (!definition || definition.type !== "program") return [];
       const roles = rolesForDeckDoctrineCard(definitionId);
       const subtypes = new Set(

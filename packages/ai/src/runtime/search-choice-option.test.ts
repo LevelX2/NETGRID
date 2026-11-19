@@ -2,7 +2,7 @@ import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthet
 import type { AiDecisionInput, CardDefinitionId } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { AI_HINTS_BY_CARD } from "../ai-hints";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   isSearchChoice,
   selectedSearchChoiceOptionIds,
@@ -535,7 +535,7 @@ function hiddenOption(
 }
 
 function canonicalProgramOption(optionId: string, definitionId: CardDefinitionId) {
-  const card = CARD_DEFINITIONS_BY_ID[definitionId]!;
+  const card = planningCardFactsByDefinitionId(definitionId)!;
   return option(optionId, card.title, card.type, {
     definitionId: card.id,
     subtypes: card.subtypes,

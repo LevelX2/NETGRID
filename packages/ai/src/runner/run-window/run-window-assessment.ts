@@ -21,7 +21,7 @@ import {
 } from "../../actions/risk-action-projection";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import { reconstructBeliefState } from "../../belief-state";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import {
   ActiveRunnerRunRoot,
@@ -1377,7 +1377,7 @@ function runnerPostPassDerezAndEndRunAssessment(
     };
   }
   const targetDefinition = targetMatches[0]!.ice.definitionId
-    ? CARD_DEFINITIONS_BY_ID[targetMatches[0]!.ice.definitionId!]
+    ? planningCardFactsByDefinitionId(targetMatches[0]!.ice.definitionId!)
     : undefined;
   const rezCost =
     targetDefinition?.type === "ice" &&

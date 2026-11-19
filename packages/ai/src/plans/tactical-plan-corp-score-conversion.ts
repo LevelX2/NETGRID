@@ -3,7 +3,7 @@ import { actionClickCost, actionCreditCost } from "../runtime/action-cost";
 import { requireVisibleCardDefinition } from "../runtime/visible-agenda-facts";
 import { quoteAgendaDefinitionScorePoints } from "@netgrid/engine";
 import { corpInstalledAdvancementPreparations } from "./corp-installed-advancement-preparation";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import {
   type AiDecisionInput,
@@ -1223,7 +1223,7 @@ function visibleAgendaPoints(
   card: VisibleCard,
 ): number {
   const definition = card.definitionId
-    ? CARD_DEFINITIONS_BY_ID[card.definitionId]
+    ? planningCardFactsByDefinitionId(card.definitionId)
     : undefined;
   const agendaPoints = card.agendaPoints ?? definition?.agendaPoints;
   if (typeof agendaPoints !== "number" || !Number.isFinite(agendaPoints))
@@ -1384,7 +1384,7 @@ function advancementRequirement(card: VisibleCard): number | undefined {
   }
   return card.definitionId
     ? positiveInteger(
-        CARD_DEFINITIONS_BY_ID[card.definitionId]?.advancementRequirement,
+        planningCardFactsByDefinitionId(card.definitionId)?.advancementRequirement,
       )
     : undefined;
 }
@@ -1394,7 +1394,7 @@ function isVisibleAgenda(card: VisibleCard): boolean {
     card.known !== false &&
     (card.type === "agenda" ||
       (card.definitionId
-        ? CARD_DEFINITIONS_BY_ID[card.definitionId]?.type === "agenda"
+        ? planningCardFactsByDefinitionId(card.definitionId)?.type === "agenda"
         : false))
   );
 }

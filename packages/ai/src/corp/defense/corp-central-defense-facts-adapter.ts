@@ -1,5 +1,5 @@
 import { decisionEventHistory } from "../../decision-event-history";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { validOptionalCardDefinitionIds } from "../../card-definition-id-input";
 import {
   type AiDecisionInput,
@@ -313,7 +313,7 @@ export function knownCorpRdDefinitionCounts(
       remaining.has(entry.cardId)
     )
       return undefined;
-    if (!CARD_DEFINITIONS_BY_ID[entry.cardId]) return undefined;
+    if (!planningCardFactsByDefinitionId(entry.cardId)) return undefined;
     remaining.set(entry.cardId, entry.quantity);
   }
   const archivesCards = canonicalCorpArchives(input);
@@ -440,7 +440,7 @@ function inventoryForDefinitionCounts(
   let importantTrashableCardCount = 0;
   const agendaPointCounts = new Map<number, number>();
   for (const [definitionId, quantity] of definitionCounts) {
-    const definition = CARD_DEFINITIONS_BY_ID[definitionId];
+    const definition = planningCardFactsByDefinitionId(definitionId);
     if (
       !definition ||
       !Number.isSafeInteger(quantity) ||

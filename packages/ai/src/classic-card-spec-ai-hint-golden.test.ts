@@ -1,4 +1,4 @@
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 
@@ -36,10 +36,10 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
   });
 
   it("pins all 54 complete compiler outputs including explicit absences", () => {
-    const compiled = cardSpecPlanningCards()
-      .filter((entry) => reviewedIds.has(entry.definition.id))
+    const compiled = listPlanningCardsWithFacts()
+      .filter((entry) => reviewedIds.has(entry.facts.id))
       .map((entry) => ({
-        cardId: entry.definition.id,
+        cardId: entry.facts.id,
         hint: deriveCardSpecAiHint(entry),
       }))
       .sort((left, right) => (left.cardId - right.cardId));
@@ -63,7 +63,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
 
   it("pins all 46 pre-Classic artifact records including Broker action costs", () => {
     const entriesById = new Map(
-      cardSpecPlanningCards().map((entry) => [entry.definition.id, entry]),
+      listPlanningCardsWithFacts().map((entry) => [entry.facts.id, entry]),
     );
     const priorGeneratedCards = generatedArtifact.cards.filter(
       (record) =>
@@ -181,9 +181,9 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
   });
 
   it("rejects unknown families, unsupported target owners and malformed action debt", () => {
-    const entries = cardSpecPlanningCards();
+    const entries = listPlanningCardsWithFacts();
     const vintage = entries.find(
-      (entry) => entry.definition.id === 55,
+      (entry) => entry.facts.id === 55,
     )!;
     expect(() =>
       deriveCardSpecAiHint({
@@ -213,7 +213,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
     ).toThrow("card_spec_unknown_action_debt_tag_prevention_shape");
 
     const targetOwner = entries.find(
-      (entry) => entry.definition.id === 50,
+      (entry) => entry.facts.id === 50,
     )!;
     expect(() =>
       deriveCardSpecAiHint({
@@ -231,10 +231,10 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
   });
 
   it("rejects invented strategy bindings and forged capability evidence", () => {
-    const entries = cardSpecPlanningCards();
+    const entries = listPlanningCardsWithFacts();
     const baskerville = structuredClone(
       entries.find(
-        (entry) => entry.definition.id === 9,
+        (entry) => entry.facts.id === 9,
       )!,
     );
     const baskervillePair =
@@ -249,7 +249,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
 
     const library = structuredClone(
       entries.find(
-        (entry) => entry.definition.id === 43,
+        (entry) => entry.facts.id === 43,
       )!,
     );
     const libraryPair =
@@ -269,7 +269,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
 
     const forgedAnchor = structuredClone(
       entries.find(
-        (entry) => entry.definition.id === 43,
+        (entry) => entry.facts.id === 43,
       )!,
     );
     const forgedPair =
@@ -286,14 +286,14 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
   });
 
   it("rejects missing scenario evidence and compatibility-container mechanics", () => {
-    const entry = cardSpecPlanningCards().find(
-      (candidate) => candidate.definition.id === 45,
+    const entry = listPlanningCardsWithFacts().find(
+      (candidate) => candidate.facts.id === 45,
     )!;
     expect(() =>
       deriveCardSpecAiHint({
         ...entry,
-        definition: {
-          ...entry.definition,
+        facts: {
+          ...entry.facts,
           id: "onr_classic_missing_scenario_evidence",
         },
       } as never),

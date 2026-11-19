@@ -1,6 +1,6 @@
 import { isRemoteServerId } from "@netgrid/shared";
 import { actionHasImmediateCreditGain } from "../actions/action-effect-classification";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   type AiDecision,
   type AiDecisionInput,
@@ -103,7 +103,7 @@ export function qualityTagsForActionWithDependencies(
       ? undefined
       : dependencies.findVisibleCard(input, action.source);
   const sourceDefinition = sourceCard?.definitionId
-    ? CARD_DEFINITIONS_BY_ID[sourceCard.definitionId]
+    ? planningCardFactsByDefinitionId(sourceCard.definitionId)
     : undefined;
   const targetServerId =
     typeof action.payload?.serverId === "string"
@@ -115,7 +115,7 @@ export function qualityTagsForActionWithDependencies(
   const agendaInHand = input.playerView.own.gripOrHq.filter(
     (card) =>
       card.definitionId &&
-      CARD_DEFINITIONS_BY_ID[card.definitionId]?.type === "agenda",
+      planningCardFactsByDefinitionId(card.definitionId)?.type === "agenda",
   ).length;
   const legalScoreAvailable =
     input.side === "corp" &&

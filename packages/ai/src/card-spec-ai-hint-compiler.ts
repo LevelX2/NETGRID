@@ -10,7 +10,7 @@ import {
   type KnownHintStrategySupportPairRole,
 } from "./hint-ontology";
 import {
-  cardSpecPlanningCards,
+  listPlanningCardsWithFacts,
   KNOWN_PLANNING_TACTIC_SIGNALS,
   KNOWN_PLANNING_TACTIC_USES,
 } from "@netgrid/cards/planning";
@@ -85,7 +85,7 @@ const CARD_SPEC_HINT_ENGINE_FIELDS = new Set([
 ]);
 
 export function deriveCardSpecAiHint(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): AiCardHint {
   for (const field of Object.keys(entry.planning.engine))
     if (!CARD_SPEC_HINT_ENGINE_FIELDS.has(field))
@@ -206,9 +206,9 @@ export function deriveCardSpecAiHint(
   );
   const evidence = deriveAiSupportEvidence(entry);
   const hint = {
-    cardId: entry.definition.id,
-    side: entry.definition.side,
-    cardType: entry.definition.type,
+    cardId: entry.facts.id,
+    side: entry.facts.side,
+    cardType: entry.facts.type,
     aiSupportStatus: evidence.status,
     roles,
     planRoles,
@@ -267,7 +267,7 @@ export function deriveCardSpecAiHint(
             ),
             threatLevel: remoteRoleAnnotation.threatLevel,
             serverScope:
-              entry.definition.type === "upgrade" ? "remote" : "server",
+              entry.facts.type === "upgrade" ? "remote" : "server",
           },
         }
       : closedMechanicalHint.remoteRole === undefined
@@ -396,7 +396,7 @@ function deriveActionCapabilitySemantics(
 }
 
 function deriveActionPlanOwnerBindings(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): NonNullable<AiCardHint["actionPlanOwnerBindings"]> {
   const result: NonNullable<AiCardHint["actionPlanOwnerBindings"]> = [];
   for (const capability of entry.planning.planningAnnotations?.capabilities ??
@@ -463,7 +463,7 @@ type ClosedMechanicalHintOverlay = {
   remoteRole?: NonNullable<AiCardHint["remoteRole"]>;
 };
 
-type PlanningEntry = ReturnType<typeof cardSpecPlanningCards>[number];
+type PlanningEntry = ReturnType<typeof listPlanningCardsWithFacts>[number];
 type PlanningAbility = NonNullable<
   PlanningEntry["planning"]["engine"]["abilities"]
 >[number];
@@ -901,7 +901,7 @@ function deriveGenericTypedHintOverlay(
     }
     if (modifier.kind === "ice_strength") {
       const runnerWeakensIce =
-        entry.definition.side === "runner" && modifier.operation === "reduce";
+        entry.facts.side === "runner" && modifier.operation === "reduce";
       overlay.effects.push(
         runnerWeakensIce
           ? {
@@ -1367,14 +1367,14 @@ function deriveGenericTypedHintOverlay(
   for (const effect of engine.lifecycle?.on_install ?? [])
     appendHostedCreditLifecycleEffect(
       overlay,
-      entry.definition.side,
+      entry.facts.side,
       effect,
       "install",
     );
   for (const effect of engine.lifecycle?.on_score ?? []) {
     appendHostedCreditLifecycleEffect(
       overlay,
-      entry.definition.side,
+      entry.facts.side,
       effect,
       "when_scored",
     );
@@ -1401,7 +1401,7 @@ function deriveGenericTypedHintOverlay(
   for (const effect of engine.lifecycle?.on_rez ?? [])
     appendHostedCreditLifecycleEffect(
       overlay,
-      entry.definition.side,
+      entry.facts.side,
       effect,
       "on_rez",
     );
@@ -1410,7 +1410,7 @@ function deriveGenericTypedHintOverlay(
     for (const effect of trigger.effects)
       appendHostedCreditLifecycleEffect(
         overlay,
-        entry.definition.side,
+        entry.facts.side,
         effect,
         "start_of_turn",
       );
@@ -1508,7 +1508,7 @@ function appendScoredAgendaActivatedAbilityMarker(
   ability: PlanningAbility,
 ): void {
   if (
-    entry.definition.type !== "agenda" ||
+    entry.facts.type !== "agenda" ||
     ability.kind !== "activated" ||
     (ability.effects?.length ?? 0) === 0
   )
@@ -1591,7 +1591,7 @@ function controlledSide(
   entry: PlanningEntry,
   recipient: "controller" | "runner" | "corp",
 ): "runner" | "corp" {
-  return recipient === "controller" ? entry.definition.side : recipient;
+  return recipient === "controller" ? entry.facts.side : recipient;
 }
 
 function appendGenericAbilityCosts(
@@ -1603,7 +1603,7 @@ function appendGenericAbilityCosts(
     for (const cost of ability.costs) {
       if (cost.kind !== "corp_random_discard_hq") continue;
       if (
-        entry.definition.side !== "corp" ||
+        entry.facts.side !== "corp" ||
         !Number.isInteger(cost.amount) ||
         cost.amount <= 0
       )
@@ -1620,26 +1620,26 @@ function appendGenericAbilityCosts(
       overlay.functionSignals.push("risk.random_outcome");
     }
   if (
-    entry.definition.side !== "runner" ||
+    entry.facts.side !== "runner" ||
     !Array.isArray(ability.costs) ||
     !ability.costs.some((cost) => cost.kind === "trash_source")
   )
     return;
   const timing =
-    entry.definition.type === "agenda" && ability.kind === "activated"
+    entry.facts.type === "agenda" && ability.kind === "activated"
       ? ("scored_activated" as const)
       : typedEffectTiming(ability);
   overlay.effects.push({
     kind:
-      entry.definition.type === "program"
+      entry.facts.type === "program"
         ? "program_trash"
-        : entry.definition.type === "hardware"
+        : entry.facts.type === "hardware"
           ? "hardware_trash"
           : "resource_trash",
     scope:
-      entry.definition.type === "program"
+      entry.facts.type === "program"
         ? "installed_program"
-        : entry.definition.type === "hardware"
+        : entry.facts.type === "hardware"
           ? "hardware"
           : "installed_card",
     timing,
@@ -1672,7 +1672,7 @@ function appendGenericAbilityEffect(
   effect: PlanningEffect,
 ): void {
   const timing =
-    entry.definition.type === "agenda" && ability.kind === "activated"
+    entry.facts.type === "agenda" && ability.kind === "activated"
       ? ("scored_activated" as const)
       : typedEffectTiming(ability);
   if (effect.kind === "private_look") {
@@ -1776,7 +1776,7 @@ function appendGenericAbilityEffect(
   }
   if (effect.kind === "gain_temporary_corp_run_credits") {
     if (
-      entry.definition.side !== "corp" ||
+      entry.facts.side !== "corp" ||
       effect.recipient !== "corp" ||
       !Number.isInteger(effect.amount) ||
       effect.amount <= 0 ||
@@ -1803,7 +1803,7 @@ function appendGenericAbilityEffect(
   }
   if (effect.kind === "trash_own_rezzed_ice_for_credits") {
     if (
-      entry.definition.side !== "corp" ||
+      entry.facts.side !== "corp" ||
       effect.target !== "chosen_own_rezzed_ice" ||
       !Number.isInteger(effect.gainCredits) ||
       effect.gainCredits <= 0 ||
@@ -1960,15 +1960,15 @@ function appendGenericAbilityEffect(
   if (effect.kind === "trash_source") {
     overlay.effects.push({
       kind:
-        entry.definition.type === "program"
+        entry.facts.type === "program"
           ? "program_trash"
-          : entry.definition.type === "hardware"
+          : entry.facts.type === "hardware"
             ? "hardware_trash"
             : "resource_trash",
       scope:
-        entry.definition.type === "program"
+        entry.facts.type === "program"
           ? "installed_program"
-          : entry.definition.type === "hardware"
+          : entry.facts.type === "hardware"
             ? "hardware"
             : "installed_card",
       timing,
@@ -2023,7 +2023,7 @@ function appendGenericAbilityEffect(
   }
   if (effect.kind === "search_trash_to_grip") {
     if (
-      entry.definition.side !== "runner" ||
+      entry.facts.side !== "runner" ||
       !["program", "any_card"].includes(effect.filter) ||
       effect.visibility !== "hidden_info_barrier"
     )
@@ -2284,7 +2284,7 @@ function appendGenericAbilityEffect(
   if (effect.kind === "add_hosted_credits") {
     overlay.effects.push({
       kind: "counter_economy",
-      scope: entry.definition.side,
+      scope: entry.facts.side,
       timing,
       resource: "credits",
       target: "economy.bank_load",
@@ -2300,7 +2300,7 @@ function appendGenericAbilityEffect(
   if (effect.kind === "take_hosted_credits") {
     overlay.effects.push({
       kind: "action_economy",
-      scope: entry.definition.side,
+      scope: entry.facts.side,
       timing,
       resource: "credits",
       target:
@@ -2996,7 +2996,7 @@ function appendScoredAgendaProjection(
 }
 
 function deriveClosedMechanicalHintOverlay(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): ClosedMechanicalHintOverlay {
   const engine = entry.planning.engine;
   const overlay: ClosedMechanicalHintOverlay = {
@@ -3389,8 +3389,8 @@ function deriveClosedMechanicalHintOverlay(
     "search_stack_install_program_free_then_run_return_or_penalty"
   ) {
     if (
-      entry.definition.side !== "runner" ||
-      entry.definition.type !== "event" ||
+      entry.facts.side !== "runner" ||
+      entry.facts.type !== "event" ||
       runnerEvent.installCost !== "free" ||
       runnerEvent.shuffleAfterwards !== true ||
       !Number.isSafeInteger(runnerEvent.penaltyBase) ||
@@ -3417,8 +3417,8 @@ function deriveClosedMechanicalHintOverlay(
     "trash_installed_runner_connections_then_add_bad_publicity"
   ) {
     if (
-      entry.definition.side !== "runner" ||
-      entry.definition.type !== "event" ||
+      entry.facts.side !== "runner" ||
+      entry.facts.type !== "event" ||
       runnerEvent.count !== 2 ||
       runnerEvent.badPublicity !== 1 ||
       runnerEvent.visibility !== "hidden_info_barrier"
@@ -3442,8 +3442,8 @@ function deriveClosedMechanicalHintOverlay(
   const runnerUtility = engine.runnerUtilityLongtail;
   if (runnerUtility?.kind === "trash_fully_broken_passed_ice") {
     if (
-      entry.definition.side !== "runner" ||
-      entry.definition.type !== "program" ||
+      entry.facts.side !== "runner" ||
+      entry.facts.type !== "program" ||
       runnerUtility.timing !== "after_passing_fully_broken_ice" ||
       runnerUtility.target !== "that_ice" ||
       runnerUtility.visibility !== "public" ||
@@ -3521,7 +3521,7 @@ function deriveClosedMechanicalHintOverlay(
     overlay.functionSignals.push("run.ends_run_after_effect");
     overlay.tacticSignals.push("run.ends_run_after_effect");
     if (
-      entry.definition.type === "event" &&
+      entry.facts.type === "event" &&
       engine.abilities?.some(
         (ability) =>
           ability.kind === "on_play" &&
@@ -3725,7 +3725,7 @@ function appendUniqueObjects<const Value>(
 }
 
 function derivedMechanicalPlanRoles(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): string[] {
   const closedExtended = usesClosedExtendedMechanicalProfile(entry);
   if (!usesExtendedMechanicalSemantics(entry) && !closedExtended) return [];
@@ -3777,7 +3777,7 @@ function derivedMechanicalPlanRoles(
     roles.add("runner_install_hardware");
   if (
     engine.restrictedHostedCreditSource?.usableFor.includes("increase_link") &&
-    entry.definition.type === "resource"
+    entry.facts.type === "resource"
   )
     roles.add("increase_link");
   return [...roles];
@@ -3812,11 +3812,11 @@ function closedPlanningValues<const Values extends readonly string[]>(
 }
 
 function deriveRequiredMechanics(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): string[] {
   if (usesClosedExtendedMechanicalProfile(entry))
     return deriveExtendedRequiredMechanics(entry);
-  const mechanics = new Set(entry.definition.mechanics);
+  const mechanics = new Set(entry.facts.mechanics);
   const normalizeGenericMechanics = usesGenericCompatibilityMechanics(entry);
   if (normalizeGenericMechanics)
     for (const internal of [
@@ -3842,9 +3842,9 @@ function deriveRequiredMechanics(
       "runner_is_tagged",
     ])
       mechanics.delete(internal);
-  if (entry.definition.type === "identity") mechanics.add("identity_setup");
+  if (entry.facts.type === "identity") mechanics.add("identity_setup");
   if (
-    entry.definition.type === "agenda" &&
+    entry.facts.type === "agenda" &&
     entry.planning.engine.scoredAgenda === undefined
   ) {
     mechanics.delete("score_agenda");
@@ -3860,18 +3860,18 @@ function deriveRequiredMechanics(
     mechanics.add("memory");
   if (
     entry.planning.engine.corpRootRezCreditOutcome !== undefined ||
-    (entry.definition.type === "upgrade" && normalizeGenericMechanics)
+    (entry.facts.type === "upgrade" && normalizeGenericMechanics)
   )
     mechanics.add("trash_cost");
   if (isSimpleBreaker(entry) || isSimplePrintedIce(entry))
-    for (const subtype of entry.definition.subtypes)
+    for (const subtype of entry.facts.subtypes)
       mechanics.add(`subtype_${subtype}`);
   if (isSimplePrintedIce(entry))
     for (const subroutine of entry.planning.engine.printedSubroutines ?? [])
       mechanics.add(subroutine.kind);
   if (
-    entry.definition.type === "resource" &&
-    entry.definition.subtypes.includes("connection")
+    entry.facts.type === "resource" &&
+    entry.facts.subtypes.includes("connection")
   )
     mechanics.add("resource_tag_interaction");
   for (const ability of entry.planning.engine.abilities ?? []) {
@@ -3914,7 +3914,7 @@ function deriveRequiredMechanics(
 }
 
 function usesClosedExtendedMechanicalProfile(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): boolean {
   const engine = entry.planning.engine;
   const simpleReviewedBreaker =
@@ -4006,11 +4006,11 @@ function usesClosedExtendedMechanicalProfile(
 }
 
 function deriveExtendedRequiredMechanics(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): string[] {
   const engine = entry.planning.engine;
   const mechanics = new Set<string>();
-  const cardType = entry.definition.type;
+  const cardType = entry.facts.type;
   if (cardType === "agenda") mechanics.add("score_agenda");
   if (cardType === "asset") {
     mechanics.add("install_asset");
@@ -4420,7 +4420,7 @@ function deriveExtendedRequiredMechanics(
 }
 
 function hasGenericOnPlayEffect(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): boolean {
   return (
     entry.planning.engine.abilities?.some(
@@ -4436,7 +4436,7 @@ function hasGenericOnPlayEffect(
 }
 
 function isSimpleBreaker(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): boolean {
   return (
     entry.planning.engine.icebreakerAbilities !== undefined &&
@@ -4447,7 +4447,7 @@ function isSimpleBreaker(
 }
 
 function isSimplePrintedIce(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): boolean {
   return (
     entry.planning.engine.printedSubroutines !== undefined &&
@@ -4456,10 +4456,10 @@ function isSimplePrintedIce(
 }
 
 function isPlainRemoteValueUpgrade(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): boolean {
   return (
-    entry.definition.type === "upgrade" &&
+    entry.facts.type === "upgrade" &&
     entry.planning.engine.fortRunWindows === undefined &&
     (!usesClosedExtendedMechanicalProfile(entry) ||
       entry.planning.engine.accessEffects === undefined) &&
@@ -4472,11 +4472,11 @@ function isPlainRemoteValueUpgrade(
 }
 
 function usesGenericCompatibilityMechanics(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): boolean {
   return (
-    entry.definition.type === "identity" ||
-    (entry.definition.type === "agenda" &&
+    entry.facts.type === "identity" ||
+    (entry.facts.type === "agenda" &&
       entry.planning.engine.scoredAgenda === undefined) ||
     entry.planning.engine.characteristics.memoryLimitBonus !== undefined ||
     entry.planning.engine.corpRootRezCreditOutcome !== undefined ||
@@ -4488,7 +4488,7 @@ function usesGenericCompatibilityMechanics(
 }
 
 function usesExtendedMechanicalSemantics(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): boolean {
   const engine = entry.planning.engine;
   return (
@@ -4568,7 +4568,7 @@ function usesExtendedMechanicalSemantics(
 
 function hasExtendedHintFamily(
   engine: ReturnType<
-    typeof cardSpecPlanningCards
+    typeof listPlanningCardsWithFacts
   >[number]["planning"]["engine"],
 ): boolean {
   return (
@@ -4589,7 +4589,7 @@ function hasExtendedHintFamily(
 }
 
 function deriveAiSupportEvidence(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): {
   status: AiCardHint["aiSupportStatus"];
   quality: NonNullable<AiCardHint["quality"]>;
@@ -4601,10 +4601,10 @@ function deriveAiSupportEvidence(
   if (
     aiSupportScenarioData.status !== "ai_supported" ||
     scenario === undefined ||
-    !scenario.coversCards.includes(entry.definition.id)
+    !scenario.coversCards.includes(entry.facts.id)
   )
     throw new Error(
-      `card_spec_ai_support_scenario_evidence_missing: ${entry.definition.id}`,
+      `card_spec_ai_support_scenario_evidence_missing: ${entry.facts.id}`,
     );
   const confidence = highestStrategySupportConfidence(
     entry.planning.planningAnnotations?.card ?? [],
@@ -4638,15 +4638,15 @@ function highestStrategySupportConfidence(
 }
 
 function deriveRoles(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): string[] {
   const roles = new Set<string>();
   const engine = entry.planning.engine;
-  const cardType = entry.definition.type;
+  const cardType = entry.facts.type;
   if (engine.relativeIce?.dynamicTraceSubroutines !== undefined)
     for (const role of ["ice", "tag_ice"]) roles.add(role);
   if (cardType === "identity") {
-    roles.add(`${entry.definition.side}_identity`);
+    roles.add(`${entry.facts.side}_identity`);
     roles.add("setup");
   }
   if (
@@ -4656,8 +4656,8 @@ function deriveRoles(
   ) {
     roles.add("agenda");
     roles.add("score_plan");
-    if (entry.definition.agendaPoints !== undefined)
-      roles.add(`agenda_${entry.definition.agendaPoints}pt`);
+    if (entry.facts.agendaPoints !== undefined)
+      roles.add(`agenda_${entry.facts.agendaPoints}pt`);
     if (!engine.lifecycle?.on_score?.length && !engine.abilities?.length)
       roles.add("no_ability_agenda");
   }
@@ -4764,14 +4764,14 @@ function deriveRoles(
   for (const modifier of entry.planning.engine.modifiers ?? [])
     if (modifier.kind === "rez_cost" || modifier.kind === "ice_strength") {
       roles.add("ice_modifier");
-      if (entry.definition.side === "corp") {
+      if (entry.facts.side === "corp") {
         roles.add("economy_asset");
         roles.add("remote_support");
-      } else if (entry.definition.type === "program") {
+      } else if (entry.facts.type === "program") {
         roles.add("program");
       }
       if (
-        entry.definition.side === "runner" &&
+        entry.facts.side === "runner" &&
         modifier.kind === "ice_strength" &&
         modifier.operation === "reduce" &&
         modifier.amount > 0
@@ -4779,7 +4779,7 @@ function deriveRoles(
         roles.add("icebreaker_support");
     }
   if (
-    entry.definition.side === "runner" &&
+    entry.facts.side === "runner" &&
     (entry.planning.engine.runnerRunStrengthBoost !== undefined ||
       entry.planning.engine.virusCounter?.continuousEffect?.kind ===
         "ice_strength_reduce_per_counter")
@@ -4831,13 +4831,13 @@ function deriveRoles(
     )
       roles.add("taxing_ice");
   }
-  if (entry.definition.subtypes.includes("barrier")) roles.add("barrier_ice");
-  if (entry.definition.subtypes.includes("code_gate"))
+  if (entry.facts.subtypes.includes("barrier")) roles.add("barrier_ice");
+  if (entry.facts.subtypes.includes("code_gate"))
     roles.add("code_gate_ice");
   if (
     (entry.planning.engine.printedSubroutines !== undefined ||
       engine.relativeIce?.dynamicTraceSubroutines !== undefined) &&
-    entry.definition.subtypes.includes("sentry")
+    entry.facts.subtypes.includes("sentry")
   )
     roles.add("sentry_ice");
   if (
@@ -4978,12 +4978,12 @@ function deriveRoles(
     }
     if (
       engine.printedSubroutines !== undefined &&
-      entry.definition.subtypes.includes("ap")
+      entry.facts.subtypes.includes("ap")
     )
       roles.add("ap_ice");
     if (
       engine.printedSubroutines !== undefined &&
-      entry.definition.subtypes.includes("wall")
+      entry.facts.subtypes.includes("wall")
     )
       roles.add("barrier_ice");
     if (
@@ -5146,7 +5146,7 @@ function deriveRoles(
       engine.restrictedHostedCreditSource?.usableFor.length === 1 &&
       engine.restrictedHostedCreditSource.usableFor[0] === "increase_link"
     )
-      for (const role of entry.definition.subtypes.includes("connection")
+      for (const role of entry.facts.subtypes.includes("connection")
         ? ["connection", "economy", "link"]
         : ["link"])
         roles.add(role);
@@ -5186,13 +5186,13 @@ function deriveRoles(
 
 function deriveRiskTags(
   annotations: readonly PlanningInterpretation[],
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): string[] {
   const risks = annotations.flatMap((annotation) =>
     annotation.kind === "risk_interpretation" ? [annotation.risk] : [],
   );
   if (
-    entry.definition.type === "agenda" &&
+    entry.facts.type === "agenda" &&
     entry.planning.engine.scoredAgenda === undefined
   )
     risks.push("hidden_until_score_or_access");
@@ -5209,7 +5209,7 @@ function deriveRiskTags(
   )
     risks.push("hidden_zone_change");
   if (isSimpleBreaker(entry)) risks.push("encounter");
-  if (entry.definition.type === "hardware") risks.push("install_runner");
+  if (entry.facts.type === "hardware") risks.push("install_runner");
   if (
     entry.planning.engine.corpRootRezCreditOutcome !== undefined ||
     isPlainRemoteValueUpgrade(entry)
@@ -5228,8 +5228,8 @@ function deriveRiskTags(
   if (hasHiddenInfoBarrier(entry.planning.engine))
     risks.push("hidden_info_barrier");
   if (
-    entry.definition.type === "resource" &&
-    entry.definition.subtypes.includes("connection")
+    entry.facts.type === "resource" &&
+    entry.facts.subtypes.includes("connection")
   )
     risks.push("resource_trash_if_tagged");
   if (
@@ -5302,7 +5302,7 @@ function deriveRiskTags(
 }
 
 function deriveClosedExtendedRiskTags(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): string[] {
   const engine = entry.planning.engine;
   const risks = new Set<string>();
@@ -5550,7 +5550,7 @@ function deriveClosedExtendedRiskTags(
       if (effect.kind === "private_look") risks.add("hidden_zone");
     }
   }
-  if (engine.unique !== undefined && entry.definition.type === "resource")
+  if (engine.unique !== undefined && entry.facts.type === "resource")
     risks.add("unique_resource");
   if (engine.hardwareDeck === true) risks.add("deck_unique");
   if (engine.restrictedHostedCreditSource !== undefined) {
@@ -5589,7 +5589,7 @@ function deriveClosedExtendedRiskTags(
 
 function lifecycleHasCreditEffect(
   lifecycle: ReturnType<
-    typeof cardSpecPlanningCards
+    typeof listPlanningCardsWithFacts
   >[number]["planning"]["engine"]["lifecycle"],
 ): boolean {
   if (lifecycle === undefined) return false;
@@ -5607,7 +5607,7 @@ function lifecycleHasCreditEffect(
 
 function hasHiddenInfoBarrier(
   engine: ReturnType<
-    typeof cardSpecPlanningCards
+    typeof listPlanningCardsWithFacts
   >[number]["planning"]["engine"],
 ): boolean {
   return (
@@ -5631,7 +5631,7 @@ function hasHiddenInfoBarrier(
 
 function deriveCostProfile(
   annotations: readonly PlanningInterpretation[],
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): AiCardHint["costProfile"] {
   if (usesClosedExtendedMechanicalProfile(entry))
     return applyStaticCardCosts(
@@ -5685,8 +5685,8 @@ function applyStaticCardCosts(
   const result: NonNullable<AiCardHint["costProfile"]> = { ...(current ?? {}) };
   const characteristics = entry.planning.engine.characteristics;
   if (
-    entry.definition.type === "event" ||
-    entry.definition.type === "operation"
+    entry.facts.type === "event" ||
+    entry.facts.type === "operation"
   ) {
     const engine = entry.planning.engine;
     const additionalPlayActions = Math.max(
@@ -5700,18 +5700,18 @@ function applyStaticCardCosts(
       result.credits = characteristics.playCost.credits;
   }
   if (
-    entry.definition.type === "program" ||
-    entry.definition.type === "hardware" ||
-    entry.definition.type === "resource"
+    entry.facts.type === "program" ||
+    entry.facts.type === "hardware" ||
+    entry.facts.type === "resource"
   ) {
     result.clicks = 1;
     if (characteristics.numeric.installCost !== null)
       result.credits = characteristics.numeric.installCost;
   }
   if (
-    entry.definition.type === "asset" ||
-    entry.definition.type === "ice" ||
-    entry.definition.type === "upgrade"
+    entry.facts.type === "asset" ||
+    entry.facts.type === "ice" ||
+    entry.facts.type === "upgrade"
   ) {
     if (characteristics.numeric.rezCost !== null)
       result.credits = characteristics.numeric.rezCost;
@@ -5723,7 +5723,7 @@ function applyStaticCardCosts(
 
 function deriveClosedExtendedCostProfile(
   annotations: readonly PlanningInterpretation[],
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): AiCardHint["costProfile"] {
   const engine = entry.planning.engine;
   const result: NonNullable<AiCardHint["costProfile"]> = {};
@@ -5765,7 +5765,7 @@ function deriveClosedExtendedCostProfile(
     );
   if (actionCost?.kind === "action") result.clicks = actionCost.amount;
   else if (onPlayAbilities.length > 0) result.clicks = 1 + additionalClicks;
-  else if (activatedAbilities.length > 0 && entry.definition.side === "runner")
+  else if (activatedAbilities.length > 0 && entry.facts.side === "runner")
     result.clicks = 0;
   if (creditCost?.kind === "credit") result.credits = creditCost.amount;
   if (counterCost?.kind === "source_counter")
@@ -5787,7 +5787,7 @@ function deriveClosedExtendedCostProfile(
 
   if (
     engine.corpUtility !== undefined &&
-    entry.definition.type === "operation"
+    entry.facts.type === "operation"
   ) {
     result.clicks =
       engine.corpUtility.playCost?.kind === "printed"
@@ -5806,25 +5806,25 @@ function deriveClosedExtendedCostProfile(
       result.memory = engine.characteristics.numeric.memoryCost;
   }
   if (engine.runnerEventLongtail !== undefined) result.clicks = 1;
-  if (engine.hardwareDeck === true || entry.definition.type === "hardware") {
+  if (engine.hardwareDeck === true || entry.facts.type === "hardware") {
     result.clicks = 1;
     if (engine.characteristics.numeric.installCost !== null)
       result.credits = engine.characteristics.numeric.installCost;
   }
-  if (entry.definition.type === "resource" && activatedAbilities.length === 0) {
+  if (entry.facts.type === "resource" && activatedAbilities.length === 0) {
     result.clicks = 1;
     if (engine.characteristics.numeric.installCost !== null)
       result.credits = engine.characteristics.numeric.installCost;
   }
   if (
-    entry.definition.type === "resource" &&
+    entry.facts.type === "resource" &&
     activatedAbilities.length > 0 &&
     creditCost === undefined &&
     engine.characteristics.numeric.installCost !== null
   )
     result.credits = engine.characteristics.numeric.installCost;
   if (
-    entry.definition.type === "program" &&
+    entry.facts.type === "program" &&
     engine.icebreakerAbilities === undefined
   ) {
     result.clicks = 0;
@@ -5840,7 +5840,7 @@ function deriveClosedExtendedCostProfile(
 }
 
 function deriveConditions(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): NonNullable<AiCardHint["conditions"]> {
   const engine = entry.planning.engine;
   const conditions: NonNullable<AiCardHint["conditions"]> = [];
@@ -6108,7 +6108,7 @@ function uniqueConditions(
 }
 
 function deriveActionTacticSignals(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
   effects: NonNullable<AiCardHint["effects"]>,
 ): string[] {
   const signals = new Set<string>();
@@ -6192,7 +6192,7 @@ function deriveActionTacticSignals(
 }
 
 function allPlanningAnnotations(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): PlanningInterpretation[] {
   return [
     ...(entry.planning.planningAnnotations?.card ?? []),
@@ -6203,7 +6203,7 @@ function allPlanningAnnotations(
 }
 
 function deriveTargetProfiles(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): NonNullable<AiCardHint["targetProfiles"]> {
   const preferences =
     entry.planning.planningAnnotations?.card?.filter(
@@ -6694,7 +6694,7 @@ function deriveTargetProfiles(
     });
   if (capabilityPreferences.size > 0)
     throw new Error(
-      `card_spec_target_preference_without_supported_mechanical_owner: ${entry.definition.id}`,
+      `card_spec_target_preference_without_supported_mechanical_owner: ${entry.facts.id}`,
     );
   return [];
 }
@@ -6718,12 +6718,12 @@ function mechanicalOwnerHasCapabilityKey(
 /** A targetless, installed Corp trace/tag ability leaves this card-level
  * preference with the asset's installation owner, not an activation choice. */
 function hasCorpMainTraceTagAssetPlacementOwner(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): boolean {
   const abilities = entry.planning.engine.abilities;
   return (
-    entry.definition.side === "corp" &&
-    entry.definition.type === "asset" &&
+    entry.facts.side === "corp" &&
+    entry.facts.type === "asset" &&
     abilities !== undefined &&
     abilities.length > 0 &&
     abilities.every(
@@ -6743,7 +6743,7 @@ function hasCorpMainTraceTagAssetPlacementOwner(
 
 function hasClosedTargetPreferenceOwner(
   engine: ReturnType<
-    typeof cardSpecPlanningCards
+    typeof listPlanningCardsWithFacts
   >[number]["planning"]["engine"],
 ): boolean {
   return (
@@ -6813,7 +6813,7 @@ function hasClosedTargetPreferenceOwner(
 }
 
 function deriveClosedExtendedTargetProfile(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
   preference: Extract<PlanningInterpretation, { kind: "target_preference" }>,
 ): NonNullable<AiCardHint["targetProfiles"]>[number] {
   const engine = entry.planning.engine;
@@ -7734,13 +7734,13 @@ function deriveClosedExtendedTargetProfile(
       hiddenInfoPolicy: "public_or_controller_known_only",
     };
   throw new Error(
-    `card_spec_target_preference_without_supported_mechanical_owner: ${entry.definition.id}`,
+    `card_spec_target_preference_without_supported_mechanical_owner: ${entry.facts.id}`,
   );
 }
 
 function deriveMechanicalValueHints(
   engine: ReturnType<
-    typeof cardSpecPlanningCards
+    typeof listPlanningCardsWithFacts
   >[number]["planning"]["engine"],
 ): AiRuntimeValueHints {
   const result: AiRuntimeValueHints = {};
@@ -7768,7 +7768,7 @@ function deriveMechanicalValueHints(
 
 function deriveBreakerProfile(
   engine: ReturnType<
-    typeof cardSpecPlanningCards
+    typeof listPlanningCardsWithFacts
   >[number]["planning"]["engine"],
 ): AiCardHint["breakerProfile"] {
   const abilities = engine.icebreakerAbilities;
@@ -7926,12 +7926,12 @@ function breakerCoverageForSubtype(
 
 function breakerProfileWithoutPump(
   engine: ReturnType<
-    typeof cardSpecPlanningCards
+    typeof listPlanningCardsWithFacts
   >[number]["planning"]["engine"],
   breaker: Extract<
     NonNullable<
       ReturnType<
-        typeof cardSpecPlanningCards
+        typeof listPlanningCardsWithFacts
       >[number]["planning"]["engine"]["icebreakerAbilities"]
     >[number],
     { kind: "break_subroutine" }
@@ -7960,7 +7960,7 @@ function breakerCoverageForMatches(
   matches: Extract<
     NonNullable<
       ReturnType<
-        typeof cardSpecPlanningCards
+        typeof listPlanningCardsWithFacts
       >[number]["planning"]["engine"]["icebreakerAbilities"]
     >[number],
     { kind: "break_subroutine" }
@@ -7999,7 +7999,7 @@ function breakerCoverageForSpecializedSubtype(
 }
 
 function deriveHintEffects(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): NonNullable<AiCardHint["effects"]> {
   if (usesClosedExtendedMechanicalProfile(entry))
     return deriveClosedExtendedHintEffects(entry);
@@ -8019,7 +8019,7 @@ function deriveHintEffects(
           kind: "economy",
           scope:
             effect.recipient === "controller"
-              ? entry.definition.side
+              ? entry.facts.side
               : effect.recipient,
           timing: "action",
           amount: effect.amount,
@@ -8030,7 +8030,7 @@ function deriveHintEffects(
           kind: "draw",
           scope:
             effect.recipient === "controller"
-              ? entry.definition.side
+              ? entry.facts.side
               : effect.recipient,
           timing: "action",
           resource: "cards",
@@ -8051,8 +8051,8 @@ function deriveHintEffects(
         });
     }
   if (
-    entry.definition.type === "resource" &&
-    entry.definition.subtypes.includes("connection")
+    entry.facts.type === "resource" &&
+    entry.facts.subtypes.includes("connection")
   )
     effects.push({
       kind: "global_modifier",
@@ -8069,7 +8069,7 @@ function deriveHintEffects(
         amount: modifier.amount,
         resource: "credits",
       });
-    if (modifier.kind === "ice_strength" && entry.definition.side === "corp")
+    if (modifier.kind === "ice_strength" && entry.facts.side === "corp")
       effects.push({
         kind: "remote_protection",
         scope: "ice",
@@ -8318,7 +8318,7 @@ function deriveHintEffects(
 }
 
 function deriveClosedExtendedHintEffects(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): NonNullable<AiCardHint["effects"]> {
   const engine = entry.planning.engine;
   const effects: NonNullable<AiCardHint["effects"]> = [];
@@ -8491,7 +8491,7 @@ function deriveClosedExtendedHintEffects(
           kind: "economy",
           scope:
             effect.recipient === "controller"
-              ? entry.definition.side
+              ? entry.facts.side
               : effect.recipient,
           timing: "action",
           resource: "credits",
@@ -8504,7 +8504,7 @@ function deriveClosedExtendedHintEffects(
           kind: "draw",
           scope:
             effect.recipient === "controller"
-              ? entry.definition.side
+              ? entry.facts.side
               : effect.recipient,
           timing: "action",
           resource: "cards",
@@ -8984,7 +8984,7 @@ function deriveClosedExtendedHintEffects(
 function appendClosedCorpUtilityEffects(
   effects: NonNullable<AiCardHint["effects"]>,
   utility: ReturnType<
-    typeof cardSpecPlanningCards
+    typeof listPlanningCardsWithFacts
   >[number]["planning"]["engine"]["corpUtility"],
 ): void {
   if (utility?.kind === "runner_memory_limit_modifier_until_end_of_turn")
@@ -9123,7 +9123,7 @@ function appendClosedCorpUtilityEffects(
 function appendClosedAccessEffects(
   effects: NonNullable<AiCardHint["effects"]>,
   accesses: ReturnType<
-    typeof cardSpecPlanningCards
+    typeof listPlanningCardsWithFacts
   >[number]["planning"]["engine"]["accessEffects"],
 ): void {
   for (const access of accesses ?? []) {
@@ -9209,7 +9209,7 @@ function appendClosedAccessEffects(
 function appendClosedBreakerEffects(
   effects: NonNullable<AiCardHint["effects"]>,
   engine: ReturnType<
-    typeof cardSpecPlanningCards
+    typeof listPlanningCardsWithFacts
   >[number]["planning"]["engine"],
 ): void {
   const breaker = engine.icebreakerAbilities?.find(
@@ -9247,7 +9247,7 @@ function appendClosedBreakerEffects(
 function appendClosedRunnerLongtailEffects(
   effects: NonNullable<AiCardHint["effects"]>,
   engine: ReturnType<
-    typeof cardSpecPlanningCards
+    typeof listPlanningCardsWithFacts
   >[number]["planning"]["engine"],
 ): void {
   const utility = engine.runnerUtilityLongtail;
@@ -9523,7 +9523,7 @@ function appendClosedRunnerLongtailEffects(
 function appendClosedHardwareEffects(
   effects: NonNullable<AiCardHint["effects"]>,
   engine: ReturnType<
-    typeof cardSpecPlanningCards
+    typeof listPlanningCardsWithFacts
   >[number]["planning"]["engine"],
 ): void {
   if (engine.hardwareDeck === true)
@@ -9698,7 +9698,7 @@ function accessDamageAmbushSignal(
 }
 
 function derivedFunctionSignals(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): string[] {
   const engine = entry.planning.engine;
   const signals = new Set<string>();
@@ -9874,8 +9874,8 @@ function derivedFunctionSignals(
     signals.add("breaker.targeted_ice_bonus");
   }
   if (
-    entry.definition.type === "resource" &&
-    entry.definition.subtypes.includes("connection")
+    entry.facts.type === "resource" &&
+    entry.facts.subtypes.includes("connection")
   )
     signals.add("resource.connection");
   if (engine.scoredAgenda?.kind === "add_counters_on_score")
@@ -10380,7 +10380,7 @@ function derivedFunctionSignals(
 }
 
 function closedCurrentRunAdditionalAccess(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): { server: "hq" | "rd"; amount: number } | null {
   const matches = (entry.planning.engine.abilities ?? []).flatMap((ability) =>
     (ability.effects ?? []).flatMap((effect) =>
@@ -10419,7 +10419,7 @@ function closedCurrentRunAdditionalAccess(
 }
 
 function derivedTacticSignals(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): string[] {
   const engine = entry.planning.engine;
   const signals = new Set<string>();
@@ -10452,9 +10452,9 @@ function derivedTacticSignals(
     signals.add("economy.corp_credit_burst");
   for (const modifier of engine.modifiers ?? []) {
     if (modifier.kind === "rez_cost") signals.add("ice.corp_rez_discount");
-    if (modifier.kind === "ice_strength" && entry.definition.side === "corp")
+    if (modifier.kind === "ice_strength" && entry.facts.side === "corp")
       signals.add("ice.corp_strength_support");
-    if (modifier.kind === "ice_strength" && entry.definition.side === "corp")
+    if (modifier.kind === "ice_strength" && entry.facts.side === "corp")
       signals.add("tax.ice");
     if (modifier.kind === "access_count")
       signals.add(
@@ -10716,7 +10716,7 @@ function valueHintKey(axis: string): keyof AiRuntimeValueHints {
 
 function derivedActionStrategyEvidence(
   engine: ReturnType<
-    typeof cardSpecPlanningCards
+    typeof listPlanningCardsWithFacts
   >[number]["planning"]["engine"],
   capabilityKey: string,
   strategyId: string,
@@ -11012,7 +11012,7 @@ type CardStrategyEvidenceProfile = NonNullable<
 
 function derivedCardStrategyEvidence(
   engine: ReturnType<
-    typeof cardSpecPlanningCards
+    typeof listPlanningCardsWithFacts
   >[number]["planning"]["engine"],
   strategyId: string,
   role: KnownHintStrategySupportPairRole,
@@ -11803,7 +11803,7 @@ function derivedCardStrategyEvidence(
 
 function derivedStrategyEvidence(
   engine: ReturnType<
-    typeof cardSpecPlanningCards
+    typeof listPlanningCardsWithFacts
   >[number]["planning"]["engine"],
   strategyId?: string,
 ): string[] {

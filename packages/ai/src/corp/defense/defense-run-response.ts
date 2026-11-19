@@ -10,7 +10,7 @@ import {
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { actionHasConditionalDefenseFollowupQuotePayload } from "../../actions/conditional-defense-followup-quote";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { type CorpDefenseSignal } from "../../plans/corp-defense-contracts";
 import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
@@ -823,7 +823,7 @@ export function corpConditionalRezSupportWithoutCurrentRouteEvidence(
       return "corp_rez_exact_card_support_breaks_score_reserve";
     }
   }
-  const definition = CARD_DEFINITIONS_BY_ID[candidate.sourceDefinitionId];
+  const definition = planningCardFactsByDefinitionId(candidate.sourceDefinitionId);
   if (definition?.mechanics.includes("ice_install_cost_mod_server"))
     return "corp_rez_fort_ice_discount_has_no_same_fort_install_route";
   const hint = AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId);

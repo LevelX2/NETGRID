@@ -1,5 +1,5 @@
 import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   type AiDecisionInput,
   type LegalAction,
@@ -186,7 +186,7 @@ export function iceCard(
   overrides: Partial<VisibleCard> = {},
 ): VisibleCard {
   const definitionId = overrides.definitionId ?? 589;
-  const definition = CARD_DEFINITIONS_BY_ID[definitionId];
+  const definition = planningCardFactsByDefinitionId(definitionId);
   return {
     instanceId,
     known: true,

@@ -4,7 +4,7 @@ import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
 
 import { type CorpPlanDomain } from "../../plans/corp-tactical-plan-contracts";
@@ -42,7 +42,7 @@ export function corpEmptyRdDrawOperationDispositionEvidence(
     corpEconomyCandidateHasExecutablePayload(input, candidate) ||
     candidate.actionType !== "play_operation" ||
     !candidate.sourceDefinitionId ||
-    CARD_DEFINITIONS_BY_ID[candidate.sourceDefinitionId]?.type !== "operation"
+    planningCardFactsByDefinitionId(candidate.sourceDefinitionId)?.type !== "operation"
   ) {
     return undefined;
   }

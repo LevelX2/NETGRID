@@ -13,7 +13,7 @@ import {
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { chooseAiAction } from "../index";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 import { resetPlanPortfolioMemory } from "../plans/plan-portfolio-memory";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
@@ -80,7 +80,7 @@ describe("hidden-info observational equivalence", () => {
       hiddenOwnedCardIds(left, "corp").find(
         (cardId) =>
           cardId !== installedId &&
-          CARD_DEFINITIONS_BY_ID[left.cardInstances[cardId]!.definitionId]
+          planningCardFactsByDefinitionId(left.cardInstances[cardId]!.definitionId)
             ?.type === "ice" &&
           left.cardInstances[cardId]!.definitionId !== installedDefinition,
       ),
@@ -304,7 +304,7 @@ function ownedDefinitionsOfType(
     ...new Set(
       Object.values(state.cardInstances).flatMap((card) =>
         card.zone.side === side &&
-        CARD_DEFINITIONS_BY_ID[card.definitionId]?.type === type
+        planningCardFactsByDefinitionId(card.definitionId)?.type === type
           ? [card.definitionId]
           : [],
       ),

@@ -1,5 +1,5 @@
 import { cardDefinitionIdValue } from "../../card-definition-id-input";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate";
@@ -600,7 +600,7 @@ function visibleInstallCost(card: VisibleCard): number {
     0,
     card.installCost ??
       (card.definitionId
-        ? CARD_DEFINITIONS_BY_ID[card.definitionId]?.installCost
+        ? planningCardFactsByDefinitionId(card.definitionId)?.installCost
         : undefined) ??
       card.cost ??
       0,
@@ -612,7 +612,7 @@ function visibleMemoryCost(card: VisibleCard): number {
     0,
     card.memoryCost ??
       (card.definitionId
-        ? CARD_DEFINITIONS_BY_ID[card.definitionId]?.memoryCost
+        ? planningCardFactsByDefinitionId(card.definitionId)?.memoryCost
         : undefined) ??
       0,
   );

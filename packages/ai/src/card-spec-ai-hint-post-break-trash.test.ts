@@ -1,4 +1,4 @@
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
 import { AI_HINTS_BY_CARD } from "./ai-hints";
@@ -8,8 +8,8 @@ import { rolesForDeckDoctrineCard } from "./deck-doctrine-card-roles";
 
 const cardId = 280;
 function entry() {
-  const card = cardSpecPlanningCards().find(
-    (candidate) => candidate.definition.id === cardId,
+  const card = listPlanningCardsWithFacts().find(
+    (candidate) => candidate.facts.id === cardId,
   );
   if (!card) throw new Error("post_break_trash_test_card_missing");
   return structuredClone(card);
@@ -103,9 +103,9 @@ describe("typed post-pass fully-broken ICE trash semantics", () => {
       original.planning;
     const renamed = {
       ...original,
-      definition: {
-        ...original.definition,
-        id: 251 as typeof original.definition.id,
+      facts: {
+        ...original.facts,
+        id: 251 as typeof original.facts.id,
       },
       planning: mechanicalPlanning,
     };

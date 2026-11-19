@@ -3,7 +3,7 @@ import type { MatchEventId } from "@netgrid/shared";
 import { visibleRunnerPathTraceContext } from "./run-analysis/trace-rules-profile-planning";
 import { currentRunPathContext } from "./run-analysis/current-run-path-context";
 import type { RunnerAccessFacts } from "./access/runner-access-facts";
-import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "./ai-hints";
 import {
@@ -798,13 +798,13 @@ function changedRemotePayoff(
 function cardDefinitionTrashCost(definitionId: number): number | undefined {
   return (
     RUNTIME_CARDS[definitionId]?.numeric.trashCost ??
-    CARD_DEFINITIONS_BY_ID[definitionId]?.trashCost
+    planningCardFactsByDefinitionId(definitionId)?.trashCost
   );
 }
 
 function cardDefinitionType(definitionId: number): string | undefined {
   return (
     RUNTIME_CARDS[definitionId]?.type ??
-    CARD_DEFINITIONS_BY_ID[definitionId]?.type
+    planningCardFactsByDefinitionId(definitionId)?.type
   );
 }

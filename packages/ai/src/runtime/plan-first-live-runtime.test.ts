@@ -23,7 +23,7 @@ import {
   type PublicGameEvent,
   type VisibleCard,
 } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
 import type { CorpStrategicIntentProfile } from "../corp-strategic-intent";
@@ -10269,7 +10269,7 @@ describe("authoritative plan-first live runtime", () => {
       { credits: 0, clicks: 1 },
       { payload: { gainCreditsAmount: 1 } },
     );
-    const dataWall = CARD_DEFINITIONS_BY_ID[450];
+    const dataWall = planningCardFactsByDefinitionId(450);
     if (!dataWall || dataWall.type !== "ice") {
       throw new Error("Missing Data Wall test definition.");
     }
@@ -10314,14 +10314,14 @@ describe("authoritative plan-first live runtime", () => {
         visibleCard("data-wall", "corp", "ice", {
           definitionId: dataWall.id,
           title: dataWall.title,
-          subtypes: dataWall.subtypes,
+          subtypes: dataWall.subtypes.slice(),
           strength: dataWallStrength,
           rezzed: true,
           effectiveRunQuote: {
             iceInstanceId: "data-wall",
             iceDefinitionId: dataWall.id,
             effectiveStrength: dataWallStrength,
-            subroutines: dataWall.subroutines ?? [],
+            subroutines: dataWall.subroutines?.slice() ?? [],
           },
         }),
       ]),
@@ -10402,7 +10402,7 @@ describe("authoritative plan-first live runtime", () => {
         },
       },
     );
-    const dataWall = CARD_DEFINITIONS_BY_ID[450];
+    const dataWall = planningCardFactsByDefinitionId(450);
     if (!dataWall || dataWall.type !== "ice") {
       throw new Error("Missing Data Wall test definition.");
     }
@@ -10433,14 +10433,14 @@ describe("authoritative plan-first live runtime", () => {
           visibleCard("data-wall", "corp", "ice", {
             definitionId: dataWall.id,
             title: dataWall.title,
-            subtypes: dataWall.subtypes,
+            subtypes: dataWall.subtypes.slice(),
             strength: dataWallStrength,
             rezzed: true,
             effectiveRunQuote: {
               iceInstanceId: "data-wall",
               iceDefinitionId: dataWall.id,
               effectiveStrength: dataWallStrength,
-              subroutines: dataWall.subroutines ?? [],
+              subroutines: dataWall.subroutines?.slice() ?? [],
             },
           }),
         ],
@@ -15178,7 +15178,7 @@ describe("authoritative plan-first live runtime", () => {
   });
 
   it("keeps one qualified opening rush stable until Engine RNG selects the posture", () => {
-    const dataWall = CARD_DEFINITIONS_BY_ID[450]!;
+    const dataWall = planningCardFactsByDefinitionId(450)!;
     const installAgenda = legalAction(
       "install-agenda",
       "corp",
@@ -15241,7 +15241,7 @@ describe("authoritative plan-first live runtime", () => {
             definitionId: dataWall.id,
             rezCost: dataWall.rezCost!,
             strength: dataWall.strength!,
-            subtypes: dataWall.subtypes,
+            subtypes: dataWall.subtypes.slice(),
             rezzed: true,
           }),
         ]),
@@ -15351,7 +15351,7 @@ describe("authoritative plan-first live runtime", () => {
   });
 
   it("keeps a public Shell-Traders breaker outside opening-rush admission", () => {
-    const dataWall = CARD_DEFINITIONS_BY_ID[450]!;
+    const dataWall = planningCardFactsByDefinitionId(450)!;
     const installAgenda = legalAction(
       "install-agenda",
       "corp",
@@ -15425,7 +15425,7 @@ describe("authoritative plan-first live runtime", () => {
           definitionId: dataWall.id,
           rezCost: dataWall.rezCost!,
           strength: dataWall.strength!,
-          subtypes: dataWall.subtypes,
+          subtypes: dataWall.subtypes.slice(),
           rezzed: true,
         }),
       ]),
@@ -28578,7 +28578,7 @@ describe("authoritative plan-first live runtime", () => {
         title: "Rent-I-Con",
         subtypes: ["icebreaker", "ai"],
         rulesText:
-          CARD_DEFINITIONS_BY_ID[35]!.rulesText,
+          planningCardFactsByDefinitionId(35)!.rulesText,
         installCost: 3,
         memoryCost: 2,
         strength: 2,
@@ -28742,7 +28742,7 @@ describe("authoritative plan-first live runtime", () => {
     )!.root = [
       visibleCard("advanced-remote-agenda", "corp", "agenda", {
         definitionId: 405,
-        agendaPoints: CARD_DEFINITIONS_BY_ID[405]!.agendaPoints!,
+        agendaPoints: planningCardFactsByDefinitionId(405)!.agendaPoints!,
         advancementCounters: 2,
         effectiveStealCostQuote: {
           stateVersion: input.playerView.stateVersion,

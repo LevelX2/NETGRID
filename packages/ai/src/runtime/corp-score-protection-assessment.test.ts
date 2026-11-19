@@ -1,5 +1,5 @@
 import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { type VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
@@ -318,7 +318,7 @@ describe("assessCorpScoreProtection", () => {
   });
 
   it("projects static hypothetical ICE only with explicit matching facts", () => {
-    const definition = CARD_DEFINITIONS_BY_ID[456]!;
+    const definition = planningCardFactsByDefinitionId(456)!;
     const assessment = assessCorpScoreProtection({
       serverIce: [
         {
@@ -898,7 +898,7 @@ describe("assessCorpScoreProtection", () => {
   });
 
   it("fails closed when encounter strength is not quoted for a visible modifier", () => {
-    const clownDefinition = CARD_DEFINITIONS_BY_ID[224]!;
+    const clownDefinition = planningCardFactsByDefinitionId(224)!;
     const assessment = assessCorpScoreProtection({
       serverIce: [ice("wall", 450)],
       runnerRig: [
@@ -1090,7 +1090,7 @@ describe("assessCorpScoreProtection", () => {
 });
 
 function ice(instanceId: string, definitionId: number): VisibleCard {
-  const definition = CARD_DEFINITIONS_BY_ID[definitionId];
+  const definition = planningCardFactsByDefinitionId(definitionId);
   if (!definition) throw new Error(`Missing test card ${definitionId}`);
   return {
     instanceId,
@@ -1110,7 +1110,7 @@ function blink(instanceId = "blink"): VisibleCard {
 }
 
 function runnerProgram(instanceId: string, definitionId: number): VisibleCard {
-  const definition = CARD_DEFINITIONS_BY_ID[definitionId];
+  const definition = planningCardFactsByDefinitionId(definitionId);
   if (!definition) throw new Error(`Missing test card ${definitionId}`);
   return {
     instanceId,
@@ -1125,7 +1125,7 @@ function runnerProgram(instanceId: string, definitionId: number): VisibleCard {
 }
 
 function shellTraders(): VisibleCard {
-  const definition = CARD_DEFINITIONS_BY_ID[388];
+  const definition = planningCardFactsByDefinitionId(388);
   if (!definition) throw new Error("Missing The Shell Traders definition");
   return {
     instanceId: "shell-traders",
@@ -1143,7 +1143,7 @@ function preparedRentICon(): VisibleCard {
     "prepared-rent-i-con",
     35,
   );
-  const definition = CARD_DEFINITIONS_BY_ID[35]!;
+  const definition = planningCardFactsByDefinitionId(35)!;
   return {
     ...card,
     memoryCost: definition.memoryCost,
@@ -1156,7 +1156,7 @@ function recurringCreditPool(
   definitionId: number,
   use: "using_icebreaker_during_run_non_noisy" | "using_killer_during_run",
 ): VisibleCard {
-  const definition = CARD_DEFINITIONS_BY_ID[definitionId];
+  const definition = planningCardFactsByDefinitionId(definitionId);
   if (!definition) throw new Error(`Missing test card ${definitionId}`);
   return {
     instanceId,
@@ -1184,7 +1184,7 @@ function recurringCreditPool(
 
 function effectiveQuote(card: VisibleCard) {
   if (!card.definitionId) throw new Error("Missing ICE definition id");
-  const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
+  const definition = planningCardFactsByDefinitionId(card.definitionId);
   if (!definition || definition.type !== "ice") {
     throw new Error(`Missing ICE definition ${card.definitionId}`);
   }

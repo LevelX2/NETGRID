@@ -5,7 +5,7 @@ import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 
 function input() {
   return JSON.parse(
@@ -46,7 +46,7 @@ it("keeps an actually unfunded known path blocked", () => {
 
 it("publishes funding rather than Draw when the exact funded free-break path removes all damage", () => {
   const current = input();
-  const worm = CARD_DEFINITIONS_BY_ID[286]!;
+  const worm = planningCardFactsByDefinitionId(286)!;
   current.playerView.own.rig = current.playerView.own.rig!.map((c) =>
     c.type === "program"
       ? {

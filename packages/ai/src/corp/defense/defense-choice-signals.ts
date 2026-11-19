@@ -11,7 +11,7 @@ import {
   assessCorpScoreProtection,
   corpVisibleSingleSubroutineIsUnbreakable,
 } from "../../runtime/corp-score-protection-assessment";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { parseCardDefinitionId } from "../../card-definition-id-input";
 import { preferredAgendaPurgeArchivesOptions } from "./agenda-purge-archives-defense";
 import {
@@ -495,7 +495,7 @@ function classicDeflectorEntryEffect(
         ? {
             strength: Math.max(
               card.strength,
-              CARD_DEFINITIONS_BY_ID[card.definitionId ?? ""]?.strength ?? 0,
+              planningCardFactsByDefinitionId(card.definitionId ?? 0)?.strength ?? 0,
             ),
           }
         : {}),

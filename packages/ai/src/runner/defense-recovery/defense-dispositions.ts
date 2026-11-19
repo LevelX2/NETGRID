@@ -1,4 +1,4 @@
-import { CapabilityIdentityError, cardSpecPlanningCardByDefinitionId, parseCanonicalCapabilityId } from "@netgrid/cards/planning";
+import { CapabilityIdentityError, planningCardByDefinitionId, parseCanonicalCapabilityId } from "@netgrid/cards/planning";
 import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { RunnerRunWindowSignal } from "../../plans/runner-tactical-plan-contracts";
@@ -289,9 +289,9 @@ function isBoundSingleSearchToGripPlay(
     if (error instanceof CapabilityIdentityError) return false;
     throw error;
   }
-  const ability = cardSpecPlanningCardByDefinitionId(
+  const ability = planningCardByDefinitionId(
     sourceDefinitionId,
-  )?.planning.engine.abilities?.find(
+  )?.engine.abilities?.find(
     (entry) => entry.capabilityKey === abilityKey,
   );
   return (

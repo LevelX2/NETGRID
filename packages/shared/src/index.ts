@@ -3435,7 +3435,7 @@ export type VisibleEffectiveSubroutine = {
   deflectorTarget?: "archives" | "any_data_fort" | "subsidiary_data_fort";
   deflectorCost?: number;
   deflectorAutoBreakIfNoTarget?: boolean;
-  breakTags?: string[];
+  breakTags?: readonly string[];
   sourceDefinitionId?: CardDefinitionId;
   sourceTitle?: string;
   dynamicSourceKind?:

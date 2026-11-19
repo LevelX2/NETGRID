@@ -7,7 +7,7 @@ import type {
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import {
   assessKnownRezzedIcePath,
@@ -28,7 +28,7 @@ export function assessCorpTemporaryIceStrengthPulse(
     .find((c) => c.instanceId === action.source);
   const planning =
     source?.definitionId &&
-    cardSpecPlanningCardByDefinitionId(source.definitionId)?.planning;
+    planningCardByDefinitionId(source.definitionId);
   const pulse =
     planning &&
     (planning.engine.abilities ?? []).some(
@@ -149,8 +149,7 @@ export function assessCorpTemporaryIceStrengthPulse(
               c.known &&
               c.type === "agenda" &&
               c.definitionId &&
-              !cardSpecPlanningCardByDefinitionId(c.definitionId)?.planning
-                .engine.agendaAccessReplacement,
+              !planningCardByDefinitionId(c.definitionId)?.engine.agendaAccessReplacement,
           )
           .reduce((n, c) => n + (c.agendaPoints ?? 0), 0) +
           input.playerView.opponent.agendaPoints >=

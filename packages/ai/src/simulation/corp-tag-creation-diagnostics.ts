@@ -4,7 +4,7 @@ import type {
   LegalAction,
   PublicGameEvent,
 } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 
 import { RUNTIME_CARDS } from "../ai-hints";
 import { classifyTagSourceFromOntology } from "../tag-punish-ontology-consumer";
@@ -35,7 +35,7 @@ export function createCorpTagCreationDiagnosticsContext(
   ): void {
     const sourceType = sourceDefinitionId === undefined
       ? undefined
-      : RUNTIME_CARDS[sourceDefinitionId]?.type ?? CARD_DEFINITIONS_BY_ID[sourceDefinitionId]?.type;
+      : RUNTIME_CARDS[sourceDefinitionId]?.type ?? planningCardFactsByDefinitionId(sourceDefinitionId)?.type;
     const tagSourceProfile = classifyTagSourceFromOntology(sourceDefinitionId);
     if (sourceType === "agenda" && tagSourceProfile?.traceTagSource)
       diagnostics.corpTagCreatedByScoredAgendaAction = true;

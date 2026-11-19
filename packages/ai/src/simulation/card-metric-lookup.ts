@@ -1,12 +1,12 @@
 import type { VisibleCard } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { RUNTIME_CARDS } from "../ai-hints";
 
 export function definitionTypeForMetrics(
   definitionId: number,
 ): string | undefined {
   return (
-    CARD_DEFINITIONS_BY_ID[definitionId]?.type ??
+    planningCardFactsByDefinitionId(definitionId)?.type ??
     RUNTIME_CARDS[definitionId]?.type
   );
 }
@@ -14,7 +14,7 @@ export function definitionTypeForMetrics(
 export function agendaPointsForMetrics(definitionId: number): number {
   return (
     RUNTIME_CARDS[definitionId]?.numeric.agendaPoints ??
-    CARD_DEFINITIONS_BY_ID[definitionId]?.agendaPoints ??
+    planningCardFactsByDefinitionId(definitionId)?.agendaPoints ??
     0
   );
 }
@@ -24,7 +24,7 @@ export function trashCostForDefinitionForMetrics(
 ): number | undefined {
   return (
     RUNTIME_CARDS[definitionId]?.numeric.trashCost ??
-    CARD_DEFINITIONS_BY_ID[definitionId]?.trashCost
+    planningCardFactsByDefinitionId(definitionId)?.trashCost
   );
 }
 

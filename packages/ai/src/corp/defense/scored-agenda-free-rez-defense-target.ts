@@ -4,7 +4,7 @@ import {
   type ServerId,
   type VisibleCard,
 } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { requireVisibleAgendaPoints } from "../../runtime/visible-agenda-facts";
 import { isFiniteNonNegativeInteger } from "../../runtime/exact-action-cost-facts";
@@ -178,7 +178,7 @@ function corpScoredAgendaIceSubtypeIsBreakable(
   subtypes: readonly string[],
 ): boolean {
   if (!ice.definitionId) return false;
-  const definition = CARD_DEFINITIONS_BY_ID[ice.definitionId];
+  const definition = planningCardFactsByDefinitionId(ice.definitionId);
   const subroutines = (definition?.subroutines ?? []).map((subroutine) => ({
     id: subroutine.id,
     type: subroutine.type,

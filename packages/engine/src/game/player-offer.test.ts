@@ -1,13 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { MatchActionSubmission } from "@netgrid/shared";
 import {
   applyAction,
+  applyMatchActionOffer,
   buildMatchPlayerOffer,
-  bindMatchActionOffer,
   createGame,
   createGameAfterSetup,
   getPlayerView,
 } from "../index";
+import * as legalActions from "./legal-actions";
 
 describe("numeric match action offers", () => {
   it("numbers the authoritative side's ordered actions deterministically", () => {
@@ -24,7 +25,8 @@ describe("numeric match action offers", () => {
 
   it("binds numeric choice and option IDs to their authoritative values", () => {
     const state = createGame({ seed: "match-offer-choice" });
-    const offer = buildMatchPlayerOffer(getPlayerView(state, "runner"));
+    const view = getPlayerView(state, "runner");
+    const offer = buildMatchPlayerOffer(view);
     const choice = offer.pendingChoice!;
     const action = offer.legalActions.find((action) => action.type === "resolve_choice")!;
     const keep = choice.options.find((option) => option.presentation === "keep")!;
@@ -44,16 +46,44 @@ describe("numeric match action offers", () => {
     expect(choice.options.map((option) => option.id)).toEqual([1, 2]);
     expect(action.choiceRequirements?.[0]?.optionIds).toEqual([1, 2]);
     expect(action.payload?.choiceId).toBe(choice.choiceId);
-    const bound = bindMatchActionOffer(state, input);
-    if (!("action" in bound)) throw new Error(bound.errorCode);
-    expect(bound.action.selectedChoices?.selectedOptionIds).toEqual(["keep"]);
-    expect(applyAction(state, bound.action).ok).toBe(true);
-    expect(bindMatchActionOffer(state, { ...input, actionId: 99 })).toEqual({
-      errorCode: "ERR_UNKNOWN_ACTION",
+    const expected = applyAction(state, {
+      matchId: state.matchId,
+      side: input.side,
+      clientKnownStateVersion: input.clientKnownStateVersion,
+      idempotencyKey: input.idempotencyKey,
+      actionId: view.legalActions[action.actionId - 1]!.actionId,
+      selectedChoices: {
+        choiceId: view.pendingChoice!.choiceId,
+        selectedOptionIds: ["keep"],
+      },
     });
-    expect(bindMatchActionOffer(state, {
+    expect(expected.ok).toBe(true);
+    const actionGeneration = vi.spyOn(legalActions, "getLegalActions");
+    try {
+      expect(applyMatchActionOffer(state, input)).toEqual(expected);
+      expect(actionGeneration).toHaveBeenCalledExactlyOnceWith(state, "runner");
+    } finally {
+      actionGeneration.mockRestore();
+    }
+    expect(applyMatchActionOffer(state, { ...input, actionId: 99 })).toMatchObject({
+      ok: false,
+      error: { code: "ERR_UNKNOWN_ACTION" },
+    });
+    expect(applyMatchActionOffer(state, {
       ...input,
       selectedChoices: { choiceId: choice.choiceId, selectedOptionIds: [99] },
-    })).toEqual({ errorCode: "ERR_INVALID_CHOICE" });
+    })).toMatchObject({ ok: false, error: { code: "ERR_INVALID_CHOICE" } });
+    expect(applyMatchActionOffer(state, {
+      ...input,
+      selectedChoices: { choiceId: choice.choiceId, selectedOptionIds: [] },
+    })).toMatchObject({ ok: false, error: { code: "ERR_INVALID_CHOICE" } });
+    expect(applyMatchActionOffer(state, {
+      ...input,
+      clientKnownStateVersion: state.stateVersion + 1,
+    })).toMatchObject({ ok: false, error: { code: "ERR_STALE_STATE" } });
+    expect(applyMatchActionOffer(state, { ...input, side: "corp" })).toMatchObject({
+      ok: false,
+      error: { code: "ERR_UNKNOWN_ACTION" },
+    });
   });
 });

@@ -5,7 +5,7 @@ import {
   traceCorpBaseStrength,
 } from "@netgrid/engine";
 import type { PublicHeapBreakerPreparation } from "./corp-public-heap-breaker-preparation";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   type LegalAction,
   type ServerId,
@@ -815,7 +815,7 @@ export function projectCorpFundedIceInstallRoute(
   }
   const sourceCard = sourceMatches[0]!;
   const sourceDefinition = sourceCard.definitionId
-    ? CARD_DEFINITIONS_BY_ID[sourceCard.definitionId]
+    ? planningCardFactsByDefinitionId(sourceCard.definitionId)
     : undefined;
   if (
     !sourceCard.definitionId ||
@@ -1259,7 +1259,7 @@ function fundedRezOptionsForQuote(
     ];
   }
   const definition = ice.definitionId
-    ? CARD_DEFINITIONS_BY_ID[ice.definitionId]
+    ? planningCardFactsByDefinitionId(ice.definitionId)
     : undefined;
   const parameter = quote.variableParameter;
   if (

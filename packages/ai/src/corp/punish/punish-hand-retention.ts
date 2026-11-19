@@ -1,4 +1,4 @@
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import {
   cardImplementationForDefinitionId,
   traceRulesDefinition,
@@ -81,9 +81,9 @@ export function prepareCorpPunishHandAssessment(input: AiDecisionInput) {
     return remaining;
   }
   const visibleMeatPrevention = [opponent.identity, ...rig].some((card) =>
-    cardSpecPlanningCardByDefinitionId(
+    planningCardByDefinitionId(
       card.definitionId!,
-    )?.planning.engine.damagePreventionSources?.some(
+    )?.engine.damagePreventionSources?.some(
       (source) =>
         source.visibility === "public" && source.damageTypes.includes("meat"),
     ),

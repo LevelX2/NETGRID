@@ -99,6 +99,20 @@ AI konfiguriert ist. Dabei gilt:
   wiederhergestellten residenten Portfolio neu.
 - Standardpayloads bleiben side-gefiltert.
 
+Der HTTP-Server lässt produktive KI-Entscheidungen in einem Pool mit zwei
+Worker-Threads berechnen. Der Auftrag enthält das seitensichere KI-DTO und
+den laufenden KI-Speicher. Regelabfragen laufen über typisierte Nachrichten
+gegen den vom Server gehaltenen, für diese Partie gesperrten Zustand.
+Der Server übernimmt den fortgeschriebenen KI-Speicher und wendet das
+Ergebnis in der Engine an. Eine Übergabe zwischen Threads erhält die
+laufende Bindung des Zugplans. Der Workerfehler führt zum bestehenden
+strukturierten Entscheidungsfehler.
+
+Der Live-Pfad hält pro Partie und Seite die bereits in das KI-DTO
+projizierten Ereignisse vor und projiziert nur neue Einträge. Beim
+Wiederöffnen entsteht die Sicht aus der gespeicherten Engine-Historie.
+Undo, Partieabschluss und Schließen des Servers geben die Projektion frei.
+
 ### Idempotente Aktionsantworten
 
 Nach erfolgreicher Sessionprüfung liefert eine bekannte Idempotenz-ID ihr

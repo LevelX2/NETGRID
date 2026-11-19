@@ -1,7 +1,7 @@
 import { isRemoteServerId } from "@netgrid/shared";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { reconstructBeliefState } from "../belief-state";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { mergedPublicHistory } from "../public-event-history";
 
@@ -28,7 +28,7 @@ function rootMayBeAgenda(
       entry.invalidatedBy.length === 0,
   );
   if (!memory) return true;
-  const definition = CARD_DEFINITIONS_BY_ID[memory.definitionId];
+  const definition = planningCardFactsByDefinitionId(memory.definitionId);
   if (!definition) {
     throw new PlanResolutionFailure("missing_card_definition", {
       side: input.side,

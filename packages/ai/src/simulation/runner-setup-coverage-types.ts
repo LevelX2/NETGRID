@@ -1,5 +1,5 @@
 import { visibleRunnerPathTraceContext } from "../run-analysis/trace-rules-profile-planning";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   type AiDecisionInput,
   type LegalAction,
@@ -146,7 +146,7 @@ export function runnerCoverageSearchActionForMetrics(
       : undefined;
   const sourceDefinition = sourceCard?.definitionId
     ? (RUNTIME_CARDS[sourceCard.definitionId] ??
-      CARD_DEFINITIONS_BY_ID[sourceCard.definitionId])
+      planningCardFactsByDefinitionId(sourceCard.definitionId))
     : undefined;
   const mechanics =
     sourceDefinition &&
@@ -199,7 +199,7 @@ export function runnerMissingBreakerRolesForMetrics(
   definitionId: number,
 ): string[] {
   const definition =
-    RUNTIME_CARDS[definitionId] ?? CARD_DEFINITIONS_BY_ID[definitionId];
+    RUNTIME_CARDS[definitionId] ?? planningCardFactsByDefinitionId(definitionId);
   const subtypes = definition?.subtypes ?? [];
   const roles = new Set<string>();
   if (

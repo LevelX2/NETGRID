@@ -1,7 +1,9 @@
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import {
+  planningCardByDefinitionId,
+  planningCardFactsByDefinitionId,
+} from "@netgrid/cards/planning";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { icebreakerAbilitiesForDefinition } from "@netgrid/engine";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
   breakerCardBlocksAccessReachability,
   classifyBreakerCoverageFromOntology,
@@ -37,8 +39,8 @@ export function projectKnownCorpCardAccessEffect(params: {
   sourceDefinitionId: number;
   sourceCard?: VisibleCard;
 }): KnownCorpCardAccessEffectProjection {
-  const card = cardSpecPlanningCardByDefinitionId(params.sourceDefinitionId);
-  const accessEffects = card?.planning.engine.accessEffects ?? [];
+  const card = planningCardByDefinitionId(params.sourceDefinitionId);
+  const accessEffects = card?.engine.accessEffects ?? [];
   const installedEffects = accessEffects.filter(
     (effect) =>
       effect.kind === "on_access" &&
@@ -54,7 +56,7 @@ export function projectKnownCorpCardAccessEffect(params: {
   const evidence = ["known_corp_card_access_effect_structured_card_spec"];
   const activation = (effect: (typeof installedEffects)[number]) =>
     effect.installedSourceActivation ??
-    (card?.definition.type === "agenda" ? "any_rez_state" : "requires_rezzed");
+    (card?.cardType === "agenda" ? "any_rez_state" : "requires_rezzed");
   if (
     params.sourceCard?.rezzed === undefined &&
     installedEffects.some((effect) => activation(effect) !== "any_rez_state")
@@ -270,7 +272,7 @@ export function projectKnownCorpCardAccessEffect(params: {
         card.type === "program" &&
         (!card.known ||
           !card.definitionId ||
-          !CARD_DEFINITIONS_BY_ID[card.definitionId]),
+          !planningCardFactsByDefinitionId(card.definitionId)),
     )
   ) {
     unsupported = true;
@@ -350,11 +352,11 @@ export function projectKnownCorpCardProspectiveAccessEffect(params: {
   const current = projectKnownCorpCardAccessEffect(params);
   if (params.input.side !== "runner" || params.sourceCard?.rezzed !== false)
     return current;
-  const card = cardSpecPlanningCardByDefinitionId(params.sourceDefinitionId);
+  const card = planningCardByDefinitionId(params.sourceDefinitionId);
   if (
     !card ||
-    (card.definition.type !== "asset" && card.definition.type !== "upgrade") ||
-    !card.planning.engine.accessEffects?.some(
+    (card.cardType !== "asset" && card.cardType !== "upgrade") ||
+    !card.engine.accessEffects?.some(
       (effect) =>
         effect.kind === "on_access" &&
         effect.sourceZones.includes("installed") &&
@@ -364,7 +366,7 @@ export function projectKnownCorpCardProspectiveAccessEffect(params: {
     )
   )
     return current;
-  const cost = card.definition.rezCost;
+  const cost = card.engine.characteristics.numeric.rezCost;
   if (typeof cost !== "number" || !Number.isFinite(cost) || cost < 0)
     return result(params.sourceDefinitionId, "unknown", 0, [
       "known_access_effect_prospective_rez_base_cost_unavailable",
@@ -431,7 +433,7 @@ function threatenedInstalledCoverage(
 }
 function installedCoverage(card: VisibleCard): string[] {
   const definition = card.definitionId
-    ? CARD_DEFINITIONS_BY_ID[card.definitionId]
+    ? planningCardFactsByDefinitionId(card.definitionId)
     : undefined;
   if (!definition) return [];
   const abilities = icebreakerAbilitiesForDefinition(definition);

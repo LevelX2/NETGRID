@@ -31,9 +31,6 @@ import {
 import { createAiLiveRuntimeComposition } from "./runtime/ai-live-runtime-composition";
 import {
   cardDefinitionTypeForAi,
-  demoCardDefinitionForAi,
-  runnerCardMechanicsForAi,
-  runtimeCardDefinitionForAi,
   visibleCardDefinition,
 } from "./runtime/card-definition-lookup";
 import { corpInstalledEconomyCreditAmount } from "./corp/economy/installed-economy-credit";
@@ -182,14 +179,11 @@ export const aiLiveRuntimeDependencies = {
   handDevelopmentEvaluations: evaluateRunnerHandDevelopment,
   economyPosture: buildRunnerEconomyPosture,
   runTargets: evaluateRunnerRunTargets,
-  mechanicsForDefinition: runnerCardMechanicsForAi,
   actionTypeIsReactive: semanticRuntimeActionTypeIsReactive,
   evaluatePracticalRunnerRunTargets: evaluateRunnerRunTargets,
   runnerRunTargetPlausibleForMultiRun,
   runnerRunTargetHighPayoff,
   findVisibleCorpServerCard,
-  runtimeDefinition: runtimeCardDefinitionForAi,
-  demoDefinition: demoCardDefinitionForAi,
   evaluateKnownCentralPayoff: evaluateKnownCentralAccessPayoff,
   definitionType: definitionTypeForMetrics,
   definitionTypeForMetrics,

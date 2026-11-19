@@ -6,13 +6,13 @@ import {
 } from "../registry";
 import { CARD_REGISTRY } from "../registry-runtime";
 import {
-  projectCardSpecDefinition,
+  projectEngineCardDefinition,
   projectCardSpecImplementation,
   projectTraceSuccessEffect,
-} from "./card-spec-compatibility-projections";
+} from "./card-spec-engine-projections";
 import type { CardLifecycleTriggeredAbilityImplementation } from "./definition-ability-contracts";
 
-describe("CardSpec compatibility implementation projection", () => {
+describe("CardSpec engine projection", () => {
   it("projects one margin-based tag effect and rejects an unrepresented combined effect", () => {
     const margin = {
       kind: "add_tags_by_trace_margin_over_runner_link" as const,
@@ -101,7 +101,7 @@ describe("CardSpec compatibility implementation projection", () => {
           ownerCapabilityKey: relativeIce.capabilityKey,
         },
       });
-      const projected = projectCardSpecDefinition(engine!, spec!);
+      const projected = projectEngineCardDefinition(engine!, spec!);
       expect(
         projected.subroutines?.find(
           (subroutine) =>
@@ -132,7 +132,7 @@ describe("CardSpec compatibility implementation projection", () => {
         String(binding.subroutineCapabilityKey),
     )!;
     const project = (enginePatch: Record<string, unknown>) =>
-      projectCardSpecDefinition(
+      projectEngineCardDefinition(
         {
           ...engine,
           engine: { ...engine.engine, ...enginePatch },
@@ -367,7 +367,7 @@ describe("CardSpec compatibility implementation projection", () => {
         engine.cardDefinitionId,
       );
       expect(spec, String(engine.cardDefinitionId)).toBeDefined();
-      const projected = projectCardSpecDefinition(engine, spec!);
+      const projected = projectEngineCardDefinition(engine, spec!);
       expect(projected.subroutines).toHaveLength(
         engine.engine.printedSubroutines?.length ?? 0,
       );
@@ -388,7 +388,7 @@ describe("CardSpec compatibility implementation projection", () => {
     const subroutine = engine!.engine.printedSubroutines?.[0];
     expect(subroutine?.kind).toBe("run_duration_encounter_cost_or_end_run");
     expect(() =>
-      projectCardSpecDefinition(
+      projectEngineCardDefinition(
         {
           ...engine!,
           engine: {
@@ -425,11 +425,11 @@ describe("CardSpec compatibility implementation projection", () => {
     expect(unconditionalSpec).toBeDefined();
     expect(conditionalSpec).toBeDefined();
 
-    const unconditionalProjection = projectCardSpecDefinition(
+    const unconditionalProjection = projectEngineCardDefinition(
       unconditional!,
       unconditionalSpec!,
     );
-    const conditionalProjection = projectCardSpecDefinition(
+    const conditionalProjection = projectEngineCardDefinition(
       conditional!,
       conditionalSpec!,
     );
@@ -445,7 +445,7 @@ describe("CardSpec compatibility implementation projection", () => {
     const strengthSubroutine = conditional!.engine.printedSubroutines?.[0];
     expect(strengthSubroutine?.kind).toBe("run_duration_ice_strength");
     expect(() =>
-      projectCardSpecDefinition(
+      projectEngineCardDefinition(
         {
           ...conditional!,
           engine: {
@@ -491,7 +491,7 @@ describe("CardSpec compatibility implementation projection", () => {
         ],
       },
     };
-    expect(() => projectCardSpecDefinition(malformed as never, spec!)).toThrow(
+    expect(() => projectEngineCardDefinition(malformed as never, spec!)).toThrow(
       "card_spec_invalid_trace_damage_effect",
     );
   });
@@ -502,7 +502,7 @@ describe("CardSpec compatibility implementation projection", () => {
     const spec = cardSpecForDefinitionId(CARD_REGISTRY, definitionId);
     expect(engine).toBeDefined();
     expect(spec).toBeDefined();
-    expect(projectCardSpecDefinition(engine!, spec!).subroutines).toEqual([
+    expect(projectEngineCardDefinition(engine!, spec!).subroutines).toEqual([
       {
         id: "subroutine_trace_x_end_run_and_run_lock",
         type: "initiate_trace",
@@ -531,7 +531,7 @@ describe("CardSpec compatibility implementation projection", () => {
         ],
       },
     };
-    expect(() => projectCardSpecDefinition(malformed as never, spec!)).toThrow(
+    expect(() => projectEngineCardDefinition(malformed as never, spec!)).toThrow(
       "card_spec_unsupported_trace_success_effect",
     );
   });

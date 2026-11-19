@@ -1,5 +1,5 @@
 import { isRemoteServerId } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   type CardInstanceId,
   type GameState,
@@ -20,7 +20,7 @@ export function cardTargetTypeForInstance(
   const definitionId = state.cardInstances[cardId]?.definitionId;
   if (!definitionId) return "unknown";
   const type =
-    CARD_DEFINITIONS_BY_ID[definitionId]?.type ??
+    planningCardFactsByDefinitionId(definitionId)?.type ??
     RUNTIME_CARDS[definitionId]?.type;
   return progressionCardTargetType(type);
 }
@@ -86,7 +86,7 @@ export function rezCostForDefinitionId(
 ): number {
   if (!definitionId) return 0;
   return (
-    CARD_DEFINITIONS_BY_ID[definitionId]?.rezCost ??
+    planningCardFactsByDefinitionId(definitionId)?.rezCost ??
     RUNTIME_CARDS[definitionId]?.numeric.rezCost ??
     0
   );

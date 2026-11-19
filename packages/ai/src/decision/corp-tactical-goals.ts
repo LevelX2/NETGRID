@@ -1,5 +1,5 @@
 import { isRemoteServerId } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import type {
   ActionSemanticCandidate,
   LegalTargetSummary,
@@ -141,7 +141,7 @@ function candidateSourceIsVisibleIce(
   const definitionId = candidate.sourceDefinitionId;
   return (
     definitionId !== undefined &&
-    CARD_DEFINITIONS_BY_ID[definitionId]?.type === "ice"
+    planningCardFactsByDefinitionId(definitionId)?.type === "ice"
   );
 }
 

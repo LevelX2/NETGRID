@@ -1,4 +1,4 @@
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   type AiDecisionInput,
   type LegalAction,
@@ -187,7 +187,7 @@ function scoringWindowAdvancementRequirement(
   }
   const demoRequirement =
     card.definitionId !== undefined
-      ? CARD_DEFINITIONS_BY_ID[card.definitionId]?.advancementRequirement
+      ? planningCardFactsByDefinitionId(card.definitionId)?.advancementRequirement
       : undefined;
   if (typeof demoRequirement === "number" && Number.isFinite(demoRequirement)) {
     return Math.max(0, Math.floor(demoRequirement));
@@ -916,7 +916,7 @@ function visibleAgendaPoints(card: VisibleCard): number {
   }
   const demoAgendaPoints =
     card.definitionId !== undefined
-      ? CARD_DEFINITIONS_BY_ID[card.definitionId]?.agendaPoints
+      ? planningCardFactsByDefinitionId(card.definitionId)?.agendaPoints
       : undefined;
   if (
     typeof demoAgendaPoints === "number" &&

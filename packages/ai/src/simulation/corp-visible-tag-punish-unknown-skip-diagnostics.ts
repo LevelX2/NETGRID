@@ -1,6 +1,6 @@
 import type { RunnerSurvivalCounterContext } from "./runner-survival-counter-context";
 import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 
 import { RUNTIME_CARDS } from "../ai-hints";
 import { titleForCardId } from "../runtime/card-title";
@@ -110,7 +110,7 @@ export function createCorpVisibleTagPunishUnknownSkipDiagnosticsContext(
       );
       const type = definitionId === undefined
         ? undefined
-        : RUNTIME_CARDS[definitionId]?.type ?? CARD_DEFINITIONS_BY_ID[definitionId]?.type;
+        : RUNTIME_CARDS[definitionId]?.type ?? planningCardFactsByDefinitionId(definitionId)?.type;
       if (type === "agenda") return "install_agenda";
       if (type === "ice" || action.payload?.placement === "ice")
         return "install_ice";

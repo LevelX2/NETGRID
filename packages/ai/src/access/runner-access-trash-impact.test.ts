@@ -1,7 +1,7 @@
 import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
-  cardSpecPlanningCardByDefinitionId,
-  type CardSpecPlanningCompatibilityCard,
+  planningCardByDefinitionId,
+  type PlanningCardView,
 } from "@netgrid/cards/planning";
 import type { VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
@@ -51,11 +51,19 @@ describe("assessRunnerAccessTrashImpactFromPlanningCard", () => {
     "derives future credits generically and deducts the canonical rez cost %s",
     (rezCost) => {
       const source = lookupPlanningCard(521);
-      const definitionId = syntheticCardDefinitionId("fixture-unrezzed-stored-economy");
+      const definitionId = syntheticCardDefinitionId(
+        "fixture-unrezzed-stored-economy",
+      );
       const planningCard = {
         ...source,
-        definition: { ...source.definition, rezCost },
-        planning: { ...source.planning, cardDefinitionId: definitionId },
+        engine: {
+          ...source.engine,
+          characteristics: {
+            ...source.engine.characteristics,
+            numeric: { ...source.engine.characteristics.numeric, rezCost },
+          },
+        },
+        cardDefinitionId: definitionId,
       };
       expect(
         assess({
@@ -78,11 +86,17 @@ describe("assessRunnerAccessTrashImpactFromPlanningCard", () => {
     const source = lookupPlanningCard(521);
     const planningCard = {
       ...source,
-      definition: { ...source.definition, rezCost: undefined },
-    } as unknown as CardSpecPlanningCompatibilityCard;
+      engine: {
+        ...source.engine,
+        characteristics: {
+          ...source.engine.characteristics,
+          numeric: { ...source.engine.characteristics.numeric, rezCost: null },
+        },
+      },
+    } as unknown as PlanningCardView;
     expect(() =>
       assess({
-        definitionId: source.planning.cardDefinitionId,
+        definitionId: source.cardDefinitionId,
         planningCard,
         rezzed: false,
         trashCost: 4,
@@ -96,27 +110,23 @@ describe("assessRunnerAccessTrashImpactFromPlanningCard", () => {
     const source = lookupPlanningCard(521);
     const planningCard = {
       ...source,
-      planning: {
-        ...source.planning,
-        prospectiveCapabilities: {
-          ...source.planning.prospectiveCapabilities,
-          capabilities:
-            source.planning.prospectiveCapabilities.capabilities.map(
-              (capability) => ({
-                ...capability,
-                descriptors: capability.descriptors.map((descriptor) =>
-                  descriptor.kind === "target"
-                    ? { ...descriptor, value: "other" }
-                    : descriptor,
-                ),
-              }),
+      prospectiveCapabilities: {
+        ...source.prospectiveCapabilities,
+        capabilities: source.prospectiveCapabilities.capabilities.map(
+          (capability) => ({
+            ...capability,
+            descriptors: capability.descriptors.map((descriptor) =>
+              descriptor.kind === "target"
+                ? { ...descriptor, value: "other" }
+                : descriptor,
             ),
-        },
+          }),
+        ),
       },
-    } as CardSpecPlanningCompatibilityCard;
+    } as PlanningCardView;
     expect(
       assess({
-        definitionId: source.planning.cardDefinitionId,
+        definitionId: source.cardDefinitionId,
         planningCard,
         rezzed: false,
         trashCost: 4,
@@ -146,25 +156,24 @@ describe("assessRunnerAccessTrashImpactFromPlanningCard", () => {
     "derives recurring draw-tag impact from capability facts, present=%s",
     (present) => {
       const source = lookupPlanningCard(525);
-      const definitionId = syntheticCardDefinitionId("fixture-recurring-draw-tax");
+      const definitionId = syntheticCardDefinitionId(
+        "fixture-recurring-draw-tax",
+      );
       const planningCard = {
         ...source,
-        planning: {
-          ...source.planning,
-          cardDefinitionId: definitionId,
-          planningAnnotations: {
-            schemaVersion: "card-planning-annotations-v1",
-            card: [],
-            capabilities: [],
-          },
-          prospectiveCapabilities: {
-            ...source.planning.prospectiveCapabilities,
-            capabilities: present
-              ? source.planning.prospectiveCapabilities.capabilities
-              : [],
-          },
+        cardDefinitionId: definitionId,
+        planningAnnotations: {
+          schemaVersion: "card-planning-annotations-v1",
+          card: [],
+          capabilities: [],
         },
-      } as CardSpecPlanningCompatibilityCard;
+        prospectiveCapabilities: {
+          ...source.prospectiveCapabilities,
+          capabilities: present
+            ? source.prospectiveCapabilities.capabilities
+            : [],
+        },
+      } as PlanningCardView;
       const result = assess({
         definitionId,
         planningCard,
@@ -208,7 +217,7 @@ describe("assessRunnerAccessTrashImpactFromPlanningCard", () => {
         planningCard,
         accessed: {
           known: true,
-          definitionId: planningCard.planning.cardDefinitionId,
+          definitionId: planningCard.cardDefinitionId,
           advancementCounters,
         },
         trashCost: 1,
@@ -322,19 +331,16 @@ describe("assessRunnerAccessTrashImpactFromPlanningCard", () => {
     const source = lookupPlanningCard(578);
     const inert = {
       ...source,
-      planning: {
-        ...source.planning,
-        prospectiveCapabilities: {
-          ...source.planning.prospectiveCapabilities,
-          capabilities: [],
-        },
-        planningAnnotations: {
-          schemaVersion: "card-planning-annotations-v1",
-          card: [],
-          capabilities: [],
-        },
+      prospectiveCapabilities: {
+        ...source.prospectiveCapabilities,
+        capabilities: [],
       },
-    } as CardSpecPlanningCompatibilityCard;
+      planningAnnotations: {
+        schemaVersion: "card-planning-annotations-v1",
+        card: [],
+        capabilities: [],
+      },
+    } as PlanningCardView;
     const assessment = assess({
       definitionId: 578,
       trashCost: 6,
@@ -386,7 +392,7 @@ function assess(params: {
   runnerCredits: number;
   economyReserve: number;
   parentReservedCredits?: number;
-  planningCard?: CardSpecPlanningCompatibilityCard;
+  planningCard?: PlanningCardView;
 }) {
   const planningCard =
     params.planningCard ?? lookupPlanningCard(params.definitionId);
@@ -407,10 +413,8 @@ function assess(params: {
   });
 }
 
-function lookupPlanningCard(
-  definitionId: number,
-): CardSpecPlanningCompatibilityCard {
-  const card = cardSpecPlanningCardByDefinitionId(definitionId);
+function lookupPlanningCard(definitionId: number): PlanningCardView {
+  const card = planningCardByDefinitionId(definitionId);
   if (!card) throw new Error(`missing test planning card: ${definitionId}`);
   return card;
 }

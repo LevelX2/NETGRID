@@ -1,9 +1,8 @@
 import { projectBreakerCreditPayment } from "./visible-run-credit-budget";
 import { subtypeKey } from "./visible-run-subtype-key";
 export { subtypeKey } from "./visible-run-subtype-key";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId, type CardPlanningFacts } from "@netgrid/cards/planning";
 import {
-  type CardDefinition,
   type CardDefinitionId,
   type VisibleCard,
   type VisibleEffectiveIceRunQuote,
@@ -207,7 +206,7 @@ export function hardUnbrokenEffectBlockedPathAssessment(params: {
 }
 
 export function missingCoverageForIceSubtypes(
-  subtypes: string[],
+  subtypes: readonly string[],
 ): NonNullable<KnownRezzedIcePathAssessment["missingCoverage"]> {
   const normalized = new Set(subtypes.map(subtypeKey));
   const coverage: NonNullable<KnownRezzedIcePathAssessment["missingCoverage"]> =
@@ -567,7 +566,7 @@ export function carryProjectedBreakerStrength(
 
 export function structuredBreakerAssessment(params: {
   breakerCard: VisibleCard;
-  breakerDefinition: CardDefinition | undefined;
+  breakerDefinition: CardPlanningFacts | undefined;
   ice: {
     instanceId?: string;
     definitionId?: number;
@@ -975,13 +974,13 @@ export function cardDefinitionStrength(
 
 export function visibleRunCardDefinition(
   definitionId: number | undefined,
-): CardDefinition | undefined {
+): CardPlanningFacts | undefined {
   if (!definitionId) return undefined;
-  return CARD_DEFINITIONS_BY_ID[definitionId];
+  return planningCardFactsByDefinitionId(definitionId);
 }
 
 export function breakerCarriesStrengthAcrossIce(
-  definition: CardDefinition,
+  definition: CardPlanningFacts,
 ): boolean {
   return (definition.mechanics ?? []).includes("run_remainder_strength_bonus");
 }

@@ -83,10 +83,11 @@ liegen im separaten aktiven Systemset. Produktive Engine-, Server- und KI-Defaul
 verwenden echte Originalset-Decks, während die synthetischen Demo-Decks nur
 noch als explizite Mechanik-Fixtures in internen Tests bestehen.
 
-Der CardSpec-Migrationsprozess CS00 bis CS13 ist abgeschlossen und integriert. Aktuell gilt:
+Für die zentrale CardSpec-Registry gelten diese Paketgrenzen.
 
 - `@netgrid/cards` ist die zentrale kartenspezifische Autoren- und Projektionsschicht;
 - `@netgrid/cards/engine` liefert der Engine mechanische CardImplementation-, Runtime- und Source-Ref-Projektionen;
+- `@netgrid/cards/planning` liefert der KI unveränderliche Regelfakten und Annotationen;
 - `packages/engine/src/card-implementations/registry.ts` besitzt keine zweite manuelle Autorenregistry;
 - Coverage ist Metadaten-/Auditlogik und bezieht Implementierungs-, Runtime- und Source-Informationen aus CardSpec;
 - die Rules Engine bleibt alleinige Autorität für Legalität und Ausführung.

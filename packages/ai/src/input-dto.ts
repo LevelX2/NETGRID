@@ -1,4 +1,5 @@
 import { validOptionalCardDefinitionIds } from "./card-definition-id-input";
+import { toPublicEventForSide } from "@netgrid/engine";
 import { isCardDefinitionId, isMatchEventId, isRunId, type RunId } from "@netgrid/shared";
 import { sanitizeCurrentCorpPunishQuoteSet } from "./corp/punish/punish-route-quote-sanitizer";
 import { sanitizeCorpStartDrawQuote } from "./runtime/corp-start-draw-quote-input";
@@ -21,6 +22,7 @@ import {
   type CounterDisplay,
   type ChoiceRequirement,
   type Cost,
+  type GameState,
   type EncounterActionTargets,
   type LegalAction,
   type PlayerView,
@@ -710,13 +712,82 @@ const ALLOWED_ABILITY_FAMILIES: ReadonlySet<PublicAbilityFamily> = new Set([
   "trace-tags",
 ]);
 
+const projectedAiHistories = new WeakMap<
+  PublicGameEvent[],
+  { side: Side; events: PublicGameEvent[] }
+>();
+
+type Chronicle = {
+  lastEventId: PublicGameEvent["eventId"] | undefined;
+  lastStateHash: string | undefined;
+  projected: PublicGameEvent[];
+  sanitized: PublicGameEvent[];
+};
+
+/** The caller releases a match on undo, replacement, or close. A new
+ * process reconstructs the projection from the stored Engine journal. */
+export class AiDecisionChronicle {
+  readonly #matches = new Map<string, Partial<Record<Side, Chronicle>>>();
+
+  project(state: GameState, side: Side): PublicGameEvent[] {
+    const sides = this.#matches.get(state.matchId) ?? {};
+    const previous = sides[side];
+    const last = previous
+      ? state.eventLog[previous.projected.length - 1]
+      : undefined;
+    const prefix =
+      previous &&
+      previous.projected.length <= state.eventLog.length &&
+      previous.lastEventId === last?.eventId &&
+      previous.lastStateHash === last?.stateHashAfter
+        ? previous
+        : undefined;
+    if (prefix && prefix.projected.length === state.eventLog.length)
+      return prefix.projected;
+
+    const added = state.eventLog
+      .slice(prefix?.projected.length ?? 0)
+      .map((event) => toPublicEventForSide(event, side));
+    const projected = (prefix?.projected ?? []).concat(added);
+    const sanitized = (prefix?.sanitized ?? []).concat(
+      added.map((event) => freezeEventValue(sanitizePublicGameEvent(event))),
+    );
+    Object.freeze(projected);
+    projectedAiHistories.set(projected, { side, events: sanitized });
+    const head = state.eventLog.at(-1);
+    sides[side] = {
+      lastEventId: head?.eventId,
+      lastStateHash: head?.stateHashAfter,
+      projected,
+      sanitized,
+    };
+    this.#matches.set(state.matchId, sides);
+    return projected;
+  }
+
+  release(matchId: string): void {
+    this.#matches.delete(matchId);
+  }
+}
+
+function freezeEventValue<T>(value: T): T {
+  if (typeof value === "object" && value !== null) {
+    for (const child of Object.values(value)) freezeEventValue(child);
+    Object.freeze(value);
+  }
+  return value;
+}
+
 export function buildAiDecisionInputDto(
   params: BuildAiDecisionInputDtoParams,
 ): AiDecisionInput {
   assertActorSideContract(params);
-  const sanitizedPublicEvents = params.playerView.publicEvents.map(
-    sanitizePublicGameEvent,
-  );
+  const cached = projectedAiHistories.get(params.playerView.publicEvents);
+  if (cached && cached.side !== params.side)
+    throw new Error("AI input chronicle actor side mismatch.");
+  const sanitizedPublicEvents = cached
+    ? cached.events.slice()
+    : params.playerView.publicEvents.map(sanitizePublicGameEvent);
   return {
     ...(params.matchId !== undefined ? { matchId: params.matchId } : {}),
     ...(params.corpRestrictedCreditRouteQuotes?.length

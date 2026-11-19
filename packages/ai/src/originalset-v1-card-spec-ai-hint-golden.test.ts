@@ -1,4 +1,4 @@
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
 import generatedArtifact from "../../../data/ai/card-spec-ai-hints-generated.json";
@@ -16,10 +16,10 @@ describe("Originalset V1 CardSpec AI hint reviewed semantic golden", () => {
   });
 
   it("pins complete compiler outputs, evidence, and typed action capacity", () => {
-    const compiled = cardSpecPlanningCards()
-      .filter((entry) => reviewedIds.has(entry.definition.id))
+    const compiled = listPlanningCardsWithFacts()
+      .filter((entry) => reviewedIds.has(entry.facts.id))
       .map((entry) => ({
-        cardId: entry.definition.id,
+        cardId: entry.facts.id,
         hint: deriveCardSpecAiHint(entry),
       }))
       .sort((left, right) => (left.cardId - right.cardId));

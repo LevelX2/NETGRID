@@ -20,7 +20,7 @@ Runs, Spiel-Traces, Zahlungs-, Änderungs- und Ersatzfenster sowie
 laufende Ziehvorgänge erhalten beim Öffnen die StateVersion des
 Übergangs. Die Herkunft eines Traces wird gesondert gebunden.
 Öffentliche Effekte tragen ihre Position im Ereignis, beginnend bei null.
-Kartenexemplare verwenden einen kurzen Base36-Schlüssel. SQLite-Schema 11 speichert
+Kartenexemplare verwenden einen kurzen Base36-Schlüssel. SQLite-Schema 12 speichert
 Kartenlisten als Positionen in der Instanztabelle. Verdeckte Slots und
 adressierbare verdeckte Ressourcen haben jeweils einen eigenen kurzen
 Schlüsseltyp. Remotes werden als `r1`, `r2` und entsprechend ihrer
@@ -36,6 +36,11 @@ Das Fähigkeitsregister vergibt stabile globale Nummern. Der Spieltransport
 verwendet laufende Nummern für Aktionen und Optionen im aktuellen Angebot
 sowie die StateVersion für geöffnete Choices. Die Engine bindet diese Nummern
 an das Angebot einer Seite. Der Server prüft zusätzlich die MatchVersion.
+`applyMatchActionOffer` prüft Match-ID und StateVersion, erzeugt die LegalActions
+für die eingereichte Seite einmal und wendet die ausgewählte Aktion unmittelbar
+an. Choice-, Ziel- und Kostenprüfung sowie Replay und StateHash verwenden
+denselben Engine-Pfad wie interne Aktionen.
+[Engine-Aktionspfad](../../packages/engine/src/game/apply-action.ts)
 
 Die Engine vergibt Unterroutinenreferenzen nach
 Aufbau der vollständigen ICE-Sequenz als nullbasierte Base36-Position.
@@ -53,7 +58,7 @@ typisierten Argumenten. Spielzufall und KI-Auswahl besitzen getrennte,
 explizit initialisierte Zähler. Die kanonische Seed-Eingabe enthält den
 Seed, das Tupel und den jeweiligen Zähler. Jede Aufzeichnung hält eine
 eigene Kopie des Tupels. Öffentliche Ereignisse geben nur den Zweckcode
-weiter. SQLite-Schema 11 speichert die Tupel unmittelbar in den
+weiter. SQLite-Schema 12 speichert die Tupel unmittelbar in den
 Zufallszeilen.
 [Zweckvertrag](../../packages/shared/src/random-purpose.ts) · [Zufallsvergabe](../../packages/engine/src/game/state/draw-random.ts)
 
@@ -109,7 +114,7 @@ API- oder Speichergrenze geführt. Zugangstokens und Idempotenzschlüssel erfül
 eigene Verträge für Authentifizierung oder Wiederholung. StateHash und
 Fingerprints dienen als Prüfsummen. Innerhalb eines Datensatzes genügt die
 bereits vorhandene übergeordnete Referenz, wenn sie denselben Bezug eindeutig
-herstellt. [CardSpec und Drucke](central-card-specification-and-registry-target-state-2026-08-09.md#63-regelidentität-druck-und-set) · [Kartenbildimport](card-images/personal-card-image-import.md) · [Aktionsquittungen](../../apps/server/src/action-idempotency.test.ts)
+herstellt. [CardSpec und Drucke](central-card-specification-and-registry-target-state-2026-08-09.md#regelidentität-druck-und-set) · [Kartenbildimport](card-images/personal-card-image-import.md) · [Aktionsquittungen](../../apps/server/src/action-idempotency.test.ts)
 
 ## Verbindliche Verträge
 
@@ -155,15 +160,16 @@ herstellt. [CardSpec und Drucke](central-card-specification-and-registry-target-
 
 ## Speicherung und lokale Matchdaten
 
-SQLite-Schema 11 speichert den aktuellen Engine-Zustand in `game_states`.
+SQLite-Schema 12 speichert den aktuellen Engine-Zustand in `game_states`.
 `matches.record_json` enthält die Match-Metadaten. Vor-Aktionssnapshots binden
 Undo und Replay an ihren jeweiligen Übergang. Full Save, Delta-Save,
 Wiederöffnung und Maintenance verwenden denselben Spielstands-Codec.
 
 SQLite speichert pro öffentlichem Ereignis den Chronikkontext und die
-Summen vor dem Ereignis. Spielupdates, Reconnect und der normale
-menschliche Aktionspfad lesen einen Ausschnitt von bis zu 80 Ereignissen.
-Die Projektion der Spielersicht übernimmt diesen Ausschnitt. Undo
+Summen vor dem Ereignis. Aktions- und Verbindungsloads lesen bis zu 80
+öffentliche Ereignisse. Spielupdates und Reconnect geben diesen Ausschnitt
+in der Spielersicht aus. Pro Match gespeicherte Journalgrößen binden
+Delta-Transaktionen an die geladene Historie. Undo
 schneidet die gespeicherten Ereignisse samt Kontext auf die Zielversion
 zurück. Replay, Wartung und KI-Pfade mit dauerhaftem Spielwissen haben
 weiterhin Zugriff auf die vollständige benötigte Historie. Die

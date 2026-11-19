@@ -7,7 +7,7 @@ import {
 } from "../../runtime/corp-canonical-credit-facts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import type {
   CorpEconomyParentFundingSignal,
   CorpEconomyDevelopmentSignal,
@@ -218,7 +218,7 @@ function hasUncomparedCurrentFunding(
     return true;
   return input.playerView.own.gripOrHq.some((card) => {
     if (!card.known || !card.definitionId) return false;
-    const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
+    const definition = planningCardFactsByDefinitionId(card.definitionId);
     const hint = AI_HINTS_BY_CARD.get(card.definitionId);
     return (
       definition?.type === "operation" &&

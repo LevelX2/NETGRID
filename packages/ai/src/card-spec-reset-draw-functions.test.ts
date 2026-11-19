@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { expect, it } from "vitest";
 import { AI_HINTS_BY_CARD } from "./ai-hints";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
@@ -7,7 +7,7 @@ import { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 
 const id = 313;
-const entry = cardSpecPlanningCards().find((c) => c.definition.id === id)!;
+const entry = listPlanningCardsWithFacts().find((c) => c.facts.id === id)!;
 
 it("projects compound pool reset and draw from mechanics without promising additive hand gain", () => {
   const hint = deriveCardSpecAiHint(entry);
@@ -52,8 +52,8 @@ it("counts the generated reset draw source in the actual Redline Riot profile", 
 });
 
 it("recognizes reset mechanics on another supported card without planning annotations", () => {
-  const other = cardSpecPlanningCards().find(
-    (c) => c.definition.id === 307,
+  const other = listPlanningCardsWithFacts().find(
+    (c) => c.facts.id === 307,
   )!;
   const planning = { ...entry.planning };
   delete planning.planningAnnotations;
@@ -64,8 +64,8 @@ it("recognizes reset mechanics on another supported card without planning annota
 });
 
 it("does not add a pool shuffle to a plain draw event", () => {
-  const draw = cardSpecPlanningCards().find(
-    (c) => c.definition.id === 307,
+  const draw = listPlanningCardsWithFacts().find(
+    (c) => c.facts.id === 307,
   )!;
   expect(deriveCardSpecAiHint(draw).functionSignals).toContain("setup.draw");
   expect(deriveCardSpecAiHint(draw).functionSignals).not.toContain(

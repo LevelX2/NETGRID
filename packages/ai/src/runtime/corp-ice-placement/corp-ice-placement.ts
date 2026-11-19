@@ -1,4 +1,4 @@
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   type AiDecisionInput,
   type LegalAction,
@@ -73,9 +73,9 @@ export function buildCorpIceCardFacts(
     ? RUNTIME_CARDS[definitionId]
     : undefined;
   const demoDefinition = definitionId
-    ? (CARD_DEFINITIONS_BY_ID[definitionId] ??
+    ? (planningCardFactsByDefinitionId(definitionId) ??
       (runtimeDefinition?.engineCardId
-        ? CARD_DEFINITIONS_BY_ID[runtimeDefinition.engineCardId]
+        ? planningCardFactsByDefinitionId(runtimeDefinition.engineCardId)
         : undefined))
     : undefined;
   const hint = definitionId ? AI_HINTS_BY_CARD.get(definitionId) : undefined;

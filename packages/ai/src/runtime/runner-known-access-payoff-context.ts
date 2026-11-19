@@ -1,4 +1,4 @@
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { AiDecisionInput } from "@netgrid/shared";
 
 import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
@@ -47,8 +47,8 @@ export function runnerCurrentRunHasSafeCompletionReward(
     return false;
   return (input.playerView.own.rig ?? []).some((card) => {
     if (!card.known || !card.definitionId || !card.rezzed) return false;
-    const effect = cardSpecPlanningCardByDefinitionId(card.definitionId)
-      ?.planning.engine.uniqueDirectLongtail;
+    const effect = planningCardByDefinitionId(card.definitionId)
+      ?.engine.uniqueDirectLongtail;
     return (
       effect?.kind === "successful_run_end_credit_resource" && effect.amount > 0
     );

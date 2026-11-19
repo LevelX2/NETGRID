@@ -1,5 +1,5 @@
 import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import { AI_HINTS_BY_CARD, RUNTIME_CARDS } from "../../ai-hints";
 import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
@@ -25,7 +25,7 @@ function scoringWindowVisibleCardText(card: VisibleCard): string {
       : undefined;
   const demoText =
     card.definitionId !== undefined
-      ? CARD_DEFINITIONS_BY_ID[card.definitionId]?.rulesText
+      ? planningCardFactsByDefinitionId(card.definitionId)?.rulesText
       : undefined;
   return [
     card.title,

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import checkpointJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-403-unrezzed-remote-memory-d63.json";
 import { deriveObservedRemoteNoProgressAccessMemory } from "../../access/access-outcome-memory";
 import { reconstructBeliefState } from "../../belief-state";
-import { CARD_DEFINITIONS } from "../../card-definition-compatibility";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import {
   resetResidentPlanPortfolioMemory,
@@ -54,7 +54,7 @@ describe("meta 403 remembered unrezzed remote access", () => {
 
   it("does not treat a remembered agenda as a declined asset", () => {
     const current = input();
-    const agenda = CARD_DEFINITIONS.find((card) => card.type === "agenda")!;
+    const agenda = listPlanningCardsWithFacts().map(({ facts }) => facts).find((card) => card.type === "agenda")!;
     const known = reconstructBeliefState(
       current,
     ).runnerOpponentModel!.knownPositionMemory.find(

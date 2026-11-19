@@ -1,5 +1,5 @@
 import type { CorpAmbushSignal } from "./corp-tactical-plan-contracts";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION,
   CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
@@ -641,7 +641,7 @@ function agenda(instanceId: string): VisibleCard {
 }
 
 function secureRemote(id: `r${number}`, root: VisibleCard[] = []) {
-  const definition = CARD_DEFINITIONS_BY_ID[DATA_WALL];
+  const definition = planningCardFactsByDefinitionId(DATA_WALL);
   if (!definition || definition.type !== "ice") {
     throw new Error("Missing Data Wall test definition.");
   }
@@ -652,14 +652,14 @@ function secureRemote(id: `r${number}`, root: VisibleCard[] = []) {
       visibleCard("data-wall", "corp", "ice", {
         definitionId: DATA_WALL,
         title: definition.title,
-        subtypes: definition.subtypes,
+        subtypes: definition.subtypes.slice(),
         strength,
         rezzed: true,
         effectiveRunQuote: {
           iceInstanceId: "data-wall",
           iceDefinitionId: DATA_WALL,
           effectiveStrength: strength,
-          subroutines: definition.subroutines ?? [],
+          subroutines: definition.subroutines?.slice() ?? [],
         },
       }),
     ],

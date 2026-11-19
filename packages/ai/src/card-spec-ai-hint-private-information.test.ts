@@ -1,4 +1,4 @@
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 
@@ -31,8 +31,8 @@ describe("private information capability translation", () => {
   ] as const)(
     "projects the exact typed capability of %s",
     (id, scope, kind, target, amount, consumed) => {
-      const entry = cardSpecPlanningCards().find(
-        (card) => card.definition.id === id,
+      const entry = listPlanningCardsWithFacts().find(
+        (card) => card.facts.id === id,
       )!;
       const mechanical = { ...entry.planning };
       delete mechanical.planningAnnotations;
@@ -62,14 +62,14 @@ describe("private information capability translation", () => {
   );
 
   it("does not infer information from a sibling capability or the card identity", () => {
-    const entry = cardSpecPlanningCards().find(
-      (card) => card.definition.id === 54,
+    const entry = listPlanningCardsWithFacts().find(
+      (card) => card.facts.id === 54,
     )!;
     const ability = entry.planning.engine.abilities![0]!;
     const hint = deriveCardSpecAiHint({
       ...entry,
-      definition: {
-        ...entry.definition,
+      facts: {
+        ...entry.facts,
         id: 395,
         title: "Renamed witness",
         rulesText: "Unrelated text",

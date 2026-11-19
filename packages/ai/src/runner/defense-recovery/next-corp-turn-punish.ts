@@ -1,6 +1,6 @@
 import {
-  cardSpecPlanningCardByDefinitionId,
-  cardSpecPlanningCards,
+  planningCardByDefinitionId,
+  planningCards,
 } from "@netgrid/cards/planning";
 import { traceRulesDefinition } from "@netgrid/engine";
 import type {
@@ -35,10 +35,10 @@ type NextCorpTurnThreat = {
   additionalRunEnablesPunish: boolean;
 };
 
-const possibleTagOperations = cardSpecPlanningCards().flatMap(
-  ({ definition }) => {
-    const source = fixedTagOperation(definition.id);
-    return source ? [{ definitionId: definition.id, ...source }] : [];
+const possibleTagOperations = planningCards().flatMap(
+  ({ cardDefinitionId }) => {
+    const source = fixedTagOperation(cardDefinitionId);
+    return source ? [{ definitionId: cardDefinitionId, ...source }] : [];
   },
 );
 
@@ -130,7 +130,7 @@ function assessNextCorpTurn(
     (card) =>
       staysInstalledForNextCorpTurn(card) &&
       card.definitionId &&
-      cardSpecPlanningCardByDefinitionId(card.definitionId)?.planning.engine
+      planningCardByDefinitionId(card.definitionId)?.engine
         .runnerUtilityLongtail?.kind === "trace_attempts_auto_success_add_tag",
   );
   const priceTagSource = (source: TagSource) => {
@@ -365,7 +365,7 @@ function readyMeatDamagePrevention(
       )
         return [];
       return (
-        cardSpecPlanningCardByDefinitionId(card.definitionId)?.planning.engine
+        planningCardByDefinitionId(card.definitionId)?.engine
           .damagePreventionSources ?? []
       ).flatMap((source) => {
         if (

@@ -22,7 +22,7 @@ import {
   type StateSnapshotId,
 } from "./state-snapshot-id";
 import { fileURLToPath } from "node:url";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { WebSocket } from "ws";
 import snapshotsData from "../../../data/decks/deck-snapshots-0.6.json";
 import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
@@ -32,6 +32,7 @@ import {
   buildAiDecisionInput as buildRuntimeAiDecisionInput,
   buildAiDecisionInputDto,
   chooseAiAction as chooseRuntimeAiAction,
+  exportAiRuntimeCheckpoint,
   residentPlanPortfolioSnapshot,
   reconstructBeliefState,
   resetResidentPlanPortfolioMemory,
@@ -47,12 +48,15 @@ import {
 import {
   applyAction,
   applyEffectCommands,
+  applyRandomizedTraceBidSelection,
+  buildMatchPlayerOffer,
   checkWinConditions,
   createGameAfterSetup as createEngineGameAfterSetup,
   CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   getLegalActions,
   hashState,
+  quoteRandomizedTraceBidSelection,
 } from "@netgrid/engine";
 import type { ConnectionAuditEvent } from "./connection-audit";
 import {
@@ -64,6 +68,7 @@ import {
   startNetgridServer,
 } from "./http-server";
 import { chronicleTurnContextByEventId } from "./chronicle-turn-context";
+import { AiDecisionWorkerPool } from "./ai-decision-worker-pool";
 import {
   InMemoryMaintenanceCredentialStore,
   MaintenanceAuthService,
@@ -125,6 +130,7 @@ import {
   type LegalAction,
   type PublicGameEvent,
   type Side,
+  type TraceRulesProfile,
 } from "@netgrid/shared";
 
 // Multiplayer mechanics in this file deliberately use test-card snapshots;
@@ -2030,9 +2036,12 @@ describe("Backend 0.5 private storage maintenance", () => {
       )?.cardId;
       if (!opponentOnlyDefinition)
         throw new Error("Missing opponent-only deck definition fixture");
-      expect(JSON.stringify(activeBundle)).not.toContain(
-        opponentOnlyDefinition,
-      );
+      const numericValues = new Set<number>();
+      JSON.stringify(activeBundle, (_key, value: unknown) => {
+        if (typeof value === "number") numericValues.add(value);
+        return value;
+      });
+      expect(numericValues.has(opponentOnlyDefinition)).toBe(false);
       expect(JSON.stringify(activeBundle)).not.toMatch(
         /sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privatePayload|privateDeckSnapshots|decklist|AIInput/i,
       );
@@ -3575,7 +3584,10 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     record.eventLog = [firstPublicEvent, ...addedPublicEvents];
     record.gameState.eventLog = [firstEngineEvent, ...addedEngineEvents];
     record.gameState.runnerTurnFlags!.runAttemptsThisGame = 1;
-    record.aiDecisionTraces = traces;
+    record.aiDecisionTraces = [
+      ...traces,
+      { ...traces.at(-1)!, decisionIndex: 121, traceJson: { marker: "latest-at-event" } },
+    ];
     record.actionReceipts = Array.from({ length: 12 }, (_, index) => ({
       idempotencyKey: `receipt-${index}`,
       matchId: record.match.matchId,
@@ -3629,6 +3641,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     expect(bounded.aiDecisionTraces).toHaveLength(
       SIDE_PAYLOAD_EVENT_TAIL_LIMIT,
     );
+    expect(bounded.aiDecisionTraces?.at(-1)?.traceJson.marker).toBe("latest-at-event");
     expect(JSON.stringify(bounded.aiDecisionTraces)).not.toContain(
       "EARLY_TRACE_SENTINEL",
     );
@@ -3661,20 +3674,56 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       publicEventCount: 121,
       engineEventCount: 121,
       actionReceiptCount: 12,
-      aiDecisionTraceCount: 120,
+      aiDecisionTraceCount: 121,
       loadedActionReceiptCount: 1,
       loadedAiDecisionTraceCount: SIDE_PAYLOAD_EVENT_TAIL_LIMIT,
     });
+    const connection = (await storage.loadForConnection(record.match.matchId))!;
+    expect(connection.eventLog).toEqual(bounded.eventLog);
+    expect(connection.aiDecisionTraces).toEqual(bounded.aiDecisionTraces);
+    expect(connection.gameState.eventLog).toEqual([]);
+    expect(connection.actionReceipts).toEqual([]);
+    expect(connection.stateSnapshots).toEqual([]);
+    expect(connection.undoSnapshots).toEqual([]);
     const service = new MultiplayerService(storage, {
       tokenSalt: "fixture-v108-bounded-action-load",
       now: () => "2026-07-19T12:00:00.000Z",
     });
+    const watchConnection = new DatabaseSync(dbPath);
+    try {
+      watchConnection.exec(`
+        CREATE TRIGGER reject_connection_state_rewrite BEFORE UPDATE ON game_states
+        BEGIN SELECT RAISE(ABORT, 'connection attempted to rewrite the game state'); END;
+      `);
+      watchConnection.prepare(
+        `UPDATE matches SET record_json = json_set(record_json, '$.aiPlanRuntime', json(?))
+         WHERE match_id = ?`,
+      ).run(JSON.stringify({ residentPlanPortfolioBySide: {} }), record.match.matchId);
+      const sessionId = connection.sessions.find(({ side }) => side === "runner")!.sessionId;
+      await storage.saveConnection(connection, { sessionId, kind: "heartbeat" });
+      expect((await storage.load(record.match.matchId))?.aiPlanRuntime)
+        .toEqual({ residentPlanPortfolioBySide: {} });
+    } finally { watchConnection.close(); }
     const fullPayload = await service.bootstrap(
       record.match.matchId,
       "runner",
       fixture.hostSessionToken,
     );
     if ("error" in fullPayload) throw new Error(fullPayload.error.message);
+    const reconnect = await service.reconnectMatch(record.match.matchId, {
+      side: "runner",
+      sessionToken: fixture.hostSessionToken,
+      reconnectToken: fixture.hostReconnectToken,
+    });
+    if ("error" in reconnect) throw new Error(reconnect.error.message);
+    expect(reconnect.playerView).toEqual(fullPayload.playerView);
+    const afterReconnect = (await storage.load(record.match.matchId))!;
+    expect(afterReconnect.gameState).toEqual(full.gameState);
+    expect(afterReconnect.actionReceipts).toEqual(full.actionReceipts);
+    expect(afterReconnect.stateSnapshots).toEqual(full.stateSnapshots);
+    expect(afterReconnect.aiDecisionTraces).toEqual(full.aiDecisionTraces);
+    expect(afterReconnect.sessions.find(({ side }) => side === "runner")?.lastSeenAt)
+      .toBe("2026-07-19T12:00:00.000Z");
     const duplicate = await service.submitAction({
       matchId: record.match.matchId,
       side: "runner",
@@ -3772,6 +3821,12 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       const final = (await storage.load(created.matchId))!;
       const finalBounded = (await storage.loadForAction(created.matchId, { side: lastSide }))!;
       expect(publicEventHistorySummary(finalBounded)).toEqual(publicEventHistorySummary(final));
+      expect(finalBounded.actionPersistenceBaseline).toMatchObject({
+        publicEventCount: final.eventLog.length,
+        engineEventCount: final.gameState.eventLog.length,
+        actionReceiptCount: final.actionReceipts.length,
+        aiDecisionTraceCount: final.aiDecisionTraces?.length ?? 0,
+      });
       expect(await service.replayMatch(created.matchId)).toMatchObject({ ok: true, errors: [] });
     } finally { storage.close(); }
   });
@@ -6531,6 +6586,41 @@ describe("MVP 0.2 multiplayer service", () => {
     );
   });
 
+  it("persists clock expiry on SQLite reconnect without rewriting the Engine journal or snapshots", async () => {
+    const start = Date.parse("2026-05-19T08:00:00.000Z");
+    let elapsed = 0;
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netgrid.sqlite");
+    const storage = new SqliteMatchStorage({ dbPath, backupDir: join(dir, "backups") });
+    const service = new MultiplayerService(storage, { now: () => new Date(start + elapsed).toISOString() });
+    try {
+      const created = await service.createMatch({
+        hostSide: "corp",
+        seed: "bounded-clock-reconnect",
+        settings: { playerClock: { mode: "player_clock", startingTimeMs: 120_000, gracePeriodMs: 5_000 } },
+      });
+      const token = new URL(created.joinUrl!).searchParams.get("joinToken")!;
+      const joined = await service.joinMatch(created.matchId, { token, displayName: "Runner" });
+      if ("error" in joined) throw new Error(joined.error.message);
+      await forceSetupComplete(service, created.matchId, dbPath);
+      const input = { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken };
+      const active = await service.reconnectMatch(created.matchId, input);
+      if ("error" in active) throw new Error(active.error.message);
+      const before = (await storage.load(created.matchId))!;
+      elapsed = 125_001;
+      const expired = await service.reconnectMatch(created.matchId, input);
+      if ("error" in expired) throw new Error(expired.error.message);
+      expect(expired).toMatchObject({ matchStatus: "finished", playerClock: { expiredSide: "corp" } });
+      const after = (await storage.load(created.matchId))!;
+      expect(after.lifecycleResult?.reason).toBe("time_expired");
+      expect(after.eventLog.at(-1)?.publicPayload.type).toBe("time_expired");
+      expect(after.eventLog.length).toBe(before.eventLog.length + 1);
+      expect(after.gameState.eventLog).toEqual(before.gameState.eventLog);
+      expect(after.stateSnapshots).toEqual(before.stateSnapshots);
+      expect(await service.replayMatch(created.matchId)).toMatchObject({ ok: true, finalStateHash: hashState(before.gameState) });
+    } finally { storage.close(); }
+  });
+
   it("moves the displayed player time to the Runner as soon as paced Corp AI finishes", async () => {
     const startMs = Date.parse("2026-07-13T08:00:00.000Z");
     let nowMs = startMs;
@@ -6819,15 +6909,89 @@ describe("MVP 0.2 multiplayer service", () => {
     ).toBe(true);
   });
 
+  it("commits a human move in another match while the live AI worker is deciding", async () => {
+    let markWorkerStarted!: () => void;
+    const workerStarted = new Promise<void>((resolve) => {
+      markWorkerStarted = resolve;
+    });
+    let workerFinished = false;
+    class ObservedWorkerPool extends AiDecisionWorkerPool {
+      override choose(...args: Parameters<AiDecisionWorkerPool["choose"]>) {
+        const result = super.choose(...args).finally(() => {
+          workerFinished = true;
+        });
+        markWorkerStarted();
+        return result;
+      }
+    }
+    const workers = new ObservedWorkerPool(1);
+    try {
+      const human = await joinedMatch("parallel-human-action", undefined, {
+        aiDecisionWorkers: workers,
+      });
+      const ai = await human.service.createMatch({
+        mode: "ai_vs_ai",
+        hostSide: "runner",
+        seed: "parallel-live-ai-action",
+        aiPacingMode: "manual",
+      });
+      const before = await human.service.loadForTest(ai.matchId);
+      if (!before?.gameState) throw new Error("Missing AI match state");
+      const advancing = human.service.advanceAi({
+        matchId: ai.matchId,
+        side: ai.hostSide,
+        sessionToken: ai.hostSessionToken,
+        knownMatchVersion: before.match.matchVersion,
+        knownStateVersion: before.gameState.stateVersion,
+        mode: "single_step",
+      });
+      await Promise.race([
+        workerStarted,
+        advancing.then((result) => {
+          throw new Error(
+            result.ok ? "AI skipped the worker" : result.error.code,
+          );
+        }),
+      ]);
+
+      const acted = await submit(
+        human.service,
+        human.matchId,
+        human.corp,
+        (action) => action.type === "mandatory_draw",
+        "parallel-human-mandatory-draw",
+      );
+      expect(acted.receipt.accepted).toBe(true);
+      expect(workerFinished).toBe(false);
+
+      const advanced = await advancing;
+      if (!advanced.ok) {
+        const diagnostic = (await human.service.loadForTest(ai.matchId))
+          ?.aiDecisionTraces?.at(-1)?.traceJson.attempt;
+        throw new Error(
+          `${advanced.error.code}: ${JSON.stringify(diagnostic)}`,
+        );
+      }
+      expect(workerFinished).toBe(true);
+      expect(advanced.requesterPayload.playerView.stateVersion).toBe(
+        before.gameState.stateVersion + 1,
+      );
+      await expectLiveWorkerTraceQuote(workers);
+    } finally {
+      workers.close();
+    }
+  }, 60_000);
+
   it("runs actions only through the server pipeline with idempotency and stale-state rejection", async () => {
     const { service, corp, matchId } = await joinedMatch();
     const before = await bootstrap(service, matchId, corp);
-    const mandatory = mustAction(
-      before,
+    const offer = buildMatchPlayerOffer(before.playerView);
+    const mandatory = offer.legalActions.find(
       (action) => action.type === "mandatory_draw",
     );
+    if (!mandatory) throw new Error("Expected mandatory draw in the offer");
 
-    const first = await service.submitAction({
+    const first = await service.submitActionOffer({
       matchId,
       side: "corp",
       sessionToken: corp.sessionToken,
@@ -6839,7 +7003,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(first.ok).toBe(true);
     if (!first.ok) throw new Error(first.error.message);
 
-    const duplicate = await service.submitAction({
+    const duplicate = await service.submitActionOffer({
       matchId,
       side: "corp",
       sessionToken: corp.sessionToken,
@@ -6854,7 +7018,7 @@ describe("MVP 0.2 multiplayer service", () => {
       first.receipt.stateVersionAfter,
     );
 
-    const stale = await service.submitAction({
+    const stale = await service.submitActionOffer({
       matchId,
       side: "corp",
       sessionToken: corp.sessionToken,
@@ -15500,6 +15664,59 @@ async function joinedMatch(
   };
 }
 
+async function expectLiveWorkerTraceQuote(workers: AiDecisionWorkerPool) {
+  const { service, matchId } = await joinedCanonicalTraceMatch(
+    "worker-blind-trace",
+    "classic_blind",
+  );
+  const state = (await service.loadForTest(matchId))?.gameState;
+  if (!state) throw new Error("Missing Blind Trace GameState");
+  const ownDeckSnapshot = {
+    deckSnapshotId: "worker-blind-trace-deck",
+    side: "corp" as const,
+    cards: SERVER_TRACE_CORP_DECK.cards.map(({ id, quantity }) => ({
+      cardId: id,
+      quantity,
+    })),
+  };
+  const input = buildRuntimeAiDecisionInput(state, "corp", {
+    ownDeckSnapshot,
+    decisionId: "worker-blind-trace-quote",
+    profileId: "worker-blind-trace",
+  });
+  const quote = vi.fn(
+    (request: Parameters<typeof quoteRandomizedTraceBidSelection>[1]) =>
+      quoteRandomizedTraceBidSelection(state, request),
+  );
+  const unexpectedQuote = () => {
+    throw new Error("Unexpected quote from the blind Trace plan");
+  };
+  const { decision } = await workers.choose(
+    input,
+    exportAiRuntimeCheckpoint(input, ownDeckSnapshot.deckSnapshotId),
+    {
+      quoteCorpPunishRoute: unexpectedQuote,
+      quoteRandomizedIceInstallSelection: unexpectedQuote,
+      quoteRandomizedTurnPlanSelection: unexpectedQuote,
+      quoteRandomizedTraceBidSelection: quote,
+    },
+  );
+  expect(quote).toHaveBeenCalledExactlyOnceWith(
+    expect.objectContaining({
+      matchId: state.matchId,
+      stateVersion: state.stateVersion,
+      side: "corp",
+    }),
+  );
+  if (decision.selectionKind !== "engine_randomized_trace_bid_selection")
+    throw new Error("The worker did not return the quoted Trace command");
+  const result = applyRandomizedTraceBidSelection(state, {
+    ...decision.engineCommand,
+    idempotencyKey: "worker-blind-trace-apply",
+  });
+  expect(result.ok).toBe(true);
+}
+
 async function joinedCorporateShuffleMatch(
   seed: string,
   options: { clicks: 2 | 3; strategicPlanningGroup: boolean },
@@ -15939,14 +16156,21 @@ async function joinedCanonicalDamageMatch(seed: string) {
   };
 }
 
-async function joinedCanonicalTraceMatch(seed: string) {
+async function joinedCanonicalTraceMatch(
+  seed: string,
+  traceRulesProfile?: TraceRulesProfile,
+) {
   const storage = new InMemoryMatchStorage();
   const service = new MultiplayerService(storage, {
     tokenSalt: `test-salt-${seed}`,
     publicWebBaseUrl: "http://127.0.0.1:3100",
     publicServerBaseUrl: "http://127.0.0.1:8787",
   });
-  const created = await service.createMatch({ hostSide: "corp", seed });
+  const created = await service.createMatch({
+    hostSide: "corp",
+    seed,
+    ...(traceRulesProfile ? { settings: { traceRulesProfile } } : {}),
+  });
   if (!created.joinUrl) throw new Error("Missing join URL");
   const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
   if (!joinToken) throw new Error("Missing join token");
@@ -15966,6 +16190,7 @@ async function joinedCanonicalTraceMatch(seed: string) {
       runnerDeck: DEMO_DECKS.demo_runner_008,
       corpDeck: SERVER_TRACE_CORP_DECK,
       agendaPointsToWin: 7,
+      ...(traceRulesProfile ? { traceRulesProfile } : {}),
     }),
   );
   putCorpIceOnServerForTest(ready, "rd", 448);

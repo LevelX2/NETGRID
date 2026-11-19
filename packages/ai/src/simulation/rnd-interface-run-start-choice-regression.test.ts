@@ -13,7 +13,7 @@ import { chooseAiAction } from "../index";
 import { buildAiDecisionInput } from "../runtime/ai-decision-input";
 import { buildPlanningStateIdentity } from "../plans/turn-planning-contracts";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 
 const PROTOCOL = 262;
@@ -118,7 +118,7 @@ function runStartFixture(version: number) {
   state.runner.credits = 10;
   state.runner.rig.programs = [protocol.instanceId];
   state.runner.rig.resources = conferences.map((card) => card.instanceId);
-  state.runner.memoryUsed = CARD_DEFINITIONS_BY_ID[PROTOCOL]!.memoryCost!;
+  state.runner.memoryUsed = planningCardFactsByDefinitionId(PROTOCOL)!.memoryCost!;
   delete state.pendingChoice;
   for (const card of [protocol, ...conferences]) {
     state.runner.grip = state.runner.grip.filter(

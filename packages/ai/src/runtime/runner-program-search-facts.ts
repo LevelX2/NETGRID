@@ -1,4 +1,4 @@
-import { canonicalCapabilityId, cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { canonicalCapabilityId, planningCardByDefinitionId } from "@netgrid/cards/planning";
 import { runnerCandidateSourceDefinitionId } from "./runner-action-source-facts";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
@@ -36,7 +36,7 @@ function opensProgramInstallSourceChoice(
 ): boolean {
   const definitionId = runnerCandidateSourceDefinitionId(input, candidate);
   const card = definitionId
-    ? cardSpecPlanningCardByDefinitionId(definitionId)?.planning
+    ? planningCardByDefinitionId(definitionId)
     : undefined;
   const abilityId = action.abilityRef?.sourceAbilityId;
   if (

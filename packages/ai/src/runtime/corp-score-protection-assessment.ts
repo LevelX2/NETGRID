@@ -1,9 +1,11 @@
 import { carryProjectedBreakerStrength } from "../run-analysis/visible-run-breaker-path";
 import type { PublicHeapBreakerPreparation } from "./corp-public-heap-breaker-preparation";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import {
-  type SubroutineDefinition,
+  planningCardFactsByDefinitionId,
+  type CardPlanningSubroutine,
+  planningCardByDefinitionId,
+} from "@netgrid/cards/planning";
+import {
   type VisibleCard,
   type VisibleEffectiveIceRunQuote,
   type VisibleEffectiveSubroutine,
@@ -200,7 +202,7 @@ export function corpVisibleSingleSubroutineIsUnbreakable(params: {
     (card) =>
       cardIsIcebreaker(card) && !randomStrengthCannotAffectIcePath(card, [ice]),
   )) {
-    const definition = CARD_DEFINITIONS_BY_ID[breaker.definitionId!];
+    const definition = planningCardFactsByDefinitionId(breaker.definitionId!);
     const encounter = visibleBreakerEncounterQuote({
       breakerDefinitionId: breaker.definitionId!,
       breakerInstanceId: breaker.instanceId,
@@ -277,13 +279,13 @@ type AccessPathState = {
 type SupportedIce = Readonly<{
   card: CorpScoreProtectionIceInput;
   endTheRunCount: number;
-  subroutines: readonly (SubroutineDefinition | VisibleEffectiveSubroutine)[];
+  subroutines: readonly (CardPlanningSubroutine | VisibleEffectiveSubroutine)[];
   endTheRunSubroutines: readonly (
-    | SubroutineDefinition
+    | CardPlanningSubroutine
     | VisibleEffectiveSubroutine
   )[];
   nextBreakLockSubroutines: readonly (
-    | SubroutineDefinition
+    | CardPlanningSubroutine
     | VisibleEffectiveSubroutine
   )[];
   effectiveStrength: number;
@@ -667,7 +669,7 @@ function readSupportedIce(card: CorpScoreProtectionIceInput): IceReadResult {
   if (!card.known || !card.definitionId || !validIdentifier(card.instanceId)) {
     return { knowledge: "unknown", reason: "unknown_rezzed_ice" };
   }
-  const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
+  const definition = planningCardFactsByDefinitionId(card.definitionId);
   const visibleType = (card as CorpScoreProtectionIceInput & { type?: string })
     .type;
   const visibleOwner = (
@@ -695,11 +697,11 @@ function readSupportedIce(card: CorpScoreProtectionIceInput): IceReadResult {
     };
   }
   const subroutines: readonly (
-    | SubroutineDefinition
+    | CardPlanningSubroutine
     | VisibleEffectiveSubroutine
   )[] = quote?.subroutines ?? definition.subroutines ?? [];
   const isAccessStop = (
-    subroutine: SubroutineDefinition | VisibleEffectiveSubroutine,
+    subroutine: CardPlanningSubroutine | VisibleEffectiveSubroutine,
   ) =>
     isHardEndTheRunSubroutine(subroutine) ||
     (subroutine.type === "initiate_trace" &&
@@ -762,7 +764,7 @@ function validEffectiveRunQuote(
 
 function matchesStaticCatalogIceFacts(
   card: CorpScoreProtectionIceInput,
-  definition: (typeof CARD_DEFINITIONS_BY_ID)[string],
+  definition: NonNullable<ReturnType<typeof planningCardFactsByDefinitionId>>,
 ): boolean {
   return (
     nonNegativeSafeInteger(card.strength) &&
@@ -775,16 +777,16 @@ function matchesStaticCatalogIceFacts(
 }
 
 function validSubroutineIdentity(
-  subroutine: SubroutineDefinition | VisibleEffectiveSubroutine,
+  subroutine: CardPlanningSubroutine | VisibleEffectiveSubroutine,
 ): boolean {
   return validIdentifier(subroutine.id);
 }
 
 function catalogMechanicsContradictDirectSubroutines(
   mechanics: readonly string[],
-  subroutines: readonly (SubroutineDefinition | VisibleEffectiveSubroutine)[],
+  subroutines: readonly (CardPlanningSubroutine | VisibleEffectiveSubroutine)[],
   isAccessStop: (
-    subroutine: SubroutineDefinition | VisibleEffectiveSubroutine,
+    subroutine: CardPlanningSubroutine | VisibleEffectiveSubroutine,
   ) => boolean,
 ): boolean {
   const directCanEndRun = subroutines.some(
@@ -800,7 +802,7 @@ function catalogMechanicsContradictDirectSubroutines(
 }
 
 function supportedSubroutine(
-  subroutine: SubroutineDefinition | VisibleEffectiveSubroutine,
+  subroutine: CardPlanningSubroutine | VisibleEffectiveSubroutine,
 ): boolean {
   if (
     isHardEndTheRunSubroutine(subroutine) ||
@@ -834,7 +836,7 @@ function supportedSubroutine(
  * encounter impact, but this exact model never invents access prevention.
  */
 const CONSERVATIVE_NON_ACCESS_PREVENTING_SUBROUTINE_TYPES = new Set<
-  SubroutineDefinition["type"]
+  CardPlanningSubroutine["type"]
 >([
   "corp_gain_credit",
   "end_the_run_unless_runner_pays",
@@ -858,7 +860,7 @@ const CONSERVATIVE_NON_ACCESS_PREVENTING_SUBROUTINE_TYPES = new Set<
 ]);
 
 function isHardEndTheRunSubroutine(
-  subroutine: SubroutineDefinition | VisibleEffectiveSubroutine,
+  subroutine: CardPlanningSubroutine | VisibleEffectiveSubroutine,
 ): boolean {
   return (
     subroutine.type === "end_the_run" ||
@@ -868,7 +870,7 @@ function isHardEndTheRunSubroutine(
 }
 
 function isNextEncounterBreakLock(
-  subroutine: SubroutineDefinition | VisibleEffectiveSubroutine,
+  subroutine: CardPlanningSubroutine | VisibleEffectiveSubroutine,
 ): boolean {
   return (
     subroutine.type === "set_next_encounter_lock" ||
@@ -881,7 +883,7 @@ function accessPreservingBreakStates(params: {
   ice: SupportedIce;
   runnerRig: readonly VisibleCard[];
   requiredSubroutines: readonly (
-    | SubroutineDefinition
+    | CardPlanningSubroutine
     | VisibleEffectiveSubroutine
   )[];
 }):
@@ -1100,7 +1102,7 @@ function randomBreakRiskProfileForEncounter(params: {
   ice: SupportedIce;
   breakerStrength: number;
   requiredSubroutines: readonly (
-    | SubroutineDefinition
+    | CardPlanningSubroutine
     | VisibleEffectiveSubroutine
   )[];
 }): EngineRandomBreakRiskProfile | undefined {
@@ -1287,7 +1289,7 @@ function validRunnerRigCard(
   ) {
     return false;
   }
-  const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
+  const definition = planningCardFactsByDefinitionId(card.definitionId);
   if (
     !definition ||
     definition.side !== "runner" ||
@@ -1315,7 +1317,7 @@ function validRunnerRigCard(
 
 function cardIsIcebreaker(card: VisibleCard): boolean {
   const definition = card.definitionId
-    ? CARD_DEFINITIONS_BY_ID[card.definitionId]
+    ? planningCardFactsByDefinitionId(card.definitionId)
     : undefined;
   return Boolean(
     definition?.subtypes.some(
@@ -1340,8 +1342,8 @@ export function visibleRunnerInRunStackInstallPotential(
     ) {
       return false;
     }
-    const abilities = cardSpecPlanningCardByDefinitionId(card.definitionId)
-      ?.planning.engine.abilities;
+    const abilities = planningCardByDefinitionId(card.definitionId)
+      ?.engine.abilities;
     return (
       abilities?.some(
         (ability) =>
@@ -1363,12 +1365,12 @@ function runnerRigCardRequiresUnsupportedAccessProjection(
   activeIce: readonly CorpScoreProtectionIceInput[],
 ): boolean {
   if (!card.definitionId) return false;
-  const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
+  const definition = planningCardFactsByDefinitionId(card.definitionId);
   if (!definition) return false;
   const hint = AI_HINTS_BY_CARD.get(card.definitionId);
-  const strengthModifiers = cardSpecPlanningCardByDefinitionId(
+  const strengthModifiers = planningCardByDefinitionId(
     card.definitionId,
-  )?.planning.engine.modifiers?.filter(
+  )?.engine.modifiers?.filter(
     (modifier) => modifier.kind === "ice_strength",
   );
   const strengthIsQuoted =

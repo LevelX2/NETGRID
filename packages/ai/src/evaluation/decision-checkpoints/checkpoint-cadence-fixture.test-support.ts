@@ -1,5 +1,5 @@
 import type { PublicGameEvent } from "@netgrid/shared";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 
@@ -99,10 +99,10 @@ function isRecordedEventRunOrigin(event: PublicGameEvent): boolean {
     typeof payload.cardDefinitionId !== "number"
   )
     return false;
-  const card = cardSpecPlanningCardByDefinitionId(payload.cardDefinitionId);
-  if (card?.definition.side !== "runner" || card.definition.type !== "event")
+  const card = planningCardByDefinitionId(payload.cardDefinitionId);
+  if (card?.side !== "runner" || card.cardType !== "event")
     return false;
-  const onPlay = card.planning.engine.abilities?.filter(
+  const onPlay = card.engine.abilities?.filter(
     (ability) => ability.kind === "on_play",
   );
   if (onPlay?.length !== 1 || onPlay[0]!.effects.length !== 1) return false;

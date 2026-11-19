@@ -1,6 +1,6 @@
 import type { CardDefinitionId } from "@netgrid/shared";
 import {
-  cardSpecPlanningCards,
+  listPlanningCardsWithFacts,
   KNOWN_PLANNING_PLAN_OWNERS,
   KNOWN_PLANNING_PLAN_OWNER_ROUTES,
 } from "@netgrid/cards/planning";
@@ -13,8 +13,8 @@ import {
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 
 function entry(cardId: CardDefinitionId) {
-  const result = cardSpecPlanningCards().find(
-    (candidate) => candidate.definition.id === cardId,
+  const result = listPlanningCardsWithFacts().find(
+    (candidate) => candidate.facts.id === cardId,
   );
   if (result === undefined) throw new Error(`missing_test_card:${cardId}`);
   return result;

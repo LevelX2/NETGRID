@@ -4,7 +4,7 @@ import type {
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import { nonNegativeActionCreditCost } from "../../runtime/action-cost";
 import { runnerRunStrengthPumpSavingsForAction } from "./run-window-strength-preparation";
 import { creditsToBreakVisibleSubroutinesWithBreaker } from "../../visible-run-analysis";
@@ -397,7 +397,7 @@ function runStrengthPreparation(input: AiDecisionInput, action: LegalAction) {
     (card) => card.known && card.instanceId === action.source,
   );
   const boost = source?.definitionId
-    ? cardSpecPlanningCardByDefinitionId(source.definitionId)?.planning.engine
+    ? planningCardByDefinitionId(source.definitionId)?.engine
         .runnerRunStrengthBoost
     : undefined;
   const breaker = input.playerView.own.rig?.find(

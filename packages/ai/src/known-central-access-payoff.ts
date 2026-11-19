@@ -1,6 +1,6 @@
 import { assessVisibleRunnerServerPath } from "./run-analysis/visible-run-server-path";
 import type { RunnerAccessFacts } from "./access/runner-access-facts";
-import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { type AiDecisionInput } from "@netgrid/shared";
 import { RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
 import { reconstructBeliefState, type BeliefState } from "./belief-state";
@@ -1088,14 +1088,14 @@ function runnerCardProvidesInstalledRdMultiaccess(
 function cardDefinitionTrashCost(definitionId: number): number | undefined {
   return (
     RUNTIME_CARDS[definitionId]?.numeric.trashCost ??
-    CARD_DEFINITIONS_BY_ID[definitionId]?.trashCost
+    planningCardFactsByDefinitionId(definitionId)?.trashCost
   );
 }
 
 function cardDefinitionType(definitionId: number): string | undefined {
   return (
     RUNTIME_CARDS[definitionId]?.type ??
-    CARD_DEFINITIONS_BY_ID[definitionId]?.type
+    planningCardFactsByDefinitionId(definitionId)?.type
   );
 }
 

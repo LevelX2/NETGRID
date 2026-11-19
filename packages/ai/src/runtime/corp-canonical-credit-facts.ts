@@ -1,4 +1,4 @@
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 
 import type { AiCardHint } from "../ai-hints";
 
@@ -19,8 +19,8 @@ export function corpUnconditionalScoreCreditGain(
   definitionId: number | undefined,
 ): number | undefined {
   const card = planningCard(definitionId);
-  const effect = card?.planning.engine.scoredAgenda;
-  if (card?.planning.side !== "corp" || card.planning.cardType !== "agenda")
+  const effect = card?.engine.scoredAgenda;
+  if (card?.side !== "corp" || card.cardType !== "agenda")
     return undefined;
   // A threshold, pool, choice or other compound scored effect is not a
   // certificate of an unconditional liquid end-of-score balance.
@@ -32,7 +32,7 @@ export function corpUnconditionalScoreCreditGain(
   )
     return undefined;
   let payout = effect?.amount ?? 0;
-  for (const lifecycle of card.planning.engine.lifecycle?.on_score ?? []) {
+  for (const lifecycle of card.engine.lifecycle?.on_score ?? []) {
     if (lifecycle.kind === "add_bad_publicity") continue;
     if (
       lifecycle.kind !== "gain_credits" ||
@@ -50,9 +50,9 @@ export function corpConditionalScoreCreditProfile(
   definitionId: number | undefined,
 ): CorpConditionalScoreCreditProfile | undefined {
   const planning = planningCard(definitionId);
-  const scoredAgenda = planning?.planning.engine.scoredAgenda;
+  const scoredAgenda = planning?.engine.scoredAgenda;
   if (
-    planning?.planning.side !== "corp" ||
+    planning?.side !== "corp" ||
     scoredAgenda?.kind !== "score_credit_swing_if_corp_credit_threshold_met" ||
     !positiveSafeInteger(scoredAgenda.threshold) ||
     !positiveSafeInteger(scoredAgenda.gainAmount)
@@ -86,8 +86,8 @@ export function corpHostedCreditBankProfile(
   definitionId: number | undefined,
 ): CorpHostedCreditBankProfile | undefined {
   const planning = planningCard(definitionId);
-  if (planning?.planning.side !== "corp") return undefined;
-  const lifecycle = planning.planning.engine.lifecycle;
+  if (planning?.side !== "corp") return undefined;
+  const lifecycle = planning.engine.lifecycle;
   const poolCredits = [
     ...(lifecycle?.on_install ?? []),
     ...(lifecycle?.on_rez ?? []),
@@ -102,7 +102,7 @@ export function corpHostedCreditBankProfile(
   );
   const payoutCredits = Math.max(
     0,
-    ...(planning.planning.engine.abilities ?? []).flatMap((ability) =>
+    ...(planning.engine.abilities ?? []).flatMap((ability) =>
       ability.effects.flatMap((effect) =>
         effect.kind === "take_hosted_credits" &&
         effect.recipient === "controller" &&
@@ -132,7 +132,7 @@ export function corpHostedCreditBankProfile(
   );
   const payoutActionCost = Math.max(
     0,
-    ...(planning.planning.engine.abilities ?? []).flatMap((ability) =>
+    ...(planning.engine.abilities ?? []).flatMap((ability) =>
       ability.effects.some(
         (effect) =>
           effect.kind === "take_hosted_credits" &&
@@ -170,12 +170,12 @@ export function corpRezHostedCreditPayoutProfile(
   | { poolCredits: number; payoutCredits: number; trashesWhenEmpty: boolean }
   | undefined {
   const planning = planningCard(definitionId);
-  const effects = planning?.planning.engine.lifecycle?.on_rez;
+  const effects = planning?.engine.lifecycle?.on_rez;
   if (
-    planning?.planning.side !== "corp" ||
-    planning.planning.cardType !== "asset" ||
+    planning?.side !== "corp" ||
+    planning.cardType !== "asset" ||
     (installing &&
-      (planning.planning.engine.lifecycle?.on_install?.length ?? 0) > 0) ||
+      (planning.engine.lifecycle?.on_install?.length ?? 0) > 0) ||
     !effects?.length ||
     !effects.every(
       (effect) =>
@@ -190,7 +190,7 @@ export function corpRezHostedCreditPayoutProfile(
       sum + (effect.kind === "add_hosted_credits" ? effect.amount : 0),
     0,
   );
-  const payouts = (planning.planning.engine.abilities ?? []).flatMap(
+  const payouts = (planning.engine.abilities ?? []).flatMap(
     (ability) => {
       const effect = ability.effects.find(
         (effect) => effect.kind === "take_hosted_credits",
@@ -233,11 +233,11 @@ export function corpScoreHostedCreditPayoutProfile(
   definitionId: number | undefined,
 ): { poolCredits: number; payoutCredits: number } | undefined {
   const planning = planningCard(definitionId);
-  const engine = planning?.planning.engine;
+  const engine = planning?.engine;
   const effects = engine?.lifecycle?.on_score;
   if (
-    planning?.planning.side !== "corp" ||
-    planning.planning.cardType !== "agenda" ||
+    planning?.side !== "corp" ||
+    planning.cardType !== "agenda" ||
     !engine ||
     engine?.scoredAgenda !== undefined ||
     !effects?.length ||
@@ -278,7 +278,7 @@ export function corpScoreHostedCreditPayoutProfile(
 
 function planningCard(definitionId: number | undefined) {
   return definitionId
-    ? cardSpecPlanningCardByDefinitionId(definitionId)
+    ? planningCardByDefinitionId(definitionId)
     : undefined;
 }
 

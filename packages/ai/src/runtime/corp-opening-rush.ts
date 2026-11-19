@@ -1,7 +1,7 @@
 import { isRemoteServerId } from "@netgrid/shared";
 import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import { readExactCurrentInstalledCorpIceRezQuote } from "./corp-exact-ice-rez-route";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type { CorpFundedRemoteAccessRiskNeed } from "./corp-funded-score-protection";
@@ -284,7 +284,7 @@ function visiblePublicStagedBreakers(input: AiDecisionInput): string[] {
   return (input.playerView.specialZones?.setAside ?? [])
     .filter((card) => {
       if (!card.known || !card.definitionId) return false;
-      const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
+      const definition = planningCardFactsByDefinitionId(card.definitionId);
       return definition?.subtypes.some(
         (subtype) => subtype.toLocaleLowerCase("en-US") === "icebreaker",
       );

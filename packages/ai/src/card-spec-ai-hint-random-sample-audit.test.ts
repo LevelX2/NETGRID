@@ -1,12 +1,12 @@
 import type { CardDefinitionId } from "@netgrid/shared";
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 
 function hint(cardId: CardDefinitionId) {
-  const entry = cardSpecPlanningCards().find(
-    (candidate) => candidate.definition.id === cardId,
+  const entry = listPlanningCardsWithFacts().find(
+    (candidate) => candidate.facts.id === cardId,
   );
   if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
   return deriveCardSpecAiHint(entry);

@@ -1,6 +1,6 @@
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { type CorpPlanDomain } from "../../plans/corp-tactical-plan-contracts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import {
@@ -293,7 +293,7 @@ export function corpDiscardWindowSignal(
         card.known &&
         (card.type === "agenda" ||
           (card.definitionId !== undefined &&
-            CARD_DEFINITIONS_BY_ID[card.definitionId]?.type === "agenda")),
+            planningCardFactsByDefinitionId(card.definitionId)?.type === "agenda")),
     ).length,
     handSize: input.playerView.own.gripOrHq.length,
     maximumHandSize: input.playerView.own.maxHandSize,
@@ -343,7 +343,7 @@ export function corpStrategicPlanningGroupDrawChoiceSignal(
         card.known &&
         (card.type === "agenda" ||
           (card.definitionId !== undefined &&
-            CARD_DEFINITIONS_BY_ID[card.definitionId]?.type === "agenda")),
+            planningCardFactsByDefinitionId(card.definitionId)?.type === "agenda")),
     ).length,
     handSize: input.playerView.own.gripOrHq.length,
     maximumHandSize: input.playerView.own.maxHandSize,
@@ -392,7 +392,7 @@ export function corpCorporateShuffleHqChoiceSignal(
         card.known &&
         (card.type === "agenda" ||
           (card.definitionId !== undefined &&
-            CARD_DEFINITIONS_BY_ID[card.definitionId]?.type === "agenda")),
+            planningCardFactsByDefinitionId(card.definitionId)?.type === "agenda")),
     ).length,
     handSize: input.playerView.own.gripOrHq.length,
     maximumHandSize: input.playerView.own.maxHandSize,

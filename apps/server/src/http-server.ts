@@ -6,6 +6,7 @@ import {
 } from "node:http";
 import { networkInterfaces } from "node:os";
 import { HttpConnectionDrain } from "./http-connection-drain";
+import { AiDecisionWorkerPool } from "./ai-decision-worker-pool";
 import { timingSafeEqual } from "node:crypto";
 import { WebSocket, WebSocketServer } from "ws";
 import { isAiDeckSnapshotRuntimeError } from "@netgrid/ai";
@@ -4247,6 +4248,7 @@ function defaultService(
     publicWebBaseUrl: deploymentConfig.webBaseUrl,
     publicServerBaseUrl: deploymentConfig.serverBaseUrl,
     allowHiddenInfoUndo: deploymentConfig.profile === "local",
+    aiDecisionWorkers: new AiDecisionWorkerPool(2),
   });
 }
 

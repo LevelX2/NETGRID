@@ -1,5 +1,5 @@
 import type { CardDefinitionId } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 
 import {
@@ -764,7 +764,7 @@ function corpAffordableMatchpointAccelerationSupport(
   ];
   return agendas.some((agenda) => {
     if (!agenda.known || !agenda.definitionId) return false;
-    const definition = CARD_DEFINITIONS_BY_ID[agenda.definitionId];
+    const definition = planningCardFactsByDefinitionId(agenda.definitionId);
     const points = agenda.agendaPoints ?? definition?.agendaPoints;
     const requirement = definition?.advancementRequirement;
     if (
@@ -838,7 +838,7 @@ function corpAgendaOverflowKeepAdjustment(
   ) {
     return { value: 0, evidence: [], duplicateDiscount: 0 };
   }
-  const definition = CARD_DEFINITIONS_BY_ID[definitionId];
+  const definition = planningCardFactsByDefinitionId(definitionId);
   const agendaPoints = definition?.agendaPoints;
   const advancementRequirement = definition?.advancementRequirement;
   if (

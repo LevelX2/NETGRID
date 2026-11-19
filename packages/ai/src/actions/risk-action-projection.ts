@@ -1,6 +1,6 @@
 import { decisionEventHistory } from "../decision-event-history";
 import { currentRunPathContext } from "../run-analysis/current-run-path-context";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import {
   assessKnownRezzedIcePath,
@@ -679,7 +679,7 @@ function visibleRandomBreakCandidateSubroutineCountForIce(
     ).length;
   }
   return (
-    CARD_DEFINITIONS_BY_ID[ice.definitionId]?.subroutines?.filter(
+    planningCardFactsByDefinitionId(ice.definitionId)?.subroutines?.filter(
       (subroutine) =>
         subroutine.type === "end_the_run" ||
         subroutine.type === "end_the_run_unless_runner_pays",

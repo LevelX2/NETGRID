@@ -1,5 +1,5 @@
 import type { CardDefinitionId } from "@netgrid/shared";
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 import { AI_HINTS_BY_CARD } from "./ai-hints";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
@@ -15,7 +15,7 @@ const trap = 557;
 const hunting = 84;
 
 function entry(id: CardDefinitionId) {
-  const result = cardSpecPlanningCards().find((c) => c.definition.id === id);
+  const result = listPlanningCardsWithFacts().find((c) => c.facts.id === id);
   if (!result) throw new Error(`missing_native_tag_witness:${id}`);
   return result;
 }

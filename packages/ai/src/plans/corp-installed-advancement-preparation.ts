@@ -1,4 +1,4 @@
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 
@@ -26,9 +26,9 @@ export function corpInstalledAdvancementPreparations(input: AiDecisionInput) {
           !card.definitionId
         )
           return [];
-        const planning = cardSpecPlanningCardByDefinitionId(
+        const planning = planningCardByDefinitionId(
           card.definitionId,
-        )?.planning;
+        );
         if (planning?.side !== "corp" || planning.cardType !== "asset")
           return [];
         const rez = card.rezzed

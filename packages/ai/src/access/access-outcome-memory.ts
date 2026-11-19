@@ -3,7 +3,7 @@ import type { MatchEventId } from "@netgrid/shared";
 import { cardDefinitionIdValue } from "../card-definition-id-input";
 import type { AiDecisionInput, PublicGameEvent } from "@netgrid/shared";
 import { reconstructBeliefState } from "../belief-state";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   findLastHistoryIndex,
   mergedPublicHistory,
@@ -47,7 +47,7 @@ export function deriveObservedRemoteNoProgressAccessMemory(
   if (
     currentKnownRoots.some(
       ({ definitionId }) =>
-        CARD_DEFINITIONS_BY_ID[definitionId]?.type === "agenda",
+        planningCardFactsByDefinitionId(definitionId)?.type === "agenda",
     )
   )
     return undefined;

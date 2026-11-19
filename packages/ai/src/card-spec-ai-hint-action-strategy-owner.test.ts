@@ -1,13 +1,13 @@
 import type { CardDefinitionId } from "@netgrid/shared";
 import { ORIGINALSET_V1_CARD_IDS } from "@netgrid/catalog";
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 
 function actionStrategyEntry(cardId: CardDefinitionId) {
-  const entry = cardSpecPlanningCards().find(
-    (candidate) => candidate.definition.id === cardId,
+  const entry = listPlanningCardsWithFacts().find(
+    (candidate) => candidate.facts.id === cardId,
   );
   if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
   return {
@@ -34,8 +34,8 @@ function actionStrategyEntry(cardId: CardDefinitionId) {
 
 describe("CardSpec action-strategy typed owners", () => {
   it("compiles all 41 Originalset capability bindings from their exact owner nodes", () => {
-    const entries = cardSpecPlanningCards().filter((entry) =>
-      ORIGINALSET_V1_CARD_IDS.includes(entry.definition.id),
+    const entries = listPlanningCardsWithFacts().filter((entry) =>
+      ORIGINALSET_V1_CARD_IDS.includes(entry.facts.id),
     );
     const bindingCount = entries.reduce(
       (count, entry) =>
@@ -62,7 +62,7 @@ describe("CardSpec action-strategy typed owners", () => {
       );
       if (!capabilityBindings) continue;
       expect(() =>
-        deriveCardSpecAiHint(actionStrategyEntry(entry.definition.id)),
+        deriveCardSpecAiHint(actionStrategyEntry(entry.facts.id)),
       ).not.toThrow();
     }
   });

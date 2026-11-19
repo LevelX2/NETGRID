@@ -38,7 +38,7 @@ import {
   type StrategicIntentState,
 } from "../strategic-intent-state";
 import { getStrategicIntentMemorySnapshot } from "../strategic-intent-memory";
-import { buildAiDecisionInputDto } from "../input-dto";
+import { buildAiDecisionInputDto, type AiDecisionChronicle } from "../input-dto";
 import {
   strategicIntentRevalidationFromCurrentPublicEvents,
   strategicIntentRevalidationPublicEventFacts,
@@ -128,6 +128,7 @@ export function buildAiDecisionInput(
     actionNumber?: number;
     profileId?: string;
     eventTail?: PublicGameEvent[];
+    chronicle?: AiDecisionChronicle;
     ownDeckSnapshot: AiDeckStrategyDeckSnapshot;
     expectedDeckSnapshot?: Omit<AiDeckSnapshotRuntimeExpectation, "side">;
   },
@@ -140,7 +141,13 @@ export function buildAiDecisionInput(
       ...expectedDeckSnapshot,
     },
   );
-  const playerView = getPlayerView(state, side);
+  const playerView = getPlayerView(
+    state,
+    side,
+    options.chronicle ? { publicEventLimit: 0 } : {},
+  );
+  if (options.chronicle)
+    playerView.publicEvents = options.chronicle.project(state, side);
   const legalActions = playerView.legalActions;
   if (side === "corp" && playerView.pendingChoice) {
     const choice = playerView.pendingChoice;

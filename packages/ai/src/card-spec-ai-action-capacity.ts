@@ -1,8 +1,8 @@
-import type { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import type { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import type { AiCardHint } from "./ai-hint-contracts";
 
 type PlanningEngine = ReturnType<
-  typeof cardSpecPlanningCards
+  typeof listPlanningCardsWithFacts
 >[number]["planning"]["engine"];
 type PlanningFlatlineReplacementSource = NonNullable<
   PlanningEngine["flatlineReplacementSources"]
@@ -12,10 +12,10 @@ type PlanningEffect = NonNullable<
 >[number]["effects"][number];
 
 export function deriveActionCapacityProfiles(
-  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+  entry: ReturnType<typeof listPlanningCardsWithFacts>[number],
 ): NonNullable<AiCardHint["actionCapacityProfiles"]> {
   const engine = entry.planning.engine;
-  const controller = entry.definition.side;
+  const controller = entry.facts.side;
   const profiles: NonNullable<AiCardHint["actionCapacityProfiles"]> = (
     engine.tagPreventionSources ?? []
   ).flatMap((source) => {
@@ -73,7 +73,7 @@ export function deriveActionCapacityProfiles(
         profiles.push({
           class: "finite_bank",
           timing:
-            entry.definition.type === "agenda"
+            entry.facts.type === "agenda"
               ? "scored_activated"
               : "immediate",
           recipient: actionCapacityRecipient(effect, controller),

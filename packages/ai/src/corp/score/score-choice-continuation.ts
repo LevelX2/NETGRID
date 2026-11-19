@@ -1,6 +1,6 @@
 import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { AiDecisionInput, CanonicalCapabilityId } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { corpScoredAgendaFreeRezDefenseTarget } from "../defense/scored-agenda-free-rez-defense-target";
 import { corpScoredAgendaIceMarkDefenseTarget } from "../defense/corp-defense-domain-signals";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
@@ -158,7 +158,7 @@ export function bindSelectedCorpScoreChoiceContinuation(
     selectedAction?.source !== undefined
       ? (visibleInstalledCard(input, selectedAction.source)?.agendaPoints ??
         (sourceDefinitionId
-          ? CARD_DEFINITIONS_BY_ID[sourceDefinitionId]?.agendaPoints
+          ? planningCardFactsByDefinitionId(sourceDefinitionId)?.agendaPoints
           : undefined) ??
         0)
       : 0;
@@ -290,7 +290,7 @@ function corpScoredAgendaHqShuffleChoiceBinding(params: {
     const agendaPoints =
       candidate.card.agendaPoints ??
       (candidate.card.definitionId
-        ? CARD_DEFINITIONS_BY_ID[candidate.card.definitionId]?.agendaPoints
+        ? planningCardFactsByDefinitionId(candidate.card.definitionId)?.agendaPoints
         : undefined) ??
       0;
     const creditGain = agendaPoints * params.profile.creditPerAgendaPoint;

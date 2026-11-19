@@ -1,4 +1,4 @@
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import type {
   AiDecisionInput,
   AiDecisionScoreComponent,
@@ -33,9 +33,9 @@ export function corpRootRezTimingComponent(
   const hint = AI_HINTS_BY_CARD.get(sourceCard.definitionId);
   const effects = hint?.effects ?? [];
   const installedAccessEffects =
-    cardSpecPlanningCardByDefinitionId(
+    planningCardByDefinitionId(
       sourceCard.definitionId,
-    )?.planning.engine.accessEffects?.filter(
+    )?.engine.accessEffects?.filter(
       (effect) =>
         effect.kind === "on_access" &&
         effect.sourceZones.includes("installed") &&

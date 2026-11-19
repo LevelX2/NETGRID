@@ -1,5 +1,5 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import {
   breakerCardBlocksAccessReachability,
@@ -12,7 +12,7 @@ import { planInstanceIdForProposal } from "../../plans/plan-instance";
 
 export function successfulRunStrengthCounter(definitionId: number | undefined) {
   const mechanic = definitionId
-    ? cardSpecPlanningCardByDefinitionId(definitionId)?.planning.engine
+    ? planningCardByDefinitionId(definitionId)?.engine
         .virusCounter
     : undefined;
   return mechanic?.addOnSuccessfulRun?.server === "any" &&

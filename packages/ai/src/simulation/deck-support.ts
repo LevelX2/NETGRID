@@ -1,4 +1,4 @@
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { type DeckDefinition } from "@netgrid/shared";
 
 import { sortedUnique } from "../runtime/collection";
@@ -21,21 +21,15 @@ export function validateSimulationDeckSupport(
       errors.push(`Simulation blockiert: Deckseite passt nicht zum ${side}-Slot.`);
       continue;
     }
-    const identity = CARD_DEFINITIONS_BY_ID[deck.identity];
+    const identity = planningCardFactsByDefinitionId(deck.identity);
     if (!identity || identity.type !== "identity" || identity.side !== side) {
       errors.push(`Simulation blockiert: Ungültige Identität im ${side}-Slot.`);
     }
     for (const entry of deck.cards) {
-      const definition = CARD_DEFINITIONS_BY_ID[entry.id];
+      const definition = planningCardFactsByDefinitionId(entry.id);
       if (!definition) {
         errors.push(
           `Simulation blockiert: Karte ${entry.id} ist nicht im Runtime-Katalog.`,
-        );
-        continue;
-      }
-      if (definition.implementationStatus !== "playable_mvp") {
-        errors.push(
-          `Simulation blockiert: Karte ${entry.id} ist nicht als playable_mvp freigegeben.`,
         );
       }
     }

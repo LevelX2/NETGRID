@@ -8,7 +8,7 @@ import { runnerPartialProgramSearchIsPayable } from "../../runtime/runner-partia
 import { runnerCandidateExecutesProgramSearch } from "../../runtime/runner-program-search-facts";
 import { runnerCandidateSourceDefinitionId } from "../../runtime/runner-action-source-facts";
 import { uniqueBy } from "../../runtime/collection";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import type { AiDecisionInput, CardDefinitionId, VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
@@ -303,7 +303,7 @@ function runnerUrgentCoverageInstallProjection(
   }
 
   const definition = visibleAnswer.definitionId
-    ? CARD_DEFINITIONS_BY_ID[visibleAnswer.definitionId]
+    ? planningCardFactsByDefinitionId(visibleAnswer.definitionId)
     : undefined;
   const memoryCost = definition?.memoryCost;
   const memoryUsed = input.playerView.own.memoryUsed;

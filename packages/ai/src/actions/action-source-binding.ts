@@ -1,5 +1,4 @@
 import { cardDefinitionIdValue } from "../card-definition-id-input";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { isCanonicalCapabilityId, type CardDefinitionId, type LegalAction } from "@netgrid/shared";
 import type {
   ActionAbilityBindingMethod,
@@ -63,16 +62,13 @@ export function applyCardActionSourceBinding(
     payloadSourceDefinitionId ??
     abilityBinding?.sourceDefinitionId ??
     visibleSourceDefinitionId;
-  const inferredAbilityBinding =
-    abilityBinding ??
-    abilityBindingFromVisibleRuntimeCard(action, sourceDefinitionId);
   const sourceKind: ActionSemanticSourceKind =
     sourceCardInstanceId !== undefined ? "card" : candidate.sourceKind;
   const projectionIssues = reconcileSourceAbilityIssues(
     candidate.projectionIssues,
     action,
     sourceCardInstanceId,
-    inferredAbilityBinding,
+    abilityBinding,
   );
 
   return {
@@ -85,8 +81,8 @@ export function applyCardActionSourceBinding(
         }
       : {}),
     ...(sourceDefinitionId !== undefined ? { sourceDefinitionId } : {}),
-    ...(inferredAbilityBinding?.abilityId !== undefined
-      ? { abilityId: inferredAbilityBinding.abilityId }
+    ...(abilityBinding?.abilityId !== undefined
+      ? { abilityId: abilityBinding.abilityId }
       : {}),
     ...(primitiveMetadata.abilityKey !== undefined
       ? { abilityKey: primitiveMetadata.abilityKey }
@@ -98,12 +94,12 @@ export function applyCardActionSourceBinding(
       ? { effectKind: primitiveMetadata.effectKind }
       : {}),
     abilityBindingMethod:
-      inferredAbilityBinding?.method ?? candidate.abilityBindingMethod,
+      abilityBinding?.method ?? candidate.abilityBindingMethod,
     projectionIssues,
     hardGates: updateSourceAbilityGates(
       candidate.hardGates,
       sourceCardInstanceId,
-      inferredAbilityBinding,
+      abilityBinding,
       action,
     ),
     evidence: [
@@ -121,8 +117,8 @@ export function applyCardActionSourceBinding(
               : `AI038 source definition bound from visible PlayerView card: ${sourceDefinitionId}`,
           ]
         : []),
-      ...(inferredAbilityBinding !== undefined
-        ? inferredAbilityBinding.evidence
+      ...(abilityBinding !== undefined
+        ? abilityBinding.evidence
         : []),
       ...primitiveMetadata.evidence,
     ],
@@ -271,34 +267,6 @@ function abilityBindingForAction(
       ? { sourceDefinitionId: binding.sourceDefinitionId }
       : {}),
     evidence: binding.evidence,
-  };
-}
-
-function abilityBindingFromVisibleRuntimeCard(
-  action: LegalAction,
-  sourceDefinitionId: number | undefined,
-): ResolvedAbilityBinding | undefined {
-  if (sourceDefinitionId === undefined) return undefined;
-  if (!requiresAbilityBinding(action)) return undefined;
-  const abilities = CARD_DEFINITIONS_BY_ID[sourceDefinitionId]?.abilities ?? [];
-  const matchingAbilities = abilities.filter(
-    (ability) =>
-      ability.publicActionType === action.type ||
-      ability.type === action.type ||
-      (action.type === "pump_breaker" && ability.type === "pump_strength") ||
-      (action.type === "break_subroutine" &&
-        ability.type === "break_subroutine"),
-  );
-  if (matchingAbilities.length !== 1) return undefined;
-  const [ability] = matchingAbilities;
-  if (!ability) return undefined;
-  return {
-    abilityId: ability.id,
-    method: "single_legal_ability_inferred",
-    sourceDefinitionId,
-    evidence: [
-      `AI038 ability inferred from visible source definition: ${sourceDefinitionId}:${ability.id}`,
-    ],
   };
 }
 

@@ -1,6 +1,6 @@
 import type { CardDefinitionId } from "@netgrid/shared";
 import { ORIGINALSET_V1_CARD_IDS } from "@netgrid/catalog";
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
@@ -10,9 +10,9 @@ function syntheticHint(
   engine: Record<string, unknown>,
   options: { side?: "corp" | "runner"; type?: string } = {},
 ) {
-  const entry = cardSpecPlanningCards().find(
+  const entry = listPlanningCardsWithFacts().find(
     (candidate) =>
-      candidate.definition.side === (options.side ?? "runner") &&
+      candidate.facts.side === (options.side ?? "runner") &&
       candidate.planning.engine.abilities === undefined &&
       candidate.planning.engine.lifecycle === undefined &&
       candidate.planning.engine.printedSubroutines === undefined &&
@@ -21,8 +21,8 @@ function syntheticHint(
   )!;
   return deriveCardSpecAiHint({
     ...entry,
-    definition: {
-      ...entry.definition,
+    facts: {
+      ...entry.facts,
       ...(options.type === undefined ? {} : { type: options.type }),
     },
     planning: {
@@ -33,8 +33,8 @@ function syntheticHint(
 }
 
 function actualHint(cardId: CardDefinitionId) {
-  const entry = cardSpecPlanningCards().find(
-    (candidate) => candidate.definition.id === cardId,
+  const entry = listPlanningCardsWithFacts().find(
+    (candidate) => candidate.facts.id === cardId,
   );
   if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
   const mechanicalPlanning = { ...entry.planning };
@@ -48,8 +48,8 @@ function actualHint(cardId: CardDefinitionId) {
 }
 
 function targetAnnotatedEntry(cardId: CardDefinitionId) {
-  const entry = cardSpecPlanningCards().find(
-    (candidate) => candidate.definition.id === cardId,
+  const entry = listPlanningCardsWithFacts().find(
+    (candidate) => candidate.facts.id === cardId,
   );
   if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
   return {
@@ -106,8 +106,8 @@ describe("generic typed CardSpec AI translators", () => {
       const entry = renamed
         ? {
             ...original,
-            definition: {
-              ...original.definition,
+            facts: {
+              ...original.facts,
               id: 521,
               title: "Synthetic trace asset",
             },
@@ -147,8 +147,8 @@ describe("generic typed CardSpec AI translators", () => {
         "risk.random_outcome",
       ]),
     );
-    const engine = cardSpecPlanningCards().find(
-      (e) => e.definition.id === 152,
+    const engine = listPlanningCardsWithFacts().find(
+      (e) => e.facts.id === 152,
     )!.planning.engine;
     expect(
       syntheticHint({ virusCounter: engine.virusCounter }, { type: "program" })
@@ -397,9 +397,9 @@ describe("generic typed CardSpec AI translators", () => {
       expect.arrayContaining(["economy.generic", "economy.turn_start_credit"]),
     );
 
-    const entry = cardSpecPlanningCards().find(
+    const entry = listPlanningCardsWithFacts().find(
       (candidate) =>
-        candidate.definition.id === 396,
+        candidate.facts.id === 396,
     );
     if (entry === undefined) throw new Error("missing_top_runners_conference");
     const withoutRunStartTrash = deriveCardSpecAiHint({
@@ -440,8 +440,8 @@ describe("generic typed CardSpec AI translators", () => {
       ]),
     );
 
-    const entry = cardSpecPlanningCards().find(
-      (candidate) => candidate.definition.id === 535,
+    const entry = listPlanningCardsWithFacts().find(
+      (candidate) => candidate.facts.id === 535,
     );
     if (entry === undefined) throw new Error("missing_experimental_ai");
     const withoutAccessEffect = deriveCardSpecAiHint({
@@ -458,8 +458,8 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("binds Blood Cat trace and tag semantics to its exact capability", () => {
-    const entry = cardSpecPlanningCards().find(
-      (candidate) => candidate.definition.id === 522,
+    const entry = listPlanningCardsWithFacts().find(
+      (candidate) => candidate.facts.id === 522,
     );
     if (entry === undefined) throw new Error("missing_blood_cat_test_card");
 
@@ -529,8 +529,8 @@ describe("generic typed CardSpec AI translators", () => {
       ]),
     );
 
-    const shellEntry = cardSpecPlanningCards().find(
-      (entry) => entry.definition.id === 388,
+    const shellEntry = listPlanningCardsWithFacts().find(
+      (entry) => entry.facts.id === 388,
     );
     if (!shellEntry) throw new Error("missing_shell_traders_test_card");
     const withoutCountdown = deriveCardSpecAiHint({
@@ -551,7 +551,7 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("sees all 27 canonical trace source cards without legacy trace fields", () => {
-    const cards = cardSpecPlanningCards();
+    const cards = listPlanningCardsWithFacts();
     const directTraceCards = cards.filter((entry) => {
       const engine = entry.planning.engine;
       return (
@@ -590,13 +590,13 @@ describe("generic typed CardSpec AI translators", () => {
     expect(directTraceCards).toHaveLength(26);
     expect(directTraceNodes).toBe(27);
     expect(dynamicTraceCards).toHaveLength(1);
-    expect(dynamicTraceCards[0]?.definition.id).toBe(
+    expect(dynamicTraceCards[0]?.facts.id).toBe(
       84,
     );
     expect(
       new Set([
-        ...directTraceCards.map((entry) => entry.definition.id),
-        ...dynamicTraceCards.map((entry) => entry.definition.id),
+        ...directTraceCards.map((entry) => entry.facts.id),
+        ...dynamicTraceCards.map((entry) => entry.facts.id),
       ]).size,
     ).toBe(27);
   });
@@ -917,8 +917,8 @@ describe("generic typed CardSpec AI translators", () => {
 
   it("keeps scored agenda placement and rez-support choices on their actual target dimensions", () => {
     const hintFor = (cardId: CardDefinitionId) => {
-      const entry = cardSpecPlanningCards().find(
-        (candidate) => candidate.definition.id === cardId,
+      const entry = listPlanningCardsWithFacts().find(
+        (candidate) => candidate.facts.id === cardId,
       );
       if (!entry) throw new Error(`missing_test_card:${cardId}`);
       return deriveCardSpecAiHint(entry);
@@ -981,9 +981,9 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("compiles all Originalset target preferences through exact typed owner unions", () => {
-    const entries = cardSpecPlanningCards().filter(
+    const entries = listPlanningCardsWithFacts().filter(
       (entry) =>
-        ORIGINALSET_V1_CARD_IDS.includes(entry.definition.id) &&
+        ORIGINALSET_V1_CARD_IDS.includes(entry.facts.id) &&
         ((entry.planning.planningAnnotations?.card?.some(
           (annotation) => annotation.kind === "target_preference",
         ) ??
@@ -1012,7 +1012,7 @@ describe("generic typed CardSpec AI translators", () => {
     ).toBe(74);
     for (const entry of entries)
       expect(() =>
-        deriveCardSpecAiHint(targetAnnotatedEntry(entry.definition.id)),
+        deriveCardSpecAiHint(targetAnnotatedEntry(entry.facts.id)),
       ).not.toThrow();
 
     const witnesses = [
@@ -1143,9 +1143,9 @@ describe("generic typed CardSpec AI translators", () => {
     const runner = syntheticHint(
       {
         characteristics: {
-          ...cardSpecPlanningCards()[0]!.planning.engine.characteristics,
+          ...listPlanningCardsWithFacts()[0]!.planning.engine.characteristics,
           numeric: {
-            ...cardSpecPlanningCards()[0]!.planning.engine.characteristics
+            ...listPlanningCardsWithFacts()[0]!.planning.engine.characteristics
               .numeric,
             installCost: 3,
             memoryCost: 2,
@@ -1163,7 +1163,7 @@ describe("generic typed CardSpec AI translators", () => {
     const operation = syntheticHint(
       {
         characteristics: {
-          ...cardSpecPlanningCards()[0]!.planning.engine.characteristics,
+          ...listPlanningCardsWithFacts()[0]!.planning.engine.characteristics,
           playCost: { kind: "fixed", credits: 4 },
         },
       },
@@ -1174,9 +1174,9 @@ describe("generic typed CardSpec AI translators", () => {
     const ice = syntheticHint(
       {
         characteristics: {
-          ...cardSpecPlanningCards()[0]!.planning.engine.characteristics,
+          ...listPlanningCardsWithFacts()[0]!.planning.engine.characteristics,
           numeric: {
-            ...cardSpecPlanningCards()[0]!.planning.engine.characteristics
+            ...listPlanningCardsWithFacts()[0]!.planning.engine.characteristics
               .numeric,
             rezCost: 6,
           },
@@ -1486,9 +1486,9 @@ describe("generic typed CardSpec AI translators", () => {
     const hint = syntheticHint(
       {
         characteristics: {
-          ...cardSpecPlanningCards()[0]!.planning.engine.characteristics,
+          ...listPlanningCardsWithFacts()[0]!.planning.engine.characteristics,
           numeric: {
-            ...cardSpecPlanningCards()[0]!.planning.engine.characteristics
+            ...listPlanningCardsWithFacts()[0]!.planning.engine.characteristics
               .numeric,
             installCost: null,
             memoryCost: null,
@@ -1582,8 +1582,8 @@ describe("generic typed CardSpec AI translators", () => {
 
   it("keeps Batch 12 strategy ownership proportional to each card", () => {
     const fullHint = (cardId: CardDefinitionId) => {
-      const entry = cardSpecPlanningCards().find(
-        (candidate) => candidate.definition.id === cardId,
+      const entry = listPlanningCardsWithFacts().find(
+        (candidate) => candidate.facts.id === cardId,
       );
       if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
       return deriveCardSpecAiHint(entry);
@@ -1617,8 +1617,8 @@ describe("generic typed CardSpec AI translators", () => {
 
   it("keeps Batch 14 choices on their actual target and information boundary", () => {
     const fullHint = (cardId: CardDefinitionId) => {
-      const entry = cardSpecPlanningCards().find(
-        (candidate) => candidate.definition.id === cardId,
+      const entry = listPlanningCardsWithFacts().find(
+        (candidate) => candidate.facts.id === cardId,
       );
       if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
       return deriveCardSpecAiHint(entry);
@@ -1705,8 +1705,8 @@ describe("generic typed CardSpec AI translators", () => {
 
   it("keeps Batch 14 roles, restricted resources, and liabilities mechanically exact", () => {
     const fullHint = (cardId: CardDefinitionId) => {
-      const entry = cardSpecPlanningCards().find(
-        (candidate) => candidate.definition.id === cardId,
+      const entry = listPlanningCardsWithFacts().find(
+        (candidate) => candidate.facts.id === cardId,
       );
       if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
       return deriveCardSpecAiHint(entry);
@@ -1860,8 +1860,8 @@ describe("generic typed CardSpec AI translators", () => {
 
   it("keeps Batch 15 choices on their mechanical owner and information boundary", () => {
     const fullHint = (cardId: CardDefinitionId) => {
-      const entry = cardSpecPlanningCards().find(
-        (candidate) => candidate.definition.id === cardId,
+      const entry = listPlanningCardsWithFacts().find(
+        (candidate) => candidate.facts.id === cardId,
       );
       if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
       return deriveCardSpecAiHint(entry);
@@ -1918,8 +1918,8 @@ describe("generic typed CardSpec AI translators", () => {
 
   it("projects Batch 15 run exchanges, liabilities, and breaker side effects generically", () => {
     const fullHint = (cardId: CardDefinitionId) => {
-      const entry = cardSpecPlanningCards().find(
-        (candidate) => candidate.definition.id === cardId,
+      const entry = listPlanningCardsWithFacts().find(
+        (candidate) => candidate.facts.id === cardId,
       );
       if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
       return deriveCardSpecAiHint(entry);

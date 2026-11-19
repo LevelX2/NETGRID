@@ -39,6 +39,7 @@ export type { SemanticRuntimeWhyCoverageReport } from "./diagnostics/semantic-ru
 export {
   AI_DECISION_INPUT_TOP_LEVEL_FIELDS,
   buildAiDecisionInputDto,
+  AiDecisionChronicle,
 } from "./input-dto";
 export {
   buildLegalActionWitness,
@@ -655,5 +656,6 @@ export {
 export {
   AI_RUNTIME_CHECKPOINT_SCHEMA_VERSION,
   exportAiRuntimeCheckpoint,
+  restoreAiRuntimeCheckpoint,
 } from "./evaluation/decision-checkpoints/runtime-checkpoint";
 export type { AiRuntimeCheckpointV1 } from "./evaluation/decision-checkpoints/runtime-checkpoint";

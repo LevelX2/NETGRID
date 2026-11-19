@@ -11,7 +11,7 @@ import type {
 } from "../access/access-decision-types";
 import { projectRemoteRootValue } from "../access/remote-root-value-projection";
 import { rolesMatch } from "../role-match";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import { assessRunnerAccessTrashImpactFromPlanningCard } from "../access/runner-access-trash-impact";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 
@@ -119,7 +119,7 @@ export function projectKnownRemoteTrashCommitment(
   );
   const preservesReserve =
     technicallyAffordable && creditsAfterTrash >= desiredCreditReserve;
-  const planningCard = cardSpecPlanningCardByDefinitionId(params.definitionId);
+  const planningCard = planningCardByDefinitionId(params.definitionId);
   if (!planningCard) {
     throw new PlanResolutionFailure("missing_card_definition", {
       side: input.side,

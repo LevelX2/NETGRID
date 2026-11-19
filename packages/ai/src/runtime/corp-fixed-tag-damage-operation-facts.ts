@@ -1,4 +1,4 @@
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { corpFixedOperationPlayCredits } from "./corp-canonical-card-facts";
 import { mergedPublicHistory } from "../public-event-history";
@@ -23,7 +23,7 @@ export function fixedTagOperation(
 ): FixedTagOperation | undefined {
   const credits = corpFixedOperationPlayCredits(definitionId);
   if (credits === undefined) return undefined;
-  const card = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
+  const card = planningCardByDefinitionId(definitionId);
   if (card?.engine.corpUtility?.kind === "encounter_tag")
     return { trigger: { kind: "agenda_stolen" }, tags: 1, credits };
   for (const ability of card?.engine.abilities ?? []) {
@@ -62,7 +62,7 @@ export function fixedTaggedDamageOperation(
 ): FixedTaggedDamageOperation | undefined {
   const credits = corpFixedOperationPlayCredits(definitionId);
   if (credits === undefined) return undefined;
-  const card = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
+  const card = planningCardByDefinitionId(definitionId);
   for (const ability of card?.engine.abilities ?? []) {
     if (
       ability.kind !== "on_play" ||

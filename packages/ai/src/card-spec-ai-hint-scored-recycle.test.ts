@@ -1,12 +1,12 @@
 import type { CardDefinitionId } from "@netgrid/shared";
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
 import { AI_HINTS_BY_CARD } from "./ai-hints";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 
 function source(id: CardDefinitionId) {
-  const entry = cardSpecPlanningCards().find((card) => card.definition.id === id);
+  const entry = listPlanningCardsWithFacts().find((card) => card.facts.id === id);
   if (entry === undefined) throw new Error(`scored_recycle_test_source_missing:${id}`);
   return entry;
 }
@@ -17,7 +17,7 @@ describe("scored agenda recycling timing", () => {
     expect(entry.planning.engine.scoredAgenda?.kind).toBe(
       "shuffle_hq_archives_into_rd_then_draw",
     );
-    for (const hint of [deriveCardSpecAiHint(entry), AI_HINTS_BY_CARD.get(entry.definition.id)!]) {
+    for (const hint of [deriveCardSpecAiHint(entry), AI_HINTS_BY_CARD.get(entry.facts.id)!]) {
       const effects = hint.effects!.filter((effect) =>
         ["zone_shuffle", "draw", "scored_agenda_action"].includes(effect.kind),
       );
@@ -36,7 +36,7 @@ describe("scored agenda recycling timing", () => {
 
   it("derives the timing from the typed mechanic independently of the card title", () => {
     const entry = source(400);
-    const renamed = { ...entry, definition: { ...entry.definition, title: "Scored recycle test" } };
+    const renamed = { ...entry, definition: { ...entry.facts, title: "Scored recycle test" } };
     expect(deriveCardSpecAiHint(renamed).effects).toEqual(deriveCardSpecAiHint(entry).effects);
   });
 

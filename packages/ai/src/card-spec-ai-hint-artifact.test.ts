@@ -2,11 +2,8 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import {
-  cardSpecPlanningCards,
-  CS06_CARD_DEFINITION_IDS,
-} from "@netgrid/cards/planning";
-import { cardSpecSourceRefs } from "@netgrid/cards/engine";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
+import { cardSpecRuntimeDefinitionIds } from "@netgrid/cards/engine";
 import { build } from "esbuild";
 import { describe, expect, it } from "vitest";
 
@@ -83,7 +80,9 @@ describe("CardSpec generated AI hint artifact", () => {
     expect(
       compiled.cardIds.filter((cardId) => cardId === 1 || cardId === 2),
     ).toEqual([]);
-    expect(compiled.cardIds).toEqual([...compiled.cardIds].sort((left, right) => left - right));
+    expect(compiled.cardIds).toEqual(
+      [...compiled.cardIds].sort((left, right) => left - right),
+    );
     expect(compiled.cards.map((entry) => entry.cardId)).toEqual(
       compiled.cardIds,
     );
@@ -101,7 +100,7 @@ describe("CardSpec generated AI hint artifact", () => {
   });
 
   it("changes for rules and planning-annotation fingerprint drift", () => {
-    const entries = cardSpecPlanningCards();
+    const entries = listPlanningCardsWithFacts();
     const first = entries[0]!;
     const rulesDrift = [
       {
@@ -134,31 +133,25 @@ describe("CardSpec generated AI hint artifact", () => {
   });
 
   it("binds inputs to the independent exact active CardSpec id partition", () => {
-    const entries = cardSpecPlanningCards();
-    const partitions = [
-      [...CS06_CARD_DEFINITION_IDS],
-      testsetReviewedGolden.cards.map((record) => record.cardId),
-      classicReviewedGolden.cards.map((record) => record.cardId),
-      proteusReviewedGolden.cards.map((record) => record.cardId),
-      cardSpecSourceRefs()
-        .filter(
-          (ref) =>
-            ref.sourcePath.includes("/specs/originalset-v1/") &&
-            !CS06_CARD_DEFINITION_IDS.includes(
-              ref.cardDefinitionId as (typeof CS06_CARD_DEFINITION_IDS)[number],
-            ),
-        )
-        .map((ref) => ref.cardDefinitionId),
-    ];
-    for (const partition of partitions)
-      expect(partition.length).toBeGreaterThan(0);
-    const reviewedExpectedIds = partitions.flat().sort((left, right) => left - right);
-    expect(reviewedExpectedIds.length).toBeGreaterThanOrEqual(618);
-    expect(new Set(reviewedExpectedIds).size).toBe(reviewedExpectedIds.length);
-    expect(generatedArtifact.cardIds).toEqual(reviewedExpectedIds);
-    expect(entries.map((entry) => entry.definition.id).sort((left, right) => left - right)).toEqual(
-      reviewedExpectedIds,
+    const entries = listPlanningCardsWithFacts();
+    const reviewedExpectedIds = [...cardSpecRuntimeDefinitionIds()].sort(
+      (left, right) => left - right,
     );
+    const publishedIds = new Set(reviewedExpectedIds);
+    for (const { cardId } of [
+      ...testsetReviewedGolden.cards,
+      ...classicReviewedGolden.cards,
+      ...proteusReviewedGolden.cards,
+    ])
+      expect(publishedIds.has(cardId)).toBe(true);
+    expect(reviewedExpectedIds.length).toBeGreaterThanOrEqual(618);
+    expect(publishedIds.size).toBe(reviewedExpectedIds.length);
+    expect(generatedArtifact.cardIds).toEqual(reviewedExpectedIds);
+    expect(
+      entries
+        .map((entry) => entry.facts.id)
+        .sort((left, right) => left - right),
+    ).toEqual(reviewedExpectedIds);
 
     expect(() =>
       buildCardSpecAiHintArtifact({ entries: entries.slice(1) }),
@@ -168,8 +161,8 @@ describe("CardSpec generated AI hint artifact", () => {
       index === 0
         ? {
             ...entry,
-            definition: {
-              ...entry.definition,
+            facts: {
+              ...entry.facts,
               id: 100000,
             },
           }

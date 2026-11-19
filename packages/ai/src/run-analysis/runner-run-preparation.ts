@@ -1,5 +1,5 @@
 import { type AiDecisionInput } from "@netgrid/shared";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import {
   assessRunnerRunAfterAccessPreparation,
@@ -31,9 +31,9 @@ export function runnerHasExpiringAgendaAccessPayoff(
       typeof payload.cardDefinitionId !== "number"
     )
       continue;
-    const abilities = cardSpecPlanningCardByDefinitionId(
+    const abilities = planningCardByDefinitionId(
       payload.cardDefinitionId,
-    )?.planning.engine.abilities;
+    )?.engine.abilities;
     for (const ability of abilities ?? []) {
       if (ability.kind !== "on_play") continue;
       for (const effect of ability.effects) {
@@ -82,9 +82,9 @@ export function runnerRunReplacesAgendaAccess(
   const capability = run.payload?.cardImplementationAbilityKey;
   const boundAbility =
     source && typeof capability === "string"
-      ? cardSpecPlanningCardByDefinitionId(
+      ? planningCardByDefinitionId(
           source,
-        )?.planning.engine.abilities?.find(
+        )?.engine.abilities?.find(
           (ability) => ability.capabilityKey === capability,
         )
       : undefined;

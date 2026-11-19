@@ -1,5 +1,5 @@
 import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   type LegalAction,
   type VisibleCard,
@@ -1744,7 +1744,7 @@ function recurringCreditPool(
 }
 
 function definition(definitionId: number) {
-  const card = CARD_DEFINITIONS_BY_ID[definitionId];
+  const card = planningCardFactsByDefinitionId(definitionId);
   if (!card) throw new Error(`Missing test definition ${definitionId}`);
   return card;
 }

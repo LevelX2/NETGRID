@@ -3,6 +3,7 @@ import {
   choiceOptionServerForEngineKey,
   isMatchOfferId,
   type GameState,
+  type LegalAction,
   type MatchActionSubmission,
   type OfferedChoiceOption,
   type OfferedChoiceRequest,
@@ -162,7 +163,7 @@ export function buildMatchPlayerOffer(view: PlayerView): OfferedPlayerView {
 }
 
 type MatchActionOfferBinding =
-  | { action: PlayerAction }
+  | { action: PlayerAction; legalAction: LegalAction }
   | { errorCode: "ERR_UNKNOWN_ACTION" | "ERR_INVALID_CHOICE" };
 
 export function bindMatchActionOffer(
@@ -204,6 +205,7 @@ export function bindMatchActionOffer(
   }
 
   return {
+    legalAction,
     action: {
       matchId: input.matchId,
       side: input.side,

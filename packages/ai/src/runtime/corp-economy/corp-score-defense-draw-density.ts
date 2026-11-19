@@ -1,6 +1,6 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../../ai-hints";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import type { AiDeckStrategyDeckSnapshot } from "../../deck-strategy-snapshot";
 import type { CorpFundedRemoteAccessRiskNeed } from "../corp-funded-score-protection";
 import {
@@ -92,7 +92,7 @@ export function corpScoreDefenseEffectSuitableIceDensity(
     const remainingCopies =
       entry.quantity - (outsideByDefinitionId.get(resolvedDefinitionId) ?? 0);
     if (remainingCopies <= 0) continue;
-    const definition = CARD_DEFINITIONS_BY_ID[resolvedDefinitionId];
+    const definition = planningCardFactsByDefinitionId(resolvedDefinitionId);
     if (definition?.type !== "ice") continue;
     const after = assessCorpScoreProtection({
       serverIce: [
@@ -106,7 +106,7 @@ export function corpScoreDefenseEffectSuitableIceDensity(
             ? { strength: definition.strength }
             : {}),
           ...(definition.subtypes !== undefined
-            ? { subtypes: definition.subtypes }
+            ? { subtypes: definition.subtypes.slice() }
             : {}),
         },
       ],
@@ -172,9 +172,9 @@ function unknownScoreDefenseDensity(
 }
 
 function resolvedEngineDefinitionId(definitionId: number): number | undefined {
-  if (CARD_DEFINITIONS_BY_ID[definitionId]) return definitionId;
+  if (planningCardFactsByDefinitionId(definitionId)) return definitionId;
   const engineCardId = RUNTIME_CARDS[definitionId]?.engineCardId;
-  return engineCardId && CARD_DEFINITIONS_BY_ID[engineCardId]
+  return engineCardId && planningCardFactsByDefinitionId(engineCardId)
     ? engineCardId
     : undefined;
 }

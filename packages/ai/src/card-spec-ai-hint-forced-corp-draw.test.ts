@@ -1,6 +1,6 @@
 import { chooseAiAction } from "./ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "./plans/resident-plan-portfolio-memory";
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 import { AI_HINTS_BY_CARD } from "./ai-hints";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
@@ -15,7 +15,7 @@ import { evaluateRunnerHandDevelopment } from "./runner/hand-development/hand-de
 import standardCatalog from "../../../data/decks/standard-deck-catalog-1.0.0.json";
 const id = 276;
 const entry = () =>
-  cardSpecPlanningCards().find((c) => c.definition.id === id)!;
+  listPlanningCardsWithFacts().find((c) => c.facts.id === id)!;
 const expected = {
   kind: "persistent_counter_effect",
   scope: "corp",
@@ -121,17 +121,17 @@ describe("canonical forced Corp draw reaches Runner development", () => {
   });
   it("uses mechanics rather than the card identity", () => {
     const source = mechanical(),
-      base = cardSpecPlanningCards().find(
+      base = listPlanningCardsWithFacts().find(
         (c) =>
-          c.definition.side === "runner" &&
+          c.facts.side === "runner" &&
           !c.planning.engine.abilities &&
           !c.planning.engine.virusCounter,
       )!;
     expect(
       deriveCardSpecAiHint({
         ...base,
-        definition: {
-          ...base.definition,
+        facts: {
+          ...base.facts,
           title: "Unrelated identity",
           rulesText: "Unrelated text",
         },

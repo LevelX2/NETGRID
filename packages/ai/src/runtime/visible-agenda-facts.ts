@@ -1,9 +1,8 @@
 import {
   type AiDecisionInput,
-  type CardDefinition,
   type VisibleCard,
 } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId, type CardPlanningFacts } from "@netgrid/cards/planning";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { visibleKnownCardType } from "./visible-action-facts";
 export function requireVisibleAgendaPoints(
@@ -76,7 +75,7 @@ export function requireVisibleCardDefinition(
   input: AiDecisionInput,
   card: VisibleCard,
   expectedType: "agenda" | "ice",
-): CardDefinition {
+): CardPlanningFacts {
   const actualType = visibleKnownCardType(input, card);
   if (actualType !== expectedType)
     throw new PlanResolutionFailure("step_capability_mismatch", {
@@ -87,7 +86,7 @@ export function requireVisibleCardDefinition(
       owner: "plan_module",
       removalCondition: `Bind the ${expectedType} plan step to a visible ${expectedType} card.`,
     });
-  const definition = CARD_DEFINITIONS_BY_ID[card.definitionId!];
+  const definition = planningCardFactsByDefinitionId(card.definitionId!);
   if (!definition)
     throw new PlanResolutionFailure("missing_card_definition", {
       side: input.side,

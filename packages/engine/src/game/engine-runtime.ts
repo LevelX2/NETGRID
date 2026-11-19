@@ -15,6 +15,7 @@ export {
   createGame,
   createGameAfterSetup,
   applyAction,
+  applyMatchActionOffer,
   applyRandomizedIceInstallSelection,
   candidateFingerprint,
   quoteRandomizedIceInstallSelection,

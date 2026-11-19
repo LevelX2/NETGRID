@@ -68,13 +68,8 @@ type CardSpecCardImplementationFamilies = Omit<
   "cardDefinitionId"
 >;
 
-/**
- * Compatibility bridge for consumers that still require the pre-CardSpec definition
- * shape. Every field is derived from one registry projection pair; this is
- * not an authoring surface. Remove with the legacy CardDefinition consumers
- * in CS11.
- */
-export function projectCardSpecDefinition(
+/** Compile the definition consumed by the live rules engine. */
+export function projectEngineCardDefinition(
   engineView: DeepReadonly<EngineCardView>,
   spec: DeepReadonly<CardSpec>,
 ): ResolvedCardDefinition {
@@ -257,12 +252,7 @@ export function hasCardSpecImplementation(
   );
 }
 
-/** Temporary CS06 aliases retained only for existing slice-focused tests. */
-export type Cs06CardImplementation = CardSpecCardImplementation;
-export const projectCs06CardDefinition = projectCardSpecDefinition;
-export const projectCs06CardImplementation = projectCardSpecImplementation;
-
-function projectPrintedSubroutines(
+export function projectPrintedSubroutines(
   engine: DeepReadonly<CardMechanicalSpec>,
 ): SubroutineDefinition[] {
   assertDynamicDamageSubroutineBinding(engine);
@@ -751,7 +741,7 @@ export function projectTraceSuccessEffect(
   throw new Error("card_spec_unsupported_trace_success_effect");
 }
 
-function deriveMechanicTokens(
+export function deriveMechanicTokens(
   cardType: CardSpec["identity"]["cardType"],
   engine: DeepReadonly<CardMechanicalSpec>,
 ): string[] {

@@ -1,14 +1,14 @@
 import type { CardDefinitionId } from "@netgrid/shared";
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 
-const planningEntries = cardSpecPlanningCards();
+const planningEntries = listPlanningCardsWithFacts();
 
 function planningEntry(cardId: CardDefinitionId) {
   const entry = planningEntries.find(
-    (candidate) => candidate.definition.id === cardId,
+    (candidate) => candidate.facts.id === cardId,
   );
   if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
   return entry;
@@ -450,7 +450,7 @@ describe("generic CardSpec AI-hint repair block", () => {
         (effect) => effect.kind === "trace",
       );
       for (const effect of traceEffects)
-        expect(effect, String(entry.definition.id)).not.toHaveProperty("amount");
+        expect(effect, String(entry.facts.id)).not.toHaveProperty("amount");
     }
   });
 

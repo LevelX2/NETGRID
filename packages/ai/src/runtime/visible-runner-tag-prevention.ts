@@ -1,10 +1,10 @@
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { VisibleCard } from "@netgrid/shared";
 
 export function visibleSingleTagAvoidanceCosts(card: VisibleCard) {
   if (!card.known || !card.definitionId) return [];
   const sources =
-    cardSpecPlanningCardByDefinitionId(card.definitionId)?.planning.engine
+    planningCardByDefinitionId(card.definitionId)?.engine
       .tagPreventionSources ?? [];
   return sources
     .filter(

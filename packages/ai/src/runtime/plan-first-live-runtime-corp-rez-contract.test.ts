@@ -2,7 +2,7 @@ import { planInstanceIdForProposal } from "../plans/plan-instance";
 import { describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   aiInput,
   legalAction,
@@ -1204,7 +1204,7 @@ function corpIce(
     definitionId,
     title,
     rezzed,
-    subtypes: [...(CARD_DEFINITIONS_BY_ID[definitionId]?.subtypes ?? [])],
+    subtypes: [...(planningCardFactsByDefinitionId(definitionId)?.subtypes ?? [])],
   });
 }
 

@@ -5,7 +5,7 @@ import {
 import { runnerTerminalRemoteContestIsDirectlyMandatory } from "../remote-contest/remote-contest-admission";
 import {
   canonicalCapabilityId,
-  cardSpecPlanningCardByDefinitionId,
+  planningCardByDefinitionId,
 } from "@netgrid/cards/planning";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -396,8 +396,7 @@ function boundedProgramSearchEffect(
   )
     return undefined;
   const abilities =
-    cardSpecPlanningCardByDefinitionId(binding.sourceDefinitionId)?.planning
-      .engine.abilities ?? [];
+    planningCardByDefinitionId(binding.sourceDefinitionId)?.engine.abilities ?? [];
   const ability = abilities.find(
     (entry) =>
       entry.kind === "activated" &&

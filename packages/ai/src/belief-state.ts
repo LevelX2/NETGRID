@@ -4,7 +4,7 @@ import { sortedUnique } from "./runtime/collection";
 import { cardDefinitionIdValue } from "./card-definition-id-input";
 import { isCardDefinitionId } from "@netgrid/shared";
 import { parseCardDefinitionIdCsv } from "./card-definition-id-input";
-import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   type AiDecisionInput,
   type PlayerView,
@@ -1740,7 +1740,7 @@ function reconcileObservedRootReplacement(
   for (const entry of roots.values())
     memory.delete(`${entry.zone}:${entry.positionKey}`);
   for (const [index, entry] of roots) {
-    if (CARD_DEFINITIONS_BY_ID[entry.definitionId]?.type === "asset") continue;
+    if (planningCardFactsByDefinitionId(entry.definitionId)?.type === "asset") continue;
     let removedBefore = 0;
     let prefixKnown = true;
     for (let lower = 0; lower < index; lower++) {
@@ -1749,7 +1749,7 @@ function reconcileObservedRootReplacement(
         prefixKnown = false;
         break;
       }
-      if (CARD_DEFINITIONS_BY_ID[lowerEntry.definitionId]?.type === "asset")
+      if (planningCardFactsByDefinitionId(lowerEntry.definitionId)?.type === "asset")
         removedBefore++;
     }
     // An unobserved lower slot could contain another removed asset.
@@ -2255,14 +2255,14 @@ function beliefRemoteServerId(serverId: string): boolean {
 
 function beliefDefinitionType(definitionId: number): string | undefined {
   return (
-    CARD_DEFINITIONS_BY_ID[definitionId]?.type ??
+    planningCardFactsByDefinitionId(definitionId)?.type ??
     RUNTIME_CARDS[definitionId]?.type
   );
 }
 
 function beliefDefinitionSide(definitionId: number): Side | undefined {
   return (
-    CARD_DEFINITIONS_BY_ID[definitionId]?.side ??
+    planningCardFactsByDefinitionId(definitionId)?.side ??
     RUNTIME_CARDS[definitionId]?.side
   );
 }
@@ -2270,7 +2270,7 @@ function beliefDefinitionSide(definitionId: number): Side | undefined {
 function beliefDefinitionTrashCost(definitionId: number): number | undefined {
   return (
     RUNTIME_CARDS[definitionId]?.numeric.trashCost ??
-    CARD_DEFINITIONS_BY_ID[definitionId]?.trashCost
+    planningCardFactsByDefinitionId(definitionId)?.trashCost
   );
 }
 
@@ -3139,11 +3139,11 @@ function rndInvalidationReason(
 }
 
 function definitionLooksAgenda(definitionId: number): boolean {
-  return CARD_DEFINITIONS_BY_ID[definitionId]?.type === "agenda";
+  return planningCardFactsByDefinitionId(definitionId)?.type === "agenda";
 }
 
 function definitionLooksLowValueRndAccess(definitionId: number): boolean {
-  const definition = CARD_DEFINITIONS_BY_ID[definitionId];
+  const definition = planningCardFactsByDefinitionId(definitionId);
   if (!definition) return false;
   return (
     definition.type !== "agenda" &&

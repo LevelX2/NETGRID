@@ -1,6 +1,6 @@
+import type { CardPlanningFacts } from "@netgrid/cards/planning";
 import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
-  type ResolvedCardDefinition,
   AiDecisionInput,
   LegalAction,
   VisibleCard,
@@ -8,16 +8,16 @@ import {
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const testDefinitionAuthority = vi.hoisted(() => ({
-  byId: {} as Record<string, ResolvedCardDefinition>,
+  byId: {} as Record<number, CardPlanningFacts>,
 }));
 
-vi.mock("../card-definition-compatibility", async (importOriginal) => {
+vi.mock("@netgrid/cards/planning", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("../card-definition-compatibility")>();
-  Object.assign(testDefinitionAuthority.byId, actual.CARD_DEFINITIONS_BY_ID);
+    await importOriginal<typeof import("@netgrid/cards/planning")>();
   return {
     ...actual,
-    CARD_DEFINITIONS_BY_ID: testDefinitionAuthority.byId,
+    planningCardFactsByDefinitionId: (id: number) =>
+      testDefinitionAuthority.byId[id] ?? actual.planningCardFactsByDefinitionId(id),
   };
 });
 
@@ -712,7 +712,6 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       type: "agenda",
       playCost: null,
       subtypes: [],
-      implementationStatus: "playable_mvp",
       advancementRequirement: 3,
       agendaPoints: 2,
       numeric: {

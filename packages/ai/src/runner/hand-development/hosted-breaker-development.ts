@@ -1,5 +1,5 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import { breakerCardBlocksAccessReachability } from "../../breaker-ontology-consumer";
 import { runnerInvestmentTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import {
@@ -19,7 +19,7 @@ function profile(
   card: VisibleCard,
 ): { capacityMu: number; creditCapacity: number } | undefined {
   const engine = card.definitionId
-    ? cardSpecPlanningCardByDefinitionId(card.definitionId)?.planning.engine
+    ? planningCardByDefinitionId(card.definitionId)?.engine
     : undefined;
   const host = engine?.hostedProgramCapacity;
   const pool = engine?.restrictedHostedCreditSource;

@@ -1,5 +1,5 @@
 import type { CardDefinitionId } from "@netgrid/shared";
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 import { AI_HINTS_BY_CARD } from "./ai-hints";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
@@ -7,7 +7,7 @@ import { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
 import { runnerEffectsProvideHeapRecovery, runnerEffectsProvideTopTrashRecovery } from "./runner-canonical-hint-semantics";
 
 function entry(id: CardDefinitionId) {
-  const found = cardSpecPlanningCards().find((card) => card.definition.id === id);
+  const found = listPlanningCardsWithFacts().find((card) => card.facts.id === id);
   if (!found) throw new Error("heap_recovery_test_card_missing:" + id);
   return found;
 }

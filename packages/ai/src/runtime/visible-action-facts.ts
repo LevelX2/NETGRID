@@ -5,7 +5,7 @@ import {
   type VisibleCard,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { visibleOwnCardByInstanceId } from "./runner-action-source-facts";
 
@@ -31,7 +31,7 @@ export function visibleKnownCardType(
       removalCondition:
         "Every own known card must expose both definitionId and type in PlayerView.",
     });
-  const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
+  const definition = planningCardFactsByDefinitionId(card.definitionId);
   if (!definition?.type)
     throw new PlanResolutionFailure("missing_card_definition", {
       side: input.side,

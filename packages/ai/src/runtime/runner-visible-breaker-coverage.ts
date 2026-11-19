@@ -1,6 +1,6 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { icebreakerAbilitiesForDefinition } from "@netgrid/engine";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { rolesMatch } from "../role-match";
 
 type KnownPathAssessment = {
@@ -207,7 +207,7 @@ export function visibleBreakerRoles(card: VisibleCard): string[] {
   );
   const roles = new Set<string>();
   const definition = card.definitionId
-    ? CARD_DEFINITIONS_BY_ID[card.definitionId]
+    ? planningCardFactsByDefinitionId(card.definitionId)
     : undefined;
   // Generic printed Icebreaker labels do not make distinct capabilities
   // interchangeable when preserving coverage for an installation.

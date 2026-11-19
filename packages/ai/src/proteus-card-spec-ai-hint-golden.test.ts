@@ -1,4 +1,4 @@
-import { cardSpecPlanningCards, planningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts, planningCards } from "@netgrid/cards/planning";
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 
@@ -56,10 +56,10 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
   });
 
   it("pins all 151 complete compiler outputs including explicit absences", () => {
-    const compiled = cardSpecPlanningCards()
-      .filter((entry) => reviewedIds.has(entry.definition.id))
+    const compiled = listPlanningCardsWithFacts()
+      .filter((entry) => reviewedIds.has(entry.facts.id))
       .map((entry) => ({
-        cardId: entry.definition.id,
+        cardId: entry.facts.id,
         hint: deriveCardSpecAiHint(entry),
       }))
       .sort((left, right) => (left.cardId - right.cardId));
@@ -85,15 +85,15 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
     const productionById = new Map(
       planningCards().map((entry) => [entry.cardDefinitionId, entry]),
     );
-    const compatibility = cardSpecPlanningCards().filter((entry) =>
-      reviewedIds.has(entry.definition.id),
+    const compatibility = listPlanningCardsWithFacts().filter((entry) =>
+      reviewedIds.has(entry.facts.id),
     );
 
     expect(compatibility).toHaveLength(151);
     for (const entry of compatibility) {
-      const production = productionById.get(entry.definition.id);
-      expect(production, String(entry.definition.id)).toBeDefined();
-      expect(entry.planning.cardDefinitionId).toBe(entry.definition.id);
+      const production = productionById.get(entry.facts.id);
+      expect(production, String(entry.facts.id)).toBeDefined();
+      expect(entry.planning.cardDefinitionId).toBe(entry.facts.id);
       expect(entry.planning.cardRulesFingerprint).toBe(
         production!.cardRulesFingerprint,
       );
@@ -109,7 +109,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
 
   it("keeps all 100 pre-Proteus artifact records pinned full-record stable", () => {
     const entriesById = new Map(
-      cardSpecPlanningCards().map((entry) => [entry.definition.id, entry]),
+      listPlanningCardsWithFacts().map((entry) => [entry.facts.id, entry]),
     );
     const originalsetIds = new Set(
       originalsetReviewedGolden.cards.map((record) => record.cardId),
@@ -234,7 +234,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
 
   it("derives plan-owned access, rez, and post-pass semantics only from exact typed nodes", () => {
     const entries = new Map(
-      cardSpecPlanningCards().map((entry) => [entry.definition.id, entry]),
+      listPlanningCardsWithFacts().map((entry) => [entry.facts.id, entry]),
     );
     const hint = (cardId: number) => deriveCardSpecAiHint(entries.get(cardId)!);
 
@@ -354,9 +354,9 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
   });
 
   it("rejects unknown families and missing current scenario evidence", () => {
-    const entry = cardSpecPlanningCards().find(
+    const entry = listPlanningCardsWithFacts().find(
       (candidate) =>
-        candidate.definition.id === 59,
+        candidate.facts.id === 59,
     )!;
     expect(() =>
       deriveCardSpecAiHint({
@@ -371,8 +371,8 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
     expect(() =>
       deriveCardSpecAiHint({
         ...entry,
-        definition: {
-          ...entry.definition,
+        facts: {
+          ...entry.facts,
           id: "onr_proteus_missing_scenario_evidence",
         },
       } as never),
@@ -380,9 +380,9 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
   });
 
   it("rejects invented strategy bindings and forged capability evidence", () => {
-    const entry = cardSpecPlanningCards().find(
+    const entry = listPlanningCardsWithFacts().find(
       (candidate) =>
-        candidate.definition.id === 61,
+        candidate.facts.id === 61,
     )!;
 
     for (const mutation of [
@@ -405,9 +405,9 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
 
   it("derives the eight closed longtail hint surfaces from their typed owners", () => {
     const hints = new Map(
-      cardSpecPlanningCards()
-        .filter((entry) => reviewedIds.has(entry.definition.id))
-        .map((entry) => [entry.definition.id, deriveCardSpecAiHint(entry)]),
+      listPlanningCardsWithFacts()
+        .filter((entry) => reviewedIds.has(entry.facts.id))
+        .map((entry) => [entry.facts.id, deriveCardSpecAiHint(entry)]),
     );
     expect(hints.get(113)).toMatchObject({
       conditions: [{ kind: "requires_advancement_counter" }],
@@ -508,9 +508,9 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
 
   it("binds relative ICE and X-trace placeholder subroutines to their dynamic owners", () => {
     const hints = new Map(
-      cardSpecPlanningCards()
-        .filter((entry) => reviewedIds.has(entry.definition.id))
-        .map((entry) => [entry.definition.id, deriveCardSpecAiHint(entry)]),
+      listPlanningCardsWithFacts()
+        .filter((entry) => reviewedIds.has(entry.facts.id))
+        .map((entry) => [entry.facts.id, deriveCardSpecAiHint(entry)]),
     );
     const expectedRelative = (
       damageResource: "net_damage" | "brain_damage",
@@ -640,8 +640,8 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
     ];
     for (const [cardId, mutate] of mutations) {
       const entry = structuredClone(
-        cardSpecPlanningCards().find(
-          (candidate) => candidate.definition.id === cardId,
+        listPlanningCardsWithFacts().find(
+          (candidate) => candidate.facts.id === cardId,
         )!,
       );
       mutate(entry);
@@ -669,8 +669,8 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
       ],
     ] as const;
     for (const [cardId, scope, target, functionSignal, role] of expected) {
-      const entry = cardSpecPlanningCards().find(
-        (candidate) => candidate.definition.id === cardId,
+      const entry = listPlanningCardsWithFacts().find(
+        (candidate) => candidate.facts.id === cardId,
       )!;
       const hint = deriveCardSpecAiHint(entry);
       expect(hint.effects).toContainEqual({
@@ -696,9 +696,9 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
     }
 
     const malformed = structuredClone(
-      cardSpecPlanningCards().find(
+      listPlanningCardsWithFacts().find(
         (candidate) =>
-          candidate.definition.id === 205,
+          candidate.facts.id === 205,
       )!,
     );
     Object.assign(malformed.planning.engine.abilities![0]!, {
@@ -748,8 +748,8 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
     ];
     for (const [cardId, mutate] of mutations) {
       const entry = structuredClone(
-        cardSpecPlanningCards().find(
-          (candidate) => candidate.definition.id === cardId,
+        listPlanningCardsWithFacts().find(
+          (candidate) => candidate.facts.id === cardId,
         )!,
       );
       mutate(entry);
@@ -798,8 +798,8 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
     ];
     for (const [cardId, mutate] of profileMutations) {
       const entry = structuredClone(
-        cardSpecPlanningCards().find(
-          (candidate) => candidate.definition.id === cardId,
+        listPlanningCardsWithFacts().find(
+          (candidate) => candidate.facts.id === cardId,
         )!,
       );
       mutate(entry);
@@ -809,9 +809,9 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
     }
 
     const forgedProfile = structuredClone(
-      cardSpecPlanningCards().find(
+      listPlanningCardsWithFacts().find(
         (candidate) =>
-          candidate.definition.id === 124,
+          candidate.facts.id === 124,
       )!,
     );
     const cardPair = forgedProfile.planning.planningAnnotations?.card?.find(
@@ -824,9 +824,9 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
     );
 
     const tagAnchor = structuredClone(
-      cardSpecPlanningCards().find(
+      listPlanningCardsWithFacts().find(
         (candidate) =>
-          candidate.definition.id === 110,
+          candidate.facts.id === 110,
       )!,
     );
     Object.assign(tagAnchor.planning.planningAnnotations!, {

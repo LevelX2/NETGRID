@@ -61,6 +61,7 @@ export function restoreAiRuntimeCheckpoint(
   input: AiDecisionInput,
   deckSnapshotId: string,
   checkpoint: AiRuntimeCheckpointV1,
+  options: { preserveLiveCommitment?: boolean } = {},
 ): void {
   if (checkpoint.schemaVersion !== AI_RUNTIME_CHECKPOINT_SCHEMA_VERSION) {
     throw new Error("fixture_migration_required:ai_runtime_checkpoint");
@@ -75,7 +76,10 @@ export function restoreAiRuntimeCheckpoint(
   const residentPlanPortfolio = checkpoint.residentPlanPortfolio
     ? structuredClone(checkpoint.residentPlanPortfolio)
     : undefined;
-  if (residentPlanPortfolio?.turnPlanCommitment) {
+  if (
+    residentPlanPortfolio?.turnPlanCommitment &&
+    !options.preserveLiveCommitment
+  ) {
     residentPlanPortfolio.turnPlanCommitment =
       invalidateTurnPlanCommitmentForRestart(
         residentPlanPortfolio.turnPlanCommitment,

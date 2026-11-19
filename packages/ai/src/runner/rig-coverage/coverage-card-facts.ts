@@ -1,4 +1,4 @@
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { type VisibleCard } from "@netgrid/shared";
 import type { BreakerCapability } from "../../deck-capabilities";
 import {
@@ -10,7 +10,7 @@ import { missingBreakerCoverageKind } from "../../plans/tactical-plan-breaker-co
 export function runnerVisibleDeckBreaker(
   breaker: BreakerCapability,
 ): VisibleCard | undefined {
-  const definition = CARD_DEFINITIONS_BY_ID[breaker.cardId];
+  const definition = planningCardFactsByDefinitionId(breaker.cardId);
   if (
     !definition ||
     definition.side !== "runner" ||

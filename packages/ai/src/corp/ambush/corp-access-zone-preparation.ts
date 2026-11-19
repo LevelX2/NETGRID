@@ -1,6 +1,6 @@
 import { isRemoteServerId } from "@netgrid/shared";
 import type { CorpAmbushSignal } from "../../plans/corp-tactical-plan-contracts";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import { reconstructBeliefState } from "../../belief-state";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -10,7 +10,7 @@ import { corpBluffDefenseNeed } from "../defense/corp-bluff-defense";
 
 /** Mechanical profile only. No remote damage is inferred from central access. */
 export function corpAccessZonePreparationProfile(definitionId: number) {
-  const spec = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
+  const spec = planningCardByDefinitionId(definitionId);
   if (spec?.side !== "corp" || spec.cardType !== "asset") return undefined;
   const engine = spec.engine;
   const zoneEffect = engine.accessEffects?.find(

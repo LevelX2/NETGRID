@@ -1,13 +1,13 @@
 import type { CardDefinitionId } from "@netgrid/shared";
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 import { AI_HINTS_BY_CARD } from "./ai-hints";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 import { buildCorpIceCardFacts } from "./runtime/corp-ice-placement/corp-ice-placement";
 
-const entries = cardSpecPlanningCards();
+const entries = listPlanningCardsWithFacts();
 function entry(id: CardDefinitionId) {
-  const e = entries.find((c) => c.definition.id === id);
+  const e = entries.find((c) => c.facts.id === id);
   if (!e) throw Error(`counter_lock_test_missing_card:${id}`);
   return e;
 }
@@ -171,9 +171,9 @@ describe("typed runner-counter and run-duration lock projections", () => {
     delete planning.planningAnnotations;
     const renamed = deriveCardSpecAiHint({
       ...e,
-      definition: {
-        ...e.definition,
-        id: entry(461).definition.id,
+      facts: {
+        ...e.facts,
+        id: entry(461).facts.id,
       },
       planning,
     });

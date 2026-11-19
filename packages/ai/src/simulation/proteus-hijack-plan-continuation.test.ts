@@ -9,7 +9,7 @@ import { describe, expect, it } from "vitest";
 
 import proteusDecksJson from "../../../../data/decks/proteus-playtest-decks-2026-05-25.json";
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { chooseAiAction } from "../index";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { buildPlanningStateIdentity } from "../plans/turn-planning-contracts";
@@ -290,7 +290,7 @@ function hijackState(
   state.runner.rig.resources = [];
   state.runner.memoryUsed = installedPrograms.reduce(
     (total, program) =>
-      total + (CARD_DEFINITIONS_BY_ID[program.definitionId]?.memoryCost ?? 0),
+      total + (planningCardFactsByDefinitionId(program.definitionId)?.memoryCost ?? 0),
     0,
   );
   if (installedPrograms.length > 0) state.runner.memoryLimit = 4;

@@ -4,6 +4,7 @@ import type {
   EngineResult,
   GameState,
   LegalAction,
+  MatchActionSubmission,
   PlayerAction,
 } from "@netgrid/shared";
 import { validateChoiceAction } from "./choices/choice-validation";
@@ -11,6 +12,7 @@ import { buildEvent } from "./events/build-event";
 import { getLegalActions } from "./legal-actions";
 import { cloneGameStateForAction } from "./apply-action-state";
 import { hashState } from "./hash";
+import { bindMatchActionOffer } from "./player-offer";
 import { withActionRandomHistory } from "./state/draw-random";
 import { validateGameState } from "./validation";
 import { toPublicEvent } from "./view/public-event-view";
@@ -58,20 +60,8 @@ export function buildApplyAction(
   playerAction: PlayerAction,
   options: ApplyActionOptions = {},
 ): EngineResult {
-  if (playerAction.matchId !== state.matchId) {
-    return fail(
-      state,
-      "ERR_INVALID_TARGET",
-      "Diese Aktion gehört nicht zu diesem Spiel.",
-    );
-  }
-  if (playerAction.clientKnownStateVersion !== state.stateVersion) {
-    return fail(
-      state,
-      "ERR_STALE_STATE",
-      "Der Spielzustand ist veraltet. Bitte aktualisiere die Ansicht.",
-    );
-  }
+  const scopeError = validateActionScope(state, playerAction);
+  if (scopeError) return scopeError;
 
   const legalActions = getLegalActions(state, playerAction.side);
   const legalAction = legalActions.find(
@@ -86,6 +76,57 @@ export function buildApplyAction(
       "Diese Aktion ist im aktuellen Fenster nicht legal.",
     );
   }
+  return applyLegalAction(host, state, legalAction, playerAction, options);
+}
+
+export function applyMatchActionOffer(
+  state: GameState,
+  input: MatchActionSubmission,
+  options: ApplyActionOptions = {},
+): EngineResult {
+  if (!defaultApplyActionCoreHost)
+    throw new Error("ApplyActionCore-Host ist nicht initialisiert.");
+  const scopeError = validateActionScope(state, input);
+  if (scopeError) return scopeError;
+
+  const bound = bindMatchActionOffer(state, input);
+  if ("errorCode" in bound)
+    return fail(state, bound.errorCode, "Diese Aktion ist nicht legal.");
+
+  return applyLegalAction(
+    defaultApplyActionCoreHost,
+    state,
+    bound.legalAction,
+    bound.action,
+    options,
+  );
+}
+
+function validateActionScope(
+  state: GameState,
+  action: Pick<PlayerAction, "matchId" | "clientKnownStateVersion">,
+): EngineResult | undefined {
+  if (action.matchId !== state.matchId)
+    return fail(
+      state,
+      "ERR_INVALID_TARGET",
+      "Diese Aktion gehört nicht zu diesem Spiel.",
+    );
+  if (action.clientKnownStateVersion !== state.stateVersion)
+    return fail(
+      state,
+      "ERR_STALE_STATE",
+      "Der Spielzustand ist veraltet. Bitte aktualisiere die Ansicht.",
+    );
+}
+
+function applyLegalAction(
+  host: ApplyActionCoreHost,
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+  options: ApplyActionOptions,
+): EngineResult {
 
   const choiceError = validateChoiceAction(
     state.pendingChoice,

@@ -1,5 +1,5 @@
 import { type AiDecisionInput } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 
 type VisibleRootCard =
   AiDecisionInput["playerView"]["servers"][number]["root"][number];
@@ -7,7 +7,7 @@ type VisibleRootCard =
 export function visibleRootIsKnownAgenda(card: VisibleRootCard): boolean {
   if (!card.known) return false;
   const canonicalType = card.definitionId
-    ? CARD_DEFINITIONS_BY_ID[card.definitionId]?.type
+    ? planningCardFactsByDefinitionId(card.definitionId)?.type
     : undefined;
   if (
     card.type !== undefined &&

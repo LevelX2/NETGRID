@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { hashGameState } from "@netgrid/engine";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 
 import defensiveDrawD9Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-3bb14-03-defensive-draw-d9.json";
 import defensiveDrawD10Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-3bb14-04-defensive-draw-d10.json";
@@ -201,7 +201,7 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
   const state = checkpoint.engine.testOnlyGameState;
   const agendas = state.corp.hq.filter(
     (id) =>
-      CARD_DEFINITIONS_BY_ID[state.cardInstances[id]!.definitionId]?.type ===
+      planningCardFactsByDefinitionId(state.cardInstances[id]!.definitionId)?.type ===
       "agenda",
   );
   state.corp.hq = state.corp.hq.filter((id) => !agendas.includes(id));

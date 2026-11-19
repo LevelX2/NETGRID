@@ -1,7 +1,17 @@
-import { createGameAfterSetup } from "@netgrid/engine";
-import { ORIGINALSET_DEFAULT_DECKS, type Side } from "@netgrid/shared";
+import {
+  applyAction,
+  createGame,
+  createGameAfterSetup,
+  getPlayerView,
+} from "@netgrid/engine";
+import {
+  ORIGINALSET_DEFAULT_DECKS,
+  type GameState,
+  type Side,
+} from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
+  AiDecisionChronicle,
   assertValidAiDeckSnapshotForRuntime,
   buildAiDecisionInput,
   isAiDeckSnapshotRuntimeError,
@@ -26,6 +36,37 @@ describe("AI deck snapshot runtime validation", () => {
 
     expect(input.ownDeckStrategyProfile?.deckId).toBe(snapshot.deckSnapshotId);
     expect(input.ownDeckCapabilities?.side).toBe("corp");
+  });
+
+  it("appends side-filtered observations and rebuilds the exact input after a rewind", () => {
+    const initial = createGame({
+      matchId: "ai-chronicle",
+      seed: "ai-chronicle",
+    });
+    const keep = openingChoice(initial, "keep");
+    const mulligan = openingChoice(initial, "mulligan");
+    const chronicle = new AiDecisionChronicle();
+    for (const side of ["runner", "corp"] as const) {
+      const options = { ownDeckSnapshot: snapshotForSide(side) };
+      const read = (state: GameState) => {
+        const current = buildAiDecisionInput(state, side, {
+          ...options,
+          chronicle,
+        });
+        expect(current).toEqual(buildAiDecisionInput(state, side, options));
+        return current.playerView.publicEvents;
+      };
+      const before = read(initial);
+      const after = read(keep);
+      expect(after.length).toBeGreaterThan(before.length);
+      expect(before.length).toBeGreaterThan(0);
+      expect(after[0]).toBe(before[0]);
+      expect(read(mulligan).at(-1)?.stateHashAfter).not.toBe(
+        after.at(-1)?.stateHashAfter,
+      );
+      chronicle.release(initial.matchId);
+      expect(read(keep)[0]).not.toBe(before[0]);
+    }
   });
 
   it("rejects a normal AI decision input without ownDeckSnapshot", () => {
@@ -109,6 +150,27 @@ describe("AI deck snapshot runtime validation", () => {
     );
   });
 });
+
+function openingChoice(state: GameState, selectedOptionId: string): GameState {
+  const view = getPlayerView(state, "runner");
+  const choice = view.pendingChoice!;
+  const action = view.legalActions.find(
+    (offer) => offer.type === "resolve_choice",
+  )!;
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side: "runner",
+    actionId: action.actionId,
+    clientKnownStateVersion: state.stateVersion,
+    idempotencyKey: selectedOptionId,
+    selectedChoices: {
+      choiceId: choice.choiceId,
+      selectedOptionIds: [selectedOptionId],
+    },
+  });
+  if (!result.ok) throw new Error(result.error.code);
+  return result.state;
+}
 
 function snapshotForSide(side: Side): AiDeckStrategyDeckSnapshot {
   return deckSnapshotForSimulation(ORIGINALSET_DEFAULT_DECKS[side]);

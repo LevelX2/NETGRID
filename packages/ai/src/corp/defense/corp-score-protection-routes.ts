@@ -5,7 +5,7 @@ import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { actionClickCost, actionCreditCost } from "../../runtime/action-cost";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   corpEconomyActionIsOwned,
   corpEconomyCandidateHasExecutablePayload,
@@ -282,7 +282,7 @@ export function corpScoreProtectionStagingInstallSignal(
     input,
     candidate.sourceCardInstanceId,
   );
-  const definition = CARD_DEFINITIONS_BY_ID[candidate.sourceDefinitionId];
+  const definition = planningCardFactsByDefinitionId(candidate.sourceDefinitionId);
   const action = input.legalActions.find(
     (a) => a.actionId === candidate.actionId,
   );
@@ -521,7 +521,7 @@ function corpBoundedScoreProtectionLayerCanPrecedeFunding(
   candidates: readonly ActionSemanticCandidate[],
 ): boolean {
   const agendaDefinition = project.agendaDefinitionId
-    ? CARD_DEFINITIONS_BY_ID[project.agendaDefinitionId]
+    ? planningCardFactsByDefinitionId(project.agendaDefinitionId)
     : undefined;
   const advancementRequirement = agendaDefinition?.advancementRequirement;
   const centralsHaveInitialCoverage = ["hq", "rd"].every(

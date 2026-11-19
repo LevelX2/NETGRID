@@ -1,5 +1,5 @@
 import { carryProjectedBreakerStrength } from "./run-analysis/visible-run-breaker-path";
-import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   type CardDefinition,
   type CardDefinitionId,
@@ -181,7 +181,7 @@ export function assessKnownRezzedIcePath(
   const fullGroupedBreakVariants =
     rigCards.some((card) => {
       const definition =
-        card.definitionId && CARD_DEFINITIONS_BY_ID[card.definitionId];
+        card.definitionId && planningCardFactsByDefinitionId(card.definitionId);
       return (
         definition &&
         icebreakerAbilitiesForDefinition(definition).some(
@@ -1592,7 +1592,7 @@ function visibleBreakerStrengthForTargetServer(
     !card.definitionId
   )
     return strength;
-  const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
+  const definition = planningCardFactsByDefinitionId(card.definitionId);
   if (!definition) return strength;
   const hasLastServerBoundCounters = icebreakerAbilitiesForDefinition(
     definition,

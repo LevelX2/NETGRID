@@ -1,6 +1,6 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 
 // Development has no memory-sacrifice continuation. A direct search requires
@@ -64,7 +64,7 @@ export function runnerDevelopmentSearchTargetIsExecutable(
       "A direct program-search installation requires one exact canonical install cost mode.",
     );
   }
-  const target = CARD_DEFINITIONS_BY_ID[targetDefinitionId];
+  const target = planningCardFactsByDefinitionId(targetDefinitionId);
   const memoryUsed = input.playerView.own.memoryUsed;
   const memoryLimit = input.playerView.own.memoryLimit;
   if (

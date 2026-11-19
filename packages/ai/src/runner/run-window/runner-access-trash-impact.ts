@@ -1,4 +1,4 @@
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import {
   assessRunnerAccessTrashImpactFromPlanningCard,
@@ -30,10 +30,10 @@ export function assessRunnerAccessTrashImpact(params: {
     trashAction.source !== accessed.instanceId
   )
     return undefined;
-  const planningCard = cardSpecPlanningCardByDefinitionId(
+  const planningCard = planningCardByDefinitionId(
     accessed.definitionId,
   );
-  if (!planningCard || planningCard.planning.side !== "corp") return undefined;
+  if (!planningCard || planningCard.side !== "corp") return undefined;
   const trashCost = remoteTrashActionTotalCost(params.trashAction);
   const dedicatedTrashCredits = remoteTrashQuotedDedicatedCredits(
     trashAction,

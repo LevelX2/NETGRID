@@ -1,5 +1,5 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 
 import type {
   BreakerCapability,
@@ -378,7 +378,7 @@ function breakerTraitsForProvider(
   visibleInstance: VisibleCard | undefined,
 ): { killer: boolean; noisy: boolean } {
   const canonicalSubtypes =
-    cardSpecPlanningCardByDefinitionId(breaker.cardId)?.planning.engine
+    planningCardByDefinitionId(breaker.cardId)?.engine
       .characteristics.subtypes ?? [];
   const traits = new Set(
     [
@@ -404,7 +404,7 @@ function memoryUnitsForVisibleCard(card: VisibleCard): number | undefined {
     knownNonNegativeInteger(card.memoryCost) ??
     (card.definitionId
       ? knownNonNegativeInteger(
-          cardSpecPlanningCardByDefinitionId(card.definitionId)?.planning.engine
+          planningCardByDefinitionId(card.definitionId)?.engine
             .characteristics.numeric.memoryCost,
         )
       : undefined)
@@ -422,7 +422,7 @@ function breakerMemoryUnits(
     knownNonNegativeInteger(breaker.memoryCost) ??
     knownNonNegativeInteger(visibleInstance?.memoryCost) ??
     knownNonNegativeInteger(
-      cardSpecPlanningCardByDefinitionId(breaker.cardId)?.planning.engine
+      planningCardByDefinitionId(breaker.cardId)?.engine
         .characteristics.numeric.memoryCost,
     )
   );
@@ -588,7 +588,7 @@ function additionalMemoryCapacity(
 ): number {
   if (
     !definitionId ||
-    cardSpecPlanningCardByDefinitionId(definitionId)?.planning.engine
+    planningCardByDefinitionId(definitionId)?.engine
       .hardwareDeck !== true
   )
     return capacity;
@@ -596,7 +596,7 @@ function additionalMemoryCapacity(
     (sum, card) => {
       if (
         !card.definitionId ||
-        cardSpecPlanningCardByDefinitionId(card.definitionId)?.planning.engine
+        planningCardByDefinitionId(card.definitionId)?.engine
           .hardwareDeck !== true
       )
         return sum;
@@ -627,7 +627,7 @@ function memoryCapacityForCard(
 
 function memoryCapacityForDefinition(definitionId: number): number {
   const capacity =
-    cardSpecPlanningCardByDefinitionId(definitionId)?.planning.engine
+    planningCardByDefinitionId(definitionId)?.engine
       .characteristics.memoryLimitBonus;
   return knownNonNegativeInteger(capacity) ?? 0;
 }

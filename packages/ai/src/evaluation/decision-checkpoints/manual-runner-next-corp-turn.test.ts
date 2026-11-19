@@ -9,7 +9,7 @@ import {
   createGameAfterSetup,
   getLegalActions,
 } from "@netgrid/engine";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   ORIGINALSET_DEFAULT_DECKS,
   type GameState,
@@ -150,8 +150,8 @@ it("prepares the fifth Grip card at manual D61 when the payoff is known but the 
   const afterDraw = structuredClone(input);
   const { playerView: view } = afterDraw;
   const drawnCard =
-    cardSpecPlanningCardByDefinitionId(JETTISON_ICE)!.definition;
-  if (drawnCard.type !== "event") throw new Error("Expected a Runner event");
+    planningCardFactsByDefinitionId(JETTISON_ICE)!;
+  if (drawnCard.type !== "event" || drawnCard.playCost === null) throw new Error("Expected a Runner event");
   view.own.gripOrHq.push({
     instanceId: "c1sz",
     known: true,

@@ -1,4 +1,4 @@
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { isCardDefinitionId, type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 
 import { RUNTIME_CARDS } from "../../ai-hints";
@@ -207,8 +207,8 @@ function nonNegativeSafeInteger(value: unknown): value is number {
 }
 
 function exactKnownDefinitionType(definitionId: number): string | undefined {
-  const direct = CARD_DEFINITIONS_BY_ID[definitionId];
+  const direct = planningCardFactsByDefinitionId(definitionId);
   if (direct) return direct.type;
   const engineCardId = RUNTIME_CARDS[definitionId]?.engineCardId;
-  return engineCardId ? CARD_DEFINITIONS_BY_ID[engineCardId]?.type : undefined;
+  return engineCardId ? planningCardFactsByDefinitionId(engineCardId)?.type : undefined;
 }

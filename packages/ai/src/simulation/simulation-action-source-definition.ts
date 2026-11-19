@@ -1,4 +1,4 @@
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   type AiDecisionInput,
   type LegalAction,
@@ -28,7 +28,7 @@ export function createDefinitionForSimulationAction(
   return (input: AiDecisionInput, action: LegalAction) => {
     const definitionId = sourceDefinitionIdForAction(input, action);
     return definitionId
-      ? (RUNTIME_CARDS[definitionId] ?? CARD_DEFINITIONS_BY_ID[definitionId])
+      ? (RUNTIME_CARDS[definitionId] ?? planningCardFactsByDefinitionId(definitionId))
       : undefined;
   };
 }
