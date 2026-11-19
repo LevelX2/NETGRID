@@ -31,6 +31,22 @@ Die Engine ist alleinige Regelautorität. UI, Server und KI reichen nur angebote
 
 ## Engine und Karten
 
+„Amt für Umleitungen“ (Corp) und „Redaktionsschluss“ (Runner) sind als
+Standarddecks in Version 0.2.0 mit je 45 Karten verfügbar. Im gepaarten
+Vergleich vom 19.11.2026 spielte jede Fassung auf schwerer KI-Stufe fünf
+Seeds gegen jeweils dieselben zehn zufällig gezogenen Standardgegner. Alle
+200 Partien endeten regulär und wurden per Replay bestätigt
+(Evidence-Registry, Paarungen 783–822).
+
+Das Amt gewann mit Red Herrings, einem dritten Quandary und Corporate
+Downsizing neun von 50 Partien, die Erstfassung sieben. Die eigenen
+Agendapunkte stiegen im Mittel von 2,42 auf 3,26. Aus HQ stahlen die
+Runner 65 Agenden, zuvor 51. Redaktionsschluss gewann
+mit zwei Identity Donor 45 von 50 Partien, zuvor 42. Die drei Flatlines
+der Erstfassung durch Fleischschaden im Corp-Zug standen einer Flatline
+durch Netzschaden bei einem Zugriff auf Setup! gegenüber. Ein Einsatz von
+Identity Donor gegen Dead Channel ist im Spielverlauf belegt.
+
 „Dr. Dreffs letzte Visite“ ist als Standarddeck mit 45 Karten,
 20 Agendapunkten und deutscher/englischer Anleitung verfügbar. Version 1.3.0
 enthält je ein Reclamation Project und Corporate Shuffle sowie neu Red
