@@ -3,7 +3,7 @@
   "catalogId": "netgrid-standard-decks-1.0.0",
   "version": "1.0.0",
   "status": "active",
-  "curatedAt": "2026-11-19",
+  "curatedAt": "2026-11-20",
   "decks": [
     {
       "standardDeckId": "standard_corp_express_shutdown",
@@ -6191,7 +6191,7 @@
     },
     {
       "standardDeckId": "standard_corp_amt_fuer_umleitungen",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "status": "active",
       "name": "Amt für Umleitungen",
       "side": "corp",
@@ -6250,7 +6250,7 @@
           "quantity": 3
         },
         {
-          "cardId": 573,
+          "cardId": 131,
           "quantity": 2
         },
         {
@@ -6274,7 +6274,7 @@
           "quantity": 2
         },
         {
-          "cardId": 503,
+          "cardId": 128,
           "quantity": 1
         },
         {
@@ -6289,7 +6289,7 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_amt_fuer_umleitungen",
-        "sourceDeckVersion": "0.2.0"
+        "sourceDeckVersion": "0.3.0"
       }
     },
     {
@@ -6393,6 +6393,97 @@
         "kind": "curated_local_deck",
         "sourceDeckId": "local_runner_redaktionsschluss",
         "sourceDeckVersion": "0.2.0"
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_doppelte_buchfuehrung",
+      "version": "0.1.0",
+      "status": "active",
+      "name": "Doppelte Buchführung",
+      "side": "corp",
+      "identityCardId": 3,
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
+      "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
+      "formatProfileVersion": "1.0.0",
+      "cards": [
+        {
+          "cardId": 66,
+          "quantity": 3
+        },
+        {
+          "cardId": 406,
+          "quantity": 3
+        },
+        {
+          "cardId": 426,
+          "quantity": 2
+        },
+        {
+          "cardId": 411,
+          "quantity": 2
+        },
+        {
+          "cardId": 560,
+          "quantity": 3
+        },
+        {
+          "cardId": 546,
+          "quantity": 3
+        },
+        {
+          "cardId": 540,
+          "quantity": 2
+        },
+        {
+          "cardId": 524,
+          "quantity": 2
+        },
+        {
+          "cardId": 503,
+          "quantity": 3
+        },
+        {
+          "cardId": 517,
+          "quantity": 3
+        },
+        {
+          "cardId": 507,
+          "quantity": 3
+        },
+        {
+          "cardId": 493,
+          "quantity": 3
+        },
+        {
+          "cardId": 482,
+          "quantity": 3
+        },
+        {
+          "cardId": 491,
+          "quantity": 3
+        },
+        {
+          "cardId": 473,
+          "quantity": 2
+        },
+        {
+          "cardId": 96,
+          "quantity": 2
+        },
+        {
+          "cardId": 87,
+          "quantity": 2
+        },
+        {
+          "cardId": 90,
+          "quantity": 1
+        }
+      ],
+      "source": {
+        "kind": "curated_local_deck",
+        "sourceDeckId": "local_corp_doppelte_buchfuehrung",
+        "sourceDeckVersion": "0.1.0"
       }
     }
   ]

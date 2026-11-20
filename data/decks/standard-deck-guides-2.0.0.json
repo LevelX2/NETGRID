@@ -2,7 +2,7 @@
   "schemaVersion": "netgrid-standard-deck-guides-v2",
   "guideSetId": "netgrid-standard-deck-guides-2.0.0",
   "catalogId": "netgrid-standard-decks-1.0.0",
-  "analyzedAt": "2026-11-19",
+  "analyzedAt": "2026-11-20",
   "guides": [
     {
       "standardDeckId": "standard_corp_express_shutdown",
@@ -5853,11 +5853,11 @@
     },
     {
       "standardDeckId": "standard_corp_amt_fuer_umleitungen",
-      "sourceDeckVersion": "0.2.0",
-      "sourceDeckHash": "standard-deck:35ea95ad",
-      "sourceAnalysisHash": "deck-analysis:f5b4604f",
-      "sourceAnalysisInputHash": "deck-analysis-input:d2f62cb0",
-      "reviewedAt": "2026-11-19",
+      "sourceDeckVersion": "0.3.0",
+      "sourceDeckHash": "standard-deck:595d8db7",
+      "sourceAnalysisHash": "deck-analysis:0ab58b44",
+      "sourceAnalysisInputHash": "deck-analysis-input:ff04fb83",
+      "reviewedAt": "2026-11-20",
       "analysis": {
         "primaryStrategyIds": [
           "corp.remote_scoring",
@@ -5865,22 +5865,21 @@
           "corp.central_stabilize"
         ],
         "secondaryStrategyIds": [
-          "corp.overadvance_value",
           "corp.ambush_bluff",
+          "corp.overadvance_value",
           "corp.asset_economy",
-          "corp.rush_score",
-          "corp.fast_advance"
+          "corp.rush_score"
         ],
         "reviewStatus": "observe"
       },
       "contentByLocale": {
         "en": {
-          "summary": "Send the Runner to reception. Siren diverts a dangerous run to its own remote, where Namatoki Plaza makes room for a second asset. Score agendas in a separate fort while the Runner deals with the welcome desk.",
-          "deckIdea": "Siren works behind a single cheap piece of ICE. Add Namatoki Plaza to seat Virus Test Site beside it. Once the Runner commits, rez the trap for free before access. With two advancement counters it deals four net damage. If the Runner stays away, Falsified-Transactions Expert can move those counters onto an agenda in the other fort.",
+          "summary": "HQ has a reception desk. Siren and Trapdoor divert runs to a remote. If the Runner makes it through, accessing Simon Francisco can take one stored HQ card out of reach.",
+          "deckIdea": "Set up a diversion fort and keep the scoring fort free. At a layered HQ, Rasmin Bridger asks for a credit after each piece of ice the Runner passes. Accessing Simon removes one remaining stored-card access. Red Herrings raises the price of an agenda the Runner still finds.",
           "gamePlan": {
-            "opening": "Look for affordable ICE and income. Cover the more exposed central, then give Siren a remote with a stopping subroutine. Night Shift or a rez of Snowbank can leave you the credit for the first redirect.",
-            "midgame": "Install Plaza before adding the trap beside Siren. Use Trapdoor on HQ or R&D as a second route to reception. A scored Data Fort Reclamation gives you ten credits and can set up the separate scoring fort from HQ.",
-            "endgame": "Keep a redirect available when you install the winning agenda. With three counters banked on the trap, you can install Project Zurich and play Falsified-Transactions Expert to bring it straight to its scoring threshold."
+            "opening": "Cover the exposed central with affordable ice. Night Shift and the rez income from Snowbank pay for development. Install Simon in HQ when it holds agendas.",
+            "midgame": "Give Siren a remote and retain a credit after its mandatory rez. Install Trapdoor on HQ or R&D and give the destination fort a piece of rezzed ice if possible.",
+            "endgame": "Secure the final scoring window. Scoring Corporate Downsizing can shuffle other agendas from HQ into R&D. Use Virus Test Site in its own remote as bait."
           },
           "keyCards": [
             {
@@ -5889,89 +5888,89 @@
               "role": "Pay one credit at the start of a run to divert it to Siren’s fort."
             },
             {
-              "cardId": 573,
-              "title": "Namatoki Plaza",
-              "role": "Provides the second asset slot that lets Siren and Virus Test Site share a remote."
-            },
-            {
-              "cardId": 560,
-              "title": "Virus Test Site",
-              "role": "While rezzed, deals two net damage per advancement counter, with a minimum of one. An unrezzed copy deals one on access regardless of its counters."
-            },
-            {
               "cardId": 18,
               "title": "Trapdoor",
-              "role": "An unbroken subroutine on HQ or R&D sends the Runner to a remote of your choice."
+              "role": "An unbroken subroutine diverts an HQ or R&D run to a remote."
             },
             {
-              "cardId": 503,
-              "title": "Falsified-Transactions Expert",
-              "role": "For one credit, move up to three advancement counters from the bait to a freshly installed agenda."
+              "cardId": 131,
+              "title": "Simon Francisco",
+              "role": "Accessing Simon removes one stored-card access from the remaining queue in that fort."
+            },
+            {
+              "cardId": 128,
+              "title": "Rasmin Bridger",
+              "role": "After passing each piece of ice on this fort, the Runner must pay a credit or end the run."
             },
             {
               "cardId": 578,
               "title": "Red Herrings",
-              "role": "Stealing an agenda from this server costs the Runner five additional credits, even on the run in which they trash Red Herrings."
+              "role": "Adds five credits to the price of stealing an agenda from this fort."
+            },
+            {
+              "cardId": 406,
+              "title": "Corporate Downsizing",
+              "role": "Scoring it lets you shuffle agendas from HQ into R&D and gain credits."
             }
           ],
           "pilotingTips": [
-            "Siren and Plaza each cost three credits to install and rez. Build them on different turns if you also need credits for ICE or a redirect.",
-            "Place Trapdoor over a central after a suitable remote exists. With no rezzed ICE in the destination fort, the Runner arrives past its last piece of ICE.",
-            "Against early multiaccess, install Red Herrings in the threatened central. Corporate Downsizing scores with three advancement counters and can shuffle other agendas from HQ into R&D."
+            "Prioritize HQ for Simon when the Runner has HQ multiaccess.",
+            "Budget four credits to rez Rasmin. Two pieces of ice on HQ can then demand two payments per run.",
+            "Virus Test Site also deals damage when accessed from HQ or R&D. In a remote, each advancement counter means two net damage on access."
           ],
           "weaknesses": [
-            "Siren has a printed trash cost of zero. A Runner who reaches reception early can dismantle it before the trap is ready.",
-            "Repeated runs cost you a credit per diversion. Losing Plaza also forces you to give up one of the two assets if both still occupy the fort."
+            "An early visit can trash an exposed Siren for free.",
+            "Simon needs a stored card left to access. Rasmin needs the Runner to pass ice on his fort."
           ]
         },
         "de": {
-          "summary": "Wer ins HQ will, landet erst einmal am Empfang. Siren leitet einen gefährlichen Run auf ihren eigenen Remote um. Dort schafft Namatoki Plaza Platz für eine zweite Karte. Die Agenden wertest du in einem anderen Server.",
-          "deckIdea": "Hinter einem günstigen ICE kann Siren bereits einen Run abfangen. Mit Namatoki Plaza passt Virus Test Site daneben. Setzt der Runner den Run fort, rezze die Falle vor dem Zugriff kostenlos. Mit zwei Entwicklungsmarkern verursacht sie vier Netzschaden. Meidet er den Empfang, kann Falsified-Transactions Expert die Marker auf eine Agenda im Nachbarserver verschieben.",
+          "summary": "Im Amt führt der Weg ins HQ am Empfang vorbei. Siren und Trapdoor leiten Runs in einen Remote um. Kommt der Runner dennoch durch, kann Simon Francisco den Zugriff auf eine Karte in HQ streichen.",
+          "deckIdea": "Baue einen Umleitungsserver und halte den Wertungsserver frei. An einem mehrfach geschützten HQ fordert Rasmin Bridger nach jedem passierten ICE einen Credit. Simon nimmt beim Zugriff eine noch ausstehende Karte aus der Zugriffsfolge. Red Herrings verteuert den Diebstahl einer Agenda, die der Runner trotzdem findet.",
           "gamePlan": {
-            "opening": "Halte Ausschau nach bezahlbarem ICE und Einkommen. Sichere die gefährdetere Zentrale und gib Siren einen eigenen Remote mit einem Run-Stopper. Night Shift oder ein Rez von Snowbank lässt dir den Credit für die erste Umleitung.",
-            "midgame": "Installiere Plaza, bevor du die Falle neben Siren legst. Trapdoor an HQ oder R&D eröffnet einen zweiten Weg zum Empfang. Eine gewertete Data Fort Reclamation bringt zehn Credits und kann aus HQ den separaten Wertungsserver aufbauen.",
-            "endgame": "Halte eine Umleitung bereit, wenn du die entscheidende Agenda auslegst. Liegen drei Marker auf der Falle, kannst du Project Zurich installieren und mit Falsified-Transactions Expert sofort bis zur Wertung entwickeln."
+            "opening": "Schütze früh die gefährdete Zentrale mit günstigem ICE. Night Shift und der Rez von Snowbank finanzieren den weiteren Ausbau. Installiere Simon an HQ, wenn dort Agenden liegen.",
+            "midgame": "Gib Siren einen eigenen Remote. Halte nach dem Pflicht-Rez einen Credit zum Umleiten bereit. Installiere Trapdoor über HQ oder R&D und gib dem Zielserver möglichst ein gerezztes ICE.",
+            "endgame": "Schaffe der letzten Agenda ein Wertungsfenster. Corporate Downsizing kann bei der Wertung weitere Agenden aus HQ nach R&D zurückmischen. Schütze Virus Test Site in einem eigenen Remote als Köder."
           },
           "keyCards": [
             {
               "cardId": 132,
               "title": "Siren",
-              "role": "Für einen Credit zu Beginn eines Runs lenkst du ihn auf Sirens eigenen Server."
-            },
-            {
-              "cardId": 573,
-              "title": "Namatoki Plaza",
-              "role": "Erlaubt ein zweites Asset im Remote. So passen Siren und Virus Test Site nebeneinander."
-            },
-            {
-              "cardId": 560,
-              "title": "Virus Test Site",
-              "role": "Gerezzt verursacht die Falle zwei Netzschaden pro Entwicklungsmarker, mindestens einen. Solange sie verdeckt bleibt, verursacht sie beim Zugriff unabhängig von den Markern einen Netzschaden."
+              "role": "Lenkt zu Beginn eines Runs für einen Credit in den eigenen Remote um."
             },
             {
               "cardId": 18,
               "title": "Trapdoor",
-              "role": "Kommt die Subroutine an HQ oder R&D durch, schickst du den Runner in einen Remote deiner Wahl."
+              "role": "Leitet mit ihrer ungebrochenen Subroutine einen Run auf HQ oder R&D zu einem Remote um."
             },
             {
-              "cardId": 503,
-              "title": "Falsified-Transactions Expert",
-              "role": "Verschiebt für einen Credit bis zu drei Entwicklungsmarker vom Köder auf eine frisch installierte Agenda."
+              "cardId": 131,
+              "title": "Simon Francisco",
+              "role": "Wenn der Runner Simon beim Zugriff trifft, greift er auf eine gespeicherte Karte weniger in diesem Server zu."
+            },
+            {
+              "cardId": 128,
+              "title": "Rasmin Bridger",
+              "role": "Nach jedem passierten ICE dieses Servers muss der Runner einen Credit zahlen oder den Run beenden."
             },
             {
               "cardId": 578,
               "title": "Red Herrings",
-              "role": "Der Runner muss fünf zusätzliche Credits bezahlen, um eine Agenda aus diesem Server zu stehlen. Der Aufpreis gilt auch in dem Run, in dem er Red Herrings zerstört."
+              "role": "Erhöht den Diebstahlpreis an diesem Server um fünf Credits."
+            },
+            {
+              "cardId": 406,
+              "title": "Corporate Downsizing",
+              "role": "Eine Wertung erlaubt, Agenden aus HQ zurückzumischen und dabei Credits zu erhalten."
             }
           ],
           "pilotingTips": [
-            "Siren und Plaza kosten beim Installieren je drei Credits für den sofortigen Rez. Baue sie über zwei Züge auf, wenn du zusätzlich ICE oder die Umleitung bezahlen musst.",
-            "Lege Trapdoor vor eine Zentrale, sobald ein passender Remote steht. Liegt dort kein gerezztes ICE, kommt der Runner direkt hinter dem letzten ICE an.",
-            "Zeigt der Runner früh Mehrfachzugriffe, lege Red Herrings ins bedrohte HQ oder R&D. Mit Corporate Downsizing kannst du nach drei Entwicklungsmarkern punkten und weitere Agenden aus HQ zurück in R&D mischen."
+            "Lege Simon bevorzugt ins HQ, wenn der Runner mehrfach auf deine Hand zugreift.",
+            "Rechne bei Rasmin mit vier Credits für den Rez. Zwei ICE vor HQ können danach schon zwei Zahlungen pro Run fordern.",
+            "Virus Test Site wirkt auch beim Zugriff aus HQ oder R&D. Mit Entwicklungsmarkern im Remote verursacht sie zwei Netzschaden pro Marker."
           ],
           "weaknesses": [
-            "Siren kostet beim Zugriff zunächst null Credits zum Zerstören. Ein früher Besuch kann den Empfang schließen, bevor die Falle liegt.",
-            "Jede weitere Umleitung kostet wieder einen Credit. Fällt Plaza und liegen beide Assets noch im Server, musst du eines davon aufgeben."
+            "Ein schneller Zugriff kann die ungeschützte Siren kostenlos zerstören.",
+            "Ist beim Zugriff auf Simon keine gespeicherte Karte mehr übrig, schützt er in diesem Run keine. Rasmin braucht ICE, das der Runner passiert."
           ]
         }
       }
@@ -6096,6 +6095,129 @@
           "weaknesses": [
             "Ist das ICE bereits gerezzt, bleiben die Honorare aus. Dann finanzieren Livewire’s Contacts, Score! und Chiba Bank Account deine Runs.",
             "Weiter innen kann unbekanntes ICE den ersten Probelauf stoppen. False Echo braucht einen erfolgreichen Run. Weefle Initiation verhindert bis zu sieben Schaden während des eigenen Runs."
+          ]
+        }
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_doppelte_buchfuehrung",
+      "sourceDeckVersion": "0.1.0",
+      "sourceDeckHash": "standard-deck:c9a6144b",
+      "sourceAnalysisHash": "deck-analysis:0d105b34",
+      "sourceAnalysisInputHash": "deck-analysis-input:6bad6b9f",
+      "reviewedAt": "2026-11-20",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.fast_advance",
+          "corp.overadvance_value",
+          "corp.remote_scoring"
+        ],
+        "secondaryStrategyIds": [
+          "corp.draw_engine",
+          "corp.ambush_bluff",
+          "corp.rush_score"
+        ],
+        "reviewStatus": "observe"
+      },
+      "contentByLocale": {
+        "en": {
+          "summary": "Three copies of Falsified-Transactions Expert move advancement counters to the card that can use them this turn. The Corp can score an agenda, gain actions, or cash out for credits.",
+          "deckIdea": "Install Virus Test Site or Pacifica Regional AI in a remote early and build a reserve. Team Restructuring puts one counter on each of up to two different installed targets. When an agenda arrives, the Expert moves up to three existing counters from one card onto another for one credit.",
+          "gamePlan": {
+            "opening": "Protect a central and keep a second remote open for the next agenda. Night Shift draws a card and gains two credits. An early Virus Test Site can hold counters while the Runner avoids it.",
+            "midgame": "With three counters on one card, install Project Zurich or Corporate Downsizing, play the Expert and score in the same turn. Chicago Branch spends one action and three credits to add two new counters to an installed advanceable card.",
+            "endgame": "If two extra counters on Project Babylon would win, transfer them before scoring. When you need actions, transfer counters to a rezzed Pacifica Regional AI and spend them individually on your turn."
+          },
+          "keyCards": [
+            {
+              "cardId": 503,
+              "title": "Falsified-Transactions Expert",
+              "role": "For one credit, move up to three existing advancement counters from a single card to a different installed advanceable card."
+            },
+            {
+              "cardId": 560,
+              "title": "Virus Test Site",
+              "role": "An advanceable ambush. Each counter increases net damage on access and can be moved to an agenda before the next run."
+            },
+            {
+              "cardId": 546,
+              "title": "Pacifica Regional AI",
+              "role": "Spend an advancement counter during your turn to gain an action."
+            },
+            {
+              "cardId": 540,
+              "title": "Information Laundering",
+              "role": "Spend an action and trash it to gain four credits for each advancement counter still on it."
+            },
+            {
+              "cardId": 517,
+              "title": "Team Restructuring",
+              "role": "Place one counter on each of up to two different advanceable cards, developing both a decoy and an agenda in one action."
+            },
+            {
+              "cardId": 426,
+              "title": "Project Babylon",
+              "role": "Each pair of counters above its difficulty of three scores an additional agenda point."
+            }
+          ],
+          "pilotingTips": [
+            "Count the counters on a single source. Two counters on one card and one on another cannot fund a three-counter transfer.",
+            "Budget one credit and one action for the Expert. Three counters on Information Laundering are worth twelve credits when cashed out.",
+            "Use Chicago Branch directly on the agenda when a scoring window is already secure."
+          ],
+          "weaknesses": [
+            "Two installed targets need space and protection. Losing the donor before the transfer can cost several advancement actions.",
+            "After moving away every counter, Virus Test Site deals one net damage on access. An Expert in HQ cannot create fresh counters."
+          ]
+        },
+        "de": {
+          "summary": "Drei Exemplare von Falsified-Transactions Expert machen Entwicklungsmarker dort verfügbar, wo sie in diesem Zug am meisten bringen. Die Corp kann eine Agenda werten, weitere Aktionen erhalten oder Credits auszahlen.",
+          "deckIdea": "Lege früh Virus Test Site oder Pacifica Regional AI in einen eigenen Remote und sammle dort Marker. Team Restructuring verteilt je einen Marker auf bis zu zwei verschiedene installierte Ziele. Wenn die Agenda kommt, bewegt der Expert für einen Credit bis zu drei vorhandene Marker von einer Karte auf die andere.",
+          "gamePlan": {
+            "opening": "Sichere eine Zentrale und halte einen zweiten Remote für die nächste Agenda bereit. Night Shift liefert eine Karte und zwei Credits. Ein frühes Virus Test Site hält Marker, solange der Runner die Falle meidet.",
+            "midgame": "Mit drei Markern auf einer Karte kannst du Project Zurich oder Corporate Downsizing installieren, den Expert spielen und noch im selben Zug werten. Chicago Branch legt für eine Aktion und drei Credits zwei neue Marker auf eine installierte entwickelbare Karte.",
+            "endgame": "Reichen zwei zusätzliche Marker auf Project Babylon für den Sieg, schiebe sie vor der Wertung hinüber. Brauchst du mehr Aktionen, verschiebe Marker auf eine gerezzte Pacifica Regional AI und löse sie im eigenen Zug einzeln ein."
+          },
+          "keyCards": [
+            {
+              "cardId": 503,
+              "title": "Falsified-Transactions Expert",
+              "role": "Verschiebt für einen Credit bis zu drei vorhandene Entwicklungsmarker von genau einer Karte auf ein anderes installiertes, entwickelbares Ziel."
+            },
+            {
+              "cardId": 560,
+              "title": "Virus Test Site",
+              "role": "Ein entwickelter Köder. Jeder Marker erhöht den Netzschaden beim Zugriff. Vor dem nächsten Run können die Marker auf eine Agenda wechseln."
+            },
+            {
+              "cardId": 546,
+              "title": "Pacifica Regional AI",
+              "role": "Jeder ausgegebene Entwicklungsmarker liefert der Corp im eigenen Zug eine Aktion."
+            },
+            {
+              "cardId": 540,
+              "title": "Information Laundering",
+              "role": "Für eine Aktion und das Trashen erhältst du vier Credits pro verbliebenem Entwicklungsmarker."
+            },
+            {
+              "cardId": 517,
+              "title": "Team Restructuring",
+              "role": "Legt je einen Marker auf bis zu zwei verschiedene entwickelbare Karten. So wachsen Köder und Agenda mit derselben Aktion."
+            },
+            {
+              "cardId": 426,
+              "title": "Project Babylon",
+              "role": "Je zwei Marker oberhalb der Schwierigkeit von drei geben bei der Wertung einen zusätzlichen Agendapunkt."
+            }
+          ],
+          "pilotingTips": [
+            "Zähle die Marker einer einzelnen Quelle. Zwei Marker auf einer Karte und einer auf einer anderen reichen für eine Umbuchung über drei Marker nicht aus.",
+            "Plane einen Credit und eine Aktion für den Expert ein. Drei Marker auf Information Laundering sind bei der Auszahlung zwölf Credits wert.",
+            "Du kannst eine Agenda auch direkt mit Chicago Branch entwickeln, wenn bereits ein sicheres Wertungsfenster offensteht."
+          ],
+          "weaknesses": [
+            "Zwei gleichzeitig installierte Ziele brauchen Platz und Schutz. Ein Zugriff auf den Markenspeicher vor der Umbuchung kann mehrere Entwicklungsaktionen kosten.",
+            "Nach einer großen Umbuchung richtet Virus Test Site ohne Marker noch einen Netzschaden an. Ein Expert auf der Hand erzeugt selbst keine neuen Marker."
           ]
         }
       }
