@@ -2,7 +2,7 @@
   "schemaVersion": "netgrid-standard-deck-guides-v2",
   "guideSetId": "netgrid-standard-deck-guides-2.0.0",
   "catalogId": "netgrid-standard-decks-1.0.0",
-  "analyzedAt": "2026-11-05",
+  "analyzedAt": "2026-11-20",
   "guides": [
     {
       "standardDeckId": "standard_corp_express_shutdown",
@@ -5847,6 +5847,377 @@
           "weaknesses": [
             "Teures ICE und Corporate War brauchen dieselbe Creditreserve.",
             "Agenda-Rabatte und ICE-Verstärkung hängen von der richtigen Reihenfolge ab. Der gesamte Plan muss sich noch im Spiel bewähren."
+          ]
+        }
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_amt_fuer_umleitungen",
+      "sourceDeckVersion": "0.3.0",
+      "sourceDeckHash": "standard-deck:595d8db7",
+      "sourceAnalysisHash": "deck-analysis:0ab58b44",
+      "sourceAnalysisInputHash": "deck-analysis-input:ff04fb83",
+      "reviewedAt": "2026-11-20",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.remote_scoring",
+          "corp.ice_tax_glacier",
+          "corp.central_stabilize"
+        ],
+        "secondaryStrategyIds": [
+          "corp.ambush_bluff",
+          "corp.overadvance_value",
+          "corp.asset_economy",
+          "corp.rush_score"
+        ],
+        "reviewStatus": "observe"
+      },
+      "contentByLocale": {
+        "en": {
+          "summary": "HQ has a reception desk. Siren and Trapdoor divert runs to a remote. If the Runner makes it through, accessing Simon Francisco can take one stored HQ card out of reach.",
+          "deckIdea": "Set up a diversion fort and keep the scoring fort free. At a layered HQ, Rasmin Bridger asks for a credit after each piece of ice the Runner passes. Accessing Simon removes one remaining stored-card access. Red Herrings raises the price of an agenda the Runner still finds.",
+          "gamePlan": {
+            "opening": "Cover the exposed central with affordable ice. Night Shift and the rez income from Snowbank pay for development. Install Simon in HQ when it holds agendas.",
+            "midgame": "Give Siren a remote and retain a credit after its mandatory rez. Install Trapdoor on HQ or R&D and give the destination fort a piece of rezzed ice if possible.",
+            "endgame": "Secure the final scoring window. Scoring Corporate Downsizing can shuffle other agendas from HQ into R&D. Use Virus Test Site in its own remote as bait."
+          },
+          "keyCards": [
+            {
+              "cardId": 132,
+              "title": "Siren",
+              "role": "Pay one credit at the start of a run to divert it to Siren’s fort."
+            },
+            {
+              "cardId": 18,
+              "title": "Trapdoor",
+              "role": "An unbroken subroutine diverts an HQ or R&D run to a remote."
+            },
+            {
+              "cardId": 131,
+              "title": "Simon Francisco",
+              "role": "Accessing Simon removes one stored-card access from the remaining queue in that fort."
+            },
+            {
+              "cardId": 128,
+              "title": "Rasmin Bridger",
+              "role": "After passing each piece of ice on this fort, the Runner must pay a credit or end the run."
+            },
+            {
+              "cardId": 578,
+              "title": "Red Herrings",
+              "role": "Adds five credits to the price of stealing an agenda from this fort."
+            },
+            {
+              "cardId": 406,
+              "title": "Corporate Downsizing",
+              "role": "Scoring it lets you shuffle agendas from HQ into R&D and gain credits."
+            }
+          ],
+          "pilotingTips": [
+            "Prioritize HQ for Simon when the Runner has HQ multiaccess.",
+            "Budget four credits to rez Rasmin. Two pieces of ice on HQ can then demand two payments per run.",
+            "Virus Test Site also deals damage when accessed from HQ or R&D. In a remote, each advancement counter means two net damage on access."
+          ],
+          "weaknesses": [
+            "An early visit can trash an exposed Siren for free.",
+            "Simon needs a stored card left to access. Rasmin needs the Runner to pass ice on his fort."
+          ]
+        },
+        "de": {
+          "summary": "Im Amt führt der Weg ins HQ am Empfang vorbei. Siren und Trapdoor leiten Runs in einen Remote um. Kommt der Runner dennoch durch, kann Simon Francisco den Zugriff auf eine Karte in HQ streichen.",
+          "deckIdea": "Baue einen Umleitungsserver und halte den Wertungsserver frei. An einem mehrfach geschützten HQ fordert Rasmin Bridger nach jedem passierten ICE einen Credit. Simon nimmt beim Zugriff eine noch ausstehende Karte aus der Zugriffsfolge. Red Herrings verteuert den Diebstahl einer Agenda, die der Runner trotzdem findet.",
+          "gamePlan": {
+            "opening": "Schütze früh die gefährdete Zentrale mit günstigem ICE. Night Shift und der Rez von Snowbank finanzieren den weiteren Ausbau. Installiere Simon an HQ, wenn dort Agenden liegen.",
+            "midgame": "Gib Siren einen eigenen Remote. Halte nach dem Pflicht-Rez einen Credit zum Umleiten bereit. Installiere Trapdoor über HQ oder R&D und gib dem Zielserver möglichst ein gerezztes ICE.",
+            "endgame": "Schaffe der letzten Agenda ein Wertungsfenster. Corporate Downsizing kann bei der Wertung weitere Agenden aus HQ nach R&D zurückmischen. Schütze Virus Test Site in einem eigenen Remote als Köder."
+          },
+          "keyCards": [
+            {
+              "cardId": 132,
+              "title": "Siren",
+              "role": "Lenkt zu Beginn eines Runs für einen Credit in den eigenen Remote um."
+            },
+            {
+              "cardId": 18,
+              "title": "Trapdoor",
+              "role": "Leitet mit ihrer ungebrochenen Subroutine einen Run auf HQ oder R&D zu einem Remote um."
+            },
+            {
+              "cardId": 131,
+              "title": "Simon Francisco",
+              "role": "Wenn der Runner Simon beim Zugriff trifft, greift er auf eine gespeicherte Karte weniger in diesem Server zu."
+            },
+            {
+              "cardId": 128,
+              "title": "Rasmin Bridger",
+              "role": "Nach jedem passierten ICE dieses Servers muss der Runner einen Credit zahlen oder den Run beenden."
+            },
+            {
+              "cardId": 578,
+              "title": "Red Herrings",
+              "role": "Erhöht den Diebstahlpreis an diesem Server um fünf Credits."
+            },
+            {
+              "cardId": 406,
+              "title": "Corporate Downsizing",
+              "role": "Eine Wertung erlaubt, Agenden aus HQ zurückzumischen und dabei Credits zu erhalten."
+            }
+          ],
+          "pilotingTips": [
+            "Lege Simon bevorzugt ins HQ, wenn der Runner mehrfach auf deine Hand zugreift.",
+            "Rechne bei Rasmin mit vier Credits für den Rez. Zwei ICE vor HQ können danach schon zwei Zahlungen pro Run fordern.",
+            "Virus Test Site wirkt auch beim Zugriff aus HQ oder R&D. Mit Entwicklungsmarkern im Remote verursacht sie zwei Netzschaden pro Marker."
+          ],
+          "weaknesses": [
+            "Ein schneller Zugriff kann die ungeschützte Siren kostenlos zerstören.",
+            "Ist beim Zugriff auf Simon keine gespeicherte Karte mehr übrig, schützt er in diesem Run keine. Rasmin braucht ICE, das der Runner passiert."
+          ]
+        }
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_redaktionsschluss",
+      "sourceDeckVersion": "0.2.0",
+      "sourceDeckHash": "standard-deck:7c1a6f6c",
+      "sourceAnalysisHash": "deck-analysis:1bd969f9",
+      "sourceAnalysisInputHash": "deck-analysis-input:7bfbe9c2",
+      "reviewedAt": "2026-11-19",
+      "analysis": {
+        "primaryStrategyIds": [
+          "runner.run_event_tempo",
+          "runner.rnd_pressure",
+          "runner.interface_closeout"
+        ],
+        "secondaryStrategyIds": [
+          "runner.hq_pressure",
+          "runner.survival_defense",
+          "runner.search.breaker",
+          "runner.rig_first"
+        ],
+        "reviewStatus": "observe"
+      },
+      "contentByLocale": {
+        "en": {
+          "summary": "Make the Corp pay for the story. Field Reporter for Ice and Data earns money when ICE gets rezzed. Probe one server with Reconnaissance, then take the scoop from HQ or R&D while the Corp is short of credits.",
+          "deckIdea": "During a Reconnaissance run, each Corp rez earns one credit immediately. An installed Field Reporter pays again at the end of your turn for each piece of ICE rezzed that turn. If the Corp lets you through unrezzed ICE, False Echo lets you spend two credits after success to force affordable rezzes on that same server, starting from the outside.",
+          "gamePlan": {
+            "opening": "Look for Field Reporter, an economy card and a cheap breaker or Temple Microcode Outlet. Put the Reporter down before the first probe. Keep enough cash for a sentry, and take an early access when the Corp leaves a central open.",
+            "midgame": "Ice and Data’s Guide to the Net exposes the outermost ICE on every fort. Pick a server that would be expensive to rez. Once the Corp commits its cash, play Executive Wiretaps on HQ or Custodial Position on R&D for three accesses on success.",
+            "endgame": "Follow the agendas. R&D Interface adds a card to each R&D access. Bodyweight™ Data Crèche can turn a successful probe into another run once per turn. Save Weefle Initiation for a run where access damage might otherwise end the game."
+          },
+          "keyCards": [
+            {
+              "cardId": 374,
+              "title": "Field Reporter for Ice and Data",
+              "role": "Costs zero to install and pays one credit at turn end per piece of ICE the Corp rezzed during your turn."
+            },
+            {
+              "cardId": 178,
+              "title": "Reconnaissance",
+              "role": "Starts a run and immediately pays one credit for each Corp card rezzed during it."
+            },
+            {
+              "cardId": 238,
+              "title": "False Echo",
+              "role": "After a successful run, force the Corp to rez as much ICE on that fort as it can afford."
+            },
+            {
+              "cardId": 297,
+              "title": "Executive Wiretaps",
+              "role": "Access two extra cards on a successful HQ run when the Corp has spent its money elsewhere."
+            },
+            {
+              "cardId": 293,
+              "title": "Custodial Position",
+              "role": "Takes the same three-card shot at R&D, with a further card from an installed R&D Interface."
+            },
+            {
+              "cardId": 170,
+              "title": "Identity Donor",
+              "role": "Keep it in your grip. When you would suffer meat damage during the Corp’s turn, prevent that damage and give the Corp two bad publicity."
+            }
+          ],
+          "pilotingTips": [
+            "Budget for the current encounter using credits already in your pool. The Reporter’s end-of-turn payout funds your next turn.",
+            "False Echo gives the Corp its normal rez effects. If forcing a Snowbank would hand it three credits, weigh that against taking the access and leaving it facedown.",
+            "Hold Identity Donor against tag-and-damage decks. If the Corp can deal damage twice in a turn, choose which source to prevent."
+          ],
+          "weaknesses": [
+            "A Corp with fully rezzed ICE can dry up both reporting payouts. Livewire’s Contacts, Score! and Chiba Bank Account fund runs in that game.",
+            "Inner ICE can still stop the first probe. False Echo needs a successful run. Weefle Initiation prevents up to seven damage during its own run."
+          ]
+        },
+        "de": {
+          "summary": "Die Corp bezahlt deine nächste Schlagzeile. Field Reporter for Ice and Data verdient an frisch gerezztem ICE. Mit Reconnaissance klopfst du an einem Server an. Gibt die Corp dort ihre Credits aus, holst du die Story aus HQ oder R&D.",
+          "deckIdea": "Während eines Runs mit Reconnaissance bringt dir jeder Corp-Rez sofort einen Credit. Für jedes in deinem Zug gerezzte ICE zahlt ein installierter Field Reporter am Zugende einen weiteren Credit. Lässt die Corp dich an verdecktem ICE vorbei, kannst du nach dem erfolgreichen Run zwei Credits für False Echo zahlen. Die Corp muss auf diesem Server von außen nach innen so viel ICE rezzen, wie sie sich leisten kann.",
+          "gamePlan": {
+            "opening": "Eine gute Starthand enthält Field Reporter, Geld und einen günstigen Breaker oder Temple Microcode Outlet. Installiere den Reporter vor dem ersten Probelauf. Halte Geld für einen Sentry bereit und greife früh zu, wenn eine Zentrale offenliegt.",
+            "midgame": "Ice and Data’s Guide to the Net deckt das äußerste ICE jedes Servers auf. Klopfe dort an, wo ein Rez für die Corp teuer wäre. Bindet sie dort ihr Geld, siehst du mit Executive Wiretaps auf HQ oder Custodial Position auf R&D bei Erfolg jeweils drei Karten.",
+            "endgame": "Folge den Agenden. R&D Interface zeigt dir bei jedem Zugriff auf R&D eine Karte mehr. Bodyweight™ Data Crèche erlaubt einmal pro Zug gleich nach einem erfolgreichen Run einen weiteren. Hebe Weefle Initiation für einen Zugriff auf, bei dem Schaden die Partie entscheiden könnte."
+          },
+          "keyCards": [
+            {
+              "cardId": 374,
+              "title": "Field Reporter for Ice and Data",
+              "role": "Kostet beim Installieren null Credits. Am Zugende erhältst du einen Credit für jedes ICE, das die Corp in deinem Zug gerezzt hat."
+            },
+            {
+              "cardId": 178,
+              "title": "Reconnaissance",
+              "role": "Startet einen Run. Für jede Corp-Karte, die währenddessen gerezzt wird, bekommst du sofort einen Credit."
+            },
+            {
+              "cardId": 238,
+              "title": "False Echo",
+              "role": "Erzwingt nach einem erfolgreichen Run bezahlbare ICE-Rezzes auf genau diesem Server."
+            },
+            {
+              "cardId": 297,
+              "title": "Executive Wiretaps",
+              "role": "Greift bei Erfolg auf zwei zusätzliche Karten im HQ zu. Ein guter Zeitpunkt ist direkt nach einem teuren Rez am anderen Server."
+            },
+            {
+              "cardId": 293,
+              "title": "Custodial Position",
+              "role": "Öffnet denselben Dreifachzugriff auf R&D. Ein installiertes R&D Interface bringt eine vierte Karte dazu."
+            },
+            {
+              "cardId": 170,
+              "title": "Identity Donor",
+              "role": "Behalte die Karte im Griff. Bei Fleischschaden im Corp-Zug kannst du den gesamten Schaden dieser Quelle verhindern. Die Corp erhält zwei schlechte Publicity."
+            }
+          ],
+          "pilotingTips": [
+            "Bezahle die aktuelle Begegnung mit dem Geld, das jetzt im Pool liegt. Das Honorar des Reporters am Zugende finanziert den nächsten Zug.",
+            "Bei False Echo erhält die Corp alle normalen Rez-Effekte. Würde ein erzwungener Snowbank-Rez ihr drei Credits schenken, kannst du den Zugriff nehmen und das ICE verdeckt lassen.",
+            "Gegen eine Corp mit Tags und Schadensoperationen lohnt sich Identity Donor auf der Hand. Treffen im selben Zug zwei Schadensquellen, wähle sorgfältig, welche du verhinderst."
+          ],
+          "weaknesses": [
+            "Ist das ICE bereits gerezzt, bleiben die Honorare aus. Dann finanzieren Livewire’s Contacts, Score! und Chiba Bank Account deine Runs.",
+            "Weiter innen kann unbekanntes ICE den ersten Probelauf stoppen. False Echo braucht einen erfolgreichen Run. Weefle Initiation verhindert bis zu sieben Schaden während des eigenen Runs."
+          ]
+        }
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_doppelte_buchfuehrung",
+      "sourceDeckVersion": "0.1.0",
+      "sourceDeckHash": "standard-deck:c9a6144b",
+      "sourceAnalysisHash": "deck-analysis:0d105b34",
+      "sourceAnalysisInputHash": "deck-analysis-input:6bad6b9f",
+      "reviewedAt": "2026-11-20",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.fast_advance",
+          "corp.overadvance_value",
+          "corp.remote_scoring"
+        ],
+        "secondaryStrategyIds": [
+          "corp.draw_engine",
+          "corp.ambush_bluff",
+          "corp.rush_score"
+        ],
+        "reviewStatus": "observe"
+      },
+      "contentByLocale": {
+        "en": {
+          "summary": "Three copies of Falsified-Transactions Expert move advancement counters to the card that can use them this turn. The Corp can score an agenda, gain actions, or cash out for credits.",
+          "deckIdea": "Install Virus Test Site or Pacifica Regional AI in a remote early and build a reserve. Team Restructuring puts one counter on each of up to two different installed targets. When an agenda arrives, the Expert moves up to three existing counters from one card onto another for one credit.",
+          "gamePlan": {
+            "opening": "Protect a central and keep a second remote open for the next agenda. Night Shift draws a card and gains two credits. An early Virus Test Site can hold counters while the Runner avoids it.",
+            "midgame": "With three counters on one card, install Project Zurich or Corporate Downsizing, play the Expert and score in the same turn. Chicago Branch spends one action and three credits to add two new counters to an installed advanceable card.",
+            "endgame": "If two extra counters on Project Babylon would win, transfer them before scoring. When you need actions, transfer counters to a rezzed Pacifica Regional AI and spend them individually on your turn."
+          },
+          "keyCards": [
+            {
+              "cardId": 503,
+              "title": "Falsified-Transactions Expert",
+              "role": "For one credit, move up to three existing advancement counters from a single card to a different installed advanceable card."
+            },
+            {
+              "cardId": 560,
+              "title": "Virus Test Site",
+              "role": "An advanceable ambush. Each counter increases net damage on access and can be moved to an agenda before the next run."
+            },
+            {
+              "cardId": 546,
+              "title": "Pacifica Regional AI",
+              "role": "Spend an advancement counter during your turn to gain an action."
+            },
+            {
+              "cardId": 540,
+              "title": "Information Laundering",
+              "role": "Spend an action and trash it to gain four credits for each advancement counter still on it."
+            },
+            {
+              "cardId": 517,
+              "title": "Team Restructuring",
+              "role": "Place one counter on each of up to two different advanceable cards, developing both a decoy and an agenda in one action."
+            },
+            {
+              "cardId": 426,
+              "title": "Project Babylon",
+              "role": "Each pair of counters above its difficulty of three scores an additional agenda point."
+            }
+          ],
+          "pilotingTips": [
+            "Count the counters on a single source. Two counters on one card and one on another cannot fund a three-counter transfer.",
+            "Budget one credit and one action for the Expert. Three counters on Information Laundering are worth twelve credits when cashed out.",
+            "Use Chicago Branch directly on the agenda when a scoring window is already secure."
+          ],
+          "weaknesses": [
+            "Two installed targets need space and protection. Losing the donor before the transfer can cost several advancement actions.",
+            "After moving away every counter, Virus Test Site deals one net damage on access. An Expert in HQ cannot create fresh counters."
+          ]
+        },
+        "de": {
+          "summary": "Drei Exemplare von Falsified-Transactions Expert machen Entwicklungsmarker dort verfügbar, wo sie in diesem Zug am meisten bringen. Die Corp kann eine Agenda werten, weitere Aktionen erhalten oder Credits auszahlen.",
+          "deckIdea": "Lege früh Virus Test Site oder Pacifica Regional AI in einen eigenen Remote und sammle dort Marker. Team Restructuring verteilt je einen Marker auf bis zu zwei verschiedene installierte Ziele. Wenn die Agenda kommt, bewegt der Expert für einen Credit bis zu drei vorhandene Marker von einer Karte auf die andere.",
+          "gamePlan": {
+            "opening": "Sichere eine Zentrale und halte einen zweiten Remote für die nächste Agenda bereit. Night Shift liefert eine Karte und zwei Credits. Ein frühes Virus Test Site hält Marker, solange der Runner die Falle meidet.",
+            "midgame": "Mit drei Markern auf einer Karte kannst du Project Zurich oder Corporate Downsizing installieren, den Expert spielen und noch im selben Zug werten. Chicago Branch legt für eine Aktion und drei Credits zwei neue Marker auf eine installierte entwickelbare Karte.",
+            "endgame": "Reichen zwei zusätzliche Marker auf Project Babylon für den Sieg, schiebe sie vor der Wertung hinüber. Brauchst du mehr Aktionen, verschiebe Marker auf eine gerezzte Pacifica Regional AI und löse sie im eigenen Zug einzeln ein."
+          },
+          "keyCards": [
+            {
+              "cardId": 503,
+              "title": "Falsified-Transactions Expert",
+              "role": "Verschiebt für einen Credit bis zu drei vorhandene Entwicklungsmarker von genau einer Karte auf ein anderes installiertes, entwickelbares Ziel."
+            },
+            {
+              "cardId": 560,
+              "title": "Virus Test Site",
+              "role": "Ein entwickelter Köder. Jeder Marker erhöht den Netzschaden beim Zugriff. Vor dem nächsten Run können die Marker auf eine Agenda wechseln."
+            },
+            {
+              "cardId": 546,
+              "title": "Pacifica Regional AI",
+              "role": "Jeder ausgegebene Entwicklungsmarker liefert der Corp im eigenen Zug eine Aktion."
+            },
+            {
+              "cardId": 540,
+              "title": "Information Laundering",
+              "role": "Für eine Aktion und das Trashen erhältst du vier Credits pro verbliebenem Entwicklungsmarker."
+            },
+            {
+              "cardId": 517,
+              "title": "Team Restructuring",
+              "role": "Legt je einen Marker auf bis zu zwei verschiedene entwickelbare Karten. So wachsen Köder und Agenda mit derselben Aktion."
+            },
+            {
+              "cardId": 426,
+              "title": "Project Babylon",
+              "role": "Je zwei Marker oberhalb der Schwierigkeit von drei geben bei der Wertung einen zusätzlichen Agendapunkt."
+            }
+          ],
+          "pilotingTips": [
+            "Zähle die Marker einer einzelnen Quelle. Zwei Marker auf einer Karte und einer auf einer anderen reichen für eine Umbuchung über drei Marker nicht aus.",
+            "Plane einen Credit und eine Aktion für den Expert ein. Drei Marker auf Information Laundering sind bei der Auszahlung zwölf Credits wert.",
+            "Du kannst eine Agenda auch direkt mit Chicago Branch entwickeln, wenn bereits ein sicheres Wertungsfenster offensteht."
+          ],
+          "weaknesses": [
+            "Zwei gleichzeitig installierte Ziele brauchen Platz und Schutz. Ein Zugriff auf den Markenspeicher vor der Umbuchung kann mehrere Entwicklungsaktionen kosten.",
+            "Nach einer großen Umbuchung richtet Virus Test Site ohne Marker noch einen Netzschaden an. Ein Expert auf der Hand erzeugt selbst keine neuen Marker."
           ]
         }
       }

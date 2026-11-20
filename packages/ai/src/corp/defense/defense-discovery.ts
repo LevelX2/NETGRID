@@ -3,6 +3,7 @@ import { buildCorpRezDefenseSignals } from "./defense-rez-discovery";
 import { candidateTargetIds } from "../../actions/action-candidate-facts";
 import { corpProgramTrashDefenseSignals } from "./program-trash-signal";
 import { corpArchivesAgendaRelocationSignal } from "./archives-agenda-relocation";
+import { corpStartRunRedirectInstallSignal } from "./start-run-redirect-install";
 import { corpRezOrTrashDefenseChoiceSignal } from "./rez-or-trash-choice";
 import { corpTraceHardwareTrashDefenseSignals } from "./trace-hardware-trash-signal";
 import { type AiDecisionInput } from "@netgrid/shared";
@@ -97,7 +98,7 @@ export function buildCorpDefenseNeeds({
   defenseDrawSignals,
   consumedDefenseDrawSignals,
   agendaPurgeDefenseChoice,
-  classicDeflectorDefenseChoice,
+  runRedirectDefenseChoice,
 }: {
   input: AiDecisionInput;
   terminalRezReserveSignals: CorpGenericDefenseSignal[];
@@ -116,7 +117,7 @@ export function buildCorpDefenseNeeds({
   defenseDrawSignals: CorpDefenseSignal[];
   consumedDefenseDrawSignals: CorpDefenseSignal[];
   agendaPurgeDefenseChoice: CorpGenericDefenseSignal | undefined;
-  classicDeflectorDefenseChoice: CorpGenericDefenseSignal | undefined;
+  runRedirectDefenseChoice: CorpGenericDefenseSignal | undefined;
 }) {
   const routeByOffer = new Map<
     string,
@@ -156,6 +157,13 @@ export function buildCorpDefenseNeeds({
           candidate,
         );
         if (postPassIceLifecycle) return [postPassIceLifecycle];
+        const redirectInstall = corpStartRunRedirectInstallSignal(
+          input,
+          candidate,
+          centralDefenseAllocation,
+          scoreProjects,
+        );
+        if (redirectInstall) return [redirectInstall];
         const globalSupportInstall = corpGlobalIceSupportAssetInstallSignal(
           input,
           candidate,
@@ -547,7 +555,7 @@ export function buildCorpDefenseNeeds({
       ...defenseDrawSignals,
       ...consumedDefenseDrawSignals,
       ...(agendaPurgeDefenseChoice ? [agendaPurgeDefenseChoice] : []),
-      ...(classicDeflectorDefenseChoice ? [classicDeflectorDefenseChoice] : []),
+      ...(runRedirectDefenseChoice ? [runRedirectDefenseChoice] : []),
       ...[
         corpRezOrTrashDefenseChoiceSignal(input, candidates, scoreProjects),
       ].filter(

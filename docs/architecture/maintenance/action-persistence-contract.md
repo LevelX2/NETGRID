@@ -18,9 +18,10 @@ Engine-Ereignisse der zuletzt geladenen 32 Partien im Speicher. Bei gleicher
 Journalgeneration liest er ab dem nächsten Ereignisindex und prüft die
 vollständige, lückenlose Fortsetzung. Kopf und Ereignisse stammen aus
 derselben Lesetransaktion. Die Engine erhält die vollständige Ereignisfolge.
-Die KI-Projektion ergänzt daraus die seitensichere Sicht je Seite. Der
-erste Aktionsload nach Serverstart, Verdrängung oder Journalwechsel liest
-die gespeicherte Engine-Historie einmal vollständig ein.
+Die KI-Projektion ergänzt daraus je Seite die vollständige seitensichere
+Sicht für Beobachtungen und Belief-State. Der erste Aktionsload nach
+Serverstart, Verdrängung oder Journalwechsel liest die gespeicherte
+Engine-Historie einmal vollständig ein.
 
 Reconnect, WebSocket-Bootstrap und WebSocket-Präsenz laden den Kernzustand,
 Sessions, Tokens, Lobby, ausstehendes Undo und die öffentliche Chronik mit bis

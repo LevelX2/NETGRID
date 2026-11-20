@@ -4988,6 +4988,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       name: "O:NR V1.9.22 Data Fort Reclamation",
       cards: [
         { id: 409, quantity: 1 },
+        { id: 125, quantity: 1 },
+        { id: 131, quantity: 1 },
         { id: 589, quantity: 1 },
         { id: 520, quantity: 1 },
         ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
@@ -5006,6 +5008,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     moveCorpCardToHq(state, 409);
     const iceId = moveCorpCardToHq(state, 589);
     const assetId = moveCorpCardToHq(state, 520);
+    const centralOnly = [125, 131].map((id) => moveCorpCardToHq(state, id));
 
     state = apply(
       state,
@@ -5046,6 +5049,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) => action.type === "resolve_choice",
     );
+    const offeredIds = state.pendingChoice!.options.map((option) => option.value);
+    expect(offeredIds).toEqual(expect.arrayContaining([iceId, assetId]));
+    for (const id of centralOnly) expect(offeredIds).not.toContain(id);
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
       side: "runner",

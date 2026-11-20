@@ -341,6 +341,12 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
 
     let state = applyLegal(before, "runner", runHq.actionId);
     expect(state.pendingChoice?.source).toContain("corp.start_of_run_redirect");
+    expect(getPlayerView(state, "corp").pendingChoice?.options).toContainEqual(
+      expect.objectContaining({
+        value: sirenId,
+        metadata: expect.objectContaining({ creditCost: 1 }),
+      }),
+    );
     expect(state.run?.runStartInterventions).toEqual([
       {
         kind: "start_run_redirect_to_source_fort",
@@ -365,6 +371,11 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
     state = applyChoice(state, "corp", "pass");
     expect(state.run?.attackedServerId).toBe("hq");
     expect(state.run?.runStartInterventions).toBeUndefined();
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "access_card",
+      ),
+    ).toBe(true);
 
     const redirectedBefore = baseState("pro014-siren-redirect");
     addCorpRoot(redirectedBefore, SIREN, "siren_2", "r1", true);
@@ -376,8 +387,45 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
     );
     redirected = applyChoice(redirected, "corp", "redirect_siren_2");
     expect(redirected.run?.attackedServerId).toBe("r1");
+    expect(redirected.run?.position).toEqual({
+      kind: "server",
+      serverId: "r1",
+    });
+    redirected = apply(
+      redirected,
+      "runner",
+      (action) => action.type === "access_card",
+    );
+    expect(redirected.run?.accessedCardId).toBe("siren_2");
     expect(redirected.corp.credits).toBe(19);
     expectReplayStable(redirectedBefore, redirected);
+  });
+
+  it("approaches the destination fort’s outermost ICE after a Siren redirect", () => {
+    const before = baseState("pro014-siren-protected-destination");
+    const siren = addCorpRoot(before, SIREN, "siren_protected", "r1");
+    addCorpIce(before, WALL, "inner_wall", "r1", false);
+    const outer = addCorpIce(before, WALL, "outer_wall", "r1", false);
+    let state = apply(
+      before,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    state = applyChoice(state, "corp", `redirect_${siren}`);
+    expect(state.run?.position).toEqual({
+      kind: "ice",
+      serverId: "r1",
+      iceIndex: 1,
+    });
+    expect(state.run?.approachedIceId).toBe(outer);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === outer,
+    );
+    expect(state.run?.encounteredIceId).toBe(outer);
+    expectReplayStable(before, state);
   });
 
   it("does not offer Siren redirect to an otherwise illegal source fort", () => {

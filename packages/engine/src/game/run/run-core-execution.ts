@@ -139,14 +139,7 @@ export function startRun(
       : {}),
     phase: "approach_ice",
     startOfRunIceRepositionOpen: true,
-    position:
-      server.ice.length > 0
-        ? {
-            kind: "ice",
-            serverId: server.id,
-            iceIndex: outermostIceIndex(server),
-          }
-        : { kind: "server", serverId: server.id },
+    position: runStartPosition(server),
     brokenSubroutineIndexes: [],
     resolvedSubroutineIndexes: [],
     ignoredSubroutineIndexes: [],
@@ -314,20 +307,29 @@ export function resumeRunAfterStartEffects(
   host: RunCoreExecutionHost,
   legalAction?: LegalAction,
 ): void {
+  if (host.callbacks.openStartOfRunFortUtilityWindow(host.state, legalAction))
+    return;
+  enterRunStartApproach(host, legalAction);
+}
+
+export function enterRunStartApproach(
+  host: RunCoreExecutionHost,
+  legalAction?: LegalAction,
+): void {
   const { state } = host;
   const run = state.run;
   if (!run) throw new Error("Die Run-Start-Fortsetzung hat keinen Run.");
   const server = host.servers.mustServer(run.attackedServerId);
-  if (host.callbacks.openStartOfRunFortUtilityWindow(state, legalAction))
-    return;
+  delete run.runStartInterventions;
+  run.position = runStartPosition(server);
+  state.activeSide = "runner";
   // Start-window action producers must observe the approach timing before
   // availability is queried, including an already-rezzed first ICE.
   state.timingPoint = "run.approach_ice";
-  if (server.ice.length > 0) {
-    const iceIndex = outermostIceIndex(server);
+  if (run.position.kind === "ice") {
     const approachedIceId = mustArrayValue(
       server.ice,
-      iceIndex,
+      run.position.iceIndex,
       "Server has no approached ice.",
     );
     run.approachedIceId = approachedIceId;
@@ -388,8 +390,10 @@ function assertRequiredHostGroups(host: RunCoreExecutionHost): void {
   }
 }
 
-function outermostIceIndex(server: CorpServer): number {
-  return server.ice.length - 1;
+function runStartPosition(server: CorpServer): RunState["position"] {
+  return server.ice.length > 0
+    ? { kind: "ice", serverId: server.id, iceIndex: server.ice.length - 1 }
+    : { kind: "server", serverId: server.id };
 }
 
 function mustArrayValue<T>(values: T[], index: number, message: string): T {

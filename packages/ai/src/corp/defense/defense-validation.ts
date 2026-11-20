@@ -1,4 +1,4 @@
-import { isRunId, isTraceId } from "@netgrid/shared";
+import { isRemoteServerId, isRunId, isTraceId } from "@netgrid/shared";
 import { isCardDefinitionId } from "@netgrid/shared";
 import { parseOptionalCardDefinitionIdCsv } from "../../card-definition-id-input";
 import type { AiDecisionInput, VisibleCorpRezCostQuote } from "@netgrid/shared";
@@ -967,6 +967,7 @@ export const GENERIC_DEFENSE_SIGNAL_KEYS = new Set([
   "urgent",
   "visibleAgendaExposureDefense",
   "centralPressure",
+  "protectedCentralServerId",
   "immediateInstallSupport",
   "iceInstallCostSupportActionId",
   "rezWindowVerdict",
@@ -1111,6 +1112,16 @@ export function isValidDefenseSignal(
     return (
       hasOnlyKeys(value, GENERIC_DEFENSE_SIGNAL_KEYS) &&
       genericDefensePhase(value.phase) &&
+      (value.protectedCentralServerId === undefined ||
+        ((value.protectedCentralServerId === "hq" ||
+          value.protectedCentralServerId === "rd") &&
+          value.phase === "install_defense_support" &&
+          value.centralPressure !== undefined &&
+          (value.serverId === "new_remote" || isRemoteServerId(value.serverId)) &&
+          Array.isArray(value.actionIds) &&
+          value.actionIds.length === 1 &&
+          Array.isArray(value.sourceDefinitionIds) &&
+          value.sourceDefinitionIds.length === 1)) &&
       (value.visibleAgendaExposureDefense === undefined ||
         (value.visibleAgendaExposureDefense === true &&
           value.serverId === "archives" &&
@@ -1308,8 +1319,55 @@ function validDefenseChoiceResolution(
       );
     case "resolve_install_targets":
       return validAgendaPurgeDefenseChoiceResolution(resolution, signal);
-    case "resolve_run_redirect":
+    case "resolve_run_redirect": {
+      const resolution = defenseRecord(signal.choiceResolution);
+      if (resolution?.kind === "start_run_redirect") {
+        const target = defenseRecord(resolution.target);
+        return (
+          hasOnlyKeys(
+            resolution,
+            new Set([
+              "kind",
+              "choiceId",
+              "sourceStateVersion",
+              "runId",
+              "originalServerId",
+              "selectedOptionId",
+              "target",
+            ]),
+          ) &&
+          nonEmptyString(resolution.choiceId) &&
+          knownNonNegativeInteger(resolution.sourceStateVersion) &&
+          isRunId(resolution.runId) &&
+          nonEmptyString(resolution.originalServerId) &&
+          Array.isArray(signal.actionIds) &&
+          signal.actionIds.length === 1 &&
+          nonEmptyString(signal.actionIds[0]) &&
+          (resolution.target === undefined
+            ? resolution.selectedOptionId === "pass" &&
+              signal.serverId === resolution.originalServerId
+            : target !== undefined &&
+              hasOnlyKeys(
+                target,
+                new Set([
+                  "sourceCardInstanceId",
+                  "sourceDefinitionId",
+                  "serverId",
+                  "creditCost",
+                ]),
+              ) &&
+              nonEmptyString(target.sourceCardInstanceId) &&
+              isCardDefinitionId(target.sourceDefinitionId) &&
+              nonEmptyString(target.serverId) &&
+              target.serverId !== resolution.originalServerId &&
+              target.serverId === signal.serverId &&
+              knownNonNegativeInteger(target.creditCost) &&
+              resolution.selectedOptionId ===
+                `redirect_${target.sourceCardInstanceId}`)
+        );
+      }
       return validClassicDeflectorDefenseChoiceResolution(resolution, signal);
+    }
     default:
       return resolution === undefined;
   }

@@ -24,6 +24,7 @@ import {
   type VisibleCard,
 } from "@netgrid/shared";
 import { runnerPartialProgramSearchProfile } from "./runner-partial-program-search-facts";
+import { planBoundStartRunRedirectSelection } from "../corp/defense/start-run-redirect-choice";
 import { selectedRunnerRunProgramSearchOptionIds } from "../runner/run-window/run-window-program-search-binding";
 import {
   selectedCorpAccessPaymentOptionsFromAmbushPlan,
@@ -1178,6 +1179,29 @@ export function selectedChoicesForDecision(
       ],
       "corp_satellite_monitors_start",
     );
+  }
+  if (
+    input.side === "corp" &&
+    choice.source.startsWith("corp.start_of_run_redirect:")
+  ) {
+    const executor = currentPortfolio?.instances.find(
+      (instance) =>
+        instance.instanceId === currentPortfolio.executorInstanceId &&
+        instance.moduleId === "corp.defend_servers" &&
+        instance.executionState === "executor",
+    );
+    const binding = planBoundStartRunRedirectSelection(
+      input,
+      action,
+      executor?.moduleState,
+    );
+    if (!binding)
+      throw unresolvedChoiceFailure(
+        input,
+        action,
+        "Bind start-of-run redirection to the current defense executor, run and quoted source.",
+      );
+    return resolved(binding.selectedOptionIds, "corp_start_run_redirect");
   }
   if (
     input.side === "corp" &&

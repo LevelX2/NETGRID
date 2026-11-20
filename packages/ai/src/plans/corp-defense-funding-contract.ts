@@ -35,6 +35,9 @@ export function corpGenericDefensePriorityClass(
         // Its exact parent remains P6; score support has a separate delegated
         // contract, and concrete central pressure retains its own priority.
         (signal.immediateInstallSupport && signal.parentKind !== "remote") ||
+        (signal.phase === "install_defense_support" &&
+          signal.protectedCentralServerId !== undefined &&
+          signal.centralPressure === "material") ||
         (signal.phase === "install_ice" &&
           (signal.installRoute?.progressKind ===
             "scoreline_central_tax_allocation" ||

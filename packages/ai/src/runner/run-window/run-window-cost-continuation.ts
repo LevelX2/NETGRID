@@ -6,6 +6,7 @@ import {
   type ResidentPlanPortfolio,
 } from "../../plans/resident-plan-portfolio";
 import { type RunnerTargetedBypassChoiceContinuation } from "./runner-targeted-bypass-plan";
+import type { RunnerTargetedIceTrashChoiceContinuation } from "../../runtime/runner-targeted-ice-trash-plan";
 import { reconcileSelectedRunnerSuccessfulReplacementChoice } from "./run-window-successful-replacement-continuation";
 import {
   bindRunnerDevelopmentSearchEngineContinuation,
@@ -150,7 +151,7 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       bindRunnerEventInstallChoiceEngineContinuation(input, result, pending);
       bindRunnerDevelopmentSearchEngineContinuation(input, result, pending);
       result.portfolio.stateVersion = input.playerView.stateVersion;
-      restorePaidRunnerRunStartExecutor(input, result, pending, selectedAction);
+      restorePaidRunnerServerExecutor(input, result, pending, selectedAction);
       delete result.portfolio.pendingRunnerCostPenaltySupportOrigin;
       return;
     }
@@ -468,7 +469,7 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       previous,
       pending,
     );
-    preserveSelectedRunnerTargetedBypassBindingAcrossPaymentStep(
+    preserveSelectedRunnerTargetedPreparationAcrossPaymentStep(
       input,
       result,
       previous,
@@ -505,7 +506,7 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
   delete result.portfolio.pendingRunnerCostPenaltySupportOrigin;
 }
 
-function preserveSelectedRunnerTargetedBypassBindingAcrossPaymentStep(
+function preserveSelectedRunnerTargetedPreparationAcrossPaymentStep(
   input: AiDecisionInput,
   result: Extract<PlanSchedulerResult, { lane: "plan" }>,
   previous: ResidentPlanPortfolio | undefined,
@@ -525,14 +526,22 @@ function preserveSelectedRunnerTargetedBypassBindingAcrossPaymentStep(
   const previousState = previousExecutor.moduleState as
     | {
         kind?: unknown;
-        choiceContinuation?: RunnerTargetedBypassChoiceContinuation;
+        choiceContinuation?:
+          | RunnerTargetedBypassChoiceContinuation
+          | RunnerTargetedIceTrashChoiceContinuation;
       }
     | undefined;
   const continuation = previousState?.choiceContinuation;
-  if (continuation?.family !== "runner_targeted_bypass") return;
+  if (
+    continuation?.family !== "runner_targeted_bypass" &&
+    continuation?.family !== "runner_targeted_ice_trash"
+  )
+    return;
   const exactOrigin =
     previous?.side === "runner" &&
-    previousExecutor.executionState === "executor" &&
+    (previousExecutor.executionState === "executor" ||
+      (previousExecutor.executionState === "preempted" &&
+        pending.windowId !== undefined)) &&
     (previousState?.kind === "central_pressure" ||
       previousState?.kind === "remote_contest") &&
     continuation.ownerModuleId === previousExecutor.moduleId &&
@@ -551,7 +560,7 @@ function preserveSelectedRunnerTargetedBypassBindingAcrossPaymentStep(
       planInstanceId: pending.executorInstanceId,
       stepId: pending.sourceStepId,
       removalCondition:
-        "Carry the exact selected targeted-bypass plan and its bound Social Engineering continuation through payment support.",
+        "Carry the selected server plan and its exact ICE preparation target through payment support.",
     });
   }
   const existing = result.portfolio.instances.find(
@@ -617,10 +626,10 @@ function rebaseSelectedRunnerImmediateChoiceOriginForPaymentStep(
         };
 }
 
-/** The payment plan completed its job. The Engine resumes the previously
- * selected Run, so subsequent encounter windows belong to that same plan.
+/** Payment support hands the action back to the server plan that selected
+ * the run or its ICE preparation and owns the next Engine window.
  */
-function restorePaidRunnerRunStartExecutor(
+function restorePaidRunnerServerExecutor(
   input: AiDecisionInput,
   result: Extract<PlanSchedulerResult, { lane: "engine_window" }>,
   pending: NonNullable<
@@ -632,25 +641,40 @@ function restorePaidRunnerRunStartExecutor(
   const original = portfolio.instances.find(
     (plan) => plan.instanceId === pending.executorInstanceId,
   );
+  const state = original?.moduleState as
+    | {
+        kind?: string;
+        signal?: { serverId?: string };
+        choiceContinuation?: RunnerTargetedIceTrashChoiceContinuation;
+      }
+    | undefined;
+  const preparation =
+    state?.choiceContinuation?.family === "runner_targeted_ice_trash"
+      ? state.choiceContinuation
+      : undefined;
   if (
     !action ||
     (action.type !== "start_run" &&
       (action.type !== "play_event" ||
-        action.payload?.runnerEventRun !== true)) ||
+        (action.payload?.runnerEventRun !== true && !preparation))) ||
     input.playerView.run ||
     pending.rootPlanInstanceId !== pending.executorInstanceId ||
     (original?.moduleId !== "runner.pressure_central" &&
       original?.moduleId !== "runner.contest_remote") ||
-    portfolio.executorInstanceId === original.instanceId
+    (portfolio.executorInstanceId === original.instanceId && !preparation)
   )
     return;
-  const state = original.moduleState as
-    | { kind?: string; signal?: { serverId?: string } }
-    | undefined;
-  const serverId = action.payload?.serverId;
+  const serverId = preparation
+    ? preparation.serverId
+    : action.payload?.serverId;
+  const windowId = action.payload?.runnerCostPenaltySupportWindowId;
   if (
     original.side !== "runner" ||
-    original.executionState !== "preempted" ||
+    (original.executionState !== "preempted" &&
+      !(
+        original.executionState === "executor" &&
+        portfolio.executorInstanceId === original.instanceId
+      )) ||
     original.viability !== "ready" ||
     original.parentInstanceId !== undefined ||
     original.target?.kind !== "server" ||
@@ -661,10 +685,24 @@ function restorePaidRunnerRunStartExecutor(
     !actionMatchesCurrentDecision(input, action) ||
     action.actionId !== pending.originalActionId ||
     action.payload?.runnerCostPenaltySupportContinuation !== true ||
-    action.payload.runnerCostPenaltySupportWindowId !== pending.windowId ||
-    result.origin.windowId !== String(pending.windowId) ||
+    !isRunnerPaymentWindowId(windowId) ||
+    (windowId !== pending.windowId &&
+      !(
+        pending.windowId === undefined &&
+        windowId === pending.selectedAtStateVersion + 1
+      )) ||
+    result.origin.windowId !== String(windowId) ||
     result.origin.rootPlanInstanceId !== pending.rootPlanInstanceId ||
-    result.origin.leafPlanInstanceId !== pending.executorInstanceId
+    result.origin.leafPlanInstanceId !== pending.executorInstanceId ||
+    (preparation &&
+      (action.type !== "play_event" ||
+        action.source !== preparation.sourceCardInstanceId ||
+        preparation.ownerModuleId !== original.moduleId ||
+        preparation.ownerDedupeKey !== original.dedupeKey ||
+        preparation.sourceActionId !== pending.originalActionId ||
+        preparation.selectedActionId !== pending.originalActionId ||
+        preparation.plannedAtStateVersion !== pending.selectedAtStateVersion ||
+        preparation.selectedAtStateVersion !== pending.selectedAtStateVersion))
   ) {
     throw new PlanResolutionFailure("window_origin_missing", {
       side: input.side,
@@ -676,9 +714,13 @@ function restorePaidRunnerRunStartExecutor(
       planInstanceId: pending.executorInstanceId,
       stepId: pending.sourceStepId,
       removalCondition:
-        "Resume the exact paid Run with its preempted server plan, Engine window and unchanged action.",
+        "Resume the exact paid action with its server plan, Engine payment window and bound target.",
     });
   }
+  if (preparation)
+    preparation.engineContinuationAtStateVersion =
+      input.playerView.stateVersion;
+  if (portfolio.executorInstanceId === original.instanceId) return;
   delete portfolio.turnPlanExecutionLease;
   delete portfolio.turnPlanCommitment;
   const resumed = selectResidentPlanPortfolioExecutor({
@@ -687,15 +729,16 @@ function restorePaidRunnerRunStartExecutor(
     timingPoint: input.playerView.timingPoint,
     reason: "executor_selected",
   });
-  resumed.selectedActionOrigin = {
-    rootPlanInstanceId: pending.rootPlanInstanceId,
-    executorInstanceId: pending.executorInstanceId,
-    selectedActionId: action.actionId,
-    selectedAtStateVersion: input.playerView.stateVersion,
-    immediateChoicePolicy: "resolve_runner_run_start_order",
-    sourceStepId: pending.sourceStepId,
-    sourceActionType: action.type,
-    continuedThroughStateVersion: input.playerView.stateVersion,
-  };
+  if (!preparation)
+    resumed.selectedActionOrigin = {
+      rootPlanInstanceId: pending.rootPlanInstanceId,
+      executorInstanceId: pending.executorInstanceId,
+      selectedActionId: action.actionId,
+      selectedAtStateVersion: input.playerView.stateVersion,
+      immediateChoicePolicy: "resolve_runner_run_start_order",
+      sourceStepId: pending.sourceStepId,
+      sourceActionType: action.type,
+      continuedThroughStateVersion: input.playerView.stateVersion,
+    };
   result.portfolio = resumed;
 }

@@ -31,7 +31,9 @@ export function runnerRunExitAction(action: LegalAction): boolean {
 /** Current Engine offers, not a second action chooser or a reconstructed rule. */
 export function runnerFortPassTollWindow(input: AiDecisionInput) {
   const actions = input.legalActions.filter(
-    (a) => a.payload?.fortRunWindowAbility === FORT_PASS_TOLL,
+    (a) =>
+      a.payload?.fortRunWindowAbility === FORT_PASS_TOLL &&
+      a.payload.runnerCostPenaltySupportContinuation !== true,
   );
   if (actions.length === 0) return undefined;
   const run = input.playerView.run;

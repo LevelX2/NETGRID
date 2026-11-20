@@ -968,6 +968,12 @@ Coverage-Reconciliation erhält unabhängig weiterhin sinnvolle Breakersuchen;
 vor dem Routenwechsel bleibt eine tatsächlich benötigte Child-Bindung erhalten.
 Die gespeicherten Entscheidungen D159/D160 aus Paarung 425 prüfen beide Seiten
 dieses Übergangs mit den historischen LegalActions und Runtime-Checkpoints.
+
+Öffnet eine gezielte ICE-Vorbereitung ein Zahlungsfenster, behält der
+ursprüngliche Zentral- oder Remoteplan sein gewähltes ICE, auch wenn der
+Einkommensplan eine Bank aktiviert. Bei der Fortsetzung prüft der Owner
+Quellkarte, Aktion und Fenster-ID. Die anschließende Zielauswahl bindet an
+die StateVersion der fortgesetzten Aktion und übernimmt das zuvor gewählte ICE.
 Paarung 557/R1/G18/D320 ergänzt den Zentralfall mit verdrängter Run-Finanzierung: Der aktuelle HQ-Vorbereitungsschritt behält keinen Need des noch nicht neu quotierten Folgeruns. Der Funding-Owner und seine fail-closed Parentprüfung bleiben unverändert.
 
 Die Runpfad-Projektion trennt einen nicht tödlichen Handpufferverstoß von
@@ -3915,7 +3921,10 @@ nach dieser Gebühr. Seine vorhandenen Sicherheitsabbrüche gelten auch für
 die angebotene Fort-Exit-Action. Bad-Publicity-/temporäre Run-Credits und
 gebundene Zahlungshilfen bleiben von zweckgebundenen Breaker-Pools getrennt;
 eine quotierte Zahlungshilfe muss weiterhin im echten Engine-Fenster ausgeführt
-werden. Die Engine revalidiert beim Anwenden das tatsächliche passierte ICE.
+werden. Öffnet die gewählte Mautzahlung ein Bankfenster, übernimmt der
+Zahlungspfad die an diese Aktion gebundene Fortsetzung. Die auf der
+Fortsetzung mitgeführten Mautdaten eröffnen keine weitere Wahl zwischen
+Zahlen und Run-Ende. Die Engine revalidiert beim Anwenden das passierte ICE.
 Es entstehen weder ein zweiter Chooser noch ein allgemeiner Zahlungsbonus.
 
 Bei einem bedingten Encounter-ETR darf der freie Run-Abbruch nur gegenüber
@@ -4016,6 +4025,12 @@ Ereignistypen, Lücken oder ein abweichendes Quell-ICE invalidieren die
 Fortsetzung weiterhin fail-closed.
 
 ## 9. `runner.expose_information`
+
+Bei *Ice and Data Special Report* kann die Runner-KI das Event ausspielen und
+anschließend an der optionalen Serverwahl mit `window_origin_missing` stoppen.
+Der Informationsplan bindet die Folgeauswahl
+`expose_installed_cards_fort_select` dann nicht an einen konkreten Server.
+Die Reproduktion gegen Chrome Rush Bureau bot `fort_none` und `fort_r1` an.
 
 Mehrfach-Aufdeckungen liefern aus der Engine gleich lange, gleich geordnete
 `publicRevealDefinitionIds`, `exposedServerIds` und `exposedPositionKeys`.

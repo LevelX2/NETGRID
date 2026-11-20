@@ -41,6 +41,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
   urgent: boolean;
   visibleAgendaExposureDefense?: true;
   centralPressure?: "material" | "acute" | "terminal";
+  protectedCentralServerId?: "hq" | "rd";
   immediateInstallSupport?: boolean;
   iceInstallCostSupportActionId?: string;
   rezWindowVerdict?: "productive" | "nonproductive" | "open";
@@ -122,6 +123,15 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
           serverId: string;
           optionId: string;
         }>;
+      }
+    | {
+        kind: "start_run_redirect";
+        choiceId: string;
+        sourceStateVersion: number;
+        runId: RunId;
+        originalServerId: string;
+        selectedOptionId: string;
+        target?: { sourceCardInstanceId: string; sourceDefinitionId: number; serverId: string; creditCost: number };
       }
     | {
         kind: "classic_deflector_redirect";

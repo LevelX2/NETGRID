@@ -972,7 +972,10 @@ export function configureFlowRuntimeBootstrap({
             publicLabel: "Start-of-run Redirect",
             value: cardId,
             serverId: targetServerId,
-            metadata: { cardTitle: definitionFor(state, cardId).title },
+            metadata: {
+              cardTitle: definitionFor(state, cardId).title,
+              creditCost: startRunRedirectCostCredits(state, cardId),
+            },
           };
         }),
         ...reorderSourceIds.map((cardId) => ({

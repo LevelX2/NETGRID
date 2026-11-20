@@ -61,9 +61,10 @@ export function selectedRunnerTargetedIceTrashChoiceOptionId(
     continuation.ownerModuleId === executor.moduleId &&
     continuation.sourceCardInstanceId === source?.sourceCardInstanceId &&
     continuation.sourceActionId === continuation.selectedActionId &&
-    continuation.selectedAtStateVersion === portfolio.stateVersion &&
-    continuation.plannedAtStateVersion === portfolio.stateVersion &&
-    continuation.selectedAtStateVersion + 1 === input.playerView.stateVersion &&
+    continuation.plannedAtStateVersion === continuation.selectedAtStateVersion &&
+    (continuation.engineContinuationAtStateVersion ??
+      continuation.selectedAtStateVersion) === portfolio.stateVersion &&
+    portfolio.stateVersion + 1 === input.playerView.stateVersion &&
     (moduleState?.kind === "central_pressure" ||
       moduleState?.kind === "remote_contest");
   if (!exactOrigin) {
