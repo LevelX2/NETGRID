@@ -49,6 +49,16 @@ type PrevalidatedHqToNewRemoteInstall = {
   destination: "ice" | "root";
 };
 
+function emptyRemotePreview(): CorpServer {
+  return {
+    id: "new_remote_preview" as Exclude<ServerId, "new_remote">,
+    label: "New Remote Preview",
+    kind: "remote",
+    ice: [],
+    root: [],
+  };
+}
+
 export type HqToNewRemoteInstallRezStep =
   | "select_hq_cards"
   | "install_next_card"
@@ -121,15 +131,13 @@ export function startHqToNewRemoteInstallRezChoice(
   });
   if (host.state.pendingChoice)
     throw new Error("Es ist bereits eine Choice offen.");
+  const remote = emptyRemotePreview();
   const options = host.state.corp.hq
     .filter((cardId) => {
       const definition = host.cards.definitionFor(cardId);
       return definition.type === "ice"
-        ? canInstallCorpIceInServer(definition, {
-            id: "new_remote",
-            kind: "remote",
-          })
-        : host.cards.isCorpInstallableCardType(definition);
+        ? canInstallCorpIceInServer(definition, remote)
+        : host.cards.canInstallCorpRootCardInServer(definition, remote);
     })
     .sort()
     .map((cardId) => {
@@ -604,13 +612,7 @@ function prevalidateHqToNewRemoteInstallSelection(
   host: CorpInstallRezSequenceHandlerHost,
   selectedIds: readonly CardInstanceId[],
 ): PrevalidatedHqToNewRemoteInstall[] {
-  const simulatedServer: CorpServer = {
-    id: "new_remote_preview" as Exclude<ServerId, "new_remote">,
-    label: "New Remote Preview",
-    kind: "remote",
-    ice: [],
-    root: [],
-  };
+  const simulatedServer = emptyRemotePreview();
   const selectedCards: PrevalidatedHqToNewRemoteInstall[] = [];
   for (const cardId of selectedIds) {
     if (!host.state.corp.hq.includes(cardId))

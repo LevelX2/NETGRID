@@ -52,11 +52,12 @@ function fixture(
   credits: number,
   lethalRemainingIce = false,
   withKnownSentry = false,
+  runnerDeck = decks.runner!,
 ) {
   let s = createGameAfterSetup({
     seed: "runner-current-pass-toll",
     corpDeck: decks.corp!,
-    runnerDeck: decks.runner!,
+    runnerDeck,
     traceRulesProfile: "modern_open",
   });
   s = apply(s, "corp", "ce");
@@ -104,13 +105,13 @@ function fixture(
   expect(s.run?.postPassPayOrEndRun?.amount).toBe(1);
   return s;
 }
-function input(s: GameState) {
+function input(s: GameState, runnerDeck = decks.runner!) {
   return buildAiDecisionInput(s, "runner", {
     difficulty: "hard",
     ownDeckSnapshot: {
-      deckSnapshotId: decks.runner!.id,
+      deckSnapshotId: runnerDeck.id,
       side: "runner",
-      cards: decks.runner!.cards.map((c) => ({
+      cards: runnerDeck.cards.map((c) => ({
         cardId: c.id,
         quantity: c.quantity,
       })),
@@ -154,6 +155,44 @@ it("pays an affordable current fort toll under the run owner and really preserve
   const replay = replayEvents(initial, s.eventLog.slice(start));
   expect(replay.ok).toBe(true);
   expect(hashState(replay.state)).toBe(hashState(s));
+});
+
+it("keeps a selected fort toll bound while the bank payment window resolves", () => {
+  const runnerDeck = {
+    ...decks.runner!,
+    cards: [...decks.runner!.cards, { id: 191, quantity: 1 }],
+  };
+  let state = fixture(10, false, false, runnerDeck);
+  RealEngineFixtureBuilder.forState(state).withRunnerResourceInstalled(191);
+  const initial = structuredClone(state);
+  const toll = chooseRunnerAction(input(state, runnerDeck));
+  expect(toll.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
+    "runner.convert_run_window",
+  );
+  state = apply(state, "runner", toll.actionId);
+  const window = state.runnerCostPenaltySupportWindow;
+  expect(window?.originalActionId).toBe(toll.actionId);
+  const offers = getLegalActions(state, "runner");
+  expect(offers.some((a) => a.payload?.decision === "end_run")).toBe(false);
+  const next = chooseRunnerAction(input(state, runnerDeck));
+  const chosen = offers.find((a) => a.actionId === next.actionId)!;
+  if (chosen.type === "activated_card_ability") {
+    expect(chosen.payload?.costPenaltySupportOriginalActionId).toBe(toll.actionId);
+    state = apply(state, "runner", chosen.actionId);
+    const resume = chooseRunnerAction(input(state, runnerDeck));
+    expect(resume.actionId).toBe(toll.actionId);
+    state = apply(state, "runner", resume.actionId);
+  } else {
+    expect(chosen.actionId).toBe(toll.actionId);
+    expect(chosen.payload?.runnerCostPenaltySupportContinuation).toBe(true);
+    state = apply(state, "runner", chosen.actionId);
+  }
+  expect(state.runnerCostPenaltySupportWindow).toBeUndefined();
+  expect(state.run).toBeDefined();
+  expect(state.run?.postPassPayOrEndRun).toBeUndefined();
+  const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+  expect(replay.ok).toBe(true);
+  expect(hashState(replay.state)).toBe(hashState(state));
 });
 
 it("uses the available toll exit instead of paying into known lethal remaining ICE", () => {

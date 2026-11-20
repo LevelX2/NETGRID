@@ -3921,7 +3921,10 @@ nach dieser Gebühr. Seine vorhandenen Sicherheitsabbrüche gelten auch für
 die angebotene Fort-Exit-Action. Bad-Publicity-/temporäre Run-Credits und
 gebundene Zahlungshilfen bleiben von zweckgebundenen Breaker-Pools getrennt;
 eine quotierte Zahlungshilfe muss weiterhin im echten Engine-Fenster ausgeführt
-werden. Die Engine revalidiert beim Anwenden das tatsächliche passierte ICE.
+werden. Öffnet die gewählte Mautzahlung ein Bankfenster, übernimmt der
+Zahlungspfad die an diese Aktion gebundene Fortsetzung. Die auf der
+Fortsetzung mitgeführten Mautdaten eröffnen keine weitere Wahl zwischen
+Zahlen und Run-Ende. Die Engine revalidiert beim Anwenden das passierte ICE.
 Es entstehen weder ein zweiter Chooser noch ein allgemeiner Zahlungsbonus.
 
 Bei einem bedingten Encounter-ETR darf der freie Run-Abbruch nur gegenüber
