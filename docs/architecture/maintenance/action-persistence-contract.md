@@ -12,9 +12,15 @@ Normale Aktionen benötigen keine vollständige Hydration aller öffentlichen
 Events, KI-Traces, Receipts, Undo-Historie und Snapshots. Der aktuelle
 Kernzustand ist vollständig. Öffentliche Aktionsloads lesen höchstens 80
 Ereignisse direkt in SQL und je Ereignis höchstens den neuesten KI-Trace.
-In reinen Human-Partien gilt dieselbe Grenze für
-Engine-Ereignisse; KI-Partien behalten die vollständige side-sichere Chronologie
-für ihre bestehenden Beobachtungs- und Belief-Verträge.
+In reinen Human-Partien gilt dieselbe Grenze für Engine-Ereignisse.
+Für aktive KI-Partien hält der SQLite-Adapter die bereits dekodierten
+Engine-Ereignisse der zuletzt geladenen 32 Partien im Speicher. Bei gleicher
+Journalgeneration liest er ab dem nächsten Ereignisindex und prüft die
+vollständige, lückenlose Fortsetzung. Kopf und Ereignisse stammen aus
+derselben Lesetransaktion. Die Engine erhält die vollständige Ereignisfolge.
+Die KI-Projektion ergänzt daraus die seitensichere Sicht je Seite. Der
+erste Aktionsload nach Serverstart, Verdrängung oder Journalwechsel liest
+die gespeicherte Engine-Historie einmal vollständig ein.
 
 Reconnect, WebSocket-Bootstrap und WebSocket-Präsenz laden den Kernzustand,
 Sessions, Tokens, Lobby, ausstehendes Undo und die öffentliche Chronik mit bis
@@ -59,8 +65,8 @@ Fehlgeschlagene KI-Versuche führen ihren Diagnosecode im Fehlerdatensatz.
 Ereignisblobs beziehen ihre ID aus der Tabellenzeile. Öffentliche
 Ereignisblobs beziehen daraus auch StateVersions und StateHash.
 
-Das Match-Schema 12 speichert die typisierten RNG-Tuples und numerische Run-IDs
-und erfordert einen passenden Matchdatenpfad. Ein konfigurierter
+Das Match-Schema 13 speichert die Engine-Journalgeneration, die typisierten
+RNG-Tuples und numerische Run-IDs und erfordert einen passenden Matchdatenpfad. Ein konfigurierter
 separater Accountpfad kann die Konto-Tabellen einer Datenbank mit Schema 3
 weiterverwenden.
 
@@ -97,12 +103,16 @@ enthalten; eine neue Entscheidung baut die Chronologie erneut auf.
   Beide lesen diese Größen aus `match_journal_counts`. SQLite-Trigger führen
   sie beim Einfügen und Entfernen von Journalzeilen in derselben Transaktion
   fort. Das gilt auch für Undo und kaskadierende Löschungen.
+  Engine-Ereignisse werden am Journalende eingefügt. Jede Änderung oder
+  Löschung vorhandener Engine-Zeilen erhöht die Journalgeneration. Der
+  Delta-Save prüft auch diese Generation aus der Lade-Baseline.
   Fehlende Baseline und Versions- oder Präfixdrift erzeugen einen strukturierten
   Storagefehler; vorhandene Historie wird nicht still überschrieben.
 - Persistiert werden aktueller Kernzustand und neue History-Segmente. Der
   Delta-Save bereitet den serialisierten Zustand und neue Snapshots vor der
   Schreibtransaktion vor. Snapshot-Einfügungen binden den Primärschlüssel.
-  Undo bleibt ein gesonderter vollständiger Truncate-Pfad.
+  Undo kürzt das Journal in einer gesonderten Transaktion. Der nächste
+  Aktionsload baut den Rohverlauf für die neue Journalgeneration auf.
 - Erfolg und Persistence Observer folgen erst nach erfolgreichem Commit.
   Ein Persistenzfehler erzeugt keinen erfolgreichen Aktionsresponse.
 - Öffentliche Replay-Zufallsnachweise enthalten Domäne, Zähler, numerischen
@@ -116,5 +126,6 @@ enthalten; eine neue Entscheidung baut die Chronologie erneut auf.
 ## Nachweis
 
 Die Storage-/Service-Regressionen in `apps/server/src/multiplayer.test.ts`
-prüfen begrenztes Laden, Delta-Persistenz, Konflikte und Wiederöffnung.
+prüfen die tatsächlich aus SQLite gelesenen Engine-Indizes, eine abweichende
+Fortsetzung nach Undo, Delta-Konflikte und den Replay-StateHash nach Wiederöffnung.
 Der frühere DAP-Paketprozess ist keine zusätzliche aktuelle Steuerungsquelle.

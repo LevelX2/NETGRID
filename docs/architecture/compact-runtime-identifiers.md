@@ -20,7 +20,7 @@ Runs, Spiel-Traces, Zahlungs-, Änderungs- und Ersatzfenster sowie
 laufende Ziehvorgänge erhalten beim Öffnen die StateVersion des
 Übergangs. Die Herkunft eines Traces wird gesondert gebunden.
 Öffentliche Effekte tragen ihre Position im Ereignis, beginnend bei null.
-Kartenexemplare verwenden einen kurzen Base36-Schlüssel. SQLite-Schema 12 speichert
+Kartenexemplare verwenden einen kurzen Base36-Schlüssel. SQLite-Schema 13 speichert
 Kartenlisten als Positionen in der Instanztabelle. Verdeckte Slots und
 adressierbare verdeckte Ressourcen haben jeweils einen eigenen kurzen
 Schlüsseltyp. Remotes werden als `r1`, `r2` und entsprechend ihrer
@@ -58,7 +58,7 @@ typisierten Argumenten. Spielzufall und KI-Auswahl besitzen getrennte,
 explizit initialisierte Zähler. Die kanonische Seed-Eingabe enthält den
 Seed, das Tupel und den jeweiligen Zähler. Jede Aufzeichnung hält eine
 eigene Kopie des Tupels. Öffentliche Ereignisse geben nur den Zweckcode
-weiter. SQLite-Schema 12 speichert die Tupel unmittelbar in den
+weiter. SQLite-Schema 13 speichert die Tupel unmittelbar in den
 Zufallszeilen.
 [Zweckvertrag](../../packages/shared/src/random-purpose.ts) · [Zufallsvergabe](../../packages/engine/src/game/state/draw-random.ts)
 
@@ -160,7 +160,7 @@ herstellt. [CardSpec und Drucke](central-card-specification-and-registry-target-
 
 ## Speicherung und lokale Matchdaten
 
-SQLite-Schema 12 speichert den aktuellen Engine-Zustand in `game_states`.
+SQLite-Schema 13 speichert den aktuellen Engine-Zustand in `game_states`.
 `matches.record_json` enthält die Match-Metadaten. Vor-Aktionssnapshots binden
 Undo und Replay an ihren jeweiligen Übergang. Full Save, Delta-Save,
 Wiederöffnung und Maintenance verwenden denselben Spielstands-Codec.
@@ -168,8 +168,9 @@ Wiederöffnung und Maintenance verwenden denselben Spielstands-Codec.
 SQLite speichert pro öffentlichem Ereignis den Chronikkontext und die
 Summen vor dem Ereignis. Aktions- und Verbindungsloads lesen bis zu 80
 öffentliche Ereignisse. Spielupdates und Reconnect geben diesen Ausschnitt
-in der Spielersicht aus. Pro Match gespeicherte Journalgrößen binden
-Delta-Transaktionen an die geladene Historie. Undo
+in der Spielersicht aus. Journalgrößen und die Engine-Journalgeneration
+binden Delta-Transaktionen an die geladene Historie. Bei laufenden KI-Partien
+liest der SQLite-Adapter bei passender Generation nur neue Engine-Zeilen. Undo
 schneidet die gespeicherten Ereignisse samt Kontext auf die Zielversion
 zurück. Replay, Wartung und KI-Pfade mit dauerhaftem Spielwissen haben
 weiterhin Zugriff auf die vollständige benötigte Historie. Die

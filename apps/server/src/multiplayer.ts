@@ -416,6 +416,7 @@ export type ActionPersistenceBaseline = {
   expectedStateVersion: number;
   publicEventCount: number;
   engineEventCount: number;
+  engineEventGeneration: number;
   actionReceiptCount: number;
   aiDecisionTraceCount: number;
   loadedPublicEventCount: number;
@@ -1307,10 +1308,14 @@ export class MultiplayerService {
     };
   }
 
-  private async persist(record: StoredMatch): Promise<void> {
+  private async persist(
+    record: StoredMatch,
+    options: { rewound?: boolean } = {},
+  ): Promise<void> {
     ensureMatchResultSnapshot(record);
     await this.storage.save(record);
-    this.releaseTerminalAiRuntime(record);
+    if (options.rewound) this.releaseAiRuntimeFor(record.match.matchId);
+    else this.releaseTerminalAiRuntime(record);
     for (const observer of this.persistenceObservers) await observer(record);
   }
 
@@ -4407,7 +4412,7 @@ export class MultiplayerService {
           };
         record.match.matchVersion += 1;
         record.match.updatedAt = this.now();
-        await this.persist(record);
+        await this.persist(record, { rewound: true });
         return {
           ok: true,
           requesterPayload: this.payloadFor(record, input.side),
@@ -5466,8 +5471,7 @@ export class MultiplayerService {
       }
       record.match.matchVersion += 1;
       record.match.updatedAt = this.now();
-      await this.persist(record);
-      if (status === "accepted") this.releaseAiRuntimeFor(record.match.matchId);
+      await this.persist(record, { rewound: status === "accepted" });
       return {
         ok: true,
         requesterPayload: this.payloadFor(record, pending.requestedBy),

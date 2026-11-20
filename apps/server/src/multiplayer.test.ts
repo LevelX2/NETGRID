@@ -14,7 +14,7 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
-import { DatabaseSync } from "node:sqlite";
+import { DatabaseSync, StatementSync } from "node:sqlite";
 import {
   aiAttemptStateSnapshotId,
   INITIAL_STATE_SNAPSHOT_ID,
@@ -55,6 +55,7 @@ import {
   CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   getLegalActions,
+  getPlayerView,
   hashState,
   quoteRandomizedTraceBidSelection,
 } from "@netgrid/engine";
@@ -3745,6 +3746,133 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     storage.close();
   });
 
+  it("loads only new SQLite engine rows in KI games and rebuilds after undo and reopen", async () => {
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netgrid.sqlite");
+    const options = { dbPath, backupDir: join(dir, "backups") };
+    const serviceOptions = { tokenSalt: "incremental-engine-journal" };
+    let storage = new SqliteMatchStorage(options);
+    let service = new MultiplayerService(storage, serviceOptions);
+    const nativeAll = StatementSync.prototype.all;
+    const reads: number[][] = [];
+    const audit = vi.spyOn(StatementSync.prototype, "all").mockImplementation(
+      function (this: StatementSync, ...args: Parameters<StatementSync["all"]>) {
+        const rows = Reflect.apply(nativeAll, this, args) as ReturnType<StatementSync["all"]>;
+        if (this.sourceSQL.includes("FROM engine_events") && this.sourceSQL.includes("AS eventJson"))
+          reads.push(rows.map(({ eventIndex }) => Number(eventIndex)));
+        return rows;
+      },
+    );
+    try {
+      const created = await service.createMatch({
+        mode: "human_corp_vs_runner_ai",
+        hostSide: "corp",
+        seed: "incremental-engine-journal",
+        aiPacingMode: "manual",
+      });
+      const corp = {
+        side: "corp" as const,
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      };
+      const load = async () => {
+        const record = await storage.loadForAction(created.matchId, { side: "corp" });
+        if (!record?.actionPersistenceBaseline) throw new Error("Missing action baseline");
+        return record;
+      };
+      const fullRead = (record: StoredMatch) =>
+        [record.gameState.eventLog.map((_, index) => index)];
+      reads.length = 0;
+      const initial = await load();
+      expect(initial.gameState.eventLog.length).toBeGreaterThan(0);
+      expect(reads).toEqual(fullRead(initial));
+
+      reads.length = 0;
+      await submitChoice(service, created.matchId, corp, "keep", "journal-keep");
+      expect(reads).toEqual([]);
+      const afterKeep = await load();
+      expect(reads).toEqual([[initial.gameState.eventLog.length]]);
+      expect(afterKeep.gameState.eventLog.slice(0, -1)).toEqual(initial.gameState.eventLog);
+      expect(afterKeep.gameState.eventLog[0]).toBe(initial.gameState.eventLog[0]);
+      afterKeep.gameState.eventLog.pop();
+      reads.length = 0;
+      expect((await load()).gameState.eventLog).toHaveLength(initial.gameState.eventLog.length + 1);
+      expect(reads).toEqual([]);
+
+      await submit(service, created.matchId, corp, (action) => action.type === "mandatory_draw", "journal-mandatory");
+      const beforeGain = await load();
+      const gain = await submit(service, created.matchId, corp, (action) => action.type === "gain_credit", "journal-gain");
+      const beforeUndo = await load();
+      const releaseAiRuntime = vi.spyOn(
+        service as unknown as { releaseAiRuntimeFor(matchId: string): void },
+        "releaseAiRuntimeFor",
+      );
+      const undo = await service.requestUndo({
+        matchId: created.matchId,
+        side: corp.side,
+        sessionToken: corp.sessionToken,
+        clientKnownMatchVersion: beforeUndo.match.matchVersion,
+        targetEventId: gain.publicEvent!.eventId,
+      });
+      if (!undo.ok) throw new Error(undo.error.message);
+      expect(releaseAiRuntime).toHaveBeenCalledExactlyOnceWith(created.matchId);
+      releaseAiRuntime.mockRestore();
+      reads.length = 0;
+      const rewound = await load();
+      expect(reads).toEqual(fullRead(beforeGain));
+      expect(rewound.gameState.eventLog).toEqual(beforeGain.gameState.eventLog);
+      expect(hashState(rewound.gameState)).toBe(hashState(beforeGain.gameState));
+      expect(rewound.actionPersistenceBaseline!.engineEventGeneration)
+        .toBeGreaterThan(beforeUndo.actionPersistenceBaseline!.engineEventGeneration);
+
+      const draw = await submit(service, created.matchId, corp, (action) => action.type === "draw_card", "journal-draw");
+      expect(draw.publicEvent!.eventId).toBe(gain.publicEvent!.eventId);
+      reads.length = 0;
+      const beforeReopen = await load();
+      expect(reads).toEqual([[rewound.gameState.eventLog.length]]);
+      expect(beforeReopen.gameState.eventLog.at(-1)?.publicPayload.actionType).toBe("draw_card");
+      expect(await service.replayMatch(created.matchId)).toMatchObject({
+        ok: true,
+        finalStateHash: hashState(beforeReopen.gameState),
+      });
+
+      service.closeStorage();
+      storage = new SqliteMatchStorage(options);
+      service = new MultiplayerService(storage, serviceOptions);
+      reads.length = 0;
+      expect(await service.reconnectMatch(created.matchId, corp)).toHaveProperty("playerView");
+      expect(reads).toEqual([]);
+      const reopened = await load();
+      expect(reads).toEqual(fullRead(beforeReopen));
+      expect(reopened.gameState.eventLog).toEqual(beforeReopen.gameState.eventLog);
+      for (const side of ["corp", "runner"] as const)
+        expect(getPlayerView(reopened.gameState, side)).toEqual(getPlayerView(beforeReopen.gameState, side));
+      expect(await service.replayMatch(created.matchId)).toMatchObject({
+        ok: true,
+        finalStateHash: hashState(beforeReopen.gameState),
+      });
+
+      const writer = new DatabaseSync(dbPath);
+      try {
+        writer.prepare(`UPDATE engine_events SET event_json = event_json
+          WHERE match_id = ? AND event_index = ?`)
+          .run(created.matchId, reopened.gameState.eventLog.length - 1);
+        await expect(storage.saveActionDelta(reopened)).rejects.toMatchObject({
+          code: "action_persistence_conflict",
+        });
+        reads.length = 0;
+        expect((await load()).gameState.eventLog).toEqual(reopened.gameState.eventLog);
+        expect(reads).toEqual(fullRead(reopened));
+      } finally {
+        writer.close();
+      }
+    } finally {
+      audit.mockRestore();
+      service.closeStorage();
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
   it("keeps native history tails accurate through reopen, undo and reapply after 80 events", async () => {
     const dir = await tempStorageDir();
     const dbPath = join(dir, "netgrid.sqlite");
@@ -3827,6 +3955,8 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
         actionReceiptCount: final.actionReceipts.length,
         aiDecisionTraceCount: final.aiDecisionTraces?.length ?? 0,
       });
+      expect(finalBounded.actionPersistenceBaseline!.engineEventGeneration)
+        .toBeGreaterThan(bounded.actionPersistenceBaseline!.engineEventGeneration);
       expect(await service.replayMatch(created.matchId)).toMatchObject({ ok: true, errors: [] });
     } finally { storage.close(); }
   });
@@ -17389,6 +17519,7 @@ class ActionDeltaTrackingStorage implements MultiplayerStorage {
       expectedStateVersion: record.gameState.stateVersion,
       publicEventCount: record.eventLog.length,
       engineEventCount: record.gameState.eventLog.length,
+      engineEventGeneration: 0,
       actionReceiptCount: record.actionReceipts.length,
       aiDecisionTraceCount: record.aiDecisionTraces?.length ?? 0,
       loadedPublicEventCount: record.eventLog.length,
