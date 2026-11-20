@@ -31,9 +31,10 @@ Die Engine ist alleinige Regelautorität. UI, Server und KI reichen nur angebote
 
 ## Engine und Karten
 
-„Amt für Umleitungen“ (Corp) und „Redaktionsschluss“ (Runner) sind als
-Standarddecks in Version 0.2.0 mit je 45 Karten verfügbar. Im gepaarten
-Vergleich vom 19.11.2026 spielte jede Fassung auf schwerer KI-Stufe fünf
+Als Standarddecks stehen „Amt für Umleitungen“ 0.3.0 (Corp),
+„Redaktionsschluss“ 0.2.0 (Runner) und „Doppelte Buchführung“ 0.1.0 (Corp)
+mit je 45 Karten zur Verfügung. Im gepaarten Vergleich der beiden
+ursprünglichen Decks vom 19.11.2026 spielte jede Fassung auf schwerer KI-Stufe fünf
 Seeds gegen jeweils dieselben zehn zufällig gezogenen Standardgegner. Alle
 200 Partien endeten regulär und wurden per Replay bestätigt
 (Evidence-Registry, Paarungen 783–822).
@@ -60,6 +61,27 @@ gingen von 206 auf 188 zurück. Gegen R&D Express gingen sieben Agenden
 weniger verloren. Die Bilanz des
 Amts stieg von neun auf 13 Siege. Alle Nachspiele endeten regulär mit
 geprüftem Replay (Paarungen 823–832, SP-880, KI-Stand `0f2028ed6`).
+
+Für Amt 0.3.0 ersetzen zwei Simon Francisco und ein Rasmin Bridger die beiden
+Namatoki Plaza und den Falsified-Transactions Expert. Am 20.11.2026 spielten
+beide Amtsfassungen dieselben 50 Seeds auf Stand `981d5ab17`. Alle 100 Replays
+waren gültig, alle 50 Kontrollspiele von 0.2.0 reproduzierten den früheren
+Endzustand. Mit 0.3.0 sanken die HQ-Diebstähle von 56 auf 54, die daraus
+verlorenen Agendapunkte von 127 auf 118 und die Zahl der betroffenen Partien
+von 33 auf 29. Die Runner stahlen 50 statt 44 Agenden aus Remotes, die Corp
+gewann 12 statt 13 Partien. Simon kürzte zwei HQ-Zugriffe um je eine Karte.
+Rasmin kostete die Runner im HQ acht Credits und beendete drei HQ-Runs
+(Paarungen 833–842, SP-881/882).
+
+„Doppelte Buchführung“ kombiniert drei Falsified-Transactions Expert mit
+Virus Test Site als Markenspender. Eine mit dem Standarddeck gespielte
+Regelsequenz bestätigt die Übertragung von drei Entwicklungsmarkern auf ein
+frisch installiertes Project Zurich und die Wertung für zwei Punkte im selben
+Zug. In zehn KI-Partien gegen R&D Interface Dig und Bit-Denial Lock kam
+der Expert in jeder Partie auf die Hand. Nur in einer Partie lagen ein
+entwickelter Spender und ein anderes entwickelbares Ziel aus, als die Corp
+den Expert spielen konnte. Die KI spielte ihn keinmal und gewann eine der
+zehn Partien (Paarungen 843–844).
 
 „Dr. Dreffs letzte Visite“ ist als Standarddeck mit 45 Karten,
 20 Agendapunkten und deutscher/englischer Anleitung verfügbar. Version 1.3.0
