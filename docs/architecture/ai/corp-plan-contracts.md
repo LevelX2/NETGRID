@@ -200,6 +200,13 @@ auch vor einem gemeinsamen Beschleunigungsschritt erhalten. Andere
 Zielagenden bleiben verfügbar; ein zur Asseterhaltung benötigter neuer
 Remote wird nicht verdrängt.
 
+Bei einer vollständig finanzierten Installation mit Wertung im selben Zug
+darf der vorbereitete Remote den neuen nur verdrängen, wenn dieselbe Agenda
+dort ebenfalls in diesem Zug für mindestens gleich viele Punkte gewertet
+werden kann. Würde die Installation den benötigten Markenspender trashen,
+erhält die Planwahl die belegte Wertungsroute im neuen Remote. Der
+Score-Owner prüft anschließend die Reserven für die gesamte Route (SP-883).
+
 Vor dem Erhalt einer vorbereiteten Agenda-/Remotebindung vergleicht der
 Score-Owner bereits zugelassene terminale HQ-Agendas für denselben Remote.
 Eine bereits zugelassene siegbringende HQ-Agenda verdrängt auch die

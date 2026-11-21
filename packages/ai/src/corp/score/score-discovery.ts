@@ -331,6 +331,18 @@ export function reconcileCorpScoreProjects({
       )
       .map((project) => project.agendaInstanceId!),
   );
+  const isFundedSameTurnInstall = (project: CorpScoreProjectSignal) =>
+    project.phase === "install_agenda" &&
+    project.feasible &&
+    project.sameTurnCloseout &&
+    project.sameTurnConversionProof === "engine_quoted_path";
+  const preparedSameTurnInstalls = proposedScoreProjects.filter(
+    (project) =>
+      isFundedSameTurnInstall(project) &&
+      project.serverId !== undefined &&
+      project.serverId !== "new_remote" &&
+      !requiresReprotection(project),
+  );
   const concreteScoreProjectsBeforeOpeningRush = uniqueScoreProjects(
     proposedScoreProjects.filter(
       (project) =>
@@ -339,6 +351,14 @@ export function reconcileCorpScoreProjects({
           project.serverId === "new_remote" &&
           !assetPreservation.preservingProjectIds.has(project.projectId) &&
           project.agendaInstanceId !== undefined &&
+          // A prepared fort can replace a funded install-and-score only if
+          // this agenda can also finish there before the Runner acts.
+          (!isFundedSameTurnInstall(project) ||
+            preparedSameTurnInstalls.some(
+              (other) =>
+                other.agendaInstanceId === project.agendaInstanceId &&
+                other.agendaPoints >= project.agendaPoints,
+            )) &&
           (residentScoreDefenseBinding?.agendaInstanceId ===
             project.agendaInstanceId ||
             agendaInstancesWithEngineQuotedReusableRemote.has(
