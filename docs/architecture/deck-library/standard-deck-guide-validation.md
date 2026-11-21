@@ -54,13 +54,13 @@ Ob er eine Kartenkombination vorbereitet und ausführt, lässt sich an diesen
 einzelnen Entscheidungen prüfen.
 
 Für „Doppelte Buchführung“ 0.1.0 enthält Paarung 843 in
-`reproduction_json.guidedExample` eine solche Stellung. Übernahm die schwere
-Corp-KI nach den ersten 15 gespeicherten Aktionen, lagen auf Virus Test Site
-drei Marker und Project Zurich war installiert. Die KI spielte den Expert,
-verschob alle drei Marker und wertete Zurich für zwei Punkte. Ihr Replay
-erreichte den gespeicherten Hash `fnv1a:1d13be8d`. Übernahm sie eine Aktion
-früher, lag Zurich noch auf der Hand. Sie installierte Sleeper vor HQ, nahm
-einen Credit und beendete den Zug (`fnv1a:6a4f901d`). In beiden Stellungen
-führte sie `corp.fast_advance` als aktive Strategie (Quellstand `e2dcd5849`).
-In den zehn frei gespielten Pilotpartien der Paarungen 843 und 844 hatte die
-Corp den Expert jedes Mal auf der Hand und spielte ihn keinmal.
+`reproduction_json.guidedExample` eine solche Stellung. Nach 14 gespeicherten
+Aktionen liegen drei Marker auf Virus Test Site und Project Zurich ist in HQ.
+Auf Stand `a7180a402` installiert die schwere Corp-KI Zurich in einen neuen
+Remote, spielt den Expert, verschiebt alle drei Marker und wertet für zwei
+Punkte. Übernimmt sie erst nach der Installation, erreicht sie mit derselben
+Umbuchung ebenfalls den gespeicherten Replay-Hash `fnv1a:1d13be8d`. Vor der
+Korrektur wählte sie beim früheren Einstieg Sleeper vor HQ und beendete den
+Zug mit null Punkten (`fnv1a:6a4f901d`). In beiden Fällen war schnelles
+Werten die aktive Strategie. Die freie Nutzung des Expert ist in den
+Paarungen 843–844 und 850–851 ausgewiesen.

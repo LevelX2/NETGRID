@@ -83,6 +83,17 @@ entwickelter Spender und ein anderes entwickelbares Ziel aus, als die Corp
 den Expert spielen konnte. Die KI spielte ihn keinmal und gewann eine der
 zehn Partien (Paarungen 843–844).
 
+Seit `a7180a402` installiert die Corp in dieser Kontrollstellung auch
+Project Zurich selbst. Der Score-Owner erhält die einzige finanzierte
+Wertungsroute, wenn die Agenda im vorhandenen Remote ihren Markenspender
+verdrängen würde (SP-883). Die zehn freien Vergleichsspiele gegen dieselben
+Gegner mit denselben Seeds endeten mit identischen Endzustands-Hashes.
+Der Expert war in allen zehn Spielen auf der Hand, wurde keinmal gespielt
+und die Corp gewann erneut eine Partie (Paarungen 850–851). In der vierten
+Partie gegen Bit-Denial Lock hätte die erste berechnete Umbuchung die
+Verteidigungsreserve unterschritten. Bei der zweiten Gelegenheit wertete die
+Corp den Markenspender Employee Empowerment direkt für drei Punkte.
+
 „Dr. Dreffs letzte Visite“ ist als Standarddeck mit 45 Karten,
 20 Agendapunkten und deutscher/englischer Anleitung verfügbar. Version 1.3.0
 enthält je ein Reclamation Project und Corporate Shuffle sowie neu Red
