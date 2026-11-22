@@ -680,8 +680,16 @@ export function chronicleEventDetail(
       undefined,
       "run",
     );
-  if (action === "jack_out")
+  if (action === "jack_out") {
+    const number = n("jackOutIcePosition");
+    const titleKey =
+      number !== undefined
+        ? "event.runJackedOutBeforeIce"
+        : b("jackOutBeforeAccess") === true
+          ? "event.runJackedOutBeforeAccess"
+          : "event.runJackedOut";
     return {
+      title: t(titleKey, { subject, server, number: known(number) }),
       description: detail(
         ability === "viral_15_jack_out_tax"
           ? "viralJackOut"
@@ -689,19 +697,31 @@ export function chronicleEventDetail(
         { server, amount: known(n("jackOutAdditionalCost")) },
       ),
     };
-  if (ability === "rio_de_janeiro_passed_ice")
-    return say(
-      "rio",
-      {
-        ice: name(d("passedIceDefinitionId")) ?? target,
-        roll: known(roll),
-        outcome: detail(
-          b("rioRunEnded") === true ? "runEnded" : "runContinues",
-        ),
-      },
-      undefined,
-      "run",
-    );
+  }
+  if (ability === "rio_de_janeiro_passed_ice") {
+    const ice = name(d("passedIceDefinitionId"));
+    const number = n("passedIcePosition");
+    const location =
+      number === undefined
+        ? (ice ?? t("card.unknown"))
+        : ice
+          ? t("details.numberedNamedIce", { number, ice })
+          : t("details.numberedIce", { number });
+    const ended = b("rioRunEnded") === true;
+    return {
+      ...say(
+        "rio",
+        {
+          ice: location,
+          roll: known(roll),
+          outcome: detail(ended ? "runEnded" : "runContinues"),
+        },
+        undefined,
+        "run",
+      ),
+      importance: ended ? "critical" : "important",
+    };
+  }
   if (n("vacuumLinkDieRoll", "rezzedIceRewindDieRoll") !== undefined)
     return say(
       b("vacuumLinkRewindApplied") === true ||

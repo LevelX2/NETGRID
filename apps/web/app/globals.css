@@ -10922,8 +10922,7 @@ section[data-testid="legal-actions"].cueHighlight {
 
 .agendaActiveCounterBadge,
 .projectVeniceActionCounterBadge,
-.projectZurichCreditCounterBadge,
-.iceMarkModifierCounterBadge {
+.projectZurichCreditCounterBadge {
   position: absolute;
   right: 6px;
   top: 30px;
@@ -10959,18 +10958,6 @@ section[data-testid="legal-actions"].cueHighlight {
   text-shadow: 0 1px 1px rgb(0 0 0 / 0.55);
   pointer-events: auto;
   cursor: help;
-}
-
-.iceMarkModifierCounterBadge {
-  border-color: color-mix(in srgb, var(--ice), white 26%);
-  background:
-    radial-gradient(circle at 30% 22%, rgb(255 255 255 / 0.3), transparent 32%),
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--ice), #10363c 28%),
-      rgb(12 31 38 / 0.96)
-    );
-  color: color-mix(in srgb, var(--ice), white 82%);
 }
 
 .counterHelpTooltipTrigger:focus-visible {

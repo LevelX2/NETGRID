@@ -74,6 +74,14 @@ verlorenen Credits aus den beiden öffentlichen Ergebnisfeldern.
 Geplante Mengen sind kein Ergebnis: Bei unterbrochenem Kartenziehen zählt
 `resolvedEffects[].amount`, nicht die ursprünglich geplante `drawCardsAmount`.
 Verzögertes Agenda-Stehlen darf noch keine gewonnenen Agendapunkte melden.
+Die Chronik zeigt beim Jack-out den öffentlichen Server und die nächste
+ICE-Position beziehungsweise den Ausstieg vor dem Zugriff im Titel. Sie
+führt den Würfelwurf von Rio de Janeiro City Grid zusammen mit der passierten
+ICE-Position und dem Run-Ergebnis als eigenen Eintrag neben den Subroutinen.
+Auf dem Spielbrett zeigt eine Stärkeplakette bei ICE mit gedrucktem Zahlenwert
+die effektive Änderung gegenüber dem Aufdruck. Der ICE-Marker bleibt in den
+Kartendetails sichtbar.
+
 Die Chronik blendet die Zugriffsbestätigung `decline_trash` aus und zeigt
 öffentliche Effekte desselben Ereignisses weiterhin als eigene Einträge.
 Der gemeinsame Formatter beschreibt die Aktion als Zugriffsabschluss, da sie
