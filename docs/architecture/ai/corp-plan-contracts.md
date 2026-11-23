@@ -1292,6 +1292,19 @@ erneuten Härtung resident.
 Fortschritt wird über effektiven Schutz und Nutzbarkeit gemessen, nicht über
 ICE-Anzahl allein.
 
+**Offene Bewertung an der Grenze zwischen Remote-, Economy- und Scoreplan.**
+Ein für die Wertung vorgesehenes Fort kann bis zum frühesten tragfähigen
+Agendaeinbau eine auszahlbare Wirtschaftskarte schützen. Entscheidend für
+den Vergleich sind die vor diesem Termin erreichbaren Auszahlungen, die
+Kosten einer Räumung, die finanzierbare Verteidigung und das Risiko der
+verbleibenden Agenda in HQ. Eine im nächsten Corp-Zug bereits tragfähige
+Wertung ist der Gegenfall. Beim Vergleich von sofortigem Advance mit
+verdeckter Installation und Finanzierung ändert sich auch, was der Runner
+vor seinem nächsten Zug über das Fort weiß. Eine Bewertung über den
+Gegnerzug muss diese öffentliche Information und die zusätzliche Zeit bis
+zur Wertung gemeinsam berücksichtigen. Diese Varianten sind eine offene
+Fähigkeit der bestehenden Owner. Die ausführbare Aktion wählt der TurnPlanner.
+
 Ein vorbereitetes Zielremote bleibt über Economy-, Draw-, Punish- und
 Central-Responses erhalten. Remote-Optionswert, Defense-Wert, Fundingwert und
 Scorewert werden getrennt zugerechnet.
