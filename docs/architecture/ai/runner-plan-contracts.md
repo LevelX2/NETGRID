@@ -651,6 +651,17 @@ Siegagenda ihren Steal finanziert. Der Zentraldruck bindet den Anspruch an
 die konkrete Archiv-Action. Normale und spekulative Zugriffe behalten ihre
 jeweiligen Prioritätsklassen.
 
+Ein HQ-Zugriff ohne Diebstahl oder Trash verbraucht die gewöhnliche
+Zugriffskadenz. Bei einem legalen Basisrun mit garantiertem, finanziertem
+Normalzugriff prüft der Zentraldruck den nächsten HQ-Zugriff erneut, wenn
+weiterhin unbekannte Karten oder ein konkreter bezahlbarer Zugriffsertrag
+vorliegen. Das HQ-Gedächtnis liefert den aktuellen Grenznutzen. Der
+TurnPlanner vergleicht die Route mit den anderen Klickoptionen. Bestehende
+Reserve-, Handpuffer- und Sicherheitsprüfungen gelten auch für diese
+Route. Nach dem tatsächlichen Zugriff wird neu geplant. Das native
+Fixture aus `match_910071d4b10c4a02`, Entscheidung 19, belegt den Folge-Run
+unter derselben Zentraldruckinstanz.
+
 Die Aktionsdiagnostik jeder Zentralroute führt den ausgewerteten Belief-Stand.
 Ein öffentlich beobachteter Corp-Draw invalidiert die bekannte R&D-Spitze
 und verändert die Zugriffsbewertung. Die D112-Gegenprobe hält die LegalActions
