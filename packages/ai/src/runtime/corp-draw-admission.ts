@@ -42,6 +42,7 @@ export type CorpDrawAdmissionAssessment = {
   disposition:
     | "admitted"
     | "defer_for_capacity_release"
+    | "defer_for_current_funding"
     | "blocked_attempt_budget"
     | "blocked_unknown_projection"
     | "blocked_end_turn_overflow"
@@ -81,6 +82,7 @@ export function assessCorpDrawAdmission(params: {
     terminalNeedBeforeMandatoryDraw: boolean;
   };
   allowFinalClickScoreMaterialReplacement?: boolean;
+  currentFundingHeadActionId?: string;
   punishSearch?: {
     nextMandatoryDrawCount: number | undefined;
     spareNonAgendaCount: number;
@@ -209,6 +211,12 @@ export function assessCorpDrawAdmission(params: {
   } else if (!validProjection || !consequenceFactsKnown || clickCost > params.currentClicks) {
     disposition = "blocked_unknown_projection";
   } else if (
+    params.purpose === "score_defense_answer_search" &&
+    params.priorityClass === "P4" &&
+    params.currentFundingHeadActionId
+  ) {
+    disposition = "defer_for_current_funding";
+  } else if (
     params.purpose === "punish_component_search" &&
     (!punishSearch || !mandatoryCountKnown)
   ) {
@@ -320,6 +328,11 @@ export function assessCorpDrawAdmission(params: {
       `corp_draw_final_click_score_material_replacement:${
         params.allowFinalClickScoreMaterialReplacement === true
       }`,
+      ...(params.currentFundingHeadActionId
+        ? [
+            `corp_draw_competing_current_funding:${params.currentFundingHeadActionId}`,
+          ]
+        : []),
       ...(punishSearch
         ? [
             `corp_punish_next_mandatory_draw_count:${mandatoryCount ?? "unknown"}`,

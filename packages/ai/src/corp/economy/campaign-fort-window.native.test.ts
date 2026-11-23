@@ -4,6 +4,7 @@ import {
   createGame,
   getLegalActions,
   hashState,
+  replayEvents,
 } from "@netgrid/engine";
 import type {
   GameState,
@@ -167,3 +168,87 @@ it.each([
     }
   },
 );
+
+it("collects the two current BBS payouts before searching for ICE with five cards in HQ", () => {
+  const initial = stateAt(fixture.scenarios[0]!);
+  let state = initial;
+  const fundingNeed = "score-support:agenda:c2hp:r1";
+  for (const [step, type] of [
+    "install_card",
+    "rez_card",
+    "activated_card_ability",
+    "activated_card_ability",
+  ].entries()) {
+    const input = buildAiDecisionInput(state, "corp", {
+      difficulty: "hard",
+      ownDeckSnapshot: fixture.corpSnapshot,
+    });
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+    const decision = chooseAiAction(
+      input,
+      simulationEngineRuntimeOptions(state),
+    );
+    const action = input.legalActions.find(
+      (a) => a.actionId === decision.actionId,
+    )!;
+    expect(action).toMatchObject({
+      type,
+      source: "c37x",
+      expiresAtStateVersion: state.stateVersion,
+    });
+    expect(decision).toMatchObject({ fallbackUsed: false, timeoutUsed: false });
+    const trace = decision.decisionDebug!.planFirstDecision!;
+    expect(trace).toMatchObject({
+      selectedPlan: { moduleId: "corp.economy", parentNeedId: fundingNeed },
+      route: { actionId: action.actionId, stateVersion: state.stateVersion },
+    });
+    if (step === 1 || step === 2) {
+      expect(input.playerView.own.gripOrHq).toHaveLength(5);
+      const draw = input.legalActions.find((a) => a.type === "draw_card")!;
+      expect(trace.dispositions).toContainEqual({
+        actionId: draw.actionId,
+        ownerModuleId: "corp.defend_servers",
+        disposition: "explicitly_nonproductive",
+        evidenceCode:
+          "corp_draw_admission:defer_for_current_funding:score_defense_answer_search",
+      });
+    }
+    state = execute(state, action);
+  }
+  expect([state.corp.credits, state.corp.clicks, state.corp.hq.length]).toEqual(
+    [8, 0, 5],
+  );
+  expect(state.cardInstances.c37x?.counters?.bit).toBe(12);
+
+  state = execute(
+    state,
+    getLegalActions(state, "corp").find((a) => a.type === "end_turn")!,
+  );
+  const run = getLegalActions(state, "runner").find(
+    (a) => a.type === "start_run" && a.payload?.serverId === "r1",
+  )!;
+  state = execute(state, run);
+  // Pass the outer ICE and keep the eight credits for the inner ICE.
+  state = execute(
+    state,
+    getLegalActions(state, "corp").find((a) => a.type === "decline_rez")!,
+  );
+  state = execute(
+    state,
+    getLegalActions(state, "runner").find((a) => a.type === "continue_run")!,
+  );
+  const rez = getLegalActions(state, "corp").find(
+    (a) => a.type === "rez_ice" && a.source === "c2u5",
+  )!;
+  expect(rez.costs).toEqual([{ credits: 8 }]);
+  state = execute(state, rez);
+  expect(state.corp.credits).toBe(0);
+  expect(state.cardInstances.c2u5?.rezzed).toBe(true);
+  const replay = replayEvents(
+    initial,
+    state.eventLog.slice(initial.eventLog.length),
+  );
+  if (!replay.ok)
+    throw Error("Native replay rejected the funding and rez sequence");
+  expect(hashState(replay.state)).toBe(hashState(state));
+});

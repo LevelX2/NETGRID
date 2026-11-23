@@ -212,6 +212,7 @@ export function arbitrateCorpHandConversionBeforeDraw(
     parentProvidesExactSameTurnCapacityRelease?: boolean;
     allowFinalClickScoreMaterialReplacement?: boolean;
     terminalNeedBeforeMandatoryDraw?: boolean;
+    currentFundingHeadActionId?: string;
     punishSearch?: NonNullable<
       Parameters<typeof assessCorpDrawAdmission>[0]["punishSearch"]
     >;
@@ -253,9 +254,24 @@ export function arbitrateCorpHandConversionBeforeDraw(
     return assessment.disposition === "admitted";
   };
 
+  const currentFundingByDeferredDraw = new Map(
+    domain.economyNeeds.flatMap((signal) => {
+      if (signal.kind !== "parent_funding") return [];
+      const route = signal.fundingRouteAssessment;
+      const deferral = route?.scoreProtectionDrawDeferral;
+      return deferral?.stateVersion === input.playerView.stateVersion &&
+        route?.headActionId &&
+        signal.actionIds.includes(route.headActionId)
+        ? [[deferral.defenseId, route.headActionId] as const]
+        : [];
+    }),
+  );
   const defenseNeeds: CorpPlanDomain["defenseNeeds"] =
     domain.defenseNeeds.flatMap((signal): CorpPlanDomain["defenseNeeds"] => {
       if (signal.kind === "score_protection_draw") {
+        const currentFundingHead = currentFundingByDeferredDraw.get(
+          signal.defenseId,
+        );
         return assess({
           routeId: signal.defenseId,
           ownerModuleId: "corp.defend_servers",
@@ -268,6 +284,9 @@ export function arbitrateCorpHandConversionBeforeDraw(
           terminalNeedBeforeMandatoryDraw:
             signal.delegatedPriorityClass === "P1" ||
             signal.delegatedPriorityClass === "P2",
+          ...(currentFundingHead
+            ? { currentFundingHeadActionId: currentFundingHead }
+            : {}),
         })
           ? [signal]
           : [];

@@ -2830,6 +2830,18 @@ normalen Aktionen, durchgehend mit demselben Parent und Engine-Replay.
 G12 D211 erhält zwei Basiskredite und Accounts Receivable mit sechs Credits
 Nettozufluss statt des schwächeren Bankaufbaus.
 
+Bei mindestens vier HQ-Karten konkurriert eine freiwillige Basis-Ziehaktion
+für zusätzlichen Fortschutz mit der konkreten Finanzierung desselben
+mehrzügigen P4-Scoreprojekts. Economy bindet einen bereits installierten
+endlichen Pool im Zielfort. Es zählt der aktuell legale Abruf oder der
+kostenlose Rez mit bestätigter Auszahlungskapazität. Die Ziehzulassung stellt
+die Suche zurück, wenn ihr Klick eine unmittelbar erreichbare Rez- oder
+Wertungsschwelle verfehlt oder die Auszahlung im quotierten Ein-Zug-Horizont
+verkleinert. Jeder Abruf wird neu gebunden. Dringende Schutz- und
+Wertungsentscheidungen behalten ihre Priorität. Im rekonstruierten Seed 8
+der Paarung 846 ergeben zwei Abrufe bei fünf HQ-Karten acht Credits. Damit
+ist der Rez von Haunting Inquisition für den folgenden Angriff bezahlbar.
+
 Ein bereits zugelassener P2-Rezreservebedarf für vorhandenes, ungeresstes ICE
 darf denselben kostenlosen aktuellen Aufbau nutzen, wenn sein absolutes Ziel
 zur beobachteten Bank und Lücke passt. Die gesamte Auszahlung im Restzug muss

@@ -1374,10 +1374,13 @@ export function corpRequiredEconomyNeeds(
   immediateFundingActionIds: string[],
   terminalFundingActionIds: string[],
   candidates: readonly ActionSemanticCandidate[],
+  comparedScoreProtectionDrawIds: ReadonlySet<string> = new Set(),
 ): CorpCorePlanDomain["economyNeeds"] {
   const projectsWithCurrentProtectionSupport = new Set(
     defenseNeeds.flatMap((need) =>
       need.kind === "generic" ||
+      (need.kind === "score_protection_draw" &&
+        comparedScoreProtectionDrawIds.has(need.defenseId)) ||
       (need.kind === "score_protection_install" && need.effect === "progress")
         ? []
         : [need.parentProjectId],
