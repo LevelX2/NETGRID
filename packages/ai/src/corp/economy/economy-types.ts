@@ -144,6 +144,7 @@ export type CorpEconomyDevelopmentSignal = CorpEconomySignalBase & {
   };
   riskAdjustment?: {
     serverId: string;
+    fundedLightProtection?: true;
     protectionState:
       | "unprotected"
       | "protected_contestable"

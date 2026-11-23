@@ -1292,6 +1292,15 @@ erneuten Härtung resident.
 Fortschritt wird über effektiven Schutz und Nutzbarkeit gemessen, nicht über
 ICE-Anzahl allein.
 
+Ein für die Wertung vorgesehenes Fort kann bis zum tragfähigen Agendaeinbau
+eine auszahlbare Wirtschaftskarte schützen. Die begrenzte Nutzung eines
+endlichen Pools ist beim [Economy-Owner](#6-corpeconomy) beschrieben. Beim
+Vergleich zwischen sofortigem Advance und verdeckter Installation mit
+Finanzierung bleibt eine weitergehende Bewertungsfrage offen. Sichtbare
+Marker verändern die Angriffswahl des Runners, ein späterer Advance kostet
+Zeit und eine in HQ gehaltene Agenda bleibt dort angreifbar. Der Vergleich
+dieser Wege gehört zu den bestehenden Ownern und zum TurnPlanner.
+
 Ein vorbereitetes Zielremote bleibt über Economy-, Draw-, Punish- und
 Central-Responses erhalten. Remote-Optionswert, Defense-Wert, Fundingwert und
 Scorewert werden getrennt zugerechnet.
@@ -2745,6 +2754,20 @@ Kampagne verwenden, wenn sie den konkreten Fehlbetrag deckt und nach der
 Leerung noch ein Installationsklick verbleibt. Ein aktuell legaler
 Score, eine bindende Frist oder ein bereits belegter Platz schließt diese
 Zulassung aus. Die Engine revalidiert Installation, Rez und jeden Abruf.
+
+Ein kostenlos installierbarer, kostenlos rezzbarer endlicher Pool kann auch
+vor seiner vollständigen Leerung Platz für die Agenda machen. Für diese
+Zwischennutzung muss der finanzierte Pfad des Fortprojekts im aktuellen
+Zustand mindestens leichten Schutz bieten. Alle Agenda-Projekte am selben
+Ort müssen nach dem erreichbaren Ertrag dieses Zuges weiterhin an einer
+bekannten Finanzierungs- oder Schutzlücke scheitern. Ein fehlender Schutz-
+oder Finanzierungsbeleg, eine nahe Frist oder eine ausführbare Folge hält
+den Platz frei. Economy rechnet die verbleibenden Abrufe dieses Zuges gegen
+die investierten Klicks. Den Restpool darf die Corp bei einer später legalen
+Agenda-Installation aufgeben. Bei gleichem Auszahlungsertrag bevorzugt die
+gebundene Finanzierungsroute das zugelassene geschützte Fort gegenüber dem
+Neubau. Der konkrete Rez und jeder Abruf werden erneut gegen die übrigen
+Vorhaben abgewogen.
 
 Ein bereits rezzter endlicher Pool kann vor einer sicher geschützten
 Agenda-Installation im selben Zug geleert werden. Score stellt die

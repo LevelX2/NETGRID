@@ -409,6 +409,13 @@ function contributeCorpActionDispositionForCandidate(
     );
   if (
     reservedScoreServerOverflowEvidence &&
+    !domain.economyNeeds.some(
+      (signal) =>
+        signal.kind === "develop_campaign" &&
+        signal.phase === "install" &&
+        signal.cadence.kind === "finite_pool" &&
+        signal.actionIds.includes(candidate.actionId),
+    ) &&
     !facts.corpExactExecutableNonEconomyPlanOwnsAction(domain, candidate)
   ) {
     add(

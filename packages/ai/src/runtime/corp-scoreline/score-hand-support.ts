@@ -38,6 +38,41 @@ export function corpReservedScoreServerIds(
   );
 }
 
+/** A known score blocker must outlast the immediately profitable occupation of the slot. */
+export function scoreInstallWaitsBeyondCampaignPayouts(
+  project: CorpScoreProjectSignal,
+  stateVersion: number,
+  currentPayoutCredits: number,
+  stagedProtectionOutOfReach: boolean,
+): boolean {
+  const need = project.protectionNeed;
+  if (
+    project.phase !== "install_agenda" ||
+    project.feasible ||
+    project.sameTurnCloseout ||
+    project.deadlinePressure ||
+    project.continuationReserve ||
+    project.setupNeed ||
+    (project.fundingMilestone &&
+      project.fundingMilestone.deadline !== "multi_turn") ||
+    !need ||
+    need.parentProjectId !== project.projectId ||
+    need.targetServerId !== project.serverId ||
+    need.observedAtStateVersion !== stateVersion ||
+    need.baseline.knowledge !== "known" ||
+    need.baseline.protection.protectsScore
+  )
+    return false;
+  if (project.routeAssessment === "corp_score_protection_funding_gap") {
+    const gap = project.fundingMilestone?.remainingGap ?? project.fundingGap;
+    return gap !== undefined && gap > currentPayoutCredits;
+  }
+  return (
+    project.routeAssessment === "corp_score_protection_required" &&
+    stagedProtectionOutOfReach
+  );
+}
+
 /** Require the actual Engine trash and the current empty agenda/asset slot. */
 export function corpCampaignSlotJustCleared(
   input: AiDecisionInput,

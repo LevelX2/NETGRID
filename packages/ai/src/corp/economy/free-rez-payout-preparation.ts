@@ -38,8 +38,7 @@ export function corpFreeRezPayoutPreparation(
   const defenseFunding =
     signal.immediateDefenseConversion &&
     signal.incrementalDefenseReserve &&
-    signal.parentPlanInstanceId ===
-      "penw02zfrkklof54c2nuye5att";
+    signal.parentPlanInstanceId === "penw02zfrkklof54c2nuye5att";
   // This reserve pays for already installed ICE before the next Runner turn.
   // Setup may not use more actions before reaching it than the Basic route.
   const defenseSetupFunding =
@@ -98,7 +97,7 @@ export function corpFreeRezPayoutPreparation(
     if (
       !legal ||
       legal.type !== (install ? "install_card" : "rez_card") ||
-      (install && legal.payload?.serverId !== "new_remote") ||
+      (install && legal.payload?.placement !== "root") ||
       legal.source !== candidate.sourceCardInstanceId ||
       !actionMatchesCurrentDecision(input, legal) ||
       !legal.costs.every((cost) =>
@@ -158,6 +157,20 @@ export function corpFreeRezPayoutPreparation(
         removalCondition:
           "Bind the admitted free finite-pool campaign to its current payout-execution and risk quote before using it for parent funding.",
       });
+    const targetServerId = install ? legal.payload?.serverId : server?.id;
+    if (
+      typeof targetServerId !== "string" ||
+      campaign.riskAdjustment.serverId !== targetServerId
+    )
+      return [];
+    const protectedInstall =
+      install &&
+      targetServerId !== "new_remote" &&
+      (campaign.riskAdjustment.fundedLightProtection === true ||
+        campaign.riskAdjustment.protectionState ===
+          "protected_not_contestable");
+    if (install && targetServerId !== "new_remote" && !protectedInstall)
+      return [];
     const currentPayoutExecutions =
       scoreFunding || (install && defenseSetupFunding)
         ? clicks - setupClicks
@@ -182,7 +195,7 @@ export function corpFreeRezPayoutPreparation(
         parentNeedId: signal.parentNeedId!,
         sourceInstanceId: candidate.sourceCardInstanceId,
         sourceDefinitionId: candidate.sourceDefinitionId,
-        sourceServerId: install ? "new_remote" : server!.id,
+        sourceServerId: targetServerId,
         poolCreditsOnRez: profile.poolCredits,
         payoutCredits: profile.payoutCredits,
         payoutClicks: 1 as const,
@@ -194,7 +207,11 @@ export function corpFreeRezPayoutPreparation(
   });
   return preparations.sort(
     (a, b) =>
-      b.payoutCredits - a.payoutCredits || a.actionId.localeCompare(b.actionId),
+      b.payoutCredits - a.payoutCredits ||
+      a.setupClicks - b.setupClicks ||
+      Number(b.sourceServerId !== "new_remote") -
+        Number(a.sourceServerId !== "new_remote") ||
+      a.actionId.localeCompare(b.actionId),
   )[0];
 }
 

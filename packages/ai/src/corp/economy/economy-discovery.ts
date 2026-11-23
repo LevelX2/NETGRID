@@ -181,7 +181,12 @@ export function buildCorpEconomySignals({
           }),
       ),
       ...corpOptionalActionCapacityConversions(input, candidates),
-      ...corpEconomyDevelopmentCampaigns(input, candidates, scoreProjects),
+      ...corpEconomyDevelopmentCampaigns(
+        input,
+        candidates,
+        scoreProjects,
+        remoteProjects,
+      ),
       ...corpHostedBankCycleDevelopment(input, candidates).filter(
         (signal) => !bankInvestments.has(signal.sourceInstanceId),
       ),
