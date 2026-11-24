@@ -196,6 +196,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "agendaPointCost",
   "selfRezAdditionalCostKind",
   "discountedRezSourceCardId",
+  "rootRezDelaysAgendaAccess",
   "rootRezDiscountedIceQuoteJson",
   "discountedRezSourceDefinitionId",
   "discountedRezCostBase",

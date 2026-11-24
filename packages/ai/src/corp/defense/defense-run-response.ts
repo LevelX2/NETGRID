@@ -630,6 +630,29 @@ export function corpExactCardRezSupportAssessment(
     : sourceCard.definitionId
       ? AI_HINTS_BY_CARD.get(sourceCard.definitionId)
       : undefined;
+  const delaysAgendaAccess = hint?.effects?.some(
+    (effect) =>
+      effect.kind === "remote_protection" &&
+      effect.scope === "fort" &&
+      effect.timing === "on_access" &&
+      effect.target === "access.corp_delayed_agenda_score",
+  );
+  if (delaysAgendaAccess) {
+    const productive =
+      pulseAction?.type === "rez_card" &&
+      pulseAction.source === sourceCard.instanceId &&
+      pulseAction.expiresAtStateVersion === input.playerView.stateVersion &&
+      pulseAction.timingPoint === input.playerView.timingPoint &&
+      pulseAction.payload?.rootRezDelaysAgendaAccess === true;
+    return {
+      productive,
+      serverId,
+      value: productive ? 180 : 0,
+      evidenceCode: productive
+        ? "corp_rez_defers_agenda_access_in_current_remote"
+        : "corp_rez_has_no_current_delayed_agenda_access_quote",
+    };
+  }
   const exactAgendaStealTax =
     hint?.effects?.some(
       (effect) =>

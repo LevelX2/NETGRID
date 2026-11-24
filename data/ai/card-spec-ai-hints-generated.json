@@ -46280,6 +46280,20 @@
             "rationale": "Delays immediate agenda steal from a remote run and buys the Corp a scoring window."
           }
         ],
+        "effects": [
+          {
+            "kind": "remote_protection",
+            "scope": "fort",
+            "timing": "on_access",
+            "target": "access.corp_delayed_agenda_score"
+          }
+        ],
+        "functionSignals": ["access.corp_delayed_agenda_score"],
+        "actionTacticSignals": [
+          "effect:remote_protection",
+          "effect_scope:fort",
+          "effect_timing:on_access"
+        ],
         "costProfile": { "credits": 0 },
         "riskTags": ["hidden_root"],
         "quality": {

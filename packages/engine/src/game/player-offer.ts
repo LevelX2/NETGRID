@@ -26,6 +26,7 @@ const internalOfferPayloadKeys = [
   "operationFreeRezRunQuoteJson",
   "postInstallEffectiveRunQuoteJson",
   "rootRezCreditOutcomeQuoteActionId",
+  "rootRezDelaysAgendaAccess",
   "rootRezDiscountedIceQuoteJson",
   "rootRezIceInstallCostQuoteJson",
   "runnerCostPenaltySupportOriginalActionId",

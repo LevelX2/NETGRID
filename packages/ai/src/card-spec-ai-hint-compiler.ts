@@ -3006,6 +3006,17 @@ function deriveClosedMechanicalHintOverlay(
     tacticSignals: [],
     roles: [],
   };
+  if (
+    engine.hiddenReplacementLongtail?.kind === "delayed_agenda_access_replacement"
+  ) {
+    overlay.effects.push({
+      kind: "remote_protection",
+      scope: "fort",
+      timing: "on_access",
+      target: "access.corp_delayed_agenda_score",
+    });
+    overlay.functionSignals.push("access.corp_delayed_agenda_score");
+  }
   const corpUtility = engine.corpUtility;
 
   for (const ability of engine.abilities ?? []) {

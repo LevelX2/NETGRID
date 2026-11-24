@@ -244,6 +244,9 @@ export function buildCorpRunRootRezActions(
           ...corpRootRezCreditOutcomeQuotePayload(creditOutcomeQuote),
         };
       }
+      if (rootRezDelaysAgendaAccess(host, server, cardId, definition)) {
+        action.payload = { ...action.payload, rootRezDelaysAgendaAccess: true };
+      }
       const fortRunRezSupportQuote = quoteCorpFortRunRezSupport(
         host.state,
         cardId,
@@ -268,6 +271,40 @@ export function buildCorpRunRootRezActions(
     ),
   );
   return actions;
+}
+
+function rootRezDelaysAgendaAccess(
+  host: RunRezWindowHost,
+  server: CorpServer,
+  source: CardInstanceId,
+  definition: CardDefinition,
+): boolean {
+  const run = host.state.run;
+  if (
+    server.kind !== "remote" ||
+    host.state.timingPoint !== "run.movement_rez_window" ||
+    run?.position.kind !== "server" ||
+    (run.accessServerOverride ?? run.attackedServerId) !== server.id ||
+    run.breach ||
+    run.successfulRunAccessReplacement ||
+    cardImplementationForDefinitionId(definition.id)?.hiddenReplacementLongtail
+      ?.kind !== "delayed_agenda_access_replacement"
+  )
+    return false;
+
+  const sourceIndex = server.root.indexOf(source);
+  const activeSourceIndex = server.root.findIndex(
+    (id) =>
+      host.cards.cardInstanceFor(id).rezzed &&
+      cardImplementationForDefinitionId(host.cards.definitionFor(id).id)
+        ?.hiddenReplacementLongtail?.kind === "delayed_agenda_access_replacement",
+  );
+  return server.root.some(
+    (id, index) =>
+      index > sourceIndex &&
+      (activeSourceIndex < 0 || index < activeSourceIndex) &&
+      host.cards.definitionFor(id).type === "agenda",
+  );
 }
 
 function rootRezLifecycleIsSolvable(

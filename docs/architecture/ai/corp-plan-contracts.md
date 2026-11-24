@@ -1559,6 +1559,17 @@ sonstige Fortwirkungen bleiben an ihren physischen Runserver gebunden.
 Paarung 662/D257 belegt den alten Fehlpfad und die gebundene HQ-Rez; dies
 erzeugt weder neue LegalActions noch einen zweiten Timing-Owner.
 
+Bei einer verzögerten Agendawertung markiert die Engine die aktuelle
+Root-Rez-Aktion nur im letzten bezahlten Fenster vor dem tatsächlichen
+Remote-Zugriff. Ihre Zugriffsreihenfolge muss eine Agenda hinter der
+noch ungerezzten Quelle enthalten, deren Zugriff keine bereits rezzte Quelle
+verschiebt. Die Markierung bleibt im Corp-internen Angebot. Der CardSpec-Hint
+benennt den auf den Zugang bezogenen Effekt. Der Defense-Owner bindet dieses
+Faktum an Quelle, Aktion, StateVersion und Timingpunkt und prüft die bestehende
+Wertungsreserve. Im Originalzustand der Paarung 894 G12 D241 verzögert die
+kostenlose Rez im letzten Fenster den Diebstahl von Tycho Extension. Der bereits
+ausgelöste Effekt bleibt auch nach dem Trashing der Quelle für den Run erhalten.
+
 Eine kostenlose reine Root-Rez kann im aktuellen Approach eine zuvor
 unbezahlbare ICE-Rez finanzieren. Die Engine bindet
 `CorpRootRezDiscountedIceQuote` an Root-Action, Quelle, ICE, Fort, Run und
