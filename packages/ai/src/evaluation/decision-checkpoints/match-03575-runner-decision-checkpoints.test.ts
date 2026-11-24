@@ -12,6 +12,23 @@ describe("match 03575 runner decision checkpoints", () => {
     expectCheckpointToPass(mutateFixture(traceBidEconomyJson, publishOpenTraceBid));
   });
 
+  it("matches required and forbidden numeric choice values on a legal Trace bid", () => {
+    const checkpoint = mutateFixture(traceBidEconomyJson, publishOpenTraceBid);
+    checkpoint.expectation = {
+      choice: { mustSelectValues: [1], mustNotSelectValues: [0] },
+    };
+    expectCheckpointToPass(checkpoint);
+
+    for (const choice of [{ mustSelectValues: [0] }, { mustNotSelectValues: [1] }]) {
+      checkpoint.expectation = { choice };
+      expect(runAiDecisionCheckpoint(checkpoint)).toMatchObject({
+        ok: false,
+        code: "behavior_regression",
+        message: expect.stringContaining("choice"),
+      });
+    }
+  });
+
   it("keeps the admitted remote probe under its current execution owner", () => {
     expectCheckpointToPass(fixture(rdRepeatFreshMatchpointJson));
   });

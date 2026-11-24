@@ -450,6 +450,8 @@
         "choiceId": "p3_54_delayed_success_41",
         "side": "corp",
         "source": "p3_54.delayed_success:c3it:temporary_hq_ice_encounter_after_successful_run:hq:41",
+        "sourceCardInstanceId": "c3it",
+        "sourceCardDefinitionId": 570,
         "prompt": "Dr. Dreff: Successful Run verzögern?",
         "presentationKey": "delayed_success",
         "kind": "select_option",
