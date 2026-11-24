@@ -674,6 +674,21 @@ Veraltete, unvollständige oder nicht finanzierbare Quotes erzeugen keinen
 Vorrang; der bloße Next-Turn-Pfad einer anderen nichtterminalen Agenda genügt
 weiterhin nicht. Die bestehende Agenda bleibt über den Runnerzug angreifbar.
 
+Für den letzten Klick nach der verdeckten Installation einer einzelnen
+Agenda im Remote vergleicht der Score-Owner den ersten Advance mit einer
+Basiscredit-Aktion. Der Geldklick erhält den Score-Parent und wird als
+dessen Funding-Step gebunden, wenn beide voll finanzierten Basislinien
+denselben frühesten Wertungszug innerhalb der nächsten zwei Corp-Züge
+erreichen. Der zusätzliche Credit muss ein weiteres bereits installiertes
+ICE mit aktuellem festem Rez-Preis und gequoteter Run-Interaktion
+finanzierbar machen. Die Rücklagen für weitere Advances, Zentralserver und
+den Score selbst bleiben dabei verfügbar. Die Quote belegt die zusätzliche
+Rez-Option. Den Schutz vor einem Zugriff bewertet weiterhin der
+zuständige Score-/Defense-Pfad. Ein früherer Wertungszug, ein terminaler
+Score oder eine unmittelbar siegbringende Runner-Steal-Linie behalten
+ihre bestehende Bewertung. Der Vergleich gilt für die unmittelbar
+vorangegangene Installation und wird nach dem Geldklick neu geprüft.
+
 Nach der exakten Installation bleibt derselbe Nachweis erhalten, wenn die
 Agenda nun im gebundenen Zielserver liegt und weder eine weitere HQ-Agenda
 noch eine installierte Geschwisteragenda exponiert ist. Der Wechsel aus HQ
