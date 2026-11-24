@@ -892,7 +892,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     }
   });
 
-  it("keeps Forged Activation Orders redacted, accepts rez-state changes and rejects location drift", () => {
+  it("keeps Forged Activation Orders redacted and rejects rez-state or location drift", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-forged-activation-orders-multi-ice",
@@ -1004,9 +1004,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
         selectedOptionIds: ["trash_ice"],
       },
     });
-    expect(rezzedDriftResult.ok).toBe(true);
-    if (!rezzedDriftResult.ok) throw new Error(rezzedDriftResult.error.message);
-    expect(rezzedDriftResult.state.corp.archives).toContain(rdIce);
+    expect(rezzedDriftResult.ok).toBe(false);
     const drifted = structuredClone(state);
     removeEverywhere(drifted, rdIce);
     const driftResult = applyAction(drifted, {

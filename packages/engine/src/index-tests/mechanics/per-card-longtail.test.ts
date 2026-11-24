@@ -1230,9 +1230,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(targetChoice).toBeDefined();
     if (!targetChoice)
       throw new Error("Missing Forged Activation Orders target choice");
-    expect(targetChoice.options.map((option) => option.value)).toContain(
-      rezzedReinforcedWallId,
-    );
+    expect(targetChoice.options.map((option) => option.value)).toEqual([
+      targetIceId,
+    ]);
     const targetOption = targetChoice.options.find(
       (option) => option.value === targetIceId,
     );
@@ -1285,7 +1285,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
 
-    let noUnrezzedTargetState = toRunnerTurn(
+    const noUnrezzedTargetState = toRunnerTurn(
       createGameAfterSetup({
         seed: "v1922-forged-activation-orders-no-unrezzed-target",
         runnerDeck: {
@@ -1324,26 +1324,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       noUnrezzedTargetState,
       298,
     );
-    noUnrezzedTargetState = apply(
-      noUnrezzedTargetState,
-      "runner",
-      (action) =>
-        action.type === "play_event" &&
-        sourceDefinition(noUnrezzedTargetState, action) ===
-          298,
-    );
-    const onlyRezzedTargetOption =
-      noUnrezzedTargetState.pendingChoice?.options.find(
-        (option) => option.value === onlyRezzedTargetId,
-      );
-    noUnrezzedTargetState = applyChoice(
-      noUnrezzedTargetState,
-      "runner",
-      onlyRezzedTargetOption?.id ?? "",
-    );
     expect(
-      noUnrezzedTargetState.pendingChoice?.options.map((option) => option.id),
-    ).toEqual(["trash_ice"]);
+      getLegalActions(noUnrezzedTargetState, "runner").some(
+        (action) =>
+          action.type === "play_event" &&
+          sourceDefinition(noUnrezzedTargetState, action) === 298,
+      ),
+    ).toBe(false);
 
     let trashState = toRunnerTurn(
       createGameAfterSetup({

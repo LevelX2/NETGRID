@@ -332,7 +332,7 @@ function resolveCorporateHeadhuntersAction(
     implementation.damageAmount,
   );
   let handSizeReduction = 0;
-  if (summary.cardsTrashed > 0) {
+  if (!summary.flatline && summary.cardsTrashed > 0) {
     handSizeReduction = implementation.handSizeReduction;
     host.state.runner.maxHandSize = Math.max(
       0,

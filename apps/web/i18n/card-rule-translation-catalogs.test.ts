@@ -9,6 +9,7 @@ import { describe, expect, it } from "vitest";
 import {
   CARD_RULE_TRANSLATION_SET_CATALOGS,
   cardRuleTranslationCoverage,
+  tooltipCardRulesText,
 } from "./card-rule-translations";
 import { cardRuleTranslationIssues } from "./card-rule-translation-validation";
 
@@ -36,6 +37,27 @@ describe("card rule translation catalogs", () => {
 
   it("reports the current confirmed coverage without counting fallback text", () => {
     expect(cardRuleTranslationCoverage()).toEqual({ de: 582, fr: 582 });
+  });
+
+  it("shows the unrezzed ICE requirement for Forged Activation Orders", () => {
+    const definitionId = 298;
+    const card = createRuntimeCardsById()[definitionId];
+    if (!card) throw new Error("Missing Forged Activation Orders in catalog.");
+
+    expect(card.text).toContain("Choose an unrezzed piece of ice.");
+    for (const [locale, expectedText] of [
+      ["de", "Wähle ein ungerezztes ICE."],
+      ["fr", "Choisissez une glace non rezzée."],
+    ]) {
+      expect(
+        tooltipCardRulesText({
+          definitionId,
+          englishRulesText: card.text,
+          locale,
+          translateToSelectedLanguage: true,
+        }),
+      ).toContain(expectedText);
+    }
   });
 
   it("covers every product-set card exactly once in every translated locale", () => {

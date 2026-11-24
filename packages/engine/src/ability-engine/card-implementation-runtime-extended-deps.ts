@@ -23,7 +23,6 @@ import type {
 export type CardImplementationRuntimeExtendedDependencies = {
   rezzedIceTargetCount: (state: GameState) => number;
   unrezzedIceTargetCount: (state: GameState) => number;
-  installedIceTargetCount: (state: GameState) => number;
   rezzedBlackIceTargetCount: (state: GameState) => number;
   installedAdvanceableCorpCardTargetCount: (state: GameState) => number;
   moveAdvancementCounterOptionCount: (
