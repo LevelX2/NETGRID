@@ -250,6 +250,19 @@ describe("assessRunnerAccessTrashImpactFromPlanningCard", () => {
       impactClasses: ["damage_or_tags"],
     });
   });
+
+  it("recognizes the visible value of removing a persistent link penalty upgrade", () => {
+    const impact = assess({
+      definitionId: 566,
+      trashCost: 2,
+      runnerCredits: 18,
+      economyReserve: 4,
+    });
+
+    expect(impact).toMatchObject({ recommendation: "trash", opportunityCost: 360 });
+    expect(impact?.impactClasses).not.toContain("damage_or_tags");
+  });
+
   it("justifies trashing a finite campaign with fourteen visible stored credits", () => {
     const assessment = assess({
       definitionId: 521,

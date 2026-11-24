@@ -236,6 +236,20 @@ export async function installFirstCorpCard(page: Page): Promise<string> {
   const cardSlots = page
     .locator(".corpHqHandPanel:not(.corpOpponentHqHandPanel) .cardSlot")
     .filter({ has: page.getByTestId("known-card") });
+  const draw = page.locator('[data-testid="action-button"][data-action-type="draw_card"]').first();
+  // In a standard Corp turn, two draws leave one click for the installation.
+  for (let draws = 0; draws <= 2; draws += 1) {
+    const title = await tryInstallCorpCardFromHq(page, cardSlots);
+    if (title !== null) return title;
+    if (draws === 2 || !(await draw.isVisible())) break;
+    const handSize = await cardSlots.count();
+    await draw.click();
+    await expect(cardSlots).toHaveCount(handSize + 1);
+  }
+  throw new Error("No legal Corp installation found in HQ after the available draws");
+}
+
+async function tryInstallCorpCardFromHq(page: Page, cardSlots: Locator): Promise<string | null> {
   const count = await cardSlots.count();
   for (let index = count - 1; index >= 0; index -= 1) {
     const slot = cardSlots.nth(index);
@@ -263,7 +277,7 @@ export async function installFirstCorpCard(page: Page): Promise<string> {
       return title;
     }
   }
-  throw new Error("No installable Corp card found in browser state");
+  return null;
 }
 
 export async function exerciseCardDisplayModes(page: Page): Promise<void> {
