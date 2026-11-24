@@ -16,11 +16,13 @@ import {
 import {
   installRunnerProgramForTest,
   moveCorpCardToHq,
+  moveRunnerCardToGrip,
   putCorpRootInRemote,
   putCorpIceOnServer,
   removeEverywhere,
   scoreCorpAgendaForTest,
 } from "../../../../engine/src/test-fixtures/mechanic-smoke-fixtures";
+import { addRezzedCorpRootForTest } from "../../../../engine/src/test-fixtures/index-test-helpers";
 import { buildAiDecisionInput, chooseCorpAction } from "../../index";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { assessCorpEconomyAssetPayback } from "../../corp/economy/economy-asset-payback";
@@ -60,6 +62,59 @@ it.each([
     expect(replay.ok).toBe(true);
     expect(hashGameState(replay.state)).toBe(hashGameState(state));
     expect(getPlayerView(initial, "runner").pendingChoice).toBeUndefined();
+  },
+);
+
+it("binds a delayed R&D success to its source during a physical HQ encounter", () => {
+  const state = choiceState(4, 0, false, true, false, "private_ldl");
+  const input = corpInput(state);
+  const choice = input.playerView.pendingChoice!;
+  expect(input.playerView.run).toMatchObject({
+    attackedServerId: "hq",
+    accessServerOverride: "rd",
+    position: { kind: "server", serverId: "hq" },
+  });
+  const dreff = input.playerView.servers.find((s) => s.id === "rd")!.root[0]!;
+  expect(choice.sourceCardInstanceId).toBe(dreff.instanceId);
+  expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+  const decision = chooseCorpAction(input);
+  const selected = choice.options.find(
+    (o) => o.id === selectedOptionId(decision),
+  )!;
+  const quote = JSON.parse(
+    String(selected.metadata!.temporaryEncounterBreakQuoteJson),
+  );
+  expect(quote).toMatchObject({ serverId: "hq", runId: state.run!.runId });
+  const plan = decision.decisionDebug!.planFirstDecision!;
+  expect(plan.leafExecutorInstanceId).toBe(plan.rootPlanInstanceId);
+  expect(plan.executionOrigin).toMatchObject({
+    rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
+    leafPlanInstanceId: plan.leafExecutorInstanceId,
+    windowId: choice.choiceId,
+    stateVersion: state.stateVersion,
+  });
+  const next = applyMatching(
+    state,
+    (a) => a.actionId === decision.actionId,
+    selected.id,
+  );
+  expect(next.run?.encounteredIceId).toBe(selected.value);
+  const replay = replayEvents(
+    state,
+    next.eventLog.slice(state.eventLog.length),
+  );
+  expect(replay.ok).toBe(true);
+  expect(hashGameState(replay.state)).toBe(hashGameState(next));
+});
+
+it.each(["source", "fort"])(
+  "rejects a foreign delayed-success %s",
+  (variant) => {
+    const input = corpInput(choiceState(4));
+    const choice = input.playerView.pendingChoice!;
+    if (variant === "source") choice.sourceCardInstanceId = "foreign-source";
+    else choice.source = choice.source.replace(":r1:", ":rd:");
+    expect(() => chooseCorpAction(input)).toThrow("window_origin_missing");
   },
 );
 
@@ -299,6 +354,7 @@ function choiceState(
   scoring = false,
   terminal = true,
   trace = false,
+  runSource: "remote" | "private_ldl" = "remote",
 ): GameState {
   const corpCards = [
     ...(trace
@@ -329,9 +385,11 @@ function choiceState(
           id: trace ? 252 : 251,
           quantity: 1,
         },
+        ...(runSource === "private_ldl" ? [{ id: 318, quantity: 1 }] : []),
         ...ORIGINALSET_DEFAULT_DECKS.runner.cards.filter(
           (c) =>
-            c.id !== (trace ? 252 : 251),
+            c.id !== (trace ? 252 : 251) &&
+            (runSource !== "private_ldl" || c.id !== 318),
         ),
       ],
     },
@@ -342,13 +400,15 @@ function choiceState(
     state.corp.rd.push(id);
     state.cardInstances[id]!.zone = { side: "corp", zone: "rd" };
   }
-  const dreff =
-    state.cardInstances[putCorpRootInRemote(state, 570)]!;
-  dreff.faceup = true;
-  dreff.rezzed = true;
-  state.cardInstances[
-    putCorpRootInRemote(state, 411)
-  ]!.advancementCounters = 1;
+  if (runSource === "private_ldl") {
+    addRezzedCorpRootForTest(state, 570, "rd", "off_server_success");
+    moveRunnerCardToGrip(state, 318);
+  } else {
+    const dreff = state.cardInstances[putCorpRootInRemote(state, 570)]!;
+    dreff.faceup = true;
+    dreff.rezzed = true;
+  }
+  state.cardInstances[putCorpRootInRemote(state, 411)]!.advancementCounters = 1;
   if (scoring) {
     scoreCorpAgendaForTest(state, 66);
     if (terminal)
@@ -377,9 +437,12 @@ function choiceState(
   ).toBe("end_turn");
   state = applyMatching(state, (a) => a.actionId === end.actionId);
   state.corp.badPublicity = badPublicity;
-  state = applyMatching(
-    state,
-    (a) => a.type === "start_run" && a.payload?.serverId === "r1",
+  state = applyMatching(state, (a) =>
+    runSource === "private_ldl"
+      ? a.type === "play_event" &&
+        !!a.source &&
+        state.cardInstances[a.source]?.definitionId === 318
+      : a.type === "start_run" && a.payload?.serverId === "r1",
   );
   for (let step = 0; !state.pendingChoice && step < 10; step++)
     state = applyMatching(

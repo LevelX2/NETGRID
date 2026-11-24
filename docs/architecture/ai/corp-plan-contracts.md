@@ -2488,10 +2488,15 @@ benötigen ebenfalls ein eigenes Modell.
 
 Die nachfolgende Dr.-Dreff-Choice bleibt an `corp.defend_servers` gebunden.
 Defense und Payload-Erzeugung prüfen denselben Choice-Vertrag. Aktueller
-Timingpunkt, StateVersion, angegriffener Server und auswählbare Options-IDs
-müssen mit dem LegalAction-Angebot übereinstimmen. Defense prüft diese Bindung,
-bevor es eine ICE-Option oder das auswählbare Decline in den Plan übernimmt.
-Bei einer exponierten eigenen Agenda im angegriffenen Fort oder HQ und
+Timingpunkt, StateVersion, Quellinstanz und auswählbare Options-IDs müssen
+mit dem LegalAction-Angebot übereinstimmen. Die private Engine-Choice benennt
+den Server, auf dem der Run als erfolgreich zählt. Dort muss ihre gerezzte
+Quelle liegen. Die Herkunft des Runs und die Breakquote der temporären
+Begegnung sind an den physischen Run gebunden. Bei Private LDL Access kann
+die Begegnung auf HQ stattfinden, während Dr. Dreff in R&D auslöst.
+Der native Nachweis steht in `corp-dreff-visible-budget.test.ts`.
+Der Plan übernimmt die ICE-Option oder das auswählbare Decline erst nach dieser Prüfung.
+Bei einer exponierten eigenen Agenda am tatsächlichen Zugriffsziel und
 mehreren vollständig quotierten produktiven Optionen vergleicht derselbe
 Owner die aktuelle sichtbare Runner-Breakantwort. Die
 Engine liefert dafür eine Corp-private Quote mit Karteninstanz, Fort, Run

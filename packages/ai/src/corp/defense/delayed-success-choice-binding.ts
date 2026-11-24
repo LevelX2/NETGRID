@@ -90,7 +90,7 @@ export function selectedCorpDelayedSuccessOptionId(
     throw unresolvedChoiceFailure(
       input,
       action,
-      "Complete Dr. Dreff only from the exact current corp.defend_servers choice binding on the attacked fort and its legal decline or visible HQ-ICE payload.",
+      "Complete Dr. Dreff only from the exact current corp.defend_servers choice binding on the successful-run fort and its legal decline or visible HQ-ICE payload.",
     );
   }
   return [selectedOption.id];

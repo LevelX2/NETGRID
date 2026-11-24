@@ -31,7 +31,7 @@ export function resolvePlanBoundCorpDelayedSuccessChoice(
   const binding = action
     ? currentDelayedSuccessChoice(context.input, action, choice)
     : undefined;
-  const { sourceCardId, serverId, options = [] } = binding ?? {};
+  const { sourceCard, serverId, options = [] } = binding ?? {};
   const executor = previous?.instances.find(
     (instance) =>
       instance.moduleId === "corp.defend_servers" &&
@@ -54,24 +54,6 @@ export function resolvePlanBoundCorpDelayedSuccessChoice(
         };
       }
     | undefined;
-  const sourceCard = sourceCardId
-    ? context.input.playerView.servers
-        .flatMap((server) => server.root)
-        .find(
-          (card) =>
-            card.instanceId === sourceCardId &&
-            card.known &&
-            card.definitionId === 570 &&
-            card.rezzed === true,
-        )
-    : undefined;
-  const sourceServer =
-    sourceCard && serverId
-      ? context.input.playerView.servers.find(
-          (server) =>
-            server.id === serverId && server.root.includes(sourceCard),
-        )
-      : undefined;
   const decline = options.find(
     (option) => option.id === "decline" && option.value === "decline",
   );
@@ -124,15 +106,13 @@ export function resolvePlanBoundCorpDelayedSuccessChoice(
   const activeRunId = context.input.playerView.run?.runId;
   const reactiveRunStartEvent = currentEventTail.find((event) => {
     if (event.publicPayload?.actor !== "runner") return false;
-    if (
-      !isRunId(activeRunId) ||
-      activeRunId !== event.stateVersionAfter
-    ) {
+    if (!isRunId(activeRunId) || activeRunId !== event.stateVersionAfter) {
       return false;
     }
     if (
       event.publicPayload?.actionType === "start_run" &&
-      event.publicPayload?.serverId === serverId
+      event.publicPayload?.serverId ===
+        context.input.playerView.run?.attackedServerId
     ) {
       return true;
     }
@@ -164,9 +144,8 @@ export function resolvePlanBoundCorpDelayedSuccessChoice(
   const firstContinuationEvent = continuationEvents[0];
   const matchingRunStartIndex = continuationEvents.findIndex(
     (event) =>
-      event.publicPayload?.actor === "runner" &&
-      event.publicPayload?.actionType === "start_run" &&
-      event.publicPayload?.serverId === serverId,
+      event === reactiveRunStartEvent &&
+      event.publicPayload?.actionType === "start_run",
   );
   const exactContinuationChain =
     previous !== undefined &&
@@ -204,8 +183,7 @@ export function resolvePlanBoundCorpDelayedSuccessChoice(
     previous.stateVersion >= reactiveTurnAnchor.stateVersionBefore &&
     previous.stateVersion < reactiveRunStartEvent.stateVersionAfter &&
     reactiveTurnAnchor.publicPayload?.actor === "corp" &&
-    reactiveTurnAnchor.publicPayload?.actionType === "end_turn" &&
-    context.input.playerView.run?.attackedServerId === serverId;
+    reactiveTurnAnchor.publicPayload?.actionType === "end_turn";
   const exactActiveDefenseOrigin =
     previous !== undefined &&
     executor !== undefined &&
@@ -218,8 +196,7 @@ export function resolvePlanBoundCorpDelayedSuccessChoice(
       true;
   const delayedSuccessFailedChecks = [
     ["choice_contract", binding !== undefined],
-    ["source_card", sourceCard !== undefined],
-    ["source_server", sourceServer !== undefined],
+    ["rezzed_source_on_successful_server", sourceCard !== undefined],
     ["decline", decline !== undefined],
     ["selected_option", selectedOption !== undefined],
     ["exact_effect_facts", exactEffectFacts],
@@ -265,7 +242,7 @@ export function resolvePlanBoundCorpDelayedSuccessChoice(
       ),
       owner: "continuation",
       ...(executor ? { planInstanceId: executor.instanceId } : {}),
-      removalCondition: `Failed=${delayedSuccessFailedChecks || "unknown"}. Require the current Dr. Dreff choice, rezzed source on the attacked server, Defense plan origin and exact effect facts for all offered options.`,
+      removalCondition: `Failed=${delayedSuccessFailedChecks || "unknown"}. Require the current Dr. Dreff choice, rezzed source on the bound successful-run server, Defense plan origin and exact effect facts for all offered options.`,
     });
   }
   moduleState.delayedSuccessChoiceBinding = {
