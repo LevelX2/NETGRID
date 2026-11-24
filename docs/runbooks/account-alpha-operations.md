@@ -37,7 +37,11 @@ mit einem passenden nächsten Schritt. Er wertet ausschließlich neue
 Serverlogausgaben dieses Startversuchs aus und verändert keine Daten.
 Bei `schema_missing` mit „Storage nutzt nicht das aktuelle Schema“ ist die
 konfigurierte Datenbank älter als `SQLITE_STORAGE_SCHEMA_VERSION` in
-`apps/server/src/storage-sqlite.ts`; eine Änderung der Verknüpfung hilft nicht.
+`apps/server/src/storage-sqlite.ts`. Meldet beim Start zuerst der Kontospeicher
+„Die Kontodatenbank nutzt kein unterstütztes Kontoschema“, prüfe den unter
+`NETGRID_ACCOUNT_SQLITE_PATH` gesetzten Pfad. Bei gemeinsamer Datenbank ist
+der Matchdatenpfad maßgeblich. Prüfe `storage_format` und `schema_version`
+in `storage_meta`, bevor du den Bestand zurücksetzt.
 
 Für den lokalen Version-0-Entwicklungsbetrieb werden solche Daten bei Bedarf
 zurückgesetzt, nicht automatisch migriert. Zuerst die tatsächlich konfigurierten
@@ -50,6 +54,13 @@ App zur Verfügung. Die Versionsnummer der alten Datei niemals bloß hochsetzen.
 Anschließend `/health` über die ausgegebene LAN-Adresse auf `ok: true`,
 `storage.ok: true` und die aktuelle Schemaversion sowie die Spielseite auf
 HTTP 200 prüfen. Dieser Reset ist kein Upgradeverfahren für installierte Releases.
+
+Bei ausdrücklich beauftragter Kontoübernahme können kompatible Kontotabellen
+nach einem Schemavergleich aus der Sicherung in eine leere Kontodatenbank mit
+aktuellem Schema übernommen werden. Konten, Passwort-Hashes, Decks,
+Einstellungen und gespeicherte Ergebnisstatistik gemeinsam übertragen und
+die Fremdschlüssel vor dem Commit prüfen. Alte Sitzungen und Zuordnungen zu
+nicht übernommenen Partien verbleiben in der Sicherung.
 
 ## Zugangsmodi
 

@@ -14,6 +14,9 @@
     try { $output = $reader.ReadToEnd() } finally { $reader.Dispose() }
   } finally { $stream.Dispose() }
 
+  if ($output -match 'Die Kontodatenbank nutzt kein unterstütztes Kontoschema\.') {
+    return "Das Schema der lokalen Kontodatenbank passt nicht zu dieser NETGRID-Version. Prüfe NETGRID_ACCOUNT_SQLITE_PATH oder bei gemeinsamer Datenbank NETGRID_SQLITE_STORAGE_PATH.`nBei einem älteren Schema die betroffene SQLite-Datei bei gestopptem Server sichern und zurücksetzen. Konten und Kontodecks befinden sich danach in der Sicherung. Bei gemeinsamer Datenbank gilt das auch für bisherige Partien."
+  }
   if ($output -match 'Storage nutzt nicht das aktuelle Schema\.') {
     return "Die lokale Datenbank ist veraltet und passt nicht mehr zur aktuellen NETGRID-Version. Der Server wurde deshalb nicht gestartet.`nNächster Schritt: Bei gestopptem Server die konfigurierte SQLite-Datenbank sichern und zurücksetzen, dann NETGRID erneut starten. Dadurch werden bisherige Partien und gegebenenfalls Konten und Kontodecks aus der laufenden App entfernt. Es wurden keine Daten automatisch gelöscht."
   }

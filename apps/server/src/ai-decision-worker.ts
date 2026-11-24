@@ -14,6 +14,7 @@ import {
 } from "node:worker_threads";
 
 export const AI_DECISION_WORKER_ROLE = "netgrid-ai-decision";
+export const AI_DECISION_WORKER_READY = "netgrid-ai-decision-ready";
 
 type RuntimeOptions = NonNullable<Parameters<typeof chooseAiAction>[1]>;
 export type LiveAiQuotes = Required<
@@ -55,6 +56,7 @@ export type AiDecisionWorkerMessage =
 export function runAiDecisionWorker(): void {
   if (!parentPort) throw new Error("ai_decision_worker_parent_missing");
   parentPort.on("message", (job: AiDecisionWorkerJob) => runJob(job));
+  parentPort.postMessage(AI_DECISION_WORKER_READY);
 }
 
 export function transferableAiDecisionError(error: unknown): unknown {

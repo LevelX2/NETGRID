@@ -4,6 +4,7 @@ import type {
 } from "@netgrid/ai";
 import { MessageChannel, Worker } from "node:worker_threads";
 import {
+  AI_DECISION_WORKER_READY,
   AI_DECISION_WORKER_ROLE,
   transferableAiDecisionError,
   type AiDecisionWorkerJob,
@@ -24,6 +25,7 @@ type QueuedDecision = {
 
 type Slot = {
   worker: Worker;
+  startup: Promise<{ ready: true } | { ready: false; error: unknown }>;
   fail?: (error: unknown) => void;
 };
 
@@ -37,6 +39,14 @@ export class AiDecisionWorkerPool {
   constructor(private readonly size: number) {
     if (!Number.isSafeInteger(size) || size < 1)
       throw new Error("invalid_ai_decision_worker_count");
+  }
+
+  async warmUp(): Promise<void> {
+    if (this.#closed) throw new Error("ai_decision_worker_pool_closed");
+    const slot = this.#slots.values().next().value ?? this.startWorker();
+    const startup = await slot.startup;
+    if (!startup.ready) throw startup.error;
+    if (!slot.fail) slot.worker.unref();
   }
 
   choose(
@@ -89,29 +99,41 @@ export class AiDecisionWorkerPool {
 
   private startWorker(): Slot {
     let entry = new URL(import.meta.url);
-    // Source workers load the full TypeScript graph through the workspace
-    // loader. The Windows bundle itself serves as its worker entrypoint.
+    // Load the decision runtime directly in source mode. The Windows bundle
+    // serves as its own worker entrypoint.
     if (entry.pathname.endsWith(".ts")) {
       const loader = import.meta.resolve("tsx/esm/api");
-      const source = new URL("./index.ts", entry).href;
+      const source = new URL("./ai-decision-worker.ts", entry).href;
       const bootstrap = `import { tsImport } from ${JSON.stringify(loader)};
-await tsImport(${JSON.stringify(source)}, ${JSON.stringify(source)});`;
+const { runAiDecisionWorker } = await tsImport(${JSON.stringify(source)}, ${JSON.stringify(source)});
+runAiDecisionWorker();`;
       entry = new URL(`data:text/javascript,${encodeURIComponent(bootstrap)}`);
     }
     const worker = new Worker(entry, {
       execArgv: [],
       workerData: AI_DECISION_WORKER_ROLE,
     });
-    const slot: Slot = { worker };
-    const remove = (error: unknown) => {
-      if (!this.#slots.delete(slot)) return;
-      slot.fail?.(error);
-      this.dispatch();
-    };
-    worker.on("error", remove);
-    worker.once("exit", (code) =>
-      remove(new Error(`ai_decision_worker_exit:${code}`)),
-    );
+    const startup = new Promise<Awaited<Slot["startup"]>>((resolve) => {
+      const remove = (error: unknown) => {
+        resolve({ ready: false, error });
+        if (!this.#slots.delete(slot)) return;
+        slot.fail?.(error);
+        this.dispatch();
+      };
+      worker.on("error", remove);
+      worker.once("exit", (code) =>
+        remove(new Error(`ai_decision_worker_exit:${code}`)),
+      );
+      worker.once("message", (message: unknown) => {
+        if (message === AI_DECISION_WORKER_READY) {
+          resolve({ ready: true });
+        } else {
+          void worker.terminate();
+          remove(new Error("ai_decision_worker_invalid_startup_message"));
+        }
+      });
+    });
+    const slot: Slot = { worker, startup };
     this.#slots.add(slot);
     return slot;
   }
