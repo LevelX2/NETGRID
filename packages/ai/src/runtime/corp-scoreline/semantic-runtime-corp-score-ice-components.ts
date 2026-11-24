@@ -82,15 +82,16 @@ export function corpRootRezTimingComponent(
       ].join("|"),
     };
   }
-  const taxesAgendaAtAccess =
+  const protectsAtAccess =
     hint?.remoteRole?.kind === "agenda_steal_tax" ||
     effects.some(
       (effect) =>
-        effect.kind === "run_tax" &&
         effect.timing === "on_access" &&
-        effect.target === "agenda_steal_cost",
+        ((effect.kind === "run_tax" && effect.target === "agenda_steal_cost") ||
+          (effect.kind === "remote_protection" &&
+            effect.target === "access.corp_central_access_reduction")),
     );
-  const relevantServerId = taxesAgendaAtAccess
+  const relevantServerId = protectsAtAccess
     ? corpCurrentRunAccessServerId(input)
     : run?.attackedServerId;
   if (!run || relevantServerId !== location.id) {

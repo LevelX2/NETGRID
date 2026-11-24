@@ -2477,6 +2477,16 @@ bricht, erzeugt keine harte Finanzierungsreserve. Zusatzsteuer, weitere Effekte,
 unzureichende Stärke oder unbekannte Quotes erfüllen diesen Ausschlussnachweis
 nicht. Ein unabhängiger dringlicher Bedarf nach besserem Schutz bleibt bestehen.
 
+Am letzten Rez-Fenster eines regulären Zentralzugriffs prüft
+`corp.defend_servers` den bedingungslosen Zugriffseffekt einer installierten
+Root-Karte. Ein Rez zur Verringerung der gespeicherten Zugriffskarten benötigt
+einen aktuell bedrohten Agenda-Bestand und mindestens einen ungeschützten
+Platz in der HQ- oder R&D-Zugriffsquote. Bereits aktive Reduktionen zählen
+zur Deckung. Die bestehende Score-Reserve gilt auch für diesen Rez.
+Der öffentliche Runursprung muss einen regulären Zugriff belegen.
+Zugriffsersatz und unbekannte Kartenwirkungen begründen keine Ausgabe.
+Die Gegenproben stehen in `central-access-reduction-rez.test.ts`.
+
 Gemeinsame Hint-Begriffe rechtfertigen keine gemeinsame Rez-Heuristik.
 Dr. Dreff wird nur im letzten relevanten Begegnungsfenster desselben Forts
 produktiv, wenn sichtbares HQ-ICE unter seinem eigenen Halb-Rez-Kostenvertrag
