@@ -8,6 +8,7 @@ import type { Side } from "@netgrid/shared";
 import type { PlayerView } from "../../lib/presented-player-view";
 import { useTranslations } from "use-intl/react";
 import { actionSlotDisplay } from "../../app/action-board-ui";
+import { actionSlotSideForView, opponentSide } from "./board-view-helpers";
 
 const AgendaIcon = Award;
 const TagIcon = Goal;
@@ -30,7 +31,7 @@ export function ActiveMatchResourceStrip({
 }) {
   const t = useTranslations("Board.resources");
   const opponent = opponentSide(view.side);
-  const turnSide = turnSideForView(view) ?? view.activeSide;
+  const turnSide = actionSlotSideForView(view);
   const turnClicks =
     turnSide === view.side ? view.own.clicks : view.opponent.clicks;
   const turnCapacity = actionCapacities[turnSide];
@@ -471,13 +472,4 @@ function ScoreAreaToggleButton({
         : null}
     </button>
   );
-}
-
-function turnSideForView(view: PlayerView): Side | null {
-  if (view.winner) return null;
-  return view.activeSide;
-}
-
-function opponentSide(side: Side): Side {
-  return side === "runner" ? "corp" : "runner";
 }

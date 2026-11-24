@@ -481,12 +481,12 @@ import {
   seriesStatusText,
 } from "../features/match-start/lobby-format";
 import {
+  actionSlotSideForView,
   formatCardCount,
   opponentSide,
   sideLabel,
   sideStatusLineForView,
   turnActionHeaderLabel,
-  turnSideForView,
   updateActionSlotCapacity,
   zoneHighlighted,
 } from "../features/game-board/board-view-helpers";
@@ -1029,7 +1029,8 @@ export default function Page() {
   const resourceStripRef = useRef<HTMLElement | null>(null);
   const lastActionSlotTurnRef = useRef<{
     matchId: string;
-    activeSide: Side;
+    turnSide: Side;
+    turnSerial: number | undefined;
   } | null>(null);
   const cardPreviewCollapsedStorageKey = session
     ? cardPreviewCollapsedStorageKeyFor(session.matchId, session.side)
@@ -3671,15 +3672,18 @@ export default function Page() {
     if (!payload || !activeView) return;
     const ownSide = activeView.side;
     const opponent = opponentSide(ownSide);
+    const turnSide = actionSlotSideForView(activeView);
     const turnKey = {
       matchId: payload.matchId,
-      activeSide: activeView.activeSide,
+      turnSide,
+      turnSerial: activeView.turnSerial,
     };
     const previousTurnKey = lastActionSlotTurnRef.current;
-    const resetActiveSide =
+    const newTurn =
       !previousTurnKey ||
       previousTurnKey.matchId !== turnKey.matchId ||
-      previousTurnKey.activeSide !== turnKey.activeSide;
+      previousTurnKey.turnSide !== turnKey.turnSide ||
+      previousTurnKey.turnSerial !== turnKey.turnSerial;
     lastActionSlotTurnRef.current = turnKey;
 
     setActionSlotCapacities((current) => {
@@ -3688,30 +3692,23 @@ export default function Page() {
         next,
         ownSide,
         activeView.own.clicks,
-        activeView.activeSide === ownSide,
-        resetActiveSide,
+        turnSide === ownSide,
+        newTurn,
         activeView.publicEvents,
       );
       updateActionSlotCapacity(
         next,
         opponent,
         activeView.opponent.clicks,
-        activeView.activeSide === opponent,
-        resetActiveSide,
+        turnSide === opponent,
+        newTurn,
         activeView.publicEvents,
       );
       return next.runner === current.runner && next.corp === current.corp
         ? current
         : next;
     });
-  }, [
-    activeView?.activeSide,
-    activeView?.own.clicks,
-    activeView?.opponent.clicks,
-    activeView?.side,
-    payload?.matchId,
-    payload?.playerView.stateVersion,
-  ]);
+  }, [activeView, payload?.matchId]);
 
   useEffect(() => {
     if (entryTab !== "decks" || !deckEditorContextDeck) return;

@@ -57,12 +57,27 @@ export function sideLabel(side: Side): string {
   return side === "corp" ? "Korp" : "Runner";
 }
 
-export function turnSideForView(view: PlayerView): Side | null {
-  if (view.phase === "corp_draw_phase" || view.phase === "corp_action_phase")
-    return "corp";
-  if (view.phase === "runner_action_phase" || view.phase === "run")
-    return "runner";
-  return null;
+export function turnSideForView(view: Pick<PlayerView, "phase">): Side | null {
+  switch (view.phase) {
+    case "corp_draw_phase":
+    case "corp_action_phase":
+    case "corp_discard_phase":
+      return "corp";
+    case "runner_action_phase":
+    case "runner_discard_phase":
+    case "run":
+      return "runner";
+    case "setup":
+    case "game_over":
+      return null;
+  }
+}
+
+export function actionSlotSideForView(
+  view: Pick<PlayerView, "phase" | "activeSide">,
+): Side {
+  // Setup and final board frames display the Engine's active side.
+  return turnSideForView(view) ?? view.activeSide;
 }
 
 export function turnActionHeaderLabel(
@@ -123,7 +138,7 @@ export function updateActionSlotCapacity(
   side: Side,
   currentClicks: number,
   active: boolean,
-  resetActiveSide: boolean,
+  newTurn: boolean,
   events: PublicGameEvent[],
 ): void {
   const baseCapacity = baseActionSlotCapacity(side);
@@ -131,7 +146,7 @@ export function updateActionSlotCapacity(
   const turnCapacity = active
     ? actionSlotCapacityForTurn(side, safeClicks, events)
     : safeClicks;
-  if (active && resetActiveSide) {
+  if (active && newTurn) {
     capacities[side] = Math.max(baseCapacity, turnCapacity);
     return;
   }

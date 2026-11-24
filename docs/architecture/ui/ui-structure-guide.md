@@ -286,6 +286,11 @@ aktuelle LegalAction gebunden. Die Aktionsleiste zählt eine bezahlte Aktion
 über unterbrechende Zahlungsfenster anhand desselben Aktionsordinals nur
 einmal; echte zusätzliche Aktionen bleiben sichtbar.
 
+Der Spielstandsstreifen und der Kopf des Aktionspanels zeigen die
+verbleibenden Aktionen der Zugseite aus der Spielphase. Während eines Runs
+bleibt der Runner sichtbar, auch wenn die Korp über das Rezzen von ICE
+entscheidet. Die Kapazität der Aktionsleiste gehört zum jeweiligen Zug.
+
 Bewegung, Zugriff, Damage, Trace, Pumpen und Trash erhalten ihre Ambience aus
 dem fachlichen Präsentationszustand, nicht aus dem Kartentyp. Ein Zugriff auf
 ICE bleibt daher eine Zugriffspräsentation. Serien zeigen abgeschlossene
