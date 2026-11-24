@@ -1947,7 +1947,7 @@ export class MultiplayerService {
         };
       }
 
-      this.finalizeSeriesGame(record);
+      this.finalizeGameResult(record);
       if (
         series.status === "finished" ||
         series.results.length >= series.gamesPlanned
@@ -3125,7 +3125,7 @@ export class MultiplayerService {
         finalEngineStateHash,
       };
       delete record.pendingUndo;
-      this.finalizeSeriesGame(record);
+      this.finalizeGameResult(record);
       await this.persist(record);
       return this.lifecycleResultFor(record, input.side);
     });
@@ -5743,7 +5743,11 @@ export class MultiplayerService {
     record.stateSnapshots = [];
   }
 
-  private syncPlayerClock(record: StoredMatch, nowIso = this.now()): boolean {
+  private syncPlayerClock(
+    record: StoredMatch,
+    nowIso = this.now(),
+    decision?: { side: Side; legalActions: readonly LegalAction[] },
+  ): boolean {
     const clock = record.match.playerClock;
     if (
       !clock ||
@@ -5755,12 +5759,12 @@ export class MultiplayerService {
       return false;
     const nowMs = Date.parse(nowIso);
     if (!Number.isFinite(nowMs)) return false;
-    const owner = this.playerClockDecisionOwner(record);
+    const owner = decision?.side ?? this.playerClockDecisionOwner(record);
     if (!owner) {
       delete clock.activity;
       return false;
     }
-    const key = this.playerClockActivityKey(record, owner);
+    const key = this.playerClockActivityKey(record, owner, decision?.legalActions);
     if (
       !clock.activity ||
       clock.activity.key !== key ||
@@ -5774,25 +5778,7 @@ export class MultiplayerService {
       };
       return false;
     }
-    const elapsedMs = Math.max(0, nowMs - clock.activity.startedAtMs);
-    if (clock.mode === "none") {
-      const consumedDeltaMs = Math.max(0, elapsedMs - clock.activity.chargedMs);
-      if (consumedDeltaMs <= 0) return false;
-      clock.consumedMs[owner] += consumedDeltaMs;
-      clock.activity.chargedMs += consumedDeltaMs;
-      return false;
-    }
-    const chargeableMs = Math.max(
-      0,
-      elapsedMs - clock.gracePeriodMs - clock.activity.chargedMs,
-    );
-    if (chargeableMs <= 0) return false;
-    clock.remainingMs[owner] = Math.max(
-      0,
-      clock.remainingMs[owner] - chargeableMs,
-    );
-    clock.activity.chargedMs += chargeableMs;
-    if (clock.remainingMs[owner] <= 0) {
+    if (settlePlayerClockActivity(clock, clock.activity, nowMs)) {
       this.terminalizeTimeExpired(record, owner, nowIso);
       return true;
     }
@@ -5815,10 +5801,14 @@ export class MultiplayerService {
     return undefined;
   }
 
-  private playerClockActivityKey(record: StoredMatch, owner: Side): string {
+  private playerClockActivityKey(
+    record: StoredMatch,
+    owner: Side,
+    legalActions?: readonly LegalAction[],
+  ): string {
     const state = record.gameState;
     const actions = state
-      ? getLegalActions(state, owner)
+      ? (legalActions ?? getLegalActions(state, owner))
           .map((action) => action.actionId)
           .sort()
           .join(",")
@@ -5870,7 +5860,7 @@ export class MultiplayerService {
         finalEngineStateHash,
       ),
     );
-    this.finalizeSeriesGame(record);
+    this.finalizeGameResult(record);
     this.revokeAllTokens(record, nowIso);
   }
 
@@ -5939,7 +5929,7 @@ export class MultiplayerService {
       schemaVersion: "player-clock-v1",
       mode: "player_clock",
       remainingMs: effectiveRemaining,
-      consumedMs: { ...clock.consumedMs },
+      consumedMs: timeSpentFromBudget(clock.startingTimeMs, effectiveRemaining),
       startingTimeMs: clock.startingTimeMs,
       gracePeriodMs: clock.gracePeriodMs,
       ...(decisionOwnerSide ? { decisionOwnerSide } : {}),
@@ -6213,10 +6203,19 @@ export class MultiplayerService {
     if (!record.gameState?.winner) return;
     record.match.status = "finished";
     record.match.winner = record.gameState.winner;
-    this.finalizeSeriesGame(record);
+    this.finalizeGameResult(record);
   }
 
-  private finalizeSeriesGame(record: StoredMatch): void {
+  private finalizeGameResult(record: StoredMatch): void {
+    const clock = record.match.playerClock;
+    if (clock?.activity) {
+      settlePlayerClockActivity(
+        clock,
+        clock.activity,
+        Date.parse(record.match.updatedAt),
+      );
+      delete clock.activity;
+    }
     const series = record.match.series;
     const state = record.gameState;
     const winner = record.lifecycleResult?.winnerSide ?? state?.winner;
@@ -6314,6 +6313,10 @@ export class MultiplayerService {
       return { ok: false, code: "ai_no_action" };
     const legalActions = getLegalActions(state, side);
     if (legalActions.length === 0) return { ok: false, code: "ai_no_action" };
+    const clockDecision = { side, legalActions };
+    // A timeout is itself the terminal transition for this step.
+    if (this.syncPlayerClock(record, this.now(), clockDecision))
+      return { ok: true };
     const prepared = this.preparedAiDecisions.get(record.match.matchId);
     let decision: AiDecision;
     let decisionInput: AiDecisionInputWithDeckCapabilities;
@@ -6387,6 +6390,8 @@ export class MultiplayerService {
       this.captureResidentPlanPortfolioFor(record, input);
       decisionInput = input;
     }
+    if (this.syncPlayerClock(record, this.now(), clockDecision))
+      return { ok: true };
     const directLegalAction =
       decision.selectionKind === "engine_randomized_ice_install_selection" ||
       decision.selectionKind === "engine_randomized_turn_plan_selection" ||
@@ -7091,6 +7096,37 @@ function normalizePlayerClockConfig(
 
 function normalizeAiDecisionTraceMode(value: unknown): AiDecisionTraceMode {
   return value === "summary" || value === "detailed" ? value : "off";
+}
+
+function timeSpentFromBudget(
+  startingTimeMs: number,
+  remainingMs: Record<Side, number>,
+): Record<Side, number> {
+  return {
+    runner: startingTimeMs - remainingMs.runner,
+    corp: startingTimeMs - remainingMs.corp,
+  };
+}
+
+function settlePlayerClockActivity(
+  clock: PlayerClockState,
+  activity: PlayerClockActivityState,
+  nowMs: number,
+): boolean {
+  const graceMs = clock.mode === "player_clock" ? clock.gracePeriodMs : 0;
+  const deltaMs = Math.max(
+    0,
+    nowMs - activity.startedAtMs - graceMs - activity.chargedMs,
+  );
+  if (deltaMs === 0) return false;
+  activity.chargedMs += deltaMs;
+  const side = activity.decisionOwnerSide;
+  if (clock.mode === "none") {
+    clock.consumedMs[side] += deltaMs;
+    return false;
+  }
+  clock.remainingMs[side] = Math.max(0, clock.remainingMs[side] - deltaMs);
+  return clock.remainingMs[side] === 0;
 }
 
 function initialPlayerClockState(
@@ -9173,6 +9209,11 @@ function matchResultSnapshotFor(
     corpAgendaPoints,
   );
   const lifecycleReason = record.lifecycleResult?.reason;
+  const clock = record.match.playerClock;
+  const playerTimeMs =
+    clock?.mode === "player_clock"
+      ? timeSpentFromBudget(clock.startingTimeMs, clock.remainingMs)
+      : clock?.consumedMs;
   const reason: ApiGameResultReason =
     lifecycleReason === "forfeit" || lifecycleReason === "time_expired"
       ? lifecycleReason
@@ -9221,6 +9262,7 @@ function matchResultSnapshotFor(
     successfulRunCount: history.successfulRunCount,
     stolenAgendaCount: history.stolenAgendaCount,
     scoredAgendaCount: history.scoredAgendaCount,
+    ...(playerTimeMs ? { playerTimeMs: { ...playerTimeMs } } : {}),
     finalStateHash,
     ...(record.match.series
       ? {
@@ -9300,6 +9342,7 @@ function resultSummaryFor(
     successfulRunCount: snapshot.successfulRunCount ?? 0,
     stolenAgendaCount: snapshot.stolenAgendaCount ?? 0,
     scoredAgendaCount: snapshot.scoredAgendaCount ?? 0,
+    ...(snapshot.playerTimeMs ? { playerTimeMs: snapshot.playerTimeMs } : {}),
     startedAt: snapshot.startedAt,
     finishedAt: snapshot.finishedAt,
     finalStateHash: snapshot.finalStateHash || finalStateHash,

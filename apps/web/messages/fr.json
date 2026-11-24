@@ -1638,6 +1638,7 @@
       "leaveSeriesTitle": "Quitter la série de matchs ?",
       "leaveSeriesConfirm": "Cette session locale sera supprimée et tu reviendras à l’écran d’accueil.",
       "gameScore": "Score du jeu",
+      "playerTime": "Temps de jeu {duration}",
       "agenda": "Ordre du jour",
       "runner": "Runner",
       "corp": "Corp",

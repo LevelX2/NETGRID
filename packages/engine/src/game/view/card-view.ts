@@ -1328,6 +1328,11 @@ export function visibleCorpCard(
   }
   const visibleCard = visibleOwnCard(state, id);
   const definition = definitionFor(state, id);
+  const publiclyExposedInRoot =
+    area === "root" &&
+    isRemoteServerId(serverId) &&
+    !instance.rezzed &&
+    (instance.faceup || exposedBySpyCounter);
   const printedRequirement = definition.advancementRequirement;
   const effectiveRequirement = visibleCard.advancementRequirement;
   const agendaDifficultyModifier =
@@ -1342,6 +1347,7 @@ export function visibleCorpCard(
       : 0;
   return {
     ...visibleCard,
+    ...(publiclyExposedInRoot ? { publiclyExposedInRoot } : {}),
     ...(agendaDifficultyModifier !== 0 ? { agendaDifficultyModifier } : {}),
     ...visibleAgendaStealCostQuote(state, id, definition, instance, viewer),
   };

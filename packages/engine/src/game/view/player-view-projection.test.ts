@@ -1687,6 +1687,33 @@ describe("PlayerView projection", () => {
     },
   );
 
+  it("identifies public exposure of an unrezzed remote root in both player views", () => {
+    const state = createGameAfterSetup({
+      seed: "public-remote-root-exposure",
+      runnerDeck: DEMO_DECKS.demo_runner_004,
+      corpDeck: DEMO_DECKS.demo_corp_004,
+    });
+    const id = putCorpRootInRemote(state, 606);
+    const instance = state.cardInstances[id]!;
+    const rootCard = (side: "corp" | "runner") =>
+      getPlayerView(state, side).servers.find((server) => server.id === "r1")!
+        .root[0]!;
+    const exposure = () =>
+      (["corp", "runner"] as const).map((side) => rootCard(side).publiclyExposedInRoot);
+    expect(rootCard("corp").known).toBe(true);
+    expect(rootCard("runner").known).toBe(false);
+    expect(exposure()).toEqual([undefined, undefined]);
+
+    instance.faceup = true;
+    expect(exposure()).toEqual([true, true]);
+    instance.faceup = false;
+    state.spyCountersByServer = { r1: 1 };
+    expect(exposure()).toEqual([true, true]);
+    state.spyCountersByServer = {};
+    expect(exposure()).toEqual([undefined, undefined]);
+    expect(rootCard("runner").known).toBe(false);
+  });
+
   it("keeps mixed remote root order accessible without leaking hidden root types before access", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
@@ -1793,6 +1820,9 @@ describe("PlayerView projection", () => {
       definitionId: 606,
       rezzed: false,
     });
+    expect(runnerRemoteBetweenAccesses?.root[0]).not.toHaveProperty(
+      "publiclyExposedInRoot",
+    );
     expect(runnerRemoteBetweenAccesses?.root[2]).toMatchObject({
       known: false,
       rezzed: false,

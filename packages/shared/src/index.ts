@@ -4292,6 +4292,8 @@ export type VisibleCard = {
   rezCost?: number;
   baseLink?: number;
   rezzed?: boolean;
+  /** Unrezzed remote root visible to both players while faceup or under persistent fort exposure. */
+  publiclyExposedInRoot?: true;
   advancementCounters?: number;
   advancementRequirement?: number;
   /** Effective requirement minus printed requirement. Present for known remote-root agendas with a nonzero change. */

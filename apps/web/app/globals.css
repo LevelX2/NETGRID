@@ -8657,6 +8657,7 @@ section[data-testid="legal-actions"].cueHighlight {
   gap: 0;
   align-items: flex-start;
   overflow: visible;
+  isolation: isolate;
 }
 
 .iceLane.scrollableIceLane {
@@ -8667,6 +8668,11 @@ section[data-testid="legal-actions"].cueHighlight {
 }
 
 .iceLane .iceCardSlot {
+  position: relative;
+  flex: none;
+}
+
+.iceLane .iceCardSlot > .cardSlot {
   z-index: 1;
 }
 
@@ -8678,10 +8684,21 @@ section[data-testid="legal-actions"].cueHighlight {
   margin-left: calc(-58px * var(--lane-card-scale, 1));
 }
 
-.iceLane .iceCardSlot:hover,
-.iceLane .iceCardSlot:has(:focus-visible),
-.iceLane .iceCardSlot.actionMenuOpen {
-  z-index: 38;
+.iceLane .iceCardSlot > .cardSlot:hover,
+.iceLane .iceCardSlot > .cardSlot:has(:focus-visible),
+.iceLane .iceCardSlot > .cardSlot.actionMenuOpen {
+  z-index: 2;
+}
+
+/* The frame follows the slot but paints above every card face in this lane. */
+.iceLane .runPositionFrame {
+  position: absolute;
+  inset: -1px;
+  z-index: 3;
+  border: 3px solid #ffda47;
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px #493909, inset 0 0 0 1px #493909;
+  pointer-events: none;
 }
 
 .pairedServerLanes {
@@ -9347,10 +9364,6 @@ section[data-testid="legal-actions"].cueHighlight {
   transform: translate(-50%, -50%);
 }
 
-.runPositionActiveSlot {
-  z-index: 70;
-}
-
 .archivesViewToggle {
   display: inline-grid;
   place-items: center;
@@ -9451,14 +9464,6 @@ section[data-testid="legal-actions"].cueHighlight {
   to {
     filter: brightness(1.15);
   }
-}
-
-.card.runPositionActive {
-  border-color: color-mix(in srgb, var(--runner), white 26%);
-  box-shadow:
-    0 0 0 2px color-mix(in srgb, var(--runner), white 14%),
-    0 0 20px color-mix(in srgb, var(--runner), transparent 52%),
-    var(--card-shadow);
 }
 
 .card.viewMarkerActive {
@@ -12544,6 +12549,11 @@ section[data-testid="legal-actions"].cueHighlight {
 .resultScoreNote {
   color: var(--muted);
   font-size: 12px;
+}
+
+.resultScoreSide .resultPlayerTime {
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .gameOverFooter {

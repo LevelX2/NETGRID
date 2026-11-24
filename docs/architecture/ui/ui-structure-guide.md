@@ -44,6 +44,8 @@ volle Zeile zu lang sind, dürfen innerhalb ihres Felds umbrechen.
 Der Ergebnisdialog zeigt die Matchpunkte als zentrale, paarige Wertung mit
 den Teilnehmernamen unter den Zahlen. Bei Serien steht der Zwischen- oder
 Endstand der Serie über der kompakteren Wertung des gerade beendeten Spiels.
+Unter jedem Namen in der Einzelspielwertung steht die verbrauchte Spielerzeit
+dieser Partie in Minuten und Sekunden, sofern das Ergebnis sie enthält.
 Auf schmalen Displays erscheinen die Wertungen vor der Illustration.
 
 Die helle Variante (`data-theme="white"`) verwendet für den Endstand eine
@@ -90,6 +92,14 @@ und Französisch; der Aktionstext ist an die Capability
 Über jedem Server zeigt das Spielbrett die Summe seiner sichtbaren Kostenmodifikatoren
 je Kostenart und Richtung. Zwei aktive Chester Mix ergeben ein Badge „ICE-Install −4“.
 Im Tooltip stehen die beteiligten Karten, gleichnamige Quellen mit ihrer Anzahl.
+
+Im Root eines Remotes stehen öffentliche Agenden und Knoten links, verdeckte
+Karten in der Mitte und öffentliche Upgrades rechts. Innerhalb jeder Gruppe
+steht die neueste Installation links. Beide Spielbretter verwenden dafür
+den Rez-Status sowie `publiclyExposedInRoot` für offen liegende oder durch
+Spy-Counter dauerhaft aufgedeckte Karten. Eine nur kurz angesehene Karte
+behält ihren Platz. Die Engine greift im Remote in Installationsreihenfolge
+zu. Innerhalb jeder Gruppe verläuft der Zugriff daher von rechts nach links.
 
 Unter dem eigenen Corp-Statusblock erscheinen verfügbare Fähigkeiten aus
 der eigenen Agenda-Auslage als Standard-Aktionsbuttons mit Agenda-Symbol.
@@ -166,10 +176,11 @@ Zustände. ICE-Rezzen (Schild) und das Rezzen anderer Karten (Power-Symbol)
 bleiben getrennt; insbesondere kündigt das Power-Symbol in „Bewegung“ kein
 ICE-Rezfenster an. Die eigentlichen Aktionen bleiben in den Aktionsbuttons.
 
-Im ICE-Stapel verändert der Marker für die aktuelle Run-Position nicht die
-Stapelhöhe. Nur Hover, sichtbarer Tastaturfokus und ein geöffnetes Aktionsmenü
-heben eine Karte an; ein vorheriger Mausklick darf mittlere ICE nicht dauerhaft
-verdecken. Die lokalisierte Chronik übernimmt den öffentlichen
+Im ICE-Stapel kennzeichnen Fadenkreuz und gelber Rahmen dieselbe Karteninstanz
+an der aktuellen Run-Position. Der Rahmen liegt über den Kartenflächen und
+lässt Zeiger- und Touch-Eingaben durch. Hover, sichtbarer Tastaturfokus und ein
+geöffnetes Aktionsmenü heben die jeweilige Kartenfläche an.
+Die lokalisierte Chronik übernimmt den öffentlichen
 Inside-Job-Bypass samt ICE-Identität auch aus dem zugehörigen Rez-Pass-Event.
 Fortsetzungsereignisse tragen mit `runDestination` und bei ICE zusätzlich
 `runDestinationIcePosition` das öffentliche Ziel aus dem Engine-Folgezustand.

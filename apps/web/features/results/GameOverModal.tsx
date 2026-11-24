@@ -1,7 +1,7 @@
 import { Award, Save } from "lucide-react";
 import type { ApiGameResultSummary, Side } from "@netgrid/shared";
 import { useId, useRef, useState } from "react";
-import { useTranslations } from "use-intl/react";
+import { useFormatter, useTranslations } from "use-intl/react";
 
 import { ConfirmationDialog } from "../app-shell/ConfirmationDialog";
 import { Stat } from "../game-board/ResourceStrip";
@@ -180,10 +180,12 @@ export function GameOverModal({
               viewer={{
                 label: playerRoleLabel(side),
                 points: gameStanding.viewerMatchPoints,
+                timeMs: result.playerTimeMs?.[side],
               }}
               opponent={{
                 label: playerRoleLabel(opponent),
                 points: gameStanding.opponentMatchPoints,
+                timeMs: result.playerTimeMs?.[opponent],
               }}
               compact={Boolean(series)}
             />
@@ -283,6 +285,7 @@ type ScoreParticipant = {
   label: string;
   points: number;
   detail?: string;
+  timeMs?: number | undefined;
 };
 
 function MatchPointScore({
@@ -324,7 +327,32 @@ function ScoreSide({ participant }: { participant: ScoreParticipant }) {
       <span>{participant.label}</span>
       <strong>{participant.points}</strong>
       {participant.detail ? <small>{participant.detail}</small> : null}
+      {participant.timeMs !== undefined ? (
+        <ResultPlayerTime milliseconds={participant.timeMs} />
+      ) : null}
     </div>
+  );
+}
+
+function ResultPlayerTime({ milliseconds }: { milliseconds: number }) {
+  const t = useTranslations("Results.gameOver");
+  const format = useFormatter();
+  const totalSeconds = Math.floor(milliseconds / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  const parts: string[] = [];
+  if (minutes > 0) {
+    parts.push(format.number(minutes, { style: "unit", unit: "minute" }));
+  }
+  if (seconds > 0 || minutes === 0) {
+    parts.push(format.number(seconds, { style: "unit", unit: "second" }));
+  }
+  return (
+    <small className="resultPlayerTime">
+      <time dateTime={`PT${totalSeconds}S`}>
+        {t("playerTime", { duration: parts.join(" ") })}
+      </time>
+    </small>
   );
 }
 
