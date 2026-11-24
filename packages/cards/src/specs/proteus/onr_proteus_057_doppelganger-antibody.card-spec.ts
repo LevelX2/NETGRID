@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_proteus_057_doppelganger-antibody"),
+    cardDefinitionId: cardDefinitionId(115),
     title: "Doppelganger Antibody",
     side: "corp",
     cardType: "asset",

@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import {
@@ -13,6 +14,7 @@ import {
   type AiDecisionInputWithDeckCapabilities,
 } from "./ai-decision-input";
 import { buildAiDecisionInputDto } from "../input-dto";
+import { buildPlanningStateIdentity } from "../plans/turn-planning-contracts";
 import { restoreAiRuntimeCheckpoint } from "../evaluation/decision-checkpoints/runtime-checkpoint";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { evaluateRunnerRunTargets } from "../runner-run-target-evaluation";
@@ -59,6 +61,7 @@ function original() {
     ...checkpoint.input,
     ...buildAiDecisionInputDto(checkpoint.input),
   } as AiDecisionInputWithDeckCapabilities;
+  input.planningStateIdentity = buildPlanningStateIdentity(input);
   restoreAiRuntimeCheckpoint(
     input,
     input.ownDeckSnapshot!.deckSnapshotId,
@@ -77,12 +80,12 @@ it("installs the held cheaper decoder before the same central run under its exac
     (a) => a.actionId === decision.actionId,
   )!;
   expect(action.type).toBe("install_card");
-  expect(action.source).toContain("codecracker");
+  expect(referencesDefaultDeckCard(action.source, 226)).toBe(true);
   expect(action.payload?.runnerProgramTrashBeforeInstall).not.toBe(true);
   const plan = decision.decisionDebug!.planFirstDecision!;
   expect(plan.selectedPlan?.moduleId).toBe("runner.rig_and_coverage");
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:runner.pressure_central:central%3Ahq",
+    "pa7nez1ioecg7mf06q1uwqq57o",
   );
   expect(plan.selectedPlan?.parentInstanceId).toBe(plan.rootPlanInstanceId);
   expect(plan.route?.actionId).toBe(action.actionId);
@@ -105,7 +108,7 @@ it("installs the held cheaper decoder before the same central run under its exac
     eventTail: installed.state.eventLog,
   });
   const run = chooseAiAction(next);
-  expect(run.actionId).toBe("runner.start_run.hq");
+  expect(run.actionId).toBe("rs.hq");
   expect(run.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
     plan.rootPlanInstanceId,
   );
@@ -149,11 +152,11 @@ it.each([
   if (boundary === "hand_floor")
     input.playerView.own.gripOrHq = input.playerView.own.gripOrHq.filter(
       (c) =>
-        c.definitionId?.includes("codecracker") ||
-        c.definitionId?.includes("live-news-feed"),
+        c.definitionId === 226 ||
+        c.definitionId === 171,
     );
   const target = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.hq",
+    (t) => t.actionId === "rs.hq",
   )!;
   const prep = runnerSameTurnBreakerPreparation(
     input,
@@ -186,7 +189,7 @@ it("quotes known savings without treating the opaque outer ICE as guaranteed acc
   expect(hidden.definitionId).toBeUndefined();
   hidden.instanceId = "another_opaque_ice";
   const target = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.hq",
+    (t) => t.actionId === "rs.hq",
   )!;
   const prep = runnerSameTurnBreakerPreparation(
     input,
@@ -202,7 +205,7 @@ it("quotes known savings without treating the opaque outer ICE as guaranteed acc
       runnerCentralPressureHasMaterialMarginalValue,
     },
   )!;
-  expect(prep.visibleAnswer?.definitionId).toBe("onr_v1_014_codecracker");
+  expect(prep.visibleAnswer?.definitionId).toBe(226);
   expect(prep.totalRecoveryCost).toBe(6);
   expect(prep.sameTurnRunConversion).toBeUndefined();
   expect(prep.evidenceCodes).toContain(

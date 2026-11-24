@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import {
@@ -33,9 +34,9 @@ it("publishes assessed zero break cost and installs the decoder under its actual
   ).toBe(true);
   expect(hashState(saved.state)).toBe(saved.checkpoint.stateHash);
   const view = saved.checkpoint.input.playerView;
-  const server = view.servers.find((s: any) => s.id === "remote_1");
+  const server = view.servers.find((s: any) => s.id === "r1");
   const decoder = view.own.gripOrHq.find(
-    (c: any) => c.definitionId === "onr_v1_014_codecracker",
+    (c: any) => c.definitionId === 226,
   );
   const beforePath = assessKnownRezzedIcePath(
     server.ice,
@@ -88,13 +89,13 @@ it("publishes assessed zero break cost and installs the decoder under its actual
     expect(action).toBeDefined();
     if (n < 2) heads.push(action.type);
     if (n === 0) {
-      expect(action.source).toContain("codecracker");
+      expect(referencesDefaultDeckCard(action.source, 226)).toBe(true);
       expect(
         decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
       ).toBe("runner.rig_and_coverage");
       expect(
         decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-      ).toBe("plan:runner.contest_remote:remote%3Aremote_1");
+      ).toBe("p1p4xezjcxov79rno40lq3f7rv");
     }
     const result = applyAction(state, {
       matchId: state.matchId,
@@ -126,7 +127,7 @@ it("publishes assessed zero break cost and installs the decoder under its actual
 });
 it("keeps an unassessed all-unknown path distinct from an assessed free path", () => {
   const view = original().checkpoint.input.playerView;
-  const server = view.servers.find((s: any) => s.id === "remote_1");
+  const server = view.servers.find((s: any) => s.id === "r1");
   const path = assessKnownRezzedIcePath(
     server.ice.filter((c: any) => !c.known),
     view.own.rig,

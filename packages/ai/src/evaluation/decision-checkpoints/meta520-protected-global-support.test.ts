@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import checkpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta520-g3d213.json";
 import nativeState from "./fixtures/meta520-g3d213-state.json";
 import { afterEach, expect, it } from "vitest";
@@ -13,7 +14,7 @@ import { projectGlobalRootSupportRezAfterInstall } from "../../../../engine/src/
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
-import { corpGlobalIceSupportAssetInstallSignal } from "../../corp/defense/defense-discovery-support";
+import { corpGlobalIceSupportAssetInstallSignal } from "../../corp/defense/defense-install-discovery";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import {
   restoreAiRuntimeCheckpoint,
@@ -21,7 +22,7 @@ import {
 } from "./runtime-checkpoint";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 
-const source = "corp_onr_v1_317_data-masons_1";
+const source = "c39p";
 function fixture() {
   const state = structuredClone(nativeState) as unknown as GameState;
   const cp = structuredClone(checkpoint) as unknown as {
@@ -48,7 +49,7 @@ function fixture() {
     (a) =>
       a.source === source &&
       a.type === "install_card" &&
-      a.payload?.serverId === "remote_1",
+      a.payload?.serverId === "r1",
   )!;
   const candidate = candidates.find((c) => c.actionId === action.actionId)!;
   return { cp, state, input, candidates, candidate, action };
@@ -61,8 +62,8 @@ it("quotes protected placement but keeps the native scoring slot free, rezzes gl
   expect(action.payload).toMatchObject({
     postInstallRezQuoteComplete: true,
     postInstallRezQuoteCardId: source,
-    postInstallRezQuoteTargetServerId: "remote_1",
-    postInstallRezQuoteProjectedServerId: "remote_1",
+    postInstallRezQuoteTargetServerId: "r1",
+    postInstallRezQuoteProjectedServerId: "r1",
     postInstallRezQuoteExpiresAtStateVersion: state.stateVersion,
     postInstallRezQuoteFinalCredits: 1,
   });
@@ -81,9 +82,11 @@ it("quotes protected placement but keeps the native scoring slot free, rezzes gl
     payload: { serverId: "new_remote" },
   });
   expect(chosen.fallbackUsed).toBe(false);
-  expect(chosen.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toContain(
-    "plan:corp.defend_servers:",
-  );
+  expect(
+    chosen.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === chosen.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+    )?.moduleId,
+  ).toBe("corp.defend_servers");
   expect(chosen.decisionDebug?.planFirstDecision?.route).toMatchObject({
     actionId: selectedAction.actionId,
     stateVersion: state.stateVersion,
@@ -111,9 +114,11 @@ it("quotes protected placement but keeps the native scoring slot free, rezzes gl
     nextInput.legalActions.find((a) => a.actionId === rez.actionId),
   ).toMatchObject({ type: "rez_card", source });
   expect(rez.fallbackUsed).toBe(false);
-  expect(rez.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toContain(
-    "plan:corp.defend_servers:",
-  );
+  expect(
+    rez.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === rez.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+    )?.moduleId,
+  ).toBe("corp.defend_servers");
   if (!rez.actionId) throw Error("native_rez_action_missing");
   result = applyAction(installed, {
     matchId: state.matchId,
@@ -126,7 +131,7 @@ it("quotes protected placement but keeps the native scoring slot free, rezzes gl
   expect(result.state.corp.credits).toBe(11);
   expect(result.state.corp.clicks).toBe(state.corp.clicks - 1);
   const fort = getPlayerView(result.state, "corp").servers.find(
-    (s) => s.id === "remote_1",
+    (s) => s.id === "r1",
   )!;
   expect(fort.ice).toHaveLength(4);
   expect(
@@ -172,11 +177,11 @@ it.each([
     if (variant === "target")
       p.postInstallRezQuoteTargetServerId = "new_remote";
     if (variant === "projected")
-      p.postInstallRezQuoteProjectedServerId = "remote_999";
+      p.postInstallRezQuoteProjectedServerId = "r999";
     if (variant === "additional")
       p.postInstallRezQuoteMandatoryAgendaPointCost = 1;
     if (variant === "unfunded") input.playerView.own.credits = 0;
-    const fort = input.playerView.servers.find((s) => s.id === "remote_1")!;
+    const fort = input.playerView.servers.find((s) => s.id === "r1")!;
     if (variant === "no_ice") fort.ice = [];
     if (variant === "occupied")
       fort.root = [
@@ -190,7 +195,7 @@ it.each([
 it("does not suppress an admitted new remote when no existing empty fort has funded protection", () => {
   const { input, candidates } = fixture();
   for (const server of input.playerView.servers.filter((s) =>
-    s.id.startsWith("remote_"),
+    isRemoteServerId(s.id),
   ))
     server.ice = [];
   const fresh = candidates.find(
@@ -210,10 +215,10 @@ it("fails closed at the producer for existing central, missing and occupied asse
     projectGlobalRootSupportRezAfterInstall(state, source, "hq"),
   ).toMatchObject({ complete: false });
   expect(
-    projectGlobalRootSupportRezAfterInstall(state, source, "remote_999"),
+    projectGlobalRootSupportRezAfterInstall(state, source, "r999"),
   ).toMatchObject({ complete: false });
-  state.corp.servers.find((s) => s.id === "remote_1")!.root.push(source);
+  state.corp.servers.find((s) => s.id === "r1")!.root.push(source);
   expect(
-    projectGlobalRootSupportRezAfterInstall(state, source, "remote_1"),
+    projectGlobalRootSupportRezAfterInstall(state, source, "r1"),
   ).toMatchObject({ complete: false });
 });

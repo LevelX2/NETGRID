@@ -16,7 +16,7 @@ import {
 } from "./access-effect-handlers";
 
 function definition(
-  id: string,
+  id: number,
   title: string,
   type: CardDefinition["type"] = "asset",
 ): CardDefinition {
@@ -25,11 +25,11 @@ function definition(
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   zone: CardInstance["zone"] = {
     side: "corp",
     zone: "serverRoot",
-    serverId: "remote_1",
+    serverId: "r1",
   },
 ): CardInstance {
   return {
@@ -45,30 +45,15 @@ function instance(
 
 function makeHost(legalAction: LegalAction) {
   const definitions: Record<string, CardDefinition> = {
-    setup: definition("onr_v1_340_setup", "Setup!"),
-    trap: definition("onr_v1_345_trap", "TRAP!"),
-    dedicated: definition(
-      "onr_v1_356_dedicated-response-team",
-      "Dedicated Response Team",
-      "upgrade",
-    ),
-    dieter: definition("onr_v1_357_dieter-esslin", "Dieter Esslin", "upgrade"),
-    crybaby: definition("onr_v1_352_crybaby", "Crybaby", "upgrade"),
-    turbeau: definition(
-      "onr_v1_361_turbeau-delacroix",
-      "Turbeau Delacroix",
-      "upgrade",
-    ),
-    remains: definition(
-      "onr_v1_346_corprunners-shattered-remains",
-      "Corprunner's Shattered Remains",
-    ),
-    bizarre: definition(
-      "onr_v1_351_bizarre-encryption-scheme",
-      "Bizarre Encryption Scheme",
-      "upgrade",
-    ),
-    daemon: definition("daemon", "Daemon", "program"),
+    setup: definition(552, "Setup!"),
+    trap: definition(557, "TRAP!"),
+    dedicated: definition(568, "Dedicated Response Team", "upgrade"),
+    dieter: definition(569, "Dieter Esslin", "upgrade"),
+    crybaby: definition(1467723152, "Crybaby", "upgrade"),
+    turbeau: definition(3313239812, "Turbeau Delacroix", "upgrade"),
+    remains: definition(3558012119, "Corprunner's Shattered Remains"),
+    bizarre: definition(563, "Bizarre Encryption Scheme", "upgrade"),
+    daemon: definition(953318085, "Daemon", "program"),
   };
   const cardInstances: Record<string, CardInstance> = {
     setup: instance("setup", definitions.setup!.id),
@@ -241,14 +226,18 @@ function makeHost(legalAction: LegalAction) {
     },
     cardInstances,
     run: {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "rd",
       accessedCardId: "trap",
     },
   } as unknown as GameState;
   const calls = {
-    damages: [] as Array<{ type: string; amount: number; source: string }>,
-    traces: [] as Array<{ base: number; source: string }>,
+    damages: [] as Array<{
+      type: string;
+      amount: number;
+      source: CardDefinitionId;
+    }>,
+    traces: [] as Array<{ base: number; source: CardDefinitionId }>,
     counters: [] as Array<{
       cardId: string;
       counterType: string;
@@ -268,8 +257,8 @@ function makeHost(legalAction: LegalAction) {
       accessNetDamageUpgrade: definitions.dieter!.id,
       oncePerRunAccessTraceUpgrade: definitions.turbeau!.id,
       hardwareTrashByAdvancementAsset: definitions.remains!.id,
-      programTrashByAdvancementAsset: "experimental" as CardDefinitionId,
-      advancementCoreDamageAsset: "soulkiller" as CardDefinitionId,
+      programTrashByAdvancementAsset: 3394580047 as CardDefinitionId,
+      advancementCoreDamageAsset: 1544035109 as CardDefinitionId,
     },
     cards: {
       definitionFor: (cardId) => definitions[cardId]!,
@@ -417,20 +406,18 @@ describe("access effect handlers", () => {
   });
 
   it("dispatches Setup damage through the damage callback", () => {
-    const action = accessAction("setup", "remote_1");
+    const action = accessAction("setup", "r1");
     const { host, calls, state } = makeHost(action);
     state.run = {
       ...state.run!,
       accessedCardId: "setup",
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
     };
 
     const result = handleAccessEffectsForCard(host, "setup" as CardInstanceId);
 
     expect(result.handled).toBe(true);
-    expect(calls.damages).toEqual([
-      { type: "net", amount: 2, source: "onr_v1_340_setup" },
-    ]);
+    expect(calls.damages).toEqual([{ type: "net", amount: 2, source: 552 }]);
     expect(action.payload).toMatchObject({
       hiddenZoneAction: "v1917_access_ambush",
       damageResolved: true,
@@ -439,12 +426,12 @@ describe("access effect handlers", () => {
   });
 
   it("does not dispatch an installed access effect from an unrezzed source", () => {
-    const action = accessAction("setup", "remote_1");
+    const action = accessAction("setup", "r1");
     const { host, calls, state } = makeHost(action);
     state.run = {
       ...state.run!,
       accessedCardId: "setup",
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
     };
     state.cardInstances.setup = {
       ...state.cardInstances.setup!,
@@ -455,7 +442,7 @@ describe("access effect handlers", () => {
 
     expect(result.handled).toBe(false);
     expect(calls.damages).toEqual([]);
-    expect(action.payload).toEqual({ serverId: "remote_1" });
+    expect(action.payload).toEqual({ serverId: "r1" });
   });
 
   it("keeps TRAP! access payment choice and pay path stable", () => {
@@ -473,13 +460,11 @@ describe("access effect handlers", () => {
     resolveAccessPaymentChoice(host, "pay");
 
     expect(calls.spentCredits).toEqual([4]);
-    expect(calls.damages).toEqual([
-      { type: "net", amount: 3, source: "onr_v1_345_trap" },
-    ]);
+    expect(calls.damages).toEqual([{ type: "net", amount: 3, source: 557 }]);
     expect(action.payload).toMatchObject({
       ambushPaidCost: 4,
       corpCreditsAfter: 2,
-      publicRevealDefinitionId: "onr_v1_345_trap",
+      publicRevealDefinitionId: 557,
       damageResolved: true,
       damageAmount: 3,
     });
@@ -518,17 +503,17 @@ describe("access effect handlers", () => {
   });
 
   it("revalidates the installed source rez state before resolving payment", () => {
-    const action = accessAction("trap", "remote_1");
+    const action = accessAction("trap", "r1");
     const { host, state } = makeHost(action);
     state.run = {
       ...state.run!,
       accessedCardId: "trap",
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
     };
     state.cardInstances.trap = {
       ...state.cardInstances.trap!,
       rezzed: true,
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
     };
     state.corp.rd = [];
 
@@ -546,63 +531,61 @@ describe("access effect handlers", () => {
   });
 
   it("runs Dedicated Response Team and Dieter through access damage callbacks", () => {
-    const dedicatedAction = accessAction("dedicated", "remote_1");
+    const dedicatedAction = accessAction("dedicated", "r1");
     const dedicated = makeHost(dedicatedAction);
     dedicated.state.run = {
       ...dedicated.state.run!,
       accessedCardId: "dedicated",
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
     };
     handleAccessEffectsForCard(dedicated.host, "dedicated" as CardInstanceId);
 
-    const dieterAction = accessAction("dieter", "remote_1");
+    const dieterAction = accessAction("dieter", "r1");
     const dieter = makeHost(dieterAction);
     dieter.state.run = {
       ...dieter.state.run!,
       accessedCardId: "dieter",
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
     };
     handleAccessEffectsForCard(dieter.host, "dieter" as CardInstanceId);
 
     expect(dedicated.calls.damages).toEqual([
-      { type: "meat", amount: 3, source: "onr_v1_356_dedicated-response-team" },
+      { type: "meat", amount: 3, source: 568 },
     ]);
     expect(dieter.calls.damages).toEqual([
-      { type: "net", amount: 1, source: "onr_v1_357_dieter-esslin" },
+      { type: "net", amount: 1, source: 569 },
     ]);
   });
 
   it("dispatches trace, counter, and installed-trash steps through callbacks", () => {
-    const traceAction = accessAction("turbeau", "remote_1");
+    const traceAction = accessAction("turbeau", "r1");
     const trace = makeHost(traceAction);
     trace.state.run = {
       ...trace.state.run!,
       accessedCardId: "turbeau",
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
     };
     handleAccessEffectsForCard(trace.host, "turbeau" as CardInstanceId);
 
-    const counterAction = accessAction("crybaby", "remote_1");
+    const counterAction = accessAction("crybaby", "r1");
     const counter = makeHost(counterAction);
     counter.state.run = {
       ...counter.state.run!,
       accessedCardId: "crybaby",
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
     };
     handleAccessEffectsForCard(counter.host, "crybaby" as CardInstanceId);
 
-    const trashAction = accessAction("remains", "remote_1");
+    const trashAction = accessAction("remains", "r1");
     const trash = makeHost(trashAction);
     trash.state.run = {
       ...trash.state.run!,
       accessedCardId: "remains",
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
     };
     handleAccessEffectsForCard(trash.host, "remains" as CardInstanceId);
 
-    expect(trace.calls.traces).toEqual([
-      { source: "onr_v1_361_turbeau-delacroix", base: 10 },
-    ]);
+    expect(trace.calls.traces).toEqual([{ source: 3313239812, base: 10 }]);
     expect(traceAction.payload).toMatchObject({
       hiddenZoneAction: "v1918_upgrade_access_trace",
       traceLimit: 10,
@@ -618,7 +601,7 @@ describe("access effect handlers", () => {
     expect(trashAction.payload).toMatchObject({
       hiddenZoneAction: "v1919_access_ambush_trash_installed",
       trashedCount: 1,
-      trashedCardDefinitionIds: "daemon",
+      trashedCardDefinitionIds: "953318085",
     });
   });
 });

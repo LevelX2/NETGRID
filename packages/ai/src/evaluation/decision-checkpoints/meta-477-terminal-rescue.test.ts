@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { beforeEach, expect, it } from "vitest";
 import {
@@ -51,16 +52,16 @@ it("binds the native lethal damage replacement to the defense owner", () => {
   expect(decision.selectedChoices).toEqual({
     choiceId: input.playerView.pendingChoice!.choiceId,
     selectedOptionIds: [
-      "flatline_tag_replacement_from_grip_runner_onr_v1_078_arasaka-owns-you_1",
+      "flatline_tag_replacement_from_grip_c1sh",
     ],
   });
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
     selectedPlan: { moduleId: "runner.defense_and_recovery" },
-    rootPlanInstanceId: "plan:runner.defense_and_recovery:runner",
-    leafExecutorInstanceId: "plan:runner.defense_and_recovery:runner",
+    rootPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
+    leafExecutorInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
     route: {
       stepId:
-        "plan:runner.defense_and_recovery:runner:replace_damage_from_grip",
+        "p1gzjb6yfcv4zbzow512kexs33:replace_damage_from_grip",
     },
   });
 });
@@ -104,11 +105,11 @@ it("applies the actual Engine rescue without flatlining", () => {
   RealEngineFixtureBuilder.forState(state)
     .withCorpCredits(10)
     .withRunnerGripSize(0)
-    .withRunnerCardInGrip("onr_v1_078_arasaka-owns-you")
+    .withRunnerCardInGrip(290)
     .withRunnerTags(1)
-    .withCorpCardInHq("onr_v1_302_scorched-earth");
+    .withCorpCardInHq(514);
   const operation = getLegalActions(state, "corp").find(
-    (a) => a.type === "play_operation" && a.source?.includes("scorched-earth"),
+    (a) => a.type === "play_operation" && referencesDefaultDeckCard(a.source, 514),
   )!;
   const damage = applyAction(state, {
     matchId: state.matchId,
@@ -136,7 +137,9 @@ it("applies the actual Engine rescue without flatlining", () => {
   expect(rescue.state.winner).toBeNull();
   expect(rescue.state.runner.tags).toBe(0);
   expect(
-    rescue.state.runner.heap.some((id) => id.includes("arasaka-owns-you")),
+    rescue.state.runner.heap.some(
+      (id) => rescue.state.cardInstances[id]?.definitionId === 290,
+    ),
   ).toBe(true);
   expect(rescue.state.runner.grip).toHaveLength(
     rescue.state.runner.maxHandSize,

@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { beforeEach, expect, it } from "vitest";
 import {
   applyAction,
@@ -11,8 +12,8 @@ import { chooseAiAction } from "../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInput } from "./ai-decision-input";
 
-const ACCOUNT = "onr_v1_281_accounts-receivable",
-  ICE = "onr_v1_233_d-arc-knight";
+const ACCOUNT = 493,
+  ICE = 445;
 const decks = Object.fromEntries(
   (["corp", "runner"] as const).map((side) => {
     const id =
@@ -70,26 +71,26 @@ function fixture(
     .withCorpHqSize(0)
     .withCorpCredits(credits)
     .withRunnerCredits(6)
-    .withRunnerProgramInstalled("onr_v1_045_newsgroup-filter")
-    .withRunnerProgramInstalled("onr_v1_054_raptor")
-    .withRunnerProgramInstalled("onr_v1_074_worm")
-    .withCorpIceOnServer("hq", "onr_v1_237_data-wall");
+    .withRunnerProgramInstalled(257)
+    .withRunnerProgramInstalled(266)
+    .withRunnerProgramInstalled(286)
+    .withCorpIceOnServer("hq", 449);
   // An independently known unfunded R&D reserve now suspends this install
   // before its own funding demand exists. The positive fixture needs an
   // admitted staging route; retain the suspended route as a separate case.
   if (knownUnfundedCentralReserve)
-    f.withCorpIceOnServer("rd", "onr_v1_271_tko-2-0");
-  else f.withRezzedCorpIceOnServer("rd", "onr_v1_271_tko-2-0");
-  f.withCorpIceOnServer("rd", "onr_v1_270_sleeper").withRezzedCorpIceOnServer(
-    "remote_1",
-    "onr_v1_249_hunter",
+    f.withCorpIceOnServer("rd", 483);
+  else f.withRezzedCorpIceOnServer("rd", 483);
+  f.withCorpIceOnServer("rd", 482).withRezzedCorpIceOnServer(
+    "r1",
+    461,
   );
   for (const id of [
-    "onr_v1_199_employee-empowerment",
-    "onr_v1_306_trojan-horse",
-    "onr_v1_207_netwatch-operations-office",
+    411,
+    518,
+    419,
     ICE,
-    "onr_v1_363_olivia-salazar",
+    575,
     ...(account ? [fundingCard] : []),
   ])
     f.withCorpCardInHq(id);
@@ -114,13 +115,13 @@ it("funds the admitted defense installation before spending its operation thresh
   let state = fixture();
   const before = input(state),
     account = before.legalActions.find(
-      (a) => a.type === "play_operation" && a.source.includes(ACCOUNT),
+      (a) => a.type === "play_operation" && state.cardInstances[a.source]?.definitionId === ACCOUNT,
     )!;
   const decision = chooseAiAction(before),
     plan = decision.decisionDebug!.planFirstDecision!;
   expect(decision.actionId).toBe(account.actionId);
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:corp.defend_servers:server-defense-portfolio",
+    "penw02zfrkklof54c2nuye5att",
   );
   expect(plan.selectedPlan?.moduleId).toBe("corp.economy");
   expect(decision.fallbackUsed).toBe(false);
@@ -132,7 +133,7 @@ it("funds the admitted defense installation before spending its operation thresh
       (a) => a.actionId === next.actionId,
     )!;
   expect(install.type).toBe("install_card");
-  expect(install.source).toContain(ICE);
+  expect(state.cardInstances[install.source]?.definitionId).toBe(ICE);
   expect(install.payload?.serverId).toBe("hq");
   expect(next.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
     plan.rootPlanInstanceId,
@@ -151,7 +152,7 @@ it("funds the admitted defense installation before spending its operation thresh
     )!,
   );
   const rez = getLegalActions(state, "corp").find(
-    (a) => a.type === "rez_ice" && a.source.includes(ICE),
+    (a) => a.type === "rez_ice" && state.cardInstances[a.source]?.definitionId === ICE,
   )!;
   expect(rez).toBeDefined();
   state = apply(state, rez);
@@ -159,7 +160,7 @@ it("funds the admitted defense installation before spending its operation thresh
 });
 it("keeps an already funded installation immediate", () => {
   const decision = chooseAiAction(input(fixture(8)));
-  expect(decision.actionId).toContain(ICE);
+  expect(referencesDefaultDeckCard(decision.actionId, ICE)).toBe(true);
   expect(decision.actionId).toContain(".hq.");
   expect(
     decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
@@ -172,14 +173,14 @@ it("keeps funding separate while an independently known central reserve suspends
   const plan = decision.decisionDebug!.planFirstDecision!;
   const account = i.legalActions.find((a) => a.actionId === decision.actionId)!;
   expect(account.type).toBe("play_operation");
-  expect(account.source).toContain("accounts-receivable");
+  expect(referencesDefaultDeckCard(account.source, 493)).toBe(true);
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:corp.economy:economy-immediate-operation%3Acorp_onr_v1_281_accounts-receivable_1",
+    "pdcamubibo7tjbarb3t4ixoxpi",
   );
   expect(
     plan.dispositions.some(
       (d) =>
-        d.actionId.includes("d-arc-knight") &&
+        referencesDefaultDeckCard(d.actionId, 445) &&
         d.actionId.includes(".hq.") &&
         d.disposition === "explicitly_nonproductive" &&
         d.ownerModuleId === "corp.defend_servers",
@@ -188,20 +189,20 @@ it("keeps funding separate while an independently known central reserve suspends
   const funded = apply(state, account),
     installDecision = chooseAiAction(input(funded));
   expect(funded.corp.credits).toBe(9);
-  expect(installDecision.actionId).toContain("d-arc-knight");
+  expect(referencesDefaultDeckCard(installDecision.actionId, 445)).toBe(true);
   expect(installDecision.actionId).toContain(".hq.");
   expect(
     installDecision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
   ).toBe("corp.defend_servers");
 });
 it("uses a different canonical liquid-credit operation for the same admitted installation", () => {
-  const efficiency = "onr_v1_290_efficiency-experts",
+  const efficiency = 502,
     initial = fixture(5, 2, true, efficiency),
     i = input(initial),
     decision = chooseAiAction(i);
-  expect(decision.actionId).toContain(efficiency);
+  expect(referencesDefaultDeckCard(decision.actionId, efficiency)).toBe(true);
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:corp.defend_servers:server-defense-portfolio",
+    "penw02zfrkklof54c2nuye5att",
   );
   expect(
     decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
@@ -216,8 +217,8 @@ it("uses a different canonical liquid-credit operation for the same admitted ins
 it("keeps a native terminal score ahead of the defense funding prefix", () => {
   const state = fixture(5, 2, true, ACCOUNT, 4);
   RealEngineFixtureBuilder.forState(state).withCorpRemoteRoot(
-    "remote_2",
-    "onr_v1_220_tycho-extension",
+    "r2",
+    432,
     4,
   );
   const i = input(state),
@@ -241,7 +242,7 @@ it.each([
       plan = decision.decisionDebug?.planFirstDecision;
     expect(
       plan?.rootPlanInstanceId ===
-        "plan:corp.defend_servers:server-defense-portfolio" &&
+        "penw02zfrkklof54c2nuye5att" &&
         plan.selectedPlan?.moduleId === "corp.economy",
     ).toBe(false);
     expect(i.legalActions.some((a) => a.actionId === decision.actionId)).toBe(

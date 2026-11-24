@@ -472,7 +472,7 @@ function DeckStrategyEvidenceGroups({
                           key={deckStrategyEvidenceKey(
                             group.strategyId,
                             entry.source,
-                            entry.cardId,
+                            String(entry.cardId),
                             entryIndex,
                           )}
                         >

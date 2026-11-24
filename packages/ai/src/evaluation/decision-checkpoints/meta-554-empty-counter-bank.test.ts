@@ -38,7 +38,7 @@ function fixture(game: number, decision: number) {
   expect(Object.values(cp.validation).every(Boolean)).toBe(true);
   return cp;
 }
-function project(cp: ReturnType<typeof fixture>, serverId = "remote_1") {
+function project(cp: ReturnType<typeof fixture>, serverId = "r1") {
   const input = cp.input;
   const candidate = buildActionSemanticCandidates({
     legalActions: input.legalActions,
@@ -51,7 +51,7 @@ function project(cp: ReturnType<typeof fixture>, serverId = "remote_1") {
       buildActionCardSemanticProfilesByDefinitionId(),
   }).find(
     (c) =>
-      c.sourceCardInstanceId === "corp_onr_proteus_008_project-zurich_1" &&
+      c.sourceCardInstanceId === "cet" &&
       c.actionType === "install_card" &&
       input.legalActions.find((a) => a.actionId === c.actionId)?.payload
         ?.serverId === serverId,
@@ -102,7 +102,7 @@ it.each([
 ])("admits the native empty counter-bank fort at G%i D%i", (game, decision) => {
   const cp = fixture(game, decision);
   const bank = cp.input.playerView.servers
-    .find((s) => s.id === "remote_1")!
+    .find((s) => s.id === "r1")!
     .root.find((c) => c.type === "asset")!;
   expect(bank.counterBankPreparationQuote?.advancementCounters).toBe(0);
   const fort = project(cp);
@@ -114,14 +114,14 @@ it.each([
   restore(cp);
   const { action, plan } = decide(cp);
   expect(action.type).toBe("install_card");
-  expect(action.payload?.serverId).toBe("remote_1");
+  expect(action.payload?.serverId).toBe("r1");
   expect(plan.selectedPlan?.moduleId).toBe("corp.score_agenda");
 });
 it.each(["positive", "stale", "missing", "ordinary_hand"])(
   "does not extend relief to %s bank evidence",
   (kind) => {
     const cp = fixture(10, 301);
-    const bank = cp.input.playerView.servers.find((s) => s.id === "remote_1")!
+    const bank = cp.input.playerView.servers.find((s) => s.id === "r1")!
       .root[0]!;
     if (kind === "positive") {
       bank.advancementCounters = 1;

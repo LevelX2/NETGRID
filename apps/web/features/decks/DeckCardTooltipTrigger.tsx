@@ -1,5 +1,6 @@
 "use client";
 
+import { type CardDefinitionId } from "@netgrid/shared";
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { useTranslations } from "use-intl/react";
@@ -25,7 +26,7 @@ import { useCardTooltipHover } from "../cards/useCardTooltipHover";
 import { cardMetricLine, formatCardTypeLine } from "../cards/card-text-lines";
 
 type DeckTooltipCard = {
-  catalogCardId: string;
+  catalogCardId: CardDefinitionId;
   title: string;
   type: string;
   subtypes: string[];
@@ -38,7 +39,7 @@ type DeckTooltipDetail = DeckTooltipCard & {
   collectorNumber: string;
   text: string;
   numeric: Record<string, number | null | undefined>;
-  definitionId?: string;
+  definitionId?: CardDefinitionId;
 };
 
 export function DeckCardTooltipTrigger({
@@ -52,7 +53,7 @@ export function DeckCardTooltipTrigger({
 }: {
   card: DeckTooltipCard | null;
   detail: DeckTooltipDetail | undefined;
-  cardId: string;
+  cardId: CardDefinitionId;
   className: string;
   style?: CSSProperties;
   onSelect(): void;
@@ -75,7 +76,7 @@ export function DeckCardTooltipTrigger({
   const detailLines = card && detail ? catalogDetailLines(detail) : [];
   const rulesText = card && detail ? detail.text : "";
   const hasRulesLines = rulesText.length > 0;
-  const tooltipText = card ? deckBuilderCardTooltip(card, detail) : cardId;
+  const tooltipText = card ? deckBuilderCardTooltip(card, detail) : String(cardId);
   const tooltipImageId =
     detail?.definitionId ??
     detail?.catalogCardId ??
@@ -103,7 +104,7 @@ export function DeckCardTooltipTrigger({
     Boolean(card) && (showImageTooltip || hasTooltipTextContent);
   const tooltipId =
     tooltipEnabled && card
-      ? `deck-card-tooltip-${card.catalogCardId.replace(/[^A-Za-z0-9_-]/g, "-")}`
+      ? `deck-card-tooltip-${String(card.catalogCardId)}`
       : undefined;
   const nativeTitle = tooltipEnabled ? undefined : tooltipText;
   const tooltipStats = detail

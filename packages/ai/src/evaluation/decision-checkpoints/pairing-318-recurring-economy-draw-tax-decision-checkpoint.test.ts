@@ -23,7 +23,7 @@ type ReconstructedDecisionCapture = {
 
 describe("pairing 318 recurring-economy draw-tax checkpoint", () => {
   it("keeps the resident economy hold while respecting observed affordable HQ damage and draw-tax risk", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       recurringEconomyTaxedDrawJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
@@ -47,15 +47,15 @@ describe("pairing 318 recurring-economy draw-tax checkpoint", () => {
     );
 
     expect(decision).toMatchObject({
-      actionId: "runner.gain_credit",
+      actionId: "rb",
       reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:runner.develop_board_and_hand:card%3Arunner_onr_v1_079_bodyweight-synthetic-blood_1",
+            "p3rn7st7ghsxrsvjkhek2d7lci",
           leafExecutorInstanceId:
-            "plan:runner.economy:development-support%3Arunner_onr_v1_079_bodyweight-synthetic-blood_1",
+            "p87kpx09485sttvovc3vc1oqf1",
           route: {
             actionType: "gain_credit",
             semanticActionType: "economy.gain_credit",

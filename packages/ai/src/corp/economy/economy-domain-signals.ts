@@ -1,3 +1,4 @@
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { exactBasicLiquidCreditCandidate } from "../../actions/action-candidate-facts";
 
 import { type CorpEconomyLiquidityDevelopmentSignal } from "./economy-types";
@@ -23,10 +24,10 @@ export function corpExactCurrentBasicLiquidCreditAction(
   action: LegalAction | undefined,
 ): boolean {
   if (
-    action?.side !== "corp" ||
+    input.side !== "corp" ||
+    !actionMatchesCurrentDecision(input, action) ||
     action.type !== "gain_credit" ||
     action.source !== "basic_action" ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
     action.targetRequirements.length > 0 ||
     (action.choiceRequirements?.length ?? 0) > 0 ||
     !action.costs.every((cost) =>
@@ -175,50 +176,27 @@ function corpResidualCapacityUse(
 export function corpVisibleLiquidityDemandTarget(
   input: AiDecisionInput,
 ): number {
-  const exactCurrentActionCosts = input.legalActions.flatMap((action) => {
-    const credits = action.costs.reduce(
-      (sum, cost) => sum + (cost.credits ?? 0),
-      0,
-    );
-    return Number.isSafeInteger(credits) && credits >= 0 ? [credits] : [];
-  });
-  const postInstallRezCosts = input.legalActions.flatMap((action) => {
-    const quoted =
-      action.payload?.postInstallRezQuoteComplete === true
-        ? action.payload.postInstallRezQuoteFinalCredits
-        : undefined;
-    return typeof quoted === "number" &&
-      Number.isSafeInteger(quoted) &&
-      quoted >= 0
-      ? [quoted]
-      : [];
-  });
-  const postInstallRouteCosts = input.legalActions.flatMap((action) => {
-    const quoted =
-      action.payload?.postInstallRezQuoteComplete === true
-        ? action.payload.postInstallRezQuoteFinalCredits
-        : undefined;
-    const installCredits = action.costs.reduce(
-      (sum, cost) => sum + (cost.credits ?? 0),
-      0,
-    );
-    return typeof quoted === "number" &&
-      Number.isSafeInteger(quoted) &&
-      quoted >= 0 &&
-      Number.isSafeInteger(installCredits) &&
-      installCredits >= 0 &&
-      Number.isSafeInteger(installCredits + quoted)
-      ? [installCredits + quoted]
-      : [];
-  });
-  const defenseReserve = Math.max(0, ...postInstallRezCosts);
-  const exactVisibleDemand = Math.max(
-    0,
-    ...exactCurrentActionCosts,
-    ...postInstallRouteCosts,
-    defenseReserve,
-  );
-  return exactVisibleDemand;
+  if (input.side !== "corp") return 0;
+  let demand = 0;
+  for (const action of input.legalActions) {
+    if (!actionMatchesCurrentDecision(input, action)) continue;
+    const costs = action.costs.map((cost) => cost.credits ?? 0);
+    if (!costs.every((cost) => Number.isSafeInteger(cost) && cost >= 0))
+      continue;
+    const credits = costs.reduce((sum, amount) => sum + amount, 0);
+    if (!Number.isSafeInteger(credits)) continue;
+    const rezQuote = action.payload?.postInstallRezQuoteFinalCredits;
+    demand = Math.max(demand, credits);
+    if (
+      action.payload?.postInstallRezQuoteComplete === true &&
+      typeof rezQuote === "number" &&
+      rezQuote >= 0 &&
+      Number.isSafeInteger(rezQuote) &&
+      Number.isSafeInteger(credits + rezQuote)
+    )
+      demand = Math.max(demand, credits + rezQuote);
+  }
+  return demand;
 }
 
 function corpResidentLiquidityDevelopment(

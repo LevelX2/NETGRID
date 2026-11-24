@@ -6,6 +6,7 @@ import {
   residentPlanPortfolioSnapshot,
 } from "../../plans/resident-plan-portfolio-memory";
 import type { EconomyState } from "../../corp/economy/economy-types";
+import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import {
   restoreAiRuntimeCheckpoint,
   type AiRuntimeCheckpointV1,
@@ -72,18 +73,28 @@ describe("SP-611 native Department rest-turn comparison", () => {
       namedCapture("cp-meta-542-cycle-payoff-d421.json"),
     );
     expect(first.selected.payload?.hostedCreditAddAmount).toBe(3);
-    expect(first.plan?.rootPlanInstanceId).toContain(
-      "economy-hosted-bank-cycle",
-    );
+    expect(
+      first.plan?.portfolio.find(
+        (instance) => instance.instanceId === first.plan?.rootPlanInstanceId,
+      ),
+    ).toMatchObject({
+      moduleId: "corp.economy",
+      dedupeKey: expect.stringContaining("economy-hosted-bank-cycle"),
+    });
     const second = replayCapture(
       namedCapture("cp-meta-542-cycle-payoff-d422.json"),
       false,
     );
     expect(second.selected.payload?.hostedCreditTakeAmount).toBe(3);
     expect(second.plan?.selectedPlan?.moduleId).toBe("corp.economy");
-    expect(second.plan?.rootPlanInstanceId).toContain(
-      "economy-visible-card-payout",
-    );
+    expect(
+      second.plan?.portfolio.find(
+        (instance) => instance.instanceId === second.plan?.rootPlanInstanceId,
+      ),
+    ).toMatchObject({
+      moduleId: "corp.economy",
+      dedupeKey: expect.stringContaining("economy-visible-card-payout"),
+    });
     expect(second.f.input.playerView.own.credits).toBe(13);
     expect(second.f.input.playerView.own.clicks).toBe(1);
   });
@@ -117,9 +128,14 @@ describe("SP-611 native Department rest-turn comparison", () => {
         ),
       ).toBe(true);
       expect(selected.payload?.hostedCreditAddAmount).toBe(3);
-      expect(plan?.rootPlanInstanceId).toContain(
-        "economy-hosted-bank-investment",
-      );
+      expect(
+        plan?.portfolio.find(
+          (instance) => instance.instanceId === plan?.rootPlanInstanceId,
+        ),
+      ).toMatchObject({
+        moduleId: "corp.economy",
+        dedupeKey: expect.stringContaining("economy-hosted-bank-investment"),
+      });
     },
   );
   it("uses an empty active bank instead of two unbound Basic credits", () => {
@@ -128,7 +144,14 @@ describe("SP-611 native Department rest-turn comparison", () => {
     );
     expect(f.input.playerView.stateVersion).toBe(420);
     expect(selected.payload?.hostedCreditAddAmount).toBe(3);
-    expect(plan?.rootPlanInstanceId).toContain("economy-hosted-bank-cycle");
+    expect(
+      plan?.portfolio.find(
+        (instance) => instance.instanceId === plan?.rootPlanInstanceId,
+      ),
+    ).toMatchObject({
+      moduleId: "corp.economy",
+      dedupeKey: expect.stringContaining("economy-hosted-bank-cycle"),
+    });
     expect(
       JSON.parse(String(selected.payload!.hostedCreditBankCycleQuoteJson)),
     ).toMatchObject({
@@ -143,9 +166,14 @@ describe("SP-611 native Department rest-turn comparison", () => {
       namedCapture("cp-meta-542-r1-g19-d179-parent-funding.json"),
     );
     expect(selected.payload?.hostedCreditAddAmount).toBe(3);
-    expect(plan?.rootPlanInstanceId).toContain(
-      "economy-hosted-bank-investment",
-    );
+    expect(
+      plan?.portfolio.find(
+        (instance) => instance.instanceId === plan?.rootPlanInstanceId,
+      ),
+    ).toMatchObject({
+      moduleId: "corp.economy",
+      dedupeKey: expect.stringContaining("economy-hosted-bank-investment"),
+    });
     expect(plan?.selectedPlan?.moduleId).toBe("corp.economy");
     const portfolio = residentPlanPortfolioSnapshot(f.input)!;
     const executor = portfolio.instances.find(
@@ -159,11 +187,11 @@ describe("SP-611 native Department rest-turn comparison", () => {
         canCarryAcrossTurn: false,
       },
     });
-    const score = portfolio.instances.find(
-      (p) =>
-        p.moduleId === "corp.score_agenda" &&
-        p.dedupeKey.includes("security-net-optimization_2:remote_1"),
-    )!;
+    const score = portfolio.instances.find((p) => {
+      if (p.moduleId !== "corp.score_agenda") return false;
+      const { signal } = p.moduleState as { signal: CorpScoreProjectSignal };
+      return signal.agendaDefinitionId === 427 && signal.serverId === "r1";
+    })!;
     expect(score.moduleState).toMatchObject({
       signal: {
         feasible: false,
@@ -175,7 +203,7 @@ describe("SP-611 native Department rest-turn comparison", () => {
     const { f, selected, plan } = replay(4, 441);
     expect(selected.payload?.hostedCreditAddAmount).toBe(3);
     expect(plan?.selectedPlan?.moduleId).toBe("corp.economy");
-    expect(plan?.selectedPlan?.instanceId).toContain(
+    expect(plan?.selectedPlan?.dedupeKey).toContain(
       "economy-hosted-bank-investment",
     );
     expect(f.input.playerView.stateVersion).toBe(440);
@@ -225,13 +253,14 @@ describe("SP-611 native Department rest-turn comparison", () => {
       observed.push(result);
       return result;
     });
-    const { selected } = replay(2, 95);
+    const { f, selected } = replay(2, 95);
     expect(selected.payload?.hostedCreditTakeAmount).toBe(3);
-    expect(
-      observed
-        .flatMap((x) => x.actionIds)
-        .some((x) => x.includes("crystal-wall") && x.includes(".rd.")),
-    ).toBe(true);
+    const definitions = visibleSourceDefinitionsByInstanceId(f.input.playerView);
+    const installation = f.input.legalActions.find((action) =>
+      action.type === "install_card" && definitions[action.source] === 444 && action.payload?.serverId === "rd",
+    );
+    expect(installation).toBeDefined();
+    expect(observed.flatMap((window) => window.actionIds)).toContain(installation?.actionId);
   });
   it.each([
     [4, 273],
@@ -241,7 +270,11 @@ describe("SP-611 native Department rest-turn comparison", () => {
     const { selected, plan } = replay(game, d);
     expect(selected.payload?.hostedCreditTakeAmount).toBe(3);
     if (game === 29) {
-      expect(plan?.rootPlanInstanceId).toContain("corp.score_agenda");
+      expect(
+        plan?.portfolio.find(
+          (instance) => instance.instanceId === plan?.rootPlanInstanceId,
+        )?.moduleId,
+      ).toBe("corp.score_agenda");
       expect(plan?.priority?.effectiveClass).toBe("P1");
     }
   });

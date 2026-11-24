@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it, vi } from "vitest";
 import type { VisibleCard } from "@netgrid/shared";
 import {
@@ -18,14 +19,14 @@ describe("remoteTrashRoleForVisibleCard", () => {
     expect(
       remoteTrashRoleForVisibleCard({
         ...card(),
-        definitionId: "simple_upgrade",
+        definitionId: 606,
         type: "upgrade",
       }),
     ).toBe("low_value");
     expect(
       remoteTrashRoleForVisibleCard({
         ...card(),
-        definitionId: "onr_v1_317_data-masons",
+        definitionId: 529,
       }),
     ).not.toBe("low_value");
   });
@@ -33,7 +34,7 @@ describe("remoteTrashRoleForVisibleCard", () => {
     expect(
       remoteTrashRoleForVisibleCard({
         ...card(),
-        definitionId: "onr_v1_312_chicago-branch",
+        definitionId: 524,
       }),
     ).toBe("score_acceleration");
   });
@@ -42,7 +43,7 @@ describe("remoteTrashRoleForVisibleCard", () => {
     expect(
       remoteTrashRoleForVisibleCard({
         ...card(),
-        definitionId: "onr_v1_330_krumz",
+        definitionId: 542,
         counters: { bit: 1 },
       }),
     ).toBe("economy");
@@ -72,6 +73,15 @@ describe("remoteTrashRoleForVisibleCard", () => {
 });
 
 describe("remoteTrashCardLooksLikeFinitePoolForMetrics", () => {
+  it("keeps recurring credit out of the finite-pool metrics", () => {
+    expect(
+      remoteTrashCardLooksLikeFinitePoolForMetrics({
+        ...cardWithRulesText("Put 8 bits from the bank on this card. Take bits."),
+        counters: { recurring_credit: 8 },
+      }),
+    ).toBe(false);
+  });
+
   it("matches finite-pool rules text by bounded phrases", () => {
     expect(
       remoteTrashCardLooksLikeFinitePoolForMetrics(
@@ -96,7 +106,7 @@ function roleForRoles(roles: string[]) {
 function card(): VisibleCard {
   return {
     instanceId: "test_card",
-    definitionId: "test_card",
+    definitionId: syntheticCardDefinitionId("test_card"),
     known: true,
     type: "asset",
   } as VisibleCard;

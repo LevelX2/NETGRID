@@ -17,6 +17,7 @@ import type {
   ModifierKind,
   PlayerAction,
   Side,
+  TraceId,
 } from "@netgrid/shared";
 
 export type StateRuntimeResolverPort = {
@@ -24,7 +25,7 @@ export type StateRuntimeResolverPort = {
     state: GameState,
     sourceDefinitionId: CardDefinitionId,
     sourceCardInstanceId: CardInstanceId,
-    traceId: string,
+    traceId: TraceId,
     damageAmount: number,
     legalAction: LegalAction,
   ) => {
@@ -44,7 +45,7 @@ export type StateRuntimeResolverPort = {
     state: GameState,
     sourceDefinitionId: CardDefinitionId,
     sourceCardInstanceId: CardInstanceId,
-    traceId: string,
+    traceId: TraceId,
     targetCardId: CardInstanceId | undefined,
   ) => NonNullable<LegalAction["payload"]>;
   encounterTemporaryTraceCreditsAvailable: (

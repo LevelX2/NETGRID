@@ -1,6 +1,6 @@
 import { visibleRunnerNextTurnPreparationCreditGain } from "@netgrid/engine";
 import type { AiDecisionInput } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { visibleRunnerHeapBreakerPreparations } from "../../runtime/corp-public-heap-breaker-preparation";
 import { assessCorpScoreProtection } from "../../runtime/corp-score-protection-assessment";
 import type { CorpCentralDefenseAllocation } from "./corp-central-defense-allocation";
@@ -44,7 +44,7 @@ export function corpAcuteDefenseHandOptions(
   );
   for (const card of own.gripOrHq) {
     const definition = card.definitionId
-      ? CARD_DEFINITIONS_BY_ID[card.definitionId]
+      ? planningCardFactsByDefinitionId(card.definitionId)
       : undefined;
     if (
       !card.known ||

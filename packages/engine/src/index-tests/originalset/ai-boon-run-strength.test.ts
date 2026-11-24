@@ -16,8 +16,8 @@ import {
   toRunnerTurn,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 
-const AI_BOON = "onr_v1_002_ai-boon";
-const CREDIT_BLOCKS = "onr_proteus_017_credit-blocks";
+const AI_BOON = 214;
+const CREDIT_BLOCKS = 75;
 
 function aiBoonStrengthGame(seed: string) {
   return toRunnerTurn(

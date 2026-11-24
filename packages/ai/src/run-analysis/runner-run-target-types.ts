@@ -1,3 +1,7 @@
+import type {
+  KnownRezzedIcePathAssessment,
+  VisibleIceRunHazard,
+} from "./visible-run-analysis-contracts";
 import type { RunnerAccessFacts } from "../access/runner-access-facts";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
@@ -7,7 +11,6 @@ import type { BeliefState } from "../belief-state";
 import type { DeckCapabilityProfile } from "../deck-capabilities";
 import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
 import type { RunnerHandDevelopmentEvaluation } from "../runner/hand-development/runner-hand-development-types";
-import type { VisibleIceRunHazard } from "./visible-run-analysis-contracts";
 import type { RunnerRunRouteQuote } from "./runner-run-route-quote";
 
 export const RUNNER_RUN_TARGET_EVALUATION_SCHEMA_VERSION =
@@ -45,7 +48,7 @@ export type RunnerInstalledRunPayoff = {
 export type RunnerConsumableRunOpportunityQuote = {
   schemaVersion: typeof RUNNER_CONSUMABLE_RUN_OPPORTUNITY_SCHEMA_VERSION;
   kind: "bypass_first_ice" | "card_backed_run";
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   gripCopyCount: number;
   handAtCapacity: boolean;
   baseOpportunityCost: number;
@@ -88,7 +91,7 @@ export type RunActionProjection = {
   actionId: string;
   actionType: string;
   sourceKind: RunnerRunActionSourceKind;
-  sourceCardId?: string;
+  sourceCardId?: number;
   targetServerId?: string;
   targetKind?: RunnerRunTargetKind;
   accessServerId?: string;
@@ -105,7 +108,7 @@ export type RunActionProjection = {
   runTraceLinkBonus?: number;
   corpRezCostSurcharge?: {
     kind: "matching_printed_rez_cost";
-    sourceDefinitionId?: string;
+    sourceDefinitionId?: number;
   };
   runnerCreditGainOnCorpRez?: number;
   successfulRunSelfTags?: number;
@@ -359,6 +362,9 @@ export type RunnerRunTargetEvaluation = {
   accessNoveltyRatio?: number;
   multiaccessAvailable: boolean;
   pathPassability: RunnerPathPassability;
+  missingCoverage?: NonNullable<
+    KnownRezzedIcePathAssessment["missingCoverage"]
+  >;
   pathCost: number;
   futureClicksLost?: number;
   routeQuote?: RunnerRunRouteQuote;

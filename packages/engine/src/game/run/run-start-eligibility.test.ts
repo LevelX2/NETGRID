@@ -23,20 +23,17 @@ describe("run-start eligibility", () => {
         corpDeck: ONR_V1_9_19_AGENDA_OVERADVANCE_CORP_DECK,
       }),
     );
-    const sourceCardInstanceId = putCorpRootInRemote(
-      state,
-      "onr_v1_368_roving-submarine",
-    );
+    const sourceCardInstanceId = putCorpRootInRemote(state, 580);
     const source = state.cardInstances[sourceCardInstanceId]!;
     source.rezzed = true;
     source.faceup = true;
 
-    expect(evaluateRunStartEligibility(state, "remote_1")).toMatchObject({
+    expect(evaluateRunStartEligibility(state, "r1")).toMatchObject({
       allowed: false,
       serverRestrictions: [
         {
           kind: "run_prohibited",
-          targetServerId: "remote_1",
+          targetServerId: "r1",
           sourceCardInstanceId,
           sourceAbilityId: "fort_activity_gate",
         },
@@ -46,19 +43,19 @@ describe("run-start eligibility", () => {
       getLegalActions(state, "runner").some(
         (action) =>
           action.type === "start_run" &&
-          action.payload?.serverId === "remote_1",
+          action.payload?.serverId === "r1",
       ),
     ).toBe(false);
 
-    markFortActivitySinceCorpTurnStart(state, "remote_1");
+    markFortActivitySinceCorpTurnStart(state, "r1");
 
-    expect(serverRunStartRestrictions(state, "remote_1")).toEqual([]);
-    expect(evaluateRunStartEligibility(state, "remote_1").allowed).toBe(true);
+    expect(serverRunStartRestrictions(state, "r1")).toEqual([]);
+    expect(evaluateRunStartEligibility(state, "r1").allowed).toBe(true);
     expect(
       getLegalActions(state, "runner").some(
         (action) =>
           action.type === "start_run" &&
-          action.payload?.serverId === "remote_1",
+          action.payload?.serverId === "r1",
       ),
     ).toBe(true);
   });
@@ -82,16 +79,13 @@ describe("run-start eligibility", () => {
       runnerDeck: ONR_V1_9_19_AGENDA_OVERADVANCE_RUNNER_DECK,
       corpDeck: ONR_V1_9_19_AGENDA_OVERADVANCE_CORP_DECK,
     });
-    const sourceCardInstanceId = putCorpRootInRemote(
-      state,
-      "onr_v1_368_roving-submarine",
-    );
+    const sourceCardInstanceId = putCorpRootInRemote(state, 580);
     const source = state.cardInstances[sourceCardInstanceId]!;
     source.selectedServerId = "rd";
 
     expect(
       resolveRunStartRestrictionTargetServerId(source, "source_fort"),
-    ).toBe("remote_1");
+    ).toBe("r1");
     expect(
       resolveRunStartRestrictionTargetServerId(source, "selected_server"),
     ).toBe("rd");
@@ -107,26 +101,26 @@ describe("run-start eligibility", () => {
     type Restriction = Parameters<typeof runStartRestrictionCapabilityKey>[1];
 
     expect(
-      runStartRestrictionCapabilityKey("canonical", {
+      runStartRestrictionCapabilityKey(1843825557, {
         ...base,
         capabilityKey: "fort_activity_gate",
       } as Restriction),
     ).toBe("fort_activity_gate");
     expect(
-      runStartRestrictionCapabilityKey("legacy", {
+      runStartRestrictionCapabilityKey(3167603822, {
         ...base,
         abilityKey: "legacy_fort_activity_gate",
       } as Restriction),
     ).toBe("legacy_fort_activity_gate");
     expect(() =>
-      runStartRestrictionCapabilityKey("hybrid", {
+      runStartRestrictionCapabilityKey(2368939379, {
         ...base,
         capabilityKey: "fort_activity_gate",
         abilityKey: "legacy_fort_activity_gate",
       } as Restriction),
-    ).toThrow("hybrid_run_restriction_capability_identity: hybrid");
+    ).toThrow("hybrid_run_restriction_capability_identity: 2368939379");
     expect(() =>
-      runStartRestrictionCapabilityKey("missing", base as Restriction),
-    ).toThrow("run_restriction_capability_identity_missing: missing");
+      runStartRestrictionCapabilityKey(3069454615, base as Restriction),
+    ).toThrow("run_restriction_capability_identity_missing: 3069454615");
   });
 });

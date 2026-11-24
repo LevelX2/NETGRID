@@ -1,9 +1,9 @@
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { expect, it } from "vitest";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 
 it("derives repeatable conditional run credits from the mechanic, including a renamed variant", () => {
-  const entry = cardSpecPlanningCards().find(
+  const entry = listPlanningCardsWithFacts().find(
     (c) =>
       c.planning.engine.uniqueDirectLongtail?.kind ===
       "successful_run_end_credit_resource",
@@ -14,8 +14,8 @@ it("derives repeatable conditional run credits from the mechanic, including a re
       throw Error("fixture");
     const variant = {
       ...entry,
-      definition: {
-        ...entry.definition,
+      facts: {
+        ...entry.facts,
         title: "Independent run income fixture",
       },
       planning: {

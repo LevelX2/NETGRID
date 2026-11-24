@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { readFileSync } from "node:fs";
 import { beforeEach, expect, it } from "vitest";
 
@@ -45,7 +46,7 @@ it.each([2, 10])(
     const decision = chooseAiAction(capture.input);
     expect(JSON.stringify(capture.input)).toBe(before);
     const source = capture.input.playerView.own.gripOrHq.find(
-      (card) => card.definitionId === "onr_v1_123_bodyweight-data-creche",
+      (card) => card.definitionId === 335,
     )!;
     const install = capture.input.legalActions.find(
       (action) => action.type === "install_card" && action.source === source.instanceId,
@@ -56,7 +57,7 @@ it.each([2, 10])(
       fallbackUsed: false,
       timeoutUsed: false,
     });
-    const planId = `plan:runner.develop_board_and_hand:card%3A${source.instanceId}`;
+    const planId = planInstanceIdForProposal({ moduleId: "runner.develop_board_and_hand", dedupeKey: `card:${source.instanceId}` });
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       selectedPlan: { moduleId: "runner.develop_board_and_hand" },
       rootPlanInstanceId: planId,
@@ -79,7 +80,8 @@ it("preserves the original terminal-run funding cashout instead of spending the 
   expect(capture.input.playerView.own.credits).toBe(3);
   const decision = chooseAiAction(capture.input);
   expect(decision).toMatchObject({ fallbackUsed: false, timeoutUsed: false });
-  expect(decision.actionId).toContain("broker:withdraw_credits");
+  const action = capture.input.legalActions.find((a) => a.actionId === decision.actionId);
+  expect(action?.abilityRef?.sourceAbilityId).toBe(441);
   expect(decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
     "runner.credit_bank",
   );

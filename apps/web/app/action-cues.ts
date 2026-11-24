@@ -1,14 +1,20 @@
+import { cardDefinitionIdValue } from "./card-definition-id";
 import type {
-  PlayerView,
+  CardDefinitionId,
+  MatchEventId,
+  PublicCreditChange,
   PublicGameEvent,
   Side,
   VisibleCard,
 } from "@netgrid/shared";
+import type { PlayerView } from "../lib/presented-player-view";
 import {
+  chronicleActionUseByEventId,
   formatChronicleEffectItems,
   formatChronicleEvent,
   isSocialEngineeringHiddenAmountSelectionEvent,
   tagGainAmountFromPublicPayload,
+  type ChronicleActionUse,
   type ChronicleContext,
   type ChronicleImportance,
   type ChronicleItem,
@@ -21,21 +27,25 @@ import {
   publicAccessOwnsOutcomeEvent,
 } from "./access-presentation";
 import { coalesceAiPumpPresentationEvents } from "./ai-pump-presentation";
-import { payloadHasAbility } from "./action-payload";
+import {
+  isExposeOutermostIceEachDataFortPayload,
+  payloadHasAbility,
+} from "./action-payload";
 
 export type OpponentActionCue = {
   cueId: string;
-  eventId: string;
+  eventId: MatchEventId;
   viewerSide: Side;
   actor?: Side;
   actorLabel: string;
-  actionUse?: CueActionUse;
+  actionUse?: ChronicleActionUse;
+  creditChanges?: PublicCreditChange[];
   opponent: boolean;
   source: "human" | "ai" | "system";
   actionType: string;
   title: string;
   description?: string;
-  cardDefinitionId?: string;
+  cardDefinitionId?: CardDefinitionId;
   cardTitle?: string;
   visibility: ChronicleVisibility;
   importance: ChronicleImportance;
@@ -57,12 +67,12 @@ type TraceTagOutcome =
       pending: false;
       tagsAdded: number;
       preventedTags: number;
-      preventionCardIds: string[];
+      preventionCardIds: CardDefinitionId[];
     };
 
 export type DamageImpactCue = {
   cueId: string;
-  eventId: string;
+  eventId: MatchEventId;
   viewerSide: Side;
   damageType: "net" | "meat" | "core";
   amount: number;
@@ -80,14 +90,6 @@ export type DamageImpactAudioCue = {
   soundCount: number;
 };
 
-export type CueActionUse = {
-  label: string;
-  title: string;
-  clicks: number;
-  start: number;
-  end: number;
-};
-
 export type BoardHighlight =
   | {
       kind: "server";
@@ -98,7 +100,7 @@ export type BoardHighlight =
   | {
       kind: "card";
       cardInstanceId?: string;
-      cardDefinitionId?: string;
+      cardDefinitionId?: CardDefinitionId;
       title?: string;
     }
   | {
@@ -126,6 +128,7 @@ export type ActionSoundKind =
   | "credit"
   | "install_hidden"
   | "install_known"
+  | "advance"
   | "play"
   | "rez"
   | "ice_rez"
@@ -163,17 +166,19 @@ export type CueDerivationInput = {
   viewerSide: Side;
   playerView: PlayerView;
   events: PublicGameEvent[];
-  lastPresentedEventId?: string | null;
+  lastPresentedEventId?: MatchEventId | null;
   includeOwnActions?: boolean;
+  includeOwnCreditChanges?: boolean;
+  locallySoundedEventIds?: ReadonlySet<MatchEventId>;
   includeAutomaticEffectCues?: boolean;
   translate?: ChronicleTranslate;
-  contextByEventId?: Record<string, Omit<ChronicleContext, "side">>;
+  contextByEventId?: Record<MatchEventId, Omit<ChronicleContext, "side">>;
 };
 
 export function deriveOpponentActionCues(
   input: CueDerivationInput,
 ): OpponentActionCue[] {
-  const actionUsesByEventId = deriveTurnActionUses(
+  const actionUsesByEventId = chronicleActionUseByEventId(
     input.events,
     input.translate,
   );
@@ -189,8 +194,13 @@ export function deriveOpponentActionCues(
     const payload = event.publicPayload ?? {};
     const actionType = stringValue(payload.actionType) ?? event.type;
     if (
+      payload.publicRevealKind === "expose" &&
+      isExposeOutermostIceEachDataFortPayload(payload)
+    )
+      return [];
+    if (
       actionType === "access_card" &&
-      stringValue(payload.cardDefinitionId) &&
+      cardDefinitionIdValue(payload.cardDefinitionId) &&
       stringValue(payload.title)
     )
       return [];
@@ -219,8 +229,14 @@ export function deriveOpponentActionCues(
     )
       return [];
     if (isSocialEngineeringHiddenAmountSelectionEvent(event)) return [];
+    const creditChanges = payload.creditChanges;
+    const ownCreditCue =
+      input.includeOwnCreditChanges &&
+      actor === input.viewerSide &&
+      creditChanges?.length;
     if (
       !input.includeOwnActions &&
+      !ownCreditCue &&
       !opponent &&
       !systemCue &&
       !forcedPublicEffectCue &&
@@ -263,7 +279,9 @@ export function deriveOpponentActionCues(
       (entry) => entry.tagGain || entry.damage,
     );
     const sound =
-      hasDedicatedImpactEffect || traceTagOutcome?.pending === false
+      hasDedicatedImpactEffect ||
+      traceTagOutcome?.pending === false ||
+      (source === "human" && input.locallySoundedEventIds?.has(event.eventId))
         ? undefined
         : actionSoundForActionType(actionType, visibility);
     const soundCount = sound
@@ -276,6 +294,7 @@ export function deriveOpponentActionCues(
       viewerSide: input.viewerSide,
       ...(actor ? { actor } : {}),
       actorLabel: actorLabel(actor, source, input.translate),
+      ...(creditChanges?.length ? { creditChanges } : {}),
       ...(actionUsesByEventId[event.eventId]
         ? { actionUse: actionUsesByEventId[event.eventId] }
         : {}),
@@ -337,9 +356,6 @@ export function deriveOpponentActionCues(
             "system",
             input.translate,
           ),
-          ...(actionUsesByEventId[event.eventId]
-            ? { actionUse: actionUsesByEventId[event.eventId] }
-            : {}),
           opponent: Boolean(
             (effectItem.actor ?? actor) &&
             (effectItem.actor ?? actor) !== input.viewerSide,
@@ -404,15 +420,15 @@ function isTraceResult(payload: Record<string, unknown>): boolean {
 
 function traceTagPresentationEvents(
   events: PublicGameEvent[],
-  lastPresentedEventId?: string | null,
+  lastPresentedEventId?: MatchEventId | null,
 ) {
   const openings = new Map<string, PublicGameEvent>();
-  const owners = new Map<string, PublicGameEvent>();
+  const owners = new Map<MatchEventId, PublicGameEvent>();
   const prevention = new Map<
     string,
-    { amount: number; cardIds: Set<string> }
+    { amount: number; cardIds: Set<CardDefinitionId> }
   >();
-  const outcomes = new Map<string, TraceTagOutcome>();
+  const outcomes = new Map<MatchEventId, TraceTagOutcome>();
   for (const event of events) {
     const payload = event.publicPayload;
     const tagEventId = stringValue(payload.imminentEventId);
@@ -435,11 +451,11 @@ function traceTagPresentationEvents(
       prevented !== undefined
     ) {
       const source =
-        stringValue(payload.trashedCardDefinitionId) ??
-        stringValue(payload.sourceDefinitionId);
+        cardDefinitionIdValue(payload.trashedCardDefinitionId) ??
+        cardDefinitionIdValue(payload.sourceDefinitionId);
       const summary = prevention.get(tagEventId) ?? {
         amount: 0,
-        cardIds: new Set<string>(),
+        cardIds: new Set<CardDefinitionId>(),
       };
       summary.amount += prevented;
       if (source && payload.sourceVisibility !== "redacted")
@@ -553,10 +569,10 @@ export function deriveDamageImpactCues(
           ) as Record<string, unknown> | undefined)
         : undefined;
       const sourceDefinitionId =
-        stringValue(payload.sourceDefinitionId) ??
-        stringValue(payload.cardDefinitionId) ??
-        stringValue(payload.publicRevealDefinitionId) ??
-        stringValue(resolvedDamageEffect?.sourceDefinitionId);
+        cardDefinitionIdValue(payload.sourceDefinitionId) ??
+        cardDefinitionIdValue(payload.cardDefinitionId) ??
+        cardDefinitionIdValue(payload.publicRevealDefinitionId) ??
+        cardDefinitionIdValue(resolvedDamageEffect?.sourceDefinitionId);
       const visibleSource = sourceDefinitionId
         ? visibleCards.get(sourceDefinitionId)
         : undefined;
@@ -643,7 +659,7 @@ export function cueHasHiddenLeak(cue: OpponentActionCue): boolean {
 
 export function eventsAfter(
   events: PublicGameEvent[],
-  lastPresentedEventId?: string | null,
+  lastPresentedEventId?: MatchEventId | null,
 ): PublicGameEvent[] {
   if (!lastPresentedEventId) return events;
   const index = events.findIndex(
@@ -652,51 +668,12 @@ export function eventsAfter(
   return index >= 0 ? events.slice(index + 1) : [];
 }
 
-function deriveTurnActionUses(
-  events: PublicGameEvent[],
-  translate?: ChronicleTranslate,
-): Record<string, CueActionUse> {
-  const spentBySide: Partial<Record<Side, number>> = {};
-  const result: Record<string, CueActionUse> = {};
-  for (const event of events) {
-    const payload = event.publicPayload ?? {};
-    const actionType = stringValue(payload.actionType) ?? event.type;
-    const actor = sideValue(payload.actor);
-    if (!actor) continue;
-
-    const clicks = positiveIntegerValue(payload.actionCostClicks);
-    if (clicks !== undefined) {
-      const runningStart = (spentBySide[actor] ?? 0) + 1;
-      const payloadStart = positiveIntegerValue(payload.turnActionOrdinalStart);
-      const start = Math.max(runningStart, payloadStart ?? 0);
-      const payloadEnd = positiveIntegerValue(payload.turnActionOrdinalEnd);
-      const end = Math.max(start + clicks - 1, payloadEnd ?? 0);
-      result[event.eventId] = {
-        label: start === end ? String(start) : `${start}-${end}`,
-        title:
-          start === end
-            ? (translate?.("actionUse.single", { start }) ??
-              `${start}. Aktion in diesem Zug`)
-            : (translate?.("actionUse.range", { start, end }) ??
-              `Aktionen ${start} bis ${end} in diesem Zug`),
-        clicks,
-        start,
-        end,
-      };
-      spentBySide[actor] = end;
-    }
-
-    if (actionType === "end_turn") spentBySide[actor] = 0;
-  }
-  return result;
-}
-
 function deriveHighlight(
   actionType: string,
   payload: Record<string, unknown>,
   actor: Side | undefined,
   visibility: ChronicleVisibility,
-  visibleCards: Map<string, VisibleCard>,
+  visibleCards: Map<CardDefinitionId, VisibleCard>,
 ): BoardHighlight | undefined {
   if (actionType === "game_created") return undefined;
   if (
@@ -756,8 +733,8 @@ function deriveHighlight(
   if (visibility === "redacted") return serverHighlight(payload);
 
   const cardDefinitionId =
-    stringValue(payload.cardDefinitionId) ??
-    stringValue(payload.sourceDefinitionId);
+    cardDefinitionIdValue(payload.cardDefinitionId) ??
+    cardDefinitionIdValue(payload.sourceDefinitionId);
   const visibleCard = cardDefinitionId
     ? visibleCards.get(cardDefinitionId)
     : undefined;
@@ -788,12 +765,12 @@ function deriveHighlight(
 function deriveRelatedCard(
   payload: Record<string, unknown>,
   visibility: ChronicleVisibility,
-  visibleCards: Map<string, VisibleCard>,
+  visibleCards: Map<CardDefinitionId, VisibleCard>,
 ): VisibleCard | undefined {
   if (visibility === "redacted") return undefined;
   const cardDefinitionId =
-    stringValue(payload.cardDefinitionId) ??
-    stringValue(payload.sourceDefinitionId);
+    cardDefinitionIdValue(payload.cardDefinitionId) ??
+    cardDefinitionIdValue(payload.sourceDefinitionId);
   const visibleCard = cardDefinitionId
     ? visibleCards.get(cardDefinitionId)
     : undefined;
@@ -857,8 +834,9 @@ export function actionSoundForActionType(
     case "gain_credit":
       return "credit";
     case "install_card":
-    case "advance_card":
       return visibility === "redacted" ? "install_hidden" : "install_known";
+    case "advance_card":
+      return "advance";
     case "play_event":
     case "play_operation":
       return "play";
@@ -1002,7 +980,7 @@ function turnPhaseSide(phase: PlayerView["phase"]): Side | null {
   return null;
 }
 
-function visibleCardsByDefinition(view: PlayerView): Map<string, VisibleCard> {
+function visibleCardsByDefinition(view: PlayerView): Map<CardDefinitionId, VisibleCard> {
   const cards = [
     ...view.own.gripOrHq,
     ...view.own.heapOrArchives,

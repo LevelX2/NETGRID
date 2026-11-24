@@ -25,7 +25,7 @@ if (!Array.isArray(cardsData.cards) || cardsData.cards.length === 0) {
 }
 const requestedCardId = argumentValue("--card");
 const cardsToRender = requestedCardId
-  ? cardsData.cards.filter((card) => card.cardId === requestedCardId)
+  ? cardsData.cards.filter((card) => String(card.cardId) === requestedCardId)
   : cardsData.cards;
 if (cardsToRender.length === 0)
   throw new Error(`Unknown localized card id: ${requestedCardId}`);

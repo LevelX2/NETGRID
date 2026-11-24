@@ -40,6 +40,7 @@ import {
   buildTargetChoiceShadowReport,
   TARGET_CHOICE_SHADOW_SCHEMA_VERSION,
   targetChoiceRecommendationForTargetFit,
+  type TargetChoiceShadowReport,
   type TargetChoiceTargetFitRecommendation,
 } from "./target-choice-shadow";
 
@@ -68,14 +69,31 @@ export function buildSemanticShadowDecision(
   const opportunities = buildAiOpportunityProjections(frame);
   const rankedActions: SemanticRankedAction[] = [];
   const rejectedActions: SemanticRejectedAction[] = [];
+  const targetReports: TargetChoiceShadowReport[] = [];
+  const utilityFamilies = utilities.map((utility) => utility.family);
 
   for (const candidate of frame.actionCandidates) {
+    const targetAction = syntheticTargetChoiceActionForCandidate(
+      candidate,
+      frame,
+    );
+    const targetReport = targetAction
+      ? buildTargetChoiceShadowReport({
+          action: targetAction,
+          candidate,
+          utilityFamilies,
+          threats,
+          opportunities,
+        })
+      : undefined;
+    if (targetReport) targetReports.push(targetReport);
     const fit = bestFitForCandidate(
       candidate,
       utilities,
       frame,
-      threats,
-      opportunities,
+      targetReport
+        ? targetChoiceRecommendationForTargetFit(targetReport)
+        : undefined,
     );
     if (!fit || fit.fitStatus === "blocked") {
       rejectedActions.push({
@@ -117,6 +135,7 @@ export function buildSemanticShadowDecision(
   ]);
   for (const legalActionId of frame.legalActionIds) {
     if (tracedActionIds.has(legalActionId)) continue;
+    tracedActionIds.add(legalActionId);
     rejectedActions.push({
       actionId: legalActionId,
       reason: "missing_semantic_candidate",
@@ -144,12 +163,7 @@ export function buildSemanticShadowDecision(
   rejectedActions.sort((left, right) =>
     left.actionId.localeCompare(right.actionId),
   );
-  const targetChoiceShadow = targetChoiceShadowTraceSummary(
-    frame,
-    utilities,
-    threats,
-    opportunities,
-  );
+  const targetChoiceShadow = targetChoiceShadowTraceSummary(targetReports);
   const doctrineGoals = options.includeDoctrineGoalsInTrace
     ? doctrineGoalTraceSummary(frame)
     : undefined;
@@ -222,18 +236,10 @@ function bestFitForCandidate(
   candidate: ActionSemanticCandidate,
   utilities: readonly TacticalGoalUtility[],
   frame: SemanticDecisionFrame,
-  threats: readonly AiThreatProjection[],
-  opportunities: readonly AiOpportunityProjection[],
+  targetChoiceRecommendation: TargetChoiceTargetFitRecommendation | undefined,
 ): ActionGoalFit | undefined {
   if (utilities.length === 0) return undefined;
   const economyContext = frame.economyContext;
-  const targetChoiceRecommendation = targetChoiceRecommendationForCandidate(
-    candidate,
-    utilities,
-    frame,
-    threats,
-    opportunities,
-  );
   return utilities
     .map((utility) =>
       scoreActionGoalFit({
@@ -255,26 +261,6 @@ function bestFitForCandidate(
         fitStatusRank(right.fitStatus) - fitStatusRank(left.fitStatus) ||
         left.goalId.localeCompare(right.goalId),
     )[0];
-}
-
-function targetChoiceRecommendationForCandidate(
-  candidate: ActionSemanticCandidate,
-  utilities: readonly TacticalGoalUtility[],
-  frame: SemanticDecisionFrame,
-  threats: readonly AiThreatProjection[],
-  opportunities: readonly AiOpportunityProjection[],
-) {
-  const action = syntheticTargetChoiceActionForCandidate(candidate, frame);
-  if (!action) return undefined;
-  return targetChoiceRecommendationForTargetFit(
-    buildTargetChoiceShadowReport({
-      action,
-      candidate,
-      utilityFamilies: utilities.map((utility) => utility.family),
-      threats,
-      opportunities,
-    }),
-  );
 }
 
 function contextualProjectionComponents(
@@ -485,24 +471,8 @@ function fitStatusRank(status: ActionGoalFit["fitStatus"]): number {
 }
 
 function targetChoiceShadowTraceSummary(
-  frame: SemanticDecisionFrame,
-  utilities: readonly TacticalGoalUtility[],
-  threats: readonly AiThreatProjection[],
-  opportunities: readonly AiOpportunityProjection[],
+  reports: readonly TargetChoiceShadowReport[],
 ): SemanticDecisionTraceTargetChoiceShadowSummary | undefined {
-  const reports = frame.actionCandidates.flatMap((candidate) => {
-    const action = syntheticTargetChoiceActionForCandidate(candidate, frame);
-    if (!action) return [];
-    return [
-      buildTargetChoiceShadowReport({
-        action,
-        candidate,
-        utilityFamilies: utilities.map((utility) => utility.family),
-        threats,
-        opportunities,
-      }),
-    ];
-  });
   if (reports.length === 0) return undefined;
   const recommendations = reports
     .map(targetChoiceRecommendationForTargetFit)

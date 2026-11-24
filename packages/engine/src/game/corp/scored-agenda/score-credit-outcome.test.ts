@@ -53,7 +53,7 @@ describe("current score credit outcome", () => {
     const { state, agendaId } = currentCorpScoreCreditFixture(
       2,
       false,
-      "onr_v1_203_hostile-takeover",
+      415,
     );
     const action = getLegalActions(state, "corp").find(
       (a) => a.type === "score_agenda" && a.source === agendaId,
@@ -78,7 +78,7 @@ describe("current score credit outcome", () => {
     const { state, agendaId } = currentCorpScoreCreditFixture(
       2,
       false,
-      "onr_v1_193_corporate-coup",
+      405,
     );
     const action = getLegalActions(state, "corp").find(
       (a) => a.type === "score_agenda" && a.source === agendaId,

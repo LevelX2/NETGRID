@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_067_speed-trap"),
+    cardDefinitionId: cardDefinitionId(279),
     title: "Speed Trap",
     side: "runner",
     cardType: "program",

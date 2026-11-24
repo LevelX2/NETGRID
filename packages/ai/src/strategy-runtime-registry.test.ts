@@ -22,5 +22,7 @@ describe("strategy runtime registry", () => {
 
   it("keeps unknown external ids explicitly unknown", () => {
     expect(strategicFamilyForStrategyId("corp.not_registered")).toBe("unknown");
+    expect(strategicFamilyForStrategyId("constructor")).toBe("unknown");
+    expect(strategicFamilyForStrategyId("toString")).toBe("unknown");
   });
 });

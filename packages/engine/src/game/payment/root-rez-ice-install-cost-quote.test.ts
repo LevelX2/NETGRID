@@ -17,34 +17,34 @@ import {
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 import { quoteCorpRootRezIceInstallCosts } from "./root-rez-ice-install-cost-quote";
 const cards = [
-  { id: "onr_v1_188_ai-chief-financial-officer", quantity: 2 },
-  { id: "onr_v1_191_black-ice-quality-assurance", quantity: 2 },
-  { id: "onr_v1_204_ice-transmutation", quantity: 3 },
-  { id: "onr_v1_220_tycho-extension", quantity: 1 },
-  { id: "onr_v1_222_ball-and-chain", quantity: 2 },
-  { id: "onr_v1_228_cinderella", quantity: 2 },
-  { id: "onr_v1_237_data-wall", quantity: 3 },
-  { id: "onr_v1_238_data-wall-2-0", quantity: 2 },
-  { id: "onr_v1_247_haunting-inquisition", quantity: 2 },
-  { id: "onr_v1_258_neural-blade", quantity: 2 },
-  { id: "onr_v1_261_quandary", quantity: 2 },
-  { id: "onr_v1_268_shock-r", quantity: 2 },
-  { id: "onr_v1_278_wall-of-ice", quantity: 2 },
-  { id: "onr_v1_279_wall-of-static", quantity: 2 },
-  { id: "onr_v1_296_off-site-backups", quantity: 2 },
-  { id: "onr_v1_309_bbs-whispering-campaign", quantity: 2 },
-  { id: "onr_v1_314_corporate-negotiating-center", quantity: 2 },
-  { id: "onr_v1_324_fortress-architects", quantity: 2 },
-  { id: "onr_v1_352_chester-mix", quantity: 2 },
-  { id: "onr_v1_363_olivia-salazar", quantity: 2 },
-  { id: "onr_v1_367_rio-de-janeiro-city-grid", quantity: 2 },
-  { id: "onr_v1_368_roving-submarine", quantity: 2 },
-  { id: "onr_v1_374_washington-d-c-city-grid", quantity: 2 },
+  { id: 400, quantity: 2 },
+  { id: 403, quantity: 2 },
+  { id: 416, quantity: 3 },
+  { id: 432, quantity: 1 },
+  { id: 434, quantity: 2 },
+  { id: 440, quantity: 2 },
+  { id: 449, quantity: 3 },
+  { id: 450, quantity: 2 },
+  { id: 459, quantity: 2 },
+  { id: 470, quantity: 2 },
+  { id: 473, quantity: 2 },
+  { id: 480, quantity: 2 },
+  { id: 490, quantity: 2 },
+  { id: 491, quantity: 2 },
+  { id: 508, quantity: 2 },
+  { id: 521, quantity: 2 },
+  { id: 526, quantity: 2 },
+  { id: 536, quantity: 2 },
+  { id: 564, quantity: 2 },
+  { id: 575, quantity: 2 },
+  { id: 579, quantity: 2 },
+  { id: 580, quantity: 2 },
+  { id: 586, quantity: 2 },
 ];
 function setup(
   depth: number,
   otherFort = false,
-  sourceDefinitionId = "onr_v1_352_chester-mix",
+  sourceDefinitionId = 564,
 ) {
   const state = createGameAfterSetup({
     seed: "sp337-cost-proof-" + depth,
@@ -61,7 +61,7 @@ function setup(
   )!.instanceId;
   const walls = Object.values(state.cardInstances)
     .filter((c) =>
-      ["onr_v1_237_data-wall", "onr_v1_238_data-wall-2-0"].includes(
+      [449, 450].includes(
         c.definitionId,
       ),
     )
@@ -103,7 +103,7 @@ describe("Engine quote for free root rez and actual ICE installation scope", () 
     const { state, target, source, install, rez } = setup(
       2,
       true,
-      "onr_v1_324_fortress-architects",
+      536,
     );
     const initialHash = hashState(state);
     const quote = quoteCorpRootRezIceInstallCosts(state, rez);

@@ -1,4 +1,5 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { exactBasicLiquidCreditCandidate } from "../actions/action-candidate-facts";
 import { runnerDrawProjectionFor } from "../actions/action-economy-projection";
@@ -25,13 +26,23 @@ export function runnerReserveHandPreparation(
     request.requiredEndTurnHandBuffer ?? -1,
     request.reserveDevelopment?.minimumHandBuffer ?? -1,
   );
-  const basic = candidates.find(exactBasicLiquidCreditCandidate);
-  const draw = input.legalActions.find(
+  const currentActions = new Map(
+    input.legalActions
+      .filter((action) => actionMatchesCurrentDecision(input, action))
+      .map((action) => [action.actionId, action]),
+  );
+  const currentCandidates = candidates.filter(
+    (candidate) =>
+      candidate.actorSide === "runner" &&
+      candidate.stateVersion === input.playerView.stateVersion &&
+      currentActions.has(candidate.actionId),
+  );
+  const basic = currentCandidates.find(exactBasicLiquidCreditCandidate);
+  const draw = [...currentActions.values()].find(
     (action) =>
       action.type === "draw_card" &&
       action.side === "runner" &&
-      action.source === "basic_action" &&
-      action.expiresAtStateVersion === input.playerView.stateVersion,
+      action.source === "basic_action",
   );
   const projection = draw && runnerDrawProjectionFor(draw);
   if (
@@ -58,7 +69,7 @@ export function runnerReserveHandPreparation(
     drawCreditCost < 0
   )
     return undefined;
-  const ordinary = candidates.filter(
+  const ordinary = currentCandidates.filter(
     (candidate) =>
       runnerFundingRouteCandidateIsMaterializable(candidate) &&
       !runnerStrategicExchangeRequiresBoundParent(candidate),
@@ -91,13 +102,11 @@ export function runnerReserveHandPreparation(
     [];
   for (const candidate of ordinary) {
     const income = candidate.economyProjection!;
-    const action = input.legalActions.find(
-      (entry) => entry.actionId === candidate.actionId,
-    );
+    const action = currentActions.get(candidate.actionId);
     if (
       candidate.actionType !== "play_event" ||
       !action ||
-      action.expiresAtStateVersion !== input.playerView.stateVersion ||
+      action.type !== "play_event" ||
       (action.choiceRequirements?.length ?? 0) !== 0 ||
       !candidate.sourceCardInstanceId ||
       !own.gripOrHq.some(

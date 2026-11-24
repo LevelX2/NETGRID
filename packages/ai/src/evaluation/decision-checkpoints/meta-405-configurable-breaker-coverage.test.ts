@@ -1,4 +1,5 @@
 import { expect, it } from "vitest";
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import checkpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-405-configurable-breaker-coverage.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
@@ -23,7 +24,7 @@ it("SP-250 binds the legal configurable breaker installation to the missing deco
   const install = input.legalActions.find(
     (a) =>
       a.type === "install_card" &&
-      a.actionId.includes("fubar") &&
+      referencesDefaultDeckCard(a.source, 146) &&
       a.payload?.runnerProgramTrashBeforeInstall !== true,
   )!;
   expect(install.expiresAtStateVersion).toBe(281);
@@ -33,14 +34,14 @@ it("SP-250 binds the legal configurable breaker installation to the missing deco
     fallbackUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+        rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
         route: {
           actionId: install.actionId,
           stateVersion: 281,
           capabilityId: "install_breaker_code_gate",
         },
         leafExecutorInstanceId:
-          "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
+          "p5s1qdgqrafrs3n2kss1t9ct7m",
       },
     },
   });
@@ -50,7 +51,7 @@ it("keeps a once-selected wall Fubar from masquerading as simultaneous decoder c
   const input =
     checkpoint.input as unknown as AiDecisionInputWithDeckCapabilities;
   const fubar = input.playerView.own.gripOrHq.find(
-    (c) => c.definitionId === "onr_proteus_088_fubar",
+    (c) => c.definitionId === 146,
   )!;
   const rd = input.playerView.servers.find((s) => s.id === "rd")!;
   const path = (selectedSubtype?: string) =>

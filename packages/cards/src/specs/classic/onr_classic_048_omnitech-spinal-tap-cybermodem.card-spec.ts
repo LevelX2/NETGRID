@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_classic_048_omnitech-spinal-tap-cybermodem",
+      52,
     ),
     title: 'Omnitech "Spinal Tap" Cybermodem',
     side: "runner",

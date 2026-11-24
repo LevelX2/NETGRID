@@ -88,7 +88,7 @@ function blindCorpTraceState(): GameState {
   const sourceCardInstanceId = "native_trace_hunter";
   state.cardInstances[sourceCardInstanceId] = {
     instanceId: sourceCardInstanceId,
-    definitionId: "onr_v1_249_hunter",
+    definitionId: 461,
     owner: "corp",
     controller: "corp",
     zone: { side: "corp", zone: "serverIce", serverId: "rd" },
@@ -106,7 +106,7 @@ function blindCorpTraceState(): GameState {
   state.activeSide = "corp";
   state.corp.credits = 5;
   state.trace = {
-    traceId: "trace_plan_first_1",
+    traceId: 1,
     sourceCardInstanceId,
     sourceDefinitionId,
     traceRulesProfile: "classic_blind",
@@ -118,9 +118,9 @@ function blindCorpTraceState(): GameState {
     successEffect: { type: "add_tag", amount: 1 },
   };
   state.pendingChoice = {
-    choiceId: `trace_plan_first_1.corp.bid.${state.stateVersion}`,
+    choiceId: `1.corp.bid.${state.stateVersion}`,
     side: "corp",
-    source: "trace:trace_plan_first_1",
+    source: "trace:1",
     prompt: "Verdecktes Korp-Gebot wählen",
     kind: "bid_amount",
     options: Array.from({ length: 6 }, (_, bid) => ({
@@ -138,7 +138,7 @@ function blindCorpTraceState(): GameState {
 }
 
 function deckSnapshot(state: GameState): AiDeckStrategyDeckSnapshot {
-  const counts = new Map<string, number>();
+  const counts = new Map<number, number>();
   for (const instanceId of [
     ...state.corp.hq,
     ...state.corp.rd,

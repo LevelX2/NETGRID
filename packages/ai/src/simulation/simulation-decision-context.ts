@@ -1,9 +1,4 @@
-import type {
-  AiDecision,
-  AiDecisionInput,
-  LegalAction,
-  Side,
-} from "@netgrid/shared";
+import type { AiDecision, AiDecisionInput, Side } from "@netgrid/shared";
 
 import type { AiSimulationConfig } from "./ai-simulation-config";
 import { chooseRandomLegalDecision } from "./random-legal-decision";
@@ -24,10 +19,6 @@ export type SimulationDecisionContextDependencies = {
     input: AiDecisionInput,
     options?: AiSimulationConfig["aiDecisionRuntimeOptions"],
   ) => AiDecision;
-  selectedChoicesForDecision: (
-    input: AiDecisionInput,
-    action: LegalAction,
-  ) => AiDecision["selectedChoices"] | undefined;
 };
 
 export function createSimulationDecisionContext(
@@ -53,9 +44,7 @@ export function createSimulationDecisionContext(
     const mode = controllerModeForSide(side, config);
     switch (mode) {
       case "random_legal_bot":
-        return chooseRandomLegalDecision(input, simulationRng, {
-          selectedChoicesForDecision: dependencies.selectedChoicesForDecision,
-        });
+        return chooseRandomLegalDecision(input, simulationRng);
       case "current_candidate":
         return dependencies.chooseAiAction(
           input,

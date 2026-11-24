@@ -30,35 +30,42 @@ export function summarizeRunnerRepeatRemoteNoTrashMetrics(
     runnerRepeatRemoteNoTrashFixGateSuspicious: 0,
   };
   for (const summary of summaries) {
-    let declinedTrashRemote: string | undefined;
+    const declinedTrashRemotes = new Map<
+      string,
+      { unchanged: boolean; affordable: boolean }
+    >();
     for (const entry of progressionEntriesWithRunTargets(
       summary.actionSequence,
     )) {
-      if (entry.side !== "runner") continue;
-      if (
-        entry.runnerRemoteAccessWithRelevantTrashableCard === true &&
-        isRemoteServerTarget(entry.targetServerId)
-      ) {
-        metrics.runnerRepeatAccessKnownRemote += 1;
-        if (entry.runnerRemoteAccessWithTrashableCard === true) {
-          metrics.runnerRepeatAccessKnownTrashableRemote += 1;
+      const serverId = entry.targetServerId;
+      if (entry.side === "corp") {
+        const decline = serverId
+          ? declinedTrashRemotes.get(serverId)
+          : undefined;
+        if (
+          decline &&
+          (entry.actionType === "install_card" ||
+            entry.actionType === "rez_ice" ||
+            entry.actionType === "rez_card" ||
+            entry.actionType === "score_agenda" ||
+            (entry.advancementCountersAdded ?? 0) > 0)
+        ) {
+          decline.unchanged = false;
         }
-        if (entry.runnerRemoteTrashTaken === true) {
-          declinedTrashRemote = undefined;
-        } else if (entry.runnerRemoteAccessWithTrashableCard === true) {
-          metrics.runnerRepeatAccessKnownTrashableRemoteWithoutTrash += 1;
-          declinedTrashRemote = entry.targetServerId;
-        }
+        continue;
       }
       if (
-        entry.actionType === "start_run" &&
-        entry.targetServerId &&
-        entry.targetServerId === declinedTrashRemote
+        entry.actionAlternatives?.some(
+          (alternative) =>
+            !alternative.selected &&
+            alternative.whyNot?.some((reason) =>
+              reason.startsWith(
+                "runner_remote_run_declined_trash_memory_active:",
+              ),
+            ),
+        )
       ) {
-        metrics.runnerRepeatRunOnSameRemoteAfterDecliningTrash += 1;
-        metrics.runnerRepeatRunOnSameRemoteNoNewInfo += 1;
-        metrics.runnerRepeatRemoteAccessNoProgress += 1;
-        metrics.runnerRepeatRemoteNoTrashFixGateSuspicious += 1;
+        metrics.runnerRepeatRemoteRunSuppressedAfterNoTrash += 1;
       }
       if (
         hasEvidenceFlag(
@@ -68,14 +75,38 @@ export function summarizeRunnerRepeatRemoteNoTrashMetrics(
       ) {
         metrics.runnerRepeatRemoteRunPenalizedAfterNoTrash += 1;
       }
+      if (!serverId || !isRemoteServerTarget(serverId)) continue;
+      if (entry.runnerRunStarted === true) {
+        const decline = declinedTrashRemotes.get(serverId);
+        if (!decline) continue;
+        declinedTrashRemotes.delete(serverId);
+        metrics.runnerRepeatRunOnSameRemoteAfterDecliningTrash += 1;
+        if (decline.unchanged) {
+          metrics.runnerRepeatRunOnSameRemoteNoNewInfo += 1;
+          metrics.runnerRepeatRemoteAccessNoProgress += 1;
+          if (decline.affordable)
+            metrics.runnerRepeatRemoteNoTrashFixGateSuspicious += 1;
+        }
+      }
+      if (entry.runnerRemoteAccessWithRelevantTrashableCard === true) {
+        metrics.runnerRepeatAccessKnownRemote += 1;
+        if (entry.runnerRemoteAccessWithTrashableCard === true) {
+          metrics.runnerRepeatAccessKnownTrashableRemote += 1;
+          if (entry.runnerRemoteTrashDeclined === true) {
+            metrics.runnerRepeatAccessKnownTrashableRemoteWithoutTrash += 1;
+            declinedTrashRemotes.set(serverId, {
+              unchanged: true,
+              affordable:
+                entry.runnerSkippedAffordableRelevantRemoteTrash === true,
+            });
+          }
+        }
+      }
       if (
-        declinedTrashRemote &&
-        entry.actionType !== "start_run" &&
-        entry.actionType !== "decline_trash" &&
-        entry.runnerRemoteTrashTaken !== true
+        entry.actionType === "steal_agenda" ||
+        entry.actionType === "trash_accessed_card"
       ) {
-        metrics.runnerRepeatRemoteRunSuppressedAfterNoTrash += 1;
-        declinedTrashRemote = undefined;
+        declinedTrashRemotes.delete(serverId);
       }
     }
   }

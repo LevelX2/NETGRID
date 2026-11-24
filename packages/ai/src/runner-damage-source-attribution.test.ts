@@ -1,4 +1,6 @@
 import { readFileSync } from "node:fs";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
+import type { PublicGameEvent } from "@netgrid/shared";
 import { afterEach, describe, expect, it } from "vitest";
 import { chooseAiAction } from "./ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "./input-dto";
@@ -35,10 +37,12 @@ describe("public damage source attribution", () => {
       cp.runtime,
     );
     const decision = chooseAiAction(input);
-    expect(decision.actionId).toBe("runner.draw_card");
+    expect(decision.actionId).toBe("r8");
     expect(
-      decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-    ).toContain("runner.defense");
+      decision.decisionDebug?.planFirstDecision?.portfolio.find(
+        (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+      )?.moduleId,
+    ).toBe("runner.defense_and_recovery");
     expect(decision.fallbackUsed).toBe(false);
     expect(
       input.legalActions.some((a: { actionId: string }) => a.actionId === decision.actionId),
@@ -51,24 +55,25 @@ describe("public damage source attribution", () => {
       for (const events of [
         cp.input.eventTail,
         cp.input.playerView.publicEvents,
-      ]) {
-        const payload = events.find(
-          (e: { eventId: string }) => e.eventId === "evt_80",
-        ).publicPayload;
+      ] as PublicGameEvent[][]) {
+        const event = events.find((entry) => entry.eventId === 81);
+        if (!event?.publicPayload.resolvedEffects)
+          throw new Error("Native damage event lacks its resolved effects");
+        const payload = event.publicPayload;
+        const effects = event.publicPayload.resolvedEffects;
+        expect(payload).toMatchObject({ sourceDefinitionId: 490, damageAmount: 4 });
         if (condition === "no_damage") {
           delete payload.damageAmount;
           delete payload.damageResolved;
           delete payload.damageType;
           delete payload.effectKind;
-          payload.resolvedEffects = payload.resolvedEffects.filter(
-            (e: { amount?: number }) => !e.amount,
-          );
+          payload.resolvedEffects = effects.filter((effect) => effect.kind !== "damage");
         } else {
           payload.sourceDefinitionId =
             condition === "runner_source"
-              ? "onr_v1_095_jack-n-joe"
-              : "unknown-source";
-          for (const effect of payload.resolvedEffects)
+              ? 307
+              : syntheticCardDefinitionId("unknown-damage-source");
+          for (const effect of effects)
             effect.sourceDefinitionId = payload.sourceDefinitionId;
         }
       }

@@ -1,20 +1,29 @@
 import { describe, expect, it } from "vitest";
 
 import { buildActionCardSemanticProfilesByDefinitionId } from "./actions/action-card-semantic-profiles";
-import { AI_HINTS_BY_CARD } from "./ai-hints";
+import { AI_HINTS_BY_CARD, createAiHintsByCard } from "./ai-hints";
 
 const hints = [...AI_HINTS_BY_CARD.values()];
 const hintById = new Map(hints.map((hint) => [hint.cardId, hint]));
 
 describe("static AI hint semantics", () => {
+  it("keeps private fixture edits out of the canonical hint catalog", () => {
+    const cardId = 341;
+    const copy = createAiHintsByCard();
+
+    expect(copy.delete(cardId)).toBe(true);
+    expect(AI_HINTS_BY_CARD.has(cardId)).toBe(true);
+    expect(Reflect.get(AI_HINTS_BY_CARD, "delete")).toBeUndefined();
+  });
+
   it("keeps one unique static record per active card", () => {
     expect(hints.length).toBeGreaterThanOrEqual(618);
     expect(hintById.size).toBe(hints.length);
   });
 
   it("stores tactic signals and strategy anchors directly on the card", () => {
-    const hqInterface = hintById.get("onr_v1_129_hq-interface");
-    const rex = hintById.get("onr_v1_264_rex");
+    const hqInterface = hintById.get(341);
+    const rex = hintById.get(476);
 
     expect(hqInterface?.functionSignals).toContain("access.hq_multiaccess");
     expect(hqInterface?.strategyAnchors).toContain("runner.hq_pressure");
@@ -28,19 +37,19 @@ describe("static AI hint semantics", () => {
 
   it("feeds action semantics from the same static fields", () => {
     const profiles = buildActionCardSemanticProfilesByDefinitionId();
-    const hqInterface = profiles["onr_v1_129_hq-interface"];
+    const hqInterface = profiles[341];
 
     expect(hqInterface?.tacticSignals).toEqual(
-      hintById.get("onr_v1_129_hq-interface")?.actionTacticSignals,
+      hintById.get(341)?.actionTacticSignals,
     );
     expect(hqInterface?.strategySupport).toEqual([]);
   });
 
   it("keeps the ETR compatibility and effect semantics of the audited ICE", () => {
     for (const cardId of [
-      "onr_v1_232_crystal-wall",
-      "onr_v1_252_keeper",
-      "onr_v1_261_quandary",
+      444,
+      464,
+      473,
     ]) {
       const hint = hintById.get(cardId);
       expect(hint?.tacticSignals).toContain("corp_ice.end_run");
@@ -60,13 +69,13 @@ describe("static AI hint semantics", () => {
 
   it("keeps every stored semantic array duplicate-free", () => {
     for (const hint of hints) {
-      expect(new Set(hint.tacticSignals ?? []).size, hint.cardId).toBe(
+      expect(new Set(hint.tacticSignals ?? []).size, String(hint.cardId)).toBe(
         hint.tacticSignals?.length ?? 0,
       );
-      expect(new Set(hint.functionSignals ?? []).size, hint.cardId).toBe(
+      expect(new Set(hint.functionSignals ?? []).size, String(hint.cardId)).toBe(
         hint.functionSignals?.length ?? 0,
       );
-      expect(new Set(hint.strategyAnchors ?? []).size, hint.cardId).toBe(
+      expect(new Set(hint.strategyAnchors ?? []).size, String(hint.cardId)).toBe(
         hint.strategyAnchors?.length ?? 0,
       );
     }

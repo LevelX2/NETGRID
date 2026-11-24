@@ -59,9 +59,13 @@ export function validateAiHintActionPlanOwnerBindings(
       addError(bindingPath, `Unknown fields: ${unknownKeys.join(",")}.`);
     if (
       typeof binding.capabilityKey !== "string" ||
-      binding.capabilityKey.length === 0
+      binding.capabilityKey.trim().length === 0 ||
+      binding.capabilityKey !== binding.capabilityKey.trim()
     )
-      addError(`${bindingPath}.capabilityKey`, "Expected non-empty string.");
+      addError(
+        `${bindingPath}.capabilityKey`,
+        "Expected non-empty, trimmed string.",
+      );
     else {
       if (seenCapabilityKeys.has(binding.capabilityKey))
         addError(

@@ -1,3 +1,4 @@
+import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -339,9 +340,9 @@ export function createHiddenZoneNonSearchRuntime(
   ): void {
     if (state.pendingChoice)
       throw new Error("Es ist bereits eine Choice offen.");
-    const targets = installedIceIds(state);
+    const targets = deps.unrezzedInstalledIceIds(state);
     if (targets.length === 0)
-      throw new Error("Keine installierte ICE als Ziel.");
+      throw new Error("Kein installiertes, ungerezztes ICE als Ziel.");
     state.pendingChoice = {
       choiceId: `card_implementation_corp_choice_rez_or_trash_ice_target_${state.stateVersion + 1}`,
       side: "runner",
@@ -364,16 +365,6 @@ export function createHiddenZoneNonSearchRuntime(
       stateVersion: state.stateVersion + 1,
       visibility: "public",
     };
-  }
-
-  function installedIceIds(state: GameState): CardInstanceId[] {
-    return deps
-      .corpInstalledCardIds(state)
-      .filter(
-        (cardId) =>
-          deps.mustInstance(state.cardInstances, cardId).zone.zone ===
-          "serverIce",
-      );
   }
 
   function forcedRezActions(
@@ -406,8 +397,8 @@ export function createHiddenZoneNonSearchRuntime(
     )
       throw new Error("Es ist keine Rez-oder-Trash-Ziel-Choice offen.");
     const selectedId = selectedChoiceCardIds(choice, playerAction)[0];
-    if (!selectedId || !installedIceIds(state).includes(selectedId))
-      throw new Error("Das Ziel ist keine installierte ICE.");
+    if (!selectedId || !deps.unrezzedInstalledIceIds(state).includes(selectedId))
+      throw new Error("Das Ziel ist kein installiertes, ungerezztes ICE.");
     const serverLabel =
       deps.publicServerLabelForCard(state, selectedId) ?? "Server";
     const icePositionLabel =
@@ -484,11 +475,9 @@ export function createHiddenZoneNonSearchRuntime(
     const [, targetIceId] = choice.source.split(":");
     if (
       !targetIceId ||
-      !deps.corpInstalledCardIds(state).includes(targetIceId) ||
-      deps.mustInstance(state.cardInstances, targetIceId).zone.zone !==
-        "serverIce"
+      !deps.unrezzedInstalledIceIds(state).includes(targetIceId)
     )
-      throw new Error("Das Ziel ist nicht mehr installierte ICE.");
+      throw new Error("Das Ziel ist kein installiertes, ungerezztes ICE mehr.");
     const selected =
       deps.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
     const definition = deps.definitionFor(state, targetIceId);
@@ -497,8 +486,6 @@ export function createHiddenZoneNonSearchRuntime(
     const icePositionLabel =
       publicIcePositionLabelForCard(state, targetIceId) ?? serverLabel;
     if (selected === "rez_ice" || selected.startsWith("rez_ice_")) {
-      if (deps.mustInstance(state.cardInstances, targetIceId).rezzed)
-        throw new Error("Die ICE ist bereits gerezzt.");
       const rezActions = forcedRezActions(state, targetIceId);
       const selectedIndex =
         selected === "rez_ice"
@@ -533,8 +520,7 @@ export function createHiddenZoneNonSearchRuntime(
     if (selected !== "trash_ice")
       throw new Error("Die Rez-oder-Trash-Korp-Entscheidung ist ungueltig.");
     const targetWasKnownToRunner =
-      deps.mustInstance(state.cardInstances, targetIceId).faceup === true ||
-      deps.mustInstance(state.cardInstances, targetIceId).rezzed === true;
+      deps.mustInstance(state.cardInstances, targetIceId).faceup === true;
     deps.trashCorpInstalledCardToArchives(state, targetIceId);
     if (!targetWasKnownToRunner) {
       state.cardInstances[targetIceId] = {
@@ -1005,8 +991,15 @@ export function createHiddenZoneNonSearchRuntime(
     sourceDefinitionId: CardDefinitionId;
     count: number;
   } {
-    const [kind, sourceCardId = "", sourceDefinitionId = "", countRaw = ""] =
-      source.split(":");
+    const [
+      kind,
+      sourceCardId = "",
+      sourceDefinitionIdToken = "",
+      countRaw = "",
+    ] = source.split(":");
+    const sourceDefinitionId = parseCardDefinitionIdToken(
+      sourceDefinitionIdToken,
+    );
     if (kind !== RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE)
       throw new Error("Es ist keine Runner-Connection-Trash-Choice offen.");
     const count = Number(countRaw);
@@ -1197,7 +1190,7 @@ export function createHiddenZoneNonSearchRuntime(
     );
     if (!installed)
       throw new Error("Das Programm kann nicht installiert werden.");
-    shuffleRunnerStack(state, `pro018_test_spin:${choice.choiceId}:shuffle`);
+    shuffleRunnerStack(state, [38, choice.stateVersion]);
     delete state.pendingChoice;
     const serverId = (serverIdRaw || "hq") as Exclude<ServerId, "new_remote">;
     deps.startRun(

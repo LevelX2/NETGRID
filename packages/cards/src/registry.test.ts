@@ -1,6 +1,6 @@
 import type { CardDefinitionId } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
-import { canonicalCapabilityId, capabilityKey } from "./capability-identity";
+import { createCapabilityIdentityRegistry, capabilityKey } from "./capability-identity";
 import type { CardSpec, SetSpec } from "./contracts";
 import {
   assertCardRegistryPlanningContext,
@@ -41,15 +41,15 @@ const setSpec = (overrides: Partial<SetSpec> = {}): SetSpec => ({
   ...overrides,
 });
 
-function cloneSpec(id = "test_card", printingId = `${id}:first`): CardSpec {
+function cloneSpec(id = 901, printingId = `${id}:first`): CardSpec {
   const spec = JSON.parse(JSON.stringify(minimalCardSpec())) as CardSpec;
   spec.identity.cardDefinitionId = id as CardDefinitionId;
-  spec.identity.title = id;
+  spec.identity.title = `Card ${id}`;
   spec.printings = [{ ...spec.printings[0]!, printingId }];
   return spec;
 }
 
-function capabilitySpec(id = "test_card", key = "gain"): CardSpec {
+function capabilitySpec(id = 901, key = "gain"): CardSpec {
   const spec = cloneSpec(id);
   spec.text.capabilityText = [
     { capabilityKey: capabilityKey(key), actionLabel: "Gain credits" },
@@ -66,11 +66,14 @@ function capabilitySpec(id = "test_card", key = "gain"): CardSpec {
   return spec;
 }
 
+const testCapabilityIds = [[901, "gain"], [905, "gain"], [906, "gain"]] as const;
+const testCapabilityId = createCapabilityIdentityRegistry(testCapabilityIds).idFor;
+
 function registryFor(
   cards: readonly CardSpec[] = [cloneSpec()],
   sets: readonly SetSpec[] = [setSpec()],
 ) {
-  return createCardRegistry({ cardSpecs: cards, setSpecs: sets });
+  return createCardRegistry({ cardSpecs: cards, setSpecs: sets, capabilityIdentities: testCapabilityIds });
 }
 
 describe("CardRegistry", () => {
@@ -78,7 +81,7 @@ describe("CardRegistry", () => {
     expect(
       publicCardViewForDefinitionId(
         ROOT_REGISTRY,
-        "onr_proteus_134_cortical-cybermodem" as CardDefinitionId,
+        192 as CardDefinitionId,
       ),
     ).toMatchObject({
       memoryLimitBonus: 2,
@@ -88,7 +91,7 @@ describe("CardRegistry", () => {
     expect(
       engineCardViewForDefinitionId(
         ROOT_REGISTRY,
-        "onr_proteus_134_cortical-cybermodem" as CardDefinitionId,
+        192 as CardDefinitionId,
       )?.engine.characteristics,
     ).toMatchObject({
       memoryLimitBonus: 2,
@@ -98,13 +101,13 @@ describe("CardRegistry", () => {
     expect(
       publicCardViewForDefinitionId(
         ROOT_REGISTRY,
-        "onr_classic_052_zetatech-portastation" as CardDefinitionId,
+        56 as CardDefinitionId,
       ),
     ).toMatchObject({ recurringCredits: 1 });
     expect(
       publicCardViewForDefinitionId(
         ROOT_REGISTRY,
-        "onr_classic_047_little-black-box" as CardDefinitionId,
+        51 as CardDefinitionId,
       ),
     ).toMatchObject({
       memoryLimitBonus: 1,
@@ -114,7 +117,7 @@ describe("CardRegistry", () => {
     expect(
       publicCardViewForDefinitionId(
         ROOT_REGISTRY,
-        "onr_proteus_151_sunburst-cranial-interface" as CardDefinitionId,
+        209 as CardDefinitionId,
       ),
     ).toMatchObject({
       memoryLimitBonus: 1,
@@ -124,7 +127,7 @@ describe("CardRegistry", () => {
     expect(
       publicCardViewForDefinitionId(
         ROOT_REGISTRY,
-        "onr_classic_048_omnitech-spinal-tap-cybermodem" as CardDefinitionId,
+        52 as CardDefinitionId,
       ),
     ).toMatchObject({
       memoryLimitBonus: 1,
@@ -136,13 +139,13 @@ describe("CardRegistry", () => {
     expect(
       publicCardViewForDefinitionId(
         ROOT_REGISTRY,
-        "onr_v1_338_rustbelt-hq-branch" as CardDefinitionId,
+        550 as CardDefinitionId,
       ),
     ).toMatchObject({ maxHandSizeBonus: 2 });
     expect(
       publicCardViewForDefinitionId(
         ROOT_REGISTRY,
-        "onr_v1_205_main-office-relocation" as CardDefinitionId,
+        417 as CardDefinitionId,
       ),
     ).toMatchObject({ maxHandSizeBonus: 2 });
   });
@@ -157,14 +160,14 @@ describe("CardRegistry", () => {
       [active],
       [setSpec({ publication: { status: "active" } })],
     );
-    const definitionId = "test_card" as CardDefinitionId;
-    const capabilityId = canonicalCapabilityId(
+    const definitionId = 901;
+    const capabilityId = testCapabilityId(
       definitionId,
       capabilityKey("gain"),
     );
     expect(
       cardSpecForDefinitionId(registry, definitionId)?.identity.title,
-    ).toBe("test_card");
+    ).toBe("Card 901");
     expect(publicCardViewForDefinitionId(registry, definitionId)).toMatchObject(
       {
         cardDefinitionId: definitionId,
@@ -192,8 +195,8 @@ describe("CardRegistry", () => {
       capabilityKey: "gain",
     });
     expect(
-      publicPrintingViewForId(registry, "test_card:first")?.printingId,
-    ).toBe("test_card:first");
+      publicPrintingViewForId(registry, "901:first")?.printingId,
+    ).toBe("901:first");
     expect(publicSetViewForId(registry, "testset")?.name).toBe("Test Set");
     expect(publicCardViewForDefinitionId(registry, definitionId)).toBe(
       publicCardViewForDefinitionId(registry, definitionId),
@@ -208,15 +211,15 @@ describe("CardRegistry", () => {
   });
 
   it("rejects every global duplicate and orphan set reference before freezing", () => {
-    const first = cloneSpec("same", "one");
-    const second = cloneSpec("same", "two");
+    const first = cloneSpec(904, "one");
+    const second = cloneSpec(904, "two");
     expect(() => registryFor([first, second])).toThrowError(
       /duplicate_card_definition_id/,
     );
     expect(Object.isFrozen(first)).toBe(false);
 
-    const a = cloneSpec("a", "duplicate");
-    const b = cloneSpec("b", "duplicate");
+    const a = cloneSpec(902, "duplicate");
+    const b = cloneSpec(903, "duplicate");
     expect(() => registryFor([a, b])).toThrowError(/duplicate_printing_id/);
     expect(Object.isFrozen(a)).toBe(false);
 
@@ -230,8 +233,8 @@ describe("CardRegistry", () => {
 
   it("allows the same local capabilityKey on different cards", () => {
     const registry = registryFor([
-      capabilitySpec("first", "gain"),
-      capabilitySpec("second", "gain"),
+      capabilitySpec(905, "gain"),
+      capabilitySpec(906, "gain"),
     ]);
     expect(registryEditorSummary(registry).capabilityCount).toBe(2);
   });
@@ -239,15 +242,15 @@ describe("CardRegistry", () => {
   it("preserves Original Set 041-060 ability identity, limits and costs", () => {
     const mysteryBox = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_043_mystery-box" as CardDefinitionId,
+      255 as CardDefinitionId,
     )!;
     const reflector = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_055_reflector" as CardDefinitionId,
+      267 as CardDefinitionId,
     )!;
     const selfModifyingCode = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_059_self-modifying-code" as CardDefinitionId,
+      271 as CardDefinitionId,
     )!;
 
     expect(mysteryBox.text.rulesText).toMatch(/^\[0\]:/);
@@ -282,15 +285,15 @@ describe("CardRegistry", () => {
   it("preserves Original Set 061-080 prevention, run identity and costs", () => {
     const shield = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_061_shield" as CardDefinitionId,
+      273 as CardDefinitionId,
     )!;
     const shredder = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_062_shredder-uplink-protocol" as CardDefinitionId,
+      274 as CardDefinitionId,
     )!;
     const startupImmolator = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_068_startup-immolator" as CardDefinitionId,
+      280 as CardDefinitionId,
     )!;
 
     expect(shield.engine.damagePreventionSources).toMatchObject([
@@ -331,23 +334,23 @@ describe("CardRegistry", () => {
   it("preserves Original Set 081-100 counter effects and AI semantics", () => {
     const dealWithMilitech = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_082_deal-with-militech" as CardDefinitionId,
+      294 as CardDefinitionId,
     )!;
     const editedShippingManifests = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_084_edited-shipping-manifests" as CardDefinitionId,
+      296 as CardDefinitionId,
     )!;
     const forgottenBackupChip = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_087_forgotten-backup-chip" as CardDefinitionId,
+      299 as CardDefinitionId,
     )!;
     const lucidrine = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_098_lucidrine-booster-drug" as CardDefinitionId,
+      310 as CardDefinitionId,
     )!;
     const mantis = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_099_mantis-fixer-at-large" as CardDefinitionId,
+      311 as CardDefinitionId,
     )!;
 
     expect(dealWithMilitech.engine.abilities).toMatchObject([
@@ -394,31 +397,31 @@ describe("CardRegistry", () => {
   it("preserves Original Set 101-120 random, run and AI semantics", () => {
     const playfulAi = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_104_playful-ai" as CardDefinitionId,
+      316 as CardDefinitionId,
     )!;
     const privateLdl = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_106_private-ldl-access" as CardDefinitionId,
+      318 as CardDefinitionId,
     )!;
     const synchronizedAttack = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_113_synchronized-attack-on-hq" as CardDefinitionId,
+      325 as CardDefinitionId,
     )!;
     const temple = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_114_temple-microcode-outlet" as CardDefinitionId,
+      326 as CardDefinitionId,
     )!;
     const reprisal = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_115_terrorist-reprisal" as CardDefinitionId,
+      327 as CardDefinitionId,
     )!;
     const totalRetrofit = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_116_total-genetic-retrofit" as CardDefinitionId,
+      328 as CardDefinitionId,
     )!;
     const weatherPipe = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_118_weather-to-finance-pipe" as CardDefinitionId,
+      330 as CardDefinitionId,
     )!;
 
     expect(playfulAi.engine.runnerEventLongtail).toMatchObject({
@@ -476,15 +479,15 @@ describe("CardRegistry", () => {
   it("keeps the final Originalset audit block canonical and planning-precise", () => {
     const namatoki = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_361_namatoki-plaza" as CardDefinitionId,
+      573 as CardDefinitionId,
     )!;
     const tokyoChiba = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_371_tokyo-chiba-infighting" as CardDefinitionId,
+      583 as CardDefinitionId,
     )!;
     const washington = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_374_washington-d-c-city-grid" as CardDefinitionId,
+      586 as CardDefinitionId,
     )!;
 
     expect(namatoki.engine.leavePlayCleanup).toContainEqual(
@@ -512,23 +515,23 @@ describe("CardRegistry", () => {
   it("keeps the random production sample text and planning annotations precise", () => {
     const nightShift = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_295_night-shift" as CardDefinitionId,
+      507 as CardDefinitionId,
     )!;
     const aujourdOui = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_151_aujourdoui" as CardDefinitionId,
+      363 as CardDefinitionId,
     )!;
     const crashEverett = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_157_crash-everett-inventive-fixer" as CardDefinitionId,
+      369 as CardDefinitionId,
     )!;
     const encryptionBreakthrough = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_200_encryption-breakthrough" as CardDefinitionId,
+      412 as CardDefinitionId,
     )!;
     const chesterMix = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_352_chester-mix" as CardDefinitionId,
+      564 as CardDefinitionId,
     )!;
 
     expect(nightShift.text.rulesText).toBe("Gain [2] and draw one card.");
@@ -551,83 +554,83 @@ describe("CardRegistry", () => {
   });
 
   it("preserves Batch 5 source symbols in canonical card text", () => {
-    const text = (cardId: string) =>
+    const text = (cardId: CardDefinitionId) =>
       cardSpecForDefinitionId(ROOT_REGISTRY, cardId as CardDefinitionId)!.text
         .rulesText;
 
-    expect(text("onr_v1_063_signpost")).toMatch(/^\[1\]:/);
-    expect(text("onr_v1_049_pox")).toContain("pay [1]");
-    expect(text("onr_v1_006_black-dahlia")).toBe(
+    expect(text(275)).toMatch(/^\[1\]:/);
+    expect(text(261)).toContain("pay [1]");
+    expect(text(218)).toBe(
       "[2]: Break sentry subroutine.\n[2]: +1 strength.",
     );
-    expect(text("onr_v1_143_techtronica-utility-suit")).toContain(
+    expect(text(355)).toContain(
       "Use these bits only",
     );
-    expect(text("onr_v1_066_snowball")).toContain(
+    expect(text(278)).toContain(
       "[1]: Break sentry subroutine.\n[1]: +1 strength.",
     );
-    expect(text("onr_v1_355_crystal-palace-station-grid")).toContain("pay [1]");
-    expect(text("onr_v1_072_wild-card")).toBe(
+    expect(text(567)).toContain("pay [1]");
+    expect(text(284)).toBe(
       "[0]: Break sentry subroutine.\n[3]: +1 strength.",
     );
-    expect(text("onr_v1_163_floating-runner-bbs")).toBe(
+    expect(text(375)).toBe(
       "Gain [1] at the start of each of your turns.",
     );
-    expect(text("onr_v1_078_arasaka-owns-you")).toContain("Gain [10]");
-    expect(text("onr_v1_097_livewires-contacts")).toBe("Gain [3].");
-    expect(text("onr_v1_208_on-call-solo-team")).toMatch(/^A:/);
-    expect(text("onr_v1_213_private-cybernet-police")).toMatch(/^A:/);
+    expect(text(290)).toContain("Gain [10]");
+    expect(text(309)).toBe("Gain [3].");
+    expect(text(420)).toMatch(/^A:/);
+    expect(text(425)).toMatch(/^A:/);
   });
 
   it("preserves Batch 6 source symbols in canonical card text", () => {
-    const text = (cardId: string) =>
+    const text = (cardId: CardDefinitionId) =>
       cardSpecForDefinitionId(ROOT_REGISTRY, cardId as CardDefinitionId)!.text
         .rulesText;
 
-    expect(text("onr_v1_058_seeya")).toMatch(/^A, \[1\]:/);
-    expect(text("onr_v1_183_technician-lover")).toMatch(/^A:/);
-    expect(text("onr_v1_203_hostile-takeover")).toBe(
+    expect(text(270)).toMatch(/^A, \[1\]:/);
+    expect(text(395)).toMatch(/^A:/);
+    expect(text(415)).toBe(
       "Gain [5] when you score Hostile Takeover.",
     );
-    expect(text("onr_v1_118_weather-to-finance-pipe")).toContain(
+    expect(text(330)).toContain(
       "the Corp loses [4]",
     );
-    expect(text("onr_v1_179_silicon-saloon-franchise")).toMatch(
+    expect(text(391)).toMatch(
       /^A: Gain \[1\]/,
     );
-    expect(text("onr_v1_164_hells-run")).toMatch(/^Put \[1\]/);
-    expect(text("onr_v1_207_netwatch-operations-office")).toMatch(/^A:/);
-    expect(text("onr_v1_317_data-masons")).toContain("reduced by [2]");
-    expect(text("onr_v1_314_corporate-negotiating-center")).toContain(
+    expect(text(376)).toMatch(/^Put \[1\]/);
+    expect(text(419)).toMatch(/^A:/);
+    expect(text(529)).toContain("reduced by [2]");
+    expect(text(526)).toContain(
       "gain [1]",
     );
   });
 
   it("preserves Batch 14 credit symbols in canonical card text", () => {
-    const text = (cardId: string) =>
+    const text = (cardId: CardDefinitionId) =>
       cardSpecForDefinitionId(ROOT_REGISTRY, cardId as CardDefinitionId)!.text
         .rulesText;
 
-    expect(text("onr_v1_021_dwarf")).toBe(
+    expect(text(233)).toBe(
       "[1]: Break wall subroutine.\n[1]: +1 strength.",
     );
-    expect(text("onr_v1_159_databroker")).toContain("Gain [10].");
-    expect(text("onr_v1_015_codeslinger")).toBe(
+    expect(text(371)).toContain("Gain [10].");
+    expect(text(227)).toBe(
       "[1]: Break sentry subroutine.",
     );
-    expect(text("onr_v1_054_raptor")).toBe(
+    expect(text(266)).toBe(
       "[2]: Break sentry subroutine.\n[1]: +1 strength.",
     );
-    expect(text("onr_v1_187_wilson-weeflerunner-apprentice")).toContain(
+    expect(text(399)).toContain(
       "cannot spend more than [3]",
     );
-    expect(text("onr_v1_288_day-shift")).toBe("Draw two cards and gain [1].");
+    expect(text(500)).toBe("Draw two cards and gain [1].");
   });
 
   it("preserves Mastiff's printed Trace 5 in canonical card text", () => {
     const mastiff = cardSpecForDefinitionId(
       ROOT_REGISTRY,
-      "onr_v1_255_mastiff" as CardDefinitionId,
+      467 as CardDefinitionId,
     );
 
     expect(mastiff?.text.rulesText).toContain(
@@ -650,14 +653,14 @@ describe("CardRegistry", () => {
   });
 
   it("is invariant to input and authoring insertion order", () => {
-    const first = registryFor([cloneSpec("a"), cloneSpec("b")]);
-    const second = registryFor([cloneSpec("b"), cloneSpec("a")]);
+    const first = registryFor([cloneSpec(902), cloneSpec(903)]);
+    const second = registryFor([cloneSpec(903), cloneSpec(902)]);
     expect(registryFingerprintsFor(first)).toEqual(
       registryFingerprintsFor(second),
     );
     expect(
       publicCardViews(second).map((card) => card.cardDefinitionId),
-    ).toEqual(["a", "b"]);
+    ).toEqual([902, 903]);
     expect(fingerprint("order-v1", { b: 2, a: 1 })).toBe(
       fingerprint("order-v1", { a: 1, b: 2 }),
     );
@@ -670,14 +673,14 @@ describe("CardRegistry", () => {
       card: [{ kind: "strategy_anchor", strategyKey: "economy" }],
     };
     const registry = registryFor(sourceCards);
-    sourceCards.push(cloneSpec("late"));
+    sourceCards.push(cloneSpec(907));
     const spec = cardSpecForDefinitionId(
       registry,
-      "test_card" as CardDefinitionId,
+      901,
     )!;
     const publicView = publicCardViewForDefinitionId(
       registry,
-      "test_card" as CardDefinitionId,
+      901,
     )!;
     expect(Object.isFrozen(registry)).toBe(true);
     expect(Object.isFrozen(spec.engine)).toBe(true);
@@ -703,8 +706,8 @@ describe("CardRegistry", () => {
     ).toThrow();
     const capability = engineCapabilityViewForId(
       registry,
-      canonicalCapabilityId(
-        "test_card" as CardDefinitionId,
+      testCapabilityId(
+        901,
         capabilityKey("gain"),
       ),
     )!;
@@ -746,20 +749,20 @@ describe("CardRegistry", () => {
     const registry = registryFor([disabled], [disabledSet]);
     expect(publicCardViews(registry)).toEqual([]);
     expect(
-      publicCardViewForDefinitionId(registry, "test_card" as CardDefinitionId),
+      publicCardViewForDefinitionId(registry, 901),
     ).toBeUndefined();
     expect(publicSetViewForId(registry, "testset")).toBeUndefined();
     expect(
-      engineCardViewForDefinitionId(registry, "test_card" as CardDefinitionId),
+      engineCardViewForDefinitionId(registry, 901),
     ).toBeUndefined();
     expect(
       planningCardViewForDefinitionId(
         registry,
-        "test_card" as CardDefinitionId,
+        901,
       ),
     ).toBeUndefined();
     expect(editorCardViews(registry)).toHaveLength(1);
-    expect(printingSpecForId(registry, "test_card:first")).toBeDefined();
+    expect(printingSpecForId(registry, "901:first")).toBeDefined();
   });
 
   it("keeps printings internal when their set is not public", () => {
@@ -773,13 +776,13 @@ describe("CardRegistry", () => {
     );
     expect(publicCardViews(registry)).toEqual([]);
     expect(publicSetViewForId(registry, "testset")).toBeUndefined();
-    expect(printingSpecForId(registry, "test_card:first")).toBeDefined();
+    expect(printingSpecForId(registry, "901:first")).toBeDefined();
   });
 
   it("builds a positive public allowlist without engine, planning or publication", () => {
     const view = publicCardViewForDefinitionId(
       registryFor([capabilitySpec()]),
-      "test_card" as CardDefinitionId,
+      901,
     )!;
     const forbidden = new Set([
       "engine",
@@ -940,19 +943,19 @@ describe("CardRegistry", () => {
   });
 
   it("binds rules and planning contexts to registry, pool and primitive versions", () => {
-    const registry = registryFor([cloneSpec("a"), cloneSpec("b")]);
+    const registry = registryFor([cloneSpec(902), cloneSpec(903)]);
     const versions = {
       engineSchemaVersion: "engine-v1",
       cardImplementationVersion: "implementations-v1",
       primitiveContractVersion: "primitives-v1",
       cardPoolSnapshotId: "test-pool-v1",
-      matchCardPoolDefinitionIds: ["a", "b"],
+      matchCardPoolDefinitionIds: [902, 903],
     } as const;
     const rules = createRulesContextForRegistry(registry, versions);
     expect(() => assertCardRegistryRulesContext(rules)).not.toThrow();
     const reordered = createRulesContextForRegistry(registry, {
       ...versions,
-      matchCardPoolDefinitionIds: ["b", "a"],
+      matchCardPoolDefinitionIds: [903, 902],
     });
     expect(reordered.fingerprint).toBe(rules.fingerprint);
     const primitiveChange = createRulesContextForRegistry(registry, {
@@ -967,13 +970,13 @@ describe("CardRegistry", () => {
     expect(snapshotChange.fingerprint).not.toBe(rules.fingerprint);
     const subset = createRulesContextForRegistry(registry, {
       ...versions,
-      matchCardPoolDefinitionIds: ["a"],
+      matchCardPoolDefinitionIds: [902],
     });
     expect(subset.cardPoolFingerprint).not.toBe(rules.cardPoolFingerprint);
     expect(() =>
       createRulesContextForRegistry(registry, {
         ...versions,
-        matchCardPoolDefinitionIds: ["ghost"],
+        matchCardPoolDefinitionIds: [908],
       }),
     ).toThrowError(CardRegistryError);
 
@@ -984,12 +987,12 @@ describe("CardRegistry", () => {
     });
     expect(() => assertCardRegistryPlanningContext(planning)).not.toThrow();
     expect(planning.rulesContextFingerprint).toBe(rules.fingerprint);
-    const annotatedA = cloneSpec("a");
+    const annotatedA = cloneSpec(902);
     annotatedA.planningAnnotations = {
       schemaVersion: "card-planning-annotations-v1",
       card: [{ kind: "strategy_anchor", strategyKey: "economy" }],
     };
-    const annotatedRegistry = registryFor([annotatedA, cloneSpec("b")]);
+    const annotatedRegistry = registryFor([annotatedA, cloneSpec(903)]);
     const annotatedPlanning = createPlanningContextForRegistry(
       annotatedRegistry,
       rules,
@@ -1024,9 +1027,9 @@ describe("CardRegistry", () => {
         createPlanningContextForRegistry(registry, rules, changedVersions)
           .fingerprint,
       ).not.toBe(planning.fingerprint);
-    const textOnly = cloneSpec("a");
+    const textOnly = cloneSpec(902);
     textOnly.identity.title = "Renamed";
-    const textRegistry = registryFor([textOnly, cloneSpec("b")]);
+    const textRegistry = registryFor([textOnly, cloneSpec(903)]);
     expect(
       createRulesContextForRegistry(textRegistry, versions).fingerprint,
     ).toBe(rules.fingerprint);
@@ -1049,18 +1052,18 @@ describe("CardRegistry", () => {
         };
       },
     ]) {
-      const a = cloneSpec("a");
+      const a = cloneSpec(902);
       mutate(a);
       expect(
         createRulesContextForRegistry(
-          registryFor([a, cloneSpec("b")]),
+          registryFor([a, cloneSpec(903)]),
           versions,
         ).fingerprint,
       ).toBe(rules.fingerprint);
     }
-    const otherSpec = cloneSpec("a");
+    const otherSpec = cloneSpec(902);
     otherSpec.engine.characteristics.baseLink = 2;
-    const otherRegistry = registryFor([otherSpec, cloneSpec("b")]);
+    const otherRegistry = registryFor([otherSpec, cloneSpec(903)]);
     const otherRules = createRulesContextForRegistry(otherRegistry, versions);
     expect(() =>
       createPlanningContextForRegistry(registry, otherRules, {

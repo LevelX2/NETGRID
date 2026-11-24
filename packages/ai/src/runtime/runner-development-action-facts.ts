@@ -1,6 +1,7 @@
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../ai-hints";
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import { runnerCandidateSourceDefinitionId } from "./runner-action-source-facts";
 
 export function runnerOptionalProgramTrashInstallDuplicatesInstalledDefinition(
@@ -30,8 +31,11 @@ export function runnerCandidateIsOptionalProgramTrashInstall(
     (action) => action.actionId === candidate.actionId,
   );
   return (
-    legalAction?.payload?.runnerProgramTrashBeforeInstall === true ||
-    candidate.actionId.endsWith(".runner_program_trash_before_install")
+    input.side === "runner" &&
+    candidate.actorSide === "runner" &&
+    actionMatchesCurrentDecision(input, legalAction) &&
+    legalAction.type === "install_card" &&
+    legalAction.payload?.runnerProgramTrashBeforeInstall === true
   );
 }
 

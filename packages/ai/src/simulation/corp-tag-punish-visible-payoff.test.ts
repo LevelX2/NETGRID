@@ -4,8 +4,17 @@ import { describe, expect, it } from "vitest";
 import { corpVisibleMeatDamagePayoff } from "./corp-tag-punish-visible-payoff";
 
 describe("corpVisibleMeatDamagePayoff", () => {
+  it("does not count brain damage in HQ as a meat damage payoff", () => {
+    const input = corpInput();
+    input.playerView.own.gripOrHq = [
+      card("scrub", 443),
+    ];
+
+    expect(corpVisibleMeatDamagePayoff(input)).toBe(false);
+  });
+
   it("does not treat an Archives card as a live damage payoff", () => {
-    const scorched = card("scorched", "onr_v1_302_scorched-earth");
+    const scorched = card("scorched", 514);
     const input = corpInput();
     input.playerView.own.heapOrArchives = [scorched];
     input.playerView.servers = [
@@ -44,7 +53,7 @@ function corpInput(): AiDecisionInput {
       activeSide: "corp",
       phase: "corp_action_phase",
       own: {
-        identity: card("corp-identity", "corp-identity"),
+        identity: card("corp-identity", 3),
         credits: 5,
         clicks: 3,
         agendaPoints: 0,
@@ -56,7 +65,7 @@ function corpInput(): AiDecisionInput {
         tags: 0,
       },
       opponent: {
-        identity: card("runner-identity", "runner-identity"),
+        identity: card("runner-identity", 587),
         credits: 5,
         clicks: 3,
         agendaPoints: 0,
@@ -76,11 +85,11 @@ function corpInput(): AiDecisionInput {
   };
 }
 
-function card(instanceId: string, definitionId: string): VisibleCard {
+function card(instanceId: string, definitionId: number): VisibleCard {
   return {
     instanceId,
     definitionId,
-    title: definitionId,
+    title: instanceId,
     type: "operation",
     known: true,
     owner: "corp",

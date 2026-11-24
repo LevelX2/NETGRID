@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_proteus_129_back-door-to-netwatch"),
+    cardDefinitionId: cardDefinitionId(187),
     title: "Back Door to Netwatch",
     side: "runner",
     cardType: "resource",

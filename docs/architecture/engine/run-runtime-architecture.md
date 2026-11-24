@@ -247,6 +247,10 @@ ihnen aber nicht zurückimportiert.
 - Successful-Run-Interventionen werden vor Access abgeschlossen. Verzögerte
   Successful Runs behalten ihre Ice- und Source-Referenzen bis zum passenden
   Passed-Ice-Übergang.
+- Nach einer Fort-Entscheidung am Runstart setzt die Engine den Run am
+  tatsächlich angegriffenen Server fort. Bei Siren bestimmt die Umleitung
+  das Ziel, beim Verzicht bleibt es der ursprüngliche Server. In beiden
+  Fällen gelten dessen äußerste ICE-Position, Rez-Fenster und Zugriff.
 - Ein deklaratives `make_run` mit festem Central-Ziel bindet seine
   Erfolgswirkungen über `successfulRunEffectTargetServerId` an dieses Fort.
   Nach einer Deflection zählt das tatsächlich erreichte Fort. Wird das
@@ -262,6 +266,14 @@ ihnen aber nicht zurückimportiert.
   Event-/Trapdoor-Aktionen, Zugriff, Sichtbarkeit und deterministischen Replay.
 - Jeder Zufallspfad bleibt Seed-/RandomCounter-gesteuert; die Extraktionen
   fügen weder Ziehungen hinzu noch verändern sie deren Reihenfolge.
+
+## Startup Immolator: Rezkosten beim Trash nach dem Passieren
+
+Die Runstart-Vorschau für sichtbares ICE, die legale Trash-Aktion und ihre
+erneute Zahlungsprüfung verwenden die gedruckten Rezkosten des ICE. Rabatte
+wie Skälderviken SA Beta Test Site senken den Betrag, den die Corp beim Rezzen
+bezahlt. Die Regelquelle sind die Einträge zu Data Masons und Skälderviken in
+[Netrunner Errata 1.70](../../source/Netrunner%20Errata%201.70.md).
 
 ## Dr. Dreff: temporäre Begegnung und Rückkehr vor Trash
 

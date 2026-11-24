@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createTranslator } from "use-intl/core";
 import enMessages from "../messages/en.json";
+import { localActionSoundKind } from "../features/actions/local-action-sounds";
 import type { PlayerView, PublicGameEvent, Side } from "@netgrid/shared";
 import {
   actionSoundCountForAction,
@@ -15,12 +16,15 @@ import {
   type CueDerivationInput,
 } from "./action-cues";
 import { actionCueAfterAiAdvanceRequest } from "./access-presentation";
-import type { ChronicleTranslate } from "./chronicle";
+import {
+  chronicleActionUseByEventId,
+  type ChronicleTranslate,
+} from "./chronicle";
 
 const TEST_CARD_PRESENTATIONS = {
-  simple_agenda: { title: "Simple Agenda", type: "agenda" },
-  simple_barrier_ice: { title: "Simple Barrier ICE", type: "ice" },
-  simple_decoder: { title: "Simple Decoder", type: "program" },
+  588: { title: "Simple Agenda", type: "agenda" },
+  589: { title: "Simple Barrier ICE", type: "ice" },
+  591: { title: "Simple Decoder", type: "program" },
 } as const;
 
 function deriveOpponentActionCues(input: CueDerivationInput) {
@@ -39,12 +43,49 @@ function deriveOpponentActionCues(input: CueDerivationInput) {
 }
 
 describe("deriveOpponentActionCues", () => {
+  it("keeps credit balances with each confirmed action for either player", () => {
+    const gain = { side: "runner", before: 5, after: 6 } as const;
+    const payment = { side: "corp", before: 7, after: 3 } as const;
+    const events = [
+      event(95, "gain_credit", {
+        actor: "runner",
+        amount: 1,
+        creditChanges: [gain],
+      }),
+      event(96, "rez_ice", {
+        actor: "corp",
+        rezCostPaid: 4,
+        creditChanges: [payment],
+      }),
+      event(97, "activated_card_ability", {
+        actor: "runner",
+        hostedCreditsAfter: 3,
+      }),
+    ];
+    const input = {
+      viewerSide: "runner" as const,
+      playerView: view("runner"),
+      events,
+    };
+    const cues = deriveOpponentActionCues({
+      ...input,
+      includeOwnCreditChanges: true,
+      locallySoundedEventIds: new Set([95]),
+    });
+    expect(cues.map((cue) => cue.creditChanges)).toEqual([[gain], [payment]]);
+    expect(cues[0]?.sound).toBeUndefined();
+    expect(cues[1]?.sound).toBe("ice_rez");
+    expect(deriveOpponentActionCues(input).map((cue) => cue.eventId)).toEqual([
+      96,
+    ]);
+  });
+
   it("localizes the shared window and floating cue model on the viewing client", () => {
     const input = {
       viewerSide: "runner" as const,
       playerView: view("runner"),
       events: [
-        event("evt_localized_credit", "gain_credit", {
+        event(100, "gain_credit", {
           actor: "corp",
           amount: 2,
           actionCostClicks: 1,
@@ -89,7 +130,7 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "corp",
       playerView: view("corp"),
       events: [
-        event("evt_pump_1", "pump_breaker", {
+        event(101, "pump_breaker", {
           actor: "runner",
           title: "Krash",
           aiReasonCode: "runner.encounter.pump_breaker",
@@ -97,8 +138,9 @@ describe("deriveOpponentActionCues", () => {
           pumpStrengthAmount: 1,
           pumpBreakerCreditCost: 2,
           breakerStrengthAfter: 1,
+          creditChanges: [{ side: "runner", before: 7, after: 5 }],
         }),
-        event("evt_pump_2", "pump_breaker", {
+        event(102, "pump_breaker", {
           actor: "runner",
           title: "Krash",
           aiReasonCode: "runner.encounter.pump_breaker",
@@ -107,7 +149,7 @@ describe("deriveOpponentActionCues", () => {
           pumpBreakerCreditCost: 2,
           breakerStrengthAfter: 2,
         }),
-        event("evt_pump_3", "pump_breaker", {
+        event(103, "pump_breaker", {
           actor: "runner",
           title: "Krash",
           aiReasonCode: "runner.encounter.pump_breaker",
@@ -115,14 +157,16 @@ describe("deriveOpponentActionCues", () => {
           pumpStrengthAmount: 1,
           pumpBreakerCreditCost: 2,
           breakerStrengthAfter: 3,
+          creditChanges: [{ side: "runner", before: 5, after: 3 }],
         }),
       ],
     });
 
     expect(cues).toHaveLength(1);
     expect(cues[0]).toMatchObject({
-      eventId: "evt_pump_1",
+      eventId: 101,
       source: "ai",
+      creditChanges: [{ side: "runner", before: 7, after: 3 }],
       title:
         "Die Runner-KI hat Krash von Stärke 0 auf 3 gepumpt (3× gepumpt, +3 Stärke, 6 Credits insgesamt).",
       description:
@@ -135,25 +179,25 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "runner",
       playerView: view("runner"),
       events: [
-        event("evt_movement_pass", "decline_rez", {
+        event(104, "decline_rez", {
           actor: "corp",
           runRootRezPass: true,
         }),
-        event("evt_fort_pass", "decline_rez", {
+        event(105, "decline_rez", {
           actor: "corp",
           runFortPassPass: true,
         }),
-        event("evt_approach_root_pass", "decline_rez", {
+        event(106, "decline_rez", {
           actor: "corp",
           runApproachRootRezPass: true,
         }),
-        event("evt_actual_ice_decline", "decline_rez", {
+        event(107, "decline_rez", {
           actor: "corp",
         }),
       ],
     });
 
-    expect(cues.map((cue) => cue.eventId)).toEqual(["evt_actual_ice_decline"]);
+    expect(cues.map((cue) => cue.eventId)).toEqual([107]);
     expect(cues[0]?.actionType).toBe("decline_rez");
   });
 
@@ -162,12 +206,12 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "runner",
       playerView: view("runner"),
       events: [
-        event("evt_approach_root_pass_damage", "decline_rez", {
+        event(108, "decline_rez", {
           actor: "corp",
           runApproachRootRezPass: true,
           resolvedEffects: [
             {
-              effectId: "test.encounter.damage",
+              effectId: 0,
               kind: "damage",
               visibility: "hidden_info_barrier",
               side: "runner",
@@ -175,7 +219,7 @@ describe("deriveOpponentActionCues", () => {
               damageType: "net",
               cardsTrashed: 1,
               reason: "access_effect",
-              sourceDefinitionId: "simple_damage_source",
+              sourceDefinitionId: 9119,
               sourceTitle: "Simple Damage Source",
             },
           ],
@@ -185,7 +229,7 @@ describe("deriveOpponentActionCues", () => {
 
     expect(cues).toHaveLength(1);
     expect(cues[0]).toMatchObject({
-      eventId: "evt_approach_root_pass_damage",
+      eventId: 108,
       source: "system",
       title: "Du hast 1 Net Damage durch Simple Damage Source erlitten.",
     });
@@ -196,12 +240,12 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "runner",
       playerView: view("runner"),
       events: [
-        event("evt_localized_effect", "decline_rez", {
+        event(109, "decline_rez", {
           actor: "corp",
           runApproachRootRezPass: true,
           resolvedEffects: [
             {
-              effectId: "test.localized.damage",
+              effectId: 0,
               kind: "damage",
               visibility: "hidden_info_barrier",
               side: "runner",
@@ -209,7 +253,7 @@ describe("deriveOpponentActionCues", () => {
               damageType: "net",
               cardsTrashed: 1,
               reason: "access_effect",
-              sourceDefinitionId: "simple_damage_source",
+              sourceDefinitionId: 9119,
               sourceTitle: "Simple Damage Source",
             },
           ],
@@ -239,7 +283,7 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "runner",
       playerView: view("runner"),
       events: [
-        event("evt_1", "mandatory_draw", {
+        event(2, "mandatory_draw", {
           actor: "corp",
           aiReasonCode: "corp.mandatory_draw",
           aiExplanation: "Die Korp braucht ihre Pflichtkarte.",
@@ -248,12 +292,30 @@ describe("deriveOpponentActionCues", () => {
     });
 
     expect(cues).toHaveLength(1);
-    expect(cues[0]?.cueId).toBe("runner:evt_1");
+    expect(cues[0]?.cueId).toBe("runner:2");
     expect(cues[0]?.source).toBe("ai");
     expect(cues[0]?.title).toBe("Die Korp-KI hat ihre Pflichtkarte gezogen.");
     expect(cues[0]?.description).toBeUndefined();
     expect(cues[0]?.aiExplanation).toBe("Die Korp braucht ihre Pflichtkarte.");
-    expect(JSON.stringify(cues[0])).not.toContain("corp.mandatory_draw");
+    expect(JSON.stringify(cues[0])).not.toContain("ce");
+  });
+
+  it("leaves the outermost ICE reveal to its confirmation dialog", () => {
+    const cues = deriveOpponentActionCues({
+      viewerSide: "corp",
+      playerView: view("corp"),
+      events: [
+        event(110, "play_event", {
+          actor: "runner",
+          sourceDefinitionId: 304,
+          hiddenZoneAction: "v1911_expose_outermost_ice_each_data_fort",
+          publicRevealKind: "expose",
+          publicRevealDefinitionIds: "589,589",
+        }),
+      ],
+    });
+
+    expect(cues).toEqual([]);
   });
 
   it("shows each resolved City Surveillance choice exactly once", () => {
@@ -261,19 +323,19 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "corp",
       playerView: view("corp"),
       events: [
-        event("evt_city_pay", "resolve_choice", {
+        event(110, "resolve_choice", {
           actor: "runner",
           aiReasonCode: "plan_first.engine_window",
-          sourceDefinitionId: "onr_v1_313_city-surveillance",
+          sourceDefinitionId: 525,
           drawTaxSourceCount: 1,
           drawTaxDecision: "pay",
           drawTaxCreditsPaid: 1,
           drawTaxTagsAdded: 0,
         }),
-        event("evt_city_tag", "resolve_choice", {
+        event(111, "resolve_choice", {
           actor: "runner",
           aiReasonCode: "plan_first.engine_window",
-          sourceDefinitionId: "onr_v1_313_city-surveillance",
+          sourceDefinitionId: 525,
           tagsAdded: 1,
           runnerTagsAfter: 1,
           drawTaxSourceCount: 1,
@@ -296,13 +358,13 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "runner",
       playerView: view("runner"),
       events: [
-        event("evt_2", "install_card", {
+        event(3, "install_card", {
           actor: "corp",
           label: "Korp installiert eine Karte.",
           redactedKind: "installed_card",
-          cardDefinitionId: "simple_agenda",
+          cardDefinitionId: 588,
           title: "Simple Agenda",
-          serverId: "remote_1",
+          serverId: "r1",
           serverLabel: "Remote 1",
           zoneLabel: "Root",
         }),
@@ -316,13 +378,13 @@ describe("deriveOpponentActionCues", () => {
     );
     expect(cues[0]?.highlight).toEqual({
       kind: "server",
-      serverId: "remote_1",
+      serverId: "r1",
       serverLabel: "Remote 1",
       lane: "root",
     });
     expect(cueHasHiddenLeak(cues[0]!)).toBe(false);
     expect(JSON.stringify(cues[0])).not.toContain("Simple Agenda");
-    expect(JSON.stringify(cues[0])).not.toContain("simple_agenda");
+    expect(JSON.stringify(cues[0])).not.toContain(588);
   });
 
   it("filters own actions and derives visible card highlights only from PlayerView-visible cards", () => {
@@ -334,7 +396,7 @@ describe("deriveOpponentActionCues", () => {
             instanceId: "card_simple_killer",
             known: true,
             title: "Simple Killer",
-            definitionId: "simple_killer",
+            definitionId: 598,
             type: "program",
           },
         ],
@@ -344,21 +406,21 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "runner",
       playerView,
       events: [
-        event("evt_own", "install_card", {
+        event(112, "install_card", {
           actor: "runner",
-          cardDefinitionId: "simple_killer",
+          cardDefinitionId: 598,
           title: "Simple Killer",
         }),
-        event("evt_opp", "trash_resource", {
+        event(113, "trash_resource", {
           actor: "corp",
-          cardDefinitionId: "simple_killer",
+          cardDefinitionId: 598,
           title: "Simple Killer",
         }),
       ],
     });
 
     expect(cues).toHaveLength(1);
-    expect(cues[0]?.eventId).toBe("evt_opp");
+    expect(cues[0]?.eventId).toBe(113);
     expect(cues[0]?.highlight).toEqual({
       kind: "zone",
       side: "runner",
@@ -367,11 +429,11 @@ describe("deriveOpponentActionCues", () => {
   });
 
   it("keeps Rio de Janeiro City Grid roll cues visible for both players", () => {
-    const rioEvent = event("evt_rio", "continue_run", {
+    const rioEvent = event(114, "continue_run", {
       actor: "runner",
       v1921UpgradeAbility: "rio_de_janeiro_passed_ice",
-      sourceDefinitionId: "onr_v1_367_rio-de-janeiro-city-grid",
-      passedIceDefinitionId: "simple_barrier_ice",
+      sourceDefinitionId: 579,
+      passedIceDefinitionId: 589,
       serverLabel: "Remote 1",
       v1921DieRoll: 1,
       rioRunEnded: true,
@@ -398,7 +460,7 @@ describe("deriveOpponentActionCues", () => {
     expect(corpCues[0]?.title).toBe(
       "Der Runner hat Simple Barrier ICE passiert und Rio de Janeiro City Grid würfelt eine 1.",
     );
-    expect(runnerCues[0]?.cardDefinitionId).toBe("simple_barrier_ice");
+    expect(runnerCues[0]?.cardDefinitionId).toBe(589);
     expect(runnerCues[0]?.cardTitle).toBe("Simple Barrier ICE");
     expect(runnerCues[0]?.description).toBe(
       "Der Run endet durch Rio de Janeiro City Grid.",
@@ -413,20 +475,20 @@ describe("deriveOpponentActionCues", () => {
   });
 
   it("shows an ending ICE subroutine instead of an ICE-passed flyover", () => {
-    const endRunEvent = event("evt_end_run_subroutine", "continue_run", {
+    const endRunEvent = event(115, "continue_run", {
       actor: "runner",
       result: "ended",
       encounterContinue: true,
       encounterWillEndRun: true,
       unbrokenSubroutineCount: 1,
-      sourceDefinitionId: "test_kipa",
+      sourceDefinitionId: 9110,
       resolvedEffects: [
         {
-          effectId: "subroutine_1",
+          effectId: 0,
           kind: "resolve_subroutine",
           visibility: "public",
           side: "runner",
-          sourceDefinitionId: "test_kipa",
+          sourceDefinitionId: 9110,
           sourceTitle: "Kipa",
           subroutineIndex: 0,
           subroutineType: "end_the_run",
@@ -454,7 +516,7 @@ describe("deriveOpponentActionCues", () => {
   });
 
   it("keeps Vacuum Link die roll cues visible for both players", () => {
-    const vacuumEvent = event("evt_vacuum", "continue_run", {
+    const vacuumEvent = event(116, "continue_run", {
       actor: "runner",
       serverLabel: "HQ",
       rezzedIceRewindDieRoll: 3,
@@ -484,7 +546,7 @@ describe("deriveOpponentActionCues", () => {
     expect(runnerCues[0]?.description).toBe(
       "Wurf 3: Runner wird um 3 gerezzte ICE zurückgesetzt oder darf ausstöpseln; wenn nicht so viele ICE vorhanden sind, geht es zum ersten ICE. Ziel ist ICE 2.",
     );
-    expect(runnerCues[0]?.cardDefinitionId).toBe("onr_v1_275_vacuum-link");
+    expect(runnerCues[0]?.cardDefinitionId).toBe(487);
     expect(runnerCues[0]?.cardTitle).toBe("Vacuum Link");
     expect(runnerCues[0]?.highlight).toEqual({
       kind: "run",
@@ -499,11 +561,11 @@ describe("deriveOpponentActionCues", () => {
   });
 
   it("shows access-effect damage cues for both players", () => {
-    const accessDamageEvent = event("evt_access_damage", "resolve_choice", {
+    const accessDamageEvent = event(117, "resolve_choice", {
       actor: "corp",
       resolvedEffects: [
         {
-          effectId: "bel_digmo.access.damage",
+          effectId: 0,
           kind: "damage",
           visibility: "hidden_info_barrier",
           side: "runner",
@@ -511,7 +573,7 @@ describe("deriveOpponentActionCues", () => {
           damageType: "net",
           cardsTrashed: 1,
           reason: "access_effect",
-          sourceDefinitionId: "onr_proteus_071_bel-digmo-antibody",
+          sourceDefinitionId: 9111,
           sourceTitle: "Bel-Digmo Antibody",
         },
       ],
@@ -550,10 +612,10 @@ describe("deriveOpponentActionCues", () => {
   });
 
   it("queues a separate visible tag-result window with the exact gained amount", () => {
-    const tagEvent = event("evt_manhunt_tags", "resolve_choice", {
+    const tagEvent = event(118, "resolve_choice", {
       actor: "runner",
       traceStep: "runner_bid",
-      sourceDefinitionId: "onr_proteus_050_manhunt",
+      sourceDefinitionId: 108,
       corpBid: 3,
       traceValue: 6,
       runnerBid: 0,
@@ -579,12 +641,12 @@ describe("deriveOpponentActionCues", () => {
     const corpTagCue = corpCues.find((cue) => cue.cueId.includes(":effect:"));
 
     expect(runnerTagCue).toMatchObject({
-      cueId: "runner:evt_manhunt_tags:effect:0",
+      cueId: `runner:${tagEvent.eventId}:effect:0`,
       actor: "runner",
       source: "system",
       title: "Du hast 6 Tags erhalten.",
       description: "Du hast jetzt 6 Tags.",
-      cardDefinitionId: "onr_proteus_050_manhunt",
+      cardDefinitionId: 108,
       iconBadge: "+6",
       sound: "gain_tag",
       visibility: "public",
@@ -643,7 +705,7 @@ describe("deriveOpponentActionCues", () => {
       iconBadge: "6:0",
     });
     expect(localizedTagCue).toMatchObject({
-      cueId: "corp:evt_manhunt_tags:effect:0",
+      cueId: `corp:${tagEvent.eventId}:effect:0`,
       title: "The Runner gained 6 tags.",
       description: "The Runner now has 6 tags.",
       iconBadge: "+6",
@@ -658,7 +720,7 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "runner",
       playerView: view("runner"),
       events: [
-        event("evt_asp_result", "resolve_choice", {
+        event(119, "resolve_choice", {
           actor: "runner",
           traceRulesProfile: "classic_blind",
           traceBidsRevealed: true,
@@ -699,7 +761,7 @@ describe("deriveOpponentActionCues", () => {
 
     expect(cues).toHaveLength(1);
     expect(cues[0]).toMatchObject({
-      cueId: "runner:evt_asp_result",
+      cueId: "runner:119",
       opponent: false,
       presentationKind: "trace_result",
       presentationLabel: "Trace result",
@@ -713,28 +775,28 @@ describe("deriveOpponentActionCues", () => {
   it.each(["runner", "corp"] as const)(
     "updates Hunter's trace window in place after Fall Guy for %s",
     (viewerSide) => {
-      const trace = event("evt_hunter_trace", "resolve_choice", {
+      const trace = event(120, "resolve_choice", {
         actor: "runner",
         traceStep: "runner_bid",
         traceSuccessful: true,
         traceValue: 5,
         runnerStrength: 0,
-        sourceDefinitionId: "onr_v1_249_hunter",
+        sourceDefinitionId: 461,
         tagsAdded: 0,
         eventModificationWindowOpened: true,
         imminentEventId: "hunter_tag",
         imminentEventType: "add_tag",
       });
-      const unrelated = event("evt_unrelated_tag", "resolve_choice", {
+      const unrelated = event(121, "resolve_choice", {
         actor: "runner",
         imminentEventType: "add_tag",
         imminentEventId: "unrelated_tag",
         eventModificationDecision: "apply",
         preventedTags: 1,
-        sourceDefinitionId: "onr_v1_161_fall-guy",
+        sourceDefinitionId: 373,
         tagsAdded: 0,
       });
-      const avoided = event("evt_hunter_tag", "resolve_choice", {
+      const avoided = event(122, "resolve_choice", {
         ...unrelated.publicPayload,
         imminentEventId: "hunter_tag",
         eventModificationOutcome: "avoided",
@@ -763,7 +825,7 @@ describe("deriveOpponentActionCues", () => {
             pending: false,
             tagsAdded: 0,
             preventedTags: 1,
-            preventionCardIds: ["onr_v1_161_fall-guy"],
+            preventionCardIds: [373],
           },
         }),
       ]);
@@ -779,7 +841,7 @@ describe("deriveOpponentActionCues", () => {
         deriveOpponentActionCues({ ...input, events: [trace, avoided] }),
       ).toEqual(updates);
 
-      const passed = event("evt_hunter_tag_pass", "resolve_choice", {
+      const passed = event(123, "resolve_choice", {
         actor: "runner",
         imminentEventId: "hunter_tag",
         imminentEventType: "add_tag",
@@ -808,7 +870,7 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "runner",
       playerView: view("runner"),
       events: [
-        event("evt_blind_bid", "resolve_choice", {
+        event(124, "resolve_choice", {
           actor: "corp",
           traceRulesProfile: "classic_blind",
           traceBidsRevealed: false,
@@ -844,7 +906,7 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "runner",
       playerView: view("runner"),
       events: [
-        event("evt_damage", "resolve_choice", {
+        event(125, "resolve_choice", {
           damageResolved: true,
           damageType: "net",
           damageAmount: 2,
@@ -852,7 +914,7 @@ describe("deriveOpponentActionCues", () => {
           runnerGripBefore: 4,
           runnerGripAfter: 2,
           flatline: false,
-          sourceDefinitionId: "hidden_asset_1",
+          sourceDefinitionId: 9112,
           sourceTitle: "Hidden Trap",
         }),
       ],
@@ -860,8 +922,8 @@ describe("deriveOpponentActionCues", () => {
 
     expect(cues).toEqual([
       {
-        cueId: "runner:evt_damage:damage-impact",
-        eventId: "evt_damage",
+        cueId: "runner:125:damage-impact",
+        eventId: 125,
         viewerSide: "runner",
         damageType: "net",
         amount: 2,
@@ -873,7 +935,7 @@ describe("deriveOpponentActionCues", () => {
         sourceLabel: "Korp-Effekt",
       },
     ]);
-    expect(JSON.stringify(cues)).not.toContain("hidden_asset_1");
+    expect(JSON.stringify(cues)).not.toContain(9112);
     expect(JSON.stringify(cues)).not.toContain("Hidden Trap");
     expect(
       damageAudioCueFromPublicPayload({
@@ -892,7 +954,7 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "corp",
       playerView: view("corp"),
       events: [
-        event("evt_flatline", "play_operation", {
+        event(126, "play_operation", {
           actor: "corp",
           damageResolved: true,
           damageType: "meat",
@@ -947,7 +1009,7 @@ describe("deriveOpponentActionCues", () => {
       damageAudioCueFromPublicPayload({
         damageResolved: true,
         damageAmount: 2,
-        sourceDefinitionId: "hidden_trap",
+        sourceDefinitionId: 9113,
       }),
     ).toBeNull();
   });
@@ -957,7 +1019,7 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "runner",
       playerView: view("runner"),
       events: [
-        event("evt_fetal_ai", "access_card", {
+        event(127, "access_card", {
           damageResolved: true,
           damageType: "net",
           damageAmount: 2,
@@ -966,8 +1028,8 @@ describe("deriveOpponentActionCues", () => {
           runnerGripAfter: 0,
           flatline: true,
           publicRevealKind: "reveal",
-          publicRevealDefinitionId: "onr_proteus_004_fetal-ai",
-          cardDefinitionId: "onr_proteus_004_fetal-ai",
+          publicRevealDefinitionId: 62,
+          cardDefinitionId: 62,
           title: "Fetal AI",
         }),
       ],
@@ -986,15 +1048,15 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "runner",
       playerView: view("runner"),
       events: [
-        event("evt_no_damage", "continue_run", {
+        event(128, "continue_run", {
           damageResolved: true,
           damageType: "net",
           damageAmount: 0,
           cardsTrashed: 0,
           flatline: false,
-          sourceDefinitionId: "onr_proteus_021_dog-pile",
+          sourceDefinitionId: 79,
         }),
-        event("evt_prevented", "resolve_choice", {
+        event(129, "resolve_choice", {
           damageResolved: true,
           damageType: "net",
           damageAmount: 0,
@@ -1005,7 +1067,7 @@ describe("deriveOpponentActionCues", () => {
       ],
     });
 
-    expect(cues.map((cue) => cue.eventId)).toEqual(["evt_prevented"]);
+    expect(cues.map((cue) => cue.eventId)).toEqual([129]);
     expect(cues[0]).toMatchObject({
       damageType: "net",
       amount: 0,
@@ -1030,7 +1092,7 @@ describe("deriveOpponentActionCues", () => {
         },
       }),
       events: [
-        event("evt_flatline", "play_operation", {
+        event(126, "play_operation", {
           damageResolved: true,
           damageType: "meat",
           damageAmount: 4,
@@ -1053,15 +1115,15 @@ describe("deriveOpponentActionCues", () => {
     const cues = deriveDamageImpactCues({
       viewerSide: "runner",
       playerView: view("runner"),
-      lastPresentedEventId: "evt_old",
+      lastPresentedEventId: 130,
       events: [
-        event("evt_old", "resolve_choice", {
+        event(130, "resolve_choice", {
           damageResolved: true,
           damageType: "net",
           damageAmount: 1,
           flatline: false,
         }),
-        event("evt_new", "resolve_choice", {
+        event(131, "resolve_choice", {
           damageResolved: true,
           damageType: "core",
           damageAmount: 1,
@@ -1074,7 +1136,7 @@ describe("deriveOpponentActionCues", () => {
       ],
     });
 
-    expect(cues.map((cue) => cue.eventId)).toEqual(["evt_new"]);
+    expect(cues.map((cue) => cue.eventId)).toEqual([131]);
     expect(cues[0]).toMatchObject({
       damageType: "core",
       coreDamageAfter: 1,
@@ -1087,20 +1149,20 @@ describe("deriveOpponentActionCues", () => {
       instanceId: "ice_0",
       known: true,
       title: "Inner ICE",
-      definitionId: "inner_ice",
+      definitionId: 9114,
       type: "ice" as const,
     };
     const visibleIce = {
       instanceId: "ice_1",
       known: true,
       title: "Gate ICE",
-      definitionId: "gate_ice",
+      definitionId: 9116,
       type: "ice" as const,
     };
     const playerView = view("runner", {
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           label: "Remote 1",
           ice: [innerIce, visibleIce],
           root: [],
@@ -1112,9 +1174,9 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "runner",
       playerView,
       events: [
-        event("evt_rez", "rez_ice", {
+        event(132, "rez_ice", {
           actor: "corp",
-          cardDefinitionId: "gate_ice",
+          cardDefinitionId: 9116,
           title: "Gate ICE",
         }),
       ],
@@ -1131,7 +1193,7 @@ describe("deriveOpponentActionCues", () => {
       instanceId: "runner_panzer_run_1",
       known: true,
       title: "Panzer Run",
-      definitionId: "onr_classic_042_panzer-run",
+      definitionId: 46,
       type: "event" as const,
     };
     const playerView = view("corp", {
@@ -1146,9 +1208,9 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "corp",
       playerView,
       events: [
-        event("evt_panzer_run", "play_event", {
+        event(133, "play_event", {
           actor: "runner",
-          cardDefinitionId: "onr_classic_042_panzer-run",
+          cardDefinitionId: 46,
           title: "Panzer Run",
           gainedCredits: 4,
           drawnCount: 2,
@@ -1168,9 +1230,9 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "corp",
       playerView: view("corp"),
       events: [
-        event("evt_access", "access_card", {
+        event(134, "access_card", {
           actor: "runner",
-          cardDefinitionId: "agenda_1",
+          cardDefinitionId: 9117,
           title: "Public Agenda",
         }),
       ],
@@ -1180,15 +1242,15 @@ describe("deriveOpponentActionCues", () => {
   });
 
   it("does not create duplicate outcome cues for a public access reveal", () => {
-    const access = event("evt_access", "access_card", {
+    const access = event(134, "access_card", {
       actor: "runner",
-      cardDefinitionId: "onr_v1_340_setup",
+      cardDefinitionId: 552,
       title: "Setup!",
       serverLabel: "R&D",
     });
-    const trash = event("evt_trash", "trash_accessed_card", {
+    const trash = event(135, "trash_accessed_card", {
       actor: "runner",
-      cardDefinitionId: "onr_v1_340_setup",
+      cardDefinitionId: 552,
       title: "Setup!",
       serverLabel: "R&D",
     });
@@ -1202,14 +1264,14 @@ describe("deriveOpponentActionCues", () => {
   });
 
   it("keeps a public trash cue after a redacted R&D access", () => {
-    const access = event("evt_access", "access_card", {
+    const access = event(134, "access_card", {
       actor: "runner",
       serverLabel: "R&D",
       redactedKind: "hidden_zone",
     });
-    const trash = event("evt_trash", "trash_accessed_card", {
+    const trash = event(135, "trash_accessed_card", {
       actor: "runner",
-      cardDefinitionId: "public_after_trash",
+      cardDefinitionId: 9118,
       title: "Public After Trash",
       serverLabel: "R&D",
     });
@@ -1219,9 +1281,9 @@ describe("deriveOpponentActionCues", () => {
       events: [access, trash],
     });
 
-    expect(cues.map((cue) => cue.eventId)).toEqual(["evt_access", "evt_trash"]);
+    expect(cues.map((cue) => cue.eventId)).toEqual([134, 135]);
     expect(JSON.stringify(cues[0])).not.toContain("Public After Trash");
-    expect(JSON.stringify(cues[0])).not.toContain("public_after_trash");
+    expect(JSON.stringify(cues[0])).not.toContain(9118);
   });
 
   it("shows Technician Lover private look on use and suppresses the confirmation cue", () => {
@@ -1229,24 +1291,24 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "corp",
       playerView: view("corp"),
       events: [
-        event("evt_technician_use", "activated_card_ability", {
+        event(136, "activated_card_ability", {
           actor: "runner",
           title: "Technician Lover",
           hiddenZoneBarrier: true,
           hiddenZoneAction: "p3_33_private_look",
           privateLookZone: "rd",
           privateLookCount: 1,
-          sourceDefinitionId: "onr_v1_183_technician-lover",
+          sourceDefinitionId: 395,
           sourceTitle: "Technician Lover",
           aiReasonCode: "runner_private_look",
         }),
-        event("evt_technician_done", "resolve_choice", {
+        event(137, "resolve_choice", {
           actor: "runner",
           hiddenZoneBarrier: true,
           hiddenZoneAction: "p3_33_private_look",
           privateLookZone: "rd",
           privateLookCount: 1,
-          sourceDefinitionId: "onr_v1_183_technician-lover",
+          sourceDefinitionId: 395,
           sourceTitle: "Technician Lover",
           aiReasonCode: "runner_private_look",
         }),
@@ -1254,7 +1316,7 @@ describe("deriveOpponentActionCues", () => {
     });
 
     expect(cues).toHaveLength(1);
-    expect(cues[0]?.eventId).toBe("evt_technician_use");
+    expect(cues[0]?.eventId).toBe(136);
     expect(cues[0]?.title).toBe(
       "Die Runner-KI hat Technician Lover genutzt und die oberste R&D-Karte angesehen.",
     );
@@ -1266,12 +1328,12 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "corp",
       playerView: view("corp"),
       events: [
-        event("evt_short_circuit", "resolve_choice", {
+        event(138, "resolve_choice", {
           actor: "runner",
           hiddenZoneAction: "v1911_short_circuit_search",
-          sourceDefinitionId: "onr_v1_177_the-short-circuit",
-          publicRevealDefinitionId: "simple_decoder",
-          cardDefinitionId: "simple_decoder",
+          sourceDefinitionId: 389,
+          publicRevealDefinitionId: 591,
+          cardDefinitionId: 591,
           searchDestination: "runner_grip",
           shuffled: true,
         }),
@@ -1292,19 +1354,19 @@ describe("deriveOpponentActionCues", () => {
       playerView: view("corp"),
       includeOwnActions: true,
       events: [
-        event("evt_cnc", "resolve_choice", {
+        event(139, "resolve_choice", {
           actor: "corp",
           hiddenZoneBarrier: true,
           hiddenZoneAction:
             "v1917_corporate_negotiating_center_hq_agenda_reveal",
-          sourceDefinitionId: "onr_v1_314_corporate-negotiating-center",
+          sourceDefinitionId: 526,
           sourceTitle: "Corporate Negotiating Center",
           publicRevealKind: "reveal",
           publicRevealDefinitionIds:
-            "simple_agenda,onr_v1_203_hostile-takeover",
+            "588,415",
           publicRevealTitles: "Simple Agenda||Hostile Takeover",
           revealedAgendaDefinitionIds:
-            "simple_agenda,onr_v1_203_hostile-takeover",
+            "588,415",
           revealedCount: 2,
           gainedCredits: 2,
         }),
@@ -1323,16 +1385,16 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "runner",
       playerView: view("runner"),
       events: [
-        event("evt_cnc", "resolve_choice", {
+        event(139, "resolve_choice", {
           actor: "corp",
           hiddenZoneBarrier: true,
           hiddenZoneAction: "corp_hq_agenda_reveal",
-          sourceDefinitionId: "onr_v1_314_corporate-negotiating-center",
+          sourceDefinitionId: 526,
           sourceTitle: "Corporate Negotiating Center",
           publicRevealKind: "reveal",
-          publicRevealDefinitionIds: "simple_agenda",
+          publicRevealDefinitionIds: 588,
           publicRevealTitles: "Simple Agenda",
-          revealedAgendaDefinitionIds: "simple_agenda",
+          revealedAgendaDefinitionIds: 588,
           revealedCount: 1,
           gainedCredits: 1,
         }),
@@ -1351,11 +1413,11 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "runner",
       playerView: view("runner"),
       events: [
-        event("evt_cnc_none", "resolve_choice", {
+        event(140, "resolve_choice", {
           actor: "corp",
           hiddenZoneBarrier: true,
           hiddenZoneAction: "corp_hq_agenda_reveal",
-          sourceDefinitionId: "onr_v1_314_corporate-negotiating-center",
+          sourceDefinitionId: 526,
           sourceTitle: "Corporate Negotiating Center",
           publicRevealKind: "reveal",
           publicRevealDefinitionIds: "",
@@ -1379,12 +1441,12 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "runner",
       playerView: view("runner"),
       events: [
-        event("evt_downsizing_none", "resolve_choice", {
+        event(141, "resolve_choice", {
           actor: "corp",
           aiReasonCode: "corp.score_agenda",
           hiddenZoneBarrier: true,
           hiddenZoneAction: "scored_agenda_hq_agenda_shuffle_credits",
-          sourceDefinitionId: "onr_v1_194_corporate-downsizing",
+          sourceDefinitionId: 406,
           sourceTitle: "Corporate Downsizing",
           publicRevealKind: "reveal",
           publicRevealDefinitionIds: "",
@@ -1413,17 +1475,17 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "runner",
       playerView: view("runner"),
       events: [
-        event("evt_downsizing_selected", "resolve_choice", {
+        event(142, "resolve_choice", {
           actor: "corp",
           hiddenZoneBarrier: true,
           hiddenZoneAction: "scored_agenda_hq_agenda_shuffle_credits",
-          sourceDefinitionId: "onr_v1_194_corporate-downsizing",
+          sourceDefinitionId: 406,
           sourceTitle: "Corporate Downsizing",
           publicRevealKind: "reveal",
           publicRevealDefinitionIds:
-            "simple_agenda,onr_v1_203_hostile-takeover",
+            "588,415",
           publicRevealTitles: "Simple Agenda||Hostile Takeover",
-          shownCardDefinitionIds: "simple_agenda,onr_v1_203_hostile-takeover",
+          shownCardDefinitionIds: "588,415",
           shownCount: 2,
           shuffledIntoRndCount: 2,
           combinedAgendaPoints: 5,
@@ -1443,7 +1505,7 @@ describe("deriveOpponentActionCues", () => {
   });
 
   it("keeps automatic system cues behind the local option", () => {
-    const systemEvent = event("evt_auto_credit", "gain_credit", { amount: 2 });
+    const systemEvent = event(143, "gain_credit", { amount: 2 });
 
     expect(
       deriveOpponentActionCues({
@@ -1475,10 +1537,10 @@ describe("deriveOpponentActionCues", () => {
     const cues = deriveOpponentActionCues({
       viewerSide: "runner",
       playerView,
-      lastPresentedEventId: "evt_old",
+      lastPresentedEventId: 130,
       events: [
-        event("evt_old", "gain_credit", { actor: "corp", amount: 1 }),
-        event("evt_new", "end_turn", { actor: "corp" }),
+        event(130, "gain_credit", { actor: "corp", amount: 1 }),
+        event(131, "end_turn", { actor: "corp" }),
       ],
     });
 
@@ -1592,12 +1654,12 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "runner",
       playerView,
       events: [
-        event("evt_credit", "gain_credit", { actor: "corp", amount: 1 }),
+        event(144, "gain_credit", { actor: "corp", amount: 1 }),
       ],
     });
 
     expect(cues).toHaveLength(1);
-    expect(cues[0]?.eventId).toBe("evt_credit");
+    expect(cues[0]?.eventId).toBe(144);
     expect(cues[0]).not.toHaveProperty("requiresLocalAttention");
   });
 
@@ -1610,7 +1672,7 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "runner",
       playerView,
       events: [
-        event("evt_discard", "resolve_choice", {
+        event(145, "resolve_choice", {
           actor: "corp",
           discardResolved: true,
           discardCount: 1,
@@ -1622,7 +1684,7 @@ describe("deriveOpponentActionCues", () => {
 
     expect(cues).toHaveLength(1);
     expect(cues[0]).toMatchObject({
-      eventId: "evt_discard",
+      eventId: 145,
       actionType: "resolve_choice",
       title: "Die Korp hat eine Karte abgeworfen.",
     });
@@ -1633,7 +1695,7 @@ describe("deriveOpponentActionCues", () => {
     const cues = deriveOpponentActionCues({
       viewerSide: "corp",
       playerView: view("corp"),
-      events: [event("evt_draw", "draw_card", { actor: "runner", amount: 3 })],
+      events: [event(146, "draw_card", { actor: "runner", amount: 3 })],
     });
 
     expect(cues).toHaveLength(1);
@@ -1642,6 +1704,35 @@ describe("deriveOpponentActionCues", () => {
     expect(actionSoundCountForAction("draw_card", { amount: 12 })).toBe(5);
     expect(actionSoundCountForAction("mandatory_draw", {})).toBe(1);
     expect(actionSoundCountForAction("gain_credit", { amount: 3 })).toBe(1);
+  });
+
+  it("uses the advancement sound for public and hidden targets and suppresses the local echo", () => {
+    const action = legalAction("corp", "advance_card");
+    const events = [
+      event(147, action.type, {
+        actor: "corp",
+        redactedKind: "installed_card",
+        serverId: "r1",
+      }),
+    ];
+
+    expect(localActionSoundKind(action)).toBe("advance");
+    expect(actionSoundForActionType(action.type, "public")).toBe("advance");
+    const opponentCues = deriveOpponentActionCues({
+      viewerSide: "runner",
+      playerView: view("runner"),
+      events,
+    });
+    expect(opponentCues).toMatchObject([{ visibility: "redacted", sound: "advance" }]);
+    const ownCues = deriveOpponentActionCues({
+      viewerSide: "corp",
+      playerView: view("corp"),
+      events,
+      includeOwnActions: true,
+      locallySoundedEventIds: new Set([147]),
+    });
+    expect(ownCues).toHaveLength(1);
+    expect(ownCues[0]?.sound).toBeUndefined();
   });
 
   it("covers non-card system sounds without leaking hidden details", () => {
@@ -1669,38 +1760,50 @@ describe("deriveOpponentActionCues", () => {
       viewerSide: "runner",
       playerView: view("runner"),
       events: [
-        event("evt_1", "gain_credit", {
+        event(2, "gain_credit", {
           actor: "corp",
           actionCostClicks: 1,
           turnActionOrdinalStart: 1,
           turnActionOrdinalEnd: 1,
         }),
-        event("evt_2", "play_operation", {
+        event(3, "play_operation", {
           actor: "corp",
           actionCostClicks: 1,
           turnActionOrdinalStart: 2,
           turnActionOrdinalEnd: 2,
         }),
-        event("evt_3", "install_card", {
+        event(4, "install_card", {
           actor: "corp",
           actionCostClicks: 1,
           turnActionOrdinalStart: 3,
           turnActionOrdinalEnd: 3,
-          serverId: "remote_1",
+          serverId: "r1",
           serverLabel: "Remote 1",
           zoneLabel: "Root",
         }),
-        event("evt_4", "gain_credit", {
+        event(5, "gain_credit", {
           actor: "corp",
           actionCostClicks: 1,
           turnActionOrdinalStart: 1,
           turnActionOrdinalEnd: 1,
         }),
-        event("evt_5", "gain_credit", {
+        event(6, "gain_credit", {
           actor: "corp",
           actionCostClicks: 1,
           turnActionOrdinalStart: 1,
           turnActionOrdinalEnd: 1,
+        }),
+        event(7, "draw_card", {
+          actor: "corp",
+          actionCostClicks: 1,
+          turnActionOrdinalStart: 6,
+          turnActionOrdinalEnd: 6,
+        }),
+        event(8, "gain_credit", {
+          actor: "corp",
+          actionCostClicks: 1,
+          turnActionOrdinalStart: 7,
+          turnActionOrdinalEnd: 7,
         }),
       ],
     });
@@ -1711,33 +1814,75 @@ describe("deriveOpponentActionCues", () => {
       "3",
       "4",
       "5",
+      "6",
+      "7",
     ]);
-    expect(cues[4]?.actionUse?.title).toBe("5. Aktion in diesem Zug");
+    expect(cues[6]?.actionUse?.title).toBe("7. Aktion in diesem Zug");
+  });
+
+  it("shares the chronicle range and leaves the resulting effect unnumbered", () => {
+    const events = [
+      event(147, "play_operation", {
+        actor: "corp",
+        actionCostClicks: 2,
+        turnActionOrdinalStart: 3,
+        turnActionOrdinalEnd: 4,
+        resolvedEffects: [
+          {
+            effectId: 0,
+            kind: "damage",
+            visibility: "hidden_info_barrier",
+            side: "runner",
+            damageType: "net",
+            amount: 1,
+            cardsTrashed: 1,
+            reason: "access_effect",
+            sourceDefinitionId: 9119,
+            sourceTitle: "Simple Damage Source",
+          },
+        ],
+      }),
+      event(148, "mandatory_draw", { actor: "corp" }),
+    ];
+    const cues = deriveOpponentActionCues({
+      viewerSide: "runner",
+      playerView: view("runner"),
+      events,
+    });
+    const chronicleUses = chronicleActionUseByEventId(events);
+
+    expect(cues).toHaveLength(3);
+    expect(cues[0]?.actionUse).toEqual(chronicleUses[events[0]!.eventId]);
+    expect(cues[0]?.actionUse?.label).toBe("3-4");
+    expect(cues.slice(1).map((cue) => cue.actionUse)).toEqual([
+      undefined,
+      undefined,
+    ]);
   });
 
   it("does not replay an older event tail when undo removes the last presented event", () => {
     const events = [
-      event("evt_37", "start_run", {
+      event(38, "start_run", {
         actor: "runner",
         aiExplanation: "Alter Runner-Run.",
       }),
-      event("evt_38", "access_card", {
+      event(39, "access_card", {
         actor: "runner",
         aiExplanation: "Alter Zugriff.",
       }),
-      event("evt_41", "install_card", {
+      event(42, "install_card", {
         actor: "corp",
         label: "Korp installiert eine Karte.",
       }),
     ];
 
-    expect(eventsAfter(events, "evt_42")).toEqual([]);
+    expect(eventsAfter(events, 43)).toEqual([]);
     expect(
       deriveOpponentActionCues({
         viewerSide: "corp",
         playerView: view("corp"),
         events,
-        lastPresentedEventId: "evt_42",
+        lastPresentedEventId: 43,
       }),
     ).toEqual([]);
   });
@@ -1751,7 +1896,7 @@ function testTranslate(messages: Record<string, string>): ChronicleTranslate {
 }
 
 function event(
-  eventId: string,
+  eventId: number,
   actionType: string,
   payload: Record<string, unknown>,
 ): PublicGameEvent {
@@ -1802,7 +1947,7 @@ function view(side: Side, overrides: Partial<PlayerView> = {}): PlayerView {
         instanceId: `${side}_identity`,
         known: true,
         title: side === "corp" ? "Korp Identity" : "Runner Identity",
-        definitionId: `${side}_identity`,
+        definitionId: side === "corp" ? 3 : 587,
         type: "identity",
       },
       gripOrHq: [],
@@ -1826,7 +1971,7 @@ function view(side: Side, overrides: Partial<PlayerView> = {}): PlayerView {
         instanceId: `${side === "corp" ? "runner" : "corp"}_identity`,
         known: true,
         title: side === "corp" ? "Runner Identity" : "Korp Identity",
-        definitionId: `${side === "corp" ? "runner" : "corp"}_identity`,
+        definitionId: side === "corp" ? 587 : 3,
         type: "identity",
       },
       scoreArea: [],

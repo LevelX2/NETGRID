@@ -1,5 +1,6 @@
 import { hashGameState } from "@netgrid/engine";
 import { describe, expect, it } from "vitest";
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 
 import zeroCreditRdJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-e8886-01-zero-credit-rd-risk.json";
 import junkyardJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-e8886-02-junkyard-not-economy.json";
@@ -48,7 +49,7 @@ describe("match E8886 runner decision checkpoints", () => {
       result.input.legalActions.some(
         (action) =>
           action.type === "play_event" &&
-          action.actionId.includes("onr_v1_094_inside-job") &&
+          referencesDefaultDeckCard(action.source, 306) &&
           action.payload?.serverId === "rd",
       ),
     ).toBe(true);
@@ -60,7 +61,7 @@ describe("match E8886 runner decision checkpoints", () => {
       const target = state.runner.grip.find(
         (instanceId) =>
           state.cardInstances[instanceId]?.definitionId ===
-          "onr_v1_079_bodyweight-synthetic-blood",
+          291,
       );
       if (!target) throw new Error("Expected Bodyweight recovery target");
       state.runner.grip = state.runner.grip.filter(
@@ -74,12 +75,12 @@ describe("match E8886 runner decision checkpoints", () => {
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "E8886-C04-RECOVERY-TARGET";
       checkpoint.expectation = {
-        acceptableActions: [{ actionId: "runner.gain_credit" }],
+        acceptableActions: [{ actionId: "rb" }],
         planExecution: {
           acceptablePlanKinds: ["runner.economy"],
           acceptableCapabilities: ["gain_general_liquid_credits"],
           requiredAssessmentEvidence: [
-            "runner_development_funding:card:runner_onr_v1_165_junkyard-bbs_1",
+            "runner_development_funding:card:c2bt",
           ],
         },
       };
@@ -91,21 +92,18 @@ describe("match E8886 runner decision checkpoints", () => {
       result.decision?.decisionDebug?.planFirstDecision?.executionOrigin
         ?.rootPlanInstanceId,
     ).toBe(
-      "plan:runner.develop_board_and_hand:card%3Arunner_onr_v1_165_junkyard-bbs_1",
+      "p63s0ijmgg9uonto2uyza36kh2",
     );
-    const portfolioItems =
-      result.decision?.decisionDebug?.detailSections?.find(
-        (section) => section.id === "plan_portfolio",
-      )?.items ?? [];
-    expect(
-      portfolioItems.some(
-        (item) =>
-          item.includes("module:runner.develop_board_and_hand") &&
-          item.includes("card%3Arunner_onr_v1_165_junkyard-bbs_1") &&
-          item.includes("phase:fund") &&
-          item.includes("viability:ready"),
-      ),
-    ).toBe(true);
+    expect(result.decision?.decisionDebug?.planFirstDecision?.portfolio).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          moduleId: "runner.develop_board_and_hand",
+          dedupeKey: expect.stringContaining("card:c2bt"),
+          phase: "fund",
+          viability: "ready",
+        }),
+      ]),
+    );
   });
 
   it("assigns an installed Junkyard top-card recovery action to the development plan", () => {
@@ -114,12 +112,12 @@ describe("match E8886 runner decision checkpoints", () => {
       const junkyard = state.runner.grip.find(
         (instanceId) =>
           state.cardInstances[instanceId]?.definitionId ===
-          "onr_v1_165_junkyard-bbs",
+          377,
       );
       const target = state.runner.grip.find(
         (instanceId) =>
           state.cardInstances[instanceId]?.definitionId ===
-          "onr_v1_079_bodyweight-synthetic-blood",
+          291,
       );
       if (!junkyard || !target)
         throw new Error("Expected Junkyard and recovery target");
@@ -140,24 +138,21 @@ describe("match E8886 runner decision checkpoints", () => {
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "E8886-C06-INSTALLED-TOP-RECOVERY";
       checkpoint.expectation = {
-        forbiddenActions: [{ actionId: "runner.end_turn" }],
+        forbiddenActions: [{ actionId: "r9" }],
       };
     });
 
     const result = runAiDecisionCheckpoint(installedRecovery);
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
-    const portfolioItems =
-      result.decision?.decisionDebug?.detailSections?.find(
-        (section) => section.id === "plan_portfolio",
-      )?.items ?? [];
-    expect(
-      portfolioItems.some(
-        (item) =>
-          item.includes("module:runner.develop_board_and_hand") &&
-          item.includes("recovery") &&
-          item.includes("viability:ready"),
-      ),
-    ).toBe(true);
+    expect(result.decision?.decisionDebug?.planFirstDecision?.portfolio).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          moduleId: "runner.develop_board_and_hand",
+          dedupeKey: expect.stringContaining("recovery"),
+          viability: "ready",
+        }),
+      ]),
+    );
   });
 
   it("continues when the same remaining known path is now affordable", () => {
@@ -166,7 +161,7 @@ describe("match E8886 runner decision checkpoints", () => {
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "E8886-C05-FUNDED-CONTINUE";
       checkpoint.expectation = {
-        acceptableActions: [{ actionId: "runner.continue_run" }],
+        acceptableActions: [{ actionId: "r5" }],
       };
     });
 

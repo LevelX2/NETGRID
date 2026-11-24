@@ -36,8 +36,8 @@ function fixture(name: string) {
 }
 afterEach(resetResidentPlanPortfolioMemory);
 it.each([
-  ["g21-d110", "runner_onr_classic_028_matador_2"],
-  ["g31-d75", "runner_onr_classic_030_psychic-friend_2"],
+  ["g21-d110", "c76"],
+  ["g31-d75", "c7m"],
 ])("owns the original program-trash choice %s", (name, target) => {
   const input = fixture(name!);
   const decision = chooseAiAction(input);
@@ -91,7 +91,7 @@ it.each(["source", "server", "target", "cardinality"])(
     const input = fixture("g21-d110");
     const choice = input.playerView.pendingChoice!;
     if (kind === "source")
-      choice.sourceCardDefinitionId = "onr_v1_312_chicago-branch";
+      choice.sourceCardDefinitionId = 524;
     if (kind === "server") input.playerView.run!.attackedServerId = "rd";
     if (kind === "target") choice.options[0]!.value = "not-a-visible-program";
     if (kind === "cardinality") choice.minSelections = 2;

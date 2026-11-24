@@ -1,3 +1,4 @@
+import { type CardDefinitionId } from "@netgrid/shared";
 export type DeckStrategyViewerSide = "runner" | "corp";
 
 export type DeckStrategyProfileTone =
@@ -44,7 +45,7 @@ export type DeckStrategyProfileStrategyRow = DeckStrategyProfileScoreSet & {
 };
 
 export type DeckStrategyProfileAnchorEvidence = {
-  cardId: string;
+  cardId: CardDefinitionId;
   cardTitle: string;
   quantity: number;
   source: string;

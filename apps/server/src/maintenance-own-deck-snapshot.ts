@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import type { DeckSnapshot } from "@netgrid/decks";
 import type { GameState, Side } from "@netgrid/shared";
 import type { StoredMatch } from "./multiplayer";
@@ -12,11 +13,11 @@ export type StorageMaintenanceOwnDeckZoneBalance =
       hiddenDeckCount: number;
       knownOutsideDeckTotal: number;
       knownOutsideDeckDefinitionCounts: Array<{
-        definitionId: string;
+        definitionId: CardDefinitionId;
         quantity: number;
       }>;
       remainingPossibleDefinitionCounts: Array<{
-        definitionId: string;
+        definitionId: CardDefinitionId;
         quantity: number;
       }>;
     }
@@ -34,8 +35,8 @@ export type StorageMaintenanceOwnDeckSnapshot =
       provenance: "persisted";
       signature: string;
       deckSnapshotId: string;
-      identityDefinitionId: string;
-      definitionCounts: Array<{ definitionId: string; quantity: number }>;
+      identityDefinitionId: CardDefinitionId;
+      definitionCounts: Array<{ definitionId: CardDefinitionId; quantity: number }>;
       totalCards: number;
       cardPoolSnapshotId: string;
       cardPoolVersion?: string;
@@ -175,12 +176,12 @@ function snapshotMatchesPersistedBinding(
 
 function normalizedDefinitionCounts(
   snapshot: DeckSnapshot,
-): Array<{ definitionId: string; quantity: number }> | undefined {
-  const counts = new Map<string, number>();
+): Array<{ definitionId: CardDefinitionId; quantity: number }> | undefined {
+  const counts = new Map<CardDefinitionId, number>();
   for (const entry of snapshot.cards) {
     if (
-      typeof entry.cardId !== "string" ||
-      entry.cardId.length === 0 ||
+      !Number.isSafeInteger(entry.cardId) ||
+      entry.cardId <= 0 ||
       !Number.isInteger(entry.quantity) ||
       entry.quantity <= 0 ||
       counts.has(entry.cardId)
@@ -189,14 +190,14 @@ function normalizedDefinitionCounts(
     counts.set(entry.cardId, entry.quantity);
   }
   return [...counts.entries()]
-    .sort(([left], [right]) => left.localeCompare(right))
+    .sort(([left], [right]) => left - right)
     .map(([definitionId, quantity]) => ({ definitionId, quantity }));
 }
 
 function reconstructOwnDeckZoneBalance(
   state: GameState,
   side: Side,
-  definitionCounts: Array<{ definitionId: string; quantity: number }>,
+  definitionCounts: Array<{ definitionId: CardDefinitionId; quantity: number }>,
 ): StorageMaintenanceOwnDeckZoneBalance {
   const hiddenDeckCount =
     side === "runner" ? state.runner.stack.length : state.corp.rd.length;
@@ -205,7 +206,7 @@ function reconstructOwnDeckZoneBalance(
   const available = new Map(
     definitionCounts.map((entry) => [entry.definitionId, entry.quantity]),
   );
-  const knownOutside = new Map<string, number>();
+  const knownOutside = new Map<CardDefinitionId, number>();
   for (const card of Object.values(state.cardInstances)) {
     if (
       card.owner !== side ||

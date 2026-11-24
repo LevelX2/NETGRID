@@ -27,11 +27,11 @@ const context = {
   profile,
   cardsById: {
     ...cardsById,
-    range_agenda: {
+    923: {
       ...agenda,
       numeric: { ...agenda.numeric, agendaPoints: 1 },
     },
-    range_filler: {
+    924: {
       ...filler,
       numeric: { ...filler.numeric, agendaPoints: null },
     },
@@ -43,12 +43,12 @@ function deck(size: number, points: number): EditableDeck {
     deckVersion: "test",
     name: "Range probe",
     side: "corp",
-    identityCardId: "corp_identity_001",
+    identityCardId: 3,
     cardPoolSnapshotId: profile.cardPoolSnapshotId,
     formatProfileId: profile.profileId,
     cards: [
-      { cardId: "range_agenda", quantity: points },
-      { cardId: "range_filler", quantity: size - points },
+      { cardId: 923, quantity: points },
+      { cardId: 924, quantity: size - points },
     ],
     createdAt: "2026-09-13T00:00:00Z",
     updatedAt: "2026-09-13T00:00:00Z",
@@ -108,14 +108,14 @@ describe("official Corp agenda point range", () => {
     const runner = {
       ...deck(20, 7),
       side: "runner" as const,
-      identityCardId: "runner_identity_001",
-      cards: [{ cardId: "runner_filler", quantity: 20 }],
+      identityCardId: 587,
+      cards: [{ cardId: 925, quantity: 20 }],
     };
     const runnerContext = {
       ...context,
       cardsById: {
         ...context.cardsById,
-        runner_filler: {
+        925: {
           ...filler,
           side: "runner" as const,
           type: "program" as const,

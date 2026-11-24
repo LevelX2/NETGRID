@@ -23,7 +23,7 @@ it("keeps tag-pool facts restricted through native plan and route selection", ()
     ...aiLiveRuntimeDependencies,
     evaluateRunnerHandDevelopment: (args, prepared) => {
       const evaluations = aiLiveRuntimeDependencies.evaluateRunnerHandDevelopment(args, prepared);
-      const source = evaluations.find((e) => e.definitionId === "onr_v1_120_armadillo-armored-road-home")!;
+      const source = evaluations.find((e) => e.definitionId === 332)!;
       frames.push({ projected: args.rigDemandProjection !== undefined,
         role: source.developmentRole, liquidity: source.liquidityTiming,
         coverage: source.persistentInstallEvaluation?.newFunctionalCoverage ?? [] });

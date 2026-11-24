@@ -126,6 +126,7 @@ export function createTurnEndRuntimeResolvers(
         damageType: effect.damageType,
         amount: effect.amount,
         source: `runner_end:${effect.sourceDefinitionId}:${effect.sourceCardInstanceId}`,
+        randomSource: ["c", effect.sourceDefinitionId, effect.sourceCardInstanceId],
       }),
     }));
     const totalDamage = damageSummaries.reduce(
@@ -441,7 +442,7 @@ export function createTurnEndRuntimeResolvers(
   ): void {
     const pending = state.temporaryProgramInstallReturns ?? [];
     if (pending.length === 0) return;
-    const returnedDefinitionIds: string[] = [];
+    const returnedDefinitionIds: number[] = [];
     for (const entry of pending) {
       const cardId = entry.cardId;
       const instance = state.cardInstances[cardId];

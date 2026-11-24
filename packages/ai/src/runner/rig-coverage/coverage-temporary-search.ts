@@ -5,10 +5,11 @@ import {
 import { runnerTerminalRemoteContestIsDirectlyMandatory } from "../remote-contest/remote-contest-admission";
 import {
   canonicalCapabilityId,
-  cardSpecPlanningCardByDefinitionId,
+  planningCardByDefinitionId,
 } from "@netgrid/cards/planning";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { RunnerStrategicIntentProfile } from "../../runner-strategic-intent";
 import type { DeckCapabilityProfile } from "../../deck-capabilities";
 import type { RunnerCoverageGapSignal } from "../../plans/runner-coverage-contracts";
@@ -106,12 +107,11 @@ export function runnerTemporaryCoverageSearchHorizonBinding(
         source?.payload?.cardImplementationEffectKind ===
           "move_top_trash_to_grip");
     if (
-      !source ||
-      !run ||
+      !actionMatchesCurrentDecision(input, source) ||
+      !actionMatchesCurrentDecision(input, run) ||
       !binding ||
+      source.source !== binding.sourceCardInstanceId ||
       !answer ||
-      source.expiresAtStateVersion !== input.playerView.stateVersion ||
-      run.expiresAtStateVersion !== input.playerView.stateVersion ||
       (!acquireThenInstall &&
         (modes.size !== 1 || (!modes.has("free") && !modes.has("normal"))))
     ) {
@@ -234,7 +234,7 @@ export function runnerTemporaryCoverageSearchHorizonBinding(
     const draw = input.legalActions.find(
       (a) =>
         a.type === "draw_card" &&
-        a.expiresAtStateVersion === input.playerView.stateVersion &&
+        actionMatchesCurrentDecision(input, a) &&
         a.payload?.projectedNetHandDelta === 1 &&
         a.payload?.visibleDrawTaxSourceCount === 0 &&
         a.costs.reduce((n, c) => n + (c.clicks ?? 0), 0) === 1 &&
@@ -381,7 +381,7 @@ function boundedProgramSearchEffect(
   action: LegalAction,
   binding: {
     sourceCardInstanceId: string;
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
   },
 ) {
   const abilityId = action.abilityRef?.sourceAbilityId;
@@ -396,8 +396,7 @@ function boundedProgramSearchEffect(
   )
     return undefined;
   const abilities =
-    cardSpecPlanningCardByDefinitionId(binding.sourceDefinitionId)?.planning
-      .engine.abilities ?? [];
+    planningCardByDefinitionId(binding.sourceDefinitionId)?.engine.abilities ?? [];
   const ability = abilities.find(
     (entry) =>
       entry.kind === "activated" &&

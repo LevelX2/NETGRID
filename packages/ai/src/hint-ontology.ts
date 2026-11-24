@@ -941,6 +941,7 @@ export function validateAiHintActionCapabilitySemantics(
   semantics: unknown,
 ): AiHintOntologyValidationResult {
   const issues: AiHintOntologyIssue[] = [];
+  validateHiddenInfoRisk(semantics, "$.actionCapabilitySemantics", issues);
   validateActionCapabilitySemanticsValue(
     semantics,
     "$.actionCapabilitySemantics",
@@ -1103,7 +1104,7 @@ function validateActionCapacityProfiles(
       issues,
       true,
     );
-    validateOptionalNumber(profile.amount, `${profilePath}.amount`, issues);
+    validateOptionalNonNegativeInteger(profile.amount, `${profilePath}.amount`, issues);
     if (
       profile.amountKind === "fixed" &&
       (typeof profile.amount !== "number" || profile.amount <= 0)
@@ -1349,7 +1350,7 @@ function validateCostProfile(
     "counters",
     "agendaPoints",
   ]) {
-    validateOptionalNumber(costProfile[key], `${path}.${key}`, issues);
+    validateOptionalNonNegativeInteger(costProfile[key], `${path}.${key}`, issues);
   }
   validateOptionalKnown(
     costProfile.reserveRisk,
@@ -1636,7 +1637,7 @@ function validateTargetProfiles(
 
 function isTargetProfileV1(targetProfile: Record<string, unknown>): boolean {
   return (
-    targetProfile.schemaVersion === "target-profile-v1" ||
+    targetProfile.schemaVersion !== undefined ||
     targetProfile.kind !== undefined ||
     targetProfile.targetType !== undefined ||
     targetProfile.preferences !== undefined ||
@@ -1882,7 +1883,8 @@ function validateActionCapabilitySemanticsValue(
       );
     if (
       typeof entry.capabilityKey !== "string" ||
-      entry.capabilityKey.length === 0
+      entry.capabilityKey.trim().length === 0 ||
+      entry.capabilityKey !== entry.capabilityKey.trim()
     ) {
       addIssue(
         issues,
@@ -1915,19 +1917,6 @@ function validateActionCapabilitySemanticsValue(
       previousCapabilityKey = entry.capabilityKey;
     }
     validateCostProfile(entry.costProfile, `${entryPath}.costProfile`, issues);
-    if (isRecord(entry.costProfile)) {
-      for (const key of ["clicks", "credits"] as const) {
-        const value = entry.costProfile[key];
-        if (typeof value === "number" && value < 0)
-          addIssue(
-            issues,
-            "error",
-            "invalid_shape",
-            entryPath + ".costProfile." + key,
-            "Expected a finite non-negative number.",
-          );
-      }
-    }
     validateEffects(entry.effects, `${entryPath}.effects`, issues);
     validateConditions(entry.conditions, `${entryPath}.conditions`, issues);
     validateTargetProfiles(
@@ -2107,8 +2096,7 @@ function validateOptionalKnown<const T extends readonly string[]>(
   issues: AiHintOntologyIssue[],
 ): void {
   if (value === undefined) return;
-  const knownValueSet = new Set(knownValues);
-  if (typeof value !== "string" || !knownValueSet.has(value)) {
+  if (typeof value !== "string" || !knownValues.includes(value)) {
     addIssue(
       issues,
       "error",
@@ -2117,6 +2105,16 @@ function validateOptionalKnown<const T extends readonly string[]>(
       `Unknown value: ${String(value)}.`,
     );
   }
+}
+
+function validateOptionalNonNegativeInteger(
+  value: unknown,
+  path: string,
+  issues: AiHintOntologyIssue[],
+): void {
+  if (value === undefined) return;
+  if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0)
+    addIssue(issues, "error", "invalid_shape", path, "Expected a non-negative safe integer.");
 }
 
 function validateOptionalNumber(

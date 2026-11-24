@@ -1,3 +1,4 @@
+import { applyAction } from "@netgrid/engine";
 import { describe, expect, it } from "vitest";
 
 import allNighterJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-82b2-01-all-nighter-rd-bonus-d5.json";
@@ -13,7 +14,7 @@ const checkpoints = [
   ["All-Nighter ranks the bound bonus target", allNighterJson],
   ["Broker converts its reached value target", brokerCashoutJson],
   ["early layered R&D path rezzes Data Wall", earlyRdRezJson],
-  ["late layered R&D path rezzes Fire Wall", lateRdRezJson],
+  ["Inside Job bypasses the outer Fire Wall", lateRdRezJson],
   ["Vapor Ops is not immediately re-advanced", vaporReadvanceJson],
   ["Vapor Ops does not repeat the cross-plan loop", vaporRepeatJson],
 ] as const;
@@ -35,6 +36,38 @@ describe("series 82b2 remediation decision checkpoints", () => {
     const result = runAiDecisionCheckpoint(fixture(json));
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+  });
+
+  it("keeps the outer Fire Wall unrezzed when Inside Job negates that encounter", () => {
+    const checkpoint = fixture(lateRdRezJson);
+    const result = runAiDecisionCheckpoint(checkpoint);
+    expect(result.ok, result.message).toBe(true);
+    const { playerView } = result.input;
+    expect(playerView.run?.bypassFirstIceRemaining).toBe(true);
+    const run = playerView.run;
+    if (run?.position?.kind !== "ice")
+      throw new Error("Expected the Fire Wall approach");
+    const fireWall = playerView.servers.find(
+      (server) => server.id === run.attackedServerId,
+    )?.ice[run.position.iceIndex];
+    expect(fireWall?.definitionId).toBe(457);
+    expect(fireWall?.effectiveRezResourceExchangeQuote).toMatchObject({
+      complete: false,
+      reason: "current_encounter_bypassed",
+    });
+    const state = checkpoint.engine.testOnlyGameState;
+    state.eventLog = checkpoint.engine.eventPrefix;
+    const applied = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: result.selectedAction!.actionId,
+      clientKnownStateVersion: state.stateVersion,
+    });
+    if (!applied.ok) throw new Error(applied.error.message);
+    expect(applied.state.corp.credits).toBe(state.corp.credits);
+    expect(
+      applied.state.cardInstances[state.run!.approachedIceId!]?.rezzed,
+    ).toBe(false);
   });
 });
 

@@ -8,13 +8,13 @@ describe("sanitizeCardImplementationSurfacePayload", () => {
         hiddenZoneBarrier: true,
         hiddenZoneAction: "agenda_purge_rd_top3",
         revealedCount: 3,
-        publicRevealDefinitionIds: "ice_wall,agenda_contract",
+        publicRevealDefinitionIds: "2521798093,3465088428",
       }),
     ).toEqual({
       hiddenZoneBarrier: true,
       hiddenZoneAction: "agenda_purge_rd_top3",
       revealedCount: 3,
-      publicRevealDefinitionIds: "ice_wall,agenda_contract",
+      publicRevealDefinitionIds: "2521798093,3465088428",
     });
   });
 

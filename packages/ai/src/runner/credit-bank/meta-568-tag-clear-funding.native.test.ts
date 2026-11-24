@@ -54,11 +54,11 @@ it("funds the current Defense tag clear through Broker before losing the three e
     input.legalActions.find((a) => a.actionId === result.actionId),
   ).toMatchObject({
     type: "activated_card_ability",
-    source: "runner_onr_v1_154_broker_2",
+    source: "c29e",
     payload: { cardImplementationAbilityKey: "withdraw_credits" },
   });
   expect(result.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:runner.defense_and_recovery:runner",
+    rootPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
     selectedPlan: { moduleId: "runner.credit_bank" },
     route: {
       actionId: result.actionId,
@@ -69,7 +69,7 @@ it("funds the current Defense tag clear through Broker before losing the three e
   expect(
     portfolio.instances.find((p) => p.moduleId === "runner.credit_bank"),
   ).toMatchObject({
-    parentInstanceId: "plan:runner.defense_and_recovery:runner",
+    parentInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
     parentNeedId: "runner-defense-tag-clear-funding",
     moduleState: { phase: "cash_out", signal: { priorityClass: "P2" } },
   });

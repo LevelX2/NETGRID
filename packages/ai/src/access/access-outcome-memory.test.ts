@@ -8,279 +8,38 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import {
-  accessOutcomeMemoryEvidence,
   accessOutcomeMemoryPlanEvidence,
-  createAccessOutcomeMemory,
   deriveObservedRemoteNoProgressAccessMemory,
-  evaluateAccessOutcomeMemoryStatus,
-  readAccessOutcomeMemory,
-  rememberAccessOutcome,
-  resetAccessOutcomeMemoryForMatch,
 } from "./access-outcome-memory";
 
 describe("access outcome memory", () => {
-  it("remembers and reads a side-safe access outcome by match, side, profile and server", () => {
-    const key = {
-      matchId: "match-1",
-      side: "runner" as const,
-      profileId: "runner-ai",
-      serverId: "remote_1",
-    };
-    const memory = rememberAccessOutcome(createAccessOutcomeMemory(), key, {
-      remoteFingerprint: "remote:fingerprint:1",
-      observedDecision: "decline",
-      reason: "reserve_would_break",
-      creditsAtOutcome: 4,
-      desiredReserveAtOutcome: 5,
-      generalTrashCost: 4,
-      stateVersion: 12,
-    });
-
-    expect(readAccessOutcomeMemory(memory, key)).toMatchObject({
-      ...key,
-      remoteFingerprint: "remote:fingerprint:1",
-      observedDecision: "decline",
-      reason: "reserve_would_break",
-    });
-    expect(accessOutcomeMemoryEvidence(memory.records[0]!)).toEqual(
-      expect.arrayContaining([
-        "access_outcome_memory_server:remote_1",
-        "access_outcome_memory_decision:decline",
-        "access_outcome_memory_reason:reserve_would_break",
-      ]),
-    );
-  });
-
-  it("replaces existing records for the same key", () => {
-    const key = {
-      matchId: "match-1",
-      side: "runner" as const,
-      profileId: "runner-ai",
-      serverId: "remote_1",
-    };
-    const first = rememberAccessOutcome(createAccessOutcomeMemory(), key, {
-      remoteFingerprint: "old",
-      observedDecision: "decline",
-      reason: "low_value_target",
-      creditsAtOutcome: 3,
-      desiredReserveAtOutcome: 5,
-      stateVersion: 10,
-    });
-    const second = rememberAccessOutcome(first, key, {
-      remoteFingerprint: "new",
-      observedDecision: "trash",
-      reason: "trash_affordable",
-      creditsAtOutcome: 8,
-      desiredReserveAtOutcome: 5,
-      stateVersion: 14,
-    });
-
-    expect(second.records).toHaveLength(1);
-    expect(readAccessOutcomeMemory(second, key)?.remoteFingerprint).toBe("new");
-  });
-
-  it("resets all records for a match", () => {
-    const memory = rememberAccessOutcome(
-      rememberAccessOutcome(
-        createAccessOutcomeMemory(),
-        {
-          matchId: "match-1",
-          side: "runner",
-          profileId: "runner-ai",
-          serverId: "remote_1",
-        },
-        {
-          remoteFingerprint: "a",
-          observedDecision: "decline",
-          reason: "low_value_target",
-          creditsAtOutcome: 2,
-          desiredReserveAtOutcome: 4,
-          stateVersion: 1,
-        },
-      ),
-      {
-        matchId: "match-2",
-        side: "runner",
-        profileId: "runner-ai",
-        serverId: "remote_1",
-      },
-      {
-        remoteFingerprint: "b",
-        observedDecision: "trash",
-        reason: "trash_affordable",
-        creditsAtOutcome: 8,
-        desiredReserveAtOutcome: 4,
-        stateVersion: 1,
-      },
-    );
-
-    expect(resetAccessOutcomeMemoryForMatch(memory, "match-1").records).toEqual(
-      [expect.objectContaining({ matchId: "match-2" })],
-    );
-  });
-
-  it("invalidates remembered outcomes when the remote fingerprint changes", () => {
-    const record = rememberAccessOutcome(
-      createAccessOutcomeMemory(),
-      {
-        matchId: "match-1",
-        side: "runner",
-        profileId: "runner-ai",
-        serverId: "remote_1",
-      },
-      {
-        remoteFingerprint: "old",
-        observedDecision: "decline",
-        reason: "low_value_target",
-        creditsAtOutcome: 3,
-        desiredReserveAtOutcome: 5,
-        stateVersion: 1,
-      },
-    ).records[0]!;
-
-    expect(
-      evaluateAccessOutcomeMemoryStatus(record, {
-        currentRemoteFingerprint: "new",
-        currentCredits: 3,
-        currentDesiredReserve: 5,
-      }),
-    ).toMatchObject({
-      applies: false,
-      invalidationReason: "remote_fingerprint_changed",
-      suppressesPlanBonus: false,
-      evidence: expect.arrayContaining([
-        "access_outcome_memory_invalidated:remote_fingerprint_changed",
-      ]),
-    });
-  });
-
-  it("invalidates declined outcomes when credits or reserve improve", () => {
-    const record = rememberAccessOutcome(
-      createAccessOutcomeMemory(),
-      {
-        matchId: "match-1",
-        side: "runner",
-        profileId: "runner-ai",
-        serverId: "remote_1",
-      },
-      {
-        remoteFingerprint: "same",
-        observedDecision: "decline",
-        reason: "reserve_would_break",
-        creditsAtOutcome: 3,
-        desiredReserveAtOutcome: 5,
-        stateVersion: 1,
-      },
-    ).records[0]!;
-
-    expect(
-      evaluateAccessOutcomeMemoryStatus(record, {
-        currentRemoteFingerprint: "same",
-        currentCredits: 7,
-        currentDesiredReserve: 5,
-      }),
-    ).toMatchObject({
-      applies: false,
-      invalidationReason: "credits_or_reserve_improved",
-      suppressesPlanBonus: false,
-      evidence: expect.arrayContaining([
-        "access_outcome_memory_invalidated:credits_or_reserve_improved",
-      ]),
-    });
-  });
-
-  it("keeps matching outcome memory applicable while context is unchanged", () => {
-    const record = rememberAccessOutcome(
-      createAccessOutcomeMemory(),
-      {
-        matchId: "match-1",
-        side: "runner",
-        profileId: "runner-ai",
-        serverId: "remote_1",
-      },
-      {
-        remoteFingerprint: "same",
-        observedDecision: "decline",
-        reason: "reserve_would_break",
-        creditsAtOutcome: 3,
-        desiredReserveAtOutcome: 5,
-        stateVersion: 1,
-      },
-    ).records[0]!;
-
-    expect(
-      evaluateAccessOutcomeMemoryStatus(record, {
-        currentRemoteFingerprint: "same",
-        currentCredits: 3,
-        currentDesiredReserve: 5,
-      }),
-    ).toMatchObject({
-      applies: true,
-      suppressesPlanBonus: true,
-      evidence: expect.arrayContaining([
-        "access_outcome_memory_applies:true",
-        "access_outcome_memory_suppresses_plan_bonus:true",
-      ]),
-    });
-  });
-
-  it("formats no-plan-bonus evidence from structured memory status", () => {
-    const record = rememberAccessOutcome(
-      createAccessOutcomeMemory(),
-      {
-        matchId: "match-1",
-        side: "runner",
-        profileId: "runner-ai",
-        serverId: "remote_1",
-      },
-      {
-        remoteFingerprint: "same",
-        observedDecision: "decline",
-        reason: "reserve_would_break",
-        creditsAtOutcome: 3,
-        desiredReserveAtOutcome: 5,
-        stateVersion: 1,
-      },
-    ).records[0]!;
-    const status = evaluateAccessOutcomeMemoryStatus(record, {
-      currentRemoteFingerprint: "same",
-      currentCredits: 3,
-      currentDesiredReserve: 5,
-    });
-
+  it("only reports a suppressed plan bonus when the observed memory applies", () => {
+    const status = { applies: true, suppressesPlanBonus: true, evidence: [] };
     expect(accessOutcomeMemoryPlanEvidence(status)).toEqual([
       "access_outcome_memory_no_plan_bonus:true",
       "access_outcome_memory_applied:declined_access",
     ]);
     expect(
-      accessOutcomeMemoryPlanEvidence({
-        ...status,
-        applies: false,
-      }),
+      accessOutcomeMemoryPlanEvidence({ ...status, applies: false }),
     ).toEqual([]);
   });
 
   it("derives no-progress remote access memory from side-safe public events", () => {
     const input = aiInput({
       eventTail: [
-        publicEvent("evt-run", 8, "start_run", {
-          actor: "runner",
-          actionType: "start_run",
-          serverId: "remote_1",
-        }),
-        publicEvent("evt-access", 9, "access_card", {
+        publicEvent(9, "access_card", {
           actor: "runner",
           actionType: "access_card",
-          serverId: "remote_1",
-          cardDefinitionId: "onr_v1_317_data-masons",
+          serverId: "r1",
+          cardDefinitionId: 529,
           accessedCardPositionKey: "root:0",
           accessedArea: "root",
         }),
       ],
       servers: [
-        server("remote_1", [
+        server("r1", [
           visibleCard("remote-root", {
-            definitionId: "onr_v1_317_data-masons",
+            definitionId: 529,
             title: "Data Masons",
             type: "asset",
             trashCost: 1,
@@ -291,7 +50,7 @@ describe("access outcome memory", () => {
 
     const status = deriveObservedRemoteNoProgressAccessMemory(
       input,
-      "remote_1",
+      "r1",
     );
 
     expect(status).toMatchObject({
@@ -305,7 +64,7 @@ describe("access outcome memory", () => {
         "remote_access_outcome_no_progress:true",
         "known_remote_no_current_payoff",
         "repeated_remote_no_progress_suppressed",
-        "remote_access_outcome_source_event:evt-access",
+        "remote_access_outcome_source_event:10",
         "access_outcome_memory_match:access-outcome-memory-match",
       ]),
     );
@@ -324,13 +83,13 @@ describe("access outcome memory", () => {
     expect(
       deriveObservedRemoteNoProgressAccessMemory(
         inputWithoutMatchId,
-        "remote_1",
+        "r1",
       ),
     ).toBeUndefined();
     expect(
       deriveObservedRemoteNoProgressAccessMemory(
         { ...input, side: "corp" },
-        "remote_1",
+        "r1",
       ),
     ).toBeUndefined();
   });
@@ -338,22 +97,22 @@ describe("access outcome memory", () => {
   it("derives no-progress memory from visible remote labels", () => {
     const input = aiInput({
       eventTail: [
-        publicEvent("evt-run", 8, "start_run", {
+        publicEvent(8, "start_run", {
           actor: "runner",
           actionType: "start_run",
           serverLabel: "Remote 1",
         }),
-        publicEvent("evt-access", 9, "access_card", {
+        publicEvent(9, "access_card", {
           actor: "runner",
           actionType: "access_card",
           targets: { serverLabel: "Remote 1" },
-          cardDefinitionId: "onr_v1_317_data-masons",
+          cardDefinitionId: 529,
         }),
       ],
       servers: [
-        server("remote_1", [
+        server("r1", [
           visibleCard("remote-root", {
-            definitionId: "onr_v1_317_data-masons",
+            definitionId: 529,
             type: "asset",
             trashCost: 1,
           }),
@@ -362,7 +121,7 @@ describe("access outcome memory", () => {
     });
 
     expect(
-      deriveObservedRemoteNoProgressAccessMemory(input, "remote_1"),
+      deriveObservedRemoteNoProgressAccessMemory(input, "r1"),
     ).toMatchObject({
       applies: true,
       suppressesPlanBonus: true,
@@ -372,32 +131,32 @@ describe("access outcome memory", () => {
   it("retains the latest observed no-progress access across later failed runs on the unchanged remote", () => {
     const input = aiInput({
       eventTail: [
-        publicEvent("evt-run-accessed", 8, "start_run", {
+        publicEvent(8, "start_run", {
           actor: "runner",
           actionType: "start_run",
-          serverId: "remote_1",
+          serverId: "r1",
         }),
-        publicEvent("evt-access", 9, "access_card", {
+        publicEvent(9, "access_card", {
           actor: "runner",
           actionType: "access_card",
-          serverId: "remote_1",
-          cardDefinitionId: "onr_v1_317_data-masons",
+          serverId: "r1",
+          cardDefinitionId: 529,
         }),
-        publicEvent("evt-run-failed", 10, "start_run", {
+        publicEvent(10, "start_run", {
           actor: "runner",
           actionType: "start_run",
-          serverId: "remote_1",
+          serverId: "r1",
         }),
-        publicEvent("evt-end-run", 11, "end_run", {
+        publicEvent(11, "end_run", {
           actor: "runner",
           actionType: "end_run",
-          serverId: "remote_1",
+          serverId: "r1",
         }),
       ],
       servers: [
-        server("remote_1", [
+        server("r1", [
           visibleCard("remote-root", {
-            definitionId: "onr_v1_317_data-masons",
+            definitionId: 529,
             type: "asset",
             trashCost: 1,
           }),
@@ -406,41 +165,41 @@ describe("access outcome memory", () => {
     });
 
     expect(
-      deriveObservedRemoteNoProgressAccessMemory(input, "remote_1"),
+      deriveObservedRemoteNoProgressAccessMemory(input, "r1"),
     ).toMatchObject({
       applies: true,
       suppressesPlanBonus: true,
       evidence: expect.arrayContaining([
-        "remote_access_outcome_source_event:evt-access",
+        "remote_access_outcome_source_event:10",
         "repeated_remote_no_progress_suppressed",
       ]),
     });
   });
 
-  it("keeps an explicit declined trash suppressed until the remote or economy changes", () => {
+  it("remembers a declined trash without attributing an unobserved reason", () => {
     const input = aiInput({
       eventTail: [
-        publicEvent("evt-run", 8, "start_run", {
+        publicEvent(8, "start_run", {
           actor: "runner",
           actionType: "start_run",
-          serverId: "remote_1",
+          serverId: "r1",
         }),
-        publicEvent("evt-access", 9, "access_card", {
+        publicEvent(9, "access_card", {
           actor: "runner",
           actionType: "access_card",
-          serverId: "remote_1",
-          cardDefinitionId: "onr_v1_317_data-masons",
+          serverId: "r1",
+          cardDefinitionId: 529,
         }),
-        publicEvent("evt-decline", 10, "decline_trash", {
+        publicEvent(10, "decline_trash", {
           actor: "runner",
           actionType: "decline_trash",
-          serverId: "remote_1",
+          serverId: "r1",
         }),
       ],
       servers: [
-        server("remote_1", [
+        server("r1", [
           visibleCard("remote-root", {
-            definitionId: "onr_v1_317_data-masons",
+            definitionId: 529,
             type: "asset",
             trashCost: 1,
           }),
@@ -449,15 +208,15 @@ describe("access outcome memory", () => {
     });
 
     expect(
-      deriveObservedRemoteNoProgressAccessMemory(input, "remote_1"),
+      deriveObservedRemoteNoProgressAccessMemory(input, "r1"),
     ).toMatchObject({
       applies: true,
       suppressesPlanBonus: true,
       suppressUntilInvalidated: true,
       evidence: expect.arrayContaining([
         "remote_access_outcome_decision:decline",
-        "remote_access_outcome_reason:reserve_would_break",
-        "remote_access_outcome_decline_event:evt-decline",
+        "remote_access_outcome_reason:unknown",
+        "remote_access_outcome_decline_event:11",
       ]),
     });
   });
@@ -465,27 +224,27 @@ describe("access outcome memory", () => {
   it("does not derive no-progress memory after a visible remote change", () => {
     const input = aiInput({
       eventTail: [
-        publicEvent("evt-run", 8, "start_run", {
+        publicEvent(8, "start_run", {
           actor: "runner",
           actionType: "start_run",
-          serverId: "remote_1",
+          serverId: "r1",
         }),
-        publicEvent("evt-access", 9, "access_card", {
+        publicEvent(9, "access_card", {
           actor: "runner",
           actionType: "access_card",
-          serverId: "remote_1",
-          cardDefinitionId: "onr_v1_317_data-masons",
+          serverId: "r1",
+          cardDefinitionId: 529,
         }),
-        publicEvent("evt-install", 10, "install_card", {
+        publicEvent(10, "install_card", {
           actor: "corp",
           actionType: "install_card",
-          serverId: "remote_1",
+          serverId: "r1",
         }),
       ],
       servers: [
-        server("remote_1", [
+        server("r1", [
           visibleCard("remote-root", {
-            definitionId: "onr_v1_317_data-masons",
+            definitionId: 529,
             type: "asset",
             trashCost: 1,
           }),
@@ -494,7 +253,7 @@ describe("access outcome memory", () => {
     });
 
     expect(
-      deriveObservedRemoteNoProgressAccessMemory(input, "remote_1"),
+      deriveObservedRemoteNoProgressAccessMemory(input, "r1"),
     ).toBeUndefined();
   });
 });
@@ -503,7 +262,7 @@ function aiInput(params: {
   eventTail: PublicGameEvent[];
   servers: PlayerView["servers"];
 }): AiDecisionInput {
-  const legalActions = [runAction("run-remote-1", "remote_1")];
+  const legalActions = [runAction("run-remote-1", "r1")];
   const playerView: PlayerView = {
     stateVersion: 11,
     side: "runner",
@@ -556,17 +315,16 @@ function aiInput(params: {
 }
 
 function publicEvent(
-  eventId: string,
   stateVersionAfter: number,
   type: string,
   publicPayload: Record<string, unknown>,
 ): PublicGameEvent {
   return {
-    eventId,
+    eventId: stateVersionAfter + 1,
     type,
     stateVersionBefore: stateVersionAfter - 1,
     stateVersionAfter,
-    stateHashAfter: `fnv1a:${eventId}`,
+    stateHashAfter: `fnv1a:${stateVersionAfter}`,
     visibilityClass: "public",
     publicPayload,
   };
@@ -598,7 +356,7 @@ function runAction(actionId: string, serverId: string): LegalAction {
 function visibleIdentity(side: Side): VisibleCard {
   return {
     instanceId: `${side}-identity`,
-    definitionId: `${side}-identity`,
+    definitionId: side === "runner" ? 587 : 3,
     title: `${side} identity`,
     owner: side,
     controller: side,

@@ -12,7 +12,7 @@ export type AgendaDefinitionScoreQuote =
     }
   | {
       complete: true;
-      definitionId: string;
+      definitionId: number;
       advancementCounters: number;
       effectiveAdvancementRequirement: number;
       agendaPoints: number;
@@ -24,7 +24,7 @@ export type AgendaDefinitionScoreQuote =
  * This is a rule payoff quote, not legality, affordability or a future-state certificate.
  */
 export function quoteAgendaDefinitionScorePoints(
-  definitionId: string,
+  definitionId: number,
   effectiveAdvancementRequirement: number,
   advancementCounters: number,
   requestedAgendaPoints: number,

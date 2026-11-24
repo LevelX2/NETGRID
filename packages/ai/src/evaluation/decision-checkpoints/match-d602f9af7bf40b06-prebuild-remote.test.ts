@@ -33,7 +33,7 @@ type ReconstructedDecisionCapture = {
 };
 
 const INSTALL_NERVE_LABYRINTH =
-  "corp.install_card.corp_onr_v1_257_nerve-labyrinth_1.remote_2.corp_onr_v1_257_nerve-labyrinth_1.1";
+  "cc.c2wd.r2.c2wd.1";
 
 describe("match d602f9af7bf40b06 strategic remote prebuild", () => {
   it("draws for missing HQ defense when no concrete installation remains", () => {
@@ -67,7 +67,7 @@ describe("match d602f9af7bf40b06 strategic remote prebuild", () => {
 
     const decision = chooseAiAction(capture.input as AiDecisionInput);
 
-    expect(decision.actionId).toBe("corp.draw_card");
+    expect(decision.actionId).toBe("c8");
     expect(decision.decisionDebug?.planKind).toBe("corp.defend_servers");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
@@ -79,14 +79,14 @@ describe("match d602f9af7bf40b06 strategic remote prebuild", () => {
       decision.decisionDebug?.planFirstDecision?.selectedPlan,
     ).toMatchObject({
       moduleId: "corp.defend_servers",
-      instanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      instanceId: "penw02zfrkklof54c2nuye5att",
     });
     expect(
       decision.decisionDebug?.planFirstDecision?.turnPlanning?.selectedLine?.phases.at(
         0,
       ),
     ).toMatchObject({
-      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
       rootModuleId: "corp.defend_servers",
       nodes: [{ semanticActionType: "draw.card" }],
     });
@@ -104,11 +104,11 @@ describe("match d602f9af7bf40b06 strategic remote prebuild", () => {
       capture.runtime,
     );
     const decision = chooseAiAction(capture.input);
-    expect(decision.actionId).toBe("corp.gain_credit");
+    expect(decision.actionId).toBe("cb");
     expect(decision.actionId).not.toBe(INSTALL_NERVE_LABYRINTH);
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-      "plan:corp.economy:economy-visible-liquidity-development%3A8",
+      "p4gj7mjn9buqqlpbcttnuemgfj",
     );
     expect(decision.evidence).toContain(
       "plan_assessment_evidence:corp_engine_certified_basic_liquidity_development",

@@ -4,6 +4,7 @@ import {
   type CanonicalCapabilityId,
   type CapabilityAddressability,
   type CapabilityKey,
+  type ResolveCapabilityId,
 } from "./capability-identity";
 import { assertCardSpecContract } from "./card-spec-validation";
 import type { CardSpec } from "./contracts";
@@ -196,13 +197,14 @@ export type ProspectiveCapabilityView = {
   currentLegality: "not_evaluated_requires_current_legal_action_or_engine_quote";
 };
 
-const compiledByRelevantFingerprint = new Map<
-  string,
-  DeepReadonly<ProspectiveCapabilityView>
+const compiledByIdentityRegistry = new WeakMap<
+  ResolveCapabilityId,
+  Map<string, DeepReadonly<ProspectiveCapabilityView>>
 >();
 
 export function compileProspectiveCapabilities(
   spec: CardSpec,
+  resolveCapabilityId: ResolveCapabilityId = canonicalCapabilityId,
 ): DeepReadonly<ProspectiveCapabilityView> {
   assertCardSpecContract(spec);
   const fingerprints = cardSectionFingerprints(spec);
@@ -212,7 +214,12 @@ export function compileProspectiveCapabilities(
     fingerprints.cardRulesFingerprint,
     fingerprints.planningAnnotationsFingerprint,
   ]);
-  const cached = compiledByRelevantFingerprint.get(cacheKey);
+  let cache = compiledByIdentityRegistry.get(resolveCapabilityId);
+  if (!cache) {
+    cache = new Map();
+    compiledByIdentityRegistry.set(resolveCapabilityId, cache);
+  }
+  const cached = cache.get(cacheKey);
   if (cached !== undefined) return cached;
 
   const initializedValues = initialValuesFor(spec);
@@ -226,6 +233,7 @@ export function compileProspectiveCapabilities(
         value as JsonValue,
         initializedValues,
         capabilities,
+        resolveCapabilityId,
       );
       continue;
     }
@@ -239,6 +247,7 @@ export function compileProspectiveCapabilities(
           `engine.${family}${Array.isArray(json) ? `[${index}]` : ""}`,
           entry,
           initializedValues,
+          resolveCapabilityId,
         ),
       ),
     );
@@ -265,7 +274,7 @@ export function compileProspectiveCapabilities(
     currentLegality:
       "not_evaluated_requires_current_legal_action_or_engine_quote",
   } satisfies ProspectiveCapabilityView);
-  compiledByRelevantFingerprint.set(cacheKey, result);
+  cache.set(cacheKey, result);
   return result;
 }
 
@@ -274,6 +283,7 @@ function compileLifecycle(
   value: JsonValue,
   initialValues: readonly ProspectiveInitializedValue[],
   output: ProspectiveCapability[],
+  resolveCapabilityId: ResolveCapabilityId,
 ): void {
   if (!isObject(value)) return;
   const hooks = [
@@ -297,6 +307,7 @@ function compileLifecycle(
           `engine.lifecycle.${hook}[${index}]`,
           entry,
           initialValues,
+          resolveCapabilityId,
           hook,
         ),
       ),
@@ -310,10 +321,11 @@ function compileNode(
   sourcePath: string,
   value: JsonValue,
   initialValues: readonly ProspectiveInitializedValue[],
+  resolveCapabilityId: ResolveCapabilityId,
   lifecycleHook?: string,
 ): ProspectiveCapability {
   const descriptors = directDescriptors(value, sourcePath);
-  const identity = identityFor(spec, value);
+  const identity = identityFor(spec, value, resolveCapabilityId);
   const uncertaintyClass = PROSPECTIVE_CLASS_BY_FAMILY[family];
   const annotation =
     identity.kind === "keyed"
@@ -362,6 +374,7 @@ function compileNode(
 function identityFor(
   spec: CardSpec,
   value: JsonValue,
+  resolveCapabilityId: ResolveCapabilityId,
 ): ProspectiveCapabilityIdentity {
   if (!isObject(value) || typeof value.capabilityKey !== "string")
     return { kind: "unkeyed" };
@@ -369,7 +382,7 @@ function identityFor(
   return {
     kind: "keyed",
     capabilityKey: key,
-    canonicalCapabilityId: canonicalCapabilityId(
+    canonicalCapabilityId: resolveCapabilityId(
       spec.identity.cardDefinitionId,
       key,
     ),

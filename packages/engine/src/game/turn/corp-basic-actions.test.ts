@@ -15,7 +15,7 @@ describe("corp basic main actions", () => {
     });
 
     expect(buildCorpGainCreditAction(state)).toMatchObject({
-      actionId: "corp.gain_credit",
+      actionId: "cb",
       side: "corp",
       type: "gain_credit",
       label: "1 Credit nehmen",
@@ -39,13 +39,13 @@ describe("corp basic main actions", () => {
     const endTurnAction = buildCorpEndTurnAction(state);
 
     expect(drawAction).toMatchObject({
-      actionId: "corp.draw_card",
+      actionId: "c8",
       type: "draw_card",
       costs: [{ clicks: 1 }],
     });
     expect(drawAction).not.toHaveProperty("payload");
     expect(endTurnAction).toMatchObject({
-      actionId: "corp.end_turn",
+      actionId: "c9",
       type: "end_turn",
       source: "game_rule",
       costs: [],
@@ -60,7 +60,7 @@ describe("corp basic main actions", () => {
     });
 
     expect(buildCorpPurgeVirusAction(state)).toMatchObject({
-      actionId: "corp.purge_virus_counters",
+      actionId: "cl",
       side: "corp",
       type: "purge_virus_counters",
       label: "Virus-Counter purgen",

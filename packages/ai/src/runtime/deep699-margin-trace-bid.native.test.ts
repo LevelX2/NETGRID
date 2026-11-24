@@ -53,7 +53,7 @@ it("preserves a losing bid that reduces the exact visible trace margin without c
     actions: input.legalActions,
   });
   const result = chooseAiAction(input);
-  expect(result.actionId).toBe("runner.resolve_choice");
+  expect(result.actionId).toBe("rn");
   expect(result.selectedChoices).toEqual({
     choiceId: input.playerView.pendingChoice!.choiceId,
     selectedOptionIds: ["bid_6"],

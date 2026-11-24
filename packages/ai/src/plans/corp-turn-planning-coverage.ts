@@ -1,5 +1,6 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type { PlanModuleId } from "./plan-kernel-types";
 import type { PlanActionDisposition } from "./plan-scheduler";
@@ -217,6 +218,8 @@ export type CorpTurnPlanningActionCoverage = {
 export type CorpTurnPlanningCoverageIssueCode =
   | "input_side_not_corp"
   | "legal_action_candidate_coverage_mismatch"
+  | "duplicate_legal_action"
+  | "stale_legal_action"
   | "duplicate_candidate_action"
   | "stale_candidate"
   | "unknown_engine_window_action"
@@ -357,6 +360,28 @@ export function buildCorpTurnPlanningCoverageReport(params: {
   const legalActionIds = sortedUnique(
     params.input.legalActions.map((action) => action.actionId),
   );
+  if (legalActionIds.length !== params.input.legalActions.length) {
+    issues.push({
+      code: "duplicate_legal_action",
+      detail: "The current Engine offer must contain unique action IDs.",
+    });
+  }
+  const engineWindowActionIds = new Set(params.engineWindowActionIds);
+  for (const action of params.input.legalActions) {
+    const { actionId, side, timingPoint, expiresAtStateVersion } = action;
+    if (
+      side !== configuration.side ||
+      expiresAtStateVersion !== stateVersion ||
+      (engineWindowActionIds.has(actionId) &&
+        !actionMatchesCurrentDecision(params.input, action))
+    ) {
+      issues.push({
+        code: "stale_legal_action",
+        actionId,
+        detail: `actor=${side} window=${timingPoint} stateVersion=${expiresAtStateVersion}`,
+      });
+    }
+  }
   const candidateActionIds = params.candidates.map(
     (candidate) => candidate.actionId,
   );
@@ -385,7 +410,6 @@ export function buildCorpTurnPlanningCoverageReport(params: {
     }
   }
 
-  const engineWindowActionIds = new Set(params.engineWindowActionIds);
   for (const actionId of engineWindowActionIds) {
     const candidate = params.candidates.find(
       (entry) => entry.actionId === actionId,
@@ -868,7 +892,7 @@ function validateProgressRoots(params: {
           (head.executorPlanInstanceId === witness.planInstanceId ||
             head.rootPlanInstanceId === witness.planInstanceId),
       );
-      if (!selfHead) {
+      if (witness.planInstanceId !== root.planInstanceId || !selfHead) {
         params.issues.push({
           code: "provider_without_executable_head",
           actionId: witness.actionId,
@@ -936,7 +960,10 @@ export function assertCorpTurnPlanningModuleRegistry(
     (entry) => entry.moduleId,
   );
   const issues: string[] = [];
-  if (!sameStringSet(registeredModuleIds, declaredIds)) {
+  if (
+    new Set(registeredModuleIds).size !== registeredModuleIds.length ||
+    !sameStringSet(registeredModuleIds, declaredIds)
+  ) {
     issues.push(
       `module_set_mismatch:registered=${sortedUnique(registeredModuleIds).join(",")}:declared=${sortedUnique(declaredIds).join(",")}`,
     );
@@ -969,7 +996,9 @@ export function assertCorpTurnPlanningModuleRegistry(
 export function corpTurnPlanningModuleCoverage(
   moduleId: PlanModuleId,
 ): CorpTurnPlanningModuleCoverage | undefined {
-  const coverage = moduleCoverageFor(moduleId);
+  const coverage = CORP_TURN_PLANNING_MODULE_COVERAGE.find(
+    (entry) => entry.moduleId === moduleId,
+  );
   return coverage ? structuredClone(coverage) : undefined;
 }
 
@@ -978,11 +1007,9 @@ function moduleCoverageFor(
   modules: readonly Pick<
     CorpTurnPlanningModuleCoverage,
     "moduleId" | "horizonCapability" | "semanticActionPatterns"
-  >[] = CORP_TURN_PLANNING_MODULE_COVERAGE,
-): CorpTurnPlanningModuleCoverage | undefined {
-  return modules.find((entry) => entry.moduleId === moduleId) as
-    | CorpTurnPlanningModuleCoverage
-    | undefined;
+  >[],
+): TurnPlanningCoverageConfiguration["modules"][number] | undefined {
+  return modules.find((entry) => entry.moduleId === moduleId);
 }
 
 function semanticMatchesAny(

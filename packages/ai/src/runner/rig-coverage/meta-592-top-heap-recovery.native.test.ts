@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -34,7 +35,7 @@ it("admits the native exact top-heap recovery, installation and terminal remote 
     before = JSON.stringify(input),
     runtimeBefore = JSON.stringify(cp.runtime),
     d = chooseAiAction(input);
-  expect(d.actionId).toContain("junkyard-bbs");
+  expect(referencesDefaultDeckCard(d.actionId, 377)).toBe(true);
   expect(d.fallbackUsed || d.timeoutUsed).toBe(false);
   expect(input.legalActions.some((a: any) => a.actionId === d.actionId)).toBe(
     true,
@@ -45,7 +46,7 @@ it("admits the native exact top-heap recovery, installation and terminal remote 
       (x) =>
         x.moduleId === "runner.rig_and_coverage" &&
         (x.moduleState as any).gap?.priorityClass === "P2" &&
-        (x.moduleState as any).gap?.targetServerId === "remote_1" &&
+        (x.moduleState as any).gap?.targetServerId === "r1" &&
         (x.moduleState as any).gap?.directSearchActionIds.includes(d.actionId),
     ),
   ).toBe(true);

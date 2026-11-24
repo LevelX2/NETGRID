@@ -6,15 +6,18 @@ import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decis
 import {
   mergedPublicHistory,
   serverIdFromEvent,
-} from "../../runtime/public-event-history";
+} from "../../public-event-history";
 import { isRemoteServerTarget } from "../../runtime/server-target";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
+import { sourceDefinitionIdForAction } from "../../runtime/visible-card-lookup";
 
 export function runnerInstallTaxTarget(
   input: AiDecisionInputWithDeckCapabilities,
-  definitionId: string,
+  definitionId: number,
   candidates: readonly ActionSemanticCandidate[],
 ): { target?: { actionId: string; serverId: string } } | undefined {
   if (
+    input.side !== "runner" ||
     !runnerEffectsOnlyTaxCorpIceInstalls(
       AI_HINTS_BY_CARD.get(definitionId)?.effects,
     ) ||
@@ -46,14 +49,20 @@ export function runnerInstallTaxTarget(
     const action = legalActions.find(
       (offer) =>
         offer.actionId === candidate.actionId &&
-        offer.side === "runner" &&
+        offer.source === candidate.sourceCardInstanceId &&
         offer.type === "install_card" &&
-        offer.expiresAtStateVersion === playerView.stateVersion,
+        actionMatchesCurrentDecision(input, offer),
     );
     const server = playerView.servers.find(
       (entry) => entry.id === action?.payload?.selectedServerId,
     );
-    if (!action || !server || server.id === "archives") return [];
+    if (
+      !action ||
+      sourceDefinitionIdForAction(input, action) !== definitionId ||
+      !server ||
+      server.id === "archives"
+    )
+      return [];
 
     const central = server.id === "hq" || server.id === "rd";
     const planned =

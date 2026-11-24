@@ -16,19 +16,19 @@ const payload = {
   playerView: {
     side: "runner",
     stateVersion: 9,
+    legalActions: [
+      {
+        actionId: 1,
+        type: "start_run",
+        label: "Run auf R&D",
+        side: "runner",
+        source: "basic_action",
+        timingPoint: "runner_action.main",
+        costs: [],
+        payload: { serverId: "rd" },
+      },
+    ],
   },
-  legalActions: [
-    {
-      actionId: "runner.start_run.rd",
-      type: "start_run",
-      label: "Run auf R&D",
-      side: "runner",
-      source: "basic_action",
-      timingPoint: "runner_action.main",
-      costs: [],
-      payload: { serverId: "rd" },
-    },
-  ],
 } as unknown as ApiSidePayload;
 
 const preview = {
@@ -62,7 +62,7 @@ describe("human-side AI decision probe", () => {
     expect(
       humanAiDecisionProbeAvailable(
         { side: "runner", mode: "human_runner_vs_corp_ai" },
-        { ...payload, legalActions: [] },
+        { ...payload, playerView: { ...payload.playerView, legalActions: [] } },
       ),
     ).toBe(false);
   });
@@ -88,14 +88,16 @@ describe("human-side AI decision probe", () => {
   });
 
   it("maps the selected LegalAction to a server or own-card highlight without changing it", () => {
-    expect(humanAiDecisionProbeActionContext(payload.legalActions[0])).toEqual({
+    expect(
+      humanAiDecisionProbeActionContext(payload.playerView.legalActions[0]),
+    ).toEqual({
       kind: "server",
       id: "rd",
       label: "R&D",
     });
     expect(
       humanAiDecisionProbeActionContext({
-        actionId: "runner.play_event.runner_card_1",
+        actionId: "rh.runner_card_1",
         type: "play_event",
         label: "Eigene Karte spielen",
         side: "runner",
@@ -117,7 +119,7 @@ describe("human-side AI decision probe", () => {
       matchVersion: 4,
       stateVersion: 9,
       side: "runner",
-      selectedActionId: "runner.start_run.rd",
+      selectedActionId: "rs.rd",
       selectedActionType: "start_run",
       detail: {
         reasonCode: "plan_first.runner.pressure_central",
@@ -142,7 +144,7 @@ describe("human-side AI decision probe", () => {
       matchVersion: 4,
       stateVersion: 9,
       side: "runner",
-      selectedActionId: "runner.start_run.rd",
+      selectedActionId: "rs.rd",
       selectedActionType: "start_run",
       reasonCode: "plan_first.runner.pressure_central",
       selectedChoices: {

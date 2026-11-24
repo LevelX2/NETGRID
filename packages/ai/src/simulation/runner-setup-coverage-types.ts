@@ -1,4 +1,5 @@
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { visibleRunnerPathTraceContext } from "../run-analysis/trace-rules-profile-planning";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   type AiDecisionInput,
   type LegalAction,
@@ -8,7 +9,7 @@ import { RUNTIME_CARDS } from "../ai-hints";
 import { rolesMatch } from "../role-match";
 import { isRemoteServerTarget } from "../runtime/server-target";
 import { iceHasEndTheRun } from "../visible-run-analysis";
-import type { KnownRezzedIcePathAssessment } from "../visible-run-analysis";
+import type { assessKnownRezzedIcePath } from "../visible-run-analysis";
 
 export type RunnerSetupMissingCoverageType =
   | "wall"
@@ -18,13 +19,8 @@ export type RunnerSetupMissingCoverageType =
   | "special";
 
 type RunnerSetupCoverageDependencies = {
-  rolesForCardId: (definitionId: string | undefined) => string[];
-  assessKnownRezzedIcePath: (
-    iceCards: AiDecisionInput["playerView"]["servers"][number]["ice"],
-    rigCards: NonNullable<AiDecisionInput["playerView"]["own"]["rig"]>,
-    runnerCredits: number,
-    rootCards: AiDecisionInput["playerView"]["servers"][number]["root"],
-  ) => KnownRezzedIcePathAssessment;
+  rolesForCardId: (definitionId: number | undefined) => string[];
+  assessKnownRezzedIcePath: typeof assessKnownRezzedIcePath;
 };
 
 type RunnerCoverageActionDependencies = {
@@ -47,8 +43,8 @@ export function runnerVisibleMissingBreakerCoverage(
   return input.playerView.servers.some((server) =>
     server.ice
       .filter(
-        (ice): ice is typeof ice & { definitionId: string } =>
-          ice.known && typeof ice.definitionId === "string",
+        (ice): ice is typeof ice & { definitionId: number } =>
+          ice.known && typeof ice.definitionId === "number",
       )
       .flatMap((ice) => runnerMissingBreakerRolesForMetrics(ice.definitionId))
       .some((role) => !rigRoles.has(role)),
@@ -67,7 +63,7 @@ export function runnerMissingCoverageTypesForInput(
   const missing = new Set<RunnerSetupMissingCoverageType>();
   for (const server of input.playerView.servers) {
     for (const ice of server.ice) {
-      if (!ice.known || typeof ice.definitionId !== "string") continue;
+      if (!ice.known || typeof ice.definitionId !== "number") continue;
       for (const role of runnerMissingBreakerRolesForMetrics(
         ice.definitionId,
       )) {
@@ -105,7 +101,9 @@ export function runnerHasKnownBlockedPathByCoverage(
         input.playerView.own.rig ?? [],
         input.playerView.own.credits,
         server.root,
-      ).blocked,
+        input.playerView.opponent.credits,
+        visibleRunnerPathTraceContext(input),
+      ).knownPathBlockedByMissingCoverage,
   );
 }
 
@@ -148,7 +146,7 @@ export function runnerCoverageSearchActionForMetrics(
       : undefined;
   const sourceDefinition = sourceCard?.definitionId
     ? (RUNTIME_CARDS[sourceCard.definitionId] ??
-      CARD_DEFINITIONS_BY_ID[sourceCard.definitionId])
+      planningCardFactsByDefinitionId(sourceCard.definitionId))
     : undefined;
   const mechanics =
     sourceDefinition &&
@@ -167,8 +165,14 @@ export function runnerCoverageRecoveryActionForMetrics(
   action: LegalAction,
   dependencies: RunnerCoverageActionDependencies,
 ): boolean {
-  const roles = dependencies.rolesForAction(input, action);
-  return rolesMatch(roles, ["recovery", "trash_recovery", "search_trash"]);
+  return (
+    action.side === "runner" &&
+    rolesMatch(dependencies.rolesForAction(input, action), [
+      "recovery",
+      "trash_recovery",
+      "search_trash",
+    ])
+  );
 }
 
 export function createRunnerCoverageActionContext(
@@ -192,10 +196,10 @@ export function createRunnerCoverageActionContext(
 }
 
 export function runnerMissingBreakerRolesForMetrics(
-  definitionId: string,
+  definitionId: number,
 ): string[] {
   const definition =
-    RUNTIME_CARDS[definitionId] ?? CARD_DEFINITIONS_BY_ID[definitionId];
+    RUNTIME_CARDS[definitionId] ?? planningCardFactsByDefinitionId(definitionId);
   const subtypes = definition?.subtypes ?? [];
   const roles = new Set<string>();
   if (

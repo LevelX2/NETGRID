@@ -32,7 +32,7 @@ describe("localized structured deck validation", () => {
           parameters.map((name) => [
             name,
             name === "cardId"
-              ? "CARD-123"
+              ? 123
               : name === "status"
                 ? "deck_legal"
                 : 7,

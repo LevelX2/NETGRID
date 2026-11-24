@@ -1,5 +1,6 @@
 import {
   ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
+  isCardDefinitionId,
   type ActionType,
   type AbilityPayloadDiscriminatorField,
   type EventVisibilityClass,
@@ -261,7 +262,7 @@ export function buildPublicAbilitySchemaContext(
       combined.targetCardDefinitionIds = publicTargetDefinitionIds;
   }
   const metadata = publicAbilityMetadata(actionType, payload, context);
-  const sourceDefinitionId = stringValue(combined.sourceDefinitionId);
+  const sourceDefinitionId = combined.sourceDefinitionId;
   const amounts = publicAmounts(combined);
   const targets = publicTargets(combined);
   if (metadata.abilityId === RUNNER_PROGRAM_TRASH_BEFORE_INSTALL_ABILITY_ID) {
@@ -294,7 +295,8 @@ export function buildPublicAbilitySchemaContext(
   if (metadata.abilityFamily) result.abilityFamily = metadata.abilityFamily;
   if (metadata.abilityId) result.abilityId = metadata.abilityId;
   if (metadata.effectKind) result.effectKind = metadata.effectKind;
-  if (sourceDefinitionId) result.sourceDefinitionId = sourceDefinitionId;
+  if (isCardDefinitionId(sourceDefinitionId))
+    result.sourceDefinitionId = sourceDefinitionId;
   if (Object.keys(amounts).length > 0) result.amounts = amounts;
   if (Object.keys(targets).length > 0) result.targets = targets;
   result.visibility = {

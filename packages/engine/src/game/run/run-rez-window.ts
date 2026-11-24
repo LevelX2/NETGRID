@@ -911,13 +911,13 @@ function cardImplementationCorpRootRezResolver(
 }
 
 function remainingReplacementLongtailImplementationForDefinition(
-  definitionId: string,
+  definitionId: number,
 ) {
   return cardImplementationForDefinitionId(definitionId)
     ?.remainingReplacementLongtail;
 }
 
-function isObligationDebtDefinition(definitionId: string): boolean {
+function isObligationDebtDefinition(definitionId: number): boolean {
   return (
     remainingReplacementLongtailImplementationForDefinition(definitionId)
       ?.kind === "obligation_debt"
@@ -945,7 +945,7 @@ function installedRezInterruptJackOutSourceIds(
 }
 
 function runEncounterInterventionsForDefinition(
-  definitionId: string,
+  definitionId: number,
 ): readonly CardRunEncounterInterventionImplementation[] {
   return (
     cardImplementationForDefinitionId(definitionId)

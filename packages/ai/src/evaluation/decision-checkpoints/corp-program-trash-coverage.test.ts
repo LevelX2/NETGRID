@@ -1,3 +1,4 @@
+import { deckSnapshotCardCountsForTest } from "../../deck-snapshot.test-support";
 import { corpProgramTrashDefenseSignals } from "../../corp/defense/program-trash-signal";
 import { programTrashCoverageLosses } from "../../corp/defense/program-trash-coverage";
 import { afterEach, expect, it } from "vitest";
@@ -22,8 +23,11 @@ import { buildAiDecisionInput, chooseCorpAction } from "../../index";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { selectedCorpProgramTrashChoiceOptionIds } from "../../runtime/corp-program-trash-choice";
 
-const REX = "onr_v1_264_rex";
-const RAPTOR = "onr_v1_054_raptor";
+const REX = 476;
+const RAPTOR = 266;
+const CYFERMASTER = 228;
+const KRASH = 251;
+const WORM = 286;
 
 afterEach(resetResidentPlanPortfolioMemory);
 
@@ -59,9 +63,9 @@ it.each([
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           leafExecutorInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           route: { actionId: action.actionId },
         },
       },
@@ -90,16 +94,17 @@ it("destroys the sole affordable Wall response and applies the exact Defense cho
   const initial = choiceState();
   const input = corpInput(initial);
   const decision = chooseCorpAction(input);
-  expect(selectedTarget(input, decision)).toContain("worm");
+  const worm = input.playerView.opponent.rig!.find((card) => card.definitionId === WORM)!;
+  expect(selectedTarget(input, decision)).toBe(worm.instanceId);
   expect(decision.actionId).toBe(input.legalActions[0]!.actionId);
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
     lane: "plan",
     route: { actionId: decision.actionId },
     selectedStep: {
-      planInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      planInstanceId: "penw02zfrkklof54c2nuye5att",
     },
-    rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
-    leafExecutorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+    rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
+    leafExecutorInstanceId: "penw02zfrkklof54c2nuye5att",
   });
   if (!decision.actionId || !decision.selectedChoices)
     throw new Error("Expected a bound legal action");
@@ -113,9 +118,7 @@ it("destroys the sole affordable Wall response and applies the exact Defense cho
   });
   expect(result.ok).toBe(true);
   if (!result.ok) throw new Error(result.error.message);
-  expect(
-    result.state.runner.rig.programs.some((id) => id.includes("worm")),
-  ).toBe(false);
+  expect(result.state.runner.rig.programs).not.toContain(worm.instanceId);
   const replay = replayEvents(
     initial,
     result.state.eventLog.slice(initial.eventLog.length),
@@ -126,35 +129,31 @@ it("destroys the sole affordable Wall response and applies the exact Defense cho
 
 it("preserves redundant Wall coverage and instead removes the unique affordable decoder", () => {
   const input = corpInput(choiceState({ dwarf: true, gate: true }));
-  expect(selectedTarget(input, chooseCorpAction(input))).toContain(
-    "cyfermaster",
-  );
+  expect(selectedTargetDefinition(input, chooseCorpAction(input))).toBe(CYFERMASTER);
 });
 
 it("recognizes universal replacement cost but prioritizes its unique Sentry coverage", () => {
   const input = corpInput(choiceState({ krash: true }));
   const programs = input.playerView.opponent.rig!;
   const losses = programTrashCoverageLosses(input, programs);
-  const worm = programs.find((p) => p.definitionId === "onr_v1_074_worm")!;
-  const krash = programs.find((p) => p.definitionId === "onr_v1_039_krash")!;
+  const worm = programs.find((p) => p.definitionId === WORM)!;
+  const krash = programs.find((p) => p.definitionId === KRASH)!;
   expect(losses.get(worm.instanceId)).toEqual({
     lostAffordableIce: 0,
     additionalCredits: 4,
   });
   expect(losses.get(krash.instanceId)?.lostAffordableIce).toBe(1);
-  expect(selectedTarget(input, chooseCorpAction(input))).toContain("krash");
+  expect(selectedTarget(input, chooseCorpAction(input))).toBe(krash.instanceId);
 });
 
 it("does not award coverage loss for unrezzed ICE", () => {
   const input = corpInput(choiceState({ unrezzedWall: true }));
-  expect(selectedTarget(input, chooseCorpAction(input))).toContain(
-    "cyfermaster",
-  );
+  expect(selectedTargetDefinition(input, chooseCorpAction(input))).toBe(CYFERMASTER);
 });
 
 it("does not award coverage loss for a path already unaffordable before the trash", () => {
   const input = corpInput(choiceState({ gate: true, credits: 1 }));
-  expect(selectedTarget(input, chooseCorpAction(input))).toContain("worm");
+  expect(selectedTargetDefinition(input, chooseCorpAction(input))).toBe(WORM);
 });
 
 it("keeps the target unchanged when the public Runner hand count changes", () => {
@@ -176,10 +175,12 @@ it("diagnoses a pending Defense program-trash choice without its LegalAction", (
   const input = corpInput(choiceState());
   expect(() =>
     corpProgramTrashDefenseSignals({ ...input, legalActions: [] }, []),
-  ).toThrow(expect.objectContaining({
-    code: "missing_action_semantics",
-    context: expect.objectContaining({ owner: "rules_contract" }),
-  }));
+  ).toThrow(
+    expect.objectContaining({
+      code: "missing_action_semantics",
+      context: expect.objectContaining({ owner: "rules_contract" }),
+    }),
+  );
 });
 
 it("requires the selected Defense executor instead of ranking targets again in the resolver", () => {
@@ -227,6 +228,14 @@ function selectedTarget(
   );
 }
 
+function selectedTargetDefinition(
+  input: ReturnType<typeof corpInput>,
+  decision: ReturnType<typeof chooseCorpAction>,
+) {
+  const targetId = selectedTarget(input, decision);
+  return input.playerView.opponent.rig!.find((card) => card.instanceId === targetId)?.definitionId;
+}
+
 function corpInput(state: GameState) {
   return buildAiDecisionInput(state, "corp", {
     difficulty: "normal",
@@ -234,9 +243,7 @@ function corpInput(state: GameState) {
     ownDeckSnapshot: {
       deckSnapshotId: "program-trash-coverage-test",
       side: "corp",
-      cards: Object.values(state.cardInstances)
-        .filter((c) => c.owner === "corp")
-        .map((c) => ({ cardId: c.definitionId, quantity: 1 })),
+      cards: deckSnapshotCardCountsForTest(state, "corp"),
     },
     decisionId: `${state.matchId}:${state.stateVersion}:corp`,
     actionNumber: state.stateVersion,
@@ -254,15 +261,15 @@ function choiceState(
   } = {},
 ): GameState {
   const corp = [
-    "onr_proteus_029_marionette",
-    options.rexTraceProfile ? REX : "onr_v1_238_data-wall-2-0",
-    "onr_v1_247_haunting-inquisition",
+    87,
+    options.rexTraceProfile ? REX : 450,
+    459,
   ];
   const runner = [
-    "onr_v1_074_worm",
-    options.rexTraceProfile ? RAPTOR : "onr_v1_016_cyfermaster",
-    "onr_v1_021_dwarf",
-    "onr_v1_039_krash",
+    286,
+    options.rexTraceProfile ? RAPTOR : 228,
+    233,
+    251,
   ];
   let state = createGameAfterSetup({
     seed: "program-trash-coverage",

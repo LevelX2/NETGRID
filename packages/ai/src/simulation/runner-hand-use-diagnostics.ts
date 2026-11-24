@@ -64,7 +64,7 @@ export type RunnerHandUseDiagnosticsDependencies = {
     input: AiDecisionInput,
     excludeActionId: string,
   ) => boolean;
-  hasRunnerRunnablePressureAction: (
+  hasRunnerPlayablePressureCard: (
     input: AiDecisionInput,
     excludeActionId: string,
   ) => boolean;
@@ -96,7 +96,7 @@ export type RunnerHandUseDiagnosticsDependencies = {
   sourceDefinitionIdForSimulationAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string | undefined;
+  ) => number | undefined;
   runnerRemoteTrashAccessContext: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -127,12 +127,17 @@ export function createRunnerHandUseDiagnosticsForSimulationAction(
       input,
       action.actionId,
     );
-    const runnablePressure = dependencies.hasRunnerRunnablePressureAction(
+    const runnablePressure = dependencies.hasRunnerPlayablePressureCard(
       input,
       action.actionId,
     );
     const remoteTrashAvailable = dependencies.hasRunnerRemoteTrashAction(input);
-    const discardRoles = dependencies.runnerDiscardChoiceRoles(input, decision);
+    const discardChoice =
+      action.type === "resolve_choice" &&
+      input.playerView.pendingChoice?.source === "discard_phase";
+    const discardRoles = discardChoice
+      ? dependencies.runnerDiscardChoiceRoles(input, decision)
+      : [];
     const installAction = action.type === "install_card";
     const duplicateInstall =
       installAction && dependencies.isRunnerDuplicateInstall(input, action);
@@ -191,12 +196,12 @@ export function createRunnerHandUseDiagnosticsForSimulationAction(
       ...(draw.draw && remoteTrashAvailable
         ? { runnerDrawWhileRemoteTrashAvailable: true }
         : {}),
-      ...(discardRoles.length > 0 ? { runnerDiscardChoice: true } : {}),
+      ...(discardChoice ? { runnerDiscardChoice: true } : {}),
       ...(discardRoles.some((role) => isRunnerEconomyRole(role))
-        ? { runnerDiscardedPlayableEconomy: true }
+        ? { runnerDiscardedEconomyCard: true }
         : {}),
       ...(rolesMatch(discardRoles, ["breaker_"])
-        ? { runnerDiscardedInstallableBreaker: true }
+        ? { runnerDiscardedBreaker: true }
         : {}),
       ...(discardRoles.some((role) => isRunnerPressureRole(role))
         ? { runnerDiscardedRunPressureCard: true }
@@ -208,7 +213,7 @@ export function createRunnerHandUseDiagnosticsForSimulationAction(
         : {}),
       ...(duplicateInstall &&
       dependencies.sourceDefinitionIdForSimulationAction(input, action) ===
-        "onr_v1_165_junkyard-bbs"
+        377
         ? { runnerJunkyardBbsDuplicateInstall: true }
         : {}),
       ...(economyActionTaken ? { runnerEconomyActionTaken: true } : {}),

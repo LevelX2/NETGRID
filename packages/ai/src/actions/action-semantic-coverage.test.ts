@@ -1,3 +1,5 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   applyAction,
   createGameAfterSetup,
@@ -17,6 +19,9 @@ import {
   summarizeActionSemanticCandidateCoverage,
   summarizeActionSemanticCandidateCoverageSources,
 } from "./action-semantic-coverage";
+
+const visibleAbilityKey = "store_credits";
+const visibleAbilityId = canonicalCapabilityId(366, capabilityKey(visibleAbilityKey));
 
 const ALL_ACTION_TYPES = [
   "mandatory_draw",
@@ -287,13 +292,13 @@ describe("Action semantic coverage", () => {
     const [candidate] = buildActionSemanticCandidates({
       legalActions: [action],
       visibleSourceDefinitionsByInstanceId: {
-        "newsgroup-instance": "onr_v1_045_newsgroup-filter",
+        "newsgroup-instance": 257,
       },
     });
 
     expect(candidate).toMatchObject({
       sourceKind: "card",
-      sourceDefinitionId: "onr_v1_045_newsgroup-filter",
+      sourceDefinitionId: 257,
       semanticActionType: "economy.gain_credit",
       primaryProjectionStatus: "projected",
       confidence: "high",
@@ -389,21 +394,21 @@ describe("Action semantic coverage", () => {
           source: "runner-hidden-instance",
           abilityRef: {
             sourceCardInstanceId: "runner-hidden-instance",
-            sourceAbilityId: "runner-visible-definition:visible_ability",
+            sourceAbilityId: visibleAbilityId,
           },
           payload: {
             cardId: "runner-hidden-instance",
-            sourceDefinitionId: "runner-visible-definition",
+            sourceDefinitionId: 366,
             cardImplementationCapabilityBindingKind: "card_spec_capability_key",
             cardImplementationAbilityId:
-              "runner-visible-definition:visible_ability",
-            cardImplementationAbilityKey: "visible_ability",
+              visibleAbilityId,
+            cardImplementationAbilityKey: visibleAbilityKey,
           },
         }),
         legalAction("install_card", 5, {
           side: "corp",
           source: "corp-hidden-instance",
-          payload: { sourceDefinitionId: "corp-visible-definition" },
+          payload: { sourceDefinitionId: syntheticCardDefinitionId("corp-visible-definition") },
         }),
         legalAction("advance_card", 6, {
           side: "corp",
@@ -624,9 +629,9 @@ function coverageReportFixtureCandidates(): ActionSemanticCandidate[] {
         visibility: "private_to_actor",
         payload: {
           sourceCardId: "runner-hidden-instance",
-          sourceDefinitionId: "onr_proteus_136_credit-subversion",
+          sourceDefinitionId: 194,
           cardImplementationAbilityId:
-            "onr_proteus_136_credit-subversion:successful_run_before_access:0",
+            "194:successful_run_before_access:0",
           cardImplementationAbilityKey: "successful_run_before_access:0",
           cardImplementationPrimitiveKind:
             "successful_run_before_access_effect",
@@ -638,21 +643,21 @@ function coverageReportFixtureCandidates(): ActionSemanticCandidate[] {
         source: "runner-hidden-instance",
         abilityRef: {
           sourceCardInstanceId: "runner-hidden-instance",
-          sourceAbilityId: "runner-visible-definition:visible_ability",
+          sourceAbilityId: visibleAbilityId,
         },
         payload: {
           cardId: "runner-hidden-instance",
-          sourceDefinitionId: "runner-visible-definition",
+          sourceDefinitionId: 366,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityId:
-            "runner-visible-definition:visible_ability",
-          cardImplementationAbilityKey: "visible_ability",
+            visibleAbilityId,
+          cardImplementationAbilityKey: visibleAbilityKey,
         },
       }),
       legalAction("install_card", 6, {
         side: "corp",
         source: "corp-hidden-instance",
-        payload: { sourceDefinitionId: "corp-visible-definition" },
+        payload: { sourceDefinitionId: syntheticCardDefinitionId("corp-visible-definition") },
       }),
       legalAction("advance_card", 7, {
         side: "corp",

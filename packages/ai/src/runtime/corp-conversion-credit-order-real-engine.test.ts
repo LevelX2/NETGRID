@@ -14,8 +14,8 @@ import {
 import { expect, it } from "vitest";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 
-const agendaDefinition = "onr_v1_196_corporate-war",
-  supportDefinition = "onr_v1_300_project-consultants";
+const agendaDefinition = 408,
+  supportDefinition = 512;
 const extras = [agendaDefinition, supportDefinition];
 const corpDeck = {
   ...DEMO_DECKS.demo_corp_001,

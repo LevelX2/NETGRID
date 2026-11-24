@@ -1,3 +1,4 @@
+import { type CardDefinitionId } from "@netgrid/shared";
 import type { Side } from "@netgrid/shared";
 
 import type { CatalogAiInspector } from "../../app/ai-hint-inspector-ui";
@@ -18,7 +19,7 @@ export type CatalogAiHints = {
 };
 
 export type CatalogCardSummary = {
-  catalogCardId: string;
+  catalogCardId: CardDefinitionId;
   title: string;
   side: Side;
   type: string;
@@ -42,7 +43,7 @@ export type CatalogCardDetail = CatalogCardSummary & {
   collectorNumber: string;
   text: string;
   numeric: Record<string, number | null>;
-  engineCardId: string | null;
+  engineCardId: CardDefinitionId | null;
   aiHints?: CatalogAiHints | null;
   aiInspector?: CatalogAiInspector | null;
 };

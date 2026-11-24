@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type {
   AiDecisionInput,
   AiDecisionScoreComponent,
@@ -12,13 +13,11 @@ import {
   visibleBreakerCardCanAddressIce,
   visibleBreakerRoles,
 } from "../runner-visible-breaker-coverage";
-import { semanticRuntimeCorpCentralPressureAssessment } from "../semantic-runtime-corp-central-pressure";
-import { semanticRuntimeCorpEffectiveDefenseContext } from "../semantic-runtime-corp-effective-defense";
-import { semanticRuntimeCorpCentralIceProfile } from "../semantic-runtime-corp-remote-score";
+import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import {
   corpIcePlacementActionCreditCostFact,
   corpIcePlacementPostInstallRezCostFact,
-} from "../corp-ice-placement/corp-ice-placement";
+} from "../corp-ice-placement/corp-ice-placement-costs";
 import type {
   CorpScoringWindowAssessment,
   CorpScoringWindowAgendaStealSeverity,
@@ -32,9 +31,7 @@ import type {
 } from "./semantic-runtime-corp-board-triage-contracts";
 
 export function corpLegalActions(input: AiDecisionInput): LegalAction[] {
-  return (input.legalActions ?? input.playerView.legalActions ?? []).filter(
-    (action) => action.side === "corp",
-  );
+  return input.legalActions.filter((action) => action.side === "corp");
 }
 
 export function existingReadyRemoteCanReceiveScoreline(
@@ -46,7 +43,7 @@ export function existingReadyRemoteCanReceiveScoreline(
   );
   return (
     server !== undefined &&
-    server.id.startsWith("remote_") &&
+    isRemoteServerId(server.id) &&
     server.ice.length > 0 &&
     (server.root.length === 0 ||
       corpLegalActions(input).some((action) => {
@@ -206,14 +203,12 @@ export function triageNeedsFunding(triage: CorpBoardTriage): boolean {
   );
 }
 
-export function actionIsUnfundedTargetProtectionInstall<
-  TConsumer extends string,
->(
+export function actionIsUnfundedTargetProtectionInstall(
   input: AiDecisionInput,
   action: LegalAction,
   actionServerId: string | undefined,
   triage: CorpBoardTriage,
-  _dependencies: CorpBoardTriageDependencies<TConsumer>,
+  _dependencies: CorpBoardTriageDependencies,
 ): boolean {
   if (action.type !== "install_card") return false;
   if (action.payload?.placement !== "ice") return false;
@@ -251,14 +246,12 @@ export function actionDistractsFromCentralProtection(
   return false;
 }
 
-export function actionRelievesHqAgendaPressureViaSafeRemote<
-  TConsumer extends string,
->(
+export function actionRelievesHqAgendaPressureViaSafeRemote(
   input: AiDecisionInput,
   action: LegalAction,
   actionServerId: string | undefined,
   triage: CorpBoardTriage,
-  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  dependencies: CorpBoardTriageDependencies,
 ): boolean {
   if (triage.primary !== "protect_hq" || triage.severity !== "high") {
     return false;
@@ -266,7 +259,7 @@ export function actionRelievesHqAgendaPressureViaSafeRemote<
   if (
     action.type !== "install_card" ||
     action.payload?.placement === "ice" ||
-    !actionServerId?.startsWith("remote_")
+    !isRemoteServerId(actionServerId)
   ) {
     return false;
   }
@@ -326,7 +319,7 @@ export function actionCreatesPurgeActionDebt(action: LegalAction): boolean {
 export function actionBuildsScoreRemote(
   entry: Pick<ScoredLegalAction, "action" | "roles" | "serverId">,
 ): boolean {
-  if (!entry.serverId || !entry.serverId.startsWith("remote_")) return false;
+  if (!entry.serverId || !isRemoteServerId(entry.serverId)) return false;
   if (entry.action.type !== "install_card") return false;
   return (
     entry.action.payload?.placement === "ice" ||
@@ -334,10 +327,10 @@ export function actionBuildsScoreRemote(
   );
 }
 
-export function actionProvidesEconomy<TConsumer extends string>(
+export function actionProvidesEconomy(
   input: AiDecisionInput,
   action: LegalAction,
-  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  dependencies: CorpBoardTriageDependencies,
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
 ): boolean {
   if (actionHasImmediateCreditGain(action)) return true;
@@ -686,36 +679,14 @@ export function normalizedCorpBoardTriageValue(rawValue: number): number {
   return Math.max(-100, Math.min(100, Math.round(rawValue / 50)));
 }
 
-export function inputWithOpponentDefaults(
-  input: AiDecisionInput,
-): AiDecisionInput {
+export function requireCorpTriageOpponentView(input: AiDecisionInput): AiDecisionInput {
   if (input.playerView.opponent) return input;
-  return {
-    ...input,
-    playerView: {
-      ...input.playerView,
-      opponent: {
-        identity: {
-          instanceId: "triage-runner-identity",
-          known: true,
-          side: "runner",
-          owner: "runner",
-          type: "identity",
-          counterDisplays: [],
-        },
-        credits: 0,
-        clicks: 0,
-        agendaPoints: 0,
-        tags: 0,
-        handCount: 0,
-        maxHandSize: 5,
-        deckCount: 0,
-        discardCount: 0,
-        rig: [],
-        heapOrArchives: [],
-        gripOrHq: [],
-        scoreArea: [],
-      },
-    },
-  } as unknown as AiDecisionInput;
+  throw new PlanResolutionFailure("invalid_player_view_card_projection", {
+    side: input.side,
+    stateVersion: input.playerView.stateVersion,
+    timingPoint: input.playerView.timingPoint,
+    legalActionTypes: input.legalActions.map((action) => action.type),
+    owner: "rules_contract",
+    removalCondition: "Corp board triage requires the Engine's side-safe opponent view.",
+  });
 }

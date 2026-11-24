@@ -1,3 +1,4 @@
+import { quoteRunnerRunTarget } from "../runner-run-target-evaluation";
 import {
   type AiDecisionInput,
   type GameState,
@@ -5,6 +6,7 @@ import {
 } from "@netgrid/shared";
 
 import { sortedUnique } from "../runtime/collection";
+import { rolesMatch } from "../role-match";
 import {
   runnerEconomySkipReasonForDiagnostics,
   runnerEconomySubcounts,
@@ -53,6 +55,11 @@ export type RunnerEconomySetupDiagnosticsDependencies = {
     excludeActionId?: string,
   ) => boolean;
   hasRunnerRemoteTrashAction: (input: AiDecisionInput) => boolean;
+  rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
+  isRunnerPressureAction: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => boolean;
   runnerDrawKindForSimulationAction: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -70,10 +77,6 @@ export type RunnerEconomySetupDiagnosticsDependencies = {
     input: AiDecisionInput,
     action: LegalAction,
   ) => RunnerEconomySetupDefinition | undefined;
-  runnerRunKnownPathCost: (
-    input: AiDecisionInput,
-    targetServerId: string | undefined,
-  ) => number;
   runnerSetupChosenFamilyForEntry: (entry: {
     actionType: string;
     runnerEconomyTaken?: boolean;
@@ -93,6 +96,7 @@ export function createRunnerEconomySetupDiagnosticsForSimulationAction(
     action: LegalAction,
     targetServerId: string | undefined,
     stateAfterAction: GameState,
+    runStarted: boolean,
   ): Partial<AiSimulationSummary["actionSequence"][number]> {
     if (input.side !== "runner" || action.side !== "runner") return {};
     const legalRunnerActions = input.legalActions.filter(
@@ -149,21 +153,30 @@ export function createRunnerEconomySetupDiagnosticsForSimulationAction(
       input,
       action,
     ).draw;
-    const runAction = action.type === "start_run";
+    const runBelowKnownPathCost =
+      runStarted &&
+      targetServerId !== undefined &&
+      quoteRunnerRunTarget({
+        input,
+        runActionId: action.actionId,
+        targetServerId,
+      })?.target.pathPassability === "blocked_unpayable";
+    const installsBreaker =
+      action.type === "install_card" &&
+      rolesMatch(dependencies.rolesForAction(input, action), ["breaker_"]);
     const setupAction =
       action.type === "install_card" &&
-      (dependencies.isRunnerRigInstallAction(input, action) ||
-        installableBreaker);
+      dependencies.isRunnerRigInstallAction(input, action);
     const relevantSkippedReason = economySkipped
       ? runnerEconomySkipReasonForDiagnostics({
           action,
           draw,
-          runAction,
           setupAction,
-          installableBreaker,
-          remoteTrashAvailable,
-          advancedRemoteContestSkipped: advancedRemoteContest.skipped,
-          freshPressureAvailable,
+          installsBreaker,
+          advancedRemoteContestTaken: advancedRemoteContest.taken,
+          runStarted,
+          pressureAction:
+            !runStarted && dependencies.isRunnerPressureAction(input, action),
         })
       : undefined;
     const rich = creditsBefore >= Math.max(8, reserveTarget + 3);
@@ -325,14 +338,13 @@ export function createRunnerEconomySetupDiagnosticsForSimulationAction(
       ...(economyStillBelowReserve
         ? { runnerEconomyTakenButStillBelowReserve: true }
         : {}),
-      ...(economySkipped && knownUnaffordablePath
-        ? {
-            runnerEconomySkippedThenUnaffordableRun: true,
-            runnerRunStartedAfterSkippingEconomy: runAction,
-          }
+      ...(economySkipped && runStarted
+        ? { runnerRunStartedAfterSkippingEconomy: true }
         : {}),
-      ...(runAction &&
-      dependencies.runnerRunKnownPathCost(input, targetServerId) > creditsBefore
+      ...(economySkipped && runBelowKnownPathCost
+        ? { runnerEconomySkippedThenUnaffordableRun: true }
+        : {}),
+      ...(runBelowKnownPathCost
         ? { runnerRunStartedBelowKnownPathCost: true }
         : {}),
       ...(economyOverPressure

@@ -16,7 +16,7 @@ export type CorpHostedBankInvestment = {
   actionId: string;
   stateVersion: number;
   sourceInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   storedCredits: number;
   creditsPerLoad: number;
   targetCredits: number;
@@ -33,6 +33,11 @@ export type CorpEconomyFundingRouteAssessment = {
   evidence: string[];
   hostedCreditBankCycle?: import("@netgrid/shared").CorpHostedCreditBankCycleQuote;
   freeRezPayoutPreparation?: CorpFreeRezPayoutPreparation;
+  scoreProtectionDrawDeferral?: {
+    defenseId: string;
+    stateVersion: number;
+    projectedCurrentCredits: number;
+  };
 };
 
 export type CorpFreeRezPayoutPreparation = {
@@ -43,7 +48,7 @@ export type CorpFreeRezPayoutPreparation = {
   parentPlanInstanceId: string;
   parentNeedId: string;
   sourceInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   sourceServerId: string;
   poolCreditsOnRez: number;
   payoutCredits: number;
@@ -61,6 +66,7 @@ export type CorpEconomyParentFundingSignal = CorpEconomySignalBase & {
   parentPriorityClass?: PriorityClass;
   immediateDefenseConversion?: boolean;
   parentPlanInstanceId?: string;
+  parentPlanModuleId?: import("../../plans/plan-kernel-types").PlanModuleId;
   parentNeedId?: string;
   scoreFundingMilestone?: CorpScoreFundingMilestone;
   incrementalDefenseReserve?: {
@@ -109,7 +115,7 @@ export type CorpEconomyLiquidityDevelopmentSignal = CorpEconomySignalBase & {
 export type CorpEconomyDevelopmentSignal = CorpEconomySignalBase & {
   kind: "develop_campaign";
   sourceInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   phase: "install" | "advance" | "rez" | "load";
   actionIds: string[];
   restrictedCreditNeed?: {
@@ -143,6 +149,7 @@ export type CorpEconomyDevelopmentSignal = CorpEconomySignalBase & {
   };
   riskAdjustment?: {
     serverId: string;
+    fundedLightProtection?: true;
     protectionState:
       | "unprotected"
       | "protected_contestable"
@@ -174,7 +181,7 @@ export type CorpEconomyDevelopmentSignal = CorpEconomySignalBase & {
 export type CorpEconomyImmediateOperationSignal = CorpEconomySignalBase & {
   kind: "convert_immediate_operation";
   sourceInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   actionIds: [string];
   conversion: {
     clickCost: number;
@@ -200,7 +207,7 @@ export type CorpEconomyImmediateOperationSignal = CorpEconomySignalBase & {
 export type CorpEconomyVisibleCardWithdrawalSignal = CorpEconomySignalBase & {
   kind: "convert_visible_card_payout";
   sourceInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   sourceZone: "installed_root" | "score_area";
   actionIds: [string];
   withdrawalCampaign?: {
@@ -236,7 +243,7 @@ export type CorpEconomyVisibleCardWithdrawalSignal = CorpEconomySignalBase & {
 export type CorpEconomyOperationThresholdSignal = CorpEconomySignalBase & {
   kind: "prepare_immediate_operation";
   sourceInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   actionIds: [string];
   threshold: {
     currentCredits: number;
@@ -270,7 +277,7 @@ export type CorpEconomyStartRezChoiceSignal = CorpEconomySignalBase & {
 export type CorpEconomyOptionalActionCapacitySignal = CorpEconomySignalBase & {
   kind: "resolve_optional_action_capacity_offer";
   sourceInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   actionIds: [string];
   decision: "accept" | "decline";
   rejectedActionId: string;

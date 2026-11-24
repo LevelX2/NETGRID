@@ -60,8 +60,8 @@ it("SP-458 preserves the installed breaker by the existing run-window jack-out r
     fallbackUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_265",
-        route: { actionId: "runner.jack_out" },
+        leafExecutorInstanceId: "p8xqhbkzpiuechoo267e6gas23",
+        route: { actionId: "rd" },
       },
     },
   });
@@ -72,7 +72,7 @@ it("keeps the actual historical continuation without the resolved restriction", 
   delete input.playerView.run!.nextEncounterNoBreakSubroutines;
   expect(path(input)).toMatchObject({ canReachAccess: true });
   expect(chooseAiAction(input)).toMatchObject({
-    actionId: "runner.continue_run",
+    actionId: "r5",
     fallbackUsed: false,
   });
 });

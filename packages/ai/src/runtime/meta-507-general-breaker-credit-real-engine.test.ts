@@ -16,8 +16,8 @@ import { buildAiDecisionInput } from "./ai-decision-input";
 import { chooseAiAction } from "../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 afterEach(resetResidentPlanPortfolioMemory);
-const spinal = "onr_classic_048_omnitech-spinal-tap-cybermodem",
-  ms = "onr_classic_029_ms-todon";
+const spinal = 52,
+  ms = 33;
 it("spends genuine general breaker bits on a noisy breaker through the current run owner", () => {
   // This mechanism owns its required cards independently of product deck edits.
   const runner: DeckDefinition = {
@@ -34,7 +34,7 @@ it("spends genuine general breaker bits on a noisy breaker through the current r
     id: "fixture_general_breaker_bits_corp",
     cards: [
       ...DEMO_DECKS.demo_corp_001.cards,
-      { id: "onr_classic_008_deadeye", quantity: 1 },
+      { id: 12, quantity: 1 },
     ],
   };
   let s = createGameAfterSetup({
@@ -51,7 +51,7 @@ it("spends genuine general breaker bits on a noisy breaker through the current r
     .withRunnerGripSize(0)
     .withRunnerCardInGrip(spinal)
     .withRunnerCardInGrip(ms)
-    .withRezzedCorpIceOnServer("hq", "onr_classic_008_deadeye");
+    .withRezzedCorpIceOnServer("hq", 12);
   const apply = (a: LegalAction) => {
     const r = applyAction(s, {
       matchId: s.matchId,

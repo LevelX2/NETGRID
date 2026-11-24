@@ -1,5 +1,5 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import {
   breakerCardBlocksAccessReachability,
@@ -10,9 +10,9 @@ import type { RunnerRigRoleDemandInput } from "../rig-demand/runner-rig-demand-p
 import { runnerRestrictedRunCreditProfile } from "../../runtime/runner-canonical-card-facts";
 import { planInstanceIdForProposal } from "../../plans/plan-instance";
 
-export function successfulRunStrengthCounter(definitionId: string | undefined) {
+export function successfulRunStrengthCounter(definitionId: number | undefined) {
   const mechanic = definitionId
-    ? cardSpecPlanningCardByDefinitionId(definitionId)?.planning.engine
+    ? planningCardByDefinitionId(definitionId)?.engine
         .virusCounter
     : undefined;
   return mechanic?.addOnSuccessfulRun?.server === "any" &&
@@ -44,6 +44,7 @@ function supportKind(card: VisibleCard) {
 export function strategicSupportWindow(input: AiDecisionInput) {
   const own = input.playerView.own;
   return (
+    input.side === "runner" &&
     input.playerView.timingPoint === "runner_action.main" &&
     own.tags === 0 &&
     own.stackOrRdCount >= 3 &&
@@ -84,6 +85,12 @@ export function strategicSupportPrograms(
     );
   });
   if (!consumers.length) return [];
+  const nonNoisyConsumer = consumers.find((card) => !card.subtypes?.includes("noisy"));
+  const installedRestrictedCreditCapacity = rig.reduce(
+    (sum, card) =>
+      sum + (runnerRestrictedRunCreditProfile(card.definitionId)?.capacity ?? 0),
+    0,
+  );
   const ice = input.playerView.servers.flatMap((s) => s.ice);
   // Fully known zero-strength boards provide no prospective pumping benefit.
   // Unrevealed ICE gives bounded option value, not a fabricated strength quote.
@@ -126,20 +133,16 @@ export function strategicSupportPrograms(
         (kind === "passive_strength" && copies >= 3)
       )
         return [];
+      const consumer =
+        kind === "recurring_breaker_credits" ? nonNoisyConsumer : consumers[0];
+      if (!consumer) return [];
       if (kind === "recurring_breaker_credits") {
         const profile = runnerRestrictedRunCreditProfile(card.definitionId)!;
         if (
           !profile.uses.includes("using_icebreaker_during_run_non_noisy") ||
-          !consumers.some((c) => !c.subtypes?.includes("noisy"))
+          installedRestrictedCreditCapacity >= 6
         )
           return [];
-        const installedCapacity = rig.reduce(
-          (sum, c) =>
-            sum +
-            (runnerRestrictedRunCreditProfile(c.definitionId)?.capacity ?? 0),
-          0,
-        );
-        if (installedCapacity >= 6) return [];
       }
       const value = Math.round(
         (90 + strategyBonus - card.installCost! * 10) / (copies + 1) - 10,
@@ -153,7 +156,7 @@ export function strategicSupportPrograms(
           strategyBonus,
           installCost: card.installCost!,
           memoryUnits: card.memoryCost!,
-          consumerId: consumers[0]!.instanceId,
+          consumerId: consumer.instanceId,
         },
       ];
     })

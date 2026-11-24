@@ -86,6 +86,13 @@ describe("ARC-001 maintenance HTTP security", () => {
     expect(
       mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(
         request("127.0.0.1"),
+        "/api/storage/maintenance/ai-decision-traces/matches/match/decisions/1",
+        config,
+      ),
+    ).toBe(false);
+    expect(
+      mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(
+        request("127.0.0.1"),
         "/api/storage/maintenance/analysis/future-endpoint",
         config,
       ),

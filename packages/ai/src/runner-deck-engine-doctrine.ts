@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import { AI_HINTS_BY_CARD } from "./ai-hints";
 import {
@@ -21,7 +22,7 @@ export type RunnerDoctrineProviderAdditivity =
 
 export type RunnerDoctrineProvider = {
   providerId: string;
-  cardId: string;
+  cardId: CardDefinitionId;
   copies: number;
   capabilities: string[];
   supportCapabilities: string[];
@@ -102,7 +103,7 @@ export type RunnerDeckEngineDoctrine = {
 };
 
 type DoctrineHint = {
-  cardId: string;
+  cardId: CardDefinitionId;
   cardType?: string;
   roles?: string[];
   planRoles?: string[];
@@ -121,7 +122,14 @@ export function buildRunnerDeckEngineDoctrine(
   snapshot: AiDeckStrategyDeckSnapshot,
 ): RunnerDeckEngineDoctrine | undefined {
   if (snapshot.side !== "runner") return undefined;
+  const definitionIds = new Set<CardDefinitionId>();
   for (const entry of snapshot.cards) {
+    if (definitionIds.has(entry.cardId)) {
+      throw new RangeError(
+        "Duplicate runner deck doctrine definition: " + entry.cardId,
+      );
+    }
+    definitionIds.add(entry.cardId);
     if (!Number.isSafeInteger(entry.quantity) || entry.quantity < 0) {
       throw new RangeError(
         `runner deck engine doctrine quantity must be a non-negative safe integer: ${entry.cardId}:${entry.quantity}`,
@@ -283,7 +291,7 @@ export function buildRunnerDeckEngineDoctrine(
 }
 
 function providerFor(
-  cardId: string,
+  cardId: CardDefinitionId,
   copies: number,
 ): RunnerDoctrineProvider | undefined {
   const hint = HINTS.get(cardId);

@@ -104,8 +104,8 @@ describe("meta 403 installed payment source funds the remaining run", () => {
       );
       expect(decision.fallbackUsed).toBe(false);
       expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_168",
+        rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+        leafExecutorInstanceId: "p9nntvskbhm8fdkamt2qgvyl4p",
       });
     },
   );
@@ -130,12 +130,12 @@ describe("meta 403 installed payment source funds the remaining run", () => {
       );
       const decision = chooseAiAction(capture.input);
       expect(decision.actionId).toBe(
-        withBank ? "runner.continue_run" : "runner.jack_out",
+        withBank ? "r5" : "rd",
       );
       expect(decision.fallbackUsed).toBe(false);
       expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_168",
+        rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+        leafExecutorInstanceId: "p9nntvskbhm8fdkamt2qgvyl4p",
       });
     },
   );
@@ -144,7 +144,7 @@ describe("meta 403 installed payment source funds the remaining run", () => {
     const { input } = checkpoint();
     const rig = input.playerView.own.rig!;
     const ice = input.playerView.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     )!.ice[0]!;
     const budget = runnerRunPathCreditBudgetWithVisiblePools(3, rig, {
       liquidCredits: 3,

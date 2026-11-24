@@ -1,19 +1,23 @@
-import { type AiDecisionInput } from "@netgrid/shared";
-
-import { playfulAiGainValue } from "./choice-option";
-
-type PendingChoice = NonNullable<
-  AiDecisionInput["playerView"]["pendingChoice"]
->;
+import type { ChoiceOption } from "@netgrid/shared";
 
 export function selectedPlayfulAiChoiceOptionId(
-  choice: PendingChoice,
+  selectableOptions: readonly ChoiceOption[],
 ): string | undefined {
-  return (
-    choice.options.slice().sort((left, right) => {
-      const leftValue = playfulAiGainValue(left);
-      const rightValue = playfulAiGainValue(right);
-      return rightValue - leftValue || left.id.localeCompare(right.id);
-    })[0] ?? choice.options[0]
-  )?.id;
+  let best: { id: string; amount: number } | undefined;
+  for (const option of selectableOptions) {
+    const amount = option.value;
+    if (
+      typeof amount !== "number" ||
+      !Number.isSafeInteger(amount) ||
+      amount < 0
+    )
+      return undefined;
+    if (
+      !best ||
+      amount > best.amount ||
+      (amount === best.amount && option.id.localeCompare(best.id) < 0)
+    )
+      best = { id: option.id, amount };
+  }
+  return best?.id;
 }

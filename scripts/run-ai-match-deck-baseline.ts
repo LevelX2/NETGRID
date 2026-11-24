@@ -2,7 +2,12 @@ import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import type { DeckDefinition, DeckPublicMetadata, Side } from "@netgrid/shared";
+import type {
+  CardDefinitionId,
+  DeckDefinition,
+  DeckPublicMetadata,
+  Side,
+} from "@netgrid/shared";
 import {
   buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries,
   runAiSelfplayTraceMining,
@@ -20,7 +25,7 @@ type StoredDeckSnapshot = {
   name: string;
   side: Side;
   identityCardId: string;
-  cards: Array<{ cardId: string; quantity: number }>;
+  cards: Array<{ cardId: CardDefinitionId; quantity: number }>;
   publicMetadata?: DeckPublicMetadata;
   deckHash?: string;
 };
@@ -379,14 +384,6 @@ function combineTraceMiningAggregates(
     scoreWindowMissed: sumAggregates(
       aggregates,
       (aggregate) => aggregate.scoreWindowMissed,
-    ),
-    unsafeScoreChosen: sumAggregates(
-      aggregates,
-      (aggregate) => aggregate.unsafeScoreChosen,
-    ),
-    passiveActionWithScoreLineAvailable: sumAggregates(
-      aggregates,
-      (aggregate) => aggregate.passiveActionWithScoreLineAvailable,
     ),
     actionLimitClusters: mergeNumericRecords(
       aggregates.map((aggregate) => aggregate.actionLimitClusters),

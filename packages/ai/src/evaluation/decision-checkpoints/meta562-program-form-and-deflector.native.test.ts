@@ -84,13 +84,13 @@ it("resolves the original accessed-agenda MU choice with an installed program-fo
   const decision = chooseAiAction(f.memory.input);
   expect(JSON.stringify(f.memory.input)).toBe(before);
   expect(decision).toMatchObject({
-    actionId: "runner.resolve_choice",
+    actionId: "rn",
     fallbackUsed: false,
     timeoutUsed: false,
   });
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
     lane: "engine_window",
-    rootPlanInstanceId: "run:run_146",
+    rootPlanInstanceId: "run:146",
     leafExecutorInstanceId: "rules.window_resolution",
     selectedStep: { stepId: "access.resolve_card:157" },
   });
@@ -114,10 +114,10 @@ it("resolves the original accessed-agenda MU choice with an installed program-fo
     f.memory.input.playerView.own.memoryLimit!,
   );
   expect(after.runner.rig.programs).toContain(
-    "corp_onr_classic_004_theorem-proof_1",
+    "c1x",
   );
   expect(
-    after.cardInstances["corp_onr_classic_004_theorem-proof_1"]
+    after.cardInstances["c1x"]
       ?.installedAsRunnerProgram?.memoryCost,
   ).toBe(2);
 });
@@ -134,7 +134,7 @@ it("keeps three credits when the original Trapdoor has no subsidiary target", ()
   const decision = chooseAiAction(f.trapdoor.input);
   expect(JSON.stringify(f.trapdoor.input)).toBe(before);
   expect(decision).toMatchObject({
-    actionId: "corp.decline_rez",
+    actionId: "c6",
     fallbackUsed: false,
     timeoutUsed: false,
   });
@@ -169,12 +169,12 @@ it("retains the same native Trapdoor rez when an actual subsidiary target exists
   const f = fixture(),
     state = f.trapdoorState;
   const targetIce = state.corp.hq.find(
-    (id) => state.cardInstances[id]?.definitionId === "onr_classic_015_vortex",
+    (id) => state.cardInstances[id]?.definitionId === 19,
   )!;
   expect(targetIce).toBeDefined();
   state.corp.hq = state.corp.hq.filter((id) => id !== targetIce);
   state.corp.servers.push({
-    id: "remote_1",
+    id: "r1",
     kind: "remote",
     label: "Remote 1",
     ice: [targetIce],
@@ -183,7 +183,7 @@ it("retains the same native Trapdoor rez when an actual subsidiary target exists
   state.cardInstances[targetIce]!.zone = {
     side: "corp",
     zone: "serverIce",
-    serverId: "remote_1",
+    serverId: "r1",
   };
   const input = buildAiDecisionInput(state, "corp", {
     difficulty: "hard",

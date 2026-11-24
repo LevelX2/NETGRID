@@ -35,12 +35,12 @@ it("keeps the real cheaper-answer recovery in acquisition instead of installing 
       recoveryMode: "search_known_alternative",
       answerInHand: false,
       recoveryEvidenceCodes: expect.arrayContaining([
-        "coverage_efficiency_deck_alternative:onr_v1_021_dwarf",
+        "coverage_efficiency_deck_alternative:233",
       ]),
       directSearchChoiceBindings: expect.arrayContaining([
         expect.objectContaining({
-          sourceDefinitionId: "onr_v1_099_mantis-fixer-at-large",
-          targetDefinitionId: "onr_v1_021_dwarf",
+          sourceDefinitionId: 311,
+          targetDefinitionId: 233,
         }),
       ]),
     },
@@ -50,7 +50,7 @@ it("keeps the real cheaper-answer recovery in acquisition instead of installing 
       .installActionIds ?? [],
   ).toEqual([]);
   expect(decision.actionId).not.toBe(
-    "runner.install_card.runner_onr_v1_074_worm_2.runner_onr_v1_074_worm_2",
+    "rc.c1rm.c1rm",
   );
   expect(input.legalActions.some((a) => a.actionId === decision.actionId)).toBe(
     true,

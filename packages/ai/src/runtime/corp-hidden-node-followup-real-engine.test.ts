@@ -22,9 +22,9 @@ import { boundCorpPunishTraceChoices } from "../corp/punish/punish-trace-binding
 import { buildAiDecisionInput } from "./ai-decision-input";
 import { withDecisionLocalCorpPunishRouteQuotes } from "../corp/punish/punish-route-quote-input";
 
-const MANHUNT = "onr_proteus_050_manhunt";
-const MARKED = "onr_proteus_005_marked-accounts";
-const BROKER = "onr_v1_154_broker";
+const MANHUNT = 108;
+const MARKED = 63;
+const BROKER = 366;
 const corpDeck: DeckDefinition = {
   ...DEMO_DECKS.demo_corp_001,
   id: "hidden-node-followup",
@@ -63,7 +63,7 @@ function fixture() {
     runnerDeck,
     traceRulesProfile: "modern_open",
   });
-  state = act(state, "corp", "corp.mandatory_draw");
+  state = act(state, "corp", "ce");
   RealEngineFixtureBuilder.forState(state)
     .withCorpHqSize(0)
     .withCorpCredits(12)
@@ -121,7 +121,7 @@ it("keeps an all-agenda overflow concealed through a Score-owned last-click inst
   const after = act(state, "corp", decision.actionId!);
   expect(after.corp.hq).toHaveLength(5);
   expect(after.corp.clicks).toBe(0);
-  const ended = act(after, "corp", "corp.end_turn");
+  const ended = act(after, "corp", "c9");
   expect(ended.activeSide).toBe("runner");
   expect(ended.pendingChoice).toBeUndefined();
   expect(hashState(act(state, "corp", decision.actionId!))).toBe(
@@ -171,7 +171,7 @@ it("prices Manhunt, binds its zero-credit bid and then trashes a visible resourc
     stateVersion: traceInput.playerView.stateVersion,
     timingPoint: traceInput.playerView.timingPoint,
     windowKind: "trace" as const,
-    windowId: traceInput.playerView.trace!.traceId,
+    windowId: String(traceInput.playerView.trace!.traceId),
   };
   for (const invalid of ["source", "version", "option"] as const) {
     const altered = structuredClone(traceInput);

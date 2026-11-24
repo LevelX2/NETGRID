@@ -1,3 +1,7 @@
+import { isRemoteServerId } from "@netgrid/shared";
+import { sortedUnique } from "../../runtime/collection";
+import type { CardDefinitionId } from "@netgrid/shared";
+import { visibleRunnerThreat } from "../visible-runner-threat";
 import { runnerDamageThreatAssessment } from "../../runner-damage-threat-assessment";
 import { visibleRunnerPreparationIncomePerClick } from "@netgrid/engine";
 import type {
@@ -79,7 +83,6 @@ import {
   runnerHandTextHasSentryCoverageSignal,
   runnerHandTextHasTemporaryCounterSignal,
   runnerHandTextHasTraceCoverageSignal,
-  runnerHandTextHasVisibleThreatSignal,
   runnerHandTextHasWallCoverageSignal,
   runnerHandTextTokens,
   runnerHandTokensIncludeAny,
@@ -376,7 +379,7 @@ export function persistentDeckReplacementAssessment(params: {
     conflicting
       .map(({ card }) => card.definitionId)
       .filter(
-        (definitionId): definitionId is string => definitionId !== undefined,
+        (definitionId) => definitionId !== undefined,
       ),
   );
   const unassessedDefinitionIds = sortedUnique(
@@ -384,7 +387,7 @@ export function persistentDeckReplacementAssessment(params: {
       .filter(({ profile }) => profile.functionalCoverage.length === 0)
       .map(({ card }) => card.definitionId)
       .filter(
-        (definitionId): definitionId is string => definitionId !== undefined,
+        (definitionId) => definitionId !== undefined,
       ),
   );
   let status: RunnerPersistentDeckReplacementAssessment["status"];
@@ -873,6 +876,7 @@ export function breakerCoverageOverlaps(
 ): boolean {
   const leftCoverage = new Set(left);
   const rightCoverage = new Set(right);
+  if (left.length === 0 || right.length === 0) return false;
   if (leftCoverage.has("universal") || rightCoverage.has("universal")) {
     return true;
   }
@@ -980,6 +984,7 @@ export function concreteBreakerCoverageOverlaps(
   left: readonly BreakerCoverageKind[],
   right: readonly BreakerCoverageKind[],
 ): boolean {
+  if (left.length === 0 || right.length === 0) return false;
   if (left.includes("universal") || right.includes("universal")) return true;
   const concrete = new Set<BreakerCoverageKind>([
     "wall",
@@ -1859,7 +1864,7 @@ export function runnerVisibleRemoteScoreThreat(
 ): boolean {
   return input.playerView.servers.some(
     (server) =>
-      server.id.startsWith("remote_") &&
+      isRemoteServerId(server.id) &&
       server.root.some(
         (card) =>
           card.known &&
@@ -1889,9 +1894,7 @@ export function actionMatchesCard(
   const persistentDevelopment = persistentDevelopmentActionProjection(action);
   if (persistentDevelopment) {
     if (!persistentDevelopment.developsGripCard) return false;
-    return persistentDevelopment.targetCardId !== undefined
-      ? persistentDevelopment.targetCardId === card.instanceId
-      : persistentDevelopment.targetDefinitionId === card.definitionId;
+    return persistentDevelopment.targetCardId === card.instanceId;
   }
   if (
     action.type !== "install_card" &&
@@ -1903,13 +1906,14 @@ export function actionMatchesCard(
   }
   const payload = action.payload ?? {};
   const instanceIds = [
-    action.source !== "basic_action" ? action.source : undefined,
+    action.source !== "basic_action" && action.source !== "game_rule"
+      ? action.source
+      : undefined,
     payload.cardId,
     payload.sourceCardId,
   ].filter((value): value is string => typeof value === "string");
-  if (instanceIds.length > 0) {
-    return instanceIds.includes(card.instanceId);
-  }
+  if (instanceIds.length > 0) return instanceIds.includes(card.instanceId);
+  if (card.definitionId === undefined) return false;
   return (
     payload.sourceDefinitionId === card.definitionId ||
     payload.cardDefinitionId === card.definitionId ||
@@ -1960,7 +1964,7 @@ type RuntimeCardInfo = {
   >;
 };
 
-export function runtimeDefinition(cardId: string): RuntimeCardInfo | undefined {
+export function runtimeDefinition(cardId: CardDefinitionId): RuntimeCardInfo | undefined {
   return RUNTIME_CARDS[cardId] as RuntimeCardInfo | undefined;
 }
 
@@ -2121,81 +2125,6 @@ export function intentHasPressure(
   return (intent?.pressureVectors.length ?? 0) > 0;
 }
 
-export function visibleRunnerThreat(input: AiDecisionInput): boolean {
-  if ((input.playerView.own.tags ?? 0) > 0) return true;
-  return input.playerView.servers.some((server) =>
-    [...server.root, ...server.ice].some(visibleCardShowsRunnerThreat),
-  );
-}
-
-export function visibleRunnerTraceThreat(input: AiDecisionInput): boolean {
-  return input.playerView.servers.some((server) =>
-    [...server.root, ...server.ice].some(visibleCardShowsTraceThreat),
-  );
-}
-
-export function visibleRunnerTraceThreatOnServer(
-  input: AiDecisionInput,
-  serverId: string,
-): boolean {
-  const server = input.playerView.servers.find(
-    (entry) => entry.id === serverId,
-  );
-  return (
-    server !== undefined &&
-    [...server.root, ...server.ice].some(visibleCardShowsTraceThreat)
-  );
-}
-
-export function visibleRunnerTagThreat(input: AiDecisionInput): boolean {
-  return input.playerView.servers.some((server) =>
-    [...server.root, ...server.ice].some(
-      (card) =>
-        card.known === true &&
-        card.rezzed === true &&
-        (card.effectiveRunQuote?.subroutines.some(
-          (subroutine) =>
-            subroutine.type === "give_runner_tag" ||
-            (subroutine.type === "initiate_trace" &&
-              subroutine.traceSuccessEffect !== undefined &&
-              [
-                "add_tag",
-                "add_tags_by_trace_margin_over_runner_link",
-                "add_tag_and_counter",
-                "trash_runner_resource_and_add_tag",
-              ].includes(subroutine.traceSuccessEffect.type)),
-        ) === true ||
-          (card.definitionId !== undefined &&
-            AI_HINTS_BY_CARD.get(card.definitionId)?.functionSignals?.includes(
-              "tag.source",
-            ) === true)),
-    ),
-  );
-}
-
-function visibleCardShowsTraceThreat(card: VisibleCard): boolean {
-  return (
-    card.known === true &&
-    card.rezzed === true &&
-    (card.effectiveRunQuote?.subroutines.some(
-      (subroutine) => subroutine.type === "initiate_trace",
-    ) === true ||
-      (card.definitionId !== undefined &&
-        AI_HINTS_BY_CARD.get(card.definitionId)?.functionSignals?.includes(
-          "trace.source",
-        ) === true))
-  );
-}
-
-export function visibleCardShowsRunnerThreat(card: VisibleCard): boolean {
-  if (!card.known) return false;
-  return runnerHandTextHasVisibleThreatSignal(
-    [card.title, card.rulesText, card.definitionId, ...(card.subtypes ?? [])]
-      .filter((entry): entry is string => typeof entry === "string")
-      .join(" "),
-  );
-}
-
 export function persistentInstallRouteBlocked(
   evaluation: RunnerPersistentInstallEvaluation,
 ): boolean {
@@ -2285,6 +2214,4 @@ export function clampPriority(value: number): number {
   return Math.max(0, Math.min(1000, value));
 }
 
-export function sortedUnique(values: readonly string[]): string[] {
-  return [...new Set(values)].sort();
-}
+export { sortedUnique };

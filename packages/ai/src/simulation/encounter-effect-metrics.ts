@@ -37,9 +37,17 @@ export function summarizeEncounterEffectMetrics(
   for (const summary of summaries) {
     for (const entry of summary.actionSequence) {
       if (entry.side !== "runner") continue;
+      const hasFutureRunEffect = hasEvidenceFlag(
+        entry,
+        "run_remainder_subroutine_effect:true",
+      );
+      const hasNoRemainingIce = hasEvidenceFlag(
+        entry,
+        "unbroken_run_effect_ignored_because_no_remaining_ice:true",
+      );
       if (hasEvidenceFlag(entry, "run_remainder_effect_must_break:true"))
         unbrokenRunEffectChangedBreakDecision += 1;
-      if (hasEvidenceFlag(entry, "run_remainder_subroutine_effect:true")) {
+      if (hasFutureRunEffect) {
         futureEffectSubroutinesEncountered += 1;
         if (
           hasEvidenceFlag(
@@ -50,46 +58,25 @@ export function summarizeEncounterEffectMetrics(
           futureEffectSubroutinesWithRemainingIce += 1;
           unbrokenRunEffectAppliedToRemainingPath += 1;
         }
-        if (
-          hasEvidenceFlag(
-            entry,
-            "unbroken_run_effect_ignored_because_no_remaining_ice:true",
-          )
-        ) {
+        if (hasNoRemainingIce) {
           futureEffectSubroutinesWithoutRemainingIce += 1;
           unbrokenRunEffectIgnoredBecauseNoRemainingIce += 1;
         }
       }
-      if (
-        entry.actionType === "break_subroutine" &&
-        hasEvidenceFlag(entry, "run_remainder_subroutine_effect:true")
-      )
+      if (entry.actionType === "break_subroutine" && hasFutureRunEffect)
         futureEffectBreaksTaken += 1;
-      if (
-        entry.actionType === "continue_run" &&
-        hasEvidenceFlag(
-          entry,
-          "unbroken_run_effect_ignored_because_no_remaining_ice:true",
-        )
-      )
+      if (entry.actionType === "continue_run" && hasNoRemainingIce)
         futureEffectBreaksSkippedNoRemainingIce += 1;
-      if (
-        entry.actionType === "break_subroutine" &&
-        hasEvidenceFlag(
-          entry,
-          "unbroken_run_effect_ignored_because_no_remaining_ice:true",
-        )
-      )
+      if (entry.actionType === "break_subroutine" && hasNoRemainingIce)
         futureEffectBreaksTakenWithoutRemainingIce += 1;
-      if (
-        entry.actionType === "pump_breaker" &&
-        hasEvidenceFlag(entry, "run_remainder_subroutine_effect:true")
-      )
+      if (entry.actionType === "pump_breaker" && hasFutureRunEffect)
         pumpActionsBeforeFutureEffectBreak += 1;
-      if (hasEvidenceFlag(entry, "pump_cannot_lead_to_useful_break:true"))
-        pumpActionsThatCouldNotLeadToBreak += 1;
-      if (hasEvidenceFlag(entry, "pump_would_destroy_access_reserve:true"))
-        pumpActionsThatDestroyedAccessReserve += 1;
+      if (entry.actionType === "pump_breaker") {
+        if (hasEvidenceFlag(entry, "pump_cannot_lead_to_useful_break:true"))
+          pumpActionsThatCouldNotLeadToBreak += 1;
+        if (hasEvidenceFlag(entry, "pump_would_destroy_access_reserve:true"))
+          pumpActionsThatDestroyedAccessReserve += 1;
+      }
       if (
         hasEvidenceFlag(entry, "break_skipped_to_preserve_trash_reserve:true")
       )

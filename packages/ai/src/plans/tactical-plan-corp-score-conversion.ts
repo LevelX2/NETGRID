@@ -1,6 +1,9 @@
+import { isRemoteServerId } from "@netgrid/shared";
+import { actionClickCost, actionCreditCost } from "../runtime/action-cost";
+import { requireVisibleCardDefinition } from "../runtime/visible-agenda-facts";
 import { quoteAgendaDefinitionScorePoints } from "@netgrid/engine";
 import { corpInstalledAdvancementPreparations } from "./corp-installed-advancement-preparation";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import {
   type AiDecisionInput,
@@ -204,7 +207,7 @@ function conversionPathForDesiredTarget(
   recoveryPreparation?: CorpScoreRecoveryPreparation,
 ): CandidatePath | undefined {
   const deficit = Math.max(0, desiredCounters - initialCounters);
-  if (deficit === 0) {
+  if (deficit === 0 && !target.installAction) {
     if (recoveryPreparation) return undefined;
     const scoreAction = scoreActionForCard(input, target.card.instanceId);
     if (!scoreAction) return undefined;
@@ -426,11 +429,12 @@ function replacementRouteDestroysPlanProgress(
       .map((step) => step.sourceCardId)
       .filter((cardId): cardId is string => cardId !== undefined),
   );
-  if (server.root.some((card) => laterSourceIds.has(card.instanceId))) {
+  const replacedAssets = server.root.filter((card) => card.type === "asset");
+  if (replacedAssets.some((card) => laterSourceIds.has(card.instanceId))) {
     return true;
   }
 
-  const replacesProductiveCounterBank = server.root.some((card) => {
+  const replacesProductiveCounterBank = replacedAssets.some((card) => {
     const quote = readCorpCounterBankPreparationQuote(
       input,
       card,
@@ -498,7 +502,9 @@ function visitCapabilityCombinations(params: {
   visitCapabilityCombinations({ ...params, index: params.index + 1 });
 
   const capability = params.capabilities[params.index]!;
-  const alreadyUsed = params.usedActionIds.has(capability.capabilityId);
+  // Alternative targets of the same current offer share its execution.
+  const executionKey = capability.action?.actionId ?? capability.capabilityId;
+  const alreadyUsed = params.usedActionIds.has(executionKey);
   if (alreadyUsed && !capability.repeatable) return;
   const clickCost = capability.clickCost;
   const creditCost =
@@ -524,7 +530,7 @@ function visitCapabilityCombinations(params: {
       (nextSourceCounters[capability.sourceCardId] ?? 0) - appliedAmount;
   }
   const usedActionIds = new Set(params.usedActionIds);
-  usedActionIds.add(capability.capabilityId);
+  usedActionIds.add(executionKey);
   const offTargetSourceIds =
     capability.kind === "place_advancement" &&
     (capability.offTargetAdvancementAmount ?? 0) > 0
@@ -593,7 +599,7 @@ function visitCapabilityCombinations(params: {
 
 function scoreTargets(input: AiDecisionInput): ScoreTarget[] {
   const installed = input.playerView.servers
-    .filter((server) => server.id.startsWith("remote_"))
+    .filter((server) => isRemoteServerId(server.id))
     .flatMap((server) =>
       server.root
         .filter(isVisibleAgenda)
@@ -971,10 +977,9 @@ function routedActionCapacitySets(
         const capacity = capacityByActionId.get(step.actionId);
         return capacity ? [capacity] : [];
       });
-      const signature = routed
-        .map((capacity) => capacity.action.actionId)
-        .sort()
-        .join("+");
+      const signature = JSON.stringify(
+        routed.map((capacity) => capacity.action.actionId),
+      );
       if (!sets.has(signature)) sets.set(signature, routed);
     }
   }
@@ -998,13 +1003,7 @@ function applyActionCapacitySet(
   let credits = input.playerView.own.credits;
   const sourceCounters = { ...sourceCounterBudget };
   const steps: CorpScoreConversionStep[] = [];
-  for (const capacity of [...capacities].sort(
-    (left, right) =>
-      right.gain -
-        right.preExistingActionCost -
-        (left.gain - left.preExistingActionCost) ||
-      left.action.actionId.localeCompare(right.action.actionId),
-  )) {
+  for (const capacity of capacities) {
     const clickCost = actionCost(capacity.action, "clicks");
     const creditCost = actionCost(capacity.action, "credits");
     if (capacity.preExistingActionCost > clicks || creditCost > credits)
@@ -1199,7 +1198,7 @@ function projectedBonusAgendaScore(
   advancementCounters: number,
 ) {
   const quote = quoteAgendaDefinitionScorePoints(
-    card.definitionId ?? "",
+    requireVisibleCardDefinition(input, card, "agenda").id,
     requirement,
     advancementCounters,
     Math.max(
@@ -1224,7 +1223,7 @@ function visibleAgendaPoints(
   card: VisibleCard,
 ): number {
   const definition = card.definitionId
-    ? CARD_DEFINITIONS_BY_ID[card.definitionId]
+    ? planningCardFactsByDefinitionId(card.definitionId)
     : undefined;
   const agendaPoints = card.agendaPoints ?? definition?.agendaPoints;
   if (typeof agendaPoints !== "number" || !Number.isFinite(agendaPoints))
@@ -1385,7 +1384,7 @@ function advancementRequirement(card: VisibleCard): number | undefined {
   }
   return card.definitionId
     ? positiveInteger(
-        CARD_DEFINITIONS_BY_ID[card.definitionId]?.advancementRequirement,
+        planningCardFactsByDefinitionId(card.definitionId)?.advancementRequirement,
       )
     : undefined;
 }
@@ -1395,7 +1394,7 @@ function isVisibleAgenda(card: VisibleCard): boolean {
     card.known !== false &&
     (card.type === "agenda" ||
       (card.definitionId
-        ? CARD_DEFINITIONS_BY_ID[card.definitionId]?.type === "agenda"
+        ? planningCardFactsByDefinitionId(card.definitionId)?.type === "agenda"
         : false))
   );
 }
@@ -1410,10 +1409,7 @@ function actionCardId(action: LegalAction): string | undefined {
 }
 
 function actionCost(action: LegalAction, key: "clicks" | "credits"): number {
-  return (action.costs ?? []).reduce(
-    (sum, cost) => sum + Math.max(0, Number(cost[key] ?? 0)),
-    0,
-  );
+  return key === "clicks" ? actionClickCost(action) : actionCreditCost(action);
 }
 
 function visibleCardCost(card: VisibleCard): number | undefined {

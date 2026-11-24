@@ -2,7 +2,12 @@ import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, relative, resolve, join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import type { DeckDefinition, DeckPublicMetadata, Side } from "@netgrid/shared";
+import type {
+  CardDefinitionId,
+  DeckDefinition,
+  DeckPublicMetadata,
+  Side,
+} from "@netgrid/shared";
 import {
   runAiSelfplayTraceMining,
   summarizeMatchProgressionMetrics,
@@ -20,7 +25,7 @@ type StoredDeckSnapshot = {
   name: string;
   side: Side;
   identityCardId: string;
-  cards: Array<{ cardId: string; quantity: number }>;
+  cards: Array<{ cardId: CardDefinitionId; quantity: number }>;
   publicMetadata?: DeckPublicMetadata;
   deckHash?: string;
 };
@@ -367,8 +372,6 @@ function legScore(leg: LegOutput | undefined) {
     corpAgendaScores: leg.traceMiningAggregate.corpAgendaScores,
     runnerAgendaSteals: leg.traceMiningAggregate.runnerAgendaSteals,
     corpFlatlines: leg.traceMiningAggregate.corpFlatlines,
-    passiveActionWithScoreLineAvailable:
-      leg.traceMiningAggregate.passiveActionWithScoreLineAvailable,
   };
 }
 
@@ -552,14 +555,6 @@ function combineTraceMiningAggregates(
     scoreWindowMissed: sumAggregates(
       aggregates,
       (aggregate) => aggregate.scoreWindowMissed,
-    ),
-    unsafeScoreChosen: sumAggregates(
-      aggregates,
-      (aggregate) => aggregate.unsafeScoreChosen,
-    ),
-    passiveActionWithScoreLineAvailable: sumAggregates(
-      aggregates,
-      (aggregate) => aggregate.passiveActionWithScoreLineAvailable,
     ),
     actionLimitClusters: mergeNumericRecords(
       aggregates.map((aggregate) => aggregate.actionLimitClusters),

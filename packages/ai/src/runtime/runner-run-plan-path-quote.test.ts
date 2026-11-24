@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type {
   AiDecisionInput,
@@ -7,12 +8,84 @@ import type {
 import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
 
 import { quoteRunnerRunPath } from "./runner-run-plan-path-quote";
-import type { RunnerRunPlan } from "./runner-run-plan-types";
+import type { RunnerRunPlan } from "./runner-run-plan-snapshot";
 
 describe("runner run plan path quote", () => {
+  it("does not reuse a broken subroutine in the shared remaining path", () => {
+    const input = runnerEncounterInput({
+      iceDefinitionId: 464,
+      iceTitle: "Keeper",
+      iceStrength: 4,
+      rig: [],
+      subroutines: [
+        { id: "already-broken", type: "end_the_run" },
+        { id: "still-open", type: "corp_gain_credit", amount: 1 },
+      ],
+      legalActions: [
+        continueAction({
+          encounterWillEndRun: false,
+          unbrokenSubroutineCount: 2,
+        }),
+      ],
+    });
+    input.legalActions[0]!.encounterSubroutineIds = ["still-open"];
+    input.legalActions[0]!.payload!.unbrokenSubroutineCount = 1;
+
+    const quote = quoteRunnerRunPath(input, runPlan());
+    expect(quote.canReachAccess).toBe(true);
+    expect(quote.iceQuotes[0]!.subroutineQuotes).toMatchObject([
+      { index: 0, broken: true, threatClass: "irrelevant_to_current_plan" },
+      { index: 1, broken: false },
+    ]);
+  });
+
+  it("prices only the later ICE when an encounter choice is open", () => {
+    const input = runnerEncounterInput({
+      iceDefinitionId: 458,
+      iceTitle: "Fragmentation Storm",
+      iceStrength: 4,
+      futureIce: [
+        visibleIce({
+          instanceId: "later-ice",
+          iceDefinitionId: 473,
+          iceTitle: "Quandary",
+          iceStrength: 2,
+        }),
+      ],
+      subroutines: [fragmentationStormTraceSubroutine()],
+      legalActions: [],
+    });
+
+    const quote = quoteRunnerRunPath(input, runPlan(), "after_current_encounter");
+    expect(quote.iceQuotes.map(({ iceRef }) => iceRef.instanceId)).toEqual([
+      "later-ice",
+    ]);
+  });
+
+  it("does not mix another target with the active encounter", () => {
+    const input = runnerEncounterInput({
+      iceDefinitionId: 464,
+      iceTitle: "Keeper",
+      iceStrength: 4,
+      legalActions: [
+        continueAction({
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 1,
+        }),
+      ],
+    });
+    expect(
+      quoteRunnerRunPath(input, { ...runPlan(), targetServer: { id: "hq" } }),
+    ).toMatchObject({
+      quoteStatus: "unknown",
+      canReachAccess: false,
+      cannotReachReason: "active_run_target_mismatch",
+      iceQuotes: [],
+    });
+  });
   it("keeps temporary run money out of the active Trace route", () => {
     const input = runnerEncounterInput({
-      iceDefinitionId: "onr_v1_246_fragmentation-storm",
+      iceDefinitionId: 458,
       iceTitle: "Fragmentation Storm",
       iceStrength: 4,
       credits: 0,
@@ -27,7 +100,7 @@ describe("runner run plan path quote", () => {
       ],
     });
     input.playerView.run!.runnerRunTemporaryCredits = {
-      sourceDefinitionId: "onr_v1_098_lucidrine-booster-drug",
+      sourceDefinitionId: 310,
       remaining: 9,
       returnUnusedAtRunEnd: true,
     };
@@ -40,7 +113,7 @@ describe("runner run plan path quote", () => {
 
   it("uses temporary run money for the actual pump and break sequence", () => {
     const input = runnerEncounterInput({
-      iceDefinitionId: "onr_v1_252_keeper",
+      iceDefinitionId: 464,
       iceTitle: "Keeper",
       iceStrength: 4,
       credits: 0,
@@ -53,7 +126,7 @@ describe("runner run plan path quote", () => {
       ],
     });
     input.playerView.run!.runnerRunTemporaryCredits = {
-      sourceDefinitionId: "onr_v1_098_lucidrine-booster-drug",
+      sourceDefinitionId: 310,
       remaining: 9,
       returnUnusedAtRunEnd: true,
     };
@@ -69,7 +142,7 @@ describe("runner run plan path quote", () => {
 
   it("uses the guaranteed visible Trace route when it is cheaper than breaking", () => {
     const input = runnerEncounterInput({
-      iceDefinitionId: "onr_v1_246_fragmentation-storm",
+      iceDefinitionId: 458,
       iceTitle: "Fragmentation Storm",
       iceStrength: 4,
       credits: 6,
@@ -106,7 +179,7 @@ describe("runner run plan path quote", () => {
 
   it("does not claim the visible Trace route is guaranteed below Corp max", () => {
     const input = runnerEncounterInput({
-      iceDefinitionId: "onr_v1_246_fragmentation-storm",
+      iceDefinitionId: 458,
       iceTitle: "Fragmentation Storm",
       iceStrength: 4,
       credits: 4,
@@ -137,7 +210,7 @@ describe("runner run plan path quote", () => {
   it("uses visible public ICE trace caps and encounter-only trace credits", () => {
     const cappedTrace = quoteRunnerRunPath(
       runnerEncounterInput({
-        iceDefinitionId: "onr_proteus_024_homing-missile",
+        iceDefinitionId: syntheticCardDefinitionId("onr_proteus_024_homing-missile"),
         iceTitle: "Homing Missile",
         iceStrength: 5,
         credits: 15,
@@ -165,7 +238,7 @@ describe("runner run plan path quote", () => {
     );
     const temporaryPoolTrace = quoteRunnerRunPath(
       runnerEncounterInput({
-        iceDefinitionId: "onr_v1_290_pocket-v-r",
+        iceDefinitionId: syntheticCardDefinitionId("onr_v1_290_pocket-v-r"),
         iceTitle: "Pocket V.R.",
         iceStrength: 4,
         credits: 8,
@@ -199,7 +272,7 @@ describe("runner run plan path quote", () => {
   it("keeps special visible payment choices distinct from unavoidable threats", () => {
     const puzzle = quoteRunnerRunPath(
       runnerEncounterInput({
-        iceDefinitionId: "onr_proteus_030_puzzle",
+        iceDefinitionId: syntheticCardDefinitionId("onr_proteus_030_puzzle"),
         iceTitle: "Puzzle",
         iceStrength: 3,
         rig: [],
@@ -220,7 +293,7 @@ describe("runner run plan path quote", () => {
     );
     const washedUp = quoteRunnerRunPath(
       runnerEncounterInput({
-        iceDefinitionId: "onr_proteus_039_washed-up-solo-construct",
+        iceDefinitionId: syntheticCardDefinitionId("onr_proteus_039_washed-up-solo-construct"),
         iceTitle: "Washed-Up Solo Construct",
         iceStrength: 2,
         credits: 1,
@@ -255,7 +328,7 @@ describe("runner run plan path quote", () => {
 
   it("prefers a cheaper legal break over the guaranteed Trace bid", () => {
     const input = runnerEncounterInput({
-      iceDefinitionId: "onr_v1_246_fragmentation-storm",
+      iceDefinitionId: 458,
       iceTitle: "Fragmentation Storm",
       iceStrength: 4,
       credits: 6,
@@ -285,7 +358,7 @@ describe("runner run plan path quote", () => {
 
   it("quotes direct break as the current access-preserving sequence", () => {
     const input = runnerEncounterInput({
-      iceDefinitionId: "onr_v1_261_quandary",
+      iceDefinitionId: 473,
       iceTitle: "Quandary",
       iceStrength: 2,
       breakerStrength: 2,
@@ -311,7 +384,7 @@ describe("runner run plan path quote", () => {
 
   it("quotes a direct break for visible non-ETR survival damage", () => {
     const input = runnerEncounterInput({
-      iceDefinitionId: "onr_v1_261_quandary",
+      iceDefinitionId: 473,
       iceTitle: "Quandary",
       iceStrength: 2,
       breakerStrength: 2,
@@ -343,7 +416,7 @@ describe("runner run plan path quote", () => {
 
   it("allows a program-trash threat when the only program self-trashes at run end", () => {
     const input = runnerEncounterInput({
-      iceDefinitionId: "onr_v1_276_viral-15",
+      iceDefinitionId: 488,
       iceTitle: "Viral 15",
       iceStrength: 3,
       breaker: rentICon(3),
@@ -378,14 +451,14 @@ describe("runner run plan path quote", () => {
 
   it("protects a run-end self-trash breaker when later known ICE needs it", () => {
     const input = runnerEncounterInput({
-      iceDefinitionId: "onr_v1_276_viral-15",
+      iceDefinitionId: 488,
       iceTitle: "Viral 15",
       iceStrength: 3,
       breaker: rentICon(3),
       futureIce: [
         visibleIce({
           instanceId: "future-quandary",
-          iceDefinitionId: "onr_v1_261_quandary",
+          iceDefinitionId: 473,
           iceTitle: "Future Quandary",
           iceStrength: 2,
         }),
@@ -418,7 +491,7 @@ describe("runner run plan path quote", () => {
 
   it("prefers same-cost multi-break when it clears damage and ETR together", () => {
     const input = runnerEncounterInput({
-      iceDefinitionId: "onr_v1_269_shotgun-wire",
+      iceDefinitionId: 481,
       iceTitle: "Shotgun Wire",
       iceStrength: 5,
       breakerStrength: 7,
@@ -437,17 +510,17 @@ describe("runner run plan path quote", () => {
         breakAction({
           actionId: "pile-driver-break-damage",
           costs: [{ credits: 3 }],
-          subroutineIndexes: "0",
+          subroutineIndexes: [0],
         }),
         breakAction({
           actionId: "pile-driver-break-both",
           costs: [{ credits: 3 }],
-          subroutineIndexes: "0,1",
+          subroutineIndexes: [0,1],
         }),
         breakAction({
           actionId: "pile-driver-break-etr",
           costs: [{ credits: 3 }],
-          subroutineIndexes: "1",
+          subroutineIndexes: [1],
         }),
         continueAction({
           encounterWillEndRun: true,
@@ -466,9 +539,44 @@ describe("runner run plan path quote", () => {
     expect(sequence?.evidence).toContain("required_subroutine_indexes:0,1");
   });
 
+  it("does not use a break action that itself ends the run to reach access", () => {
+    const input = runnerEncounterInput({
+      iceDefinitionId: 473,
+      iceTitle: "Quandary",
+      iceStrength: 2,
+      breakerStrength: 2,
+      subroutines: [{ id: "q-etr", type: "end_the_run" }],
+      legalActions: [
+        {
+          ...breakAction({ actionId: "break-and-end", costs: [] }),
+          payload: {
+            iceId: "ice-1",
+            subroutineIndex: 0,
+            breakerEndsRunAfterBreak: true,
+          },
+        },
+        breakAction({
+          actionId: "paid-break",
+          costs: [{ credits: 2 }],
+          subroutineIndex: 0,
+        }),
+        continueAction({
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 1,
+        }),
+      ],
+    });
+
+    const quote = quoteRunnerRunPath(input, runPlan());
+    const sequence = quote.iceQuotes[0]?.cheapestAccessPreservingSequence;
+    expect(sequence?.steps.map(({ actionId }) => actionId)).toEqual([
+      "paid-break",
+    ]);
+  });
+
   it("targets the required ETR subroutine instead of a cheaper harmless break", () => {
     const input = runnerEncounterInput({
-      iceDefinitionId: "onr_v1_261_quandary",
+      iceDefinitionId: 473,
       iceTitle: "Quandary",
       iceStrength: 2,
       breakerStrength: 2,
@@ -504,7 +612,7 @@ describe("runner run plan path quote", () => {
 
   it("quotes Codecracker pumping before a future break against Quandary generically", () => {
     const input = runnerEncounterInput({
-      iceDefinitionId: "onr_v1_261_quandary",
+      iceDefinitionId: 473,
       iceTitle: "Quandary",
       iceStrength: 2,
       legalActions: [
@@ -533,7 +641,7 @@ describe("runner run plan path quote", () => {
 
   it("quotes Codecracker pumping before a future break against Keeper generically", () => {
     const input = runnerEncounterInput({
-      iceDefinitionId: "onr_v1_252_keeper",
+      iceDefinitionId: 464,
       iceTitle: "Keeper",
       iceStrength: 4,
       legalActions: [
@@ -561,7 +669,7 @@ describe("runner run plan path quote", () => {
 
   it("uses visible non-noisy recurring credits as non-cash pump budget against Keeper", () => {
     const input = runnerEncounterInput({
-      iceDefinitionId: "onr_v1_252_keeper",
+      iceDefinitionId: 464,
       iceTitle: "Keeper",
       iceStrength: 4,
       credits: 2,
@@ -595,7 +703,7 @@ describe("runner run plan path quote", () => {
 
   it("uses bad-publicity run credits before cash in the remaining path quote", () => {
     const input = runnerEncounterInput({
-      iceDefinitionId: "onr_v1_252_keeper",
+      iceDefinitionId: 464,
       iceTitle: "Keeper",
       iceStrength: 4,
       credits: 0,
@@ -622,12 +730,12 @@ describe("runner run plan path quote", () => {
   it("does not re-quote passed outer ICE while breaking the inner ICE", () => {
     const passedKeeper = visibleIce({
       instanceId: "passed-keeper",
-      iceDefinitionId: "onr_v1_252_keeper",
+      iceDefinitionId: 464,
       iceTitle: "Keeper",
       iceStrength: 4,
     });
     const input = runnerEncounterInput({
-      iceDefinitionId: "onr_v1_261_quandary",
+      iceDefinitionId: 473,
       iceTitle: "Quandary",
       iceStrength: 2,
       credits: 2,
@@ -659,7 +767,7 @@ describe("runner run plan path quote", () => {
 
   it("does not spend past a probe run's credit-loss budget after ICE is revealed", () => {
     const input = runnerEncounterInput({
-      iceDefinitionId: "onr_v1_261_quandary",
+      iceDefinitionId: 473,
       iceTitle: "Quandary",
       iceStrength: 2,
       credits: 2,
@@ -696,14 +804,14 @@ describe("runner run plan path quote", () => {
 
   it("requires breaking hard future-path modifiers before visible future ICE", () => {
     const input = runnerEncounterInput({
-      iceDefinitionId: "onr_v1_261_quandary",
+      iceDefinitionId: 473,
       iceTitle: "Quandary",
       iceStrength: 2,
       breakerStrength: 2,
       futureIce: [
         visibleIce({
           instanceId: "future-ice-1",
-          iceDefinitionId: "onr_v1_261_quandary",
+          iceDefinitionId: 473,
           iceTitle: "Future Quandary",
           iceStrength: 2,
         }),
@@ -748,7 +856,7 @@ describe("runner run plan path quote", () => {
 
   it("does not re-quote passed ICE after the active run reaches the server", () => {
     const input = runnerServerMovementInput({
-      iceDefinitionId: "onr_v1_252_keeper",
+      iceDefinitionId: 464,
       iceTitle: "Keeper",
       iceStrength: 4,
       credits: 0,
@@ -766,7 +874,7 @@ describe("runner run plan path quote", () => {
 
   it("does not quote a pump-break sequence when the breaker cannot cover the ICE", () => {
     const input = runnerEncounterInput({
-      iceDefinitionId: "onr_v1_253_laser-wire",
+      iceDefinitionId: 465,
       iceTitle: "Laser Wire",
       iceStrength: 2,
       legalActions: [
@@ -789,7 +897,7 @@ describe("runner run plan path quote", () => {
 });
 
 function runnerEncounterInput(params: {
-  iceDefinitionId: string;
+  iceDefinitionId: number;
   iceTitle: string;
   iceStrength: number;
   credits?: number;
@@ -811,6 +919,7 @@ function runnerEncounterInput(params: {
     side: "runner",
     playerView: {
       stateVersion: 86,
+      traceRulesProfile: "modern_open",
       side: "runner",
       activeSide: "runner",
       timingPoint: "run.encounter",
@@ -829,7 +938,7 @@ function runnerEncounterInput(params: {
             instanceId: "codecracker-1",
             known: true,
             title: "Codecracker",
-            definitionId: "onr_v1_014_codecracker",
+            definitionId: 226,
             type: "program",
             subtypes: ["icebreaker"],
             strength: params.breakerStrength ?? 0,
@@ -879,7 +988,7 @@ function runnerEncounterInput(params: {
       expect(action.payload?.unbrokenSubroutineCount).toBe(ids.length);
       return {
         ...action,
-        payload: { ...action.payload, encounterSubroutineIds: ids.join(",") },
+        payload: {...action.payload}, encounterSubroutineIds: ids,
       };
     }),
     difficulty: "normal",
@@ -891,7 +1000,7 @@ function runnerEncounterInput(params: {
 }
 
 function runnerServerMovementInput(params: {
-  iceDefinitionId: string;
+  iceDefinitionId: number;
   iceTitle: string;
   iceStrength: number;
   credits: number;
@@ -919,7 +1028,7 @@ function runnerServerMovementInput(params: {
             instanceId: "codecracker-1",
             known: true,
             title: "Codecracker",
-            definitionId: "onr_v1_014_codecracker",
+            definitionId: 226,
             type: "program",
             subtypes: ["icebreaker"],
             strength: params.iceStrength,
@@ -970,7 +1079,7 @@ function runnerServerMovementInput(params: {
 
 function visibleIce(params: {
   instanceId?: string;
-  iceDefinitionId: string;
+  iceDefinitionId: number;
   iceTitle: string;
   iceStrength: number;
   encounterTemporaryTraceCredits?: number;
@@ -983,7 +1092,7 @@ function visibleIce(params: {
     definitionId: params.iceDefinitionId,
     type: "ice",
     subtypes:
-      params.iceDefinitionId === "onr_v1_253_laser-wire"
+      params.iceDefinitionId === 465
         ? ["wall"]
         : ["code_gate"],
     rezzed: true,
@@ -1012,7 +1121,7 @@ function quietPrograms(): VisibleCard {
     instanceId: "quiet-1",
     known: true,
     title: "Vewy Vewy Quiet",
-    definitionId: "onr_v1_071_vewy-vewy-quiet",
+    definitionId: 283,
     type: "program",
     subtypes: ["stealth"],
     counterDisplays: [
@@ -1037,7 +1146,7 @@ function rentICon(strength: number): VisibleCard {
     instanceId: "rent-i-con-1",
     known: true,
     title: "Rent-I-Con",
-    definitionId: "onr_classic_031_rent-i-con",
+    definitionId: 35,
     type: "program",
     subtypes: ["icebreaker"],
     strength,
@@ -1168,19 +1277,18 @@ function breakAction(params: {
   breakerId?: string;
   costs: LegalAction["costs"];
   subroutineIndex?: number;
-  subroutineIndexes?: string;
+  subroutineIndexes?: readonly number[];
 }): LegalAction {
   const breakerId = params.breakerId ?? "codecracker-1";
   return action("break_subroutine", {
     actionId: params.actionId ?? "break-codecracker",
     source: breakerId,
     costs: params.costs,
+    ...(params.subroutineIndexes ? { subroutineIndexes: params.subroutineIndexes } : {}),
     payload: {
       breakerId,
       iceId: "ice-1",
-      ...(params.subroutineIndexes
-        ? { subroutineIndexes: params.subroutineIndexes }
-        : { subroutineIndex: params.subroutineIndex ?? 0 }),
+      ...(!params.subroutineIndexes ? { subroutineIndex: params.subroutineIndex ?? 0 } : {}),
     },
   });
 }
@@ -1207,6 +1315,7 @@ function action(
     actionId: string;
     source: LegalAction["source"];
     costs: LegalAction["costs"];
+    subroutineIndexes?: LegalAction["subroutineIndexes"];
     payload: NonNullable<LegalAction["payload"]>;
   },
 ): LegalAction {
@@ -1218,6 +1327,7 @@ function action(
     source: params.source,
     timingPoint: "run.encounter",
     costs: params.costs,
+    ...(params.subroutineIndexes ? { subroutineIndexes: params.subroutineIndexes } : {}),
     targetRequirements: [],
     visibility: "public",
     expiresAtStateVersion: 86,

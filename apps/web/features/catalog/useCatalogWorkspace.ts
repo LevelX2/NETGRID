@@ -1,6 +1,8 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import type { PlayerView, PublicGameEvent, Side } from "@netgrid/shared";
+import type { Side } from "@netgrid/shared";
+import type { PlayerView } from "../../lib/presented-player-view";
 
 import { revealedEventCardIds } from "../actions/access-review-derivation";
 import { visibleKnownCardIds } from "../cards/card-view-model";
@@ -52,12 +54,7 @@ const NO_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
   program: false,
 };
 
-type CatalogWorkspacePayload = {
-  eventTail: PublicGameEvent[];
-  playerView: PlayerView;
-};
-
-export function useCatalogWorkspace(payload: CatalogWorkspacePayload | null) {
+export function useCatalogWorkspace(playerView: PlayerView | undefined) {
   const [catalogSearch, setCatalogSearch] = useState("");
   const [catalogSide, setCatalogSide] = useState<Side | "all">("all");
   const [catalogTypeFilters, setCatalogTypeFilters] =
@@ -75,7 +72,7 @@ export function useCatalogWorkspace(payload: CatalogWorkspacePayload | null) {
   const [catalogFilters, setCatalogFilters] = useState<
     CatalogListResponse["filters"] | null
   >(null);
-  const [selectedCatalogId, setSelectedCatalogId] = useState<string | null>(
+  const [selectedCatalogId, setSelectedCatalogId] = useState<CardDefinitionId | null>(
     null,
   );
   const [catalogDetail, setCatalogDetail] = useState<CatalogCardDetail | null>(
@@ -122,7 +119,7 @@ export function useCatalogWorkspace(payload: CatalogWorkspacePayload | null) {
   );
 
   const ensureCatalogDetails = useCallback(
-    async (cardIds: readonly string[]) => {
+    async (cardIds: readonly CardDefinitionId[]) => {
       await catalogDetailRequestCoordinatorRef.current.ensure(
         cardIds,
         (cardId) => Boolean(catalogDetailsByIdRef.current[cardId]),
@@ -202,10 +199,12 @@ export function useCatalogWorkspace(payload: CatalogWorkspacePayload | null) {
   }, [selectedCatalogId]);
 
   useEffect(() => {
-    const eventIds = (payload?.eventTail ?? []).flatMap(revealedEventCardIds);
-    const visibleIds = visibleKnownCardIds(payload?.playerView);
+    const eventIds = (playerView?.publicEvents ?? []).flatMap(
+      revealedEventCardIds,
+    );
+    const visibleIds = visibleKnownCardIds(playerView);
     void ensureCatalogDetails([...eventIds, ...visibleIds]);
-  }, [payload?.eventTail, payload?.playerView, ensureCatalogDetails]);
+  }, [playerView, ensureCatalogDetails]);
 
   useEffect(() => {
     void fetch("/api/cards/catalog", { cache: "no-store" })

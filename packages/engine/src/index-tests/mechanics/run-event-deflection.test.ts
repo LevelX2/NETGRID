@@ -1,3 +1,4 @@
+import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
 import type { CardInstanceId, GameState } from "@netgrid/shared";
 import {
@@ -16,7 +17,7 @@ import {
   addRezzedCorpIceForTest,
 } from "../../test-fixtures/index-test-helpers";
 
-function setup(eventDefinitionId: string, target: "hq" | "rd") {
+function setup(eventDefinitionId: number, target: "hq" | "rd") {
   const state = toRunnerTurn(
     onrV1Game(`run-event-deflection-${eventDefinitionId}`),
   );
@@ -37,12 +38,12 @@ function setup(eventDefinitionId: string, target: "hq" | "rd") {
   };
   const agendaId = addCorpCardToHqForTest(
     state,
-    "onr_classic_003_unlisted-research-lab",
+    7,
     "remote_agenda",
   );
   state.corp.hq = state.corp.hq.filter((id) => id !== agendaId);
   state.corp.servers.push({
-    id: "remote_1",
+    id: "r1",
     kind: "remote",
     label: "Remote 1",
     ice: [],
@@ -51,11 +52,11 @@ function setup(eventDefinitionId: string, target: "hq" | "rd") {
   state.cardInstances[agendaId]!.zone = {
     side: "corp",
     zone: "serverRoot",
-    serverId: "remote_1",
+    serverId: "r1",
   };
   addRezzedCorpIceForTest(
     state,
-    "onr_classic_014_trapdoor",
+    18,
     target,
     "deflector",
   );
@@ -78,7 +79,7 @@ function redirect(
   expect(state.run?.phase).toBe("encounter_ice");
   state = apply(state, "runner", (a) => a.type === "continue_run");
   expect(state.run).toMatchObject({
-    attackedServerId: "remote_1",
+    attackedServerId: "r1",
     phase: "movement",
   });
   return state;
@@ -96,11 +97,11 @@ function assertReplay(initial: GameState, state: GameState) {
 
 describe("fixed-fort run-event benefits after deflection", () => {
   it.each([
-    ["onr_v1_084_edited-shipping-manifests", "hq", 1],
-    ["onr_v1_105_priority-wreck", "hq", 0],
-    ["onr_v1_106_private-ldl-access", "hq", 0],
-    ["onr_v1_081_custodial-position", "rd", 2],
-    ["onr_v1_118_weather-to-finance-pipe", "hq", 0],
+    [296, "hq", 1],
+    [317, "hq", 0],
+    [318, "hq", 0],
+    [293, "rd", 2],
+    [330, "hq", 0],
   ] as const)(
     "accesses the actual fort without the %s benefit",
     (definitionId, target, playCost) => {
@@ -110,11 +111,11 @@ describe("fixed-fort run-event benefits after deflection", () => {
       expect(state.run?.successfulRunEffectTargetServerId).toBe(target);
       const runnerView = JSON.stringify(getPlayerView(state, "runner"));
       expect(runnerView).not.toContain(fixture.agendaId);
-      expect(runnerView).not.toContain("onr_classic_003_unlisted-research-lab");
+      expect(serializedDefinitionReferences(runnerView)).not.toContain(7);
       state = apply(state, "runner", (a) => a.type === "continue_run");
       expect(state.pendingChoice).toBeUndefined();
       expect(state.run).toMatchObject({
-        attackedServerId: "remote_1",
+        attackedServerId: "r1",
         successful: true,
         accessCount: 1,
         phase: "access",
@@ -128,13 +129,13 @@ describe("fixed-fort run-event benefits after deflection", () => {
       state = apply(state, "runner", (a) => a.type === "steal_agenda");
       expect(state.runner.scoreArea).toContain(fixture.agendaId);
       expect(state.run).toBeUndefined();
-      expect(state.runnerTurnFlags?.lastSuccessfulRunServerId).toBe("remote_1");
+      expect(state.runnerTurnFlags?.lastSuccessfulRunServerId).toBe("r1");
       assertReplay(initial, state);
     },
   );
 
   it("keeps a freely chosen run's successful replacement after deflection", () => {
-    const fixture = setup("onr_proteus_105_demolition-run", "hq");
+    const fixture = setup(163, "hq");
     const initial = structuredClone(fixture.state);
     let state = redirect(fixture.state, fixture.eventId, "hq");
     expect(state.run?.successfulRunEffectTargetServerId).toBeUndefined();
@@ -142,7 +143,7 @@ describe("fixed-fort run-event benefits after deflection", () => {
     expect(state.run).toBeUndefined();
     expect(state.runner.tags).toBe(3);
     expect(state.runner.credits).toBe(16);
-    expect(state.runnerTurnFlags?.lastSuccessfulRunServerId).toBe("remote_1");
+    expect(state.runnerTurnFlags?.lastSuccessfulRunServerId).toBe("r1");
     expect(state.runner.scoreArea).not.toContain(fixture.agendaId);
     assertReplay(initial, state);
   });

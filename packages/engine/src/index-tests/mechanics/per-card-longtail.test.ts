@@ -1,3 +1,4 @@
+import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
 import { cardSpecRuntimeDefinitionIds } from "@netgrid/cards/engine";
 import {
@@ -193,40 +194,40 @@ const CARD_SPEC_RUNTIME_DEFINITION_IDS = new Set(
 describe("V1.9.22 Per-card Longtail WIP", () => {
   it("adds the first V1.9.22 runner hardware runtime definitions without catalog release promotion", () => {
     const runnerHardwareIds = [
-      "onr_v1_119_arasaka-portable-prototype",
-      "onr_v1_122_artemis-2020",
-      "onr_v1_123_bodyweight-data-creche",
-      "onr_v1_124_corolla-speed-chip",
-      "onr_v1_131_microtech-backup-drive",
-      "onr_v1_136_pandoras-deck",
-      "onr_v1_137_parraline-5750",
-      "onr_v1_138_pk-6089a",
-      "onr_v1_147_zz22-speed-chip",
+      331,
+      334,
+      335,
+      336,
+      343,
+      348,
+      349,
+      350,
+      359,
     ] as const;
     expect(MECHANIC_SMOKE_CARD_IDS.longtailEffects).toHaveLength(47);
     for (const definitionId of runnerHardwareIds) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.side, definitionId).toBe("runner");
-      expect(definition?.type, definitionId).toBe("hardware");
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.side, String(definitionId)).toBe("runner");
+      expect(definition?.type, String(definitionId)).toBe("hardware");
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
-      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+      expect(definition?.rulesText, String(definitionId)).not.toContain("WIP");
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
     }
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus,
+      CARD_DEFINITIONS_BY_ID[488]?.implementationStatus,
     ).toBe("playable_mvp");
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_123_bodyweight-data-creche"],
+      CARD_DEFINITIONS_BY_ID[335],
     ).toMatchObject({
       installCost: 3,
     });
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_124_corolla-speed-chip"],
+      CARD_DEFINITIONS_BY_ID[336],
     ).toMatchObject({
       installCost: 1,
     });
@@ -234,15 +235,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
 
   it("installs all V1.9.22 runner hardware through LegalActions with replay, visibility and revalidation", () => {
     const runnerHardwareIds = [
-      "onr_v1_119_arasaka-portable-prototype",
-      "onr_v1_122_artemis-2020",
-      "onr_v1_123_bodyweight-data-creche",
-      "onr_v1_124_corolla-speed-chip",
-      "onr_v1_131_microtech-backup-drive",
-      "onr_v1_136_pandoras-deck",
-      "onr_v1_137_parraline-5750",
-      "onr_v1_138_pk-6089a",
-      "onr_v1_147_zz22-speed-chip",
+      331,
+      334,
+      335,
+      336,
+      343,
+      348,
+      349,
+      350,
+      359,
     ] as const;
 
     for (const definitionId of runnerHardwareIds) {
@@ -264,8 +265,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       );
       state.runner.credits = 20;
       moveRunnerCardToGrip(state, definitionId);
-      if (definitionId === "onr_v1_119_arasaka-portable-prototype")
-        scoreRunnerAgendaForTest(state, "simple_agenda");
+      if (definitionId === 331)
+        scoreRunnerAgendaForTest(state, 588);
 
       const legal = mustAction(
         state,
@@ -281,9 +282,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         clientKnownStateVersion: state.stateVersion,
         idempotencyKey: `v1922-${definitionId}-wrong-side`,
       });
-      expect(wrongSide.ok, definitionId).toBe(false);
+      expect(wrongSide.ok, String(definitionId)).toBe(false);
       if (!wrongSide.ok)
-        expect(wrongSide.error.code, definitionId).toBe("ERR_WRONG_SIDE");
+        expect(wrongSide.error.code, String(definitionId)).toBe("ERR_WRONG_SIDE");
 
       const stale = applyAction(state, {
         matchId: state.matchId,
@@ -292,9 +293,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         clientKnownStateVersion: state.stateVersion - 1,
         idempotencyKey: `v1922-${definitionId}-stale`,
       });
-      expect(stale.ok, definitionId).toBe(false);
+      expect(stale.ok, String(definitionId)).toBe(false);
       if (!stale.ok)
-        expect(stale.error.code, definitionId).toBe("ERR_STALE_STATE");
+        expect(stale.error.code, String(definitionId)).toBe("ERR_STALE_STATE");
 
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;
@@ -310,27 +311,27 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         state.runner.rig.hardware.map(
           (id) => state.cardInstances[id]?.definitionId,
         ),
-        definitionId,
+        String(definitionId),
       ).toContain(definitionId);
       expect(
         getPlayerView(state, "runner").own.rig?.some(
           (card) => card.definitionId === definitionId,
         ),
-        definitionId,
+        String(definitionId),
       ).toBe(true);
       expect(
         getPlayerView(state, "corp").opponent.rig?.some(
           (card) => card.definitionId === definitionId,
         ),
-        definitionId,
+        String(definitionId),
       ).toBe(true);
       expect(
         JSON.stringify(state.eventLog.at(-1)?.publicPayload),
-        definitionId,
+        String(definitionId),
       ).not.toMatch(/"privatePayload"|"cardInstances"|"hq"|"rd"/);
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.errors, definitionId).toEqual([]);
-      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+      expect(replay.errors, String(definitionId)).toEqual([]);
+      expect(hashState(replay.state), String(definitionId)).toBe(hashState(state));
     }
   });
 
@@ -343,8 +344,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_v1922_zz22_killer",
           name: "O:NR V1.9.22 ZZ22 Killer Runner",
           cards: [
-            { id: "onr_v1_147_zz22-speed-chip", quantity: 1 },
-            { id: "simple_killer", quantity: 1 },
+            { id: 359, quantity: 1 },
+            { id: 598, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -353,7 +354,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_corp_v1922_zz22_killer",
           name: "O:NR V1.9.22 ZZ22 Killer Corp",
           cards: [
-            { id: "simple_sentry_ice", quantity: 1 },
+            { id: 601, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -366,17 +367,17 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     killerState.corp.credits = 10;
     const zz22Id = moveRunnerCardToGrip(
       killerState,
-      "onr_v1_147_zz22-speed-chip",
+      359,
     );
-    moveRunnerCardToGrip(killerState, "simple_killer");
-    const sentryId = putCorpIceOnServer(killerState, "rd", "simple_sentry_ice");
+    moveRunnerCardToGrip(killerState, 598);
+    const sentryId = putCorpIceOnServer(killerState, "rd", 601);
 
     const installZz22 = mustAction(
       killerState,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(killerState, action) === "onr_v1_147_zz22-speed-chip",
+        sourceDefinition(killerState, action) === 359,
     );
     expect(installZz22.costs[0]?.credits).toBe(5);
     killerState = apply(
@@ -385,7 +386,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) => action.actionId === installZz22.actionId,
     );
     expect(killerState.cardInstances[zz22Id]?.counters?.bit).toBe(2);
-    installRunnerProgramForTest(killerState, "simple_killer");
+    installRunnerProgramForTest(killerState, 598);
     killerState.runner.credits = 1;
 
     killerState = apply(
@@ -404,7 +405,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinition(killerState, action) === "simple_killer",
+        sourceDefinition(killerState, action) === 598,
     );
     expect(killerState.runner.credits).toBe(1);
     expect(killerState.cardInstances[zz22Id]?.counters?.bit).toBe(1);
@@ -413,7 +414,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinition(killerState, action) === "simple_killer",
+        sourceDefinition(killerState, action) === 598,
     );
     expect(killerState.runner.credits).toBe(1);
     expect(killerState.cardInstances[zz22Id]?.counters?.bit ?? 0).toBe(0);
@@ -422,7 +423,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         action.type === "break_subroutine" &&
-        sourceDefinition(killerState, action) === "simple_killer",
+        sourceDefinition(killerState, action) === 598,
     );
     killerState = apply(
       killerState,
@@ -440,7 +441,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_v1922_zz22_decoder",
           name: "O:NR V1.9.22 ZZ22 Decoder Runner",
           cards: [
-            { id: "onr_v1_147_zz22-speed-chip", quantity: 1 },
+            { id: 359, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -449,7 +450,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_corp_v1922_zz22_decoder",
           name: "O:NR V1.9.22 ZZ22 Decoder Corp",
           cards: [
-            { id: "simple_code_gate_ice", quantity: 1 },
+            { id: 590, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -460,21 +461,21 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     decoderState.runner.clicks = 4;
     decoderState.runner.memoryLimit = 4;
     decoderState.corp.credits = 10;
-    moveRunnerCardToGrip(decoderState, "onr_v1_147_zz22-speed-chip");
-    moveRunnerCardToGrip(decoderState, "simple_decoder");
+    moveRunnerCardToGrip(decoderState, 359);
+    moveRunnerCardToGrip(decoderState, 591);
     const codeGateId = putCorpIceOnServer(
       decoderState,
       "rd",
-      "simple_code_gate_ice",
+      590,
     );
     decoderState = apply(
       decoderState,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(decoderState, action) === "onr_v1_147_zz22-speed-chip",
+        sourceDefinition(decoderState, action) === 359,
     );
-    installRunnerProgramForTest(decoderState, "simple_decoder");
+    installRunnerProgramForTest(decoderState, 591);
     decoderState.runner.credits = 0;
     decoderState = apply(
       decoderState,
@@ -491,35 +492,35 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       getLegalActions(decoderState, "runner").some(
         (action) =>
           action.type === "break_subroutine" &&
-          sourceDefinition(decoderState, action) === "simple_decoder",
+          sourceDefinition(decoderState, action) === 591,
       ),
     ).toBe(false);
   });
 
   it("adds V1.9.22 runner event runtime definitions without broad play_event support", () => {
     const runnerEventIds = [
-      "onr_v1_077_anonymous-tip",
-      "onr_v1_080_core-command-jettison-ice",
-      "onr_v1_086_forged-activation-orders",
-      "onr_v1_093_if-you-want-it-done-right",
-      "onr_v1_100_misc-for-sale",
-      "onr_v1_102_open-ended-mileage-program",
-      "onr_v1_103_organ-donor",
-      "onr_v1_109_security-code-worm-chip",
-      "onr_v1_113_synchronized-attack-on-hq",
-      "onr_v1_117_valu-pak-software-bundle",
+      289,
+      292,
+      298,
+      305,
+      312,
+      314,
+      315,
+      321,
+      325,
+      329,
     ] as const;
     for (const definitionId of runnerEventIds) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.side, definitionId).toBe("runner");
-      expect(definition?.type, definitionId).toBe("event");
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.side, String(definitionId)).toBe("runner");
+      expect(definition?.type, String(definitionId)).toBe("event");
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
-      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+      expect(definition?.rulesText, String(definitionId)).not.toContain("WIP");
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
     }
   });
@@ -533,7 +534,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_v1922_if_you_want_it_done_right",
           name: "O:NR V1.9.22 If You Want It Done Right",
           cards: [
-            { id: "onr_v1_093_if-you-want-it-done-right", quantity: 1 },
+            { id: 305, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -543,7 +544,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     state.runner.credits = 10;
     state.runner.clicks = 4;
-    moveRunnerCardToGrip(state, "onr_v1_093_if-you-want-it-done-right");
+    moveRunnerCardToGrip(state, 305);
     const topFive = state.runner.stack.slice(0, 5);
     expect(topFive).toHaveLength(5);
 
@@ -553,7 +554,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(state, action) ===
-          "onr_v1_093_if-you-want-it-done-right",
+          305,
     );
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
@@ -583,7 +584,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(state, action) ===
-          "onr_v1_093_if-you-want-it-done-right",
+          305,
     );
     expect(state.pendingChoice?.source).toContain(
       "p3_37.runner_stack_top5_choose_one_arrange_rest",
@@ -592,7 +593,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.pendingChoice?.options).toHaveLength(5);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
-      cardDefinitionId: "onr_v1_093_if-you-want-it-done-right",
+      cardDefinitionId: 305,
       hiddenZoneBarrier: true,
       hiddenZoneAction: "v1922_runner_stack_top5_choose_one_arrange_rest",
     });
@@ -665,7 +666,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_v1922_organ_donor",
           name: "O:NR V1.9.22 Organ Donor",
           cards: [
-            { id: "onr_v1_103_organ-donor", quantity: 1 },
+            { id: 315, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -675,7 +676,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     state.runner.credits = 2;
     state.runner.clicks = 4;
-    moveRunnerCardToGrip(state, "onr_v1_103_organ-donor");
+    moveRunnerCardToGrip(state, 315);
     const trashCandidates = state.runner.stack.slice(0, 2);
     expect(trashCandidates).toHaveLength(2);
     for (const cardId of trashCandidates) {
@@ -694,7 +695,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(state, action) === "onr_v1_103_organ-donor",
+        sourceDefinition(state, action) === 315,
     );
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
@@ -724,7 +725,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(state, action) === "onr_v1_103_organ-donor",
+        sourceDefinition(state, action) === 315,
     );
     expect(state.pendingChoice?.source).toContain(
       "p3_47.runner_grip_trash_for_credits",
@@ -732,10 +733,10 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.pendingChoice?.visibility).toBe("hidden_info_barrier");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
-      cardDefinitionId: "onr_v1_103_organ-donor",
+      cardDefinitionId: 315,
       hiddenZoneBarrier: true,
       hiddenZoneAction: "p3_47_runner_grip_trash_for_credits",
-      sourceDefinitionId: "onr_v1_103_organ-donor",
+      sourceDefinitionId: 315,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"stack"|"grip"|"cardInstances"|"privatePayload"/,
@@ -784,9 +785,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_v1922_misc_for_sale",
           name: "O:NR V1.9.22 misc.for-sale",
           cards: [
-            { id: "onr_v1_100_misc-for-sale", quantity: 1 },
-            { id: "simple_setup_hardware", quantity: 1 },
-            { id: "onr_v1_122_artemis-2020", quantity: 1 },
+            { id: 312, quantity: 1 },
+            { id: 602, quantity: 1 },
+            { id: 334, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -796,32 +797,32 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     state.runner.credits = 100;
     state.runner.clicks = 10;
-    moveRunnerCardToGrip(state, "simple_setup_hardware");
-    moveRunnerCardToGrip(state, "onr_v1_122_artemis-2020");
+    moveRunnerCardToGrip(state, 602);
+    moveRunnerCardToGrip(state, 334);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "simple_setup_hardware",
+        sourceDefinition(state, action) === 602,
     );
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_122_artemis-2020",
+        sourceDefinition(state, action) === 334,
     );
     const installedTargets = state.runner.rig.hardware.slice(0, 2);
     expect(installedTargets).toHaveLength(2);
-    moveRunnerCardToGrip(state, "onr_v1_100_misc-for-sale");
+    moveRunnerCardToGrip(state, 312);
 
     const legal = mustAction(
       state,
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(state, action) === "onr_v1_100_misc-for-sale",
+        sourceDefinition(state, action) === 312,
     );
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
@@ -851,7 +852,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(state, action) === "onr_v1_100_misc-for-sale",
+        sourceDefinition(state, action) === 312,
     );
     expect(state.pendingChoice?.source).toContain(
       "p3_47.runner_installed_trash_for_credits",
@@ -859,10 +860,10 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.pendingChoice?.visibility).toBe("hidden_info_barrier");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
-      cardDefinitionId: "onr_v1_100_misc-for-sale",
+      cardDefinitionId: 312,
       hiddenZoneBarrier: true,
       hiddenZoneAction: "p3_47_runner_installed_trash_for_credits",
-      sourceDefinitionId: "onr_v1_100_misc-for-sale",
+      sourceDefinitionId: 312,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"stack"|"grip"|"cardInstances"|"privatePayload"/,
@@ -915,7 +916,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_card_implementation_paid_source_return_to_grip_program",
           name: "O:NR V1.9.22 Open-Ended Mileage Program",
           cards: [
-            { id: "onr_v1_102_open-ended-mileage-program", quantity: 1 },
+            { id: 314, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -928,14 +929,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.tags = 1;
     const eventCardId = moveRunnerCardToGrip(
       state,
-      "onr_v1_102_open-ended-mileage-program",
+      314,
     );
 
     const mileageActions = getLegalActions(state, "runner").filter(
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(state, action) ===
-          "onr_v1_102_open-ended-mileage-program",
+          314,
     );
     expect(mileageActions).toHaveLength(2);
     expect(
@@ -981,7 +982,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.runner.credits).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
-      cardDefinitionId: "onr_v1_102_open-ended-mileage-program",
+      cardDefinitionId: 314,
       removedTags: 1,
       runnerTagsAfter: 0,
       normalCreditsSpent: 1,
@@ -1021,7 +1022,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     rdServer.ice.push(blackIceId);
     state.cardInstances[blackIceId] = {
       instanceId: blackIceId,
-      definitionId: "onr_v1_231_cortical-scrub",
+      definitionId: 443,
       owner: "corp",
       controller: "corp",
       zone: { side: "corp", zone: "serverIce", serverId: "rd" },
@@ -1034,7 +1035,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.grip.unshift(anonymousTipId);
     state.cardInstances[anonymousTipId] = {
       instanceId: anonymousTipId,
-      definitionId: "onr_v1_077_anonymous-tip",
+      definitionId: 289,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "grip" },
@@ -1049,7 +1050,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(state, action) === "onr_v1_077_anonymous-tip",
+        sourceDefinition(state, action) === 289,
     );
     expect(legal.costs[0]?.credits).toBe(3);
     const wrongSide = applyAction(state, {
@@ -1079,7 +1080,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(state, action) === "onr_v1_077_anonymous-tip",
+        sourceDefinition(state, action) === 289,
     );
     expect(state.pendingChoice?.source).toContain(
       "card_implementation.derez_rezzed_black_ice",
@@ -1088,7 +1089,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.runner.credits).toBe(2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
-      cardDefinitionId: "onr_v1_077_anonymous-tip",
+      cardDefinitionId: 289,
       abilityId: "derez_black_ice",
     });
 
@@ -1108,7 +1109,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       choiceKind: "select_cards",
       abilityId: "derez_black_ice",
       derezzedCount: 1,
-      targetCardDefinitionId: "onr_v1_231_cortical-scrub",
+      targetCardDefinitionId: 443,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"|"rd"/,
@@ -1127,7 +1128,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_v1922_forged_activation_orders",
           name: "O:NR V1.9.22 Forged Activation Orders",
           cards: [
-            { id: "onr_v1_086_forged-activation-orders", quantity: 1 },
+            { id: 298, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -1136,8 +1137,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_corp_v1922_forged_activation_orders",
           name: "O:NR V1.9.22 Forged Activation Orders Corp",
           cards: [
-            { id: "simple_barrier_ice", quantity: 1 },
-            { id: "onr_v1_263_reinforced-wall", quantity: 1 },
+            { id: 589, quantity: 1 },
+            { id: 475, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -1147,18 +1148,18 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.credits = 2;
     state.runner.clicks = 4;
     state.corp.credits = 5;
-    const targetIceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    const targetIceId = putCorpIceOnServer(state, "rd", 589);
     const rezzedReinforcedWallId = putCorpIceOnServer(
       state,
       "hq",
-      "onr_v1_263_reinforced-wall",
+      475,
     );
     state.cardInstances[rezzedReinforcedWallId] = {
       ...state.cardInstances[rezzedReinforcedWallId]!,
       rezzed: true,
       faceup: true,
     };
-    moveRunnerCardToGrip(state, "onr_v1_086_forged-activation-orders");
+    moveRunnerCardToGrip(state, 298);
 
     const legal = mustAction(
       state,
@@ -1166,7 +1167,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(state, action) ===
-          "onr_v1_086_forged-activation-orders",
+          298,
     );
     expect(legal.costs[0]?.credits).toBe(1);
     const wrongSide = applyAction(state, {
@@ -1197,7 +1198,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(state, action) ===
-          "onr_v1_086_forged-activation-orders",
+          298,
     );
     expect(state.runner.credits).toBe(1);
     expect(state.pendingChoice?.source).toContain(
@@ -1205,7 +1206,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     expect(state.pendingChoice?.visibility).toBe("public");
     const runnerChoice = getPlayerView(state, "runner").pendingChoice;
-    expect(JSON.stringify(runnerChoice)).not.toContain("simple_barrier_ice");
+    expect(serializedDefinitionReferences(JSON.stringify(runnerChoice))).not.toContain(589);
     expect(runnerChoice?.options).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -1218,7 +1219,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
-      cardDefinitionId: "onr_v1_086_forged-activation-orders",
+      cardDefinitionId: 298,
       abilityId: "force_rez_or_trash_ice",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
@@ -1229,9 +1230,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(targetChoice).toBeDefined();
     if (!targetChoice)
       throw new Error("Missing Forged Activation Orders target choice");
-    expect(targetChoice.options.map((option) => option.value)).toContain(
-      rezzedReinforcedWallId,
-    );
+    expect(targetChoice.options.map((option) => option.value)).toEqual([
+      targetIceId,
+    ]);
     const targetOption = targetChoice.options.find(
       (option) => option.value === targetIceId,
     );
@@ -1273,7 +1274,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       choiceKind: "select_option",
       abilityId: "force_rez_or_trash_ice",
       corpDecision: "rez_ice",
-      targetCardDefinitionId: "simple_barrier_ice",
+      targetCardDefinitionId: 589,
       targetServerLabel: "R&D",
       targetIcePositionLabel: "ICE 1 in R&D",
     });
@@ -1284,7 +1285,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
 
-    let noUnrezzedTargetState = toRunnerTurn(
+    const noUnrezzedTargetState = toRunnerTurn(
       createGameAfterSetup({
         seed: "v1922-forged-activation-orders-no-unrezzed-target",
         runnerDeck: {
@@ -1292,7 +1293,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_v1922_forged_activation_orders_no_unrezzed",
           name: "O:NR V1.9.22 Forged Activation Orders No Unrezzed",
           cards: [
-            { id: "onr_v1_086_forged-activation-orders", quantity: 1 },
+            { id: 298, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -1301,7 +1302,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_corp_v1922_forged_activation_orders_no_unrezzed",
           name: "O:NR V1.9.22 Forged Activation Orders No Unrezzed Corp",
           cards: [
-            { id: "onr_v1_263_reinforced-wall", quantity: 1 },
+            { id: 475, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -1312,7 +1313,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     const onlyRezzedTargetId = putCorpIceOnServer(
       noUnrezzedTargetState,
       "hq",
-      "onr_v1_263_reinforced-wall",
+      475,
     );
     noUnrezzedTargetState.cardInstances[onlyRezzedTargetId] = {
       ...noUnrezzedTargetState.cardInstances[onlyRezzedTargetId]!,
@@ -1321,28 +1322,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     };
     moveRunnerCardToGrip(
       noUnrezzedTargetState,
-      "onr_v1_086_forged-activation-orders",
-    );
-    noUnrezzedTargetState = apply(
-      noUnrezzedTargetState,
-      "runner",
-      (action) =>
-        action.type === "play_event" &&
-        sourceDefinition(noUnrezzedTargetState, action) ===
-          "onr_v1_086_forged-activation-orders",
-    );
-    const onlyRezzedTargetOption =
-      noUnrezzedTargetState.pendingChoice?.options.find(
-        (option) => option.value === onlyRezzedTargetId,
-      );
-    noUnrezzedTargetState = applyChoice(
-      noUnrezzedTargetState,
-      "runner",
-      onlyRezzedTargetOption?.id ?? "",
+      298,
     );
     expect(
-      noUnrezzedTargetState.pendingChoice?.options.map((option) => option.id),
-    ).toEqual(["trash_ice"]);
+      getLegalActions(noUnrezzedTargetState, "runner").some(
+        (action) =>
+          action.type === "play_event" &&
+          sourceDefinition(noUnrezzedTargetState, action) === 298,
+      ),
+    ).toBe(false);
 
     let trashState = toRunnerTurn(
       createGameAfterSetup({
@@ -1352,7 +1340,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_v1922_forged_activation_orders_trash",
           name: "O:NR V1.9.22 Forged Activation Orders Trash",
           cards: [
-            { id: "onr_v1_086_forged-activation-orders", quantity: 1 },
+            { id: 298, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -1361,7 +1349,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_corp_v1922_forged_activation_orders_trash",
           name: "O:NR V1.9.22 Forged Activation Orders Trash Corp",
           cards: [
-            { id: "simple_barrier_ice", quantity: 1 },
+            { id: 589, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -1373,16 +1361,16 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     const trashTargetId = putCorpIceOnServer(
       trashState,
       "hq",
-      "simple_barrier_ice",
+      589,
     );
-    moveRunnerCardToGrip(trashState, "onr_v1_086_forged-activation-orders");
+    moveRunnerCardToGrip(trashState, 298);
     trashState = apply(
       trashState,
       "runner",
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(trashState, action) ===
-          "onr_v1_086_forged-activation-orders",
+          298,
     );
     const trashTargetChoice = trashState.pendingChoice;
     if (!trashTargetChoice)
@@ -1433,7 +1421,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_card_implementation_pay_rez_cost_trash_rezzed_ice",
           name: "O:NR V1.9.22 Core Command Jettison Ice",
           cards: [
-            { id: "onr_v1_080_core-command-jettison-ice", quantity: 1 },
+            { id: 292, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -1442,7 +1430,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_corp_card_implementation_pay_rez_cost_trash_rezzed_ice",
           name: "O:NR V1.9.22 Core Command Jettison Ice Corp",
           cards: [
-            { id: "simple_barrier_ice", quantity: 1 },
+            { id: 589, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -1451,9 +1439,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     state.runner.credits = 10;
     state.runner.clicks = 4;
-    const hqCard = moveCorpCardToHq(state, "simple_economy_operation");
+    const hqCard = moveCorpCardToHq(state, 596);
     keepOnlyCorpHqCard(state, hqCard);
-    const targetIceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    const targetIceId = putCorpIceOnServer(state, "rd", 589);
     state.cardInstances[targetIceId] = {
       ...state.cardInstances[targetIceId]!,
       faceup: true,
@@ -1461,7 +1449,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     };
     const eventCardId = moveRunnerCardToGrip(
       state,
-      "onr_v1_080_core-command-jettison-ice",
+      292,
     );
 
     expect(
@@ -1469,7 +1457,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         (action) =>
           action.type === "play_event" &&
           sourceDefinition(state, action) ===
-            "onr_v1_080_core-command-jettison-ice",
+            292,
       ),
     ).toBe(false);
     state = apply(
@@ -1490,7 +1478,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(state, action) ===
-          "onr_v1_080_core-command-jettison-ice",
+          292,
     );
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
@@ -1521,7 +1509,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(state, action) ===
-          "onr_v1_080_core-command-jettison-ice",
+          292,
     );
     expect(state.pendingChoice?.source).toContain(
       "card_implementation.pay_rez_cost_trash_rezzed_ice",
@@ -1543,7 +1531,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       choiceKind: "select_cards",
       abilityId: "successful_hq_run_pay_rez_cost_trash_rezzed_ice",
       trashedCount: 1,
-      targetCardDefinitionId: "simple_barrier_ice",
+      targetCardDefinitionId: 589,
       targetServerLabel: "R&D",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
@@ -1563,7 +1551,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_card_implementation_trash_unrezzed_ice",
           name: "O:NR V1.9.22 Security Code WORM Chip",
           cards: [
-            { id: "onr_v1_109_security-code-worm-chip", quantity: 1 },
+            { id: 321, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -1572,7 +1560,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_corp_card_implementation_trash_unrezzed_ice",
           name: "O:NR V1.9.22 Security Code WORM Chip Corp",
           cards: [
-            { id: "simple_barrier_ice", quantity: 1 },
+            { id: 589, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -1581,12 +1569,12 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     state.runner.credits = 2;
     state.runner.clicks = 4;
-    const hqCard = moveCorpCardToHq(state, "simple_economy_operation");
+    const hqCard = moveCorpCardToHq(state, 596);
     keepOnlyCorpHqCard(state, hqCard);
-    const targetIceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    const targetIceId = putCorpIceOnServer(state, "rd", 589);
     const eventCardId = moveRunnerCardToGrip(
       state,
-      "onr_v1_109_security-code-worm-chip",
+      321,
     );
 
     expect(
@@ -1594,7 +1582,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         (action) =>
           action.type === "play_event" &&
           sourceDefinition(state, action) ===
-            "onr_v1_109_security-code-worm-chip",
+            321,
       ),
     ).toBe(false);
     state = apply(
@@ -1613,7 +1601,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(state, action) ===
-          "onr_v1_109_security-code-worm-chip",
+          321,
     );
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
@@ -1643,18 +1631,18 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(state, action) ===
-          "onr_v1_109_security-code-worm-chip",
+          321,
     );
     expect(state.pendingChoice?.source).toContain(
       "card_implementation.trash_unrezzed_ice",
     );
     expect(state.pendingChoice?.visibility).toBe("public");
     expect(
-      JSON.stringify(getPlayerView(state, "runner").pendingChoice),
-    ).not.toContain("simple_barrier_ice");
+      serializedDefinitionReferences(JSON.stringify(getPlayerView(state, "runner").pendingChoice)),
+    ).not.toContain(589);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
-      cardDefinitionId: "onr_v1_109_security-code-worm-chip",
+      cardDefinitionId: 321,
       abilityId: "successful_hq_run_trash_unrezzed_ice",
     });
 
@@ -1676,7 +1664,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       targetVisibility: "installed_ice_position",
       targetServerLabel: "R&D",
       trashedCount: 1,
-      targetCardDefinitionId: "simple_barrier_ice",
+      targetCardDefinitionId: 589,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"/,
@@ -1695,7 +1683,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_card_implementation_trash_unrezzed_ice_no_target",
           name: "O:NR V1.9.22 Security Code WORM Chip No Target",
           cards: [
-            { id: "onr_v1_109_security-code-worm-chip", quantity: 1 },
+            { id: 321, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -1707,10 +1695,10 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.clicks = 4;
     const hqCard = moveCorpCardToHq(
       state,
-      "onr_v1_293_netwatch-credit-voucher",
+      505,
     );
     keepOnlyCorpHqCard(state, hqCard);
-    moveRunnerCardToGrip(state, "onr_v1_109_security-code-worm-chip");
+    moveRunnerCardToGrip(state, 321);
 
     state = apply(
       state,
@@ -1727,7 +1715,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         (action) =>
           action.type === "play_event" &&
           sourceDefinition(state, action) ===
-            "onr_v1_109_security-code-worm-chip",
+            321,
       ),
     ).toBe(false);
   });
@@ -1741,7 +1729,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_runner_successful_hq_run_corp_pay_to_retain_hq",
           name: "O:NR V1.9.22 Synchronized Attack on HQ",
           cards: [
-            { id: "onr_v1_113_synchronized-attack-on-hq", quantity: 1 },
+            { id: 325, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -1752,15 +1740,16 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.credits = 6;
     state.runner.clicks = 4;
     state.corp.credits = 4;
+    keepOnlyCorpHqCards(state, []);
     const hqCards = [
-      moveCorpCardCopyToHq(state, "simple_economy_operation"),
-      moveCorpCardCopyToHq(state, "simple_economy_operation"),
-      moveCorpCardCopyToHq(state, "simple_economy_operation"),
+      moveCorpCardCopyToHq(state, 596),
+      moveCorpCardCopyToHq(state, 596),
+      moveCorpCardCopyToHq(state, 596),
     ];
     keepOnlyCorpHqCards(state, hqCards);
     const eventCardId = moveRunnerCardToGrip(
       state,
-      "onr_v1_113_synchronized-attack-on-hq",
+      325,
     );
 
     expect(
@@ -1768,7 +1757,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         (action) =>
           action.type === "play_event" &&
           sourceDefinition(state, action) ===
-            "onr_v1_113_synchronized-attack-on-hq",
+            325,
       ),
     ).toBe(false);
     state = apply(
@@ -1787,7 +1776,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(state, action) ===
-          "onr_v1_113_synchronized-attack-on-hq",
+          325,
     );
     expect(legal.costs[0]?.credits).toBe(4);
     const wrongSide = applyAction(state, {
@@ -1818,7 +1807,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(state, action) ===
-          "onr_v1_113_synchronized-attack-on-hq",
+          325,
     );
     expect(state.pendingChoice?.source).toContain(
       "runner.successful_hq_run_corp_pay_to_retain_hq",
@@ -1829,7 +1818,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(getPlayerView(state, "corp").pendingChoice?.options).toHaveLength(3);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
-      cardDefinitionId: "onr_v1_113_synchronized-attack-on-hq",
+      cardDefinitionId: 325,
       abilityId: "successful_hq_run_corp_pay_to_retain_hq",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "successful_hq_run_corp_pay_to_retain_hq",
@@ -1883,7 +1872,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_v1922_valu_pak_software_bundle",
           name: "O:NR V1.9.22 Valu-Pak Software Bundle",
           cards: [
-            { id: "onr_v1_117_valu-pak-software-bundle", quantity: 1 },
+            { id: 329, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -1893,8 +1882,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     state.runner.credits = 2;
     state.runner.clicks = 4;
-    moveRunnerCardToGrip(state, "onr_v1_117_valu-pak-software-bundle");
-    const programId = moveRunnerCardToGrip(state, "simple_decoder");
+    moveRunnerCardToGrip(state, 329);
+    const programId = moveRunnerCardToGrip(state, 591);
 
     const legal = mustAction(
       state,
@@ -1902,7 +1891,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(state, action) ===
-          "onr_v1_117_valu-pak-software-bundle",
+          329,
     );
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
@@ -1932,7 +1921,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(state, action) ===
-          "onr_v1_117_valu-pak-software-bundle",
+          329,
     );
     expect(state.runner.clicks).toBe(8);
     expect(state.runnerTurnFlags?.valuPakProgramInstallActionsRemaining).toBe(
@@ -1945,7 +1934,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       state.runnerTurnFlags?.restrictedActionGrants?.valu_pak_program_install,
     ).toMatchObject({
       side: "runner",
-      sourceDefinitionId: "onr_v1_117_valu-pak-software-bundle",
+      sourceDefinitionId: 329,
       actionType: "install_card",
       remainingActions: 5,
       costProfile: "temporary_credit_bundle",
@@ -1957,7 +1946,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
-      cardDefinitionId: "onr_v1_117_valu-pak-software-bundle",
+      cardDefinitionId: 329,
       abilityId: "program_install_action_bundle",
       gainedActions: 5,
       temporaryProgramInstallCredits: 1,
@@ -1970,7 +1959,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       bundleActions.some(
         (action) =>
           action.type === "install_card" &&
-          sourceDefinition(state, action) === "simple_decoder",
+          sourceDefinition(state, action) === 591,
       ),
     ).toBe(true);
     expect(
@@ -1988,7 +1977,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "simple_decoder",
+        sourceDefinition(state, action) === 591,
     );
     expect(state.runner.rig.programs).toContain(programId);
     expect(state.runner.credits).toBe(0);
@@ -2006,7 +1995,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "install_card",
-      cardDefinitionId: "simple_decoder",
+      cardDefinitionId: 591,
       abilityId: "program_install_action_bundle",
       valuPakInstallActionSpent: true,
       valuPakProgramInstallActionsRemaining: 4,
@@ -2074,7 +2063,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_valu_pak_full_mu",
           cards: [
-            { id: "onr_v1_117_valu-pak-software-bundle", quantity: 1 },
+            { id: 329, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -2085,16 +2074,16 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.credits = 20;
     state.runner.clicks = 4;
     state.runner.memoryLimit = 4;
-    moveRunnerCardToGrip(state, "onr_v1_117_valu-pak-software-bundle");
+    moveRunnerCardToGrip(state, 329);
     const targetId = moveRunnerCardToGrip(
       state,
-      "onr_v1_022_emergency-self-construct",
+      234,
     );
     const fillerIds = Object.values(state.cardInstances)
       .filter(
         (instance) =>
-          instance.definitionId === "simple_decoder" ||
-          instance.definitionId === "simple_fracter",
+          instance.definitionId === 591 ||
+          instance.definitionId === 597,
       )
       .slice(0, 4)
       .map((instance) => instance.instanceId);
@@ -2120,7 +2109,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(state, action) ===
-          "onr_v1_117_valu-pak-software-bundle",
+          329,
     );
     const installAction = getLegalActions(state, "runner").find(
       (action) =>
@@ -2166,7 +2155,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_v1922_japanese_water_torture",
           name: "O:NR V1.9.22 Japanese Water Torture",
           cards: [
-            { id: "onr_v1_037_japanese-water-torture", quantity: 1 },
+            { id: 249, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -2183,11 +2172,11 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.memoryLimit = 4;
     state.corp.credits = 20;
     state.corp.maxHandSize = 99;
-    moveRunnerCardToGrip(state, "onr_v1_037_japanese-water-torture");
+    moveRunnerCardToGrip(state, 249);
     const iceId = putCorpIceOnServer(
       state,
       "archives",
-      "onr_v1_232_crystal-wall",
+      444,
     );
 
     state = apply(
@@ -2195,14 +2184,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_037_japanese-water-torture",
+        sourceDefinition(state, action) === 249,
     );
     expect(state.runner.credits).toBe(13);
     expect(state.runner.memoryUsed).toBe(1);
     const tortureId = state.runner.rig.programs.find(
       (id) =>
         state.cardInstances[id]?.definitionId ===
-        "onr_v1_037_japanese-water-torture",
+        249,
     );
     expect(tortureId).toBeDefined();
 
@@ -2224,7 +2213,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         (action) =>
           action.type === "break_subroutine" &&
           sourceDefinition(state, action) ===
-            "onr_v1_037_japanese-water-torture",
+            249,
       ),
     ).toBe(false);
 
@@ -2235,13 +2224,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         (action) =>
           action.type === "pump_breaker" &&
           sourceDefinition(state, action) ===
-            "onr_v1_037_japanese-water-torture",
+            249,
       );
     }
     expect(state.runnerTurnFlags?.forgoNextActionsPending).toBe(3);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "pump_breaker",
-      cardDefinitionId: "onr_v1_037_japanese-water-torture",
+      cardDefinitionId: 249,
       abilityId: "variable_pump_future_action_debt",
       futureActionDebtAdded: 1,
       futureActionDebtPending: 3,
@@ -2254,7 +2243,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "break_subroutine" &&
         sourceDefinition(state, action) ===
-          "onr_v1_037_japanese-water-torture" &&
+          249 &&
         action.payload?.subroutineIndex === 0,
     );
     expect(legal.costs[0]?.credits).toBe(0);
@@ -2286,7 +2275,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.run?.brokenSubroutineIndexes).toContain(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "break_subroutine",
-      cardDefinitionId: "onr_v1_037_japanese-water-torture",
+      cardDefinitionId: 249,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"/,
@@ -2329,7 +2318,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_v1922_japanese_water_torture_quandary",
           name: "O:NR V1.9.22 Japanese Water Torture Quandary",
           cards: [
-            { id: "onr_v1_037_japanese-water-torture", quantity: 1 },
+            { id: 249, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -2338,7 +2327,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_corp_v1922_japanese_water_torture_quandary",
           name: "O:NR V1.9.22 Japanese Water Torture Quandary Corp",
           cards: [
-            { id: "onr_v1_261_quandary", quantity: 1 },
+            { id: 473, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -2348,20 +2337,20 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.credits = 20;
     state.runner.memoryLimit = 4;
     state.corp.credits = 20;
-    moveRunnerCardToGrip(state, "onr_v1_037_japanese-water-torture");
-    const iceId = putCorpIceOnServer(state, "hq", "onr_v1_261_quandary");
+    moveRunnerCardToGrip(state, 249);
+    const iceId = putCorpIceOnServer(state, "hq", 473);
 
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_037_japanese-water-torture",
+        sourceDefinition(state, action) === 249,
     );
     const tortureId = state.runner.rig.programs.find(
       (id) =>
         state.cardInstances[id]?.definitionId ===
-        "onr_v1_037_japanese-water-torture",
+        249,
     );
     expect(tortureId).toBeDefined();
 
@@ -2383,7 +2372,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         (action) =>
           action.type === "pump_breaker" &&
           sourceDefinition(state, action) ===
-            "onr_v1_037_japanese-water-torture",
+            249,
       ),
     ).toBe(false);
     expect(
@@ -2391,7 +2380,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         (action) =>
           action.type === "break_subroutine" &&
           sourceDefinition(state, action) ===
-            "onr_v1_037_japanese-water-torture",
+            249,
       ),
     ).toBe(false);
   });
@@ -2405,8 +2394,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_v1922_hammer",
           name: "O:NR V1.9.22 Hammer",
           cards: [
-            { id: "onr_v1_011_cloak", quantity: 1 },
-            { id: "onr_v1_031_hammer", quantity: 1 },
+            { id: 223, quantity: 1 },
+            { id: 243, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -2422,29 +2411,29 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.clicks = 4;
     state.runner.memoryLimit = 4;
     state.corp.credits = 20;
-    moveRunnerCardToGrip(state, "onr_v1_011_cloak");
-    moveRunnerCardToGrip(state, "onr_v1_031_hammer");
-    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_232_crystal-wall");
+    moveRunnerCardToGrip(state, 223);
+    moveRunnerCardToGrip(state, 243);
+    const iceId = putCorpIceOnServer(state, "rd", 444);
 
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_011_cloak",
+        sourceDefinition(state, action) === 223,
     );
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_031_hammer",
+        sourceDefinition(state, action) === 243,
     );
     const cloakId = state.runner.rig.programs.find(
-      (id) => state.cardInstances[id]?.definitionId === "onr_v1_011_cloak",
+      (id) => state.cardInstances[id]?.definitionId === 223,
     );
     const hammerId = state.runner.rig.programs.find(
-      (id) => state.cardInstances[id]?.definitionId === "onr_v1_031_hammer",
+      (id) => state.cardInstances[id]?.definitionId === 243,
     );
     expect(cloakId).toBeDefined();
     expect(hammerId).toBeDefined();
@@ -2471,7 +2460,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinition(state, action) === "onr_v1_031_hammer",
+        sourceDefinition(state, action) === 243,
     );
 
     const legal = mustAction(
@@ -2479,7 +2468,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         action.type === "break_subroutine" &&
-        sourceDefinition(state, action) === "onr_v1_031_hammer" &&
+        sourceDefinition(state, action) === 243 &&
         action.payload?.subroutineIndex === 0,
     );
     expect(legal.costs[0]?.credits).toBe(1);
@@ -2512,7 +2501,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(cardCounterAmount(state, cloakId, "bit")).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "break_subroutine",
-      cardDefinitionId: "onr_v1_031_hammer",
+      cardDefinitionId: 243,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"/,
@@ -2531,9 +2520,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_v1922_hammer_choice",
           name: "O:NR V1.9.22 Hammer Choice",
           cards: [
-            { id: "onr_v1_011_cloak", quantity: 1 },
-            { id: "onr_v1_031_hammer", quantity: 1 },
-            { id: "onr_v1_035_invisibility", quantity: 1 },
+            { id: 223, quantity: 1 },
+            { id: 243, quantity: 1 },
+            { id: 247, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -2549,38 +2538,38 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.clicks = 4;
     state.runner.memoryLimit = 5;
     state.corp.credits = 20;
-    moveRunnerCardToGrip(state, "onr_v1_011_cloak");
-    moveRunnerCardToGrip(state, "onr_v1_031_hammer");
-    moveRunnerCardToGrip(state, "onr_v1_035_invisibility");
-    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_232_crystal-wall");
+    moveRunnerCardToGrip(state, 223);
+    moveRunnerCardToGrip(state, 243);
+    moveRunnerCardToGrip(state, 247);
+    const iceId = putCorpIceOnServer(state, "rd", 444);
 
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_011_cloak",
+        sourceDefinition(state, action) === 223,
     );
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_035_invisibility",
+        sourceDefinition(state, action) === 247,
     );
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_031_hammer",
+        sourceDefinition(state, action) === 243,
     );
     const cloakId = state.runner.rig.programs.find(
-      (id) => state.cardInstances[id]?.definitionId === "onr_v1_011_cloak",
+      (id) => state.cardInstances[id]?.definitionId === 223,
     );
     const invisibilityId = state.runner.rig.programs.find(
       (id) =>
-        state.cardInstances[id]?.definitionId === "onr_v1_035_invisibility",
+        state.cardInstances[id]?.definitionId === 247,
     );
     expect(cloakId).toBeDefined();
     expect(invisibilityId).toBeDefined();
@@ -2605,14 +2594,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinition(state, action) === "onr_v1_031_hammer",
+        sourceDefinition(state, action) === 243,
     );
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "break_subroutine" &&
-        sourceDefinition(state, action) === "onr_v1_031_hammer" &&
+        sourceDefinition(state, action) === 243 &&
         action.payload?.subroutineIndex === 0,
     );
 
@@ -2625,7 +2614,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.pendingChoice?.maxSelections).toBe(2);
     expect(state.pendingChoice?.continuation).toMatchObject({
       family: "runner_post_break_stealth_loss",
-      originActionId: expect.stringContaining("runner.break_subroutine"),
+      originActionId: expect.stringContaining("r3"),
       requiredLoss: 2,
       sourceMode: "any_stealth_cards",
       createdAtStateVersion: state.stateVersion,
@@ -2633,7 +2622,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "break_subroutine",
-      cardDefinitionId: "onr_v1_031_hammer",
+      cardDefinitionId: 243,
       postBreakStealthLossPending: 2,
     });
 
@@ -2680,7 +2669,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_v1922_flak",
           name: "O:NR V1.9.22 Flak",
           cards: [
-            { id: "onr_v1_027_flak", quantity: 1 },
+            { id: 239, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -2689,7 +2678,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_corp_v1922_flak_ap",
           name: "O:NR V1.9.22 Flak AP ICE Corp",
           cards: [
-            { id: "onr_v1_224_bolter-cluster", quantity: 1 },
+            { id: 436, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -2700,20 +2689,20 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.clicks = 4;
     state.runner.memoryLimit = 4;
     state.corp.credits = 20;
-    moveRunnerCardToGrip(state, "onr_v1_027_flak");
-    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_224_bolter-cluster");
+    moveRunnerCardToGrip(state, 239);
+    const iceId = putCorpIceOnServer(state, "rd", 436);
 
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_027_flak",
+        sourceDefinition(state, action) === 239,
     );
     expect(state.runner.credits).toBe(16);
     expect(state.runner.memoryUsed).toBe(1);
     const flakId = state.runner.rig.programs.find(
-      (id) => state.cardInstances[id]?.definitionId === "onr_v1_027_flak",
+      (id) => state.cardInstances[id]?.definitionId === 239,
     );
     expect(flakId).toBeDefined();
 
@@ -2734,7 +2723,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       getLegalActions(state, "runner").some(
         (action) =>
           action.type === "break_subroutine" &&
-          sourceDefinition(state, action) === "onr_v1_027_flak",
+          sourceDefinition(state, action) === 239,
       ),
     ).toBe(false);
     state = apply(
@@ -2742,14 +2731,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinition(state, action) === "onr_v1_027_flak",
+        sourceDefinition(state, action) === 239,
     );
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinition(state, action) === "onr_v1_027_flak",
+        sourceDefinition(state, action) === 239,
     );
 
     const legal = mustAction(
@@ -2757,7 +2746,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         action.type === "break_subroutine" &&
-        sourceDefinition(state, action) === "onr_v1_027_flak" &&
+        sourceDefinition(state, action) === 239 &&
         action.payload?.subroutineIndex === 0,
     );
     expect(legal.costs[0]?.credits).toBe(1);
@@ -2789,7 +2778,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.run?.brokenSubroutineIndexes).toContain(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "break_subroutine",
-      cardDefinitionId: "onr_v1_027_flak",
+      cardDefinitionId: 239,
       title: "Flak",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
@@ -2814,7 +2803,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_v1922_reflector",
           name: "O:NR V1.9.22 Reflector",
           cards: [
-            { id: "onr_v1_055_reflector", quantity: 1 },
+            { id: 267, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -2823,7 +2812,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_corp_v1922_reflector",
           name: "O:NR V1.9.22 Reflector Tagged ICE Corp",
           cards: [
-            { id: "onr_v1_271_tko-2-0", quantity: 1 },
+            { id: 483, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -2834,15 +2823,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.clicks = 4;
     state.runner.memoryLimit = 4;
     state.corp.credits = 20;
-    moveRunnerCardToGrip(state, "onr_v1_055_reflector");
-    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_271_tko-2-0");
+    moveRunnerCardToGrip(state, 267);
+    const iceId = putCorpIceOnServer(state, "rd", 483);
 
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_055_reflector",
+        sourceDefinition(state, action) === 267,
     );
     expect(state.runner.credits).toBe(8);
     expect(state.runner.memoryUsed).toBe(1);
@@ -2864,7 +2853,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     const breakActions = getLegalActions(state, "runner").filter(
       (action) =>
         action.type === "break_subroutine" &&
-        sourceDefinition(state, action) === "onr_v1_055_reflector",
+        sourceDefinition(state, action) === 267,
     );
     expect(
       breakActions.map((action) => action.payload?.subroutineIndex),
@@ -2899,12 +2888,12 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       getLegalActions(state, "runner").some(
         (action) =>
           action.type === "break_subroutine" &&
-          sourceDefinition(state, action) === "onr_v1_055_reflector",
+          sourceDefinition(state, action) === 267,
       ),
     ).toBe(false);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "break_subroutine",
-      cardDefinitionId: "onr_v1_055_reflector",
+      cardDefinitionId: 267,
       title: "Reflector",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
@@ -2918,42 +2907,42 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
   it("installs V1.9.22 install-only runner programs while keeping their abilities gated", () => {
     const installOnlyPrograms = [
       {
-        definitionId: "onr_v1_026_false-echo",
+        definitionId: 238,
         expectedCreditsAfter: 10,
         expectedMemoryUsed: 1,
       },
       {
-        definitionId: "onr_v1_044_netspace-inverter",
+        definitionId: 256,
         expectedCreditsAfter: 10,
         expectedMemoryUsed: 1,
       },
       {
-        definitionId: "onr_v1_048_poltergeist",
+        definitionId: 260,
         expectedCreditsAfter: 10,
         expectedMemoryUsed: 1,
       },
       {
-        definitionId: "onr_v1_051_rabbit",
+        definitionId: 263,
         expectedCreditsAfter: 10,
         expectedMemoryUsed: 1,
       },
       {
-        definitionId: "onr_v1_057_scatter-shot",
+        definitionId: 269,
         expectedCreditsAfter: 10,
         expectedMemoryUsed: 1,
       },
       {
-        definitionId: "onr_v1_067_speed-trap",
+        definitionId: 279,
         expectedCreditsAfter: 10,
         expectedMemoryUsed: 1,
       },
       {
-        definitionId: "onr_v1_068_startup-immolator",
+        definitionId: 280,
         expectedCreditsAfter: 10,
         expectedMemoryUsed: 1,
       },
       {
-        definitionId: "onr_v1_075_zetatech-software-installer",
+        definitionId: 287,
         expectedCreditsAfter: 10,
         expectedMemoryUsed: 1,
       },
@@ -2998,9 +2987,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         clientKnownStateVersion: state.stateVersion,
         idempotencyKey: `v1922-${definitionId}-wrong-side`,
       });
-      expect(wrongSide.ok, definitionId).toBe(false);
+      expect(wrongSide.ok, String(definitionId)).toBe(false);
       if (!wrongSide.ok)
-        expect(wrongSide.error.code, definitionId).toBe("ERR_WRONG_SIDE");
+        expect(wrongSide.error.code, String(definitionId)).toBe("ERR_WRONG_SIDE");
 
       const stale = applyAction(state, {
         matchId: state.matchId,
@@ -3009,9 +2998,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         clientKnownStateVersion: state.stateVersion - 1,
         idempotencyKey: `v1922-${definitionId}-stale`,
       });
-      expect(stale.ok, definitionId).toBe(false);
+      expect(stale.ok, String(definitionId)).toBe(false);
       if (!stale.ok)
-        expect(stale.error.code, definitionId).toBe("ERR_STALE_STATE");
+        expect(stale.error.code, String(definitionId)).toBe("ERR_STALE_STATE");
 
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;
@@ -3023,39 +3012,39 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           sourceDefinition(state, action) === definitionId,
       );
 
-      expect(state.runner.credits, definitionId).toBe(expectedCreditsAfter);
-      expect(state.runner.memoryUsed, definitionId).toBe(expectedMemoryUsed);
+      expect(state.runner.credits, String(definitionId)).toBe(expectedCreditsAfter);
+      expect(state.runner.memoryUsed, String(definitionId)).toBe(expectedMemoryUsed);
       expect(
         state.runner.rig.programs.map(
           (id) => state.cardInstances[id]?.definitionId,
         ),
-        definitionId,
+        String(definitionId),
       ).toContain(definitionId);
       expect(
         getLegalActions(state, "runner").some(
           (action) => sourceDefinition(state, action) === definitionId,
         ),
-        definitionId,
+        String(definitionId),
       ).toBe(false);
       expect(
         getPlayerView(state, "runner").own.rig?.some(
           (card) => card.definitionId === definitionId,
         ),
-        definitionId,
+        String(definitionId),
       ).toBe(true);
       expect(
         getPlayerView(state, "corp").opponent.rig?.some(
           (card) => card.definitionId === definitionId,
         ),
-        definitionId,
+        String(definitionId),
       ).toBe(true);
       expect(
         JSON.stringify(state.eventLog.at(-1)?.publicPayload),
-        definitionId,
+        String(definitionId),
       ).not.toMatch(/"privatePayload"|"cardInstances"|"hq"|"rd"/);
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.errors, definitionId).toEqual([]);
-      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+      expect(replay.errors, String(definitionId)).toEqual([]);
+      expect(hashState(replay.state), String(definitionId)).toBe(hashState(state));
     }
   });
 
@@ -3069,8 +3058,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_v1922_zetatech_software_installer_recurring",
           name: "O:NR V1.9.22 Zetatech Software Installer Recurring",
           cards: [
-            { id: "onr_v1_075_zetatech-software-installer", quantity: 1 },
-            { id: "onr_v1_031_hammer", quantity: 1 },
+            { id: 287, quantity: 1 },
+            { id: 243, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -3082,9 +3071,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.memoryLimit = 4;
     const installerId = moveRunnerCardToGrip(
       state,
-      "onr_v1_075_zetatech-software-installer",
+      287,
     );
-    const hammerId = moveRunnerCardToGrip(state, "onr_v1_031_hammer");
+    const hammerId = moveRunnerCardToGrip(state, 243);
 
     state = apply(
       state,
@@ -3092,7 +3081,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "install_card" &&
         sourceDefinition(state, action) ===
-          "onr_v1_075_zetatech-software-installer",
+          287,
     );
 
     expect(state.runner.credits).toBe(0);
@@ -3103,7 +3092,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "install_card" &&
         action.source === hammerId &&
-        sourceDefinition(state, action) === "onr_v1_031_hammer",
+        sourceDefinition(state, action) === 243,
     );
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
@@ -3131,7 +3120,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_031_hammer",
+        sourceDefinition(state, action) === 243,
     );
 
     expect(state.runner.credits).toBe(0);
@@ -3139,7 +3128,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.runner.rig.programs).toContain(hammerId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "install_card",
-      cardDefinitionId: "onr_v1_031_hammer",
+      cardDefinitionId: 243,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/,
@@ -3172,8 +3161,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_v1922_zetatech_payment_choice",
           name: "O:NR V1.9.22 Zetatech Payment Choice",
           cards: [
-            { id: "onr_v1_075_zetatech-software-installer", quantity: 1 },
-            { id: "onr_v1_031_hammer", quantity: 1 },
+            { id: 287, quantity: 1 },
+            { id: 243, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -3185,9 +3174,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.memoryLimit = 4;
     const installerId = moveRunnerCardToGrip(
       state,
-      "onr_v1_075_zetatech-software-installer",
+      287,
     );
-    const hammerId = moveRunnerCardToGrip(state, "onr_v1_031_hammer");
+    const hammerId = moveRunnerCardToGrip(state, 243);
 
     state = apply(
       state,
@@ -3195,7 +3184,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "install_card" &&
         sourceDefinition(state, action) ===
-          "onr_v1_075_zetatech-software-installer",
+          287,
     );
     state.runner.credits = 2;
 
@@ -3241,7 +3230,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       runnerInstallNormalCreditsPaid: 1,
       runnerInstallHostedCreditsPaid: 1,
       runnerInstallPaymentSourceDefinitionIds:
-        "onr_v1_075_zetatech-software-installer",
+        "287",
     });
     expect(
       JSON.stringify(oneBitState.eventLog.at(-1)?.publicPayload),
@@ -3272,8 +3261,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_v1922_zetatech_multiple_sources",
           name: "O:NR V1.9.22 Zetatech Multiple Sources",
           cards: [
-            { id: "onr_v1_075_zetatech-software-installer", quantity: 2 },
-            { id: "onr_v1_031_hammer", quantity: 1 },
+            { id: 287, quantity: 2 },
+            { id: 243, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -3285,12 +3274,12 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.memoryLimit = 6;
     const firstInstallerId = moveRunnerCardToGrip(
       state,
-      "onr_v1_075_zetatech-software-installer",
+      287,
     );
     const secondInstallerId = Object.entries(state.cardInstances).find(
       ([cardId, instance]) =>
         cardId !== firstInstallerId &&
-        instance.definitionId === "onr_v1_075_zetatech-software-installer",
+        instance.definitionId === 287,
     )?.[0] as CardInstanceId | undefined;
     if (!secondInstallerId) throw new Error("Missing second Zetatech instance");
     state.runner.stack = state.runner.stack.filter(
@@ -3303,7 +3292,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       faceup: true,
       rezzed: true,
     };
-    const hammerId = moveRunnerCardToGrip(state, "onr_v1_031_hammer");
+    const hammerId = moveRunnerCardToGrip(state, 243);
 
     state = apply(
       state,
@@ -3311,7 +3300,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "install_card" &&
         sourceDefinition(state, action) ===
-          "onr_v1_075_zetatech-software-installer",
+          287,
     );
     state = apply(
       state,
@@ -3319,7 +3308,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "install_card" &&
         sourceDefinition(state, action) ===
-          "onr_v1_075_zetatech-software-installer",
+          287,
     );
     state.runner.credits = 1;
 
@@ -3327,7 +3316,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       .filter(
         (cardId) =>
           state.cardInstances[cardId]?.definitionId ===
-          "onr_v1_075_zetatech-software-installer",
+          287,
       )
       .sort();
     expect(installerIds).toHaveLength(2);
@@ -3383,8 +3372,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_v1922_zetatech_overwrite",
           name: "O:NR V1.9.22 Zetatech Overwrite",
           cards: [
-            { id: "onr_v1_075_zetatech-software-installer", quantity: 1 },
-            { id: "onr_v1_031_hammer", quantity: 1 },
+            { id: 287, quantity: 1 },
+            { id: 243, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -3396,9 +3385,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.memoryLimit = 1;
     const installerId = moveRunnerCardToGrip(
       state,
-      "onr_v1_075_zetatech-software-installer",
+      287,
     );
-    const hammerId = moveRunnerCardToGrip(state, "onr_v1_031_hammer");
+    const hammerId = moveRunnerCardToGrip(state, 243);
 
     state = apply(
       state,
@@ -3406,7 +3395,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "install_card" &&
         sourceDefinition(state, action) ===
-          "onr_v1_075_zetatech-software-installer",
+          287,
     );
     expect(state.runner.memoryUsed).toBe(1);
     expect(cardCounterAmount(state, installerId, "bit")).toBe(2);
@@ -3474,7 +3463,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       trashedCount: 1,
-      trashedCardDefinitionIds: "onr_v1_075_zetatech-software-installer",
+      trashedCardDefinitionIds: "287",
       installed: true,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
@@ -3498,8 +3487,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "spotcheck_false_echo_netspace_runner",
           name: "Spotcheck False Echo Netspace Runner",
           cards: [
-            { id: "onr_v1_026_false-echo", quantity: 1 },
-            { id: "onr_v1_044_netspace-inverter", quantity: 1 },
+            { id: 238, quantity: 1 },
+            { id: 256, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -3508,9 +3497,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "spotcheck_false_echo_netspace_corp",
           name: "Spotcheck False Echo Netspace Corp",
           cards: [
-            { id: "simple_economy_asset", quantity: 1 },
-            { id: "simple_barrier_ice", quantity: 1 },
-            { id: "simple_code_gate_ice", quantity: 1 },
+            { id: 594, quantity: 1 },
+            { id: 589, quantity: 1 },
+            { id: 590, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -3518,25 +3507,25 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     state.runner.credits = 10;
     state.corp.credits = 10;
-    installRunnerProgramForTest(state, "onr_v1_026_false-echo");
-    installRunnerProgramForTest(state, "onr_v1_044_netspace-inverter");
-    putCorpRootInRemote(state, "simple_economy_asset");
+    installRunnerProgramForTest(state, 238);
+    installRunnerProgramForTest(state, 256);
+    putCorpRootInRemote(state, 594);
     const innerIce = putCorpIceOnServer(
       state,
-      "remote_1",
-      "simple_barrier_ice",
+      "r1",
+      589,
     );
     const outerIce = putCorpIceOnServer(
       state,
-      "remote_1",
-      "simple_code_gate_ice",
+      "r1",
+      590,
     );
 
     state = apply(
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "corp", (action) => action.type === "decline_rez");
     state = apply(state, "runner", (action) => action.type === "continue_run");
@@ -3618,7 +3607,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) => action.actionId === reverse.actionId,
     );
     expect(
-      reverseState.corp.servers.find((server) => server.id === "remote_1")?.ice,
+      reverseState.corp.servers.find((server) => server.id === "r1")?.ice,
     ).toEqual([outerIce, innerIce]);
     expect(reverseState.eventLog.at(-1)?.publicPayload).toMatchObject({
       abilityId: "successful_run_reverse_ice",
@@ -3639,8 +3628,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "spotcheck_arasaka_pandora_runner",
           name: "Spotcheck Arasaka Pandora Runner",
           cards: [
-            { id: "onr_v1_119_arasaka-portable-prototype", quantity: 1 },
-            { id: "onr_v1_136_pandoras-deck", quantity: 1 },
+            { id: 331, quantity: 1 },
+            { id: 348, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -3648,10 +3637,10 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       }),
     );
     state.runner.credits = 20;
-    const pandoraId = moveRunnerCardToGrip(state, "onr_v1_136_pandoras-deck");
+    const pandoraId = moveRunnerCardToGrip(state, 348);
     const arasakaId = moveRunnerCardToGrip(
       state,
-      "onr_v1_119_arasaka-portable-prototype",
+      331,
     );
 
     expect(
@@ -3659,16 +3648,16 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         (action) =>
           action.type === "install_card" &&
           sourceDefinition(state, action) ===
-            "onr_v1_119_arasaka-portable-prototype",
+            331,
       ),
     ).toBe(false);
-    const spentAgendaId = scoreRunnerAgendaForTest(state, "simple_agenda");
+    const spentAgendaId = scoreRunnerAgendaForTest(state, 588);
 
     state = apply(
       state,
       "runner",
       (action) =>
-        sourceDefinition(state, action) === "onr_v1_136_pandoras-deck",
+        sourceDefinition(state, action) === 348,
     );
     expect(getPlayerView(state, "runner").own.memoryLimit).toBe(6);
     expect(cardCounterAmount(state, pandoraId, "bit")).toBe(3);
@@ -3677,7 +3666,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         sourceDefinition(state, action) ===
-        "onr_v1_119_arasaka-portable-prototype",
+        331,
     );
     expect(state.runner.heap).toContain(pandoraId);
     expect(state.runner.rig.hardware).toContain(arasakaId);
@@ -3689,7 +3678,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     expect(state.cardInstances[spentAgendaId]?.agendaPointsSpent).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      cardDefinitionId: "onr_v1_119_arasaka-portable-prototype",
+      cardDefinitionId: 331,
       deckUniqueReplacement: true,
       agendaPointCostPaid: 1,
       spentAgendaCardId: spentAgendaId,
@@ -3705,8 +3694,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "spotcheck_eagle_techtronica_runner",
           name: "Spotcheck Eagle Techtronica Runner",
           cards: [
-            { id: "onr_v1_140_raven-microcyb-eagle", quantity: 1 },
-            { id: "onr_v1_143_techtronica-utility-suit", quantity: 1 },
+            { id: 352, quantity: 1 },
+            { id: 355, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -3716,18 +3705,18 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     followUpState.runner.credits = 30;
     const eagleId = moveRunnerCardToGrip(
       followUpState,
-      "onr_v1_140_raven-microcyb-eagle",
+      352,
     );
     const techtronicaId = moveRunnerCardToGrip(
       followUpState,
-      "onr_v1_143_techtronica-utility-suit",
+      355,
     );
     followUpState = apply(
       followUpState,
       "runner",
       (action) =>
         sourceDefinition(followUpState, action) ===
-        "onr_v1_140_raven-microcyb-eagle",
+        352,
     );
     expect(followUpState.runner.rig.hardware).toContain(eagleId);
     followUpState = apply(
@@ -3735,27 +3724,27 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         sourceDefinition(followUpState, action) ===
-        "onr_v1_143_techtronica-utility-suit",
+        355,
     );
     expect(followUpState.runner.heap).toContain(eagleId);
     expect(followUpState.runner.rig.hardware).not.toContain(eagleId);
     expect(followUpState.runner.rig.hardware).toContain(techtronicaId);
     expect(followUpState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      cardDefinitionId: "onr_v1_143_techtronica-utility-suit",
+      cardDefinitionId: 355,
       deckUniqueReplacement: true,
     });
   });
 
   it("loads P3.40/P3.41 hardware decks through CardImplementation bits and memory modifiers", () => {
     for (const [definitionId, expectedMu, expectedBits] of [
-      ["onr_v1_119_arasaka-portable-prototype", 3, 3],
-      ["onr_v1_122_artemis-2020", 2, 2],
-      ["onr_v1_136_pandoras-deck", 2, 3],
-      ["onr_v1_137_parraline-5750", 1, 1],
-      ["onr_v1_138_pk-6089a", 1, 3],
-      ["onr_v1_140_raven-microcyb-eagle", 1, 1],
-      ["onr_v1_141_raven-microcyb-owl", 1, 3],
-      ["onr_v1_143_techtronica-utility-suit", 1, 5],
+      [331, 3, 3],
+      [334, 2, 2],
+      [348, 2, 3],
+      [349, 1, 1],
+      [350, 1, 3],
+      [352, 1, 1],
+      [353, 1, 3],
+      [355, 1, 5],
     ] as const) {
       let state = toRunnerTurn(
         createGameAfterSetup({
@@ -3776,8 +3765,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       );
       state.runner.credits = 30;
       const cardId = moveRunnerCardToGrip(state, definitionId);
-      if (definitionId === "onr_v1_119_arasaka-portable-prototype")
-        scoreRunnerAgendaForTest(state, "simple_agenda");
+      if (definitionId === 331)
+        scoreRunnerAgendaForTest(state, 588);
       const memoryBefore = getPlayerView(state, "runner").own.memoryLimit ?? 0;
       state = apply(
         state,
@@ -3791,9 +3780,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       );
       if (
         [
-          "onr_v1_140_raven-microcyb-eagle",
-          "onr_v1_141_raven-microcyb-owl",
-          "onr_v1_143_techtronica-utility-suit",
+          352,
+          353,
+          355,
         ].includes(definitionId)
       ) {
         expect(CARD_DEFINITIONS_BY_ID[definitionId]?.memoryLimitBonus).toBe(1);
@@ -3803,7 +3792,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           )?.memoryLimitBonus,
         ).toBe(1);
       }
-      if (definitionId === "onr_v1_143_techtronica-utility-suit")
+      if (definitionId === 355)
         expect(CARD_DEFINITIONS_BY_ID[definitionId]?.recurringCredits).toBe(5);
       expect(cardCounterAmount(state, cardId, "bit")).toBe(expectedBits);
       expect(cardCounterAmount(state, cardId, "recurring_credit")).toBe(0);
@@ -3812,7 +3801,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         hostedCreditsAdded: expectedBits,
         counterType: "bit",
       });
-      if (definitionId === "onr_v1_119_arasaka-portable-prototype")
+      if (definitionId === 331)
         expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
           agendaPointCostPaid: 1,
         });
@@ -3821,9 +3810,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
 
   it("uses P3.40 deck bits for allowed icebreaker and link-payment contexts only", () => {
     for (const [definitionId, expectedAfterPump] of [
-      ["onr_v1_119_arasaka-portable-prototype", 2],
-      ["onr_v1_122_artemis-2020", 1],
-      ["onr_v1_137_parraline-5750", 0],
+      [331, 2],
+      [334, 1],
+      [349, 0],
     ] as const) {
       let state = toRunnerTurn(
         createGameAfterSetup({
@@ -3835,9 +3824,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
             name: `P3.40 ${definitionId} Icebreaker Runner`,
             cards: [
               { id: definitionId, quantity: 1 },
-              { id: "simple_decoder", quantity: 1 },
+              { id: 591, quantity: 1 },
               ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
-                (card) => card.id !== "simple_decoder",
+                (card) => card.id !== 591,
               ),
             ],
           },
@@ -3846,7 +3835,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
             id: `p340_${definitionId}_icebreaker_corp`,
             name: `P3.40 ${definitionId} Icebreaker Corp`,
             cards: [
-              { id: "simple_code_gate_ice", quantity: 1 },
+              { id: 590, quantity: 1 },
               ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
             ],
           },
@@ -3856,10 +3845,10 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       state.runner.credits = 30;
       state.runner.memoryLimit = 4;
       const deckId = moveRunnerCardToGrip(state, definitionId);
-      moveRunnerCardToGrip(state, "simple_decoder");
-      if (definitionId === "onr_v1_119_arasaka-portable-prototype")
-        scoreRunnerAgendaForTest(state, "simple_agenda");
-      const iceId = putCorpIceOnServer(state, "rd", "simple_code_gate_ice");
+      moveRunnerCardToGrip(state, 591);
+      if (definitionId === 331)
+        scoreRunnerAgendaForTest(state, 588);
+      const iceId = putCorpIceOnServer(state, "rd", 590);
       state = apply(
         state,
         "runner",
@@ -3867,7 +3856,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           action.type === "install_card" &&
           sourceDefinition(state, action) === definitionId,
       );
-      installRunnerProgramForTest(state, "simple_decoder");
+      installRunnerProgramForTest(state, 591);
       state.runner.credits = 0;
       state = apply(
         state,
@@ -3885,15 +3874,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         "runner",
         (action) =>
           action.type === "pump_breaker" &&
-          sourceDefinition(state, action) === "simple_decoder",
+          sourceDefinition(state, action) === 591,
       );
       expect(state.runner.credits).toBe(0);
       expect(cardCounterAmount(state, deckId, "bit")).toBe(expectedAfterPump);
     }
 
     for (const definitionId of [
-      "onr_v1_136_pandoras-deck",
-      "onr_v1_138_pk-6089a",
+      348,
+      350,
     ] as const) {
       let state = toRunnerTurn(
         createGameAfterSetup({
@@ -3913,9 +3902,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           corpDeck: {
             ...MECHANIC_SMOKE_DECKS.traceTags.corp,
             cards: [
-              { id: "onr_v1_246_fragmentation-storm", quantity: 1 },
+              { id: 458, quantity: 1 },
               ...MECHANIC_SMOKE_DECKS.traceTags.corp.cards.filter(
-                (card) => card.id !== "onr_v1_246_fragmentation-storm",
+                (card) => card.id !== 458,
               ),
             ],
           },
@@ -3933,8 +3922,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           sourceDefinition(state, action) === definitionId,
       );
       state.runner.credits = 0;
-      putCorpIceOnServer(state, "rd", "onr_v1_246_fragmentation-storm");
-      state = encounterIce(state, "rd", "onr_v1_246_fragmentation-storm");
+      putCorpIceOnServer(state, "rd", 458);
+      state = encounterIce(state, "rd", 458);
       state = apply(
         state,
         "runner",
@@ -3958,8 +3947,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "p340_owl_noisy_runner",
           name: "P3.40 Owl Noisy Runner",
           cards: [
-            { id: "onr_v1_141_raven-microcyb-owl", quantity: 1 },
-            { id: "onr_v1_036_jackhammer", quantity: 1 },
+            { id: 353, quantity: 1 },
+            { id: 248, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -3968,9 +3957,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "p340_owl_noisy_corp",
           name: "P3.40 Owl Noisy Corp",
           cards: [
-            { id: "onr_v1_232_crystal-wall", quantity: 1 },
+            { id: 444, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards.filter(
-              (card) => card.id !== "onr_v1_232_crystal-wall",
+              (card) => card.id !== 444,
             ),
           ],
         },
@@ -3979,26 +3968,26 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     owlState.runner.credits = 30;
     owlState.runner.memoryLimit = 4;
-    moveRunnerCardToGrip(owlState, "onr_v1_141_raven-microcyb-owl");
-    moveRunnerCardToGrip(owlState, "onr_v1_036_jackhammer");
+    moveRunnerCardToGrip(owlState, 353);
+    moveRunnerCardToGrip(owlState, 248);
     const wallId = putCorpIceOnServer(
       owlState,
       "rd",
-      "onr_v1_232_crystal-wall",
+      444,
     );
     owlState = apply(
       owlState,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(owlState, action) === "onr_v1_141_raven-microcyb-owl",
+        sourceDefinition(owlState, action) === 353,
     );
     owlState = apply(
       owlState,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(owlState, action) === "onr_v1_036_jackhammer",
+        sourceDefinition(owlState, action) === 248,
     );
     owlState.runner.credits = 0;
     owlState = apply(
@@ -4016,7 +4005,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       getLegalActions(owlState, "runner").some(
         (action) =>
           action.type === "pump_breaker" &&
-          sourceDefinition(owlState, action) === "onr_v1_036_jackhammer",
+          sourceDefinition(owlState, action) === 248,
       ),
     ).toBe(false);
   });
@@ -4031,8 +4020,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "spotcheck_roving_submarine_corp",
           name: "Spotcheck Roving Submarine Corp",
           cards: [
-            { id: "simple_economy_asset", quantity: 1 },
-            { id: "onr_v1_368_roving-submarine", quantity: 1 },
+            { id: 594, quantity: 1 },
+            { id: 580, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -4041,13 +4030,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state = apply(state, "runner", (action) => action.type === "end_turn");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 10;
-    moveCorpCardToHq(state, "onr_v1_368_roving-submarine");
+    moveCorpCardToHq(state, 580);
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_368_roving-submarine" &&
+        sourceDefinition(state, action) === 580 &&
         action.payload?.serverId === "new_remote",
     );
     const rovingId = state.corp.servers
@@ -4055,7 +4044,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       .find(
         (id) =>
           state.cardInstances[id]?.definitionId ===
-          "onr_v1_368_roving-submarine",
+          580,
       );
     expect(rovingId).toBeDefined();
     if (!rovingId) throw new Error("Missing Roving Submarine");
@@ -4073,7 +4062,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.cardInstances[lucidrineId] = {
       id: lucidrineId,
       instanceId: lucidrineId,
-      definitionId: "onr_v1_098_lucidrine-booster-drug",
+      definitionId: 310,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "grip" },
@@ -4096,7 +4085,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         (action) =>
           action.type === "play_event" &&
           sourceDefinition(state, action) ===
-            "onr_v1_098_lucidrine-booster-drug" &&
+            310 &&
           action.payload?.serverId === rovingServerId,
       ),
     ).toBe(true);
@@ -4118,7 +4107,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         (action) =>
           action.type === "play_event" &&
           sourceDefinition(state, action) ===
-            "onr_v1_098_lucidrine-booster-drug" &&
+            310 &&
           action.payload?.serverId === rovingServerId,
       ),
     ).toBe(false);
@@ -4134,7 +4123,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "spotcheck_speed_trap_runner",
           name: "Spotcheck Speed Trap Runner",
           cards: [
-            { id: "onr_v1_067_speed-trap", quantity: 1 },
+            { id: 279, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -4143,8 +4132,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "spotcheck_speed_trap_corp",
           name: "Spotcheck Speed Trap Corp",
           cards: [
-            { id: "simple_upgrade", quantity: 1 },
-            { id: "simple_barrier_ice", quantity: 1 },
+            { id: 606, quantity: 1 },
+            { id: 589, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -4152,9 +4141,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     state.runner.credits = 10;
     state.corp.credits = 10;
-    installRunnerProgramForTest(state, "onr_v1_067_speed-trap");
-    const upgradeId = putCorpRootInRemote(state, "simple_upgrade");
-    putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+    installRunnerProgramForTest(state, 279);
+    const upgradeId = putCorpRootInRemote(state, 606);
+    putCorpIceOnServer(state, "r1", 589);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
 
@@ -4162,7 +4151,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "corp", (action) => action.type === "decline_rez");
     expect(state.timingPoint).toBe("run.jack_out_window");
@@ -4182,7 +4171,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       actionType: "rez_card",
       abilityId: "rez_interrupt_jack_out_choice",
       rezInterruptChoiceOpened: true,
-      rezzedCardDefinitionId: "simple_upgrade",
+      rezzedCardDefinitionId: 606,
     });
 
     state = applyChoice(state, "runner", "jack_out");
@@ -4193,7 +4182,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       abilityId: "rez_interrupt_jack_out",
       rezInterruptUsed: true,
       successfulRunWithoutAccess: true,
-      rezzedCardDefinitionId: "simple_upgrade",
+      rezzedCardDefinitionId: 606,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/,
@@ -4213,7 +4202,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "spotcheck_speed_trap_pass_runner",
           name: "Spotcheck Speed Trap Pass Runner",
           cards: [
-            { id: "onr_v1_067_speed-trap", quantity: 1 },
+            { id: 279, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -4222,8 +4211,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "spotcheck_speed_trap_pass_corp",
           name: "Spotcheck Speed Trap Pass Corp",
           cards: [
-            { id: "simple_upgrade", quantity: 1 },
-            { id: "simple_barrier_ice", quantity: 1 },
+            { id: 606, quantity: 1 },
+            { id: 589, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -4231,15 +4220,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     state.runner.credits = 10;
     state.corp.credits = 10;
-    installRunnerProgramForTest(state, "onr_v1_067_speed-trap");
-    const upgradeId = putCorpRootInRemote(state, "simple_upgrade");
-    putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+    installRunnerProgramForTest(state, 279);
+    const upgradeId = putCorpRootInRemote(state, 606);
+    putCorpIceOnServer(state, "r1", 589);
 
     state = apply(
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "corp", (action) => action.type === "decline_rez");
     state = apply(state, "runner", (action) => action.type === "continue_run");
@@ -4278,7 +4267,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     });
   });
 
-  it("trashes fully-broken passed ice with Startup Immolator and revalidates the post-pass window", () => {
+  it("charges printed ICE rez cost for Startup Immolator despite Skälderviken's Corp discount", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-startup-immolator-trash-ice",
@@ -4288,7 +4277,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "spotcheck_startup_immolator_runner",
           name: "Spotcheck Startup Immolator Runner",
           cards: [
-            { id: "onr_v1_068_startup-immolator", quantity: 1 },
+            { id: 280, quantity: 1 },
+            { id: 251, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -4297,64 +4287,67 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "spotcheck_startup_immolator_corp",
           name: "Spotcheck Startup Immolator Corp",
           cards: [
-            { id: "simple_economy_asset", quantity: 1 },
-            { id: "simple_barrier_ice", quantity: 1 },
+            { id: 553, quantity: 1 },
+            { id: 492, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
       }),
     );
-    state.runner.credits = 20;
+    state.runner.credits = 23;
     state.corp.credits = 10;
-    installRunnerProgramForTest(state, "simple_fracter");
+    installRunnerProgramForTest(state, 251);
     const startupImmolatorId = installRunnerProgramForTest(
       state,
-      "onr_v1_068_startup-immolator",
+      280,
     );
-    putCorpRootInRemote(state, "simple_economy_asset");
-    const iceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+    const nodeId = putCorpRootInRemote(
+      state,
+      553,
+    );
+    state.cardInstances[nodeId]!.rezzed = true;
+    state.cardInstances[nodeId]!.faceup = true;
+    const iceId = putCorpIceOnServer(state, "rd", 492);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
 
-    state = apply(
-      state,
-      "runner",
-      (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    const isRunOnRd = (action: LegalAction) =>
+      action.type === "start_run" && action.payload?.serverId === "rd";
+    expect(mustAction(state, "runner", isRunOnRd).payload).not.toHaveProperty(
+      "runnerPostBreakTrashQuoteJson",
     );
-    state = apply(
-      state,
-      "corp",
-      (action) =>
-        action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "simple_barrier_ice",
+    state = apply(state, "runner", isRunOnRd);
+    const rez = mustAction(state, "corp", (action) => action.type === "rez_ice");
+    expect(rez.costs[0]?.credits).toBe(7);
+    state = apply(state, "corp", (action) => action.actionId === rez.actionId);
+    expect(state.corp.credits).toBe(3);
+    const preRunWithRezzedIce = structuredClone(initial);
+    preRunWithRezzedIce.cardInstances[iceId] = structuredClone(
+      state.cardInstances[iceId]!,
     );
+    const run = mustAction(preRunWithRezzedIce, "runner", isRunOnRd);
+    expect(
+      JSON.parse(String(run.payload?.runnerPostBreakTrashQuoteJson)),
+    ).toMatchObject({
+      targets: [{ targetIceInstanceId: iceId, trashCredits: 9 }],
+    });
     state = passCorpApproachRezWindowIfOpen(state);
-    state = apply(
-      state,
-      "runner",
-      (action) =>
-        action.type === "pump_breaker" &&
-        sourceDefinition(state, action) === "simple_fracter",
-    );
-    state = apply(
-      state,
-      "runner",
-      (action) =>
-        action.type === "break_subroutine" &&
-        sourceDefinition(state, action) === "simple_fracter",
-    );
+    for (const index of [0, 1, 2]) {
+      state = breakCurrentSubroutine(state, 251, index);
+    }
     state = apply(state, "runner", (action) => action.type === "continue_run");
-    const startupAction = mustAction(
-      state,
-      "runner",
-      (action) =>
-        action.type === "trigger_ability" &&
-        action.payload?.runnerUtilityAbility ===
-          "trash_fully_broken_passed_ice",
-    );
+    expect(state.runner.credits).toBe(9);
+    const isStartupAction = (action: LegalAction) =>
+      action.type === "trigger_ability" &&
+      action.payload?.runnerUtilityAbility === "trash_fully_broken_passed_ice";
+    const insufficientCredits = structuredClone(state);
+    insufficientCredits.runner.credits = 8;
+    expect(
+      getLegalActions(insufficientCredits, "runner").some(isStartupAction),
+    ).toBe(false);
+    const startupAction = mustAction(state, "runner", isStartupAction);
     expect(startupAction.payload?.targetIceId).toBe(iceId);
-    expect(startupAction.costs[0]?.credits).toBe(3);
+    expect(startupAction.costs[0]?.credits).toBe(9);
     expect(startupAction.payload).toMatchObject({
       cardImplementationTrashSourceCost: true,
       targetRezCost: true,
@@ -4367,30 +4360,24 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     expect(state.corp.archives).toContain(iceId);
     expect(
-      state.corp.servers.find((server) => server.id === "remote_1")?.ice,
+      state.corp.servers.find((server) => server.id === "rd")?.ice,
     ).not.toContain(iceId);
     expect(state.runner.heap).toContain(startupImmolatorId);
     expect(state.runner.rig.programs).not.toContain(startupImmolatorId);
-    expect(state.runner.credits).toBe(15);
-    expect(
-      getLegalActions(state, "runner").some(
-        (action) =>
-          action.type === "trigger_ability" &&
-          action.payload?.runnerUtilityAbility ===
-            "trash_fully_broken_passed_ice",
-      ),
-    ).toBe(false);
+    expect(state.runner.credits).toBe(0);
+    expect(getLegalActions(state, "runner").some(isStartupAction)).toBe(false);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "trigger_ability",
       runnerUtilityAbility: "trash_fully_broken_passed_ice",
       abilityKind: "trash_fully_broken_passed_ice",
-      rezCostPaid: 3,
-      trashedCardDefinitionId: "simple_barrier_ice",
+      rezCostPaid: 9,
+      serverId: "rd",
+      trashedCardDefinitionId: 492,
       trashedCount: 1,
       sourceTrashed: true,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/,
+      /"(?:privatePayload|cardInstances|grip|hq|rd)":/,
     );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -4407,9 +4394,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "spotcheck_microtech_backup_runner",
           name: "Spotcheck Microtech Backup Runner",
           cards: [
-            { id: "onr_v1_069_succubus", quantity: 1 },
-            { id: "onr_v1_036_jackhammer", quantity: 1 },
-            { id: "onr_v1_131_microtech-backup-drive", quantity: 1 },
+            { id: 281, quantity: 1 },
+            { id: 248, quantity: 1 },
+            { id: 343, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -4418,7 +4405,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "spotcheck_microtech_backup_corp",
           name: "Spotcheck Microtech Backup Corp",
           cards: [
-            { id: "onr_v1_233_d-arc-knight", quantity: 1 },
+            { id: 445, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -4427,22 +4414,22 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.credits = 30;
     state.runner.clicks = 10;
     state.corp.credits = 20;
-    moveRunnerCardToGrip(state, "onr_v1_131_microtech-backup-drive");
-    moveRunnerCardToGrip(state, "onr_v1_069_succubus");
-    moveRunnerCardToGrip(state, "onr_v1_036_jackhammer");
-    moveRunnerCardToGrip(state, "simple_fracter");
+    moveRunnerCardToGrip(state, 343);
+    moveRunnerCardToGrip(state, 281);
+    moveRunnerCardToGrip(state, 248);
+    moveRunnerCardToGrip(state, 597);
 
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_131_microtech-backup-drive",
+        sourceDefinition(state, action) === 343,
     );
     const microtechId = state.runner.rig.hardware.find(
       (id) =>
         state.cardInstances[id]?.definitionId ===
-        "onr_v1_131_microtech-backup-drive",
+        343,
     );
     expect(microtechId).toBeDefined();
     if (!microtechId) throw new Error("Missing Microtech Backup Drive");
@@ -4451,15 +4438,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_069_succubus",
+        sourceDefinition(state, action) === 281,
     );
     const succubusId = state.runner.rig.programs.find(
-      (id) => state.cardInstances[id]?.definitionId === "onr_v1_069_succubus",
+      (id) => state.cardInstances[id]?.definitionId === 281,
     );
     expect(succubusId).toBeDefined();
     if (!succubusId) throw new Error("Missing Succubus");
     const hostedIds: CardInstanceId[] = [];
-    for (const definitionId of ["onr_v1_036_jackhammer", "simple_fracter"]) {
+    for (const definitionId of [248, 597]) {
       const install = mustAction(
         state,
         "runner",
@@ -4477,8 +4464,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     }
     expect(hostedIds).toHaveLength(2);
     const memoryBeforeTrash = state.runner.memoryUsed;
-    putCorpIceOnServer(state, "rd", "onr_v1_233_d-arc-knight");
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    putCorpIceOnServer(state, "rd", 445);
+    putCorpCardOnTopOfRd(state, 596);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
 
@@ -4493,7 +4480,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "onr_v1_233_d-arc-knight",
+        sourceDefinition(state, action) === 445,
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = applyChoice(state, "corp", `card_${succubusId}`);
@@ -4526,7 +4513,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "activated_card_ability" &&
         sourceDefinition(state, action) ===
-          "onr_v1_131_microtech-backup-drive" &&
+          343 &&
         action.payload?.cardImplementationAbilityKey ===
           "abilities_activated_runner_main_move_top_hosted_program_to_grip",
     );
@@ -4544,9 +4531,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.runner.rig.programs).not.toContain(returnedId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",
-      sourceDefinitionId: "onr_v1_131_microtech-backup-drive",
+      sourceDefinitionId: 343,
       returnedToGrip: true,
-      returnedCardDefinitionId: "onr_v1_069_succubus",
+      returnedCardDefinitionId: 281,
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -4569,7 +4556,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_v1922_newsgroup_filter",
           name: "O:NR V1.9.22 Newsgroup Filter",
           cards: [
-            { id: "onr_v1_045_newsgroup-filter", quantity: 1 },
+            { id: 257, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -4580,21 +4567,21 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.credits = 10;
     state.runner.clicks = 4;
     state.runner.memoryLimit = 4;
-    moveRunnerCardToGrip(state, "onr_v1_045_newsgroup-filter");
+    moveRunnerCardToGrip(state, 257);
 
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_045_newsgroup-filter",
+        sourceDefinition(state, action) === 257,
     );
     expect(state.runner.credits).toBe(5);
     expect(state.runner.clicks).toBe(3);
     expect(state.runner.memoryUsed).toBe(2);
     expect(
       getPlayerView(state, "corp").opponent.rig?.some(
-        (card) => card.definitionId === "onr_v1_045_newsgroup-filter",
+        (card) => card.definitionId === 257,
       ),
     ).toBe(true);
 
@@ -4656,9 +4643,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",
       amount: 2,
-      cardDefinitionId: "onr_v1_045_newsgroup-filter",
+      cardDefinitionId: 257,
       cardImplementationAbility: "activated",
-      sourceDefinitionId: "onr_v1_045_newsgroup-filter",
+      sourceDefinitionId: 257,
       gainedCredits: 2,
       runnerCreditsAfter: 7,
       resolvedEffects: [
@@ -4666,7 +4653,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           kind: "gain_credits",
           side: "runner",
           amount: 2,
-          sourceDefinitionId: "onr_v1_045_newsgroup-filter",
+          sourceDefinitionId: 257,
           sourceTitle: "Newsgroup Filter",
           reason: "card_resolver",
         }),
@@ -4691,7 +4678,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_v1922_shield_prevention",
           name: "O:NR V1.9.22 Shield Prevention",
           cards: [
-            { id: "onr_v1_061_shield", quantity: 1 },
+            { id: 273, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.damagePrevention.runner.cards,
           ],
         },
@@ -4702,14 +4689,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.credits = 20;
     state.runner.clicks = 4;
     state.corp.credits = 20;
-    moveRunnerCardToGrip(state, "onr_v1_061_shield");
+    moveRunnerCardToGrip(state, 273);
 
     const installLegal = mustAction(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_061_shield",
+        sourceDefinition(state, action) === 273,
     );
     const wrongSideInstall = applyAction(state, {
       matchId: state.matchId,
@@ -4727,21 +4714,21 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_061_shield",
+        sourceDefinition(state, action) === 273,
     );
     expect(
       state.runner.rig.programs.map(
         (id) => state.cardInstances[id]?.definitionId,
       ),
-    ).toContain("onr_v1_061_shield");
+    ).toContain(273);
     expect(
       getPlayerView(state, "corp").opponent.rig?.some(
-        (card) => card.definitionId === "onr_v1_061_shield",
+        (card) => card.definitionId === 273,
       ),
     ).toBe(true);
 
-    putCorpIceOnServer(state, "rd", "onr_v1_258_neural-blade");
-    putCorpCardOnTopOfRd(state, "simple_agenda");
+    putCorpIceOnServer(state, "rd", 470);
+    putCorpCardOnTopOfRd(state, 588);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     state = apply(
@@ -4755,7 +4742,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "onr_v1_258_neural-blade",
+        sourceDefinition(state, action) === 470,
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
 
@@ -4789,8 +4776,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       id: "onr_v1_corp_scored_agenda_credit_until_install_or_rez",
       name: "O:NR V1.9.22 Corporate Retreat",
       cards: [
-        { id: "onr_v1_195_corporate-retreat", quantity: 1 },
-        { id: "simple_barrier_ice", quantity: 2 },
+        { id: 407, quantity: 1 },
+        { id: 589, quantity: 2 },
         ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
       ],
     };
@@ -4805,13 +4792,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.corp.clicks = 40;
     state.corp.maxHandSize = 100;
 
-    moveCorpCardToHq(state, "onr_v1_195_corporate-retreat");
+    moveCorpCardToHq(state, 407);
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_195_corporate-retreat" &&
+        sourceDefinition(state, action) === 407 &&
         action.payload?.serverId === "new_remote" &&
         action.payload?.placement === "root",
     );
@@ -4821,7 +4808,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         "corp",
         (action) =>
           action.type === "advance_card" &&
-          sourceDefinition(state, action) === "onr_v1_195_corporate-retreat",
+          sourceDefinition(state, action) === 407,
       );
     }
     state = apply(
@@ -4829,11 +4816,11 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "score_agenda" &&
-        sourceDefinition(state, action) === "onr_v1_195_corporate-retreat",
+        sourceDefinition(state, action) === 407,
     );
     const retreatView = getPlayerView(state, "corp").own.scoreArea.find(
       (visibleCard) =>
-        visibleCard.definitionId === "onr_v1_195_corporate-retreat",
+        visibleCard.definitionId === 407,
     );
     expect(retreatView?.counterDisplays).toContainEqual({
       id: "mark",
@@ -4887,7 +4874,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.corp.credits).toBe(creditsBeforeAbility + 2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "gain_credit",
-      cardDefinitionId: "onr_v1_195_corporate-retreat",
+      cardDefinitionId: 407,
       abilityId: "scored_agenda_credit_until_install_or_rez",
       gainedCredits: 2,
     });
@@ -4898,13 +4885,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
 
-    moveCorpCardToHq(state, "simple_barrier_ice");
+    moveCorpCardToHq(state, 589);
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "simple_barrier_ice",
+        sourceDefinition(state, action) === 589,
     );
     expect(
       getLegalActions(state, "corp").some(
@@ -4928,13 +4915,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     rezState.corp.credits = 40;
     rezState.corp.clicks = 40;
     rezState.corp.maxHandSize = 100;
-    moveCorpCardToHq(rezState, "onr_v1_195_corporate-retreat");
+    moveCorpCardToHq(rezState, 407);
     rezState = apply(
       rezState,
       "corp",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(rezState, action) === "onr_v1_195_corporate-retreat" &&
+        sourceDefinition(rezState, action) === 407 &&
         action.payload?.serverId === "new_remote" &&
         action.payload?.placement === "root",
     );
@@ -4944,7 +4931,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         "corp",
         (action) =>
           action.type === "advance_card" &&
-          sourceDefinition(rezState, action) === "onr_v1_195_corporate-retreat",
+          sourceDefinition(rezState, action) === 407,
       );
     }
     rezState = apply(
@@ -4952,15 +4939,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "score_agenda" &&
-        sourceDefinition(rezState, action) === "onr_v1_195_corporate-retreat",
+        sourceDefinition(rezState, action) === 407,
     );
     const rezRetreatId = rezState.corp.scoreArea.find(
       (cardId) =>
         rezState.cardInstances[cardId]?.definitionId ===
-        "onr_v1_195_corporate-retreat",
+        407,
     );
     expect(rezRetreatId).toBeDefined();
-    putCorpIceOnServer(rezState, "rd", "simple_barrier_ice");
+    putCorpIceOnServer(rezState, "rd", 589);
     rezState = apply(rezState, "corp", (action) => action.type === "end_turn");
     rezState = apply(
       rezState,
@@ -4973,7 +4960,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(rezState, action) === "simple_barrier_ice",
+        sourceDefinition(rezState, action) === 589,
     );
     if (rezRetreatId)
       expect(
@@ -4987,9 +4974,11 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       id: "onr_v1_corp_v1922_hq_to_new_remote_install_rez",
       name: "O:NR V1.9.22 Data Fort Reclamation",
       cards: [
-        { id: "onr_v1_197_data-fort-reclamation", quantity: 1 },
-        { id: "simple_barrier_ice", quantity: 1 },
-        { id: "onr_v1_308_acme-savings-and-loan", quantity: 1 },
+        { id: 409, quantity: 1 },
+        { id: 125, quantity: 1 },
+        { id: 131, quantity: 1 },
+        { id: 589, quantity: 1 },
+        { id: 520, quantity: 1 },
         ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
       ],
     };
@@ -5003,9 +4992,10 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.corp.credits = 20;
     state.corp.clicks = 20;
     state.corp.maxHandSize = 100;
-    moveCorpCardToHq(state, "onr_v1_197_data-fort-reclamation");
-    const iceId = moveCorpCardToHq(state, "simple_barrier_ice");
-    const assetId = moveCorpCardToHq(state, "onr_v1_308_acme-savings-and-loan");
+    moveCorpCardToHq(state, 409);
+    const iceId = moveCorpCardToHq(state, 589);
+    const assetId = moveCorpCardToHq(state, 520);
+    const centralOnly = [125, 131].map((id) => moveCorpCardToHq(state, id));
 
     state = apply(
       state,
@@ -5013,7 +5003,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "install_card" &&
         sourceDefinition(state, action) ===
-          "onr_v1_197_data-fort-reclamation" &&
+          409 &&
         action.payload?.serverId === "new_remote" &&
         action.payload?.placement === "root",
     );
@@ -5024,7 +5014,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         (action) =>
           action.type === "advance_card" &&
           sourceDefinition(state, action) ===
-            "onr_v1_197_data-fort-reclamation",
+            409,
       );
     }
     state = apply(
@@ -5032,7 +5022,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "score_agenda" &&
-        sourceDefinition(state, action) === "onr_v1_197_data-fort-reclamation",
+        sourceDefinition(state, action) === 409,
     );
 
     expect(state.pendingChoice).toMatchObject({
@@ -5046,6 +5036,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) => action.type === "resolve_choice",
     );
+    const offeredIds = state.pendingChoice!.options.map((option) => option.value);
+    expect(offeredIds).toEqual(expect.arrayContaining([iceId, assetId]));
+    for (const id of centralOnly) expect(offeredIds).not.toContain(id);
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
       side: "runner",
@@ -5115,7 +5108,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     const rezOption = corpRezChoice?.options[0];
     expect(rezOption?.card).toMatchObject({
       instanceId: iceId,
-      definitionId: "simple_barrier_ice",
+      definitionId: 589,
       known: true,
     });
     expect(rezOption?.hqInstallRezOptionQuote).toMatchObject({
@@ -5126,7 +5119,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       optionId: `card_${iceId}`,
       sourceAgendaId: expect.any(String),
       cardId: iceId,
-      cardDefinitionId: "simple_barrier_ice",
+      cardDefinitionId: 589,
       targetServerId: remote?.id,
       installedZone: "serverIce",
       sequencePosition: 1,
@@ -5200,13 +5193,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       ?.options[0];
     expect(assetRezOption?.card).toMatchObject({
       instanceId: assetId,
-      definitionId: "onr_v1_308_acme-savings-and-loan",
+      definitionId: 520,
       known: true,
     });
     expect(assetRezOption?.hqInstallRezOptionQuote).toMatchObject({
-      sourceAgendaId: "corp_onr_v1_197_data-fort-reclamation_1",
+      sourceAgendaId: "c2j1",
       cardId: assetId,
-      cardDefinitionId: "onr_v1_308_acme-savings-and-loan",
+      cardDefinitionId: 520,
       targetServerId: remote?.id,
       installedZone: "serverRoot",
       sequencePosition: 2,
@@ -5260,7 +5253,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       id: "onr_v1_corp_v1922_corporate_war",
       name: "O:NR V1.9.22 Corporate War",
       cards: [
-        { id: "onr_v1_196_corporate-war", quantity: 2 },
+        { id: 408, quantity: 2 },
         ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
       ],
     };
@@ -5275,13 +5268,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.corp.clicks = 20;
     state.corp.maxHandSize = 100;
 
-    moveCorpCardToHq(state, "onr_v1_196_corporate-war");
+    moveCorpCardToHq(state, 408);
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_196_corporate-war" &&
+        sourceDefinition(state, action) === 408 &&
         action.payload?.serverId === "new_remote" &&
         action.payload?.placement === "root",
     );
@@ -5291,7 +5284,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         "corp",
         (action) =>
           action.type === "advance_card" &&
-          sourceDefinition(state, action) === "onr_v1_196_corporate-war",
+          sourceDefinition(state, action) === 408,
       );
     }
 
@@ -5300,7 +5293,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "score_agenda" &&
-        sourceDefinition(state, action) === "onr_v1_196_corporate-war",
+        sourceDefinition(state, action) === 408,
     );
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
@@ -5330,12 +5323,12 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "score_agenda" &&
-        sourceDefinition(state, action) === "onr_v1_196_corporate-war",
+        sourceDefinition(state, action) === 408,
     );
     expect(state.corp.credits).toBe(creditsBeforeScore + 12);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "score_agenda",
-      cardDefinitionId: "onr_v1_196_corporate-war",
+      cardDefinitionId: 408,
       scoreCreditSwingThresholdMet: true,
       onScoreGainCredits: 12,
       resolvedEffects: [
@@ -5344,7 +5337,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           side: "corp",
           amount: 12,
           reason: "card_resolver",
-          sourceDefinitionId: "onr_v1_196_corporate-war",
+          sourceDefinitionId: 408,
           sourceTitle: "Corporate War",
         }),
       ],
@@ -5369,13 +5362,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     missState.corp.credits = 5;
     missState.corp.clicks = 20;
-    moveCorpCardToHq(missState, "onr_v1_196_corporate-war");
+    moveCorpCardToHq(missState, 408);
     missState = apply(
       missState,
       "corp",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(missState, action) === "onr_v1_196_corporate-war",
+        sourceDefinition(missState, action) === 408,
     );
     for (let index = 0; index < 3; index += 1) {
       missState = apply(
@@ -5383,7 +5376,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         "corp",
         (action) =>
           action.type === "advance_card" &&
-          sourceDefinition(missState, action) === "onr_v1_196_corporate-war",
+          sourceDefinition(missState, action) === 408,
       );
     }
     expect(missState.corp.credits).toBeLessThan(12);
@@ -5427,7 +5420,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "score_agenda" &&
-        sourceDefinition(missState, action) === "onr_v1_196_corporate-war",
+        sourceDefinition(missState, action) === 408,
     );
     expect(missState.corp.credits).toBe(0);
     expect(missState.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -5439,7 +5432,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           side: "corp",
           amount: missCreditsBeforeScore,
           reason: "card_resolver",
-          sourceDefinitionId: "onr_v1_196_corporate-war",
+          sourceDefinitionId: 408,
           sourceTitle: "Corporate War",
         }),
       ],
@@ -5463,7 +5456,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     state.corp.credits = 20;
     state.corp.clicks = 10;
-    const agendaId = putCorpRootInRemote(state, "onr_v1_192_corporate-boon");
+    const agendaId = putCorpRootInRemote(state, 404);
     state.cardInstances[agendaId]!.advancementCounters = 6;
     state = apply(
       state,
@@ -5499,9 +5492,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       id: "onr_v1_corp_agenda_purge",
       name: "O:NR V1.9.22 Security Purge",
       cards: [
-        { id: "onr_v1_216_security-purge", quantity: 1 },
-        { id: "simple_barrier_ice", quantity: 1 },
-        { id: "simple_code_gate_ice", quantity: 1 },
+        { id: 428, quantity: 1 },
+        { id: 589, quantity: 1 },
+        { id: 590, quantity: 1 },
         ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
       ],
     };
@@ -5517,13 +5510,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.corp.maxHandSize = 100;
     state.poxCountersByServer = { rd: 2 };
 
-    moveCorpCardToHq(state, "onr_v1_216_security-purge");
+    moveCorpCardToHq(state, 428);
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_216_security-purge" &&
+        sourceDefinition(state, action) === 428 &&
         action.payload?.serverId === "new_remote" &&
         action.payload?.placement === "root",
     );
@@ -5533,20 +5526,20 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         "corp",
         (action) =>
           action.type === "advance_card" &&
-          sourceDefinition(state, action) === "onr_v1_216_security-purge",
+          sourceDefinition(state, action) === 428,
       );
     }
     const trashedOperationId = putCorpCardOnTopOfRd(
       state,
-      "simple_economy_operation",
+      596,
     );
     const installedCodeGateId = putCorpCardOnTopOfRd(
       state,
-      "simple_code_gate_ice",
+      590,
     );
     const installedBarrierId = putCorpCardOnTopOfRd(
       state,
-      "simple_barrier_ice",
+      589,
     );
 
     const legal = mustAction(
@@ -5554,7 +5547,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "score_agenda" &&
-        sourceDefinition(state, action) === "onr_v1_216_security-purge",
+        sourceDefinition(state, action) === 428,
     );
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
@@ -5583,7 +5576,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "score_agenda" &&
-        sourceDefinition(state, action) === "onr_v1_216_security-purge",
+        sourceDefinition(state, action) === 428,
     );
 
     expect(state.pendingChoice).toMatchObject({
@@ -5603,9 +5596,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         .filter((option) => option.selectable === false)
         .map((option) => option.card?.definitionId),
     ).toEqual([
-      "simple_barrier_ice",
-      "simple_code_gate_ice",
-      "simple_economy_operation",
+      589,
+      590,
+      596,
     ]);
     expect(
       runnerChoice?.options.find((option) => option.id === "done"),
@@ -5623,7 +5616,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.corp.archives).not.toContain(trashedOperationId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "score_agenda",
-      cardDefinitionId: "onr_v1_216_security-purge",
+      cardDefinitionId: 428,
       abilityId: "agenda_purge",
       hiddenZoneAction: "agenda_purge_runner_review",
       revealedCount: 3,
@@ -5635,7 +5628,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       agendaPurgeRunnerReviewOpened: true,
       agendaPurgeTargetChoiceOpened: false,
       publicRevealDefinitionIds:
-        "simple_barrier_ice,simple_code_gate_ice,simple_economy_operation",
+        "589,590,596",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"hq"|"rd"|"cardInstances"|"privatePayload"/,
@@ -5680,7 +5673,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       installedIceCount: 0,
       trashedCount: 0,
       publicRevealDefinitionIds:
-        "simple_barrier_ice,simple_code_gate_ice,simple_economy_operation",
+        "589,590,596",
     });
     expect(state.pendingChoice).toMatchObject({
       side: "corp",
@@ -5795,10 +5788,10 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       agendaPurgeInstallContract: "corp_server_choice_per_ice",
       agendaPurgeTargetChoiceResolved: true,
       publicRevealDefinitionIds:
-        "simple_barrier_ice,simple_code_gate_ice,simple_economy_operation",
-      installedIceDefinitionIds: "simple_barrier_ice,simple_code_gate_ice",
+        "589,590,596",
+      installedIceDefinitionIds: "589,590",
       installedIceServerLabels: `R&D,${createdRemote?.label}`,
-      trashedDefinitionIds: "simple_economy_operation",
+      trashedDefinitionIds: "596",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"hq"|"rd"|"cardInstances"|"privatePayload"/,
@@ -5814,7 +5807,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       id: "onr_v1_corp_v1922_political_overthrow",
       name: "O:NR V1.9.22 Political Overthrow",
       cards: [
-        { id: "onr_v1_210_political-overthrow", quantity: 1 },
+        { id: 422, quantity: 1 },
         ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
       ],
     };
@@ -5829,13 +5822,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.corp.clicks = 40;
     state.corp.maxHandSize = 100;
 
-    moveCorpCardToHq(state, "onr_v1_210_political-overthrow");
+    moveCorpCardToHq(state, 422);
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_210_political-overthrow" &&
+        sourceDefinition(state, action) === 422 &&
         action.payload?.serverId === "new_remote" &&
         action.payload?.placement === "root",
     );
@@ -5845,14 +5838,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         "corp",
         (action) =>
           action.type === "advance_card" &&
-          sourceDefinition(state, action) === "onr_v1_210_political-overthrow",
+          sourceDefinition(state, action) === 422,
       );
     }
     expect(
       getLegalActions(state, "corp").some(
         (action) =>
           action.type === "activated_card_ability" &&
-          sourceDefinition(state, action) === "onr_v1_210_political-overthrow",
+          sourceDefinition(state, action) === 422,
       ),
     ).toBe(false);
     state = apply(
@@ -5860,7 +5853,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "score_agenda" &&
-        sourceDefinition(state, action) === "onr_v1_210_political-overthrow",
+        sourceDefinition(state, action) === 422,
     );
 
     const legal = mustAction(
@@ -5868,7 +5861,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "activated_card_ability" &&
-        sourceDefinition(state, action) === "onr_v1_210_political-overthrow",
+        sourceDefinition(state, action) === 422,
     );
     expect(legal.costs).toEqual([{ clicks: 1 }]);
     const wrongSide = applyAction(state, {
@@ -5900,14 +5893,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "activated_card_ability" &&
-        sourceDefinition(state, action) === "onr_v1_210_political-overthrow",
+        sourceDefinition(state, action) === 422,
     );
 
     expect(state.corp.credits).toBe(creditsBeforeAbility + 3);
     expect(state.corp.clicks).toBe(clicksBeforeAbility - 1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",
-      cardDefinitionId: "onr_v1_210_political-overthrow",
+      cardDefinitionId: 422,
       cardImplementationAbility: "activated",
       gainedCredits: 3,
       resolvedEffects: [
@@ -5916,7 +5909,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           side: "corp",
           amount: 3,
           reason: "card_resolver",
-          sourceDefinitionId: "onr_v1_210_political-overthrow",
+          sourceDefinitionId: 422,
           sourceTitle: "Political Overthrow",
         }),
       ],
@@ -5935,7 +5928,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       id: "onr_v1_corp_v1922_marine_arcology",
       name: "O:NR V1.9.22 Marine Arcology",
       cards: [
-        { id: "onr_v1_206_marine-arcology", quantity: 1 },
+        { id: 418, quantity: 1 },
         ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
       ],
     };
@@ -5950,13 +5943,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.corp.clicks = 40;
     state.corp.maxHandSize = 100;
 
-    moveCorpCardToHq(state, "onr_v1_206_marine-arcology");
+    moveCorpCardToHq(state, 418);
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_206_marine-arcology" &&
+        sourceDefinition(state, action) === 418 &&
         action.payload?.serverId === "new_remote" &&
         action.payload?.placement === "root",
     );
@@ -5966,14 +5959,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         "corp",
         (action) =>
           action.type === "advance_card" &&
-          sourceDefinition(state, action) === "onr_v1_206_marine-arcology",
+          sourceDefinition(state, action) === 418,
       );
     }
     expect(
       getLegalActions(state, "corp").some(
         (action) =>
           action.type === "activated_card_ability" &&
-          sourceDefinition(state, action) === "onr_v1_206_marine-arcology",
+          sourceDefinition(state, action) === 418,
       ),
     ).toBe(false);
     state = apply(
@@ -5981,7 +5974,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "score_agenda" &&
-        sourceDefinition(state, action) === "onr_v1_206_marine-arcology",
+        sourceDefinition(state, action) === 418,
     );
 
     const legal = mustAction(
@@ -5989,7 +5982,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "activated_card_ability" &&
-        sourceDefinition(state, action) === "onr_v1_206_marine-arcology",
+        sourceDefinition(state, action) === 418,
     );
     expect(legal.costs).toEqual([{ clicks: 2 }]);
     const wrongSide = applyAction(state, {
@@ -6033,14 +6026,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "activated_card_ability" &&
-        sourceDefinition(state, action) === "onr_v1_206_marine-arcology",
+        sourceDefinition(state, action) === 418,
     );
 
     expect(state.corp.credits).toBe(creditsBeforeAbility + 3);
     expect(state.corp.clicks).toBe(clicksBeforeAbility - 2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",
-      cardDefinitionId: "onr_v1_206_marine-arcology",
+      cardDefinitionId: 418,
       cardImplementationAbility: "activated",
       gainedCredits: 3,
       resolvedEffects: [
@@ -6049,7 +6042,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           side: "corp",
           amount: 3,
           reason: "card_resolver",
-          sourceDefinitionId: "onr_v1_206_marine-arcology",
+          sourceDefinitionId: 418,
           sourceTitle: "Marine Arcology",
         }),
       ],
@@ -6068,7 +6061,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       id: "onr_v1_corp_v1922_off_site_backups",
       name: "O:NR V1.9.22 Off-Site Backups",
       cards: [
-        { id: "onr_v1_296_off-site-backups", quantity: 1 },
+        { id: 508, quantity: 1 },
         ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
       ],
     };
@@ -6082,15 +6075,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.corp.credits = 10;
     state.corp.clicks = 10;
     state.corp.maxHandSize = 100;
-    moveCorpCardToHq(state, "onr_v1_296_off-site-backups");
+    moveCorpCardToHq(state, 508);
     const faceupArchiveId = moveCorpCardToArchives(
       state,
-      "simple_economy_operation",
+      596,
       true,
     );
     const facedownArchiveId = moveCorpCardToArchives(
       state,
-      "simple_agenda",
+      588,
       false,
     );
 
@@ -6099,7 +6092,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_296_off-site-backups",
+        sourceDefinition(state, action) === 508,
     );
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
@@ -6128,14 +6121,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_296_off-site-backups",
+        sourceDefinition(state, action) === 508,
     );
     expect(state.pendingChoice?.side).toBe("corp");
     expect(state.pendingChoice?.visibility).toBe("hidden_info_barrier");
     expect(state.pendingChoice?.options).toHaveLength(2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_operation",
-      cardDefinitionId: "onr_v1_296_off-site-backups",
+      cardDefinitionId: 508,
       hiddenZoneBarrier: true,
       hiddenZoneAction: "v1922_corp_archives_to_hq",
     });
@@ -6177,7 +6170,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       id: "onr_v1_corp_v1922_planning_consultants",
       name: "O:NR V1.9.22 Planning Consultants",
       cards: [
-        { id: "onr_v1_298_planning-consultants", quantity: 1 },
+        { id: 510, quantity: 1 },
         ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
       ],
     };
@@ -6191,19 +6184,19 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.corp.credits = 10;
     state.corp.clicks = 10;
     state.corp.maxHandSize = 100;
-    moveCorpCardToHq(state, "onr_v1_298_planning-consultants");
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
-    putCorpCardOnTopOfRd(state, "simple_agenda");
-    putCorpCardOnTopOfRd(state, "onr_v1_232_crystal-wall");
-    putCorpCardOnTopOfRd(state, "onr_v1_205_main-office-relocation");
-    putCorpCardOnTopOfRd(state, "onr_v1_324_fortress-architects");
+    moveCorpCardToHq(state, 510);
+    putCorpCardOnTopOfRd(state, 596);
+    putCorpCardOnTopOfRd(state, 588);
+    putCorpCardOnTopOfRd(state, 444);
+    putCorpCardOnTopOfRd(state, 417);
+    putCorpCardOnTopOfRd(state, 536);
 
     const legal = mustAction(
       state,
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_298_planning-consultants",
+        sourceDefinition(state, action) === 510,
     );
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
@@ -6232,14 +6225,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_298_planning-consultants",
+        sourceDefinition(state, action) === 510,
     );
     expect(state.pendingChoice?.side).toBe("corp");
     expect(state.pendingChoice?.visibility).toBe("hidden_info_barrier");
     expect(state.pendingChoice?.options).toHaveLength(5);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_operation",
-      cardDefinitionId: "onr_v1_298_planning-consultants",
+      cardDefinitionId: 510,
       hiddenZoneBarrier: true,
       hiddenZoneAction: "v1922_corp_rd_reorder_top5",
       arrangedCount: 5,
@@ -6285,7 +6278,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         id: `onr_v1_corp_v1922_planning_consultants_${rdCardCount}`,
         name: `O:NR V1.9.22 Planning Consultants ${rdCardCount}`,
         cards: [
-          { id: "onr_v1_298_planning-consultants", quantity: 1 },
+          { id: 510, quantity: 1 },
           ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
         ],
       };
@@ -6302,7 +6295,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       );
       const operationId = moveCorpCardToHq(
         state,
-        "onr_v1_298_planning-consultants",
+        510,
       );
       const movedToArchives = state.corp.rd.slice(rdCardCount);
       state.corp.rd = state.corp.rd.slice(0, rdCardCount);
@@ -6336,7 +6329,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       id: "onr_v1_corp_v1922_falsified_transactions_zero",
       name: "O:NR V1.9.22 Falsified Transactions Zero",
       cards: [
-        { id: "onr_v1_291_falsified-transactions-expert", quantity: 1 },
+        { id: 503, quantity: 1 },
         ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
       ],
     };
@@ -6349,7 +6342,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     const operationId = moveCorpCardToHq(
       state,
-      "onr_v1_291_falsified-transactions-expert",
+      503,
     );
     keepOnlyCorpHqCard(state, operationId);
 
@@ -6386,8 +6379,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       id: "onr_v1_corp_v1922_edgerunner_temps",
       name: "O:NR V1.9.22 Edgerunner Temps",
       cards: [
-        { id: "onr_v1_289_edgerunner-inc-temps", quantity: 1 },
-        { id: "simple_barrier_ice", quantity: 2 },
+        { id: 501, quantity: 1 },
+        { id: 589, quantity: 2 },
         ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
       ],
     };
@@ -6401,15 +6394,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.corp.credits = 10;
     state.corp.clicks = 10;
     state.corp.maxHandSize = 100;
-    moveCorpCardToHq(state, "onr_v1_289_edgerunner-inc-temps");
-    const iceId = moveCorpCardToHq(state, "simple_barrier_ice");
+    moveCorpCardToHq(state, 501);
+    const iceId = moveCorpCardToHq(state, 589);
 
     const legal = mustAction(
       state,
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_289_edgerunner-inc-temps",
+        sourceDefinition(state, action) === 501,
     );
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
@@ -6438,7 +6431,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_289_edgerunner-inc-temps",
+        sourceDefinition(state, action) === 501,
     );
     expect(state.corp.clicks).toBe(12);
     expect(state.corpTurnFlags?.edgerunnerTempsInstallActionsRemaining).toBe(3);
@@ -6446,7 +6439,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       state.corpTurnFlags?.restrictedActionGrants?.edgerunner_temps_install,
     ).toMatchObject({
       side: "corp",
-      sourceDefinitionId: "onr_v1_289_edgerunner-inc-temps",
+      sourceDefinitionId: 501,
       actionType: "install_card",
       remainingActions: 3,
       costProfile: "extra_click",
@@ -6454,7 +6447,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_operation",
-      cardDefinitionId: "onr_v1_289_edgerunner-inc-temps",
+      cardDefinitionId: 501,
       abilityId: "install_action_bundle",
       gainedActions: 3,
       edgerunnerTempsInstallActionsRemaining: 3,
@@ -6545,7 +6538,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       id: "onr_v1_corp_v1922_edgerunner_temps_purge",
       name: "O:NR V1.9.22 Edgerunner Temps Purge",
       cards: [
-        { id: "onr_v1_289_edgerunner-inc-temps", quantity: 1 },
+        { id: 501, quantity: 1 },
         ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
       ],
     };
@@ -6558,7 +6551,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     const operationId = moveCorpCardToHq(
       state,
-      "onr_v1_289_edgerunner-inc-temps",
+      501,
     );
     keepOnlyCorpHqCard(state, operationId);
     const runnerCardId = Object.keys(state.cardInstances).find(
@@ -6607,7 +6600,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
   });
 
   it("rezzes Zombie as core-damage ICE with replay-stable public run resolution", () => {
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_280_zombie"]?.subtypes).toEqual([
+    expect(CARD_DEFINITIONS_BY_ID[492]?.subtypes).toEqual([
       "black ice",
       "sentry",
     ]);
@@ -6620,7 +6613,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_corp_v1922_zombie",
           name: "O:NR V1.9.22 Zombie Corp",
           cards: [
-            { id: "onr_v1_280_zombie", quantity: 1 },
+            { id: 492, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -6629,8 +6622,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     state.corp.credits = 20;
     state.runner.credits = 5;
-    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_280_zombie");
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    const iceId = putCorpIceOnServer(state, "rd", 492);
+    putCorpCardOnTopOfRd(state, 596);
 
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -6645,7 +6638,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "onr_v1_280_zombie",
+        sourceDefinition(state, action) === 492,
     );
     expect(rezLegal.costs[0]?.credits).toBe(9);
     const wrongSide = applyAction(state, {
@@ -6696,7 +6689,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_v1922_tutor_hammer",
           name: "O:NR V1.9.22 Tutor Hammer Runner",
           cards: [
-            { id: "onr_v1_031_hammer", quantity: 1 },
+            { id: 243, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -6705,8 +6698,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_corp_v1922_tutor",
           name: "O:NR V1.9.22 Tutor Corp",
           cards: [
-            { id: "onr_v1_274_tutor", quantity: 1 },
-            { id: "onr_v1_279_wall-of-static", quantity: 1 },
+            { id: 486, quantity: 1 },
+            { id: 491, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -6717,19 +6710,19 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.clicks = 4;
     state.runner.memoryLimit = 4;
     state.corp.credits = 20;
-    moveRunnerCardToGrip(state, "onr_v1_031_hammer");
-    const wallId = putCorpIceOnServer(state, "rd", "onr_v1_279_wall-of-static");
-    const tutorId = putCorpIceOnServer(state, "rd", "onr_v1_274_tutor");
+    moveRunnerCardToGrip(state, 243);
+    const wallId = putCorpIceOnServer(state, "rd", 491);
+    const tutorId = putCorpIceOnServer(state, "rd", 486);
 
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_031_hammer",
+        sourceDefinition(state, action) === 243,
     );
     const hammerId = state.runner.rig.programs.find(
-      (id) => state.cardInstances[id]?.definitionId === "onr_v1_031_hammer",
+      (id) => state.cardInstances[id]?.definitionId === 243,
     );
     expect(hammerId).toBeDefined();
     if (!hammerId) throw new Error("Missing installed Hammer");
@@ -6752,7 +6745,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.run?.runDurationAdditionalSubroutineModifiers).toEqual([
       expect.objectContaining({
         sourceCardInstanceId: tutorId,
-        sourceDefinitionId: "onr_v1_274_tutor",
+        sourceDefinitionId: 486,
         subroutineKind: "end_the_run",
         append: "after_existing",
       }),
@@ -6760,11 +6753,11 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "continue_run",
       abilityId: "tutor_future_end_the_run_subroutine",
-      sourceDefinitionId: "onr_v1_274_tutor",
+      sourceDefinitionId: 486,
       resolvedEffects: [
         expect.objectContaining({
           kind: "resolve_subroutine",
-          sourceDefinitionId: "onr_v1_274_tutor",
+          sourceDefinitionId: 486,
           sourceTitle: "Tutor",
           subroutineIndex: 0,
           subroutineType: "set_run_future_end_the_run_subroutine",
@@ -6786,7 +6779,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     const breakActions = getLegalActions(state, "runner").filter(
       (action) =>
         action.type === "break_subroutine" &&
-        sourceDefinition(state, action) === "onr_v1_031_hammer",
+        sourceDefinition(state, action) === 243,
     );
     expect(
       breakActions.map((action) => action.payload?.subroutineIndex),
@@ -6796,7 +6789,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         action.type === "break_subroutine" &&
-        sourceDefinition(state, action) === "onr_v1_031_hammer" &&
+        sourceDefinition(state, action) === 243 &&
         action.payload?.subroutineIndex === 1,
     );
     const wrongSide = applyAction(state, {
@@ -6827,7 +6820,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.run?.brokenSubroutineIndexes).toContain(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "break_subroutine",
-      cardDefinitionId: "onr_v1_031_hammer",
+      cardDefinitionId: 243,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"/,
@@ -6846,7 +6839,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_v1922_virizz_hammer",
           name: "O:NR V1.9.22 Virizz Hammer Runner",
           cards: [
-            { id: "onr_v1_031_hammer", quantity: 1 },
+            { id: 243, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -6855,8 +6848,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_corp_v1922_virizz",
           name: "O:NR V1.9.22 Virizz Corp",
           cards: [
-            { id: "onr_v1_277_virizz", quantity: 1 },
-            { id: "onr_v1_279_wall-of-static", quantity: 1 },
+            { id: 489, quantity: 1 },
+            { id: 491, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -6867,24 +6860,24 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.clicks = 4;
     state.runner.memoryLimit = 4;
     state.corp.credits = 20;
-    moveRunnerCardToGrip(state, "onr_v1_031_hammer");
+    moveRunnerCardToGrip(state, 243);
     const innerWallId = putCorpIceOnServer(
       state,
       "rd",
-      "onr_v1_279_wall-of-static",
+      491,
     );
-    const virizzId = putCorpIceOnServer(state, "rd", "onr_v1_277_virizz");
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    const virizzId = putCorpIceOnServer(state, "rd", 489);
+    putCorpCardOnTopOfRd(state, 596);
 
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_031_hammer",
+        sourceDefinition(state, action) === 243,
     );
     const hammerId = state.runner.rig.programs.find(
-      (id) => state.cardInstances[id]?.definitionId === "onr_v1_031_hammer",
+      (id) => state.cardInstances[id]?.definitionId === 243,
     );
     expect(hammerId).toBeDefined();
     if (!hammerId) throw new Error("Missing installed Hammer");
@@ -6916,7 +6909,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       ),
     ).toEqual([
       expect.objectContaining({
-        sourceDefinitionId: "onr_v1_277_virizz",
+        sourceDefinitionId: 489,
         kind: "break_subroutine_cost",
         side: "runner",
         amount: 1,
@@ -6929,7 +6922,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       actionType: "continue_run",
       abilityId: "virizz_break_cost_modifier",
       breakSubroutineAdditionalCost: 1,
-      sourceDefinitionId: "onr_v1_277_virizz",
+      sourceDefinitionId: 489,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"/,
@@ -6948,7 +6941,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         action.type === "break_subroutine" &&
-        sourceDefinition(state, action) === "onr_v1_031_hammer" &&
+        sourceDefinition(state, action) === 243 &&
         action.payload?.subroutineIndex === 0,
     );
     expect(legal.costs[0]?.credits).toBe(2);
@@ -6987,7 +6980,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.runner.credits).toBe(6);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "break_subroutine",
-      cardDefinitionId: "onr_v1_031_hammer",
+      cardDefinitionId: 243,
       abilityId: "virizz_break_cost_modifier",
       breakSubroutineAdditionalCost: 1,
       breakSubroutineTotalCost: 2,
@@ -7021,7 +7014,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_corp_v1922_haunting",
           name: "O:NR V1.9.22 Haunting Corp",
           cards: [
-            { id: "onr_v1_247_haunting-inquisition", quantity: 1 },
+            { id: 459, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -7031,10 +7024,11 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.credits = 10;
     state.runner.clicks = 4;
     state.corp.credits = 20;
+    keepOnlyCorpHqCards(state, []);
     const hauntingId = putCorpIceOnServer(
       state,
       "rd",
-      "onr_v1_247_haunting-inquisition",
+      459,
     );
 
     const initial = structuredClone(state);
@@ -7086,13 +7080,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       abilityId: "direct_run_lock",
       runLockActionsAdded: 6,
       runLockActionsPending: 6,
-      sourceDefinitionId: "onr_v1_247_haunting-inquisition",
+      sourceDefinitionId: 459,
     });
     expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           kind: "resolve_subroutine",
-          sourceDefinitionId: "onr_v1_247_haunting-inquisition",
+          sourceDefinitionId: 459,
           subroutineIndex: 0,
           subroutineType: "set_runner_run_lock_actions",
           amount: 6,
@@ -7149,7 +7143,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_corp_v1922_viral_15",
           name: "O:NR V1.9.22 Active ICE Program Trash Corp",
           cards: [
-            { id: "onr_v1_276_viral-15", quantity: 1 },
+            { id: 488, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -7160,21 +7154,21 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.clicks = 4;
     state.runner.memoryLimit = 4;
     state.corp.credits = 20;
-    moveRunnerCardToGrip(state, "simple_fracter");
+    moveRunnerCardToGrip(state, 597);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "simple_fracter",
+        sourceDefinition(state, action) === 597,
     );
     const programId = state.runner.rig.programs.find(
-      (id) => state.cardInstances[id]?.definitionId === "simple_fracter",
+      (id) => state.cardInstances[id]?.definitionId === 597,
     );
     expect(programId).toBeDefined();
     if (!programId) throw new Error("Missing installed program");
-    const viralId = putCorpIceOnServer(state, "rd", "onr_v1_276_viral-15");
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    const viralId = putCorpIceOnServer(state, "rd", 488);
+    putCorpCardOnTopOfRd(state, 596);
 
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -7221,7 +7215,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.run?.passRezzedIceProgramTrashModifiers).toEqual([
       expect.objectContaining({
         sourceCardInstanceId: viralId,
-        sourceDefinitionId: "onr_v1_276_viral-15",
+        sourceDefinitionId: 488,
       }),
     ]);
     expect(state.run?.passRezzedIceProgramTrashPending).toEqual({
@@ -7231,7 +7225,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "continue_run",
       jackOutAdditionalCost: 1,
-      sourceDefinitionId: "onr_v1_276_viral-15",
+      sourceDefinitionId: 488,
       passIceTrashProgramPrompt: true,
     });
 
@@ -7297,8 +7291,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_runner_v1922_viral_15_krash_cyfermaster",
           name: "O:NR V1.9.22 Active ICE Program Trash Krash Cyfermaster Runner",
           cards: [
-            { id: "onr_v1_039_krash", quantity: 1 },
-            { id: "onr_v1_016_cyfermaster", quantity: 1 },
+            { id: 251, quantity: 1 },
+            { id: 228, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -7307,8 +7301,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_corp_v1922_viral_15_tutor_rd",
           name: "O:NR V1.9.22 Active ICE Program Trash Tutor R&D Corp",
           cards: [
-            { id: "onr_v1_274_tutor", quantity: 1 },
-            { id: "onr_v1_276_viral-15", quantity: 1 },
+            { id: 486, quantity: 1 },
+            { id: 488, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -7319,14 +7313,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.clicks = 4;
     state.runner.memoryLimit = 4;
     state.corp.credits = 20;
-    const krashId = installRunnerProgramForTest(state, "onr_v1_039_krash");
+    const krashId = installRunnerProgramForTest(state, 251);
     const cyfermasterId = installRunnerProgramForTest(
       state,
-      "onr_v1_016_cyfermaster",
+      228,
     );
-    const viralId = putCorpIceOnServer(state, "rd", "onr_v1_276_viral-15");
-    const tutorId = putCorpIceOnServer(state, "rd", "onr_v1_274_tutor");
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    const viralId = putCorpIceOnServer(state, "rd", 488);
+    const tutorId = putCorpIceOnServer(state, "rd", 486);
+    putCorpCardOnTopOfRd(state, 596);
 
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -7347,7 +7341,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         action.type === "break_subroutine" &&
-        sourceDefinition(state, action) === "onr_v1_016_cyfermaster",
+        sourceDefinition(state, action) === 228,
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = continueRunAction(state);
@@ -7400,42 +7394,42 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
   });
 
   it("keeps V1.9.22 Corp longtail runtime WIPs out of release promotion until gates close", () => {
-    const corpLongtailIds = ["onr_v1_276_viral-15"] as const;
+    const corpLongtailIds = [488] as const;
 
     for (const definitionId of corpLongtailIds) {
       expect(
         CARD_DEFINITIONS_BY_ID[definitionId]?.implementationStatus,
-        definitionId,
+        String(definitionId),
       ).toBe("playable_mvp");
     }
     for (const definitionId of [
-      "onr_v1_195_corporate-retreat",
-      "onr_v1_196_corporate-war",
-      "onr_v1_197_data-fort-reclamation",
-      "onr_v1_206_marine-arcology",
-      "onr_v1_210_political-overthrow",
-      "onr_v1_216_security-purge",
-      "onr_v1_247_haunting-inquisition",
-      "onr_v1_280_zombie",
-      "onr_v1_274_tutor",
-      "onr_v1_277_virizz",
-      "onr_v1_289_edgerunner-inc-temps",
-      "onr_v1_296_off-site-backups",
-      "onr_v1_298_planning-consultants",
+      407,
+      408,
+      409,
+      418,
+      422,
+      428,
+      459,
+      492,
+      486,
+      489,
+      501,
+      508,
+      510,
     ] as const) {
       expect(
         CARD_DEFINITIONS_BY_ID[definitionId]?.implementationStatus,
-        definitionId,
+        String(definitionId),
       ).toBe("playable_mvp");
       expect(
         CARD_DEFINITIONS_BY_ID[definitionId]?.rulesText,
-        definitionId,
+        String(definitionId),
       ).not.toContain("WIP");
       const mechanics = CARD_DEFINITIONS_BY_ID[definitionId]?.mechanics ?? [];
       if (CARD_SPEC_RUNTIME_DEFINITION_IDS.has(definitionId)) {
-        expect(mechanics.length, definitionId).toBeGreaterThan(0);
-        expect(mechanics, definitionId).not.toContain("per_card_longtail");
-      } else expect(mechanics, definitionId).toContain("per_card_longtail");
+        expect(mechanics.length, String(definitionId)).toBeGreaterThan(0);
+        expect(mechanics, String(definitionId)).not.toContain("per_card_longtail");
+      } else expect(mechanics, String(definitionId)).toContain("per_card_longtail");
     }
   });
 });

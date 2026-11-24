@@ -80,7 +80,8 @@ export function primaryActionDemandForPlan(
   plan: TacticalPlan,
   currentActions: number,
 ): ActionDemand | undefined {
-  return deriveTacticalPlanActionDemands(plan, currentActions)[0];
+  return publishTacticalPlanActionDemands(plan, currentActions)
+    .actionDemands?.[0];
 }
 
 function actionDemandPurpose(
@@ -142,7 +143,7 @@ function targetActionsForPlan(
     const scoreSequenceActions = [plan.currentStep, ...plan.nextSteps].filter(
       (step) => ACTION_CONSUMING_SCORE_STEPS.has(step.kind),
     ).length;
-    return boundedTarget(Math.max(1, budgetTarget, scoreSequenceActions));
+    return boundedTarget(Math.max(budgetTarget, scoreSequenceActions));
   }
   return boundedTarget(Math.max(1, budgetTarget));
 }

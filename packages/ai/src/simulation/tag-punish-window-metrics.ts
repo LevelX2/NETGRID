@@ -518,6 +518,7 @@ export function summarizeTagPunishWindowMetrics(
             corpOntologyPunishOpportunityExpired += 1;
         }
       }
+      const visiblePayoffCards = entry.corpVisibleTagPayoffLegalActionCards;
       if ((entry.corpVisibleTagPunishLegalActions ?? 0) > 0) {
         corpVisibleTagPunishLegalActions +=
           entry.corpVisibleTagPunishLegalActions ?? 0;
@@ -526,7 +527,7 @@ export function summarizeTagPunishWindowMetrics(
           corpVisibleTagPayoffLegalActionsByKindCounts,
         );
         addCardsToCounter(
-          entry.corpVisibleTagPayoffLegalActionCards ?? [],
+          visiblePayoffCards?.map(String) ?? [],
           corpVisibleTagPayoffLegalActionsByCardCounts,
         );
       }
@@ -565,10 +566,10 @@ export function summarizeTagPunishWindowMetrics(
           if (entry.corpVisibleTagPunishUnknownSkipChosenCardId)
             incrementStringCounter(
               unknownSkipChosenCardCounts,
-              entry.corpVisibleTagPunishUnknownSkipChosenCardId,
+              String(entry.corpVisibleTagPunishUnknownSkipChosenCardId),
             );
           addCardsToCounter(
-            entry.corpVisibleTagPayoffLegalActionCards ?? [],
+            visiblePayoffCards?.map(String) ?? [],
             unknownSkipPayoffCardCounts,
           );
           addKindsToCounter(

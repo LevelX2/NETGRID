@@ -23,7 +23,7 @@ const pilotDecks = await readJson(
 const manifestCards = Object.values(RUNTIME_CARDS)
   .filter((card) => card.setId === "proteus")
   .map((card) => ({ cardId: card.catalogCardId }))
-  .sort((left, right) => left.cardId.localeCompare(right.cardId));
+  .sort((left, right) => left.cardId - right.cardId);
 const activeById = AI_HINTS_BY_CARD;
 const pilotDeckIdsByCard = buildPilotDeckIndex(pilotDecks.decks ?? []);
 
@@ -154,7 +154,7 @@ function buildPilotDeckIndex(decks) {
   const index = new Map();
   for (const deck of decks) {
     for (const entry of deck.cards ?? []) {
-      if (!String(entry.id ?? "").startsWith("onr_proteus_")) continue;
+      if (RUNTIME_CARDS[entry.id]?.setId !== "proteus") continue;
       const deckIds = index.get(entry.id) ?? new Set();
       deckIds.add(deck.id);
       index.set(entry.id, deckIds);

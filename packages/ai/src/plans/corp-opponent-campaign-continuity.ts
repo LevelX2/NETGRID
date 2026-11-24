@@ -1,5 +1,15 @@
+import { isRemoteServerId } from "@netgrid/shared";
+import type { MatchEventId } from "@netgrid/shared";
 import type { CorpPlanDomain } from "./corp-tactical-plan-contracts";
 import type { AiDecisionInput, PublicGameEvent } from "@netgrid/shared";
+import { PlanResolutionFailure } from "./plan-resolution-failure";
+import {
+  agendaCampaignIdentity,
+  defenseCampaignIdentity,
+  compactCampaignId,
+  compareCampaignIdentities,
+  type CampaignIdentity,
+} from "./compact-plan-identity";
 
 import {
   RESIDENT_CORP_CAMPAIGN_SCHEMA_VERSION,
@@ -13,6 +23,7 @@ export const CORP_OPPONENT_CAMPAIGN_CONTINUITY_VERSION =
 
 export type CorpCampaignDescriptor = {
   campaignId: string;
+  identity: CampaignIdentity;
   kind: ResidentCorpCampaign["kind"];
   moduleId: ResidentCorpCampaign["origin"]["moduleId"];
   rootPlanInstanceId: string;
@@ -50,7 +61,8 @@ export function corpCampaignDescriptors(params: {
     );
     if (!root) continue;
     descriptors.push({
-      campaignId: `campaign:${project.projectId}`,
+      campaignId: compactCampaignId(agendaCampaignIdentity(project.projectId)),
+      identity: agendaCampaignIdentity(project.projectId),
       kind: openingRush ? "opening_rush" : "agenda",
       moduleId: "corp.score_agenda",
       rootPlanInstanceId: root.instanceId,
@@ -87,7 +99,8 @@ export function corpCampaignDescriptors(params: {
     const root = rootInstance(params.portfolio, "corp.defend_servers");
     if (!root) continue;
     descriptors.push({
-      campaignId: `campaign:corp.defend_servers:${need.defenseId}`,
+      campaignId: compactCampaignId(defenseCampaignIdentity(need.defenseId)),
+      identity: defenseCampaignIdentity(need.defenseId),
       kind: "defense",
       moduleId: "corp.defend_servers",
       rootPlanInstanceId: root.instanceId,
@@ -114,23 +127,53 @@ export function reconcileCorpCampaignContinuity(params: {
   descriptors: readonly CorpCampaignDescriptor[];
 }): ResidentCorpCampaign[] {
   if (params.input.side !== "corp") return [];
+  const identityById = new Map<string, string>();
+  for (const campaign of [...params.previous, ...params.descriptors]) {
+    const identity = JSON.stringify(campaign.identity);
+    const previousIdentity = identityById.get(campaign.campaignId);
+    if (
+      !campaign.identity ||
+      campaign.campaignId !== compactCampaignId(campaign.identity) ||
+      (previousIdentity !== undefined && previousIdentity !== identity)
+    ) {
+      throw new PlanResolutionFailure("invalid_plan_identity", {
+        side: "corp", stateVersion: params.input.playerView.stateVersion,
+        timingPoint: params.input.playerView.timingPoint,
+        legalActionTypes: params.input.legalActions.map((action) => action.type),
+        owner: "plan_registry",
+        removalCondition: "Bind every campaign reference to one canonical owner and objective before reconciliation.",
+      });
+    }
+    identityById.set(campaign.campaignId, identity);
+  }
   const descriptorById = new Map(
     params.descriptors.map((descriptor) => [descriptor.campaignId, descriptor]),
   );
   const previousById = new Map(
     params.previous.map((campaign) => [campaign.campaignId, campaign]),
   );
+  const publicEvents = uniquePublicEvents(params.input).sort(
+    comparePublicEvents,
+  );
   const campaignIds = [
     ...new Set([...descriptorById.keys(), ...previousById.keys()]),
-  ].sort();
+  ].sort((left, right) => compareCampaignIdentities(
+    (descriptorById.get(left) ?? previousById.get(left))!.identity,
+    (descriptorById.get(right) ?? previousById.get(right))!.identity,
+  ));
   return campaignIds
     .map((campaignId) => {
       const descriptor = descriptorById.get(campaignId);
       const previous = previousById.get(campaignId);
-      return reconcileCampaign(params.input, descriptor, previous);
+      return reconcileCampaign(
+        params.input,
+        publicEvents,
+        descriptor,
+        previous,
+      );
     })
     .filter((campaign): campaign is ResidentCorpCampaign => campaign !== null)
-    .sort((left, right) => left.campaignId.localeCompare(right.campaignId));
+    .sort((left, right) => compareCampaignIdentities(left.identity, right.identity));
 }
 
 /**
@@ -168,6 +211,7 @@ export function recentlyCompromisedCorpRemoteIds(
 
 function reconcileCampaign(
   input: AiDecisionInput,
+  publicEvents: readonly PublicGameEvent[],
   descriptor: CorpCampaignDescriptor | undefined,
   previous: ResidentCorpCampaign | undefined,
 ): ResidentCorpCampaign | null {
@@ -195,6 +239,7 @@ function reconcileCampaign(
     : {
         schemaVersion: RESIDENT_CORP_CAMPAIGN_SCHEMA_VERSION,
         campaignId: descriptor!.campaignId,
+        identity: structuredClone(descriptor!.identity),
         kind: descriptor!.kind,
         status:
           input.playerView.activeSide === "runner"
@@ -249,9 +294,10 @@ function reconcileCampaign(
   base.updatedAtStateVersion = stateVersion;
 
   const newOutcomes = publicOutcomesForCampaign(
-    input,
+    publicEvents,
     base,
     base.observedThroughStateVersion,
+    stateVersion,
   );
   base.publicOutcomes = uniqueOutcomes([
     ...base.publicOutcomes,
@@ -261,7 +307,10 @@ function reconcileCampaign(
   base.reaction = reconcileReactionState({
     input,
     previous: previous?.reaction,
-    outcomes: base.publicOutcomes,
+    newOutcomes,
+    observedReaction: base.publicOutcomes.some(
+      (outcome) => reactionTransitionForOutcome(outcome.kind) !== undefined,
+    ),
     descriptorCurrentlyAdmitted: descriptor?.currentlyAdmitted === true,
   });
 
@@ -342,20 +391,19 @@ function reconcileCampaign(
 function reconcileReactionState(params: {
   input: AiDecisionInput;
   previous: ResidentCorpCampaign["reaction"] | undefined;
-  outcomes: readonly ResidentCorpCampaignPublicOutcome[];
+  newOutcomes: readonly ResidentCorpCampaignPublicOutcome[];
+  observedReaction: boolean;
   descriptorCurrentlyAdmitted: boolean;
 }): ResidentCorpCampaign["reaction"] {
   const openWindowKinds = new Set<
     ResidentCorpCampaign["reaction"]["openWindowKinds"][number]
-  >();
-  let observedReaction = false;
-  for (const outcome of params.outcomes) {
+  >(params.previous?.openWindowKinds);
+  for (const outcome of params.newOutcomes) {
     const transition = reactionTransitionForOutcome(outcome.kind);
     if (!transition) {
       if (outcome.kind === "run_completed") openWindowKinds.clear();
       continue;
     }
-    observedReaction = true;
     if (transition.state === "opened") openWindowKinds.add(transition.kind);
     else openWindowKinds.delete(transition.kind);
   }
@@ -371,7 +419,7 @@ function reconcileReactionState(params: {
       reasonCode:
         sortedOpenWindows.length > 0
           ? "campaign_paused_for_public_reaction_windows"
-          : observedReaction
+          : params.observedReaction
             ? "campaign_reactions_resolved_awaiting_next_own_turn"
             : "campaign_waits_for_public_opponent_reactions",
       lastTransitionAtStateVersion: stateVersion,
@@ -397,7 +445,8 @@ function reconcileReactionState(params: {
       lastTransitionAtStateVersion: stateVersion,
     };
   }
-  const resumes = observedReaction || params.previous?.status === "paused";
+  const resumes =
+    params.observedReaction || params.previous?.status === "paused";
   return {
     status: resumes ? "resumable" : "idle",
     openWindowKinds: [],
@@ -440,17 +489,16 @@ function reactionTransitionForOutcome(
 }
 
 function publicOutcomesForCampaign(
-  input: AiDecisionInput,
+  publicEvents: readonly PublicGameEvent[],
   campaign: ResidentCorpCampaign,
   afterStateVersion: number,
+  stateVersion: number,
 ): ResidentCorpCampaignPublicOutcome[] {
-  const events = uniquePublicEvents(input)
-    .filter(
-      (event) =>
-        event.stateVersionAfter > afterStateVersion &&
-        event.stateVersionAfter <= input.playerView.stateVersion,
-    )
-    .sort(comparePublicEvents);
+  const events = publicEvents.filter(
+    (event) =>
+      event.stateVersionAfter > afterStateVersion &&
+      event.stateVersionAfter <= stateVersion,
+  );
   return events.flatMap((event) => outcomesForEvent(event, campaign));
 }
 
@@ -606,14 +654,20 @@ function outcomesForEvent(
       "campaign_public_ambush_resolved",
     );
   }
-  const accessEvent = isPublicAccessEvent(event);
-  if (accessEvent && sameServer) {
+  if (
+    isPublicAccessEvent(event) &&
+    (campaign.origin.targetServerId === undefined ||
+      targetServerId === campaign.origin.targetServerId)
+  ) {
     add(
       "access_resolved",
       "campaign_target_accessed",
       "campaign_public_access",
     );
-    if (campaign.origin.targetServerId?.startsWith("remote_")) {
+    if (
+      isRemoteServerId(targetServerId) &&
+      targetServerId === campaign.origin.targetServerId
+    ) {
       add(
         "remote_compromised",
         "campaign_remote_compromised",
@@ -626,14 +680,14 @@ function outcomesForEvent(
     !actionType.startsWith("decline_") &&
     (actionType.includes("trash") ||
       typeof payload.trashedCount === "number" ||
-      typeof payload.trashedCardDefinitionId === "string");
+      typeof payload.trashedCardDefinitionId === "number");
   const exactCampaignTargetTrashed =
     targetCardInstanceId !== undefined &&
     campaign.origin.targetCardInstanceId !== undefined &&
     targetCardInstanceId === campaign.origin.targetCardInstanceId;
   if (trashEvent && sameServer && sameCard && exactCampaignTargetTrashed) {
     add("card_trashed", "campaign_material_trashed", "campaign_public_trash");
-    if (campaign.origin.targetServerId?.startsWith("remote_")) {
+    if (isRemoteServerId(campaign.origin.targetServerId)) {
       add(
         "remote_compromised",
         "campaign_remote_compromised",
@@ -655,7 +709,7 @@ function publicRemoteAccessTarget(event: PublicGameEvent): string | undefined {
     payload.accessServerId,
     isRecord(payload.targets) ? payload.targets.serverId : undefined,
   );
-  return serverId?.startsWith("remote_") ? serverId : undefined;
+  return isRemoteServerId(serverId) ? serverId : undefined;
 }
 
 function isPublicAccessEvent(event: PublicGameEvent): boolean {
@@ -700,7 +754,7 @@ function visibleTerminalStatus(
   }
   const targetServerId = campaign.origin.targetServerId;
   if (
-    targetServerId?.startsWith("remote_") &&
+    isRemoteServerId(targetServerId) &&
     !input.playerView.servers.some((server) => server.id === targetServerId)
   ) {
     return {
@@ -765,7 +819,7 @@ function uniqueDescriptors(
   const byId = new Map<string, CorpCampaignDescriptor>();
   for (const descriptor of [...descriptors].sort(
     (left, right) =>
-      left.campaignId.localeCompare(right.campaignId) ||
+      compareCampaignIdentities(left.identity, right.identity) ||
       Number(right.currentlyAdmitted) - Number(left.currentlyAdmitted) ||
       left.milestoneId.localeCompare(right.milestoneId) ||
       left.evidenceCode.localeCompare(right.evidenceCode),
@@ -792,7 +846,7 @@ function uniqueOutcomes(
 }
 
 function uniquePublicEvents(input: AiDecisionInput): PublicGameEvent[] {
-  const byId = new Map<string, PublicGameEvent>();
+  const byId = new Map<MatchEventId, PublicGameEvent>();
   for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
     byId.set(event.eventId, event);
   }
@@ -805,7 +859,7 @@ function comparePublicEvents(
 ): number {
   return (
     left.stateVersionAfter - right.stateVersionAfter ||
-    left.eventId.localeCompare(right.eventId)
+    left.eventId - right.eventId
   );
 }
 

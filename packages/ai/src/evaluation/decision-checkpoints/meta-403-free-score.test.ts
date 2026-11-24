@@ -31,7 +31,7 @@ describe("meta 403 free score retains exact Engine cost evidence", () => {
       const score = input.legalActions.find((a) => a.type === "score_agenda")!;
       const project: CorpScoreProjectSignal = {
         projectId: "current-pool-score",
-        agendaDefinitionId: "onr_v1_209_political-coup",
+        agendaDefinitionId: 421,
         agendaInstanceId: score.source,
         agendaPoints: 2,
         actionIds: [score.actionId],
@@ -57,7 +57,7 @@ describe("meta 403 free score retains exact Engine cost evidence", () => {
         ...corpBasicCreditsDominatedByCurrentScore(input, candidates, [
           project,
         ]),
-      ]).toEqual(variant === "current" ? ["corp.gain_credit"] : []);
+      ]).toEqual(variant === "current" ? ["cb"] : []);
     },
   );
   it("admits the real free score instead of stripping its completed advancement counters", () => {

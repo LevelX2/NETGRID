@@ -8,7 +8,7 @@ import type {
 
 export type IceCardLike = {
   instanceId?: string;
-  definitionId?: string;
+  definitionId?: number;
   rezzed?: boolean;
   known: boolean;
   subtypes?: string[];
@@ -19,7 +19,7 @@ export type IceCardLike = {
 };
 
 export type RootCardLike = {
-  definitionId?: string;
+  definitionId?: number;
   rezzed?: boolean;
   known: boolean;
 };
@@ -62,6 +62,8 @@ export type VisibleDeflectorContext = {
   prohibitBreakingIceInstanceIds?: readonly string[];
   /** Runner-private Engine quote for trace base-link and credit support. */
   runnerTraceSupportQuote?: VisibleRunnerTraceSupportQuote;
+  /** Same-turn liquidity bound for Trace inside a hypothetical path price. */
+  runnerTraceCreditLimit?: number;
   /** Active trace rules profile used by run-path trace projections. */
   traceRulesProfile?: TraceRulesProfile;
   /** Fail closed when the bound quote includes a visible Trace and lacks its rules profile. */
@@ -80,7 +82,7 @@ export type HardUnbrokenRunEffectKind =
 export type BreakAssessment = {
   cost: number;
   breakerInstanceId: string;
-  breakerDefinitionId: string;
+  breakerDefinitionId: number;
   breakerSubtypes: string[];
   endingStrength: number;
   carriesStrengthAcrossIce: boolean;
@@ -138,7 +140,7 @@ export type RunnerRunPathCreditBudget = {
   /** Conditional one-shot sources, usable only at a positive payment window. */
   paymentSupportSources?: readonly {
     cardInstanceId: string;
-    sourceAbilityId: string;
+    sourceAbilityId: number;
     creditCost: number;
     gainCredits: number;
   }[];
@@ -214,7 +216,7 @@ export type VisibleIceRunHazard = {
   preventsAccess: boolean;
   canCauseFlatlineBeforeAccess: boolean;
   iceIndex: number;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   sourceTitle?: string;
   subroutineId: string;
   traceBaseStrength?: number;
@@ -230,7 +232,7 @@ export type VisibleIceRunHazard = {
   traceBidCost?: number;
   baseLinkValue?: number;
   baseLinkActivationCost?: number;
-  baseLinkSourceDefinitionId?: string;
+  baseLinkSourceDefinitionId?: number;
   baseLinkSourceTitle?: string;
   baseLinkSideEffect?: VisibleTraceSupportSideEffect;
   breakAvoidanceCost?: number;
@@ -255,13 +257,14 @@ export type VisibleIceRunHazardProjection = {
   traceSupportSourceIdsConsumed?: string[];
   avoidancePayment?:
     | { kind: "general"; cost: number }
-    | { kind: "breaker"; assessment: BreakAssessment };
+    | { kind: "breaker"; assessment: BreakAssessment }
+    | { kind: "tag_prevention"; cost: number; trashedSourceIds: string[] };
 };
 
 export type DeferredNextEncounterDamage = {
   iceInstanceId: string;
   subroutineId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   amount: number;
 };
 
@@ -326,7 +329,7 @@ export type KnownRezzedIcePathAssessment = {
     clicks: number;
     subtypeChanges?: Array<{
       sourceCardInstanceId: string;
-      sourceDefinitionId: string;
+      sourceDefinitionId: number;
       selectedSubtype: string;
     }>;
   };

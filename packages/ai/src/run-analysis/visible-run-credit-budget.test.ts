@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import {
   normalizeRunnerRunPathCreditBudget,
@@ -17,7 +18,7 @@ function assessment(
   return {
     cost: options.cost ?? 0,
     breakerInstanceId: "breaker",
-    breakerDefinitionId: "breaker",
+    breakerDefinitionId: syntheticCardDefinitionId("breaker"),
     breakerSubtypes: ["icebreaker"],
     endingStrength: 0,
     carriesStrengthAcrossIce: false,
@@ -162,6 +163,39 @@ describe("visible run stealth-loss budget", () => {
         assessment("single_stealth_card", { optionalIfUnavailable: false }),
       ).affordable,
     ).toBe(false);
+  });
+
+  it("accounts for an earlier optional loss and leaves an insolvent ledger untouched", () => {
+    const budget = normalizeRunnerRunPathCreditBudget({
+      credits: 1,
+      stealthCreditsBySourceId: { cloak: 3 },
+    });
+    const quote: BreakAssessment = {
+      ...assessment("any_stealth_cards", { cost: 1 }),
+      breakerSubtypes: ["icebreaker", "noisy"],
+      postBreakStealthLosses: [
+        {
+          amount: 2,
+          occurrences: 1,
+          trigger: "per_subroutine",
+          sourceMode: "any_stealth_cards",
+          optionalIfUnavailable: true,
+        },
+        {
+          amount: 2,
+          occurrences: 1,
+          trigger: "per_subroutine",
+          sourceMode: "single_stealth_card",
+          optionalIfUnavailable: false,
+        },
+      ],
+    };
+    const before = structuredClone(budget);
+    expect(projectBreakerCreditPayment(budget, quote).affordable).toBe(false);
+    expect(() => spendBreakerCreditsAndApplySideEffects(budget, quote)).toThrow(
+      /Stealth-Credit-Verlust/,
+    );
+    expect(budget).toEqual(before);
   });
 
   it("keeps hosted, killer, and generic icebreaker credits available", () => {

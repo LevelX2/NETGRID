@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type {
   CardDefinition,
   CardInstance,
@@ -26,8 +27,8 @@ function instance(
   options: Partial<CardInstance> = {},
 ): CardInstance {
   return {
-    id,
-    definitionId,
+    instanceId: id,
+    definitionId: syntheticCardDefinitionId(definitionId),
     owner: options.owner ?? "corp",
     controller: options.controller ?? "corp",
     zone: options.zone ?? { side: "corp", zone: "serverIce", serverId: "hq" },
@@ -38,12 +39,18 @@ function instance(
   } as CardInstance;
 }
 
-function definition(id: string): CardDefinition {
+function definition(id: number): CardDefinition {
   return {
     id,
-    title: id,
-    side: id.startsWith("runner") ? "runner" : "corp",
-    type: id.includes("ice") ? "ice" : "resource",
+    title: String(id),
+    side:
+      id === syntheticCardDefinitionId("runner_resource") ? "runner" : "corp",
+    type: [
+      syntheticCardDefinitionId("inner_ice"),
+      syntheticCardDefinitionId("outer_ice"),
+    ].includes(id)
+      ? "ice"
+      : "resource",
   } as CardDefinition;
 }
 
@@ -64,7 +71,7 @@ function makeState(): GameState {
       root: [],
     } as CorpServer,
     {
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Data Fort 1",
       ice: [OUTER_ICE_ID],
@@ -254,7 +261,7 @@ describe("run-core-execution", () => {
   it.each([
     ["hq" as const, 1],
     ["rd" as const, 0],
-    ["remote_1" as Exclude<ServerId, "new_remote">, 0],
+    ["r1" as Exclude<ServerId, "new_remote">, 0],
   ])("starts a run against %s at the outermost ICE", (serverId, iceIndex) => {
     const state = makeState();
     const { host, calls } = hostFor(state);
@@ -266,7 +273,7 @@ describe("run-core-execution", () => {
     expect(state.activeSide).toBe("runner");
     expect(state.runnerTurnFlags?.runAttemptsThisTurn).toBe(1);
     expect(state.run).toMatchObject({
-      runId: "run_42",
+      runId: 42,
       attackedServerId: serverId,
       phase: "encounter_ice",
       position: { kind: "ice", serverId, iceIndex },
@@ -296,7 +303,7 @@ describe("run-core-execution", () => {
     const { host } = hostFor(state);
     const legalAction = action(state);
     const temporaryCredits = {
-      sourceDefinitionId: "runner_credit_source",
+      sourceDefinitionId: 3377491711,
       remaining: 3,
       returnUnusedAtRunEnd: true,
     } as NonNullable<StartRunOptions["runnerRunTemporaryCredits"]>;
@@ -304,10 +311,10 @@ describe("run-core-execution", () => {
       successfulRunCreditLoss: 2,
       successfulRunRunnerCreditGain: 1,
       successfulRunSourceCardId: "source_card" as CardInstanceId,
-      successfulRunSourceDefinitionId: "source_definition",
+      successfulRunSourceDefinitionId: 462381168,
       successfulRunSourceTitle: "Source",
       runTraceLinkBonus: 2,
-      runTraceLinkBonusSourceDefinitionId: "link_source",
+      runTraceLinkBonusSourceDefinitionId: 2198629711,
       runnerRunTemporaryCredits: temporaryCredits,
     };
 
@@ -318,10 +325,10 @@ describe("run-core-execution", () => {
       successfulRunCreditLoss: 2,
       successfulRunRunnerCreditGain: 1,
       successfulRunSourceCardId: "source_card",
-      successfulRunSourceDefinitionId: "source_definition",
+      successfulRunSourceDefinitionId: 462381168,
       successfulRunSourceTitle: "Source",
       runTraceLinkBonus: 2,
-      runTraceLinkBonusSourceDefinitionId: "link_source",
+      runTraceLinkBonusSourceDefinitionId: 2198629711,
       runnerRunTemporaryCredits: temporaryCredits,
     });
     expect(state.run?.runnerRunTemporaryCredits).not.toBe(temporaryCredits);

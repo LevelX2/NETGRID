@@ -12,7 +12,7 @@ import { buildSemanticDecisionFrame } from "../decision/semantic-decision-frame"
 import type { SemanticDecisionTrace } from "../decision/semantic-decision-trace";
 import { buildSemanticShadowDecision } from "../decision/semantic-shadow-decision";
 import type { AiPlayStrengthPilotScope } from "../decision/pilot-scope-registry";
-import type { DeckDoctrineV2Diagnostic } from "../deck-doctrine-strategy";
+import type { DeckDoctrineV2Diagnostic } from "../deck-doctrine-diagnostic";
 import { findForbiddenSemanticPath } from "../diagnostics/semantic-redaction";
 import type { AiMistakeClass } from "./mistake-taxonomy";
 import { visibleSourceDefinitionsByInstanceId } from "../runtime/visible-source-definitions";

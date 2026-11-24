@@ -45,10 +45,17 @@ describe("createAiSoakRunner", () => {
       }),
     );
 
-    createAiSoakRunner({ simulateAiGame }).simulateAiSoak({
+    const { simulateAiSoak } = createAiSoakRunner({ simulateAiGame });
+    const custom = simulateAiSoak({
       runnerDifficulty: "hard",
       corpDifficulty: "easy",
     });
+    const seedCount = new Set([
+      ...SOAK_SEEDS.tuningSeeds,
+      ...SOAK_SEEDS.holdoutSeeds,
+    ]).size;
+    expect(custom.aggregate.seeds).toBe(seedCount);
+    expect(custom.aggregate.games).toBe(simulateAiGame.mock.calls.length);
 
     expect(simulateAiGame).toHaveBeenCalledTimes(
       SOAK_SEEDS.tuningSeeds.length + SOAK_SEEDS.holdoutSeeds.length,
@@ -59,5 +66,13 @@ describe("createAiSoakRunner", () => {
         corpDifficulty: "easy",
       }),
     );
+
+    simulateAiGame.mockClear();
+    const matrix = simulateAiSoak();
+    expect(matrix.aggregate.seeds).toBe(seedCount);
+    expect(matrix.aggregate.games).toBe(
+      custom.aggregate.games * SOAK_SEEDS.matrix.difficulties.length,
+    );
+    expect(matrix.aggregate.games).toBe(simulateAiGame.mock.calls.length);
   });
 });

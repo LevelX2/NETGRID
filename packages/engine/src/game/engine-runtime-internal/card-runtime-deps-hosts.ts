@@ -804,14 +804,9 @@ export function createCardRuntimeDepsHosts(
       deps.runRemainderStrengthBonusForBreaker(run, breakerId);
     if (breakerStrength < deps.iceStrengthFor(state, iceId))
       throw new Error("Der Icebreaker ist nicht stark genug fuer dieses ICE.");
-    const rawIndexes =
-      typeof legalAction.payload?.subroutineIndexes === "string"
-        ? legalAction.payload.subroutineIndexes
-        : "";
-    if (!rawIndexes) throw new Error("Multi-Break braucht Subroutine-Ziele.");
-    const subroutineIndexes = rawIndexes
-      .split(",")
-      .map((value) => Number(value));
+    const subroutineIndexes = legalAction.subroutineIndexes;
+    if (!Array.isArray(subroutineIndexes))
+      throw new Error("Multi-Break braucht Subroutine-Ziele.");
     const subroutines = subroutinesForCurrentEncounter(state, iceDefinition);
     const eligibleIndexes = subroutines
       .map((subroutine, index) => ({ subroutine, index }))
@@ -1073,7 +1068,7 @@ export function createCardRuntimeDepsHosts(
           state.cardInstances[cardId],
         definitionFor: (cardId: CardInstanceId) => definitionFor(state, cardId),
         runnerInstalledCardIds: () => runnerInstalledCardIds(state),
-        cardImplementationForDefinitionId: (definitionId: string) =>
+        cardImplementationForDefinitionId: (definitionId: number) =>
           cardImplementationForDefinitionId(definitionId as CardDefinitionId),
       },
       actions: {

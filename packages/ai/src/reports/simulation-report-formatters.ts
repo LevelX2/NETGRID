@@ -1,3 +1,4 @@
+import { formatMarkdownTableRow } from "./markdown-table";
 import { DOCTRINE_QUALITY_METRIC_NAMES } from "../simulation/simulation-metric-aggregation";
 
 export type DoctrineQualityCaseAnalysisReportInput = {
@@ -38,9 +39,12 @@ export function formatDoctrineQualityCaseAnalysisReport(
     "",
     "| Metric | Count | Examples |",
     "| --- | ---: | ---: |",
-    ...DOCTRINE_QUALITY_METRIC_NAMES.map(
-      (metric) =>
-        `| ${metric} | ${analysis.totals[metric]} | ${analysis.examples[metric].length} |`,
+    ...DOCTRINE_QUALITY_METRIC_NAMES.map((metric) =>
+      formatMarkdownTableRow([
+        metric,
+        analysis.totals[metric],
+        analysis.examples[metric].length,
+      ]),
     ),
     "",
     "## Examples",
@@ -59,7 +63,15 @@ export function formatDoctrineQualityCaseAnalysisReport(
     );
     for (const example of examples) {
       lines.push(
-        `| ${example.seed} | ${example.actionIndex} | ${example.side} | ${example.actionType} | ${example.reasonCode} | ${example.targetServerId ?? "none"} | ${example.qualityTags.join(", ")} |`,
+        formatMarkdownTableRow([
+          example.seed,
+          example.actionIndex,
+          example.side,
+          example.actionType,
+          example.reasonCode,
+          example.targetServerId ?? "none",
+          example.qualityTags.join(", "),
+        ]),
       );
     }
     lines.push("");

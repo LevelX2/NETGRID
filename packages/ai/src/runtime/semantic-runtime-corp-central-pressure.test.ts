@@ -5,7 +5,7 @@ import {
   semanticRuntimeCorpCentralDefenseAllocationDirection,
   semanticRuntimeCorpCentralPressureAssessment,
 } from "./semantic-runtime-corp-central-pressure";
-import { withDecisionDerivedCache } from "./decision-derived-cache";
+import { withDecisionDerivedCache } from "../decision-derived-cache";
 
 describe("semanticRuntimeCorpCentralPressureAssessment", () => {
   it("reuses the immutable assessment within one decision only", () => {
@@ -123,6 +123,61 @@ describe("semanticRuntimeCorpCentralPressureAssessment", () => {
     ).toBe(0);
   });
 
+  it("distinguishes hardware multiaccess from virus pressure and requires a current multiaccess event for diversion", () => {
+    const runnerRig = [
+      runnerCard("interface", {
+        definitionId: 351,
+        type: "hardware",
+        title: "R&D Interface",
+        rulesText: "Access 1 additional card when you access R&D.",
+      }),
+    ];
+    const ownGripOrHq: VisibleCard[] = [
+      {
+        instanceId: "agenda",
+        known: true,
+        type: "agenda",
+        owner: "corp",
+      } as VisibleCard,
+    ];
+    const access = publicCentralEvent(
+      "rd-multiaccess",
+      "access_card",
+      "rd",
+      20,
+    );
+    access.publicPayload.effectiveAccessCount = 2;
+    const old = corpInput({
+      runnerRig,
+      ownGripOrHq,
+      eventTail: [access],
+      stateVersion: 100,
+    });
+    expect(
+      semanticRuntimeCorpCentralPressureAssessment(old, "rd"),
+    ).toMatchObject({
+      visibleMultiaccess: true,
+      visibleVirusPressure: false,
+      eventMultiaccess: true,
+      recentEventMultiaccess: false,
+    });
+    expect(
+      semanticRuntimeCorpCentralDefenseAllocationDirection(old),
+    ).toBeUndefined();
+
+    const current = corpInput({
+      runnerRig,
+      ownGripOrHq,
+      eventTail: [access],
+      stateVersion: 25,
+    });
+    expect(
+      semanticRuntimeCorpCentralDefenseAllocationDirection(current),
+    ).toMatchObject({
+      selectedServerId: "rd",
+    });
+  });
+
   it("permits a visible Highlighter R&D focus to divert central defense despite a known HQ agenda", () => {
     const input = corpInput({
       ownGripOrHq: [
@@ -183,7 +238,7 @@ function rdVirusCard(instanceId: string): VisibleCard {
 
 function highlighterCard(instanceId: string): VisibleCard {
   return runnerCard(instanceId, {
-    definitionId: "onr_proteus_090_highlighter",
+    definitionId: 148,
     title: "Highlighter",
     rulesText:
       "After each successful run on R&D, give the Corp a Highlighter counter. Each Highlighter counter after the first allows you to access an additional card from R&D whenever you access cards from R&D.",
@@ -211,7 +266,7 @@ function publicCentralEvent(
   stateVersionAfter = 2,
 ): AiDecisionInput["eventTail"][number] {
   return {
-    eventId,
+    eventId: stateVersionAfter + 1,
     type: actionType,
     stateVersionBefore: Math.max(0, stateVersionAfter - 1),
     stateVersionAfter,
@@ -230,7 +285,7 @@ function publicRunnerEndTurn(
   stateVersionAfter: number,
 ): AiDecisionInput["eventTail"][number] {
   return {
-    eventId,
+    eventId: stateVersionAfter + 1,
     type: "end_turn",
     stateVersionBefore: stateVersionAfter - 1,
     stateVersionAfter,

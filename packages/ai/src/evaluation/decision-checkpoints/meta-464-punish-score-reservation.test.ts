@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
 import { corpPunishPreparationConflictsScoreServer } from "../../corp/punish/punish-preparation";
 import { afterEach, expect, it } from "vitest";
@@ -27,8 +28,8 @@ it.each([cp184, cp185])(
     restoreResidentPlanPortfolioMemorySnapshot(x, rt.residentPlanPortfolio!);
     const blocked = x.legalActions.filter(
       (a) =>
-        a.source?.includes("city-surveillance") &&
-        a.payload?.serverId === "remote_1" &&
+        referencesDefaultDeckCard(a.source, 525) &&
+        a.payload?.serverId === "r1" &&
         ["install_card", "rez_card"].includes(a.type),
     );
     expect(blocked.length).toBeGreaterThan(0);
@@ -69,15 +70,15 @@ it("limits the root-slot reservation to conflicting persistent asset placement",
   });
   const city = candidates.filter(
     (c) =>
-      c.sourceCardInstanceId?.includes("city-surveillance") &&
+      referencesDefaultDeckCard(c.sourceCardInstanceId, 525) &&
       c.semanticActionType === "install.card",
   );
   expect(city.length).toBeGreaterThan(1);
   for (const c of city) {
     const a = x.legalActions.find((a) => a.actionId === c.actionId)!;
     expect(
-      corpPunishPreparationConflictsScoreServer(x, c, new Set(["remote_1"])),
-    ).toBe(a.payload?.serverId === "remote_1");
+      corpPunishPreparationConflictsScoreServer(x, c, new Set(["r1"])),
+    ).toBe(a.payload?.serverId === "r1");
     expect(corpPunishPreparationConflictsScoreServer(x, c, new Set())).toBe(
       false,
     );
@@ -90,6 +91,6 @@ it("limits the root-slot reservation to conflicting persistent asset placement",
   expect(other.length).toBeGreaterThan(0);
   for (const c of other)
     expect(
-      corpPunishPreparationConflictsScoreServer(x, c, new Set(["remote_1"])),
+      corpPunishPreparationConflictsScoreServer(x, c, new Set(["r1"])),
     ).toBe(false);
 });

@@ -9,7 +9,7 @@ import {
   createGameAfterSetup,
   getLegalActions,
 } from "@netgrid/engine";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   ORIGINALSET_DEFAULT_DECKS,
   type GameState,
@@ -31,16 +31,16 @@ import {
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
 
-const AUDIT = "onr_v1_283_audit-of-call-records";
-const CHANCE = "onr_v1_284_chance-observation";
-const FALL_GUY = "onr_v1_161_fall-guy";
-const HUNTER = "onr_v1_249_hunter";
-const URBAN = "onr_v1_307_urban-renewal";
-const SCORCHED = "onr_v1_302_scorched-earth";
-const PUNITIVE = "onr_v1_301_punitive-counterstrike";
-const MRAM = "onr_v1_134_mram-chip";
-const BODYWEIGHT = "onr_v1_079_bodyweight-synthetic-blood";
-const JETTISON_ICE = "onr_v1_080_core-command-jettison-ice";
+const AUDIT = 495;
+const CHANCE = 496;
+const FALL_GUY = 373;
+const HUNTER = 461;
+const URBAN = 519;
+const SCORCHED = 514;
+const PUNITIVE = 513;
+const MRAM = 346;
+const BODYWEIGHT = 291;
+const JETTISON_ICE = 292;
 
 afterEach(resetResidentPlanPortfolioMemory);
 
@@ -69,12 +69,12 @@ it.each([
 
     const decision = chooseAiAction(input);
     expect(decision.fallbackUsed).toBe(false);
-    expect(decision.actionId).toBe("runner.draw_card");
+    expect(decision.actionId).toBe("r8");
     expect(decision.evidence).toContain("plan_priority_class:P3");
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.defense_and_recovery:runner",
+      rootPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
       route: {
-        actionId: "runner.draw_card",
+        actionId: "r8",
         stateVersion: input.playerView.stateVersion,
       },
     });
@@ -93,7 +93,7 @@ it.each(["unknown top", "unfunded follow-up", "no observed payoff"] as const)(
     );
     if (condition === "unknown top") {
       changeHistory(input, (events) =>
-        events.filter((event) => event.eventId !== "evt_210"),
+        events.filter((event) => event.eventId !== 210),
       );
     } else if (condition === "unfunded follow-up") {
       input.playerView.opponent.credits = 4;
@@ -118,7 +118,7 @@ it("respects the installed tag shield when the observed backup trace has no trig
     observedPayoffFixture,
   );
   changeHistory(input, (events) =>
-    events.filter((event) => event.eventId !== "evt_61"),
+    events.filter((event) => event.eventId !== 61),
   );
   expect(
     runnerNextCorpTurnThreat(input)?.observedPayoffMeatDamage,
@@ -143,17 +143,17 @@ it("prepares the fifth Grip card at manual D61 when the payoff is known but the 
 
   const decision = chooseAiAction(input);
   expect(decision.fallbackUsed).toBe(false);
-  expect(decision.actionId).toBe("runner.draw_card");
+  expect(decision.actionId).toBe("r8");
   expect(decision.evidence).toContain("plan_priority_class:P3");
 
   // Recheck planning after the basis draw. The captured Grip remains actor-only.
   const afterDraw = structuredClone(input);
   const { playerView: view } = afterDraw;
   const drawnCard =
-    cardSpecPlanningCardByDefinitionId(JETTISON_ICE)!.definition;
-  if (drawnCard.type !== "event") throw new Error("Expected a Runner event");
+    planningCardFactsByDefinitionId(JETTISON_ICE)!;
+  if (drawnCard.type !== "event" || drawnCard.playCost === null) throw new Error("Expected a Runner event");
   view.own.gripOrHq.push({
-    instanceId: "runner_onr_v1_080_core-command-jettison-ice_3",
+    instanceId: "c1sz",
     known: true,
     owner: "runner",
     title: drawnCard.title,
@@ -168,7 +168,7 @@ it("prepares the fifth Grip card at manual D61 when the payoff is known but the 
   afterDraw.decisionId = `${input.matchId}:${view.stateVersion}:runner`;
   const drawEvent: PublicGameEvent = {
     ...afterDraw.eventTail.at(-1)!,
-    eventId: "test-basis-draw",
+    eventId: view.stateVersion + 1,
     type: "draw_card",
     stateVersionBefore: view.stateVersion - 1,
     stateVersionAfter: view.stateVersion,
@@ -188,7 +188,7 @@ it("prepares the fifth Grip card at manual D61 when the payoff is known but the 
   );
   const continuation = chooseAiAction(afterDraw);
   expect(continuation.fallbackUsed).toBe(false);
-  expect(continuation.actionId).toBe("runner.start_run.rd");
+  expect(continuation.actionId).toBe("rs.rd");
   expect(
     continuation.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
   ).toBe("runner.pressure_central");
@@ -265,7 +265,7 @@ it.each([
       ...events,
       {
         ...events.at(-1)!,
-        eventId: "observed-audit-played",
+        eventId: events.at(-1)!.stateVersionAfter + 2,
         type: "play_operation",
         publicPayload: {
           actionType: "play_operation",
@@ -289,7 +289,7 @@ it("draws to the reachable five-card buffer for a known next-turn payoff", () =>
   const input = withKnownDamage([URBAN]);
   expect(runnerNextCorpTurnThreat(input)?.incomingMeatDamage).toBe(5);
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("runner.draw_card");
+  expect(decision.actionId).toBe("r8");
   expect(decision.evidence).toContain("plan_priority_class:P3");
 });
 
@@ -334,7 +334,7 @@ it("holds a legal credit bank installation that would spend the fifth Grip card 
       input.playerView.own.gripOrHq.some(
         (card) =>
           card.instanceId === action.source &&
-          card.definitionId === "onr_v1_178_short-term-contract",
+          card.definitionId === 390,
       ),
   );
   expect(install).toBeDefined();
@@ -385,7 +385,7 @@ it("detects a second run from an observed event-started attempt, and counts it o
               resolvedEffects: [
                 {
                   kind: "start_run",
-                  effectId: "synthetic-event-run",
+                  effectId: 0,
                   side: "runner",
                   visibility: "public",
                 },
@@ -412,7 +412,7 @@ it("recognizes the optional run that would activate an unaffordable-to-buffer co
     decision.decisionDebug?.planFirstDecision?.dispositions,
   ).toContainEqual(
     expect.objectContaining({
-      actionId: "runner.start_run.rd",
+      actionId: "rs.rd",
       evidenceCode:
         "runner_optional_run_would_enable_known_next_corp_turn_flatline",
     }),
@@ -431,7 +431,7 @@ it("keeps the survival owner for an optional run on empty Archives", () => {
   expect(archives.root).toEqual([]);
   expect(input.legalActions).toContainEqual(
     expect.objectContaining({
-      actionId: "runner.start_run.archives",
+      actionId: "rs.archives",
       expiresAtStateVersion: input.playerView.stateVersion,
     }),
   );
@@ -443,11 +443,11 @@ it("keeps the survival owner for an optional run on empty Archives", () => {
   expect(decision.fallbackUsed).toBe(false);
   expect(
     decision.decisionDebug?.planFirstDecision?.dispositions?.filter(
-      (entry) => entry.actionId === "runner.start_run.archives",
+      (entry) => entry.actionId === "rs.archives",
     ),
   ).toEqual([
     {
-      actionId: "runner.start_run.archives",
+      actionId: "rs.archives",
       disposition: "explicitly_nonproductive",
       ownerModuleId: "runner.defense_and_recovery",
       evidenceCode: "runner_optional_run_would_enable_known_next_corp_turn_flatline",
@@ -485,7 +485,7 @@ it("uses ready meat prevention and respects a base link above the blind trace li
     {
       instanceId: "synthetic-installed-dermatech",
       known: true,
-      definitionId: "onr_v1_125_dermatech-bodyplating",
+      definitionId: 337,
       owner: "runner",
       type: "hardware",
       rezzed: true,
@@ -504,10 +504,10 @@ it("expires the next-turn payoff when the observed finisher is no longer in HQ",
   changeHistory(input, (events) =>
     events
       .map((event) =>
-        event.eventId === "synthetic-hq-observation-0"
+        event.publicPayload.actionType === "access_card" && event.publicPayload.cardDefinitionId === URBAN
           ? {
               ...event,
-              eventId: "evt_22_urban_access",
+              eventId: 22,
               stateVersionBefore: 20,
               stateVersionAfter: 21,
             }
@@ -515,7 +515,7 @@ it("expires the next-turn payoff when the observed finisher is no longer in HQ",
       )
       .concat({
         ...events.at(-1)!,
-        eventId: "observed-urban-played",
+        eventId: events.at(-1)!.stateVersionAfter + 2,
         type: "play_operation",
         publicPayload: {
           actor: "corp",
@@ -577,7 +577,7 @@ it("retains the immediately proven Runner win even with a funded damage threat",
   expect(runnerNextCorpTurnThreat(input)?.incomingMeatDamage).toBe(5);
   input.playerView.opponent.deckCount = 0;
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("runner.end_turn");
+  expect(decision.actionId).toBe("r9");
   expect(decision.evidence).toContain("plan_priority_class:P1");
 });
 
@@ -599,7 +599,7 @@ it("keeps an immediately executable terminal remote contest above the concealed-
     runtime,
   );
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("runner.start_run.remote_1");
+  expect(decision.actionId).toBe("rs.r1");
   expect(decision.evidence).toContain("plan_priority_class:P2");
 });
 
@@ -706,7 +706,7 @@ it.each([
       "plan_assessment_evidence:runner_next_corp_turn_extend_hand_limit:6",
     );
     if (variant === "clearable tag")
-      expect(decision.actionId).toBe("runner.remove_tag");
+      expect(decision.actionId).toBe("rm");
     if (variant === "buffer already built") {
       expect(runnerNextCorpTurnThreat(input)?.incomingMeatDamage).toBe(5);
       expect(decision.actionId).not.toBe(install.actionId);
@@ -832,7 +832,7 @@ function legal(
   state: GameState,
   side: "runner" | "corp",
   type: LegalAction["type"],
-  definitionId?: string,
+  definitionId?: number,
 ): LegalAction {
   const action = getLegalActions(state, side).find(
     (candidate) =>
@@ -906,7 +906,10 @@ function capacityFixture() {
     .withCorpCredits(10)
     .withRunnerCredits(5)
     .withRunnerClicks(2)
-    .withRunnerGripSize(3)
+    .withRunnerGripSize(0)
+    .withRunnerCardInGrip(226)
+    .withRunnerCardInGrip(227)
+    .withRunnerCardInGrip(233)
     .withRunnerCardInGrip(MRAM)
     .withRunnerCardInGrip(BODYWEIGHT);
   state.runnerTurnFlags!.runAttemptsThisTurn = 2;
@@ -923,7 +926,7 @@ function capacityFixture() {
 
 function visibleRetaliationEvents(
   input: AiDecisionInputWithDeckCapabilities,
-  definitions: readonly string[],
+  definitions: readonly number[],
   stoleAgenda = false,
 ): PublicGameEvent[] {
   const view = input.playerView;
@@ -946,7 +949,7 @@ function visibleRetaliationEvents(
   return [
     ...runAttempts.map((event, index) => ({
       ...event,
-      eventId: `test-run-attempt-${index}`,
+      eventId: view.stateVersion + index + 1,
       turnSerial,
       stateVersionBefore: before,
       stateVersionAfter: view.stateVersion,
@@ -954,7 +957,7 @@ function visibleRetaliationEvents(
     ...definitions.map<PublicGameEvent>((id, index) => ({
       ...observation,
       type: "access_card",
-      eventId: `test-hq-observation-${index}`,
+      eventId: view.stateVersion + index + 101,
       publicPayload: {
         actionType: "access_card",
         actor: "runner",
@@ -966,7 +969,7 @@ function visibleRetaliationEvents(
       ? [
           {
             ...observation,
-            eventId: "test-agenda-stolen",
+            eventId: view.stateVersion + 201,
             type: "steal_agenda",
             publicPayload: {
               actionType: "steal_agenda",
@@ -1007,7 +1010,7 @@ function changeHistory(
   input.playerView.publicEvents = input.eventTail;
 }
 
-function withKnownDamage(definitions: readonly string[], keepFallGuy = false) {
+function withKnownDamage(definitions: readonly number[], keepFallGuy = false) {
   const { input } = capture();
   if (!keepFallGuy) {
     const install = fallGuyInstall(input)!;
@@ -1027,7 +1030,7 @@ function withKnownDamage(definitions: readonly string[], keepFallGuy = false) {
       ...events,
       ...definitions.map((id, index) => ({
         ...access,
-        eventId: `synthetic-hq-observation-${index}`,
+        eventId: access.eventId + index + 1,
         publicPayload: { ...access.publicPayload, cardDefinitionId: id },
       })),
     ];

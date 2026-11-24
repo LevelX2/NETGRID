@@ -3,7 +3,8 @@ import type { AiDecisionInput } from "@netgrid/shared";
 import {
   RUNNER_DAMAGE_PREVENTION_CONTEXT_IDS,
   RUNNER_FLATLINE_PREVENTION_CONTEXT_IDS,
-  RUNNER_TRACE_DEFENSE_CONTEXT_IDS,
+  RUNNER_TRACE_LINK_CONTEXT_IDS,
+  RUNNER_TRACE_LIMIT_REDUCTION_CONTEXT_IDS,
 } from "./tag-punish-card-sets";
 
 export type RunnerSurvivalCounterContext = {
@@ -22,11 +23,16 @@ export function runnerSurvivalCounterContextForInput(
     visibleRunnerCards
       .filter((card) => card.known)
       .map((card) => card.definitionId)
-      .filter((definitionId): definitionId is string => Boolean(definitionId)),
+      .filter((definitionId) => definitionId !== undefined),
   );
-  const trace = [...definitionIds].some((definitionId) =>
-    RUNNER_TRACE_DEFENSE_CONTEXT_IDS.has(definitionId),
+  const link = [...definitionIds].some((id) =>
+    RUNNER_TRACE_LINK_CONTEXT_IDS.has(id),
   );
+  const trace =
+    link ||
+    [...definitionIds].some((id) =>
+      RUNNER_TRACE_LIMIT_REDUCTION_CONTEXT_IDS.has(id),
+    );
   const damage = [...definitionIds].some((definitionId) =>
     RUNNER_DAMAGE_PREVENTION_CONTEXT_IDS.has(definitionId),
   );
@@ -38,6 +44,6 @@ export function runnerSurvivalCounterContextForInput(
     trace,
     damage,
     flatline,
-    link: trace,
+    link,
   };
 }

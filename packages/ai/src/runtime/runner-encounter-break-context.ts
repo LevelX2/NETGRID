@@ -1,63 +1,19 @@
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
-import {
-  type AiDecisionInput,
-  type LegalAction,
-  type VisibleCard,
-} from "@netgrid/shared";
+import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 
-import { breakerIdForEncounterAction } from "./encounter-action";
 import { runnerEncounterPaymentForAction } from "./runner-encounter-credit-budget";
 
 export type RunnerEncounterBreakContextDependencies = {
-  actionCreditCost: (action: LegalAction) => number;
-  findVisibleCard: (
-    input: AiDecisionInput,
-    instanceId: string,
-  ) => VisibleCard | undefined;
   runnerCreditReserveTarget: (input: AiDecisionInput) => number;
 };
 
 export function createRunnerEncounterBreakContext(
   dependencies: RunnerEncounterBreakContextDependencies,
 ): {
-  estimatedEncounterBreakCost: (
-    input: AiDecisionInput,
-    action: LegalAction,
-  ) => number | undefined;
   encounterBreakReserveContext: (
     input: AiDecisionInput,
     action: LegalAction,
   ) => { preserveReserve: boolean; evidence: string[] };
 } {
-  const estimatedEncounterBreakCost = (
-    input: AiDecisionInput,
-    action: LegalAction,
-  ): number | undefined => {
-    const breakerId = breakerIdForEncounterAction(action);
-    const targetIceId =
-      typeof action.payload?.iceId === "string"
-        ? action.payload.iceId
-        : undefined;
-    const currentBreakCosts = input.legalActions
-      .filter(
-        (candidate) =>
-          candidate.type === "break_subroutine" &&
-          breakerIdForEncounterAction(candidate) === breakerId &&
-          (!targetIceId || candidate.payload?.iceId === targetIceId),
-      )
-      .map((candidate) => dependencies.actionCreditCost(candidate));
-    if (currentBreakCosts.length > 0) return Math.min(...currentBreakCosts);
-    const breaker = dependencies.findVisibleCard(input, action.source);
-    if (!breaker?.definitionId) return 1;
-    const abilityCosts =
-      CARD_DEFINITIONS_BY_ID[breaker.definitionId]?.abilities
-        ?.filter((ability) => ability.type === "break_subroutine")
-        .map((ability) =>
-          typeof ability.cost?.credits === "number" ? ability.cost.credits : 1,
-        ) ?? [];
-    return abilityCosts.length > 0 ? Math.min(...abilityCosts) : 1;
-  };
-
   const encounterBreakReserveContext = (
     input: AiDecisionInput,
     action: LegalAction,
@@ -80,7 +36,6 @@ export function createRunnerEncounterBreakContext(
   };
 
   return {
-    estimatedEncounterBreakCost,
     encounterBreakReserveContext,
   };
 }

@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -28,7 +29,7 @@ it("uses the current hybrid draw route under the original missing-Codegate Cover
   const hybrid = c.input.legalActions.find(
     (a) =>
       a.type === "activated_card_ability" &&
-      a.source.includes("silicon-saloon-franchise"),
+      referencesDefaultDeckCard(a.source, 391),
   )!;
   expect(hybrid).toBeDefined();
   const before = JSON.stringify(c.input);

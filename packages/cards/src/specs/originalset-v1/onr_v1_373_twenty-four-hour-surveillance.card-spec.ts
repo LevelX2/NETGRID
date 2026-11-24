@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_v1_373_twenty-four-hour-surveillance",
+      585,
     ),
     title: "Twenty-Four-Hour Surveillance",
     side: "corp",

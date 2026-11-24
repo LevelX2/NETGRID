@@ -1,16 +1,12 @@
 import { evidenceValue, hasEvidenceFlag } from "../runtime/evidence-value";
 import { roundNumber as round } from "../runtime/number-rounding";
-import type { AiSimulationActionSequenceEntry } from "./ai-simulation-action-sequence-entry";
 import type { AiMatchProgressionMetrics } from "./ai-match-progression-types";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import {
   corpCompressionActionLeadsToScoreLine,
-  corpRemoteCreatedConverts,
   corpRemoteCreatedConvertsTo,
   isCorpProtectionScoreConversionAction,
-  nextEntries,
   ownStrategicWindow,
-  remoteTargetsMatch,
   runnerStealsBeforeNextCorpScore,
   scorePathFollowsCorpProtection,
 } from "./plan-conversion-predicates";
@@ -66,8 +62,6 @@ export function summarizeCorpUnsafeRemoteScoreConversionMetrics(
   | "corpScoreWindowCompressionRate"
   | "corpScoreWindowCompressionSkipped"
   | "corpNonEssentialActionBeforeScoreWindow"
-  | "corpEconomyBeforeScoreWindow"
-  | "corpEconomyBeforeScoreWindowNecessary"
   | "corpProtectionBeforeScoreWindow"
   | "corpProtectionBeforeScoreWindowNoSafetyDelta"
   | "corpCentralProtectionBeforeScoreWindow"
@@ -179,8 +173,6 @@ export function summarizeCorpUnsafeRemoteScoreConversionMetrics(
   let corpScoreWindowCompressionTaken = 0;
   let corpScoreWindowCompressionSkipped = 0;
   let corpNonEssentialActionBeforeScoreWindow = 0;
-  let corpEconomyBeforeScoreWindow = 0;
-  let corpEconomyBeforeScoreWindowNecessary = 0;
   let corpProtectionBeforeScoreWindow = 0;
   let corpProtectionBeforeScoreWindowNoSafetyDelta = 0;
   let corpCentralProtectionBeforeScoreWindow = 0;
@@ -436,15 +428,6 @@ export function summarizeCorpUnsafeRemoteScoreConversionMetrics(
           corpRunnerStealAfterDelayedScoreWindow += 1;
         }
       }
-      if (hasEvidenceFlag(entry, "corp_economy_before_score_window:true"))
-        corpEconomyBeforeScoreWindow += 1;
-      if (
-        hasEvidenceFlag(
-          entry,
-          "corp_economy_before_score_window_necessary:true",
-        )
-      )
-        corpEconomyBeforeScoreWindowNecessary += 1;
       if (hasEvidenceFlag(entry, "corp_protection_before_score_window:true"))
         corpProtectionBeforeScoreWindow += 1;
       if (
@@ -526,12 +509,11 @@ export function summarizeCorpUnsafeRemoteScoreConversionMetrics(
         scoredAgendaDamagePunishOpportunities += 1;
       if (hasEvidenceFlag(entry, "scored_agenda_damage_punish_taken:true"))
         scoredAgendaDamagePunishTaken += 1;
-      scoredAgendaActionValueOverBasic += Math.max(
-        0,
-        Number(
-          evidenceValue(entry, "scored_agenda_action_value_over_basic:") ?? 0,
-        ),
+      const agendaActionValue = Number(
+        evidenceValue(entry, "scored_agenda_action_value_over_basic:"),
       );
+      if (Number.isFinite(agendaActionValue) && agendaActionValue > 0)
+        scoredAgendaActionValueOverBasic += agendaActionValue;
       if (
         hasEvidenceFlag(
           entry,
@@ -546,8 +528,7 @@ export function summarizeCorpUnsafeRemoteScoreConversionMetrics(
         )
       )
         basicDrawTakenWhileBetterAgendaDrawAvailable += 1;
-      if (hasEvidenceFlag(entry, "corp_new_remote_created:true"))
-        corpNewRemoteCreated += 1;
+
       if (hasEvidenceFlag(entry, "corp_new_remote_created_with_plan:true"))
         corpNewRemoteCreatedWithPlan += 1;
       if (
@@ -585,28 +566,47 @@ export function summarizeCorpUnsafeRemoteScoreConversionMetrics(
         corpRemoteIceConsolidationOpportunity += 1;
       if (hasEvidenceFlag(entry, "corp_remote_ice_consolidation_taken:true"))
         corpRemoteIceConsolidationTaken += 1;
-      if (
-        hasEvidenceFlag(entry, "corp_new_remote_created:true") &&
-        !corpRemoteCreatedConverts(sequence, index, 3)
-      ) {
-        corpEmptyRemoteStayedUnusedTurns += 1;
-        corpRemoteCreatedThenNoScorePath += 1;
+      if (entry.corpNewRemoteCreated === true) {
+        corpNewRemoteCreated += 1;
+        const installedPayloadOnCreation =
+          entry.actionType === "install_card" &&
+          entry.installPlacement !== "ice" &&
+          (entry.targetCardType === "agenda" ||
+            entry.targetCardType === "asset");
+        const laterAgenda = corpRemoteCreatedConvertsTo(
+          sequence,
+          index,
+          3,
+          "agenda",
+        );
+        const laterAsset = corpRemoteCreatedConvertsTo(
+          sequence,
+          index,
+          3,
+          "asset",
+        );
+        const laterBait = corpRemoteCreatedConvertsTo(
+          sequence,
+          index,
+          3,
+          "bait",
+        );
+        if (laterAgenda) corpRemoteCreatedThenAgendaInstalledWithin3 += 1;
+        if (laterAsset) corpRemoteCreatedThenAssetInstalledWithin3 += 1;
+        if (laterBait) corpRemoteCreatedThenBaitOrAmbushWithin3 += 1;
+        if (
+          installedPayloadOnCreation ||
+          laterAgenda ||
+          laterAsset ||
+          laterBait
+        ) {
+          corpRemoteConvertedToAgendaAssetOrBait += 1;
+        } else {
+          corpRemoteCreatedThenNoScorePath += 1;
+          if (entry.installPlacement === "ice")
+            corpEmptyRemoteStayedUnusedTurns += 1;
+        }
       }
-      if (
-        hasEvidenceFlag(entry, "corp_new_remote_created:true") &&
-        corpRemoteCreatedConvertsTo(sequence, index, 3, "agenda")
-      )
-        corpRemoteCreatedThenAgendaInstalledWithin3 += 1;
-      if (
-        hasEvidenceFlag(entry, "corp_new_remote_created:true") &&
-        corpRemoteCreatedConvertsTo(sequence, index, 3, "asset")
-      )
-        corpRemoteCreatedThenAssetInstalledWithin3 += 1;
-      if (
-        hasEvidenceFlag(entry, "corp_new_remote_created:true") &&
-        corpRemoteCreatedConvertsTo(sequence, index, 3, "bait")
-      )
-        corpRemoteCreatedThenBaitOrAmbushWithin3 += 1;
       if (hasEvidenceFlag(entry, "corp_hq_agenda_flood_risk:true"))
         corpHqAgendaFloodRisk += 1;
       if (hasEvidenceFlag(entry, "runner_hq_access_threat:true"))
@@ -751,8 +751,6 @@ export function summarizeCorpUnsafeRemoteScoreConversionMetrics(
         : 0,
     corpScoreWindowCompressionSkipped,
     corpNonEssentialActionBeforeScoreWindow,
-    corpEconomyBeforeScoreWindow,
-    corpEconomyBeforeScoreWindowNecessary,
     corpProtectionBeforeScoreWindow,
     corpProtectionBeforeScoreWindowNoSafetyDelta,
     corpCentralProtectionBeforeScoreWindow,
@@ -795,18 +793,10 @@ export function summarizeCorpUnsafeRemoteScoreConversionMetrics(
     corpNewRemoteCreatedWithoutPayloadPlan,
     corpEmptyRemoteWithIceCreated,
     corpEmptyRemoteStayedUnusedTurns,
-    corpRemoteConvertedToAgendaAssetOrBait:
-      corpRemoteCreatedThenAgendaInstalledWithin3 +
-      corpRemoteCreatedThenAssetInstalledWithin3 +
-      corpRemoteCreatedThenBaitOrAmbushWithin3,
+    corpRemoteConvertedToAgendaAssetOrBait,
     corpRemoteConversionRate:
       corpNewRemoteCreated > 0
-        ? round(
-            (corpRemoteCreatedThenAgendaInstalledWithin3 +
-              corpRemoteCreatedThenAssetInstalledWithin3 +
-              corpRemoteCreatedThenBaitOrAmbushWithin3) /
-              corpNewRemoteCreated,
-          )
+        ? round(corpRemoteConvertedToAgendaAssetOrBait / corpNewRemoteCreated)
         : 0,
     corpIceInstalledOnNewRemoteInsteadOfExistingScoringRemote,
     corpExistingRemoteCouldBeStrengthened,

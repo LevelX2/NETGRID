@@ -1,5 +1,6 @@
+import type { CardPlanningFacts } from "@netgrid/cards/planning";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
-  type ResolvedCardDefinition,
   AiDecisionInput,
   LegalAction,
   VisibleCard,
@@ -7,16 +8,16 @@ import {
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const testDefinitionAuthority = vi.hoisted(() => ({
-  byId: {} as Record<string, ResolvedCardDefinition>,
+  byId: {} as Record<number, CardPlanningFacts>,
 }));
 
-vi.mock("../card-definition-compatibility", async (importOriginal) => {
+vi.mock("@netgrid/cards/planning", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("../card-definition-compatibility")>();
-  Object.assign(testDefinitionAuthority.byId, actual.CARD_DEFINITIONS_BY_ID);
+    await importOriginal<typeof import("@netgrid/cards/planning")>();
   return {
     ...actual,
-    CARD_DEFINITIONS_BY_ID: testDefinitionAuthority.byId,
+    planningCardFactsByDefinitionId: (id: number) =>
+      testDefinitionAuthority.byId[id] ?? actual.planningCardFactsByDefinitionId(id),
   };
 });
 
@@ -56,7 +57,7 @@ import {
 } from "./semantic-runtime-corp-scoring-window.test-support";
 
 const DEFINITION_BACKED_AGENDA_ID =
-  "test_definition_backed_score_window_agenda";
+  syntheticCardDefinitionId("test_definition_backed_score_window_agenda");
 
 describe("semanticRuntimeCorpScoringWindowAssessment", () => {
   afterEach(() => {
@@ -72,7 +73,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       "advance-score-now",
       "advance_card",
       {
-        serverId: "remote_1",
+        serverId: "r1",
       },
       agenda.instanceId,
     );
@@ -82,7 +83,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
         servers: [
           centralServer("hq", [centralIce("hq-ice")]),
           centralServer("rd", [centralIce("rd-ice")]),
-          remoteServer("remote_1", [], [agenda]),
+          remoteServer("r1", [], [agenda]),
         ],
       }),
       action,
@@ -104,7 +105,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       {
         cardType: "agenda",
         placement: "root",
-        serverId: "remote_1",
+        serverId: "r1",
       },
       agenda.instanceId,
     );
@@ -114,7 +115,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
         ownCredits: 5,
         hq: [agenda],
         servers: protectedCentralServers([
-          remoteServer("remote_1", [wallIce("remote-wall", { rezCost: 3 })]),
+          remoteServer("r1", [wallIce("remote-wall", { rezCost: 3 })]),
         ]),
       }),
       action,
@@ -137,7 +138,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       "advance-agenda-with-thin-rez-floor",
       "advance_card",
       {
-        serverId: "remote_1",
+        serverId: "r1",
       },
       agenda.instanceId,
     );
@@ -147,7 +148,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
         ownCredits: 4,
         servers: protectedCentralServers([
           remoteServer(
-            "remote_1",
+            "r1",
             [wallIce("remote-wall", { rezCost: 3 })],
             [agenda],
           ),
@@ -182,7 +183,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       {
         cardType: "agenda",
         placement: "root",
-        serverId: "remote_1",
+        serverId: "r1",
       },
       agenda.instanceId,
     );
@@ -193,7 +194,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
         runnerCredits: 9,
         hq: [agenda],
         servers: protectedCentralServers([
-          remoteServer("remote_1", [wallIce("remote-wall", { rezCost: 3 })]),
+          remoteServer("r1", [wallIce("remote-wall", { rezCost: 3 })]),
         ]),
       }),
       action,
@@ -217,7 +218,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       {
         cardType: "agenda",
         placement: "root",
-        serverId: "remote_1",
+        serverId: "r1",
       },
       agenda.instanceId,
     );
@@ -232,7 +233,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
         ],
         hq: [agenda],
         servers: protectedCentralServers([
-          remoteServer("remote_1", [wallIce("remote-wall", { rezzed: true })]),
+          remoteServer("r1", [wallIce("remote-wall", { rezzed: true })]),
         ]),
       }),
       action,
@@ -259,7 +260,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       {
         cardType: "agenda",
         placement: "root",
-        serverId: "remote_1",
+        serverId: "r1",
       },
       agenda.instanceId,
     );
@@ -278,7 +279,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
           }),
         ],
         servers: protectedCentralServers([
-          remoteServer("remote_1", [
+          remoteServer("r1", [
             wallIce("remote-wall-1", { rezzed: true }),
             wallIce("remote-wall-2", { rezzed: true }),
           ]),
@@ -307,7 +308,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       {
         cardType: "agenda",
         placement: "root",
-        serverId: "remote_1",
+        serverId: "r1",
       },
       agenda.instanceId,
     );
@@ -330,7 +331,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
           }),
         ],
         servers: protectedCentralServers([
-          remoteServer("remote_1", [
+          remoteServer("r1", [
             wallIce("remote-wall-1", { rezzed: true }),
             wallIce("remote-wall-2", { rezzed: true }),
             wallIce("new-remote-wall", { rezzed: true }),
@@ -359,7 +360,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       {
         cardType: "agenda",
         placement: "root",
-        serverId: "remote_1",
+        serverId: "r1",
       },
       agenda.instanceId,
     );
@@ -369,7 +370,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
         ownClicks: 4,
         runnerCredits: 9,
         hq: [agenda],
-        servers: protectedCentralServers([remoteServer("remote_1", [])]),
+        servers: protectedCentralServers([remoteServer("r1", [])]),
       }),
       action,
     );
@@ -387,7 +388,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       advancementRequirement: 3,
     });
     const projectConsultants = operationCard("project-consultants", {
-      definitionId: "onr_v1_300_project-consultants",
+      definitionId: 512,
       title: "Project Consultants",
       cost: 10,
       rulesText:
@@ -399,7 +400,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       {
         cardType: "agenda",
         placement: "root",
-        serverId: "remote_1",
+        serverId: "r1",
       },
       agenda.instanceId,
     );
@@ -410,7 +411,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
         ownClicks: 3,
         runnerCredits: 9,
         hq: [agenda, projectConsultants],
-        servers: protectedCentralServers([remoteServer("remote_1", [])]),
+        servers: protectedCentralServers([remoteServer("r1", [])]),
       }),
       action,
     );
@@ -425,11 +426,11 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
 
   it("does not charge a click for scoring after a visible two-counter burst", () => {
     const agenda = agendaCard("project-zurich", {
-      definitionId: "onr_proteus_008_project-zurich",
+      definitionId: 66,
       advancementRequirement: 3,
     });
     const systematicLayoffs = operationCard("systematic-layoffs", {
-      definitionId: "onr_v1_304_systematic-layoffs",
+      definitionId: 516,
       title: "Systematic Layoffs",
       cost: 5,
       rulesText:
@@ -441,7 +442,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       {
         cardType: "agenda",
         placement: "root",
-        serverId: "remote_1",
+        serverId: "r1",
       },
       agenda.instanceId,
     );
@@ -452,7 +453,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
         ownClicks: 3,
         runnerCredits: 9,
         hq: [agenda, systematicLayoffs],
-        servers: protectedCentralServers([remoteServer("remote_1", [])]),
+        servers: protectedCentralServers([remoteServer("r1", [])]),
       }),
       action,
     );
@@ -480,7 +481,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       {
         cardType: "agenda",
         placement: "root",
-        serverId: "remote_1",
+        serverId: "r1",
       },
       agenda.instanceId,
     );
@@ -491,7 +492,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
         ownClicks: 3,
         runnerCredits: 9,
         hq: [agenda, counterfeitConsultants],
-        servers: protectedCentralServers([remoteServer("remote_1", [])]),
+        servers: protectedCentralServers([remoteServer("r1", [])]),
       }),
       action,
     );
@@ -505,7 +506,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       "advance-generic-protected-agenda",
       "advance_card",
       {
-        serverId: "remote_1",
+        serverId: "r1",
       },
       agenda.instanceId,
     );
@@ -516,7 +517,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
         hq: [agenda],
         servers: protectedCentralServers([
           remoteServer(
-            "remote_1",
+            "r1",
             [genericIce("remote-protection-ice")],
             [agenda],
           ),
@@ -543,7 +544,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       {
         cardType: "agenda",
         placement: "root",
-        serverId: "remote_1",
+        serverId: "r1",
       },
       agenda.instanceId,
     );
@@ -555,7 +556,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
         runnerRig: [simpleFracter("runner-fracter")],
         hq: [agenda],
         servers: protectedCentralServers([
-          remoteServer("remote_1", [wallIce("remote-wall", { rezCost: 3 })]),
+          remoteServer("r1", [wallIce("remote-wall", { rezCost: 3 })]),
         ]),
       }),
       action,
@@ -577,7 +578,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       {
         cardType: "agenda",
         placement: "root",
-        serverId: "remote_1",
+        serverId: "r1",
       },
       agenda.instanceId,
     );
@@ -589,7 +590,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
         runnerRig: [simpleFracter("runner-fracter", 5)],
         hq: [agenda],
         servers: protectedCentralServers([
-          remoteServer("remote_1", [wallIce("remote-wall", { rezCost: 3 })]),
+          remoteServer("r1", [wallIce("remote-wall", { rezCost: 3 })]),
         ]),
       }),
       action,
@@ -613,7 +614,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       {
         cardType: "agenda",
         placement: "root",
-        serverId: "remote_1",
+        serverId: "r1",
       },
       agenda.instanceId,
     );
@@ -629,7 +630,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
         ],
         hq: [agenda],
         servers: protectedCentralServers([
-          remoteServer("remote_1", [
+          remoteServer("r1", [
             wallIce("remote-wall-1", { rezzed: true, rezCost: 0 }),
             wallIce("remote-wall-2", { rezzed: true, rezCost: 0 }),
             wallIce("remote-wall-3", { rezzed: true, rezCost: 0 }),
@@ -650,7 +651,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
     expect(assessment?.evidence).toEqual(
       expect.arrayContaining([
         "visible_runner_exposure_contest_credits:18",
-        "exposure_visible_runner_pre_run_credit_take_bonus:5",
+        "exposure_visible_runner_income_above_basic_credits:5",
       ]),
     );
   });
@@ -664,7 +665,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       "advance-remote-agenda",
       "advance_card",
       {
-        serverId: "remote_1",
+        serverId: "r1",
       },
       agenda.instanceId,
     );
@@ -676,7 +677,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
         runnerRig: [simpleFracter("runner-fracter")],
         servers: protectedCentralServers([
           remoteServer(
-            "remote_1",
+            "r1",
             [wallIce("remote-wall", { rezzed: true, rezCost: 0 })],
             [agenda],
           ),
@@ -711,7 +712,6 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       type: "agenda",
       playCost: null,
       subtypes: [],
-      implementationStatus: "playable_mvp",
       advancementRequirement: 3,
       agendaPoints: 2,
       numeric: {
@@ -741,7 +741,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       {
         cardType: "agenda",
         placement: "root",
-        serverId: "remote_1",
+        serverId: "r1",
       },
       agenda.instanceId,
     );
@@ -753,7 +753,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
         runnerRig: [simpleFracter("runner-fracter")],
         hq: [agenda],
         servers: protectedCentralServers([
-          remoteServer("remote_1", [
+          remoteServer("r1", [
             wallIce("remote-wall", { rezzed: true, rezCost: 0 }),
           ]),
         ]),
@@ -790,7 +790,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       "advance-classic-wall-agenda",
       "advance_card",
       {
-        serverId: "remote_1",
+        serverId: "r1",
       },
       agenda.instanceId,
     );
@@ -802,7 +802,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
         runnerRig: [earlyWormBreaker("runner-worm")],
         servers: protectedCentralServers([
           remoteServer(
-            "remote_1",
+            "r1",
             [
               classicWallIce("remote-classic-wall", {
                 rezzed: true,

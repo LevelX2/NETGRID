@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type {
   AiDeckStrategyProfile,
@@ -148,6 +149,21 @@ describe("StrategicIntentState contract", () => {
       previousStrategyId: "corp.remote_scoring",
     });
     expect(continued.commitment.decisionsCommitted).toBe(2);
+    const repeated = buildStrategicIntentState({
+      side: "corp",
+      stateVersion: 21,
+      strategyProfile: profileInput,
+      previousState: continued,
+      availableCredits: 7,
+      roleStatuses: activeRoles,
+    });
+    expect(repeated.commitment.decisionsCommitted).toBe(2);
+    expect(() => buildStrategicIntentState({
+      side: "corp",
+      stateVersion: 20,
+      strategyProfile: profileInput,
+      previousState: repeated,
+    })).toThrow("invalid_plan_identity");
   });
 
   it.each([
@@ -625,7 +641,7 @@ describe("StrategicIntentState contract", () => {
           observedAtStateVersion: 42,
           reason: "phase_change",
           evidenceCodes: ["phase_changed"],
-          actionIds: ["runner.start_run.rd"],
+          actionIds: ["rs.rd"],
         } as never,
       });
     } catch (error) {
@@ -727,7 +743,7 @@ function score(params: {
       params.anchor > 0
         ? [
             {
-              cardId: "fixture-card",
+              cardId: syntheticCardDefinitionId("fixture-card"),
               quantity: 1,
               source: "derivedStrategyAnchor",
               strategyId: "fixture.strategy",
@@ -739,7 +755,7 @@ function score(params: {
       params.support > 0
         ? [
             {
-              cardId: "fixture-support",
+              cardId: syntheticCardDefinitionId("fixture-support"),
               quantity: 1,
               source: "functionSignal",
               signal: "fixture.support",

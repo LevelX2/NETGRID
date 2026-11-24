@@ -47,7 +47,7 @@ describe("runnerDrawTaxLiabilityScoreComponent", () => {
       runnerDrawTaxLiabilityScoreComponent(
         input(0, {
           credits: 2,
-          visibleTagSourceDefinitionId: "onr_v1_313_city-surveillance",
+          visibleTagSourceDefinitionId: 525,
         }),
         multiDraw,
       ),
@@ -68,7 +68,7 @@ describe("runnerDrawTaxLiabilityScoreComponent", () => {
       runnerDrawTaxLiabilityScoreComponent(
         input(0, {
           credits: 2,
-          visibleTagSourceDefinitionId: "onr_v1_333_omniscience-foundation",
+          visibleTagSourceDefinitionId: 545,
         }),
         multiDraw,
       ),
@@ -85,7 +85,7 @@ describe("runnerDrawTaxLiabilityScoreComponent", () => {
       runnerDrawTaxLiabilityScoreComponent(
         input(0, {
           credits: 7,
-          visibleTagSourceDefinitionId: "onr_v1_313_city-surveillance",
+          visibleTagSourceDefinitionId: 525,
         }),
         multiDraw,
       ),
@@ -97,7 +97,7 @@ describe("runnerDrawTaxLiabilityScoreComponent", () => {
       runnerDrawTaxLiabilityScoreComponent(
         input(0, {
           credits: 0,
-          visibleTagSourceDefinitionId: "onr_v1_313_city-surveillance",
+          visibleTagSourceDefinitionId: 525,
         }),
         action({
           runnerDrawProjectionSchemaVersion:
@@ -120,7 +120,7 @@ function input(
   tags: number,
   options: {
     credits?: number;
-    visibleTagSourceDefinitionId?: string;
+    visibleTagSourceDefinitionId?: number;
   } = {},
 ): AiDecisionInput {
   return {
@@ -130,7 +130,7 @@ function input(
       servers: options.visibleTagSourceDefinitionId
         ? [
             {
-              id: "remote_1",
+              id: "r1",
               ice: [],
               root: [
                 {

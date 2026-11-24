@@ -1,4 +1,5 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import type {
   CardDefinition,
@@ -43,7 +44,7 @@ describe("damage core", () => {
     const gripCardId = "grip_1" as CardInstanceId;
     const state = minimalState({
       cardInstances: {
-        [gripCardId]: instance(gripCardId, "grip_card", "runner", "grip"),
+        [gripCardId]: instance(gripCardId, 3202026548, "runner", "grip"),
       },
       runnerGrip: [gripCardId],
     });
@@ -54,6 +55,7 @@ describe("damage core", () => {
       damageType: "net",
       amount: 1,
       source: "test",
+      randomSource: ["g", 0] as const,
     });
 
     expect(summary).toEqual({
@@ -78,18 +80,8 @@ describe("damage core", () => {
     const createState = (matchId: string) => {
       const state = minimalState({
         cardInstances: {
-          [firstCardId]: instance(
-            firstCardId,
-            "grip_first_definition",
-            "runner",
-            "grip",
-          ),
-          [secondCardId]: instance(
-            secondCardId,
-            "grip_second_definition",
-            "runner",
-            "grip",
-          ),
+          [firstCardId]: instance(firstCardId, 2350464868, "runner", "grip"),
+          [secondCardId]: instance(secondCardId, 2457450858, "runner", "grip"),
         },
         runnerGrip: [firstCardId, secondCardId],
       });
@@ -108,28 +100,28 @@ describe("damage core", () => {
       actionFor("corp", "play_operation"),
       "net",
       1,
-      "source_def",
+      syntheticCardDefinitionId("source_def"),
     );
     resolveDamageOperation(
       right,
       actionFor("corp", "play_operation"),
       "net",
       1,
-      "source_def",
+      syntheticCardDefinitionId("source_def"),
     );
 
     expect(left.runner.heap).toEqual(right.runner.heap);
     expect(left.randomDrawRecords).toEqual(right.randomDrawRecords);
-    expect(left.randomDrawRecords.at(-1)?.purpose).toBe(
-      "damage:damage.1.source_def:net:operation:source_def:1:selection:0",
-    );
+    expect(left.randomDrawRecords.at(-1)?.purpose).toEqual([
+      11, 0, ["c", syntheticCardDefinitionId("source_def")], 1, 0,
+    ]);
   });
 
   it("binds resolved damage to the runner action that created its event", () => {
     const gripCardId = "grip_action" as CardInstanceId;
     const state = minimalState({
       cardInstances: {
-        [gripCardId]: instance(gripCardId, "grip_card", "runner", "grip"),
+        [gripCardId]: instance(gripCardId, 3202026548, "runner", "grip"),
       },
       runnerGrip: [gripCardId],
     });
@@ -144,6 +136,7 @@ describe("damage core", () => {
       damageType: "net",
       amount: 1,
       source: "test",
+      randomSource: ["g", 0] as const,
     });
 
     delete state.runnerTurnFlags.currentRunnerActionOrdinal;
@@ -157,7 +150,7 @@ describe("damage core", () => {
     const gripCardId = "grip_bonus_run" as CardInstanceId;
     const state = minimalState({
       cardInstances: {
-        [gripCardId]: instance(gripCardId, "grip_card", "runner", "grip"),
+        [gripCardId]: instance(gripCardId, 3202026548, "runner", "grip"),
       },
       runnerGrip: [gripCardId],
     });
@@ -166,13 +159,14 @@ describe("damage core", () => {
     state.runnerTurnFlags = {
       runnerActionOrdinal: 7,
     } as NonNullable<GameState["runnerTurnFlags"]>;
-    state.run = { runId: "bonus_run", attackedServerId: "rd" } as any;
+    state.run = { runId: 857038, attackedServerId: "rd" } as any;
 
     doDamage(state, {
       damageId: "bonus_run_damage",
       damageType: "net",
       amount: 1,
       source: "test",
+      randomSource: ["g", 0] as const,
     });
 
     expect(state.runnerTurnFlags.lastDamageRunnerActionOrdinal).toBeUndefined();
@@ -182,7 +176,7 @@ describe("damage core", () => {
     const gripCardId = "grip_action_run" as CardInstanceId;
     const state = minimalState({
       cardInstances: {
-        [gripCardId]: instance(gripCardId, "grip_card", "runner", "grip"),
+        [gripCardId]: instance(gripCardId, 3202026548, "runner", "grip"),
       },
       runnerGrip: [gripCardId],
     });
@@ -191,7 +185,7 @@ describe("damage core", () => {
       runnerActionOrdinal: 7,
     } as NonNullable<GameState["runnerTurnFlags"]>;
     state.run = {
-      runId: "action_run",
+      runId: 898613,
       attackedServerId: "rd",
       runnerActionOrdinal: 7,
     } as any;
@@ -201,6 +195,7 @@ describe("damage core", () => {
       damageType: "net",
       amount: 1,
       source: "test",
+      randomSource: ["g", 0] as const,
     });
 
     expect(state.runnerTurnFlags.lastDamageRunnerActionOrdinal).toBe(7);
@@ -218,6 +213,7 @@ describe("damage core", () => {
       damageType: "net",
       amount: 1,
       source: "test",
+      randomSource: ["g", 0] as const,
     });
 
     resolveDamageImminentEvent(state, {
@@ -230,7 +226,7 @@ describe("damage core", () => {
 
   it("keeps flatline timing and state markers stable", () => {
     const state = minimalState({ cardInstances: {}, runnerGrip: [] });
-    state.run = { runId: "run_1", attackedServerId: "rd" } as any;
+    state.run = { runId: 1, attackedServerId: "rd" } as any;
     configureDamageCoreHost(testHost());
 
     const summary = doDamage(state, {
@@ -238,6 +234,7 @@ describe("damage core", () => {
       damageType: "meat",
       amount: 1,
       source: "test",
+      randomSource: ["g", 0] as const,
     });
 
     expect(summary).toMatchObject({
@@ -252,36 +249,53 @@ describe("damage core", () => {
     expect(state.timingPoint).toBe("game.checkpoint");
     expect(state.activeSide).toBe("corp");
     expect(state.run).toBeUndefined();
+    expect(state.randomCounter).toBe(0);
   });
 
   it.each(["net", "meat", "core"] as const)(
-    "reports the actual retained grip after terminal %s damage without inventing discards",
+    "trashes every available grip card on lethal %s damage before ending the game",
     (damageType) => {
       const grip = ["terminal_a", "terminal_b", "terminal_c", "terminal_d"].map(
         (id) => id as CardInstanceId,
       );
       const state = minimalState({
         cardInstances: Object.fromEntries(
-          grip.map((id) => [id, instance(id, "grip_card", "runner", "grip")]),
+          grip.map((id) => [id, instance(id, 3202026548, "runner", "grip")]),
         ),
         runnerGrip: grip,
       });
-      configureDamageCoreHost(testHost());
+      const host = testHost();
+      const openReaction = vi.fn(() => false);
+      host.reactions = { openPostMeatDamageReactionWindow: openReaction };
+      configureDamageCoreHost(host);
       const action = actionFor("corp", "play_operation");
 
-      resolveDamageOperation(state, action, damageType, 5, "terminal_source");
+      resolveDamageOperation(
+        state,
+        action,
+        damageType,
+        5,
+        syntheticCardDefinitionId("terminal_source"),
+      );
 
       expect(state.winner).toBe("corp");
       expect(state.gameEndReason).toBe("flatline");
-      expect(state.runner.grip).toEqual(grip);
-      expect(state.runner.heap).toEqual([]);
-      expect(state.randomCounter).toBe(0);
+      expect(state.runner.grip).toHaveLength(0);
+      expect(state.runner.heap).toEqual(grip);
+      for (const id of grip) {
+        expect(state.cardInstances[id]).toMatchObject({
+          zone: { side: "runner", zone: "heap" },
+          faceup: true,
+        });
+      }
+      expect(state.randomCounter).toBe(grip.length);
+      expect(openReaction).not.toHaveBeenCalled();
       expect(action.payload).toMatchObject({
         flatline: true,
         damageAmount: 5,
-        cardsTrashed: 0,
+        cardsTrashed: 4,
         runnerGripBefore: 4,
-        runnerGripAfter: state.runner.grip.length,
+        runnerGripAfter: 0,
       });
     },
   );
@@ -290,7 +304,7 @@ describe("damage core", () => {
     const gripCardId = "grip_1" as CardInstanceId;
     const state = minimalState({
       cardInstances: {
-        [gripCardId]: instance(gripCardId, "grip_card", "runner", "grip"),
+        [gripCardId]: instance(gripCardId, 3202026548, "runner", "grip"),
       },
       runnerGrip: [gripCardId],
     });
@@ -300,7 +314,7 @@ describe("damage core", () => {
     configureDamageCoreHost(testHost());
     const action = actionFor("corp", "play_operation");
 
-    resolveDamageOperation(state, action, "net", 1, "damage_source");
+    resolveDamageOperation(state, action, "net", 1, syntheticCardDefinitionId("damage_source"));
 
     expect(state.pendingChoice).toMatchObject({
       source: "v120.event_modification.prevent",
@@ -344,27 +358,15 @@ describe("damage core", () => {
     const secondId = "bioweapons_2" as CardInstanceId;
     const state = minimalState({
       cardInstances: {
-        [firstId]: instance(
-          firstId,
-          "onr_v1_190_bioweapons-engineering",
-          "corp",
-          "identity",
-        ),
-        [secondId]: instance(
-          secondId,
-          "onr_v1_190_bioweapons-engineering",
-          "corp",
-          "identity",
-        ),
+        [firstId]: instance(firstId, 402, "corp", "identity"),
+        [secondId]: instance(secondId, 402, "corp", "identity"),
       },
       runnerGrip: [],
     });
     state.corp.scoreArea = [firstId, secondId];
     const host = testHost();
     host.cards.scoredAgendaKindForDefinition = (definition) =>
-      definition.id === "onr_v1_190_bioweapons-engineering"
-        ? "meat_damage_bonus"
-        : undefined;
+      definition.id === 402 ? "meat_damage_bonus" : undefined;
     configureDamageCoreHost(host);
 
     expect(
@@ -373,6 +375,7 @@ describe("damage core", () => {
         damageType: "meat",
         amount: 1,
         source: "test",
+        randomSource: ["g", 0] as const,
       }).payload,
     ).toMatchObject({
       baseDamageAmount: 1,
@@ -387,21 +390,16 @@ describe("damage core", () => {
     const secondTargetId = "program_b" as CardInstanceId;
     const state = minimalState({
       cardInstances: {
-        [umbrellaId]: instance(
-          umbrellaId,
-          "onr_v1_186_umbrella-policy",
-          "runner",
-          "identity",
-        ),
+        [umbrellaId]: instance(umbrellaId, 398, "runner", "identity"),
         [firstTargetId]: instance(
           firstTargetId,
-          "program_a_def",
+          2381570239,
           "runner",
           "identity",
         ),
         [secondTargetId]: instance(
           secondTargetId,
-          "program_b_def",
+          2562566734,
           "runner",
           "identity",
         ),
@@ -436,7 +434,12 @@ describe("damage core", () => {
       cardInstances: Object.fromEntries(
         targetIds.map((cardId) => [
           cardId,
-          instance(cardId, `${cardId}_def`, "runner", "identity"),
+          instance(
+            cardId,
+            syntheticCardDefinitionId(`${cardId}_def`),
+            "runner",
+            "identity",
+          ),
         ]),
       ),
       runnerGrip: [],
@@ -484,23 +487,23 @@ describe("damage core", () => {
       cardInstances: Object.fromEntries(
         gripCardIds.map((cardId) => [
           cardId,
-          instance(cardId, "grip_card", "runner", "grip"),
+          instance(cardId, 3202026548, "runner", "grip"),
         ]),
       ),
       runnerGrip: gripCardIds,
     });
     state.run = {
-      runId: "weefle_run",
+      runId: 236827,
       attackedServerId: "rd",
       damagePreventionPool: {
-        sourceDefinitionId: "onr_proteus_127_weefle-initiation",
+        sourceDefinitionId: 185,
         remaining: 7,
       },
     } as NonNullable<GameState["run"]>;
     configureDamageCoreHost(testHost());
     const action = actionFor("corp", "play_operation");
 
-    resolveDamageOperation(state, action, "net", 3, "weefle_damage");
+    resolveDamageOperation(state, action, "net", 3, syntheticCardDefinitionId("weefle_damage"));
 
     const preventionOptions = state.pendingChoice?.options.filter((option) =>
       option.id.includes("run_damage_prevent_"),
@@ -533,7 +536,7 @@ describe("damage core", () => {
 
   it("keeps differently sized prevention sources in the same priority stage", () => {
     const window: EventModificationWindow = {
-      windowId: "prevention_stage",
+      windowId: 1,
       eventId: "damage_event",
       eventType: "damage",
       kind: "prevent",
@@ -608,13 +611,13 @@ describe("damage core", () => {
     const state = minimalState({
       cardInstances: {
         [fallGuyId]: {
-          ...instance(fallGuyId, "onr_v1_161_fall-guy", "runner", "grip"),
+          ...instance(fallGuyId, 373, "runner", "grip"),
           faceup: true,
           rezzed: true,
           zone: { side: "runner", zone: "rig" },
         } as CardInstance,
         [nomadId]: {
-          ...instance(nomadId, "onr_v1_170_nomad-allies", "runner", "grip"),
+          ...instance(nomadId, 382, "runner", "grip"),
           faceup: true,
           rezzed: true,
           zone: { side: "runner", zone: "rig" },
@@ -685,7 +688,7 @@ describe("damage core", () => {
     const state = minimalState({
       cardInstances: {
         [fallGuyId]: {
-          ...instance(fallGuyId, "onr_v1_161_fall-guy", "runner", "grip"),
+          ...instance(fallGuyId, 373, "runner", "grip"),
           faceup: true,
           rezzed: true,
           zone: { side: "runner", zone: "rig" },
@@ -728,12 +731,7 @@ describe("damage core", () => {
     const state = minimalState({
       cardInstances: {
         [camaroId]: {
-          ...instance(
-            camaroId,
-            "onr_classic_051_vintage-camaro",
-            "runner",
-            "grip",
-          ),
+          ...instance(camaroId, 55, "runner", "grip"),
           faceup: true,
           rezzed: true,
           zone: { side: "runner", zone: "rig" },
@@ -765,7 +763,7 @@ describe("damage core", () => {
     expect(state.runnerTurnFlags?.forgoNextActionsPending).toBe(1);
     expect(choiceAction.payload).toMatchObject({
       eventModificationOutcome: "avoided",
-      sourceDefinitionId: "onr_classic_051_vintage-camaro",
+      sourceDefinitionId: 55,
       paidCredits: 1,
       runnerForgoNextActions: 1,
       tagsAdded: 0,
@@ -776,7 +774,7 @@ describe("damage core", () => {
     const gripCardId = "grip_1" as CardInstanceId;
     const state = minimalState({
       cardInstances: {
-        [gripCardId]: instance(gripCardId, "grip_card", "runner", "grip"),
+        [gripCardId]: instance(gripCardId, 3202026548, "runner", "grip"),
       },
       runnerGrip: [gripCardId],
     });
@@ -786,7 +784,7 @@ describe("damage core", () => {
     configureDamageCoreHost(testHost());
     const action = actionFor("corp", "play_operation");
 
-    resolveDamageOperation(state, action, "net", 1, "damage_source");
+    resolveDamageOperation(state, action, "net", 1, syntheticCardDefinitionId("damage_source"));
 
     expect(state.pendingChoice).toMatchObject({
       source: "v121.replacement.damage",
@@ -874,7 +872,7 @@ function minimalState(input: {
     cardInstances: {
       runner_identity: instance(
         "runner_identity" as CardInstanceId,
-        "runner_identity_def",
+        198573098,
         "runner",
         "identity",
       ),
@@ -884,7 +882,7 @@ function minimalState(input: {
   } as unknown as GameState;
 }
 
-function definition(id: string, type: CardDefinition["type"]): CardDefinition {
+function definition(id: number, type: CardDefinition["type"]): CardDefinition {
   return {
     id: id as CardDefinitionId,
     title: id,
@@ -900,7 +898,7 @@ function definition(id: string, type: CardDefinition["type"]): CardDefinition {
 
 function instance(
   id: CardInstanceId,
-  definitionId: string,
+  definitionId: number,
   owner: "corp" | "runner",
   runnerZone: "grip" | "heap" | "identity",
 ): CardInstance {
@@ -947,7 +945,7 @@ function testHost(): DamageCoreHost {
       definitionFor: (state, cardId) => {
         const definitionId = state.cardInstances[cardId]?.definitionId;
         if (!definitionId) throw new Error(`Definition fehlt: ${cardId}`);
-        if (definitionId === "runner_identity_def")
+        if (definitionId === 198573098)
           return { ...definition(definitionId, "identity"), baseLink: 0 };
         return definition(definitionId, "program");
       },

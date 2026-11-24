@@ -8,14 +8,14 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 describe("selfplay 177 Security Purge install targets decision checkpoint", () => {
   it("binds the choice to the current central-defense allocation", () => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(securityPurgeJson) as AiDecisionCheckpointV1,
+      structuredClone(securityPurgeJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     if (!result.ok) return;
 
     expect(result.decision).toMatchObject({
-      actionId: "corp.resolve_choice",
+      actionId: "cn",
       reasonCode: "plan_first.corp.defend_servers",
       selectedChoices: {
         choiceId: "choice_agenda_purge_install_targets_47",
@@ -25,7 +25,7 @@ describe("selfplay 177 Security Purge install targets decision checkpoint", () =
       },
     });
     const plan = result.decision!.decisionDebug!.planFirstDecision!;
-    const owner = "plan:corp.defend_servers:server-defense-portfolio";
+    const owner = "penw02zfrkklof54c2nuye5att";
     expect(plan).toMatchObject({
       rootPlanInstanceId: owner,
       leafExecutorInstanceId: owner,
@@ -45,10 +45,10 @@ describe("selfplay 177 Security Purge install targets decision checkpoint", () =
     expect(option).toBeDefined();
     expect(option.selectable).not.toBe(false);
     const [iceId, serverId] = String(option.value).split("|");
-    expect(iceId).toBe("corp_onr_proteus_012_bug-zapper_2");
+    expect(iceId).toBe("cfq");
     const checkpoint = structuredClone(
       securityPurgeJson,
-    ) as AiDecisionCheckpointV1;
+    ) as unknown as AiDecisionCheckpointV1;
     const initial = checkpoint.engine.testOnlyGameState;
     initial.eventLog = checkpoint.engine.eventPrefix;
     const applied = applyAction(initial, {

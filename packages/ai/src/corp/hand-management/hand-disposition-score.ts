@@ -1,7 +1,7 @@
 import { corpArchivesPreparationDiscardValue } from "../ambush/corp-access-zone-preparation";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { corpTerminalHqAgendaShuffleExposure } from "../defense/corp-server-protection-reserve";
 import type { DiscardChoiceKeepScore } from "../../runtime/discard-choice-selection";
 import {
@@ -57,7 +57,7 @@ export function corpHandDispositionScore(params: {
     };
   }
   const definition = card.definitionId
-    ? CARD_DEFINITIONS_BY_ID[card.definitionId]
+    ? planningCardFactsByDefinitionId(card.definitionId)
     : undefined;
   const type = card.type ?? definition?.type;
   if (type !== "agenda") {

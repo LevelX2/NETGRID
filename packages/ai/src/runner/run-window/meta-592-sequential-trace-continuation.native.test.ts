@@ -50,20 +50,20 @@ it("retains the direct central run root across both real Pocket traces and Chiba
       selectedAtStateVersion: d === 124 ? 123 : 125,
       originalActionId:
         d === 124
-          ? "runner.continue_run.printed_subroutines_trace_a"
-          : "runner.resolve_choice",
+          ? "r5.1"
+          : "rn",
     });
     if (d === 126)
       expect(z.selectedChoices?.selectedOptionIds).toEqual(["bid_6"]);
     if (d === 127) {
       const a = input.legalActions.find((a: any) => a.actionId === z.actionId)!;
       expect(a.payload.costPenaltySupportOriginalActionId).toBe(
-        "runner.resolve_choice",
+        "rn",
       );
       expect(a.payload.costPenaltySupportWindowId).toBe(
-        "runner_cost_penalty_support.126",
+        126,
       );
-      expect(z.actionId).toContain("chiba-bank-account");
+      expect(input.playerView.own.rig.find((card: { instanceId: string }) => card.instanceId === a.source)?.definitionId).toBe(191);
     }
   }
 });
@@ -116,14 +116,14 @@ it.each([
       input.eventTail = input.eventTail.filter((e: any) => e !== event);
     if (variant === "corp_actor") event.publicPayload.actor = "corp";
     if (variant === "foreign_trace")
-      event.publicPayload.traceId = "foreign-run.foreign.trace";
+      event.publicPayload.traceSourceRunId = 118;
     if (variant === "nontrace_effect")
       event.publicPayload.effectKind = "not-trace";
     const result: Extract<PlanSchedulerResult, { lane: "engine_window" }> = {
       lane: "engine_window",
       actionId: input.legalActions[0].actionId,
       origin: {
-        rootPlanInstanceId: "run:run_119",
+        rootPlanInstanceId: "run:119",
         leafPlanInstanceId: "rules.window_resolution",
         side: "runner",
         windowKind: "run",
@@ -191,6 +191,7 @@ it("executes the full second-trace, Chiba and exact original bid sequence twice 
       expect(JSON.stringify(input)).toBe(before);
       expect(z.fallbackUsed || z.timeoutUsed).toBe(false);
       expect(a).toBeDefined();
+      if (i === 3) expect(state.cardInstances[a!.source]?.definitionId).toBe(191);
       actions.push(a!.actionId);
       const r = applyAction(state, {
         matchId: state.matchId,
@@ -204,11 +205,10 @@ it("executes the full second-trace, Chiba and exact original bid sequence twice 
       state = r.state;
       expect(validateGameState(state).ok).toBe(true);
     }
-    expect(actions[0]).toBe("runner.continue_run.printed_subroutines_trace_a");
-    expect(actions[3]).toContain("chiba-bank-account");
-    expect(actions[4]).toBe("runner.resolve_choice");
+    expect(actions[0]).toBe("r5.1");
+    expect(actions[4]).toBe("rn");
     expect(state.runner.credits).toBe(0);
     hashes.push(hashGameState(state));
   }
-  expect(hashes).toEqual(["fnv1a:3f7c6978", "fnv1a:3f7c6978"]);
+  expect(hashes).toEqual(["fnv1a:3fb11493", "fnv1a:3fb11493"]);
 });

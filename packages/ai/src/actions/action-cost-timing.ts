@@ -1,3 +1,4 @@
+import { exactCostDimension } from "../runtime/action-cost";
 import type { LegalAction } from "@netgrid/shared";
 import type {
   ActionCostProfile,
@@ -175,32 +176,6 @@ function runnerInstallHostedCreditCost(
   const sum = sourceAmounts.reduce((sum, amount) => sum + Number(amount), 0);
   if (!Number.isSafeInteger(sum) || sum !== total) return fail();
   return total;
-}
-
-function exactCostDimension(
-  action: LegalAction,
-  key: "clicks" | "credits",
-):
-  | { status: "invalid" }
-  | { status: "known"; value: number; explicit: boolean } {
-  // The Engine's complete empty cost list certifies zero expenditure.
-  // Preserve that fact for planners which require exact resource dimensions.
-  let value = 0;
-  let explicit = false;
-  for (const cost of action.costs) {
-    const component = cost[key];
-    if (component === undefined) continue;
-    if (
-      !Number.isSafeInteger(component) ||
-      component < 0 ||
-      !Number.isSafeInteger(value + component)
-    ) {
-      return { status: "invalid" };
-    }
-    explicit = true;
-    value += component;
-  }
-  return { status: "known", value, explicit };
 }
 
 function stringPayload(action: LegalAction, key: string): string | undefined {

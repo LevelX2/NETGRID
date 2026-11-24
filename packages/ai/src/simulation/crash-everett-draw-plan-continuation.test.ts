@@ -21,9 +21,10 @@ import {
   residentPlanPortfolioSnapshot,
 } from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInput } from "../runtime/ai-decision-input";
+import { applyPostSetupDeckOrder } from "../evaluation/decision-checkpoints/post-setup-deck-order.test-support";
 
-const CRASH_EVERETT = "onr_v1_157_crash-everett-inventive-fixer";
-const CITY_SURVEILLANCE = "onr_v1_313_city-surveillance";
+const CRASH_EVERETT = 369;
+const CITY_SURVEILLANCE = 525;
 
 describe("Crash Everett draw-plan continuation", () => {
   it.each([0, 2, 5, 6])(
@@ -34,14 +35,26 @@ describe("Crash Everett draw-plan continuation", () => {
       const observations = [];
       for (const filtering of [false, true]) {
         resetResidentPlanPortfolioMemory();
-        let state = toRunnerTurn(
-          createGameAfterSetup({
-            seed: "draw-filter-value-review",
-            runnerDeck,
-            corpDeck,
-            agendaPointsToWin: 7,
-          }),
-        );
+        const initial = createGameAfterSetup({
+          seed: "draw-filter-value-review",
+          runnerDeck,
+          corpDeck,
+          agendaPointsToWin: 7,
+        });
+        const runnerGrip = ["cvd", "c19l", "c121", "c10h", "c149"];
+        const nextBufferCard = "c19m";
+        const runnerStack = [
+          ...initial.runner.grip,
+          ...initial.runner.stack,
+        ].filter((id) => !runnerGrip.includes(id) && id !== nextBufferCard);
+        runnerStack.push(nextBufferCard);
+        applyPostSetupDeckOrder(initial, {
+          runnerGrip,
+          runnerStack,
+          corpHq: initial.corp.hq,
+          corpRd: initial.corp.rd,
+        });
+        let state = toRunnerTurn(initial);
         state.runner.credits = 10;
         const crashId = moveRunnerCardToGrip(state, CRASH_EVERETT);
         state = applyLegal(
@@ -166,11 +179,13 @@ describe("Crash Everett draw-plan continuation", () => {
       },
     });
     expect(drawDecision).toMatchObject({
-      actionId: expect.stringContaining("runner.draw"),
+      actionId: drawInput.legalActions.find(
+        (action) => action.type === "draw_card",
+      )!.actionId,
       fallbackUsed: false,
     });
     expect(choiceDecision).toMatchObject({
-      actionId: "runner.resolve_choice",
+      actionId: "rn",
       reasonCode: drawDecision.reasonCode,
       fallbackUsed: false,
     });
@@ -236,7 +251,7 @@ describe("Crash Everett draw-plan continuation", () => {
       );
       const taxDecision = chooseRunnerAction(taxInput);
       expect(taxDecision).toMatchObject({
-        actionId: "runner.resolve_choice",
+        actionId: "rn",
         fallbackUsed: false,
       });
       state = applyDecision(state, "runner", taxDecision);
@@ -268,7 +283,7 @@ describe("Crash Everett draw-plan continuation", () => {
       },
     });
     expect(choiceDecision).toMatchObject({
-      actionId: "runner.resolve_choice",
+      actionId: "rn",
       reasonCode: drawDecision.reasonCode,
       fallbackUsed: false,
     });
@@ -356,7 +371,7 @@ function toRunnerTurn(state: GameState): GameState {
 
 function moveRunnerCardToGrip(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
 ): CardInstanceId {
   const entry = Object.entries(state.cardInstances).find(
     ([, card]) => card.definitionId === definitionId,
@@ -388,7 +403,7 @@ function moveRunnerCardToGrip(
 
 function moveCorpCardToRemoteAndRez(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
 ): CardInstanceId {
   const entry = Object.entries(state.cardInstances).find(
     ([, card]) => card.definitionId === definitionId,
@@ -403,10 +418,10 @@ function moveCorpCardToRemoteAndRez(
     server.ice = server.ice.filter((id) => id !== cardId);
     server.root = server.root.filter((id) => id !== cardId);
   }
-  let remote = state.corp.servers.find((server) => server.id === "remote_1");
+  let remote = state.corp.servers.find((server) => server.id === "r1");
   if (!remote) {
     remote = {
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: [],
@@ -417,7 +432,7 @@ function moveCorpCardToRemoteAndRez(
   remote.root.push(cardId);
   state.cardInstances[cardId] = {
     ...card,
-    zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+    zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
     faceup: true,
     rezzed: true,
   };

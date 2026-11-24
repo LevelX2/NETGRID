@@ -17,7 +17,7 @@ export type RemoteContestCandidateEvaluation = {
   pathPassability?: string;
   scoreThreat?: boolean;
   structuredAlignment: boolean;
-  scoreGap: number;
+  scoreGap: number | null;
   scoreGapThreshold: number;
   candidateStatus: RemoteContestCandidateStatus;
   blockedReason?: string;
@@ -70,7 +70,7 @@ export function evaluateRemoteContestCandidate(params: {
     candidate && runTarget
       ? alignRunTargetAction(candidate, runTarget)
       : undefined;
-  const scoreGap = params.scoreGap ?? Number.NEGATIVE_INFINITY;
+  const scoreGap = params.scoreGap;
   const blockedReason = remoteContestBlockedReason({
     candidateMissing: candidate === undefined,
     runTarget,
@@ -151,7 +151,7 @@ function remoteContestBlockedReason(input: {
   candidateMissing: boolean;
   runTarget: RunnerRunTarget | undefined;
   alignment: ReturnType<typeof alignRunTargetAction> | undefined;
-  scoreGap: number;
+  scoreGap: number | null;
   threshold: number;
 }): string | undefined {
   if (input.candidateMissing) return "remote_contest_candidate_missing";
@@ -180,6 +180,7 @@ function remoteContestBlockedReason(input: {
   ) {
     return "remote_contest_high_risk_blocked";
   }
+  if (input.scoreGap === null) return "remote_contest_score_gap_unknown";
   if (input.scoreGap < input.threshold)
     return "remote_contest_score_gap_below_threshold";
   return undefined;
@@ -188,7 +189,7 @@ function remoteContestBlockedReason(input: {
 function remoteContestReadinessV3(input: {
   runTarget: RunnerRunTarget | undefined;
   alignment: ReturnType<typeof alignRunTargetAction> | undefined;
-  scoreGap: number;
+  scoreGap: number | null;
   threshold: number;
   blockedReason: string | undefined;
 }): RemoteContestReadinessV3 {
@@ -201,7 +202,8 @@ function remoteContestReadinessV3(input: {
     input.runTarget !== undefined &&
     !input.runTarget.riskyUniversalCoverage &&
     input.runTarget.creditsAfterRun >= 0;
-  const scoreGapPasses = input.scoreGap >= input.threshold;
+  const scoreGapPasses =
+    input.scoreGap !== null && input.scoreGap >= input.threshold;
   return {
     version: "remote-contest-readiness-v3",
     activationStatus: "report_only",
@@ -218,7 +220,13 @@ function remoteContestReadinessV3(input: {
       ...(runNow ? [] : ["run_now_recommendation_missing"]),
       ...(reachablePath ? [] : ["reachable_path_missing"]),
       ...(riskClear ? [] : ["risk_clear_missing"]),
-      ...(scoreGapPasses ? [] : ["score_gap_below_threshold"]),
+      ...(scoreGapPasses
+        ? []
+        : [
+            input.scoreGap === null
+              ? "score_gap_unknown"
+              : "score_gap_below_threshold",
+          ]),
       ...(input.blockedReason ? [input.blockedReason] : []),
     ],
   };

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
@@ -15,7 +16,7 @@ import {
 } from "./remote-protection-score";
 
 it("distinguishes active, payable and unfundable root protection in a native remote", () => {
-  const redHerrings = "onr_v1_366_red-herrings";
+  const redHerrings = 578;
   const corpDeck = {
     ...DEMO_DECKS.demo_corp_001,
     cards: [
@@ -40,14 +41,14 @@ it("distinguishes active, payable and unfundable root protection in a native rem
   const current = applied.state;
   RealEngineFixtureBuilder.forState(current)
     .withCorpCredits(0)
-    .withCorpRemoteRoot("remote_1", redHerrings, 0);
-  const root = current.corp.servers.find((server) => server.id === "remote_1")!
+    .withCorpRemoteRoot("r1", redHerrings, 0);
+  const root = current.corp.servers.find((server) => server.id === "r1")!
     .root[0]!;
   const protection = (state: GameState, creditCost = 0) =>
     remoteProtectionScoreForSimulation(
       state,
       { playerView: getPlayerView(state, "corp") } as AiDecisionInput,
-      "remote_1",
+      "r1",
       creditCost,
     );
   expect(protection(current)).toBe(-45);
@@ -69,17 +70,17 @@ it("distinguishes active, payable and unfundable root protection in a native rem
 
 describe("runnerContestRiskForSimulation", () => {
   it("counts only real runtime icebreakers for remote contest risk", () => {
-    expect(contestRiskWithRunnerRig([runnerCard("simple_decoder")])).toBe(
+    expect(contestRiskWithRunnerRig([runnerCard(591)])).toBe(
       "high",
     );
     expect(
-      contestRiskWithRunnerRig([runnerCard("local_icebreakerish_noise")]),
+      contestRiskWithRunnerRig([runnerCard(syntheticCardDefinitionId("local_icebreakerish_noise"))]),
     ).toBe("low");
   });
 });
 
 function contestRiskWithRunnerRig(rig: VisibleCard[]): string {
-  return runnerContestRiskForSimulation(gameState(), aiInput(rig), "remote_1");
+  return runnerContestRiskForSimulation(gameState(), aiInput(rig), "r1");
 }
 
 function gameState(): GameState {
@@ -88,7 +89,7 @@ function gameState(): GameState {
       credits: 4,
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           ice: ["remote-ice-instance"],
           root: [],
         },
@@ -96,7 +97,7 @@ function gameState(): GameState {
     },
     cardInstances: {
       "remote-ice-instance": {
-        definitionId: "simple_barrier_ice",
+        definitionId: 589,
         rezzed: false,
       },
     },
@@ -112,11 +113,11 @@ function aiInput(rig: VisibleCard[]): AiDecisionInput {
       },
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           ice: [
             {
               instanceId: "remote-ice-instance",
-              definitionId: "simple_barrier_ice",
+              definitionId: 589,
               known: true,
               rezzed: false,
             },
@@ -128,7 +129,7 @@ function aiInput(rig: VisibleCard[]): AiDecisionInput {
   } as unknown as AiDecisionInput;
 }
 
-function runnerCard(definitionId: string): VisibleCard {
+function runnerCard(definitionId: number): VisibleCard {
   return {
     instanceId: `${definitionId}-instance`,
     definitionId,

@@ -12,7 +12,7 @@ describe("Proteus restricted multi-run plan-first coverage", () => {
   it("converts Pirate Broadcast's exact R&D and Archives sequence legs through the generic run-window plan [legacy_compare]", () => {
     const captures: AiSimulationDecisionCheckpointCapture[] = [];
     const summary = simulateAiGame({
-      seed: "proteus-pilot-qualifier-01",
+      seed: "pirate-broadcast-sequence-5",
       maxActions: 105,
       runnerDeck: deck("proteus_runner_rd_bad_publicity_2026_05_25"),
       corpDeck: pirateBroadcastCoverageCorpDeck(),
@@ -28,7 +28,7 @@ describe("Proteus restricted multi-run plan-first coverage", () => {
     });
 
     const rdActionId =
-      "runner.start_run.rd.bonus_run.onr_proteus_116_pirate-broadcast";
+      "rs.rd.bonus_run.174";
     const rdCapture = captures.find((snapshot) =>
       snapshot.input.legalActions.some(
         (action) => action.actionId === rdActionId,
@@ -102,7 +102,7 @@ describe("Proteus restricted multi-run plan-first coverage", () => {
     });
 
     const archivesActionId =
-      "runner.start_run.archives.bonus_run.onr_proteus_116_pirate-broadcast";
+      "rs.archives.bonus_run.174";
     expect(
       summary.actionSequence.find((entry) =>
         entry.evidence.includes(
@@ -134,10 +134,10 @@ function deck(deckId: string): DeckDefinition {
 function pirateBroadcastCoverageCorpDeck(): DeckDefinition {
   const result = deck("proteus_corp_region_fast_score_2026_05_25");
   const caryatid = result.cards.find(
-    (card) => card.id === "onr_proteus_013_caryatid",
+    (card) => card.id === 71,
   );
   const scaffolding = result.cards.find(
-    (card) => card.id === "onr_proteus_037_scaffolding",
+    (card) => card.id === 95,
   );
   if (!caryatid || !scaffolding) {
     throw new Error("Missing Pirate Broadcast coverage ICE");

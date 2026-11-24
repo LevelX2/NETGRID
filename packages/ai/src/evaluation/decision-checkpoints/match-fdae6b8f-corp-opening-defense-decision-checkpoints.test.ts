@@ -23,7 +23,7 @@ describe("match fdae6b8f Corp opening and central defense regressions", () => {
     ],
   ])("%s", (_label, checkpointJson) => {
     const result = runAiDecisionCheckpoint(
-      checkpointJson as AiDecisionCheckpointV1,
+      checkpointJson as unknown as AiDecisionCheckpointV1,
     );
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });

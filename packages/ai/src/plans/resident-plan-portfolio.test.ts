@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { PlanProposal } from "./plan-kernel-types";
 import {
   applyPlanOutcomeReceipt,
+  selectResidentPlanPortfolioExecutor,
   assertResidentPlanPortfolio,
   reconcileResidentPlanPortfolio,
   RESIDENT_CORP_CAMPAIGN_SCHEMA_VERSION,
@@ -18,7 +19,7 @@ describe("resident plan portfolio", () => {
       stateVersion: 10,
       timingPoint: "runner_action.main",
       proposals,
-      selectedExecutorInstanceId: "plan:runner.development_0:card-0",
+      selectedExecutorInstanceId: "p28phkw5qwv4dizb6tuofkopus",
     });
 
     expect(portfolio.instances).toHaveLength(7);
@@ -44,7 +45,7 @@ describe("resident plan portfolio", () => {
       stateVersion: 20,
       timingPoint: "runner_action.main",
       proposals: [economy, defense],
-      selectedExecutorInstanceId: "plan:runner.economy:general",
+      selectedExecutorInstanceId: "pbx8c10wae2gnt77urgbqjfsd1",
     });
     const preempted = reconcileResidentPlanPortfolio({
       side: "runner",
@@ -52,7 +53,7 @@ describe("resident plan portfolio", () => {
       timingPoint: "runner_action.main",
       proposals: [economy, defense],
       previous: first,
-      selectedExecutorInstanceId: "plan:runner.defense:damage",
+      selectedExecutorInstanceId: "pb4erro8qttkpchca88a54jjqk",
       selectionReason: "preempted_by_higher_class",
     });
     const resumed = reconcileResidentPlanPortfolio({
@@ -61,12 +62,12 @@ describe("resident plan portfolio", () => {
       timingPoint: "runner_action.main",
       proposals: [economy, defense],
       previous: preempted,
-      selectedExecutorInstanceId: "plan:runner.economy:general",
+      selectedExecutorInstanceId: "pbx8c10wae2gnt77urgbqjfsd1",
     });
 
     expect(
       preempted.instances.find(
-        (instance) => instance.instanceId === "plan:runner.economy:general",
+        (instance) => instance.instanceId === "pbx8c10wae2gnt77urgbqjfsd1",
       ),
     ).toMatchObject({
       createdAtStateVersion: 20,
@@ -74,7 +75,7 @@ describe("resident plan portfolio", () => {
     });
     expect(
       resumed.instances.find(
-        (instance) => instance.instanceId === "plan:runner.economy:general",
+        (instance) => instance.instanceId === "pbx8c10wae2gnt77urgbqjfsd1",
       ),
     ).toMatchObject({
       createdAtStateVersion: 20,
@@ -92,7 +93,7 @@ describe("resident plan portfolio", () => {
       stateVersion: 30,
       timingPoint: "corp_action.main",
       proposals: [plan],
-      selectedExecutorInstanceId: "plan:corp.economy:general",
+      selectedExecutorInstanceId: "p4e71671o1xr33brpcqfj9p953",
     });
     const second = reconcileResidentPlanPortfolio({
       side: "corp",
@@ -100,7 +101,7 @@ describe("resident plan portfolio", () => {
       timingPoint: "corp_action.main",
       proposals: [plan],
       previous: first,
-      selectedExecutorInstanceId: "plan:corp.economy:general",
+      selectedExecutorInstanceId: "p4e71671o1xr33brpcqfj9p953",
     });
 
     expect(second.executorInstanceId).toBe(first.executorInstanceId);
@@ -149,12 +150,12 @@ describe("resident plan portfolio", () => {
       stateVersion: 50,
       timingPoint: "runner_action.main",
       proposals: [plan],
-      selectedExecutorInstanceId: "plan:runner.economy:general",
+      selectedExecutorInstanceId: "pbx8c10wae2gnt77urgbqjfsd1",
     });
     const progressed = applyPlanOutcomeReceipt(
       initial,
       {
-        planInstanceId: "plan:runner.economy:general",
+        planInstanceId: "pbx8c10wae2gnt77urgbqjfsd1",
         stateVersionBefore: 50,
         stateVersionAfter: 51,
         progress: "progress",
@@ -186,12 +187,12 @@ describe("resident plan portfolio", () => {
       stateVersion: 60,
       timingPoint: "corp_action.main",
       proposals: [plan],
-      selectedExecutorInstanceId: "plan:corp.score:remote-1",
+      selectedExecutorInstanceId: "pbssu6w4a6b68gk1xfrejca535",
     });
     const completed = applyPlanOutcomeReceipt(
       initial,
       {
-        planInstanceId: "plan:corp.score:remote-1",
+        planInstanceId: "pbssu6w4a6b68gk1xfrejca535",
         stateVersionBefore: 60,
         stateVersionAfter: 61,
         progress: "completed",
@@ -205,7 +206,7 @@ describe("resident plan portfolio", () => {
     expect(completed.instances).toHaveLength(0);
     expect(completed.completionHistory).toEqual([
       expect.objectContaining({
-        instanceId: "plan:corp.score:remote-1",
+        instanceId: "pbssu6w4a6b68gk1xfrejca535",
         terminalViability: "completed",
         retainUntilStateVersion: 64,
       }),
@@ -215,7 +216,7 @@ describe("resident plan portfolio", () => {
   it("allows a ready parent when its resident child has no active need", () => {
     const parent = proposal("runner.pressure", "rd");
     const child = proposal("runner.economy", "fund-rd", {
-      parentInstanceId: "plan:runner.pressure:rd",
+      parentInstanceId: "p1tfih4bygfn0mpf9s6e2eyji2",
     });
 
     const portfolio = reconcileResidentPlanPortfolio({
@@ -223,19 +224,19 @@ describe("resident plan portfolio", () => {
       stateVersion: 70,
       timingPoint: "runner_action.main",
       proposals: [parent, child],
-      selectedExecutorInstanceId: "plan:runner.pressure:rd",
+      selectedExecutorInstanceId: "p1tfih4bygfn0mpf9s6e2eyji2",
     });
 
     expect(portfolio).toMatchObject({
-      rootForegroundInstanceId: "plan:runner.pressure:rd",
-      executorInstanceId: "plan:runner.pressure:rd",
+      rootForegroundInstanceId: "p1tfih4bygfn0mpf9s6e2eyji2",
+      executorInstanceId: "p1tfih4bygfn0mpf9s6e2eyji2",
     });
     expect(
       portfolio.instances.find(
-        (instance) => instance.instanceId === "plan:runner.economy:fund-rd",
+        (instance) => instance.instanceId === "p7h62odrfsugk2kjdyoydubpx9",
       ),
     ).toMatchObject({
-      parentInstanceId: "plan:runner.pressure:rd",
+      parentInstanceId: "p1tfih4bygfn0mpf9s6e2eyji2",
       executionState: "idle",
       portfolioRole: "background",
     });
@@ -244,7 +245,7 @@ describe("resident plan portfolio", () => {
   it("preserves an exact parent need across refresh and clears it when omitted", () => {
     const parent = proposal("runner.pressure", "rd");
     const supportWithNeed = proposal("runner.economy", "fund-rd", {
-      parentInstanceId: "plan:runner.pressure:rd",
+      parentInstanceId: "p1tfih4bygfn0mpf9s6e2eyji2",
       parentNeedId: "need:credits:runner-pressure-rd",
     });
     const initial = reconcileResidentPlanPortfolio({
@@ -254,11 +255,11 @@ describe("resident plan portfolio", () => {
       proposals: [parent, supportWithNeed],
     });
     const initialSupport = initial.instances.find(
-      (instance) => instance.instanceId === "plan:runner.economy:fund-rd",
+      (instance) => instance.instanceId === "p7h62odrfsugk2kjdyoydubpx9",
     );
 
     expect(initialSupport).toMatchObject({
-      parentInstanceId: "plan:runner.pressure:rd",
+      parentInstanceId: "p1tfih4bygfn0mpf9s6e2eyji2",
       parentNeedId: "need:credits:runner-pressure-rd",
     });
 
@@ -273,11 +274,11 @@ describe("resident plan portfolio", () => {
       previous: persisted,
     });
     const refreshedSupport = refreshed.instances.find(
-      (instance) => instance.instanceId === "plan:runner.economy:fund-rd",
+      (instance) => instance.instanceId === "p7h62odrfsugk2kjdyoydubpx9",
     );
 
     expect(refreshedSupport).toMatchObject({
-      parentInstanceId: "plan:runner.pressure:rd",
+      parentInstanceId: "p1tfih4bygfn0mpf9s6e2eyji2",
       parentNeedId: "need:credits:runner-pressure-rd",
       createdAtStateVersion: 75,
       updatedAtStateVersion: 76,
@@ -290,17 +291,17 @@ describe("resident plan portfolio", () => {
       proposals: [
         parent,
         proposal("runner.economy", "fund-rd", {
-          parentInstanceId: "plan:runner.pressure:rd",
+          parentInstanceId: "p1tfih4bygfn0mpf9s6e2eyji2",
         }),
       ],
       previous: refreshed,
     });
     const clearedSupport = cleared.instances.find(
-      (instance) => instance.instanceId === "plan:runner.economy:fund-rd",
+      (instance) => instance.instanceId === "p7h62odrfsugk2kjdyoydubpx9",
     );
 
     expect(clearedSupport).toMatchObject({
-      parentInstanceId: "plan:runner.pressure:rd",
+      parentInstanceId: "p1tfih4bygfn0mpf9s6e2eyji2",
       createdAtStateVersion: 75,
       updatedAtStateVersion: 77,
     });
@@ -310,7 +311,7 @@ describe("resident plan portfolio", () => {
   it("invalidates exact support providers in the same transition that removes their parent", () => {
     const parent = proposal("runner.pressure", "rd");
     const support = proposal("runner.economy", "fund-rd", {
-      parentInstanceId: "plan:runner.pressure:rd",
+      parentInstanceId: "p1tfih4bygfn0mpf9s6e2eyji2",
       parentNeedId: "need:credits:runner-pressure-rd",
     });
     const initial = reconcileResidentPlanPortfolio({
@@ -318,13 +319,23 @@ describe("resident plan portfolio", () => {
       stateVersion: 78,
       timingPoint: "runner_action.main",
       proposals: [parent, support],
-      selectedExecutorInstanceId: "plan:runner.pressure:rd",
+      selectedExecutorInstanceId: "p1tfih4bygfn0mpf9s6e2eyji2",
     });
 
+    const selected = selectResidentPlanPortfolioExecutor({
+      portfolio: initial,
+      selectedExecutorInstanceId: "p7h62odrfsugk2kjdyoydubpx9",
+      timingPoint: "runner_action.main",
+      reason: "preempted_by_validated_value",
+    });
+    expect(
+      selected.instances.find(({ instanceId }) => instanceId === selected.rootForegroundInstanceId),
+    ).toMatchObject({ portfolioRole: "foreground", executionState: "preempted" });
+
     const completed = applyPlanOutcomeReceipt(
-      initial,
+      selected,
       {
-        planInstanceId: "plan:runner.pressure:rd",
+        planInstanceId: "p1tfih4bygfn0mpf9s6e2eyji2",
         stateVersionBefore: 78,
         stateVersionAfter: 79,
         progress: "completed",
@@ -336,9 +347,11 @@ describe("resident plan portfolio", () => {
     );
 
     expect(completed.instances).toHaveLength(0);
+    expect(completed.executorInstanceId).toBeUndefined();
+    expect(completed.rootForegroundInstanceId).toBeUndefined();
     expect(completed.transitions).toContainEqual(
       expect.objectContaining({
-        instanceId: "plan:runner.economy:fund-rd",
+        instanceId: "p7h62odrfsugk2kjdyoydubpx9",
         reason: "invalidated",
         detailCode: "support_parent_not_resident",
       }),
@@ -350,7 +363,7 @@ describe("resident plan portfolio", () => {
       dormantStateVersionTtl: 0,
     });
     const support = proposal("runner.economy", "fund-rd", {
-      parentInstanceId: "plan:runner.pressure:rd",
+      parentInstanceId: "p1tfih4bygfn0mpf9s6e2eyji2",
       parentNeedId: "need:credits:runner-pressure-rd",
       dormantStateVersionTtl: 4,
     });
@@ -372,7 +385,7 @@ describe("resident plan portfolio", () => {
     expect(reconciled.instances).toHaveLength(0);
     expect(reconciled.transitions).toContainEqual(
       expect.objectContaining({
-        instanceId: "plan:runner.economy:fund-rd",
+        instanceId: "p7h62odrfsugk2kjdyoydubpx9",
         reason: "invalidated",
         detailCode: "support_parent_not_resident",
       }),
@@ -391,7 +404,7 @@ describe("resident plan portfolio", () => {
       applyPlanOutcomeReceipt(
         portfolio,
         {
-          planInstanceId: "plan:runner.economy:general",
+          planInstanceId: "pbx8c10wae2gnt77urgbqjfsd1",
           stateVersionBefore: 80,
           stateVersionAfter: 81,
           progress: "progress",
@@ -418,13 +431,13 @@ describe("resident plan portfolio", () => {
     initial.campaigns = [
       {
         schemaVersion: RESIDENT_CORP_CAMPAIGN_SCHEMA_VERSION,
-        campaignId: "campaign:agenda:remote-1",
+        campaignId: "k4qc7wr2pe482r64rilo527xdv", identity: {"ownerModuleId":"corp.score_agenda","objectiveKey":"agenda:remote-1"},
         kind: "agenda",
         status: "awaiting_opponent_outcome",
         origin: {
-          rootPlanInstanceId: "plan:corp.score_agenda:agenda%3Aremote-1",
+          rootPlanInstanceId: "p4el07bg8uegolxdbizdlbgbjm",
           moduleId: "corp.score_agenda",
-          targetServerId: "remote_1",
+          targetServerId: "r1",
           targetCardInstanceId: "agenda-1",
         },
         milestoneId: "agenda_installed",

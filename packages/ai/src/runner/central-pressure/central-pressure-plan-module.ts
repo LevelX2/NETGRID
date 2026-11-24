@@ -1,6 +1,7 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { runnerRunProjectionPreservesNormalAccess } from "../../actions/run-action-projection";
+import { runnerVisibleArchivesWinningRun } from "../../runtime/runner-archives-score";
 import type {
   PlanMaterialization,
   PlanModule,
@@ -125,16 +126,29 @@ export function centralPressureModule(): PlanModule {
               current.signal.supportNeedId,
               routeExists,
             );
+      const priority = centralPressurePriority(current.signal);
+      const winningArchivesProof =
+        priority === "P1" &&
+        routeExists &&
+        domain(context).runTargetEvaluations?.some(
+          (target) =>
+            candidates.some(
+              ({ candidate }) => candidate.actionId === target.actionId,
+            ) &&
+            runnerVisibleArchivesWinningRun(context.input, target),
+        );
       const result = assessment(
         instance,
-        centralPressurePriority(current.signal),
+        priority,
         routeExists,
         current.signal.marginalValue,
         portfolio.executorInstanceId,
         undefined,
-        current.signal.routePreparation === "targeted_bypass"
-          ? "belief_supported"
-          : "visible_state_forced",
+        winningArchivesProof
+          ? "rules_proven"
+          : current.signal.routePreparation === "targeted_bypass"
+            ? "belief_supported"
+            : "visible_state_forced",
         resourceGaps,
       );
       if (!routeExists && current.signal.supportNeedId) {

@@ -47,7 +47,7 @@ function fixture() {
   state = drawn.state;
   RealEngineFixtureBuilder.forState(state).withCorpHqSize(0).withCorpCredits(5);
   const moved = new Set<string>();
-  const place = (definition: string, zone: "hq" | "archives") => {
+  const place = (definition: number, zone: "hq" | "archives") => {
     const card = Object.values(state.cardInstances).find(
       (c) => c.definitionId === definition && !moved.has(c.instanceId),
     )!;
@@ -62,15 +62,15 @@ function fixture() {
     card.faceup = zone === "archives";
     return card.instanceId;
   };
-  const existing = place("onr_v1_197_data-fort-reclamation", "archives");
-  place("onr_v1_197_data-fort-reclamation", "hq");
-  place("onr_v1_197_data-fort-reclamation", "hq");
-  place("onr_proteus_007_project-venice", "hq");
-  place("onr_v1_216_security-purge", "hq");
-  place("onr_classic_018_reclamation-project", "hq");
-  place("onr_proteus_015_colonel-failure", "hq");
+  const existing = place(409, "archives");
+  place(409, "hq");
+  place(409, "hq");
+  place(65, "hq");
+  place(428, "hq");
+  place(22, "hq");
+  place(73, "hq");
   for (let n = 0; n < 2; n++) {
-    const scoredId = place("onr_proteus_008_project-zurich", "archives");
+    const scoredId = place(66, "archives");
     state.corp.archives = state.corp.archives.filter((id) => id !== scoredId);
     state.runner.scoreArea.push(scoredId);
     state.cardInstances[scoredId]!.zone = { side: "runner", zone: "scoreArea" };
@@ -128,9 +128,9 @@ it("binds a nonagenda discard through the existing hand owner and replays the na
     (o) => o.id === options[0],
   )!;
   const card = state.cardInstances[String(selected.value)]!;
-  expect(card.definitionId).not.toBe("onr_v1_197_data-fort-reclamation");
-  expect(card.definitionId).not.toBe("onr_v1_216_security-purge");
-  expect(card.definitionId).not.toBe("onr_proteus_007_project-venice");
+  expect(card.definitionId).not.toBe(409);
+  expect(card.definitionId).not.toBe(428);
+  expect(card.definitionId).not.toBe(65);
   expect(hashState(state)).toBe(before);
   const result = applyAction(state, {
     matchId: state.matchId,

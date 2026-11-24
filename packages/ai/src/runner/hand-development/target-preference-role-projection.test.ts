@@ -10,7 +10,7 @@ import { restoreAiRuntimeCheckpoint } from "../../evaluation/decision-checkpoint
 import { runnerInput } from "../../runner-hand-development.test-support";
 import { evaluateRunnerHandDevelopment } from "./hand-development-evaluation";
 
-function canonicalCard(definitionId: string): VisibleCard {
+function canonicalCard(definitionId: number): VisibleCard {
   const definition = RUNTIME_CARDS[definitionId];
   if (!definition) throw new Error(`missing_card:${definitionId}`);
   return {
@@ -65,7 +65,7 @@ describe("target preferences cannot manufacture hand-development capabilities", 
         buildActionCardSemanticProfilesByDefinitionId(),
     });
     const card = input.playerView.own.gripOrHq.find(
-      (card: VisibleCard) => card.definitionId === "onr_proteus_084_crumble",
+      (card: VisibleCard) => card.definitionId === 142,
     );
     const evaluation = evaluateRunnerHandDevelopment({
       input,
@@ -98,17 +98,17 @@ describe("target preferences cannot manufacture hand-development capabilities", 
     );
     const decision = chooseAiAction(input);
     const plan = decision.decisionDebug?.planFirstDecision;
-    const root = "plan:runner.pressure_central:central%3Ahq";
+    const root = "pa7nez1ioecg7mf06q1uwqq57o";
     const executor =
-      "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate%3Arun%3Arunner.start_run.hq";
-    expect(decision.actionId).toBe("runner.draw_card");
+      "p9dwwqtm9u3zd1ipcqyqyaojc7";
+    expect(decision.actionId).toBe("r8");
     expect(decision.fallbackUsed).toBe(false);
     expect(plan?.rootPlanInstanceId).toBe(root);
     expect(plan?.leafExecutorInstanceId).toBe(executor);
     expect(plan?.selectedStep?.parentInstanceId).toBe(root);
     expect(plan?.route).toMatchObject({
       planInstanceId: executor,
-      actionId: "runner.draw_card",
+      actionId: "r8",
       stateVersion: checkpoint.stateVersion,
     });
     expect(plan?.executionOrigin).toMatchObject({
@@ -120,12 +120,12 @@ describe("target preferences cannot manufacture hand-development capabilities", 
   });
 
   it.each([
-    ["onr_v1_100_misc-for-sale", "economy_engine"],
-    ["onr_v1_103_organ-donor", "economy_engine"],
-    ["onr_v1_166_karl-de-veres-corporate-stooge", "economy_engine"],
-    ["onr_v1_154_broker", "bank_tool"],
-    ["onr_v1_091_hunt-club-bbs", "access_payoff"],
-    ["onr_v1_155_code-viral-cache", "access_payoff"],
+    [312, "economy_engine"],
+    [315, "economy_engine"],
+    [378, "economy_engine"],
+    [366, "bank_tool"],
+    [303, "access_payoff"],
+    [367, "access_payoff"],
   ])("preserves the real capability of %s", (definitionId, developmentRole) => {
     const card = canonicalCard(definitionId);
     const input = runnerInput({ credits: 15, hand: [card], legalActions: [] });
@@ -134,7 +134,7 @@ describe("target preferences cannot manufacture hand-development capabilities", 
   });
 
   it("keeps an unaffordable HQ-trash program unavailable", () => {
-    const card = canonicalCard("onr_proteus_084_crumble");
+    const card = canonicalCard(142);
     const input = runnerInput({
       credits: 2,
       hand: [card],

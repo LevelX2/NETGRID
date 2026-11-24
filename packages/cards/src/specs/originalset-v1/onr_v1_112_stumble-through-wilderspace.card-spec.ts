@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_v1_112_stumble-through-wilderspace",
+      324,
     ),
     title: "Stumble through Wilderspace",
     side: "runner",

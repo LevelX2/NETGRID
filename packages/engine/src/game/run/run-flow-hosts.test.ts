@@ -50,7 +50,7 @@ function state(): GameState {
     cardInstances: {
       [ICE_ID]: {
         id: ICE_ID,
-        definitionId: "outer_ice",
+        definitionId: 3872123020,
         owner: "corp",
         controller: "corp",
         zone: { side: "corp", zone: "serverIce", serverId: "hq" },
@@ -60,7 +60,7 @@ function state(): GameState {
       } as unknown as CardInstance,
     },
     run: {
-      runId: "run_4",
+      runId: 4,
       attackedServerId: "hq",
       phase: "access",
       position: { kind: "server", serverId: "hq" },

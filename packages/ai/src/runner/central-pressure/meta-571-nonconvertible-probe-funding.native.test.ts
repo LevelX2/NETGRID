@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -47,23 +48,21 @@ function decideFixture(name: string) {
 it.each([
   ["cp-meta571-terminal-central-funding.json", "rd"],
   ["cp-meta571-partial-known-funding.json", "hq"],
-])("retains admitted bank funding in %s", (name, server) => {
-  const { input, decision, portfolio } = decideFixture(name);
-  expect(
-    input.legalActions.find((a) => a.actionId === decision.actionId),
-  ).toMatchObject({
-    type: "activated_card_ability",
-    payload: { cardImplementationAbilityKey: "withdraw_credits" },
-  });
-  const parentId = "plan:runner.pressure_central:central%3A" + server;
-  expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    parentId,
+])("keeps bank funding on hold when %s cannot substantiate its information probe", (name, server) => {
+  const { decision, portfolio } = decideFixture(name);
+  expect(decision.actionId).toBe("r8");
+  const parent = portfolio.instances.find(
+    (p) => p.instanceId === planInstanceIdForProposal({ moduleId: "runner.pressure_central", dedupeKey: `central:${server}` }),
   );
+  expect(parent?.moduleState).toMatchObject({ signal: { reachable: false } });
   expect(
-    portfolio.instances.find((p) => p.instanceId === parentId)?.moduleState,
-  ).toMatchObject({
-    signal: { supportNeedId: "run-support:central:" + server },
-  });
+    (parent?.moduleState as { signal?: { supportNeedId?: string } })?.signal
+      ?.supportNeedId,
+  ).toBeUndefined();
+  expect(
+    portfolio.instances.find((p) => p.moduleId === "runner.credit_bank")
+      ?.moduleState,
+  ).toMatchObject({ signal: { phase: "hold", actionIds: [] } });
 });
 
 it.each([2, 3, 4])(
@@ -104,7 +103,7 @@ it.each([2, 3, 4])(
       decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
     ).not.toBe("runner.credit_bank");
     const parent = portfolio.instances.find(
-      (p) => p.instanceId === "plan:runner.pressure_central:central%3Ard",
+      (p) => p.instanceId === "pa90fufw9vc5bkshp96ztlryxl",
     );
     expect(parent?.moduleState).toMatchObject({
       signal: {

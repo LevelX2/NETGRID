@@ -1,10 +1,13 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
-import { corpRezHostedCreditPayoutProfile } from "../../runtime/corp-canonical-card-facts";
+import {
+  corpImmediateEconomyGainFromHint,
+  corpRezHostedCreditPayoutProfile,
+} from "../../runtime/corp-canonical-credit-facts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
-import { corpImmediateEconomyGainFromHint } from "../../runtime/corp-canonical-card-facts";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import type {
   CorpEconomyParentFundingSignal,
   CorpEconomyDevelopmentSignal,
@@ -22,8 +25,7 @@ export function corpFreeRezPayoutPreparation(
   const basic = candidates.find((c) => c.actionId === basicFundingActionId);
   const clicks = input.playerView.own.clicks;
   const scoreFunding =
-    signal.parentPlanInstanceId?.startsWith("plan:corp.score_agenda:") ===
-      true &&
+    signal.parentPlanModuleId === "corp.score_agenda" &&
     signal.parentNeedId === signal.needId &&
     signal.delegatedPriorityClass === "P4" &&
     signal.scoreFundingMilestone?.deadline === "multi_turn" &&
@@ -36,8 +38,7 @@ export function corpFreeRezPayoutPreparation(
   const defenseFunding =
     signal.immediateDefenseConversion &&
     signal.incrementalDefenseReserve &&
-    signal.parentPlanInstanceId ===
-      "plan:corp.defend_servers:server-defense-portfolio";
+    signal.parentPlanInstanceId === "penw02zfrkklof54c2nuye5att";
   // This reserve pays for already installed ICE before the next Runner turn.
   // Setup may not use more actions before reaching it than the Basic route.
   const defenseSetupFunding =
@@ -72,15 +73,17 @@ export function corpFreeRezPayoutPreparation(
     basic.economyProjection?.netLiquidCreditGain !== 1
   )
     return undefined;
+  const canCompareInstallFunding =
+    (scoreFunding || defenseSetupFunding) &&
+    clicks >= 2 &&
+    !hasUncomparedCurrentFunding(input, candidates);
   const preparations = candidates.flatMap((candidate) => {
     const install = candidate.actionType === "install_card";
     const setupClicks = install ? (1 as const) : (0 as const);
     if (
       (install
-        ? (!scoreFunding && !defenseSetupFunding) ||
-          clicks < 2 ||
-          candidate.semanticActionType !== "install.card" ||
-          hasUncomparedCurrentFunding(input, candidates)
+        ? !canCompareInstallFunding ||
+          candidate.semanticActionType !== "install.card"
         : candidate.semanticActionType !== "corp_window.rez") ||
       !candidate.sourceCardInstanceId ||
       !candidate.sourceDefinitionId ||
@@ -94,8 +97,9 @@ export function corpFreeRezPayoutPreparation(
     if (
       !legal ||
       legal.type !== (install ? "install_card" : "rez_card") ||
-      (install && legal.payload?.serverId !== "new_remote") ||
-      legal.expiresAtStateVersion !== input.playerView.stateVersion ||
+      (install && legal.payload?.placement !== "root") ||
+      legal.source !== candidate.sourceCardInstanceId ||
+      !actionMatchesCurrentDecision(input, legal) ||
       !legal.costs.every((cost) =>
         Object.entries(cost).every(
           ([key, value]) =>
@@ -153,6 +157,20 @@ export function corpFreeRezPayoutPreparation(
         removalCondition:
           "Bind the admitted free finite-pool campaign to its current payout-execution and risk quote before using it for parent funding.",
       });
+    const targetServerId = install ? legal.payload?.serverId : server?.id;
+    if (
+      typeof targetServerId !== "string" ||
+      campaign.riskAdjustment.serverId !== targetServerId
+    )
+      return [];
+    const protectedInstall =
+      install &&
+      targetServerId !== "new_remote" &&
+      (campaign.riskAdjustment.fundedLightProtection === true ||
+        campaign.riskAdjustment.protectionState ===
+          "protected_not_contestable");
+    if (install && targetServerId !== "new_remote" && !protectedInstall)
+      return [];
     const currentPayoutExecutions =
       scoreFunding || (install && defenseSetupFunding)
         ? clicks - setupClicks
@@ -177,7 +195,7 @@ export function corpFreeRezPayoutPreparation(
         parentNeedId: signal.parentNeedId!,
         sourceInstanceId: candidate.sourceCardInstanceId,
         sourceDefinitionId: candidate.sourceDefinitionId,
-        sourceServerId: install ? "new_remote" : server!.id,
+        sourceServerId: targetServerId,
         poolCreditsOnRez: profile.poolCredits,
         payoutCredits: profile.payoutCredits,
         payoutClicks: 1 as const,
@@ -189,7 +207,11 @@ export function corpFreeRezPayoutPreparation(
   });
   return preparations.sort(
     (a, b) =>
-      b.payoutCredits - a.payoutCredits || a.actionId.localeCompare(b.actionId),
+      b.payoutCredits - a.payoutCredits ||
+      a.setupClicks - b.setupClicks ||
+      Number(b.sourceServerId !== "new_remote") -
+        Number(a.sourceServerId !== "new_remote") ||
+      a.actionId.localeCompare(b.actionId),
   )[0];
 }
 
@@ -213,7 +235,7 @@ function hasUncomparedCurrentFunding(
     return true;
   return input.playerView.own.gripOrHq.some((card) => {
     if (!card.known || !card.definitionId) return false;
-    const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
+    const definition = planningCardFactsByDefinitionId(card.definitionId);
     const hint = AI_HINTS_BY_CARD.get(card.definitionId);
     return (
       definition?.type === "operation" &&

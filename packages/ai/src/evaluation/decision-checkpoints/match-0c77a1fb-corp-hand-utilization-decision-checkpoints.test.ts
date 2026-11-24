@@ -7,7 +7,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("match 0c77a1fb Corp hand-utilization checkpoints", () => {
   it("converts Accounts Receivable instead of spending the last click on a speculative defense draw", () => {
     const result = runAiDecisionCheckpoint(
-      accountsBeforeDefenseDrawJson as AiDecisionCheckpointV1,
+      accountsBeforeDefenseDrawJson as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
@@ -21,10 +21,10 @@ describe("match 0c77a1fb Corp hand-utilization checkpoints", () => {
       ]),
     );
     for (const definitionId of [
-      "onr_proteus_007_project-venice",
-      "onr_v1_281_accounts-receivable",
-      "onr_v1_290_efficiency-experts",
-      "onr_v1_340_setup",
+      65,
+      493,
+      502,
+      552,
     ]) {
       const record = inventory?.items.find((item) =>
         item.includes(`definition:${definitionId}`),

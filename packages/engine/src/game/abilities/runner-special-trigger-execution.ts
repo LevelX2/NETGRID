@@ -580,7 +580,7 @@ function resolveDelayedInstallSetAside(
     throw new Error("The Shell Traders hat kein gueltiges Ziel.");
   const targetDefinition = host.cards.definitionFor(state, targetCardId);
   if (
-    typeof legalAction.payload?.targetCardDefinitionId === "string" &&
+    typeof legalAction.payload?.targetCardDefinitionId === "number" &&
     legalAction.payload.targetCardDefinitionId !== targetDefinition.id
   )
     throw new Error("Die Shell-Traders-Zielkarte hat sich geaendert.");
@@ -657,7 +657,7 @@ function resolveDelayedInstallRemoveCounter(
     throw new Error("Die Shell-Traders-Zielkarte ist nicht vorbereitet.");
   const targetDefinition = host.cards.definitionFor(state, targetCardId);
   if (
-    typeof legalAction.payload?.targetCardDefinitionId === "string" &&
+    typeof legalAction.payload?.targetCardDefinitionId === "number" &&
     legalAction.payload.targetCardDefinitionId !== targetDefinition.id
   )
     throw new Error("Die Shell-Traders-Zielkarte hat sich geaendert.");

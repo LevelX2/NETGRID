@@ -10,7 +10,7 @@ import {
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { actionHasConditionalDefenseFollowupQuotePayload } from "../../actions/conditional-defense-followup-quote";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { type CorpDefenseSignal } from "../../plans/corp-defense-contracts";
 import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
@@ -20,6 +20,7 @@ import {
   corpIceRezSupportTargetHasNoCurrentEffect,
   definitionHasActionIceRezSupport,
 } from "./corp-defense-rez-support-facts";
+import { assessCentralAccessReductionRez } from "./central-access-reduction-rez";
 import { assessCorpPaidEncounterDefense } from "./corp-paid-encounter-defense";
 import { assessMobileIceRunDefense } from "./mobile-ice-run-defense";
 import { assessCorpTemporaryIceStrengthPulse } from "./corp-temporary-ice-strength-pulse";
@@ -27,7 +28,7 @@ import { corpPassTaxRezAssessment } from "../../runtime/corp-pass-tax-rez-assess
 import { corpRootRezDiscountedIceAssessment } from "./corp-root-rez-discounted-ice";
 import { corpRootRezTimingComponent } from "../../runtime/corp-scoreline/semantic-runtime-corp-score-ice-components";
 import { isFiniteNonNegativeInteger } from "../../runtime/exact-action-cost-facts";
-import { legalActionCreditCost } from "../../runtime/legal-action-credit-cost";
+import { nonNegativeActionCreditCost } from "../../runtime/action-cost";
 import {
   isServerId,
   serverForInstalledCard,
@@ -47,7 +48,7 @@ export function corpVisibleHandHasActionIceRezSupport(
   return input.playerView.own.gripOrHq.some(
     (card) =>
       card.known &&
-      typeof card.definitionId === "string" &&
+      typeof card.definitionId === "number" &&
       definitionHasActionIceRezSupport(card.definitionId),
   );
 }
@@ -192,7 +193,7 @@ export function corpPostPassIceLifecycleDefenseSignal(
   const serverId = action?.payload?.serverId;
   const decision = action?.payload?.decision;
   const paymentAmount = action?.payload?.paymentAmount;
-  const creditCost = action ? legalActionCreditCost(action) : undefined;
+  const creditCost = action ? nonNegativeActionCreditCost(action) : undefined;
   if (
     action?.type !== "continue_run" ||
     action.side !== "corp" ||
@@ -201,8 +202,8 @@ export function corpPostPassIceLifecycleDefenseSignal(
     typeof action.payload.postPassIceTrashedUnlessReturned !== "boolean" ||
     typeof action.source !== "string" ||
     action.source.length === 0 ||
-    typeof sourceDefinitionId !== "string" ||
-    sourceDefinitionId.length === 0 ||
+    typeof sourceDefinitionId !== "number" ||
+    sourceDefinitionId <= 0 ||
     typeof serverId !== "string" ||
     !isServerId(serverId) ||
     !(
@@ -618,6 +619,12 @@ export function corpExactCardRezSupportAssessment(
     serverId,
   );
   if (passTaxAssessment) return passTaxAssessment;
+  const accessReduction = assessCentralAccessReductionRez(
+    input,
+    sourceCard,
+    serverId,
+  );
+  if (accessReduction) return accessReduction;
   const hint = candidate.sourceDefinitionId
     ? AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId)
     : sourceCard.definitionId
@@ -823,7 +830,7 @@ export function corpConditionalRezSupportWithoutCurrentRouteEvidence(
       return "corp_rez_exact_card_support_breaks_score_reserve";
     }
   }
-  const definition = CARD_DEFINITIONS_BY_ID[candidate.sourceDefinitionId];
+  const definition = planningCardFactsByDefinitionId(candidate.sourceDefinitionId);
   if (definition?.mechanics.includes("ice_install_cost_mod_server"))
     return "corp_rez_fort_ice_discount_has_no_same_fort_install_route";
   const hint = AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId);

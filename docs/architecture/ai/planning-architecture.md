@@ -687,9 +687,25 @@ StateVersions.
 
 ### 8.1 Identität und Retention
 
-Der Kernel bildet die technische Instanzidentität aus Modul, Modulversion und
-stabilem `dedupeKey`. Das Modul definiert, welche fachlichen Änderungen eine
-bestehende Instanz fortsetzen und welche eine neue Instanz verlangen.
+Der Kernel bildet die technische Instanzidentität aus dem seitengebundenen
+Modul und dem stabilen, normalisierten `dedupeKey`. Die Referenz ist `p`
+plus der Base36-Darstellung eines kanonischen, domaingetrennten 128-Bit-Hashs.
+Die Modulversion bestimmt weiterhin, ob ein residenter Vertrag ersetzt wird;
+sie verändert die fachliche Zielidentität nicht. Das Modul definiert, welche
+fachlichen Änderungen eine bestehende Instanz fortsetzen und welche eine
+neue Instanz verlangen.
+
+Das Portfolio behält Modul und Deduplizierungsschlüssel als eigene Daten und
+prüft die Referenz gegen beide Felder. Doppelte Referenzen und fehlende oder
+widersprüchliche Bindungen scheitern strukturiert. Kampagnen verwenden die
+getrennte Referenz `k` und ein eigenes typisiertes Tupel aus Owner und Ziel.
+Die Vergabe benötigt keinen veränderlichen globalen Katalog. Rediscovery,
+Retention-Ablauf und erneutes Öffnen liefern für dasselbe Ziel dieselbe
+Referenz. Parent, Need, Executor und Commitment führen diese Referenz im
+bereits match- und seitengebundenen Portfolio weiter. Aus ihren Zeichen
+werden keine Modul-, Ziel- oder Prioritätsregeln abgeleitet. Die Reihenfolge
+gleichwertiger Pläne verwendet ausdrücklich Modul und Deduplizierungsschlüssel.
+[Kanonische Vergabe](../../../packages/ai/src/plans/compact-plan-identity.ts)
 
 Jede Persistence Policy legt fest:
 
@@ -1084,7 +1100,7 @@ Horizontdaten verwenden [CreditDemand](../../../packages/ai/src/plans/credit-dem
 und [FundingRoute](../../../packages/ai/src/plans/funding-route.ts).
 Projected-Ressourcen stehen im
 [ProjectedDecisionFrame](../../../packages/ai/src/plans/turn-projection.ts),
-harte Fortsetzungen in [PlanCommitment](../../../packages/ai/src/plans/plan-continuation.ts).
+harte Fortsetzungen im produktiven [TurnPlanCommitment](../../../packages/ai/src/plans/turn-plan-commitment.ts).
 Deadline und Verbindlichkeit bleiben am konkreten Bedarf; diese Erläuterung
 fordert keine neue generische Ledger- oder Liability-API.
 
@@ -1309,6 +1325,9 @@ eine belastbare Machbarkeitsprüfung. Die Engine führt trotzdem jede Aktion und
 jede Zwischenentscheidung einzeln aus; der Vertrag ist keine Transaktion.
 
 ### 15.1 Commitment-Vertrag
+
+Das `TurnPlanCommitment` trägt den ausführbaren Verlauf. Das folgende Schema
+beschreibt die fachlichen Bindungen unabhängig von der Datenstruktur.
 
 ```ts
 type PlanCommitment = {

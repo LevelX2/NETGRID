@@ -21,7 +21,7 @@ import {
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   zone: CardInstance["zone"],
   options: Partial<CardInstance> = {},
 ): CardInstance {
@@ -64,17 +64,17 @@ function makeState(): GameState {
         { id: "rd", kind: "rd", ice: [], root: [] },
         { id: "hq", kind: "hq", ice: [], root: [] },
         { id: "archives", kind: "archives", ice: [], root: [] },
-        { id: "remote_1", kind: "remote", ice: [], root: [] },
+        { id: "r1", kind: "remote", ice: [], root: [] },
       ],
     },
     cardInstances: {
-      breaker: instance("breaker", "simple_decoder", {
+      breaker: instance("breaker", 591, {
         side: "runner",
         zone: "rig",
       }),
       vewy: instance(
         "vewy",
-        "onr_v1_071_vewy-vewy-quiet",
+        283,
         {
           side: "runner",
           zone: "rig",
@@ -83,7 +83,7 @@ function makeState(): GameState {
       ),
     },
     run: {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "rd",
       phase: "encounter_ice",
       position: { kind: "ice", serverId: "rd", iceIndex: 0 },
@@ -92,7 +92,7 @@ function makeState(): GameState {
         amount: 2,
         remaining: 2,
         returnUnusedAtRunEnd: true,
-        sourceDefinitionId: "lucidrine_def",
+        sourceDefinitionId: 932235382,
       },
     },
   } as unknown as GameState;
@@ -182,7 +182,7 @@ describe("run duration payment", () => {
   it("pays or ends Ball-and-Chain-style encounter tax without changing payload fields", () => {
     const state = makeState();
     state.run!.encounterTaxForFutureIce = 3;
-    state.run!.encounterTaxSourceDefinitionId = "onr_v1_222_ball-and-chain";
+    state.run!.encounterTaxSourceDefinitionId = 434;
     const legalAction = { payload: {} } as LegalAction;
 
     const paid = payEncounterTaxForFutureIce(
@@ -194,7 +194,7 @@ describe("run duration payment", () => {
     expect(legalAction.payload).toMatchObject({
       encounterTaxForFutureIce: 3,
       encounterTaxPaid: 3,
-      encounterTaxSource: "onr_v1_222_ball-and-chain",
+      encounterTaxSource: 434,
     });
 
     const cannotPay = makeState();
@@ -207,10 +207,10 @@ describe("run duration payment", () => {
     cannotPay.run!.runnerRunTemporaryCredits = {
       remaining: 0,
       returnUnusedAtRunEnd: true,
-      sourceDefinitionId: "lucidrine_def",
+      sourceDefinitionId: 932235382,
     };
     cannotPay.run!.encounterTaxForFutureIce = 3;
-    cannotPay.run!.encounterTaxSourceDefinitionId = "onr_v1_222_ball-and-chain";
+    cannotPay.run!.encounterTaxSourceDefinitionId = 434;
     const unpaidAction = { payload: {} } as LegalAction;
 
     const unpaid = payEncounterTaxForFutureIce(
@@ -227,7 +227,7 @@ describe("run duration payment", () => {
     expect(unpaidAction.payload).toMatchObject({
       encounterTaxForFutureIce: 3,
       encounterTaxPaid: 0,
-      encounterTaxSource: "onr_v1_222_ball-and-chain",
+      encounterTaxSource: 434,
     });
   });
 
@@ -262,7 +262,7 @@ describe("run duration payment", () => {
     state.runner.rig.hardware.push("sunburst" as CardInstanceId);
     state.cardInstances.sunburst = instance(
       "sunburst",
-      "onr_proteus_151_sunburst-cranial-interface",
+      209,
       { side: "runner", zone: "rig" },
       { counters: { bit: 1 } },
     );
@@ -277,7 +277,7 @@ describe("run duration payment", () => {
     expect(state.cardInstances.sunburst?.counters?.bit).toBeUndefined();
 
     state.cardInstances.sunburst!.counters = { bit: 1 };
-    state.cardInstances.breaker!.definitionId = "onr_v1_036_jackhammer";
+    state.cardInstances.breaker!.definitionId = 248;
     expect(availableRunnerRunCredits(host, "breaker")).toBe(0);
     expect(state.cardInstances.sunburst?.counters?.bit).toBe(1);
   });

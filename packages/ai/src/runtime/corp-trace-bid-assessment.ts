@@ -2,7 +2,8 @@ import { traceCorpBaseStrength, traceRulesDefinition } from "@netgrid/engine";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
 import { createAiHintsByCard } from "../ai-hints";
-import { corpVisibleCardPlayCost } from "./corp-tag-punish-payoff-profiles";
+import { corpVisibleCardPlayCost } from "./corp-visible-card-play-cost";
+import { exactCurrentChoiceAction } from "./plan-bound-choice-contract";
 import type { LatestTraceContext } from "./trace-context";
 import { corpCurrentRunAgendaExposure } from "../corp/defense/corp-server-protection-reserve";
 
@@ -20,7 +21,7 @@ export type CorpTraceBidAssessment = {
   minimumGuaranteedBid?: number;
   followupCreditReserve?: number;
   followupCardId?: string;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
 };
 
 const NATIVE_TRACE_SUCCESS_PAYOFF_KINDS = new Set([
@@ -40,7 +41,7 @@ export function assessCorpTraceBid(params: {
   input: AiDecisionInput;
   traceContext: LatestTraceContext;
   maxBid: number;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
 }): CorpTraceBidAssessment {
   const terminalRunLockBid = currentTerminalRunLockBid(
     params.input,
@@ -173,18 +174,12 @@ function currentTerminalRunLockBid(
     choice.stateVersion !== quote.stateVersion ||
     choice.source !== `trace:${trace.traceId}` ||
     !choice.options.some(
-      (option) => option.id === quote.optionId && option.value === quote.amount,
+      (option) =>
+        option.id === quote.optionId &&
+        option.value === quote.amount &&
+        option.selectable !== false,
     ) ||
-    !input.legalActions.some(
-      (action) =>
-        action.actionId === quote.actionId &&
-        action.expiresAtStateVersion === quote.stateVersion &&
-        action.choiceRequirements?.some(
-          (requirement) =>
-            requirement.choiceId === quote.choiceId &&
-            requirement.optionIds.includes(quote.optionId),
-        ),
-    )
+    exactCurrentChoiceAction(input, choice)?.actionId !== quote.actionId
   )
     return undefined;
   // The one-click lock exhausts the current turn's ordinary run horizon.
@@ -216,7 +211,7 @@ function currentTerminalRunLockBid(
 }
 
 function sourceHasNativeTraceSuccessPayoff(
-  sourceDefinitionId: string,
+  sourceDefinitionId: number,
 ): boolean {
   const hint = AI_HINTS_BY_CARD.get(sourceDefinitionId);
   if (!hint || hint.cardType !== "ice") return false;

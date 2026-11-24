@@ -1,3 +1,4 @@
+import { type CardDefinitionId } from "@netgrid/shared";
 import { isGeneratedCardImageId } from "./card-image-service";
 
 export function rulesTextLines(text: string): string[] {
@@ -93,7 +94,7 @@ export function isOperationCardType(type: string | undefined | null): boolean {
 }
 
 export function hasGeneratedCardArt(
-  cardId: string | undefined | null,
+  cardId: CardDefinitionId | undefined | null,
 ): boolean {
   return isGeneratedCardImageId(cardId);
 }

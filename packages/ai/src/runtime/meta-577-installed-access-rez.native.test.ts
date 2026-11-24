@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import { applyAction, getLegalActions, hashGameState } from "@netgrid/engine";
@@ -29,7 +30,7 @@ function fixture(name = "current-tagged-access") {
   } as AiDecisionInput;
   const source = input.playerView.servers
     .flatMap((s) => s.root)
-    .find((c) => c.definitionId === "onr_v1_356_dedicated-response-team")!;
+    .find((c) => c.definitionId === 568)!;
   const rez = input.legalActions.find(
     (a) => a.type === "rez_card" && a.source === source.instanceId,
   )!;
@@ -130,7 +131,7 @@ describe("SP-724 installed access effect ownership handoff", () => {
       take("runner", "end_turn");
       take("corp", "mandatory_draw");
       take("corp", "play_operation", (a) =>
-        a.actionId.includes("scorched-earth"),
+        referencesDefaultDeckCard(a.actionId, 514),
       );
       expect(state.winner).toBe("corp");
     },
@@ -150,11 +151,11 @@ describe("SP-724 installed access effect ownership handoff", () => {
     const f = fixture();
     f.input.playerView.run!.position = {
       kind: "ice",
-      serverId: "remote_1",
+      serverId: "r1",
       iceIndex: 0,
     };
     expect(current(f)).toEqual([]);
-    f.input.playerView.run!.position = { kind: "server", serverId: "remote_1" };
+    f.input.playerView.run!.position = { kind: "server", serverId: "r1" };
     f.rez.expiresAtStateVersion -= 1;
     expect(current(f)).toEqual([]);
   });

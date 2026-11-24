@@ -157,7 +157,7 @@ describe("runner run target guidance", () => {
       runnerPressureProbeTargetAllowed({
         ...base,
         targetKind: "remote",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
       }),
     ).toBe(false);
     expect(

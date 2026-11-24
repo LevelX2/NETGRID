@@ -18,7 +18,8 @@ it("records the real Corp candidate and end-state audit without changing its sel
     ),
   );
   expect(Object.values(cp.validation).every(Boolean)).toBe(true);
-  const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
+  const dto = buildAiDecisionInputDto(cp.input);
+  const input = { ...cp.input, ...dto };
   restoreAiRuntimeCheckpoint(
     input,
     input.ownDeckSnapshot.deckSnapshotId,
@@ -26,12 +27,28 @@ it("records the real Corp candidate and end-state audit without changing its sel
   );
   const before = JSON.stringify(input.playerView);
   const result = chooseAiAction(input);
-  expect(result.actionId).toBe(cp.originalSelection.actionId);
+  expect(result.actionId).toBe(cp.expectedSelection.actionId);
+  expect(
+    dto.legalActions.find((action) => action.actionId === result.actionId),
+  ).toMatchObject({
+    type: "install_card",
+    source: cp.expectedSelection.sourceCardInstanceId,
+    payload: {
+      cardId: cp.expectedSelection.sourceCardInstanceId,
+      serverId: "rd",
+      placement: "ice",
+    },
+  });
+  expect(
+    dto.playerView.own.gripOrHq.find(
+      (card) => card.instanceId === cp.expectedSelection.sourceCardInstanceId,
+    ),
+  ).toMatchObject({ definitionId: 15, title: "Glacier" });
   expect(result.fallbackUsed).toBe(false);
   expect(result.timeoutUsed).toBe(false);
   const plan = result.decisionDebug!.planFirstDecision!;
-  expect(plan.rootPlanInstanceId).toBe(cp.originalSelection.root);
-  expect(plan.leafExecutorInstanceId).toBe(cp.originalSelection.executor);
+  expect(plan.rootPlanInstanceId).toBe(cp.expectedSelection.root);
+  expect(plan.leafExecutorInstanceId).toBe(cp.expectedSelection.executor);
   expect(plan.route).toMatchObject({
     actionId: result.actionId,
     stateVersion: 3,
@@ -49,11 +66,27 @@ it("records the real Corp candidate and end-state audit without changing its sel
     selectedInLine: true,
     assessment: {
       readiness: "executable_now",
+      effectivePriorityClass: "P5",
       resourceGaps: expect.any(Array),
       blockers: expect.any(Array),
     },
   });
   expect(audit.consideredLines!.length).toBeGreaterThan(1);
+  expect(
+    audit.consideredLines!.find(
+      (line) => line.firstActionId === result.actionId,
+    ),
+  ).toMatchObject({
+    priorityClass: "P3",
+    projectedEndState: {
+      creditMinimum: 5,
+      creditMaximum: 5,
+      unrestrictedActionMinimum: 2,
+      unrestrictedActionMaximum: 2,
+      handMinimum: 5,
+      handMaximum: 5,
+    },
+  });
   for (const line of audit.consideredLines!) {
     expect(line.projectedEndState).toMatchObject({
       creditMinimum: expect.any(Number),

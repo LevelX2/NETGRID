@@ -83,6 +83,26 @@ export function buildRunnerStrategicIntentProfile(
 ): RunnerStrategicIntentProfile {
   const strategyProfile = params.strategyProfile;
   const deckCapabilities = params.deckCapabilities;
+  const side = strategyProfile?.side ?? deckCapabilities?.side;
+  if (side !== "runner") {
+    return {
+      schemaVersion: RUNNER_STRATEGIC_INTENT_SCHEMA_VERSION,
+      side: "runner",
+      source: sourceFor(params),
+      primaryWinIntent: "runner.unknown",
+      setupEngine: [],
+      pressureVectors: [],
+      riskProfile: ["runner.low_confidence_strategy_projection"],
+      rejectedIntents: [
+        "runner.hq_depletion",
+        "runner.bad_publicity_pressure",
+        "runner.dedicated_rnd_multiaccess",
+        "runner.dedicated_hq_multiaccess",
+      ],
+      confidence: "low",
+      evidence: ["projection_input_side:not_runner"],
+    };
+  }
   const engineDoctrine = strategyProfile?.runnerEngineDoctrine;
   const engineProviders = engineDoctrine?.providers.slice();
   const engineDependencies = engineDoctrine?.dependencies.slice();
@@ -98,31 +118,6 @@ export function buildRunnerStrategicIntentProfile(
     .sort((left, right) =>
       left.contributionId.localeCompare(right.contributionId),
     );
-  const side = strategyProfile?.side ?? deckCapabilities?.side;
-  if (side !== "runner") {
-    return {
-      schemaVersion: RUNNER_STRATEGIC_INTENT_SCHEMA_VERSION,
-      side: "runner",
-      source: sourceFor(params),
-      primaryWinIntent: "runner.unknown",
-      setupEngine: [],
-      ...(engineProviders?.length ? { engineProviders } : {}),
-      ...(engineDependencies?.length ? { engineDependencies } : {}),
-      ...(engineLineIds?.length ? { engineLineIds } : {}),
-      ...(developmentTendencies?.length ? { developmentTendencies } : {}),
-      ...(planContributions?.length ? { planContributions } : {}),
-      pressureVectors: [],
-      riskProfile: ["runner.low_confidence_strategy_projection"],
-      rejectedIntents: [
-        "runner.hq_depletion",
-        "runner.bad_publicity_pressure",
-        "runner.dedicated_rnd_multiaccess",
-        "runner.dedicated_hq_multiaccess",
-      ],
-      confidence: "low",
-      evidence: ["projection_input_side:not_runner"],
-    };
-  }
   if (!hasProductiveStrategyAnchor(strategyProfile)) {
     const riskProfile = ["runner.low_confidence_strategy_projection" as const];
     const rejectedIntents = sortedIntentValues<RunnerRejectedIntent>([
@@ -195,14 +190,12 @@ export function buildRunnerStrategicIntentProfile(
       ? ["runner.conditional_remote_contest" as const]
       : []),
   ]);
-  const riskProfile = sortedIntentValues<RunnerRiskProfile>([
-    ...(hasRiskyUniversalCoverage(strategyProfile, deckCapabilities)
-      ? ["runner.risky_universal_breaker_pressure" as const]
-      : []),
-    ...(!strategyProfile && !deckCapabilities
-      ? ["runner.low_confidence_strategy_projection" as const]
-      : []),
-  ]);
+  const riskProfile: RunnerRiskProfile[] = hasRiskyUniversalCoverage(
+    strategyProfile,
+    deckCapabilities,
+  )
+    ? ["runner.risky_universal_breaker_pressure"]
+    : [];
   const rejectedIntents = sortedIntentValues<RunnerRejectedIntent>([
     ...(shouldRejectDedicatedRndPressure(strategyProfile)
       ? ["runner.dedicated_rnd_multiaccess" as const]

@@ -1,3 +1,4 @@
+import type { RandomPurpose } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
   type CardDefinition,
@@ -13,6 +14,7 @@ import {
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { capabilityKey, canonicalCapabilityId } from "@netgrid/cards/engine";
+import { printedIceRezCost } from "../payment/corp-rez-cost";
 import { buildLegalAction } from "../turn/action-builders";
 
 type ActiveRun = NonNullable<GameState["run"]>;
@@ -22,9 +24,8 @@ export type EncounterSpecialWindowHost = {
   callbacks?: {
     derezCorpInstalledCard?: (cardId: CardInstanceId) => void;
     finishRun?: (successful: boolean, legalAction?: LegalAction) => void;
-    quoteIceRezCost?: (iceId: CardInstanceId) => number;
     resetBreakerStrength?: () => void;
-    rollDie?: (purpose: string) => number;
+    rollDie?: (purpose: RandomPurpose) => number;
     spendCredits?: (side: Side, amount: number) => void;
     trashCorpInstalledCard?: (cardId: CardInstanceId) => void;
     trashRunnerInstalledCardToHeap?: (
@@ -73,13 +74,13 @@ export type FullyBrokenPassedIceWindowResult = EncounterSpecialWindowResult & {
 
 export type SubmarinePostBidMarkerResult = EncounterSpecialWindowResult & {
   sourceCardId?: CardInstanceId;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   forcedRunEndAfterEncounter?: boolean;
 };
 
 export type PostPassIceWindowResult = EncounterSpecialWindowResult & {
   sourceCardId?: CardInstanceId;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   dieRoll?: number;
 };
 
@@ -259,7 +260,7 @@ export function resolveRezzedIceRewindSubroutine(
   if (currentIndex < 0)
     throw new Error("Rezzed-ICE-Rewind konnte das Encounter-ICE nicht finden.");
 
-  const randomPurpose = `rewind_run_to_rezzed_ice_by_die.${run.runId}.${run.encounteredIceId}`;
+  const randomPurpose: RandomPurpose = [17, run.runId, run.encounteredIceId!];
   const die = rollDie(host, randomPurpose);
   legalActionPayload(legalAction, { rezzedIceRewindDieRoll: die });
   if (die >= 4) {
@@ -439,7 +440,7 @@ export function applyPassedIceRunEndTrigger(
 
   for (const rioId of rioIds) {
     const rioDefinitionId = definitionFor(state, rioId).id;
-    const randomPurpose = `v1921.die.${rioDefinitionId}.passed_ice.${run.runId}.${passedIceId}.${rioId}`;
+    const randomPurpose: RandomPurpose = [18, rioDefinitionId, run.runId, passedIceId, rioId];
     const dieRoll = rollDie(host, randomPurpose);
     const runEnded = dieRoll === 1;
     legalActionPayload(legalAction, {
@@ -450,7 +451,7 @@ export function applyPassedIceRunEndTrigger(
       passedIceDefinitionId: definitionFor(state, passedIceId).id,
       ...(server.label ? { serverLabel: server.label } : {}),
       v1921DieRoll: dieRoll,
-      randomPurpose,
+      randomPurpose: randomPurpose[0],
       randomCounterAfter: state.randomCounter,
       rioRunEnded: runEnded,
     });
@@ -478,7 +479,7 @@ export function fullyBrokenPassedIceTrashPostPassActions(
   if (!run || !targetIceId || !state.cardInstances[targetIceId]) return [];
   if (!rezzedInstalledIceIds(state).includes(targetIceId)) return [];
   if (!run.fullyBrokenIceIds?.includes(targetIceId)) return [];
-  const rezCost = quoteIceRezCost(host, targetIceId);
+  const rezCost = printedIceRezCost(state, targetIceId);
   if (state.runner.credits < rezCost) return [];
   const targetDefinition = definitionFor(state, targetIceId);
   return state.runner.rig.programs
@@ -816,9 +817,8 @@ export function resolveFullyBrokenPassedIceTrash(
     !rezzedInstalledIceIds(state).includes(targetIceId as CardInstanceId)
   )
     throw new Error("Das Post-Pass-ICE-Ziel ist nicht legal.");
-  const rezCost = quoteIceRezCost(host, targetIceId as CardInstanceId);
-  const paid = Number(legalAction.payload?.rezCostPaid ?? rezCost);
-  if (!Number.isInteger(paid) || paid !== rezCost)
+  const rezCost = printedIceRezCost(state, targetIceId as CardInstanceId);
+  if (legalAction.payload?.rezCostPaid !== rezCost)
     throw new Error(
       "Die Post-Pass-Faehigkeit muss exakt die Rez-Kosten zahlen.",
     );
@@ -1065,15 +1065,6 @@ function rezzedInstalledIceIds(state: GameState): CardInstanceId[] {
   });
 }
 
-function quoteIceRezCost(
-  host: EncounterSpecialWindowHost,
-  iceId: CardInstanceId,
-): number {
-  if (!host.callbacks?.quoteIceRezCost)
-    throw new Error("Rez-Kosten-Callback fehlt.");
-  return host.callbacks.quoteIceRezCost(iceId);
-}
-
 function spendCredits(
   host: EncounterSpecialWindowHost,
   side: Side,
@@ -1084,7 +1075,7 @@ function spendCredits(
   host.callbacks.spendCredits(side, amount);
 }
 
-function rollDie(host: EncounterSpecialWindowHost, purpose: string): number {
+function rollDie(host: EncounterSpecialWindowHost, purpose: RandomPurpose): number {
   if (!host.callbacks?.rollDie) throw new Error("RNG-Callback fehlt.");
   return host.callbacks.rollDie(purpose);
 }

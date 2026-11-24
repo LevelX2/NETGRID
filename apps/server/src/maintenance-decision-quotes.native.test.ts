@@ -56,7 +56,7 @@ function nativeCheckpoint() {
   if (!drawn.ok) throw new Error(drawn.error.message);
   state = drawn.state;
   const damage = Object.values(state.cardInstances).find(
-    (c) => c.definitionId === "onr_v1_302_scorched-earth",
+    (c) => c.definitionId === 514,
   )!;
   for (const zone of [state.corp.hq, state.corp.rd, state.corp.archives]) {
     const i = zone.indexOf(damage.instanceId);
@@ -155,11 +155,16 @@ it("reconstructs the same terminal Punish owner as the real Engine-backed runtim
   const selected = chooseAiAction(reconstructed);
   expect(selected.actionId).toBe(live.actionId);
   expect(selected.fallbackUsed).toBe(false);
-  expect(selected.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId:
-      "plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
+  const plan = selected.decisionDebug?.planFirstDecision;
+  expect(plan).toMatchObject({
+    rootPlanInstanceId: live.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
     route: { actionId: live.actionId, stateVersion: state.stateVersion },
   });
+  expect(
+    plan?.portfolio.find(
+      (instance) => instance.instanceId === plan.rootPlanInstanceId,
+    )?.moduleId,
+  ).toBe("corp.punish_campaign");
 });
 
 it("keeps native state and persisted actor input intact and exports no private GameState", () => {

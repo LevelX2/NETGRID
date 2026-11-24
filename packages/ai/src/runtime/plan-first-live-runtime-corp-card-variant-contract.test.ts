@@ -21,14 +21,14 @@ import {
 } from "../semantic-ai-runtime-cutover.test-support";
 import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
 
-const HOSTILE_TAKEOVER = "onr_v1_203_hostile-takeover";
-const CORPORATE_DOWNSIZING = "onr_v1_194_corporate-downsizing";
-const ANNUAL_REVIEWS = "onr_v1_282_annual-reviews";
-const OVERTIME_INCENTIVES = "onr_v1_297_overtime-incentives";
-const DATA_WALL = "onr_v1_237_data-wall";
-const PRECISION_BRIBERY = "onr_proteus_146_precision-bribery";
-const CORPORATE_GUARD_R_TEMPS = "onr_proteus_046_corporate-guard-r-temps";
-const VIRAL_BREEDING_GROUND = "onr_proteus_009_viral-breeding-ground";
+const HOSTILE_TAKEOVER = 415;
+const CORPORATE_DOWNSIZING = 406;
+const ANNUAL_REVIEWS = 494;
+const OVERTIME_INCENTIVES = 509;
+const DATA_WALL = 449;
+const PRECISION_BRIBERY = 204;
+const CORPORATE_GUARD_R_TEMPS = 104;
+const VIRAL_BREEDING_GROUND = 67;
 
 describe("plan-first Corp card variant contracts", () => {
   beforeEach(() => {
@@ -58,12 +58,12 @@ describe("plan-first Corp card variant contracts", () => {
       ]),
     );
     expect(portfolio).toContain(
-      "plan:corp.score_agenda:agenda%3Aagenda-1%3Aremote_1",
+      "pbdq9qo2j7h919e58ns3d9h9nh",
     );
     expect(portfolio).toContain('"actionIds":["play-overtime"]');
     expect(portfolio).not.toContain(fixture.installPrepared.actionId);
     expect(portfolio).not.toContain(
-      "plan:corp.score_agenda:agenda%3Aagenda-1%3Anew_remote",
+      "p2btcios09wllgc3khmfqcqa7d",
     );
   });
 
@@ -82,7 +82,7 @@ describe("plan-first Corp card variant contracts", () => {
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_priority_class:P4",
-        "plan_assessment_evidence:corp_engine_certified_mature_remote_score_install:remote_1",
+        "plan_assessment_evidence:corp_engine_certified_mature_remote_score_install:r1",
       ]),
     );
   });
@@ -109,12 +109,12 @@ describe("plan-first Corp card variant contracts", () => {
       ]),
     );
     expect(portfolio).toContain(
-      "plan:corp.score_agenda:agenda%3Aagenda-1%3Aremote_1",
+      "pbdq9qo2j7h919e58ns3d9h9nh",
     );
     expect(portfolio).toContain('"actionIds":["play-overtime"]');
     expect(portfolio).not.toContain(fixture.installPrepared.actionId);
     expect(portfolio).not.toContain(
-      "plan:corp.score_agenda:agenda%3Aagenda-1%3Anew_remote",
+      "p2btcios09wllgc3khmfqcqa7d",
     );
   });
 
@@ -133,7 +133,7 @@ describe("plan-first Corp card variant contracts", () => {
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_priority_class:P4",
-        "plan_assessment_evidence:corp_engine_certified_mature_remote_score_install:remote_1",
+        "plan_assessment_evidence:corp_engine_certified_mature_remote_score_install:r1",
       ]),
     );
   });
@@ -190,7 +190,7 @@ describe("plan-first Corp card variant contracts", () => {
     expect(decision.actionId).toBe(credit.actionId);
     expect(
       JSON.stringify(residentPlanPortfolioSnapshot(fixture.input)),
-    ).not.toContain("plan:corp.score_agenda:general");
+    ).not.toContain("pa1d7j8c33k25iup8n8nyo9r2g");
   });
 
   it("routes a visible HQ agenda through its exact P4 remote-lock removal step", () => {
@@ -221,7 +221,7 @@ describe("plan-first Corp card variant contracts", () => {
       ]),
     );
     expect(portfolio).toContain(
-      "plan:corp.score_agenda:agenda%3Aagenda-lock%3Anew_remote",
+      "p81h60o14i7jctvpfdamw0hpj9",
     );
     expect(portfolio).toContain(`"actionIds":["${unlock.actionId}"]`);
   });
@@ -264,7 +264,7 @@ describe("plan-first Corp card variant contracts", () => {
       value: card.instanceId,
     }));
     const resolve = legalAction(
-      "corp.resolve_choice",
+      "cn",
       "corp",
       "resolve_choice",
       "Resolve Viral Breeding Ground",
@@ -298,7 +298,7 @@ describe("plan-first Corp card variant contracts", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [source]),
+      server("r1", [], [source]),
     ];
     bindCurrentStateVersion(input);
 
@@ -332,7 +332,7 @@ describe("plan-first Corp card variant contracts", () => {
   it("marks remote-lock removal nonproductive without an exact score parent", () => {
     const unlock = precisionBriberyUnlock();
     const gain = legalAction(
-      "corp.gain_credit",
+      "cb",
       "corp",
       "gain_credit",
       "Gain 1 Credit",
@@ -375,7 +375,7 @@ describe("plan-first Corp card variant contracts", () => {
     const x1 = corporateGuardRTemps(source, 1);
     const x2 = corporateGuardRTemps(source, 2);
     const gain = legalAction(
-      "corp.gain_credit",
+      "cb",
       "corp",
       "gain_credit",
       "Gain 1 Credit",
@@ -442,7 +442,7 @@ describe("plan-first Corp card variant contracts", () => {
 });
 
 function scoreConversionFixture(params: {
-  agendaDefinitionId: string;
+  agendaDefinitionId: number;
   agendaTitle: string;
   agendaPoints: number;
   includeOvertime: boolean;
@@ -460,7 +460,7 @@ function scoreConversionFixture(params: {
     title: "Overtime Incentives",
     cost: 4,
   });
-  const installPrepared = installAgenda(agenda, "remote_1");
+  const installPrepared = installAgenda(agenda, "r1");
   const installNew = installAgenda(agenda, "new_remote");
   const overtimeAction = params.includeOvertime
     ? playOvertime(overtime)
@@ -488,7 +488,7 @@ function scoreConversionFixture(params: {
     server("hq"),
     server("rd"),
     server("archives"),
-    server("remote_1", [
+    server("r1", [
       preparedDataWall("prepared-wall-1"),
       preparedDataWall("prepared-wall-2"),
     ]),
@@ -520,24 +520,24 @@ function annualReviewsFixture(params: {
   });
   const fillerOne = corpCard(
     "filler-operation-1",
-    "onr_v1_283_audit-of-call-records",
+    495,
     "operation",
   );
   const fillerTwo = corpCard(
     "filler-operation-2",
-    "onr_v1_298_planning-consultants",
+    510,
     "operation",
   );
   const annualReviews = playAnnualReviews(annual);
   const basicDraw = legalAction(
-    "corp.draw_card",
+    "c8",
     "corp",
     "draw_card",
     "Draw one card",
     { credits: 0, clicks: 1 },
     { payload: { drawCardsAmount: 1 } },
   );
-  const agendaInstall = installAgenda(agenda, "remote_1");
+  const agendaInstall = installAgenda(agenda, "r1");
   const actions = [
     annualReviews,
     basicDraw,
@@ -562,7 +562,7 @@ function annualReviewsFixture(params: {
     server("hq"),
     server("rd"),
     server("archives"),
-    server("remote_1"),
+    server("r1"),
   ];
   bindSyntheticAgendaInstallQuotes(input);
   attachOwnDeckSnapshot(input, {
@@ -573,11 +573,11 @@ function annualReviewsFixture(params: {
       { cardId: HOSTILE_TAKEOVER, quantity: 3 },
       { cardId: ANNUAL_REVIEWS, quantity: 3 },
       {
-        cardId: "onr_v1_283_audit-of-call-records",
+        cardId: 495,
         quantity: 3,
       },
       {
-        cardId: "onr_v1_298_planning-consultants",
+        cardId: 510,
         quantity: 3,
       },
     ],
@@ -587,7 +587,7 @@ function annualReviewsFixture(params: {
 
 function corpCard(
   instanceId: string,
-  definitionId: string,
+  definitionId: number,
   type: NonNullable<VisibleCard["type"]>,
   overrides: Omit<
     Partial<VisibleCard>,
@@ -611,7 +611,7 @@ function preparedDataWall(instanceId: string): VisibleCard {
 
 function installAgenda(
   agenda: VisibleCard,
-  serverId: "remote_1" | "new_remote",
+  serverId: "r1" | "new_remote",
 ): LegalAction {
   return legalAction(
     `install-${agenda.instanceId}-${serverId}`,

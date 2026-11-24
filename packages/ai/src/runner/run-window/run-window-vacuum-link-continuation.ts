@@ -1,3 +1,4 @@
+import { parseRunIdToken } from "@netgrid/shared";
 import { type AiDecisionInput } from "@netgrid/shared";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import {
@@ -18,10 +19,10 @@ export function bindSelectedEngineWindowRunnerVacuumLinkOrigin(
   );
   const canOpenRunnerVacuumLinkRewind =
     selectedAction?.type === "continue_run" &&
-    selectedAction.payload?.sourceDefinitionId === "onr_v1_275_vacuum-link" &&
+    selectedAction.payload?.sourceDefinitionId === 487 &&
     Number(selectedAction.payload?.unbrokenSubroutineCount) > 0 &&
     input.playerView.run?.encounteredIce?.definitionId ===
-      "onr_v1_275_vacuum-link";
+      487;
   if (!canOpenRunnerVacuumLinkRewind || !selectedAction) return;
 
   const currentPortfolio = result.portfolio;
@@ -139,7 +140,7 @@ export function bindSelectedEngineWindowRunnerVacuumLinkOrigin(
     sourceStepId,
     sourceActionType: "continue_run",
     sourceCardInstanceId: input.playerView.run!.encounteredIce!.instanceId,
-    sourceCardDefinitionId: "onr_v1_275_vacuum-link",
+    sourceCardDefinitionId: 487,
   };
 }
 
@@ -175,7 +176,7 @@ export function resolvePlanBoundRunnerVacuumLinkChoice(
           actionId: string;
           selectedOptionId: string;
           sourceCardInstanceId: string;
-          sourceCardDefinitionId: string;
+          sourceCardDefinitionId: number;
           observedAtStateVersion: number;
         };
       }
@@ -189,10 +190,11 @@ export function resolvePlanBoundRunnerVacuumLinkChoice(
   const action = choiceActions.length === 1 ? choiceActions[0] : undefined;
   const [requirement] = action?.choiceRequirements ?? [];
   const optionIds = choice.options.map((option) => option.id);
-  const choiceRunId =
+  const choiceRunId = parseRunIdToken(
     /^card_implementation\.vacuum_link_rewind:([^:]+):([0-9]+)$/.exec(
       choice.choiceId,
-    )?.[1];
+    )?.[1],
+  );
   const sourceCard = context.input.playerView.run?.encounteredIce;
   const executionLease = previous?.turnPlanExecutionLease;
   const executionStateVersion = executionLease?.currentBinding.stateVersion;
@@ -295,8 +297,7 @@ export function resolvePlanBoundRunnerVacuumLinkChoice(
     sourceCard !== undefined &&
     sourceCard.instanceId === choice.sourceCardInstanceId &&
     sourceCard.definitionId === choice.sourceCardDefinitionId &&
-    typeof choiceRunId === "string" &&
-    choiceRunId.length > 0 &&
+    choiceRunId !== undefined &&
     choiceRunId === context.input.playerView.run?.runId &&
     choice.minSelections === 1 &&
     choice.maxSelections === 1 &&

@@ -1133,7 +1133,7 @@ export function createScoredEconomyRuntimeHosts(
           const server =
             serverId === "new_remote"
               ? ({
-                  id: "remote_0",
+                  id: "r0",
                   label: "Neues Remote",
                   kind: "remote",
                   ice: [],
@@ -1345,6 +1345,7 @@ export function createScoredEconomyRuntimeHosts(
             damageType: "meat",
             amount,
             source: `scored_agenda:${definition.id}`,
+            randomSource: ["c", definition.id, sourceCardId],
           });
           if (openDamageResolutionWindow(state, event, legalAction)) {
             return {

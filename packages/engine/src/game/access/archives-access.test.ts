@@ -28,21 +28,9 @@ function currentRunGame(seed: string) {
 describe("V1.1.2 Full Archives Access", () => {
   it("turns existing facedown Archives cards faceup at breach start and skips cards without decisions", () => {
     let state = toRunnerTurn(currentRunGame("v112-archives-queue"));
-    const faceupOperation = moveCorpCardToArchives(
-      state,
-      "simple_economy_operation",
-      true,
-    );
-    const facedownAsset = moveCorpCardToArchives(
-      state,
-      "simple_economy_asset",
-      false,
-    );
-    const facedownAgenda = moveCorpCardToArchives(
-      state,
-      "simple_agenda",
-      false,
-    );
+    const faceupOperation = moveCorpCardToArchives(state, 596, true);
+    const facedownAsset = moveCorpCardToArchives(state, 594, false);
+    const facedownAgenda = moveCorpCardToArchives(state, 588, false);
     keepOnlyCorpArchivesCards(state, [
       faceupOperation,
       facedownAsset,
@@ -81,12 +69,12 @@ describe("V1.1.2 Full Archives Access", () => {
       {
         entryId: `${state.run?.runId}.breach.0`,
         status: "accessed",
-        cardDefinitionId: "simple_economy_operation",
+        cardDefinitionId: 596,
       },
       {
         entryId: `${state.run?.runId}.breach.1`,
         status: "accessed",
-        cardDefinitionId: "simple_economy_asset",
+        cardDefinitionId: 594,
       },
     ]);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -94,10 +82,10 @@ describe("V1.1.2 Full Archives Access", () => {
       hiddenZoneBarrier: true,
       hiddenZoneAction: "archives_breach_reveal",
       archivesRevealCount: 2,
-      archivesRevealDefinitionIds: "simple_economy_asset,simple_agenda",
+      archivesRevealDefinitionIds: "594,588",
       archivesRevealTitles: "Simple Economy Asset|Simple Agenda",
-      archivesRevealAgendaDefinitionIds: "simple_agenda",
-      publicRevealDefinitionIds: "simple_economy_asset,simple_agenda",
+      archivesRevealAgendaDefinitionIds: "588",
+      publicRevealDefinitionIds: "594,588",
       publicRevealTitles: "Simple Economy Asset|Simple Agenda",
       archivesAutoAccessedCount: 2,
     });
@@ -112,21 +100,9 @@ describe("V1.1.2 Full Archives Access", () => {
   it("preserves Archives queue progress, forbids Archives trash, and replays deterministically", () => {
     let state = toRunnerTurn(currentRunGame("v112-archives-access"));
     state.runner.credits = 10;
-    const faceupOperation = moveCorpCardToArchives(
-      state,
-      "simple_economy_operation",
-      true,
-    );
-    const facedownAsset = moveCorpCardToArchives(
-      state,
-      "simple_economy_asset",
-      false,
-    );
-    const facedownAgenda = moveCorpCardToArchives(
-      state,
-      "simple_agenda",
-      false,
-    );
+    const faceupOperation = moveCorpCardToArchives(state, 596, true);
+    const facedownAsset = moveCorpCardToArchives(state, 594, false);
+    const facedownAgenda = moveCorpCardToArchives(state, 588, false);
     keepOnlyCorpArchivesCards(state, [
       faceupOperation,
       facedownAsset,
@@ -150,12 +126,12 @@ describe("V1.1.2 Full Archives Access", () => {
       {
         entryId: `${state.run?.runId}.breach.0`,
         status: "accessed",
-        cardDefinitionId: "simple_economy_operation",
+        cardDefinitionId: 596,
       },
       {
         entryId: `${state.run?.runId}.breach.1`,
         status: "accessed",
-        cardDefinitionId: "simple_economy_asset",
+        cardDefinitionId: 594,
       },
     ]);
     expect(
@@ -186,7 +162,7 @@ describe("V1.1.2 Full Archives Access", () => {
       MECHANIC_SMOKE_GAMES.assetNodeEffects("v112-archives-no-trash"),
     );
     state.runner.credits = 10;
-    const setupId = moveCorpCardToArchives(state, "onr_v1_340_setup", false);
+    const setupId = moveCorpCardToArchives(state, 552, false);
     keepOnlyCorpArchivesCards(state, [setupId]);
 
     state = apply(
@@ -206,18 +182,14 @@ describe("V1.1.2 Full Archives Access", () => {
     expect(state.cardInstances[setupId]?.faceup).toBe(true);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "start_run",
-      archivesRevealDefinitionIds: "onr_v1_340_setup",
+      archivesRevealDefinitionIds: "552",
       archivesAutoAccessedCount: 1,
     });
   });
 
   it("auto-accesses Bizarre Encryption Scheme in Archives without a pointless window", () => {
     let state = toRunnerTurn(v199CardReleaseGame("v112-archives-bizarre"));
-    const bizarreId = moveCorpCardToArchives(
-      state,
-      "onr_v1_351_bizarre-encryption-scheme",
-      false,
-    );
+    const bizarreId = moveCorpCardToArchives(state, 563, false);
     keepOnlyCorpArchivesCards(state, [bizarreId]);
 
     state = apply(
@@ -249,7 +221,7 @@ describe("V1.1.2 Full Archives Access", () => {
     );
     const programTrashByAdvancementAssetId = moveCorpCardToArchives(
       state,
-      "onr_v1_323_experimental-ai",
+      535,
       false,
     );
     state.cardInstances[programTrashByAdvancementAssetId] = {
@@ -269,7 +241,7 @@ describe("V1.1.2 Full Archives Access", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "start_run",
       hiddenZoneAction: "archives_breach_reveal",
-      archivesRevealDefinitionIds: "onr_v1_323_experimental-ai",
+      archivesRevealDefinitionIds: "535",
       archivesAutoAccessedCount: 1,
     });
   });
@@ -280,10 +252,10 @@ describe("V1.1.2 Full Archives Access", () => {
         "v112-archives-experimental-ai-target",
       ),
     );
-    const programId = installRunnerProgramForTest(state, "simple_decoder");
+    const programId = installRunnerProgramForTest(state, 591);
     const programTrashByAdvancementAssetId = moveCorpCardToArchives(
       state,
-      "onr_v1_323_experimental-ai",
+      535,
       false,
     );
     state.cardInstances[programTrashByAdvancementAssetId] = {
@@ -304,7 +276,7 @@ describe("V1.1.2 Full Archives Access", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "start_run",
       hiddenZoneAction: "archives_breach_reveal",
-      archivesRevealDefinitionIds: "onr_v1_323_experimental-ai",
+      archivesRevealDefinitionIds: "535",
       archivesAutoAccessedCount: 1,
     });
   });

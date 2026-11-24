@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_proteus_144_lucidrinetm-drip-feed"),
+    cardDefinitionId: cardDefinitionId(202),
     title: "Lucidrine™ Drip Feed",
     side: "runner",
     cardType: "hardware",

@@ -46,8 +46,8 @@ it("funds current cumulative lethal damage mitigation even when the later access
     fallbackUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_321",
+        rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+        leafExecutorInstanceId: "p89bfleudnd71qjlge2ojlwvq8",
         route: {
           actionId: pump.actionId,
           stateVersion: input.playerView.stateVersion,
@@ -78,10 +78,8 @@ it.each([1, 2])(
   (brokenCount) => {
     const input = restoredInput();
     const action = input.legalActions.find((a) => a.type === "continue_run")!;
-    const ids = String(action.payload!.encounterSubroutineIds)
-      .split(",")
-      .slice(brokenCount);
-    action.payload!.encounterSubroutineIds = ids.join(",");
+    const ids = action.encounterSubroutineIds!.slice(brokenCount);
+    action.encounterSubroutineIds = ids;
     action.payload!.unbrokenSubroutineCount = ids.length;
     expect(currentEncounterRequiresDamagePreservingBreak(input, 0)).toBe(false);
     expect(encounterContinueAcceptsOnlyNonlethalDamageThreats(input)).toBe(

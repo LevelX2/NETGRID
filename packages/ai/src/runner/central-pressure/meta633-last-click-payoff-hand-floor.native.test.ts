@@ -16,7 +16,7 @@ const cp = JSON.parse(
   ),
 );
 const install =
-  "runner.install_card.runner_onr_v1_129_hq-interface_2.runner_onr_v1_129_hq-interface_2";
+  "rc.c23u.c23u";
 afterEach(resetResidentPlanPortfolioMemory);
 
 function decide(variant: "native" | "surplus" | "remaining_click" = "native") {
@@ -54,14 +54,14 @@ it("retains the built hand buffer below the confirmed floor instead of spending 
   expect(cp.input.playerView.own.gripOrHq).toHaveLength(2);
   expect(cp.input.playerView.own.clicks).toBe(1);
   const decision = decide();
-  expect(decision.actionId).toBe("runner.draw_card");
+  expect(decision.actionId).toBe("r8");
   const plan = decision.decisionDebug!.planFirstDecision!;
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:runner.defense_and_recovery:runner",
+    "p1gzjb6yfcv4zbzow512kexs33",
   );
   expect(plan.leafExecutorInstanceId).toBe(plan.rootPlanInstanceId);
   expect(plan.route).toMatchObject({
-    actionId: "runner.draw_card",
+    actionId: "r8",
     stateVersion: 52,
   });
   expect(
@@ -75,7 +75,7 @@ it("still installs payoff when five actual hand cards preserve the four-card flo
   const decision = decide("surplus");
   expect(decision.actionId).toBe(install);
   expect(decision.decisionDebug!.planFirstDecision!.rootPlanInstanceId).toBe(
-    "plan:runner.pressure_central:central%3Ahq",
+    "pa7nez1ioecg7mf06q1uwqq57o",
   );
 });
 

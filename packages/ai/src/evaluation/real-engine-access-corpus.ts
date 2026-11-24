@@ -1,4 +1,4 @@
-import type { LegalAction } from "@netgrid/shared";
+import type { CardDefinitionId, LegalAction } from "@netgrid/shared";
 import type { AccessOutcomeMemoryStatus } from "../access/access-outcome-memory";
 import { remoteAccessFingerprint } from "../access/remote-access-fingerprint";
 import {
@@ -10,6 +10,9 @@ import {
   type AccessDecisionProjection,
 } from "../decision/access-decision-projection";
 
+const LOW_VALUE_UPGRADE_DEFINITION_ID = 606;
+
+// These report-only fixtures exercise access projections without an Engine session.
 export const REAL_ENGINE_ACCESS_CORPUS_SCENARIO_IDS = [
   "access_remote_known_agenda_steal",
   "access_remote_trash_affordable",
@@ -203,7 +206,7 @@ export function buildRealEngineAccessCorpus(): RealEngineAccessCorpusScenario[] 
       reason: "unknown",
       valueScore: 0,
       expectedRecommendation: "known_no_current_payoff",
-      legalActionPayload: { serverId: "remote_1" },
+      legalActionPayload: { serverId: "r1" },
     }),
   ];
 }
@@ -228,12 +231,12 @@ function scenario(params: {
   includeSecondaryLowValueUpgrade?: boolean;
   legalActionPayload?: LegalAction["payload"];
 }): RealEngineAccessCorpusScenario {
-  const serverId = "remote_1";
+  const serverId = "r1";
   const definitionId = definitionIdFor(params.targetKind);
   const projection = projectAccessDecision({
     source: "access_window",
     serverId,
-    knownRootDefinitionId: definitionId,
+    ...(definitionId === undefined ? {} : { knownRootDefinitionId: definitionId }),
     target: params.targetKind,
     intendedAccessAction: params.intendedAccessAction,
     ...(params.reason === "reserve_would_break"
@@ -253,7 +256,7 @@ function scenario(params: {
       : {}),
   });
   const rankedTargets = rankKnownRemoteAccessTargets([
-    {
+    ...(definitionId === undefined ? [] : [{
       positionKey: "root:0",
       instanceId: `${definitionId}-instance`,
       definitionId,
@@ -263,21 +266,21 @@ function scenario(params: {
         knownAccessState:
           params.intendedAccessAction === "decline" ||
           params.intendedAccessAction === "access_only"
-            ? "known_no_current_payoff"
-            : "known_payoff",
+            ? ("known_no_current_payoff" as const)
+            : ("known_payoff" as const),
         intendedAccessAction: params.intendedAccessAction,
         reason: params.reason,
         evidence: [`real_engine_access_corpus_commitment:${params.reason}`],
       },
       projection,
       valueScore: params.valueScore,
-    },
+    }]),
     ...(params.includeSecondaryAssetTarget
       ? [
           {
             positionKey: "root:1",
             instanceId: "secondary-asset",
-            definitionId: "onr_v1_322_euromarket-consortium",
+            definitionId: 534,
             targetKind: "asset" as const,
             commitment: {
               serverId,
@@ -289,7 +292,7 @@ function scenario(params: {
             projection: projectAccessDecision({
               source: "access_window",
               serverId,
-              knownRootDefinitionId: "onr_v1_322_euromarket-consortium",
+              knownRootDefinitionId: 534,
               target: "asset",
               intendedAccessAction: "trash",
             }),
@@ -302,7 +305,7 @@ function scenario(params: {
           {
             positionKey: "root:1",
             instanceId: "secondary-upgrade",
-            definitionId: "low-value-upgrade",
+            definitionId: LOW_VALUE_UPGRADE_DEFINITION_ID,
             targetKind: "upgrade" as const,
             commitment: {
               serverId,
@@ -314,7 +317,7 @@ function scenario(params: {
             projection: projectAccessDecision({
               source: "access_window",
               serverId,
-              knownRootDefinitionId: "low-value-upgrade",
+              knownRootDefinitionId: LOW_VALUE_UPGRADE_DEFINITION_ID,
               target: "upgrade",
               intendedAccessAction: "decline",
             }),
@@ -331,9 +334,9 @@ function scenario(params: {
     serverId,
     root: [
       {
-        instanceId: `${definitionId}-instance`,
-        definitionId,
-        known: true,
+        instanceId: definitionId === undefined ? "unknown-root" : `${definitionId}-instance`,
+        ...(definitionId === undefined ? {} : { definitionId }),
+        known: definitionId !== undefined,
       },
     ],
   });
@@ -366,16 +369,16 @@ function scenario(params: {
 
 function definitionIdFor(
   targetKind: "agenda" | "asset" | "upgrade" | "unknown",
-): string {
+): CardDefinitionId | undefined {
   switch (targetKind) {
     case "agenda":
-      return "simple_agenda";
+      return 588;
     case "asset":
-      return "onr_v1_322_euromarket-consortium";
+      return 534;
     case "upgrade":
-      return "low-value-upgrade";
+      return LOW_VALUE_UPGRADE_DEFINITION_ID;
     case "unknown":
-      return "unknown-root";
+      return undefined;
   }
 }
 
@@ -384,10 +387,10 @@ function runLegalAction(
   payload: LegalAction["payload"],
 ): LegalAction {
   return {
-    actionId: `${scenarioId}:run_remote_1`,
+    actionId: `${scenarioId}:run_r1`,
     side: "runner",
     type: "start_run",
-    label: "Run remote_1",
+    label: "Run r1",
     source: "basic_action",
     timingPoint: "runner_action.main",
     costs: [{ clicks: 1 }],

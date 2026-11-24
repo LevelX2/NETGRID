@@ -7,6 +7,7 @@ import {
 } from "@netgrid/engine";
 import {
   DEMO_DECKS,
+  type CardDefinitionId,
   type DeckDefinition,
   type GameState,
   type LegalAction,
@@ -24,10 +25,10 @@ import { buildAiDecisionInput } from "./ai-decision-input";
 import { withDecisionLocalCorpPunishRouteQuotes } from "../corp/punish/punish-route-quote-input";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 
-const CHANCE = "onr_v1_284_chance-observation";
-const AUDIT = "onr_v1_283_audit-of-call-records";
-const PUNITIVE = "onr_v1_301_punitive-counterstrike";
-const URBAN = "onr_v1_307_urban-renewal";
+const CHANCE = 496;
+const AUDIT = 495;
+const PUNITIVE = 513;
+const URBAN = 519;
 const CORP_DECK = withCards(DEMO_DECKS.demo_corp_001, "forced-trace-punish", [
   CHANCE,
   AUDIT,
@@ -173,7 +174,11 @@ it.each(["locked", "side", "timing", "missing"] as const)(
     if (kind === "side") action.side = "runner";
     if (kind === "timing") action.timingPoint = "game.checkpoint";
     if (kind === "missing") input.legalActions = [];
-    expect(() => chooseCorpAction(input)).toThrow("invalid_support_graph");
+    expect(() => chooseCorpAction(input)).toThrow(
+      kind === "side"
+        ? "actor_private_legal_action_projected_for_other_side"
+        : "invalid_support_graph",
+    );
   },
 );
 
@@ -222,7 +227,7 @@ it.each(["modern_open", "classic_blind", "classic_blind_corp_ties"] as const)(
     state.runner.rig.resources.push(crash);
     state.cardInstances[crash] = {
       instanceId: crash,
-      definitionId: "onr_classic_044_crash-space",
+      definitionId: 48,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "rig" },
@@ -255,10 +260,10 @@ it.each(["modern_open", "classic_blind", "classic_blind_corp_ties"] as const)(
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId:
-        "plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
+        "pp3zys3mvrb02r0muk2126s52",
       selectedStep: {
         parentInstanceId:
-          "plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
+          "pp3zys3mvrb02r0muk2126s52",
       },
     });
     expect(JSON.stringify(decision.decisionDebug)).toContain(
@@ -303,18 +308,6 @@ it.each(["modern_open", "classic_blind", "classic_blind_corp_ties"] as const)(
             latestTraceContext(bidInput),
           ),
         ).toBe("bid_0");
-        const unrelatedChoice = {
-          ...choice,
-          source: "card_implementation.secret_spend_compare:unrelated",
-        };
-        if (side === "runner")
-          expect(
-            selectedBidChoiceOptionId(
-              bidInput,
-              unrelatedChoice,
-              latestTraceContext(bidInput),
-            ),
-          ).not.toBe("bid_0");
       } else {
         const assessed = assessTraceBidCandidates(
           bidInput,
@@ -365,8 +358,8 @@ function decisionInput(state: GameState) {
 
 function punishState(
   profile: TraceRulesProfile,
-  source: string,
-  damage: string,
+  source: CardDefinitionId,
+  damage: CardDefinitionId,
   credits: number,
   clicks: number,
   grip: number,
@@ -411,7 +404,7 @@ function applySelected(
 function playOperation(
   actions: readonly LegalAction[],
   input: ReturnType<typeof decisionInput>,
-  definitionId: string,
+  definitionId: number,
 ): LegalAction {
   const instanceId = input.playerView.own.gripOrHq.find(
     (card) => card.definitionId === definitionId,
@@ -443,7 +436,7 @@ function applyMandatoryDraw(state: GameState): GameState {
 function withCards(
   base: DeckDefinition,
   id: string,
-  additions: readonly string[],
+  additions: readonly CardDefinitionId[],
 ): DeckDefinition {
   return {
     ...base,

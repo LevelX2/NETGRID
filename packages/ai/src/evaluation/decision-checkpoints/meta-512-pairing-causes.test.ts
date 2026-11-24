@@ -11,6 +11,7 @@ import type { AiDecisionInput, GameState } from "@netgrid/shared";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
+import { RealEngineFixtureBuilder } from "../real-engine-fixture-builder";
 import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
@@ -86,7 +87,9 @@ function decide(input: AiDecisionInput, state: GameState) {
     input.legalActions.find((a) => a.actionId === decision.actionId)
       ?.expiresAtStateVersion,
   ).toBe(state.stateVersion);
-  return { decision: { ...decision, actionId: decision.actionId }, pf };
+  return { decision: { ...decision, actionId: decision.actionId }, pf,
+    action: input.legalActions.find((action) => action.actionId === decision.actionId)!,
+  };
 }
 function take(state: GameState, side: "runner" | "corp", actionId: string) {
   const result = applyAction(state, {
@@ -127,7 +130,7 @@ it.each([
         expect(pf.selectedPlan?.moduleId).toBe("runner.convert_run_window");
       else expect(pf.leafExecutorInstanceId).toBe("rules.window_resolution");
       if (i < steps - 1)
-        expect(decision.actionId).toContain("runner_onr_v1_074_worm_1");
+        expect(decision.actionId).toContain("c1rl");
       else
         expect(
           input.legalActions.find((a) => a.actionId === decision.actionId)
@@ -147,7 +150,7 @@ function sixActualKrashPumps(state: GameState) {
       "runner",
       getLegalActions(state, "runner").find(
         (a) =>
-          a.type === "pump_breaker" && a.source === "runner_onr_v1_039_krash_1",
+          a.type === "pump_breaker" && a.source === "c1jt",
       )!.actionId,
     );
   return state;
@@ -156,39 +159,39 @@ it("keeps actually cheaper already-pumped Krash", () => {
   const original = source("g11d190");
   const pumped = sixActualKrashPumps(original.state);
   const r = source("g11d190", (state) => Object.assign(state, pumped));
-  expect(decide(r.input, r.state).decision.actionId).toContain(
-    "break_subroutine.runner_onr_v1_039_krash_1",
-  );
+  expect(decide(r.input, r.state).action).toMatchObject({
+    type: "break_subroutine", source: "c1jt",
+  });
 });
 it("retains partial Safety mitigation when the whole encounter cannot be funded", () => {
   const original = source("g11d190");
   const pumped = sixActualKrashPumps(original.state);
   pumped.runner.credits = 4;
   const r = source("g11d190", (state) => Object.assign(state, pumped));
-  expect(decide(r.input, r.state).decision.actionId).toContain(
-    "break_subroutine.runner_onr_v1_039_krash_1",
-  );
+  expect(decide(r.input, r.state).action).toMatchObject({
+    type: "break_subroutine", source: "c1jt",
+  });
 });
 it("keeps the cheaper nominal full route when run-only credits fund both", () => {
   const r = source("g11d190", (state) => {
     state.run!.badPublicityCredits = 20;
   });
-  expect(decide(r.input, r.state).decision.actionId).toContain(
-    "pump_breaker.runner_onr_v1_074_worm_1",
-  );
+  expect(decide(r.input, r.state).action).toMatchObject({
+    type: "pump_breaker", source: "c1rl",
+  });
 });
 it("does not invent a whole mixed encounter when even Worm cannot be funded", () => {
   const r = source("g11d190", (state) => {
     state.runner.credits = 10;
   });
   expect(decide(r.input, r.state).decision.actionId).toContain(
-    "runner.continue_run.",
+    "r5.",
   );
 });
 const permanent =
-  "corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_238_data-wall-2-0_1";
+  "cq.c2s5.c2s5";
 const temporary =
-  "corp.rez_ice.corp_onr_v1_238_data-wall-2-0_1.hq.corp_onr_v1_238_data-wall-2-0_1.corp_onr_v1_363_olivia-salazar_1";
+  "cq.c2s5.hq.c2s5.c3jx";
 it("values same-ICE paid rez lifetime and actually preserves it over three Engine runs", () => {
   const r = source("g18d13"),
     { decision, pf } = decide(r.input, r.state);
@@ -196,11 +199,11 @@ it("values same-ICE paid rez lifetime and actually preserves it over three Engin
   expect(decision.actionId).toBe(permanent);
   let state = take(r.state, "corp", decision.actionId);
   for (let i = 0; i < 3; i++) {
-    if (i > 0) state = take(state, "runner", "runner.start_run.hq");
+    if (i > 0) state = take(state, "runner", "rs.hq");
     state = take(
       state,
       "runner",
-      "runner.continue_run.printed_subroutines_end_the_run",
+      "r5.0",
     );
     expect(state.run).toBeUndefined();
   }
@@ -222,15 +225,15 @@ it("preserves the same generic paid lifetime for the three currently funded Quan
     { decision, pf } = decide(r.input, r.state);
   expect(pf.selectedPlan?.moduleId).toBe("corp.defend_servers");
   expect(decision.actionId).toBe(
-    "corp.rez_ice.corp_onr_v1_261_quandary_2.corp_onr_v1_261_quandary_2",
+    "cq.c2xa.c2xa",
   );
   let state = take(r.state, "corp", decision.actionId);
   for (let i = 0; i < 3; i++) {
-    if (i > 0) state = take(state, "runner", "runner.start_run.rd");
+    if (i > 0) state = take(state, "runner", "rs.rd");
     state = take(
       state,
       "runner",
-      "runner.continue_run.printed_subroutines_end_the_run",
+      "r5.0",
     );
     expect(state.run).toBeUndefined();
   }
@@ -241,26 +244,57 @@ it("retains an actually free temporary Data Wall activation at G22", () => {
   const r = source("g22d10"),
     { decision } = decide(r.input, r.state);
   expect(decision.actionId).toBe(
-    "corp.rez_ice.corp_onr_v1_237_data-wall_3.rd.corp_onr_v1_237_data-wall_3.corp_onr_v1_363_olivia-salazar_1",
+    "cq.c2rz.rd.c2rz.c3jx",
   );
   expect(take(r.state, "corp", decision.actionId).corp.credits).toBe(
     r.state.corp.credits,
   );
 });
-it("revalidates the mature fort after the real mandatory draw without clearing the resident portfolio", () => {
+it("keeps the mature fort unproven after mandatory draw with a public stack search", () => {
+  const r = source("g23d400");
+  const first = decide(r.input, r.state);
+  expect(first.decision.actionId).toBe("ce");
+  const state = take(r.state, "corp", first.decision.actionId);
+  const next = load("g23d401", "native");
+  expect(hashGameState(state)).toBe(next.stateHash);
+  const input = liveInput(state, next);
+  const { decision } = decide(input, state);
+  const portfolio = residentPlanPortfolioSnapshot(input)!;
+  const projects = portfolio.instances
+    .filter((instance) => instance.moduleId === "corp.score_agenda")
+    .map(
+      (instance) =>
+        (instance.moduleState as { signal: CorpScoreProjectSignal }).signal,
+    );
+  const matureProjects = projects.filter(
+    (project) => project.serverId === "r1",
+  );
+  expect(matureProjects.length).toBeGreaterThan(0);
+  expect(
+    matureProjects.every(
+      (project) =>
+        project.protectionNeed?.baseline.knowledge === "unknown" &&
+        project.protectionNeed.baseline.evidence.includes(
+          "protectionUnknownReason:unsupported_runner_access_effect",
+        ),
+    ),
+  ).toBe(true);
+  take(state, "corp", decision.actionId);
+});
+it("revalidates the mature fort after mandatory draw when public stack search is unavailable", () => {
   const r = source("g23d400"),
     first = decide(r.input, r.state);
-  expect(first.decision.actionId).toBe("corp.mandatory_draw");
+  expect(first.decision.actionId).toBe("ce");
   const state = take(r.state, "corp", first.decision.actionId),
     next = load("g23d401", "native");
   expect(hashGameState(state)).toBe(next.stateHash);
-  const input: AiDecisionInput = {
-    ...next.input,
-    ...buildAiDecisionInputDto(next.input),
-  };
+  RealEngineFixtureBuilder.forState(state).withRunnerCardInGrip(
+    271,
+  );
+  const input = liveInput(state, next);
   const second = decide(input, state);
   expect(second.pf.selectedPlan?.moduleId).toBe("corp.score_agenda");
-  expect(second.decision.actionId).toContain(".remote_1.");
+  expect(second.decision.actionId).toContain(".r1.");
   expect(second.decision.actionId).not.toContain(".new_remote.");
   take(state, "corp", second.decision.actionId);
   const current = residentPlanPortfolioSnapshot(input)!
@@ -268,7 +302,7 @@ it("revalidates the mature fort after the real mandatory draw without clearing t
     .map((i) => (i.moduleState as { signal: CorpScoreProjectSignal }).signal)
     .find(
       (p) =>
-        p.serverId === "remote_1" &&
+        p.serverId === "r1" &&
         p.agendaInstanceId ===
           input.legalActions.find(
             (action) => action.actionId === second.decision.actionId,
@@ -302,7 +336,7 @@ it("revalidates the mature fort after the real mandatory draw without clearing t
       candidate,
       agenda,
       current.projectId,
-      "remote_1",
+      "r1",
       current.terminalScore,
       true,
     ),
@@ -310,7 +344,7 @@ it("revalidates the mature fort after the real mandatory draw without clearing t
       corpMatureRemoteAffordableDefenseLayerCertification(
         input,
         candidate,
-        "remote_1",
+        "r1",
       )!,
   };
   expect(project.scoreHorizonCertification).toBeDefined();
@@ -331,7 +365,7 @@ it("revalidates the mature fort after the real mandatory draw without clearing t
   const wrongServer = structuredClone(project);
   wrongServer.scoreHorizonCertification = {
     ...wrongServer.scoreHorizonCertification!,
-    serverId: "remote_2",
+    serverId: "r2",
   };
   expect(corpScoreProjectHasCurrentProtectionRequote(input, wrongServer)).toBe(
     false,
@@ -340,8 +374,8 @@ it("revalidates the mature fort after the real mandatory draw without clearing t
   duplicateLayer.scoreHorizonCertification = {
     ...duplicateLayer.scoreHorizonCertification!,
     layerInstanceIds: [
-      "corp_onr_v1_278_wall-of-ice_1",
-      "corp_onr_v1_278_wall-of-ice_1",
+      "c311",
+      "c311",
     ],
   };
   expect(

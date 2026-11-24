@@ -48,12 +48,12 @@ it("preserves the terminal central rez claim through the actual conditional scor
     "cp-meta571-r2-g39-conditional-score-reserve",
   );
   const original =
-    "corp.install_card.corp_onr_v1_196_corporate-war_1.remote_1.corp_onr_v1_196_corporate-war_1";
+    "cc.c2it.r1.c2it";
   expect(decision.actionId).not.toBe(original);
   const project = portfolio.instances.find(
     (p) =>
       p.instanceId ===
-      "plan:corp.score_agenda:agenda%3Acorp_onr_v1_196_corporate-war_1%3Aremote_1",
+      "p4n7umhkfdmz4r000t61mmpk3j",
   );
   expect(project?.moduleState).toMatchObject({
     signal: {
@@ -64,8 +64,8 @@ it("preserves the terminal central rez claim through the actual conditional scor
   expect(input.playerView.own.credits).toBe(15);
 });
 it.each([
-  ["cp-meta571-r2-g7-terminal-war", "corp_onr_v1_196_corporate-war_1"],
-  ["cp-meta571-r2-g6-funded-war", "corp_onr_v1_196_corporate-war_3"],
+  ["cp-meta571-r2-g7-terminal-war", "c2it"],
+  ["cp-meta571-r2-g6-funded-war", "c2iv"],
 ])("retains safe and terminal score routes in %s", (name, source) => {
   const { input, decision } = decide(name);
   expect(

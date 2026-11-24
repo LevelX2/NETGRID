@@ -47,14 +47,14 @@ function restore(captured: CapturedCheckpoint) {
   );
 }
 
-const root = "plan:runner.pressure_central:central%3Ahq";
-const executor = "plan:runner.convert_run_window:run%3Arun_242";
+const root = "pa7nez1ioecg7mf06q1uwqq57o";
+const executor = "p8xv5mggp2pynithya7ltta9cg";
 
 function expectPaymentContinuation() {
   const captured = checkpoint(260);
   const decision = chooseAiAction(captured.input);
   expect(decision).toMatchObject({
-    actionId: "runner.continue_run",
+    actionId: "r5",
     fallbackUsed: false,
     timeoutUsed: false,
   });
@@ -73,7 +73,7 @@ describe("pairing 472: forced movement preserves encounter-payment ownership", (
     restore(captured);
     const movement = chooseAiAction(captured.input);
     expect(movement).toMatchObject({
-      actionId: "runner.continue_run",
+      actionId: "r5",
       fallbackUsed: false,
       timeoutUsed: false,
     });
@@ -82,7 +82,7 @@ describe("pairing 472: forced movement preserves encounter-payment ownership", (
       pendingRunnerCostPenaltySupportOrigin: {
         rootPlanInstanceId: root,
         executorInstanceId: executor,
-        originalActionId: "runner.continue_run",
+        originalActionId: "r5",
         selectedAtStateVersion: 257,
       },
     });
@@ -96,7 +96,7 @@ describe("pairing 472: forced movement preserves encounter-payment ownership", (
       first.input.legalActions[0]!.actionId,
     );
     expect(chooseAiAction(checkpoint(258).input).actionId).toBe(
-      "runner.continue_run",
+      "r5",
     );
     expectPaymentContinuation();
   });
@@ -126,7 +126,7 @@ describe("pairing 472: forced movement preserves encounter-payment ownership", (
         (e) => e.stateVersionBefore === 256,
       )!.publicPayload.serverId = "rd";
     if (fault === "other_run")
-      captured.input.playerView.run!.runId = "different";
+      captured.input.playerView.run!.runId = captured.input.playerView.stateVersion + 1;
     if (fault === "unrelated_action")
       captured.input.eventTail!.find(
         (e) => e.stateVersionBefore === 256,
@@ -146,7 +146,7 @@ describe("pairing 472: forced movement preserves encounter-payment ownership", (
         ?.pendingRunnerCostPenaltySupportOrigin,
     ).toBeUndefined();
     const next = checkpoint(260).input;
-    if (fault === "other_run") next.playerView.run!.runId = "different";
+    if (fault === "other_run") next.playerView.run!.runId = next.playerView.stateVersion + 1;
     expect(() => chooseAiAction(next)).toThrow("window_origin_missing");
   });
 });

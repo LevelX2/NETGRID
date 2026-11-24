@@ -69,8 +69,10 @@ it.each(["native_four_point_remote", "ordinary_companion"] as const)(
       );
     else
       expect(
-        decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-      ).toMatch(/^plan:runner\.contest_remote:/);
+        decision.decisionDebug?.planFirstDecision?.portfolio.find(
+          (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+        )?.moduleId,
+      ).toBe("runner.contest_remote");
     const after = structuredClone(input);
     if (variant === "ordinary_companion") {
       // Changing the public score invalidates only this derived identity.

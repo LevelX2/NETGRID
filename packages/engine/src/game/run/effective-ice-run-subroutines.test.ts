@@ -11,11 +11,11 @@ import {
 } from "../../ability-engine/additional-subroutine-modifiers";
 import { effectiveIceRunSubroutines } from "./effective-ice-run-subroutines";
 
-const CRYSTAL_WALL = "onr_v1_232_crystal-wall" as CardDefinitionId;
-const ENCODER = "onr_v1_320_encoder-inc" as CardDefinitionId;
-const GALATEA = "onr_proteus_023_galatea" as CardDefinitionId;
-const GATEKEEPER = "onr_proteus_024_gatekeeper" as CardDefinitionId;
-const TUTOR = "onr_v1_274_tutor" as CardDefinitionId;
+const CRYSTAL_WALL = 444 as CardDefinitionId;
+const ENCODER = 532 as CardDefinitionId;
+const GALATEA = 81 as CardDefinitionId;
+const GATEKEEPER = 82 as CardDefinitionId;
+const TUTOR = 486 as CardDefinitionId;
 
 describe("effective ICE run subroutines", () => {
   it("stacks separately attributed run-duration subroutines without mark-copying external modifiers", () => {
@@ -88,13 +88,11 @@ describe("effective ICE run subroutines", () => {
     const subroutines = effectiveIceRunSubroutines(state, targetId, definition);
     const ids = subroutines.map((subroutine) => subroutine.id);
 
-    expect(
-      ids.filter((id) => id.includes("run_duration.tutor_modifier_")),
-    ).toHaveLength(2);
+    expect(ids).toEqual(subroutines.map((_, index) => index.toString(36)));
     expect(
       subroutines
         .filter((subroutine) =>
-          subroutine.id.includes("run_duration.tutor_modifier_"),
+          subroutine.provenance?.[0] === "r",
         )
         .map((subroutine) => dynamicSubroutineAttributionFor(subroutine)),
     ).toEqual([
@@ -102,8 +100,9 @@ describe("effective ICE run subroutines", () => {
       expect.objectContaining({ sourceCardInstanceId: externalSourceId }),
     ]);
     expect(
-      ids.filter((id) =>
-        id.includes("current_encounter_additional_subroutine"),
+      subroutines.filter((subroutine) =>
+        subroutine.provenance?.[0] === "e" ||
+        (subroutine.provenance?.[0] === "m" && subroutine.provenance[1][0] === "e"),
       ),
     ).toHaveLength(2);
     expect(subroutines).toHaveLength(
@@ -172,9 +171,9 @@ describe("effective ICE run subroutines", () => {
         (subroutine) => subroutine.id,
       ),
     ).toEqual([
-      "variable_ice_paid_end_the_run_1",
-      "variable_ice_paid_end_the_run_2",
-      "run_duration.tutor_modifier.end_the_run",
+      "0",
+      "1",
+      "2",
     ]);
   });
 
@@ -204,7 +203,7 @@ describe("effective ICE run subroutines", () => {
             zone: {
               side: "corp",
               zone: "serverIce",
-              serverId: "remote_1",
+              serverId: "r1",
             },
           },
           [encoderId]: {
@@ -217,14 +216,14 @@ describe("effective ICE run subroutines", () => {
             zone: {
               side: "corp",
               zone: "serverRoot",
-              serverId: "remote_1",
+              serverId: "r1",
             },
           },
         },
         corp: {
           servers: [
             {
-              id: "remote_1",
+              id: "r1",
               label: "Remote 1",
               kind: "remote",
               ice: [targetId],

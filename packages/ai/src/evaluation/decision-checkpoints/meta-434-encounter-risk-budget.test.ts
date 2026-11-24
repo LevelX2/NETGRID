@@ -64,14 +64,14 @@ it.each([
     expect(decision.fallbackUsed).toBe(false);
     const root =
       game === 21
-        ? "plan:runner.pressure_central:central%3Ahq"
-        : "plan:runner.contest_remote:remote%3Aremote_1";
+        ? "pa7nez1ioecg7mf06q1uwqq57o"
+        : "p1p4xezjcxov79rno40lq3f7rv";
     expect(decision.evidence).toContain(`plan_first_root:${root}`);
-    expect(
-      decision.evidence?.some((e: string) =>
-        e.startsWith("plan_first_executor:plan:runner.convert_run_window:"),
-      ),
-    ).toBe(true);
+    const execution = decision.decisionDebug!.planFirstDecision!;
+    expect(execution.selectedPlan).toMatchObject({
+      instanceId: execution.leafExecutorInstanceId, moduleId: "runner.convert_run_window",
+    });
+    expect(decision.evidence).toContain(`plan_first_executor:${execution.leafExecutorInstanceId}`);
   },
 );
 
@@ -90,7 +90,7 @@ it.each([10, 12])(
       input.legalActions.find((a) => a.actionId === decision.actionId)?.type,
     ).toBe("break_subroutine");
     expect(decision.evidence).toContain(
-      "plan_first_root:plan:runner.contest_remote:remote%3Aremote_1",
+      "plan_first_root:p1p4xezjcxov79rno40lq3f7rv",
     );
     expect(decision.fallbackUsed).toBe(false);
   },
@@ -108,7 +108,7 @@ it("preserves the original break that keeps a later jack-out available", () => {
     input.legalActions.find((a) => a.actionId === decision.actionId)?.type,
   ).toBe("break_subroutine");
   expect(decision.evidence).toContain(
-    "plan_first_root:plan:runner.contest_remote:remote%3Aremote_3",
+    "plan_first_root:p1p4x0bu4pvfpkxrd7jjbdjjah",
   );
   expect(decision.fallbackUsed).toBe(false);
 });
@@ -129,7 +129,7 @@ it.each(["liquid", "run-only"])(
       input.legalActions.find((a) => a.actionId === decision.actionId)?.type,
     ).toBe("pump_breaker");
     expect(decision.evidence).toContain(
-      "plan_first_root:plan:runner.contest_remote:remote%3Aremote_1",
+      "plan_first_root:p1p4xezjcxov79rno40lq3f7rv",
     );
     expect(decision.fallbackUsed).toBe(false);
   },

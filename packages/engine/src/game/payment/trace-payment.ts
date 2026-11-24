@@ -401,7 +401,9 @@ function quoteRunnerTracePayment(
     traceLinkCreditsToPay,
     bonusTraceLinkCreditsToPay,
     normalCreditsToPay,
-    sourceDefinitionIds: sourceDefinitionIds.sort(),
+    sourceDefinitionIds: sourceDefinitionIds.sort(
+      (left, right) => left - right,
+    ),
   };
 }
 

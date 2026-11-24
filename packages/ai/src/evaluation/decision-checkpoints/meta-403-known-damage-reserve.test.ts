@@ -24,7 +24,7 @@ describe("meta 403 known damage cannot consume the unknown-ICE reserve", () => {
         ...buildAiDecisionInputDto(capture.input),
       };
       const quote = evaluateRunnerRunTargets({ input: capture.input }).find(
-        (q) => q.actionId === "runner.start_run.rd",
+        (q) => q.actionId === "rs.rd",
       )!;
       expect(quote.pathPassability).toBe(
         credits === 8 ? "blocked_by_visible_damage_hand_buffer" : "reachable",
@@ -37,7 +37,7 @@ describe("meta 403 known damage cannot consume the unknown-ICE reserve", () => {
           capture.runtime,
         );
         const result = chooseAiAction(capture.input);
-        expect(result.actionId).not.toBe("runner.start_run.rd");
+        expect(result.actionId).not.toBe("rs.rd");
         expect(result.fallbackUsed).toBe(false);
       }
     },

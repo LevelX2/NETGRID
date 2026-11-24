@@ -13,8 +13,8 @@ import {
 import { selectedCorpDiscardChoiceOptionIds } from "./corp-discard-choice-selection";
 import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
 
-const BEL = "onr_proteus_054_bel-digmo-antibody";
-const STEREO = "onr_proteus_075_stereogram-antibody";
+const BEL = 112;
+const STEREO = 133;
 function setup(installed = false, protectedRemote = false) {
   const card = visibleCard("antibody", "corp", "asset", {
     definitionId: BEL,
@@ -30,7 +30,7 @@ function setup(installed = false, protectedRemote = false) {
       source: card.instanceId,
       payload: {
         cardId: card.instanceId,
-        serverId: "remote_1",
+        serverId: "r1",
         placement: "root",
       },
     },
@@ -47,7 +47,7 @@ function setup(installed = false, protectedRemote = false) {
     server("rd"),
     server("archives"),
     server(
-      "remote_1",
+      "r1",
       protectedRemote
         ? [visibleCard("ice", "corp", "ice", { rezzed: true })]
         : [],
@@ -63,6 +63,18 @@ function setup(installed = false, protectedRemote = false) {
   return { input, action, card, candidates };
 }
 describe("zone-specific access preparation", () => {
+  it("rejects recycling evidence bound to another actor or card", () => {
+    const { input, action, candidates } = setup();
+    expect(corpRdRecyclingSignals(
+      { ...input, legalActions: [{ ...action, side: "runner" }] },
+      candidates,
+    )).toEqual([]);
+    expect(corpRdRecyclingSignals(
+      { ...input, legalActions: [{ ...action, source: "another-card" }] },
+      candidates,
+    )).toEqual([]);
+  });
+
   it("distinguishes free rez recycling from Archives-only access recycling", () => {
     expect(corpAccessZonePreparationProfile(BEL)).toMatchObject({
       zone: "rd",
@@ -86,7 +98,7 @@ describe("zone-specific access preparation", () => {
         actionIds: [action.actionId],
         plannedAdvancementTarget: 0,
         installRoute: { creditCost: 0, fundingGap: 0 },
-        serverId: "remote_1",
+        serverId: "r1",
       },
     ]);
   });
@@ -95,14 +107,14 @@ describe("zone-specific access preparation", () => {
     expect(corpRdRecyclingSignals(input, candidates)[0]?.actionIds).toEqual([]);
     input.playerView.activeSide = "runner";
     input.playerView.run = {
-      runId: "run-1",
-      attackedServerId: "remote_1",
+      runId: input.playerView.stateVersion,
+      attackedServerId: "r1",
       phase: "movement",
       successful: false,
-      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      position: { kind: "ice", serverId: "r1", iceIndex: 0 },
     };
     expect(corpRdRecyclingSignals(input, candidates)[0]?.actionIds).toEqual([]);
-    input.playerView.run.position = { kind: "server", serverId: "remote_1" };
+    input.playerView.run.position = { kind: "server", serverId: "r1" };
     expect(corpRdRecyclingSignals(input, candidates)[0]?.actionIds).toEqual([
       action.actionId,
     ]);
@@ -127,7 +139,7 @@ describe("zone-specific access preparation", () => {
   it("does not reveal a held protected decoy during an unrelated central run", () => {
     const { input, candidates } = setup(true, true);
     input.playerView.run = {
-      runId: "central",
+      runId: input.playerView.stateVersion,
       attackedServerId: "rd",
       phase: "movement",
       successful: false,
@@ -150,7 +162,7 @@ describe("zone-specific access preparation", () => {
         input,
         candidates,
         undefined,
-        new Set(["remote_1"]),
+        new Set(["r1"]),
       ),
     ).toEqual([]);
   });
@@ -167,7 +179,7 @@ describe("zone-specific access preparation", () => {
       ],
     } as unknown as ResidentPlanPortfolio;
     input.playerView.own.gripOrHq = [];
-    input.playerView.servers.push(server("remote_2", [], [agenda]));
+    input.playerView.servers.push(server("r2", [], [agenda]));
     input.playerView.turnSerial = 4;
     expect(
       corpRdRecyclingSignals(input, candidates, previous)[0],
@@ -180,7 +192,7 @@ describe("zone-specific access preparation", () => {
   it("permits two decoys with a funded agenda but does not keep installing idle copies", () => {
     const { input, candidates, card } = setup();
     input.playerView.servers.push(
-      server("remote_2", [], [{ ...card, instanceId: "first-decoy" }]),
+      server("r2", [], [{ ...card, instanceId: "first-decoy" }]),
     );
     expect(
       corpRdRecyclingSignals(input, candidates).filter(
@@ -196,7 +208,7 @@ describe("zone-specific access preparation", () => {
       ),
     ).toHaveLength(1);
     input.playerView.servers.push(
-      server("remote_3", [], [{ ...card, instanceId: "second-decoy" }]),
+      server("r3", [], [{ ...card, instanceId: "second-decoy" }]),
     );
     expect(
       corpRdRecyclingSignals(input, candidates).filter(

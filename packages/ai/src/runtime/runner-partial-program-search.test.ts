@@ -1,9 +1,10 @@
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { afterEach, expect, it } from "vitest";
 import checkpoint from "../../../../data/scenarios/ai-decision-checkpoints/cp-meta-485-sp332-g1-d70.json";
 import positiveCheckpoint from "../../../../data/scenarios/ai-decision-checkpoints/cp-meta-485-sp332-g1-d83.json";
 import decks from "../../../../data/scenarios/ai-decision-checkpoints/cp-meta-485-sp332-decks.json";
 import { applyAction, createGameAfterSetup } from "@netgrid/engine";
-import type { DeckDefinition } from "@netgrid/shared";
+import type { DeckDefinition, LegalAction } from "@netgrid/shared";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { AI_HINTS_BY_CARD } from "../ai-hints";
 import { buildDeckCapabilityProfileFromInput } from "../deck-capabilities";
@@ -20,6 +21,11 @@ import {
 } from "./ai-decision-input";
 import { residentPlanPortfolioSnapshot } from "../plans/resident-plan-portfolio-memory";
 
+function isOwnStackSearch(action: LegalAction): boolean {
+  return action.type === "activated_card_ability" &&
+    action.payload?.cardImplementationAbilityKey === "abilities_activated_runner_main_look_top_stack_take_matching";
+}
+
 function fixture(source: unknown = checkpoint) {
   const cp = structuredClone(source) as unknown as {
     input: AiDecisionInputWithDeckCapabilities;
@@ -34,7 +40,7 @@ afterEach(resetResidentPlanPortfolioMemory);
 it("projects the canonical own-stack program search without injected roles", () => {
   const { input } = fixture();
   expect(
-    AI_HINTS_BY_CARD.get("onr_v1_151_aujourdoui")?.targetProfiles,
+    AI_HINTS_BY_CARD.get(363)?.targetProfiles,
   ).toContainEqual(
     expect.objectContaining({
       zone: "stack_top",
@@ -46,7 +52,7 @@ it("projects the canonical own-stack program search without injected roles", () 
   const caps = buildDeckCapabilityProfileFromInput(input);
   expect(caps.runner?.searchAccess.tools).toContainEqual(
     expect.objectContaining({
-      cardId: "onr_v1_151_aujourdoui",
+      cardId: 363,
       canSearchPrograms: true,
       canSearchBreakers: true,
       legalNow: true,
@@ -81,8 +87,8 @@ it("selects the partial search through the real development executor and exact r
   ).toMatchObject({
     signal: {
       programSearchCommitment: {
-        sourceDefinitionId: "onr_v1_151_aujourdoui",
-        targetDefinitionId: "onr_v1_011_cloak",
+        sourceDefinitionId: 363,
+        targetDefinitionId: 223,
         selectedActionId: legal.actionId,
         selectedAtStateVersion: input.playerView.stateVersion,
       },
@@ -112,16 +118,17 @@ it.each([
     state.runner.clicks = 4;
     RealEngineFixtureBuilder.forState(state)
       .withRunnerGripSize(0)
-      .withRunnerCardInGrip("onr_v1_151_aujourdoui")
-      .withRunnerCardInGrip("onr_v1_161_fall-guy")
-      .withRunnerCardInGrip("onr_v1_056_replicator")
-      .withRunnerCardInGrip("onr_v1_121_armored-fridge")
-      .withRunnerProgramInstalled("onr_v1_074_worm")
-      .withRezzedCorpIceOnServer("hq", "onr_v1_230_cortical-scanner")
-      .withRezzedCorpIceOnServer("rd", "onr_v1_239_endless-corridor");
+      .withRunnerCardInGrip(363)
+      .withRunnerCardInGrip(373)
+      .withRunnerCardInGrip(268)
+      .withRunnerCardInGrip(333)
+      .withRunnerProgramInstalled(286)
+      .withRezzedCorpIceOnServer("hq", 442)
+      .withRezzedCorpIceOnServer("rd", 451);
     state.runner.memoryUsed = 1;
     const actions: string[] = [];
-    let targetDefinitionId: string | undefined;
+    let searchActionId: string | undefined;
+    let targetDefinitionId: number | undefined;
     let ownerInstanceId: string | undefined;
     let creditsBeforeChoice: number | undefined;
     for (let n = 0; n < 5; n++) {
@@ -135,14 +142,16 @@ it.each([
       });
       if (state.pendingChoice && tamper) {
         input.playerView.pendingChoice!.sourceCardDefinitionId =
-          "onr_v1_161_fall-guy";
+          373;
         expect(() => chooseAiAction(input)).toThrow("invalid_support_graph");
         return;
       }
       const decision = chooseAiAction(input);
       if (!decision.actionId)
         throw Error("The real Engine path requires a selected legal action.");
-      if (decision.actionId.includes("look_top_stack_take_matching")) {
+      const legal = input.legalActions.find((action) => action.actionId === decision.actionId)!;
+      if (isOwnStackSearch(legal)) {
+        searchActionId = legal.actionId;
         const portfolio = residentPlanPortfolioSnapshot(input)!;
         ownerInstanceId = portfolio.executorInstanceId;
         const moduleState = portfolio.instances.find(
@@ -151,7 +160,7 @@ it.each([
           gap: {
             directSearchChoiceBindings: Array<{
               actionId: string;
-              targetDefinitionId: string;
+              targetDefinitionId: number;
             }>;
           };
         };
@@ -176,7 +185,7 @@ it.each([
       }
       if (state.pendingChoice) {
         expect(input.playerView.pendingChoice).toMatchObject({
-          sourceCardDefinitionId: "onr_v1_151_aujourdoui",
+          sourceCardDefinitionId: 363,
           minSelections: 0,
         });
         expect(residentPlanPortfolioSnapshot(input)!.executorInstanceId).toBe(
@@ -207,16 +216,10 @@ it.each([
       });
       if (!result.ok) throw Error(result.error.message);
       state = result.state;
-      if (
-        actions.some((a) => a.includes("look_top_stack_take_matching")) &&
-        !state.pendingChoice
-      )
-        break;
+      if (searchActionId && !state.pendingChoice) break;
     }
-    expect(actions[0]).toContain("install_card");
-    expect(
-      actions.some((a) => a.includes("look_top_stack_take_matching")),
-    ).toBe(true);
+    expect(actions[0]).toMatch(/^rc\./);
+    expect(searchActionId).toBeDefined();
     expect(state.pendingChoice).toBeUndefined();
     expect(state.runner.credits).toBe(
       creditsBeforeChoice! - (hasTarget ? 1 : 0),
@@ -246,10 +249,10 @@ it.each(["no_credit", "full_hand"])(
     state.runner.credits = boundary === "no_credit" ? 0 : 8;
     state.runner.clicks = 4;
     RealEngineFixtureBuilder.forState(state)
-      .withRunnerResourceInstalled("onr_v1_151_aujourdoui")
-      .withRunnerProgramInstalled("onr_v1_074_worm")
-      .withRezzedCorpIceOnServer("hq", "onr_v1_230_cortical-scanner")
-      .withRezzedCorpIceOnServer("rd", "onr_v1_239_endless-corridor");
+      .withRunnerResourceInstalled(363)
+      .withRunnerProgramInstalled(286)
+      .withRezzedCorpIceOnServer("hq", 442)
+      .withRezzedCorpIceOnServer("rd", 451);
     state.runner.memoryUsed = 1;
     if (boundary === "full_hand")
       while (state.runner.grip.length < state.runner.maxHandSize) {
@@ -262,14 +265,9 @@ it.each(["no_credit", "full_hand"])(
       ownDeckSnapshot: snapshot,
       eventTail: state.eventLog,
     });
-    expect(
-      input.legalActions.some((a) =>
-        a.actionId.includes("look_top_stack_take_matching"),
-      ),
-    ).toBe(true);
-    expect(chooseAiAction(input).actionId).not.toContain(
-      "look_top_stack_take_matching",
-    );
+    const search = input.legalActions.find(isOwnStackSearch);
+    expect(search).toBeDefined();
+    expect(chooseAiAction(input).actionId).not.toBe(search?.actionId);
   },
 );
 
@@ -282,7 +280,7 @@ it("does not route the own-stack ability through an R&D-information parent", () 
   );
   const decision = chooseAiAction(input);
   const ownSearch = decision.decisionDebug?.actionAlternatives?.find((a) =>
-    a.actionId.includes("aujourdoui"),
+    referencesDefaultDeckCard(a.actionId, 363),
   )!;
   expect(ownSearch).toBeDefined();
   expect(

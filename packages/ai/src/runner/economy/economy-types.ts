@@ -3,7 +3,7 @@ import type { InstalledMemorySurplusQuote } from "./installed-memory-surplus";
 export type RunnerInstalledCardLiquidationChoiceSignal = {
   conversionId: string;
   sourceResourceInstanceId: string;
-  sourceResourceDefinitionId: string;
+  sourceResourceDefinitionId: number;
   actionId: string;
   choiceId: string;
   sourceStateVersion: number;

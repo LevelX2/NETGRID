@@ -1,18 +1,21 @@
-import type { LegalAction, PublicGameEvent } from "@netgrid/shared";
+import type { CardInstanceId, GameState } from "@netgrid/shared";
 
-export function advancementCountersAddedForSimulationAction(
-  action: LegalAction,
-  event: PublicGameEvent,
-): number {
-  const candidates = [
-    action.payload?.addedAdvancementCounters,
-    action.payload?.advancementCountersAdded,
-    event.publicPayload.addedAdvancementCounters,
-    event.publicPayload.advancementCountersAdded,
-  ];
-  for (const value of candidates) {
-    if (typeof value === "number" && Number.isFinite(value) && value > 0)
-      return value;
+/** The simulator sees the applied Engine transition. Only aggregate facts
+ * derived here enter the report; the affected instances stay local. */
+export function advancementChangesForSimulationAction(
+  before: GameState,
+  after: GameState,
+): { added: number; advancedCardIds: CardInstanceId[] } {
+  let added = 0;
+  const advancedCardIds: CardInstanceId[] = [];
+  for (const card of Object.values(after.cardInstances)) {
+    if (card.advancementCounters <= 0) continue;
+    const oldCount =
+      before.cardInstances[card.instanceId]?.advancementCounters ?? 0;
+    const increase = card.advancementCounters - oldCount;
+    if (increase <= 0) continue;
+    added += increase;
+    advancedCardIds.push(card.instanceId);
   }
-  return action.type === "advance_card" ? 1 : 0;
+  return { added, advancedCardIds };
 }

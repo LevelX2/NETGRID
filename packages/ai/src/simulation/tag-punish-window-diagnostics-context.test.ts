@@ -5,22 +5,77 @@ import type {
   GameState,
   LegalAction,
 } from "@netgrid/shared";
-import { createTagPunishWindowDiagnosticsContext } from "./tag-punish-window-diagnostics-context";
+import { runnerSurvivalCounterContextForInput } from "./runner-survival-counter-context";
+import {
+  createTagPunishWindowDiagnosticsContext,
+  type TagPunishWindowDiagnosticsContextDependencies,
+} from "./tag-punish-window-diagnostics-context";
 
 describe("tag punish window diagnostics", () => {
-  it("matches runner trace tag reason codes by bounded terms", () => {
-    expect(diagnosticsForReason("corp.trace.bid_visible_amount")).toMatchObject(
-      {
-        runnerTaggedAfterTraceDuringRun: true,
-      },
+  it("distinguishes trace limit reduction from a link ability", () => {
+    const context = (definitionId: number) =>
+      runnerSurvivalCounterContextForInput({
+        playerView: { opponent: { rig: [{ known: true, definitionId }] } },
+      } as unknown as AiDecisionInput);
+    expect(context(263)).toMatchObject({
+      trace: true,
+      link: false,
+    });
+    expect(context(275)).toMatchObject({
+      trace: true,
+      link: true,
+    });
+  });
+
+  it("passes resolved Engine trace evidence to the tag creation classifier", () => {
+    const received: unknown[] = [];
+    const diagnostics = diagnosticsForTag((...args) =>
+      received.push(args.at(-1)),
     );
-    expect(diagnosticsForReason("traceroute_noise")).not.toHaveProperty(
-      "runnerTaggedAfterTraceDuringRun",
-    );
+    expect(diagnostics.runnerTagAddedByAction).toBe(true);
+    expect(received).toEqual([{ traceSuccessful: true }]);
+  });
+  it("samples Corp turn start once and records a chosen source after another offered source", () => {
+    const first = { ...action(), actionId: "first" };
+    const chosen = { ...action(), actionId: "chosen" };
+    const diagnose = diagnosticsContext({
+      corpTagSourceOpportunities: () => [
+        { action: first, traceTag: false },
+        { action: chosen, traceTag: true },
+      ],
+    });
+    const basic = {
+      ...state(1),
+      activeSide: "corp",
+      timingPoint: "corp_action.main",
+    } as GameState;
+    const decision = { reasonCode: "test" } as AiDecision;
+    const corpInput = {
+      side: "corp",
+      playerView: { own: { credits: 5, clicks: 3 }, opponent: { credits: 2 } },
+    } as AiDecisionInput;
+    const actionRow = diagnose(corpInput, chosen, decision, basic, basic, {});
+    expect(actionRow).toMatchObject({
+      corpTagSourceTaken: true,
+      corpTraceTagTaken: true,
+    });
+    expect(actionRow.runnerTaggedAtStartOfCorpTurn).toBeUndefined();
+
+    const turnStart = {
+      ...basic,
+      timingPoint: "corp_draw.mandatory_draw",
+    } as GameState;
+    const draw = { ...chosen, type: "mandatory_draw" } as LegalAction;
+    expect(
+      diagnose(corpInput, draw, decision, turnStart, basic, {})
+        .runnerTaggedAtStartOfCorpTurn,
+    ).toBe(true);
   });
 });
 
-function diagnosticsForReason(reasonCode: string) {
+function diagnosticsContext(
+  overrides: Partial<TagPunishWindowDiagnosticsContextDependencies> = {},
+) {
   return createTagPunishWindowDiagnosticsContext({
     corpVisibleTagPunishOpportunities: () => [],
     runnerSurvivalCounterContextForInput: () => ({
@@ -34,16 +89,21 @@ function diagnosticsForReason(reasonCode: string) {
     applyTagPunishOntologyDiagnostics: () => undefined,
     applyCorpVisibleTagPunishTakenWindowDiagnostics: () => undefined,
     applyCorpVisibleTagPunishUnknownSkipDiagnostics: () => undefined,
-    strongestCorpTagSourceOpportunity: () => undefined,
+    corpTagSourceOpportunities: () => [],
     corpOntologyPayoffAvailableForTagSource: () => false,
-    applyCorpTagSourceWindowDiagnostics: () => undefined,
     applyActualTagCreationDiagnostics: () => undefined,
-  }).tagPunishWindowDiagnosticsForSimulationAction(
+    ...overrides,
+  }).tagPunishWindowDiagnosticsForSimulationAction;
+}
+
+function diagnosticsForTag(record: (...args: unknown[]) => void) {
+  return diagnosticsContext({ applyActualTagCreationDiagnostics: record })(
     input(),
     action(),
-    { reasonCode } as AiDecision,
+    { reasonCode: "any" } as AiDecision,
     state(0),
     state(1),
+    { traceSuccessful: true },
   );
 }
 

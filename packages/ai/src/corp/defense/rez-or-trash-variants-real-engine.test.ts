@@ -27,10 +27,10 @@ import { selectedCorpRezOrTrashIceOptionId } from "./defense-choice-binding";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 
-const FAO = "onr_v1_086_forged-activation-orders";
-const CARYATID = "onr_proteus_013_caryatid";
-const HOMING = "onr_proteus_025_homing-missile";
-const GATEKEEPER = "onr_proteus_024_gatekeeper";
+const FAO = 298;
+const CARYATID = 71;
+const HOMING = 83;
+const GATEKEEPER = 82;
 function deck(side: "runner" | "corp"): DeckDefinition {
   const d = catalog.decks.find(
     (d) =>
@@ -48,7 +48,7 @@ function deck(side: "runner" | "corp"): DeckDefinition {
     identity: d.identityCardId,
     cards: [
       ...d.cards.map((c) => ({ id: c.cardId, quantity: c.quantity })),
-      ...(side === "runner" ? [{ id: "onr_v1_074_worm", quantity: 1 }] : []),
+      ...(side === "runner" ? [{ id: 286, quantity: 1 }] : []),
     ],
   };
 }
@@ -77,7 +77,7 @@ function apply(
   if (!result.ok) throw Error(JSON.stringify(result.error));
   return result.state;
 }
-function fixture(definitionId: string, credits = 20, worm = false) {
+function fixture(definitionId: number, credits = 20, worm = false) {
   let state = createGameAfterSetup({
     matchId: "forced:" + definitionId,
     seed: "forced:" + definitionId,
@@ -96,7 +96,7 @@ function fixture(definitionId: string, credits = 20, worm = false) {
     .withRunnerCredits(20)
     .withRunnerCardInGrip(FAO);
   if (worm) {
-    builder.withRunnerProgramInstalled("onr_v1_074_worm");
+    builder.withRunnerProgramInstalled(286);
     state.runner.memoryUsed = 1;
   }
   state = apply(
@@ -108,7 +108,7 @@ function fixture(definitionId: string, credits = 20, worm = false) {
   state = apply(
     state,
     getLegalActions(state, "runner").find(
-      (a) => a.type === "play_event" && a.source.includes(FAO),
+      (a) => a.type === "play_event" && state.cardInstances[a.source]?.definitionId === FAO,
     )!,
   );
   const target = state.corp.servers
@@ -122,15 +122,16 @@ function fixture(definitionId: string, credits = 20, worm = false) {
   });
   return { state, initial, start, target };
 }
-function inputFor(state: GameState) {
-  return buildAiDecisionInput(state, "corp", {
+function inputFor(state: GameState, side: "corp" | "runner" = "corp") {
+  const deck = side === "corp" ? corpDeck : runnerDeck;
+  return buildAiDecisionInput(state, side, {
     difficulty: "hard",
     decisionId: "forced:" + state.stateVersion,
     profileId: "forced-native",
     ownDeckSnapshot: {
       deckSnapshotId: "forced-native",
-      side: "corp",
-      cards: corpDeck.cards.map((c) => ({
+      side,
+      cards: deck.cards.map((c) => ({
         cardId: c.id,
         quantity: c.quantity,
       })),
@@ -165,14 +166,14 @@ describe("native mandatory variable ICE rez", () => {
       expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
       expect(
         JSON.stringify(state.eventLog.slice(start).map((e) => e.publicPayload)),
-      ).not.toContain(definitionId);
+      ).not.toMatch(new RegExp('"[^"]*definitionId":' + definitionId + "(?=[,}])", "i"));
       expect(
         JSON.stringify(state.eventLog.slice(start).map((e) => e.publicPayload)),
       ).not.toContain("forcedIceRezQuote");
       const decision = chooseAiAction(input),
         portfolio = residentPlanPortfolioSnapshot(input)!;
       expect(decision.fallbackUsed).toBe(false);
-      expect(decision.actionId).toBe("corp.resolve_choice");
+      expect(decision.actionId).toBe("cn");
       expect(
         decision.decisionDebug!.planFirstDecision!.selectedPlan?.moduleId,
       ).toBe("corp.defend_servers");
@@ -245,11 +246,11 @@ describe("native mandatory variable ICE rez", () => {
     const projects = [
       {
         projectId: "score-floor",
-        serverId: "remote_1",
+        serverId: "r1",
         agendaPoints: 1,
         terminalScore: false,
         continuationReserve: {
-          serverId: "remote_1",
+          serverId: "r1",
           requiredCreditsBeforeNextCorpTurn: 2,
           remainingAdvancementCounters: 1,
         },
@@ -315,22 +316,31 @@ describe("native mandatory variable ICE rez", () => {
     );
   });
   it("strips unapproved quote fields and never admits them to a Runner DTO", () => {
-    const input = inputFor(fixture(GATEKEEPER).state),
-      q = input.playerView.pendingChoice!.options[0]!.forcedIceRezQuote!;
-    Object.assign(q, {
+    const { state } = fixture(GATEKEEPER);
+    const input = inputFor(state);
+    const choice = input.playerView.pendingChoice!;
+    const quote = choice.options[0]!.forcedIceRezQuote!;
+    Object.assign(quote, {
       hiddenRunnerHand: ["secret"],
       rawGameState: { secret: true },
     });
     const dto = buildAiDecisionInputDto(input);
+    expect(
+      dto.playerView.pendingChoice?.options[0]?.forcedIceRezQuote,
+    ).toBeDefined();
     expect(JSON.stringify(dto)).not.toContain("hiddenRunnerHand");
     expect(JSON.stringify(dto)).not.toContain("rawGameState");
-    input.playerView.side = "runner";
-    input.side = "runner";
-    input.legalActions = [];
-    input.playerView.legalActions = [];
+
+    const runnerInput = inputFor(state, "runner");
+    expect(runnerInput.playerView.pendingChoice).toBeUndefined();
+    runnerInput.playerView.pendingChoice = choice;
+    const runnerDto = buildAiDecisionInputDto(runnerInput);
+    expect(runnerDto.playerView.pendingChoice?.options).toHaveLength(
+      choice.options.length,
+    );
     expect(
-      buildAiDecisionInputDto(input).playerView.pendingChoice!.options.every(
-        (o) => !o.forcedIceRezQuote,
+      runnerDto.playerView.pendingChoice?.options.every(
+        (option) => !option.forcedIceRezQuote,
       ),
     ).toBe(true);
   });

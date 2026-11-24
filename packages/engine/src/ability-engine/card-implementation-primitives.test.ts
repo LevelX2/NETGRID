@@ -12,7 +12,7 @@ import {
   CardImplementationPrimitiveIdentityError,
 } from "./card-implementation-primitives";
 
-const DATA_FORT_RECLAMATION_DEFINITION_ID = "onr_v1_197_data-fort-reclamation";
+const DATA_FORT_RECLAMATION_DEFINITION_ID = 409;
 
 describe("card implementation primitive ability keys", () => {
   it("are unique per card definition for primitive-backed abilities", () => {
@@ -101,13 +101,13 @@ describe("card implementation primitive ability keys", () => {
   it("preserves legacy primitive payload identity without claiming an index binding", () => {
     const payload = cardImplementationPrimitivePayload({
       sourceCardId: "legacy_primitive_instance" as CardInstanceId,
-      sourceDefinitionId: "legacy_primitive_definition" as CardDefinitionId,
+      sourceDefinitionId: 1831876184 as CardDefinitionId,
       primitiveKind: "select_rezzed_ice_mark_modifier",
       effectKind: "mark_modifier",
     });
     expect(payload).toMatchObject({
       cardImplementationAbilityId:
-        "legacy_primitive_definition:scored_ice_mark:0",
+        "1831876184:scored_ice_mark:0",
       cardImplementationAbilityKey: "scored_ice_mark:0",
     });
     expect(payload).not.toHaveProperty(

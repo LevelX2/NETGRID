@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { beforeEach, describe, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
@@ -46,7 +47,7 @@ describe("pairing 541 native credit-bank budgets", () => {
     expect(recorded.input.playerView.own.credits).toBe(7);
     expect(
       recorded.input.playerView.own.rig?.find((c) =>
-        c.instanceId.endsWith("broker_2"),
+        referencesDefaultDeckCard(c.instanceId, 366, 2),
       )?.counters?.bit,
     ).toBe(9);
     const decision = replay(recorded);
@@ -55,7 +56,7 @@ describe("pairing 541 native credit-bank budgets", () => {
         ?.type,
     ).not.toBe("install_card");
     expect(decision.evidence).toContain(
-      "plan_portfolio_blocked_evidence:plan:runner.credit_bank:runner_onr_v1_154_broker_1:runner_credit_bank_install_deferred_portfolio_budget_funded",
+      "plan_portfolio_blocked_evidence:pdeck54mcc1lshdzs9k74eyxih:runner_credit_bank_install_deferred_portfolio_budget_funded",
     );
   });
 

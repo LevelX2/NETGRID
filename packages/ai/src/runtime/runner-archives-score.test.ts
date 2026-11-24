@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type {
   AiDecisionInput,
@@ -9,15 +10,13 @@ import type {
 
 import {
   runnerArchivesHasQualifiedHiddenPayoff,
-  runnerArchivesScoreComponents,
   runnerArchivesSpeculativeProbeDisposition,
 } from "./runner-archives-score";
 
-describe("runnerArchivesScoreComponents", () => {
+describe("runnerArchivesHasQualifiedHiddenPayoff", () => {
   it("does not treat a lone hidden card as a concrete information plan", () => {
     const input = aiInput({ hiddenArchives: 1, corpDeckCount: 14 });
 
-    expect(components(input)).toEqual([]);
     expect(runnerArchivesHasQualifiedHiddenPayoff(input)).toBe(false);
   });
 
@@ -39,16 +38,8 @@ describe("runnerArchivesScoreComponents", () => {
       admitted: true,
       bucket: 0,
     });
-    expect(components(admitted!)).toEqual([
-      expect.objectContaining({
-        key: "runner_archives_hidden_information",
-        value: 35,
-        reason: expect.stringContaining(
-          "archives_hidden_information_qualified:seeded_one_in_eight_probe",
-        ),
-      }),
-    ]);
-    expect(components(declined!)).toEqual([]);
+    expect(runnerArchivesHasQualifiedHiddenPayoff(admitted!)).toBe(true);
+    expect(runnerArchivesHasQualifiedHiddenPayoff(declined!)).toBe(false);
     expect(runnerArchivesSpeculativeProbeDisposition(admitted!)).toEqual(
       runnerArchivesSpeculativeProbeDisposition(admitted!),
     );
@@ -57,31 +48,18 @@ describe("runnerArchivesScoreComponents", () => {
   it("values hidden Archives cards while Corp R&D is under pressure", () => {
     const input = aiInput({ hiddenArchives: 1, corpDeckCount: 6 });
 
-    expect(components(input)).toEqual([
-      expect.objectContaining({
-        key: "runner_archives_hidden_information",
-        value: 260,
-        reason: expect.stringContaining("archives_corp_deck_pressure:true"),
-      }),
-    ]);
+    expect(runnerArchivesHasQualifiedHiddenPayoff(input)).toBe(true);
   });
 
   it("qualifies hidden Archives information when the Runner is at matchpoint", () => {
     const input = aiInput({ hiddenArchives: 1, corpDeckCount: 14 });
     input.playerView.own.agendaPoints = 6;
 
-    expect(components(input)).toEqual([
-      expect.objectContaining({
-        key: "runner_archives_hidden_information",
-        value: 420,
-        reason: expect.stringContaining("archives_runner_matchpoint:true"),
-      }),
-    ]);
+    expect(runnerArchivesHasQualifiedHiddenPayoff(input)).toBe(true);
 
     const twoPointsAway = aiInput({ hiddenArchives: 1, corpDeckCount: 14 });
     twoPointsAway.playerView.own.agendaPoints = 5;
     expect(runnerArchivesHasQualifiedHiddenPayoff(twoPointsAway)).toBe(false);
-    expect(components(twoPointsAway)).toEqual([]);
   });
 
   it("values a still-unseen random HQ discard", () => {
@@ -96,28 +74,13 @@ describe("runnerArchivesScoreComponents", () => {
       publicEvents: [randomDiscard],
     });
 
-    expect(components(input)).toEqual([
-      expect.objectContaining({
-        key: "runner_archives_hidden_information",
-        value: 480,
-        reason: expect.stringContaining("archives_random_discard_unseen:true"),
-      }),
-    ]);
+    expect(runnerArchivesHasQualifiedHiddenPayoff(input)).toBe(true);
   });
 
   it("admits a large hidden Archives accumulation as a low-value information plan", () => {
     const input = aiInput({ hiddenArchives: 10, corpDeckCount: 14 });
 
     expect(runnerArchivesHasQualifiedHiddenPayoff(input)).toBe(true);
-    expect(components(input)).toEqual([
-      expect.objectContaining({
-        key: "runner_archives_hidden_information",
-        value: 120,
-        reason: expect.stringContaining(
-          "archives_hidden_information_qualified:large_hidden_accumulation",
-        ),
-      }),
-    ]);
   });
 
   it("does not invent an Archives information plan without hidden cards", () => {
@@ -126,57 +89,20 @@ describe("runnerArchivesScoreComponents", () => {
     expect(runnerArchivesHasQualifiedHiddenPayoff(input)).toBe(false);
   });
 
-  it("keeps a visible Archives agenda as an unconditional payoff", () => {
-    const input = aiInput({ hiddenArchives: 0, corpDeckCount: 14 });
-    archives(input).root = [card("agenda", "agenda")];
-    input.playerView.opponent.discardCount = 1;
+  it("subtracts a visible agenda from the hidden Archives count", () => {
+    const input = aiInput({ hiddenArchives: 1, corpDeckCount: 6 });
+    archives(input).root.push(card("agenda", "agenda"));
 
-    expect(components(input)).toEqual([
-      expect.objectContaining({
-        key: "runner_archives_visible_agenda",
-        value: 1250,
-      }),
-    ]);
+    expect(runnerArchivesHasQualifiedHiddenPayoff(input)).toBe(false);
   });
 
-  it("does not project runner Archives payoff across actor boundaries", () => {
-    const corpInput = aiInput({ hiddenArchives: 10, corpDeckCount: 6 });
-    corpInput.side = "corp";
+  it("does not project Runner Archives payoff for Corp", () => {
+    const input = aiInput({ hiddenArchives: 10, corpDeckCount: 6 });
+    input.side = "corp";
 
-    expect(components(corpInput)).toEqual([]);
-    expect(runnerArchivesHasQualifiedHiddenPayoff(corpInput)).toBe(false);
-
-    const runnerInput = aiInput({ hiddenArchives: 10, corpDeckCount: 6 });
-    const corpAction = { ...startRunArchives(), side: "corp" } as LegalAction;
-    expect(
-      runnerArchivesScoreComponents(
-        runnerInput,
-        corpAction,
-        archives(runnerInput),
-        {
-          evaluationForAction: () => ({ accessServerId: "archives" }),
-          definitionType: () => "operation",
-        },
-      ),
-    ).toEqual([]);
+    expect(runnerArchivesHasQualifiedHiddenPayoff(input)).toBe(false);
   });
 });
-
-function components(input: AiDecisionInput) {
-  return runnerArchivesScoreComponents(
-    input,
-    startRunArchives(),
-    archives(input),
-    {
-      evaluationForAction: (_input, action) => ({
-        accessServerId: action.payload?.serverId === "hq" ? "hq" : "archives",
-        pathPassability: "reachable",
-      }),
-      definitionType: (definitionId) =>
-        definitionId === "agenda" ? "agenda" : "operation",
-    },
-  );
-}
 
 function aiInput(params: {
   hiddenArchives: number;
@@ -257,7 +183,7 @@ function card(
 ): VisibleCard {
   return {
     instanceId,
-    definitionId: instanceId,
+    definitionId: syntheticCardDefinitionId(instanceId),
     title: instanceId,
     type,
     owner: side,
@@ -267,21 +193,21 @@ function card(
 }
 
 function startRunArchives(): LegalAction {
-  return action("runner.start_run.archives", "start_run", {
+  return action("rs.archives", "start_run", {
     serverId: "archives",
   });
 }
 
 function gainCredit(): LegalAction {
-  return action("runner.gain_credit", "gain_credit");
+  return action("rb", "gain_credit");
 }
 
 function drawCard(): LegalAction {
-  return action("runner.draw_card", "draw_card");
+  return action("r8", "draw_card");
 }
 
 function endTurn(): LegalAction {
-  return action("runner.end_turn", "end_turn");
+  return action("r9", "end_turn");
 }
 
 function action(
@@ -309,7 +235,7 @@ function publicEvent(
   publicPayload: Record<string, unknown>,
 ): PublicGameEvent {
   return {
-    eventId: `event-${stateVersionAfter}`,
+    eventId: stateVersionAfter + 1,
     type: String(publicPayload.actionType ?? "resolve_choice"),
     stateVersionBefore: stateVersionAfter - 1,
     stateVersionAfter,

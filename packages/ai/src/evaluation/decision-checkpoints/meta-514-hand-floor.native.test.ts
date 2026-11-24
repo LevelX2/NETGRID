@@ -81,7 +81,6 @@ function apply(
     clientKnownStateVersion: state.stateVersion,
     ...(selectedChoices ? { selectedChoices } : {}),
   });
-  expect(r.ok).toBe(true);
   if (!r.ok) throw Error(JSON.stringify(r.error));
   return r.state;
 }
@@ -127,7 +126,7 @@ afterEach(resetResidentPlanPortfolioMemory);
 it("rejects G9/D18 last-action bank installation at the existing four-card hand floor", () => {
   const { input } = native("g9d18"),
     { d, pf } = decide(input);
-  expect(d.actionId).toBe("runner.draw_card");
+  expect(d.actionId).toBe("r8");
   expect(pf.selectedPlan?.moduleId).toBe("runner.rig_and_coverage");
   expect(pf.dispositions).toEqual(
     expect.arrayContaining([
@@ -141,7 +140,7 @@ it("rejects G9/D18 last-action bank installation at the existing four-card hand 
 it("rejects G27/D109 optional installation and an automatic load with no marginal income advantage", () => {
   const { input } = native("g27d109"),
     { d, pf } = decide(input);
-  expect(d.actionId).toBe("runner.gain_credit");
+  expect(d.actionId).toBe("rb");
   expect(pf.selectedPlan?.moduleId).toBe("runner.economy");
   const bank = pf.portfolio.find(
     (instance) => instance.moduleId === "runner.credit_bank",
@@ -150,15 +149,15 @@ it("rejects G27/D109 optional installation and an automatic load with no margina
     "runner_credit_bank_automatic_load_not_profitable_within_horizon",
   );
   expect(
-    input.legalActions.some((action) =>
-      action.actionId.includes("runner_main_add_three_hosted_credits"),
+    input.legalActions.some(
+      (action) => action.payload?.cardImplementationAbilityId === 271,
     ),
   ).toBe(true);
   expect(pf.dispositions).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
         actionId:
-          "runner.install_card.runner_onr_v1_177_the-short-circuit_2.runner_onr_v1_177_the-short-circuit_2",
+          "rc.c2ei.c2ei",
         ownerModuleId: "runner.develop_board_and_hand",
         disposition: "explicitly_nonproductive",
       }),
@@ -169,26 +168,26 @@ it("retains G34/D307 development with a genuine spare hand and followup action",
   const { input } = native("g34d307"),
     { d, pf } = decide(input);
   expect(d.actionId).toBe(
-    "runner.install_card.runner_onr_v1_177_the-short-circuit_1.runner_onr_v1_177_the-short-circuit_1",
+    "rc.c2eh.c2eh",
   );
   expect(pf.selectedPlan?.moduleId).toBe("runner.develop_board_and_hand");
 });
 it("keeps safe last-action development after an actual native G34 credit action", () => {
   const { cp, state } = native("g34d307"),
-    afterGain = apply(state, "runner", "runner.gain_credit"),
+    afterGain = apply(state, "runner", "rb"),
     input = next(afterGain, cp),
     { d, pf } = decide(input);
   expect(input.playerView.own.clicks).toBe(1);
   expect(input.playerView.own.gripOrHq).toHaveLength(8);
   expect(d.actionId).toBe(
-    "runner.install_card.runner_onr_v1_177_the-short-circuit_1.runner_onr_v1_177_the-short-circuit_1",
+    "rc.c2eh.c2eh",
   );
   expect(pf.selectedPlan?.moduleId).toBe("runner.develop_board_and_hand");
   expect(apply(afterGain, "runner", d.actionId!).runner.grip).toHaveLength(7);
 });
 it("admits the real G9/D16 bank after Draw when installation preserves the four-card floor", () => {
   const { cp, state } = native("g9d16"),
-    afterDraw = apply(state, "runner", "runner.draw_card"),
+    afterDraw = apply(state, "runner", "r8"),
     input = next(afterDraw, cp),
     targets = evaluateRunnerRunTargets({ input }),
     facts = runnerDefenseHandBufferFacts(input, targets, () => false);
@@ -231,7 +230,7 @@ it("admits the real G9/D16 bank after Draw when installation preserves the four-
   );
   expect(facts.minimumHandBuffer).toBe(4);
   const id =
-    "runner.install_card.runner_onr_proteus_150_streetware-distributor_1.runner_onr_proteus_150_streetware-distributor_1";
+    "rc.c1a9.c1a9";
   expect(signals).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
@@ -254,22 +253,22 @@ it.each(["g9d18", "g27d109"])(
       cp,
     );
     expect(state.runner.grip).toHaveLength(4);
-    state = apply(state, "corp", "corp.mandatory_draw");
-    if (key === "g9d18") state = apply(state, "corp", "corp.gain_credit");
-    else state = operation(state, "corp_onr_v1_290_efficiency-experts_3");
+    state = apply(state, "corp", "ce");
+    if (key === "g9d18") state = apply(state, "corp", "cb");
+    else state = operation(state, "c33r");
     state = traceZero(
       operation(
         state,
         key === "g9d18"
-          ? "corp_onr_proteus_050_manhunt_1"
-          : "corp_onr_proteus_050_manhunt_2",
+          ? "co5"
+          : "co6",
       ),
     );
     state = operation(
       state,
       key === "g9d18"
-        ? "corp_onr_v1_302_scorched-earth_1"
-        : "corp_onr_v1_302_scorched-earth_3",
+        ? "c36d"
+        : "c36f",
     );
     expect(state.runner.grip).toHaveLength(0);
     expect(state.winner).toBeNull();

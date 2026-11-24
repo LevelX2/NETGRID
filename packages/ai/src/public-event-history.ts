@@ -1,0 +1,150 @@
+import type { MatchEventId } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  PublicGameEvent,
+  ServerId,
+} from "@netgrid/shared";
+import { decisionDerivedValue } from "./decision-derived-cache";
+
+const MERGED_PUBLIC_HISTORY_DECISION_CACHE_KEY = Symbol(
+  "merged-public-history",
+);
+
+export function findLastHistoryIndex<T>(
+  values: readonly T[],
+  predicate: (value: T) => boolean,
+): number {
+  for (let index = values.length - 1; index >= 0; index -= 1) {
+    if (predicate(values[index]!)) return index;
+  }
+  return -1;
+}
+
+export function mergedPublicHistory(input: AiDecisionInput): PublicGameEvent[] {
+  return decisionDerivedValue(
+    input,
+    MERGED_PUBLIC_HISTORY_DECISION_CACHE_KEY,
+    () => buildMergedPublicHistory(input),
+  );
+}
+
+function buildMergedPublicHistory(input: AiDecisionInput): PublicGameEvent[] {
+  const byId = new Map<MatchEventId, PublicGameEvent>();
+  const publicEvents = input.playerView.publicEvents ?? [];
+  const eventTail = input.eventTail ?? [];
+  for (const event of publicEvents) {
+    byId.set(event.eventId, event);
+  }
+  if (eventTail !== publicEvents) {
+    for (const event of eventTail) {
+      byId.set(event.eventId, event);
+    }
+  }
+  return [...byId.values()].sort(
+    (left, right) => eventVersion(left) - eventVersion(right),
+  );
+}
+
+export function isArchivesAccessEvent(event: PublicGameEvent): boolean {
+  return (
+    event.publicPayload.actionType === "access_card" &&
+    serverIdFromEvent(event) === "archives"
+  );
+}
+
+export function eventMayChangeArchives(event: PublicGameEvent): boolean {
+  const payload = event.publicPayload;
+  if (
+    payload.discardZone === "archives" ||
+    payload.hiddenZoneAction === "discard_phase"
+  )
+    return true;
+  const actionType =
+    typeof payload.actionType === "string" ? payload.actionType : event.type;
+  return (
+    actionType === "trash_accessed_card" ||
+    actionType === "trash_card" ||
+    actionType === "play_operation"
+  );
+}
+
+export function eventMayChangeHqPressure(event: PublicGameEvent): boolean {
+  const actionType =
+    typeof event.publicPayload.actionType === "string"
+      ? event.publicPayload.actionType
+      : event.type;
+  return (
+    actionType === "draw_card" ||
+    actionType === "mandatory_draw" ||
+    actionType === "install_card" ||
+    actionType === "play_operation" ||
+    actionType === "discard_card" ||
+    actionType === "resolve_choice"
+  );
+}
+
+export function eventRefreshesCentralTarget(
+  event: PublicGameEvent,
+  target: Exclude<ServerId, `r${number}` | "new_remote">,
+): boolean {
+  const actionType =
+    typeof event.publicPayload.actionType === "string"
+      ? event.publicPayload.actionType
+      : event.type;
+  if (actionType === "steal_agenda" || actionType === "trash_accessed_card")
+    return true;
+  if (target === "hq")
+    return (
+      event.publicPayload.actor === "corp" &&
+      (actionType === "draw_card" ||
+        actionType === "mandatory_draw" ||
+        actionType === "install_card" ||
+        actionType === "play_operation")
+    );
+  if (target === "rd") {
+    const changesCorpDeck = event.publicPayload.actor === "corp";
+    return (
+      (changesCorpDeck &&
+        (actionType === "draw_card" || actionType === "mandatory_draw")) ||
+      ((changesCorpDeck || serverIdFromEvent(event) === "rd") &&
+        (actionType === "shuffle_stack" || actionType === "reorder_cards"))
+    );
+  }
+  return actionType === "trash_card";
+}
+
+export function serverIdFromEvent(event: PublicGameEvent): string | undefined {
+  const payload = event.publicPayload;
+  if (typeof payload.serverId === "string") return payload.serverId;
+  if (typeof payload.server === "string") return payload.server;
+  if (typeof payload.targetServerId === "string") return payload.targetServerId;
+  if (typeof payload.attackedServerId === "string")
+    return payload.attackedServerId;
+  return undefined;
+}
+
+/** The Engine tags a nonbasic run start with a structured effect. */
+export function runStartServerIdFromEvent(
+  event: PublicGameEvent,
+): string | undefined {
+  const starts = event.publicPayload.resolvedEffects?.filter(
+    (effect) =>
+      effect.kind === "start_run" &&
+      effect.visibility === "public" &&
+      effect.side === "runner" &&
+      typeof effect.serverId === "string",
+  );
+  if (starts?.length === 1) return starts[0]?.serverId;
+  if (starts && starts.length > 1) return undefined;
+  return event.publicPayload.actionType === "start_run" ||
+    event.type === "start_run" ||
+    event.type === "run_started"
+    ? serverIdFromEvent(event)
+    : undefined;
+}
+
+export function eventVersion(event: PublicGameEvent): number {
+  return typeof event.stateVersionAfter === "number"
+    ? event.stateVersionAfter
+    : 0;
+}

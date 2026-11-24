@@ -90,7 +90,7 @@ export function passRootRezWindowBeforeAccessIfOpen(
 
 export function traceChoiceOptionIdForDefinition(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   optionPrefix: string,
 ): string {
   const option = state.pendingChoice?.options.find(

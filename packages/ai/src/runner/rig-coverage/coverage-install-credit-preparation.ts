@@ -1,3 +1,5 @@
+import { costProfileForAction } from "../../actions/action-cost-timing";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import {
   visibleRunnerInitialProgramInstallCredits,
   visibleRunnerPreparationIncomePerClick,
@@ -26,19 +28,23 @@ export function runnerCoverageInstallCreditPreparation(
   if (!Number.isSafeInteger(memoryLimit) || !Number.isSafeInteger(memoryUsed))
     return gap;
   const currentInstall = (action: LegalAction) =>
-    action.side === "runner" &&
+    actionMatchesCurrentDecision(input, action) &&
     action.type === "install_card" &&
-    action.timingPoint === input.playerView.timingPoint &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
     action.payload?.runnerProgramTrashBeforeInstall !== true;
-  const creditCost = (action: LegalAction) =>
-    action.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0) -
-    Number(action.payload?.runnerInstallPaymentHostedCredits ?? 0);
-  const clickCost = (action: LegalAction) =>
-    action.costs.reduce((sum, cost) => sum + (cost.clicks ?? 0), 0);
-  const answers = input.legalActions.filter(
-    (action) =>
-      gap.installActionIds?.includes(action.actionId) && currentInstall(action),
+  const installOffers = input.legalActions
+    .filter(currentInstall)
+    .flatMap((action) => {
+      const cost = costProfileForAction(action);
+      if (
+        cost.clickCost === undefined ||
+        cost.creditCost === undefined ||
+        cost.additionalCosts.length !== 0
+      )
+        return [];
+      return [{ action, clicks: cost.clickCost, credits: cost.creditCost }];
+    });
+  const answers = installOffers.filter(({ action }) =>
+    gap.installActionIds?.includes(action.actionId),
   );
   const income = visibleRunnerPreparationIncomePerClick(
     input.playerView.own.rig ?? [],
@@ -46,14 +52,22 @@ export function runnerCoverageInstallCreditPreparation(
   const preparations: NonNullable<
     RunnerCoverageGapSignal["installCreditPreparation"]
   >[] = [];
-  for (const action of input.legalActions.filter(currentInstall)) {
+  for (const {
+    action,
+    clicks: setupClicks,
+    credits: setupCredits,
+  } of installOffers) {
     const source = input.playerView.own.gripOrHq.find(
       (card) => card.instanceId === action.source,
     );
     if (!source || source.definitionId === gap.handAnswerDefinitionId) continue;
     const pool = visibleRunnerInitialProgramInstallCredits(source);
     if (pool <= 0) continue;
-    for (const answer of answers) {
+    for (const {
+      action: answer,
+      clicks: targetClicks,
+      credits: targetCredits,
+    } of answers) {
       const target = input.playerView.own.gripOrHq.find(
         (card) => card.instanceId === answer.source,
       );
@@ -69,17 +83,15 @@ export function runnerCoverageInstallCreditPreparation(
         !Number.isSafeInteger(sourceMu) ||
         !Number.isSafeInteger(targetMu) ||
         memoryUsed! + sourceMu! + targetMu! > memoryLimit! ||
-        clickCost(action) + clickCost(answer) > input.playerView.own.clicks
+        setupClicks + targetClicks > input.playerView.own.clicks
       )
         continue;
-      const setupCredits = creditCost(action);
-      const targetCredits = creditCost(answer);
       const saving = Math.min(pool, targetCredits) - setupCredits;
       if (
         !Number.isSafeInteger(saving) ||
         setupCredits + Math.max(0, targetCredits - pool) >
           input.playerView.own.credits ||
-        saving <= clickCost(action) * income
+        saving <= setupClicks * income
       )
         continue;
       preparations.push({
@@ -95,7 +107,8 @@ export function runnerCoverageInstallCreditPreparation(
   preparations.sort(
     (a, b) =>
       b.savedLiquidCredits - a.savedLiquidCredits ||
-      technicalIdCompare(a.actionId, b.actionId),
+      technicalIdCompare(a.actionId, b.actionId) ||
+      technicalIdCompare(a.targetCardInstanceId, b.targetCardInstanceId),
   );
   const best = preparations[0];
   return best

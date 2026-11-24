@@ -333,11 +333,7 @@ function executeBreakSubroutineAction(
       recordFortBoundBreakerUse(host, breakerId, breakAbility, false);
     }
     if (!multiBreak.resolved || multiBreak.suspended) return;
-    for (const subroutineIndex of String(
-      legalAction.payload?.subroutineIndexes ?? "",
-    )
-      .split(",")
-      .map((value) => Number(value))) {
+    for (const subroutineIndex of legalAction.subroutineIndexes ?? []) {
       recordBrokenSubroutineBreaker(host, breakerId, subroutineIndex);
     }
     recordFortBoundBreakerUse(host, breakerId, breakAbility, true);

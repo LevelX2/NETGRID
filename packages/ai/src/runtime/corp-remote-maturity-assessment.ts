@@ -211,7 +211,7 @@ export function assessCorpRemoteMaturityFromVisibleServer(
       [...params.runnerRig],
       params.runnerCreditBudget,
       [...(params.serverRoot ?? [])],
-      params.visibleCorpBidCapacity ?? 0,
+      Math.max(0, (params.visibleCorpBidCapacity ?? 0) - cost),
       traceContext,
     );
     const quote = quotePath({
@@ -289,7 +289,8 @@ export function remotePathMeetsProtectionTarget(
   }
   if (path.accessStatus === "blocked") return true;
   const threshold = protectionThreshold(targetBand, path.generalCreditsBefore);
-  if (path.generalCreditTax >= threshold) return true;
+  if (path.generalCreditTax > 0 && path.generalCreditTax >= threshold)
+    return true;
   const hazard = path.hazards;
   switch (targetBand) {
     case "light":
@@ -381,7 +382,6 @@ function quotePath(input: CorpRemoteMaturityPathInput): CorpRemotePathQuote {
     ? normalizeRunnerRunPathCreditBudget(after)
     : before;
   const visibleHazards = input.assessment.visibleIceRunHazards ?? [];
-  const hardEffects = input.assessment.hardUnbrokenRunEffects ?? [];
   return {
     accessStatus,
     ...(input.exactAccessProbability && accessStatus !== "unknown"

@@ -1,3 +1,4 @@
+import type { RandomPurpose } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -53,7 +54,7 @@ export type HiddenZoneSearchActivationBaseHost = {
     ) => boolean;
   };
   runnerMemoryLimit: () => number;
-  shuffleRunnerStack: (purpose: string) => void;
+  shuffleRunnerStack: (purpose: RandomPurpose) => void;
 };
 
 export type HiddenZoneSearchActivationHost =
@@ -596,7 +597,7 @@ export function handleTopFiveProgramInstallActivation(
   });
   if (programIds.length === 0) {
     host.shuffleRunnerStack(
-      `v1915.revealed_stack_program_install.shuffle.no_program.${sourceCardId}.${run.runId}`,
+      [40, sourceCardId, run.runId],
     );
     host.legalAction.payload = {
       ...(host.legalAction.payload ?? {}),

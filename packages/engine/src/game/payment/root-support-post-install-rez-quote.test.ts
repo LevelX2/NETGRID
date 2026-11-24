@@ -24,14 +24,14 @@ describe("global root support installation payment facts", () => {
           ...MECHANIC_SMOKE_DECKS.runAccess.corp.cards.filter(
             (c) =>
               ![
-                "onr_v1_320_encoder-inc",
-                "onr_v1_326_holovid-campaign",
-                "onr_v1_244_filter",
+                532,
+                538,
+                456,
               ].includes(c.id),
           ),
-          { id: "onr_v1_320_encoder-inc", quantity: 1 },
-          { id: "onr_v1_326_holovid-campaign", quantity: 1 },
-          { id: "onr_v1_244_filter", quantity: 1 },
+          { id: 532, quantity: 1 },
+          { id: 538, quantity: 1 },
+          { id: 456, quantity: 1 },
         ],
       },
     });
@@ -39,8 +39,8 @@ describe("global root support installation payment facts", () => {
     let state = game("sp207-native-root-support");
     state = apply(state, "corp", (a) => a.type === "mandatory_draw");
     state.corp.credits = 20;
-    const id = moveCorpCardToHq(state, "onr_v1_320_encoder-inc");
-    const ice = putCorpIceOnServer(state, "hq", "onr_v1_244_filter");
+    const id = moveCorpCardToHq(state, 532);
+    const ice = putCorpIceOnServer(state, "hq", 456);
     state.cardInstances[ice]!.rezzed = true;
     state.cardInstances[ice]!.faceup = true;
     const beforeHash = hashState(state);
@@ -57,7 +57,7 @@ describe("global root support installation payment facts", () => {
       postInstallRezQuoteComplete: true,
       postInstallRezQuoteCardId: id,
       postInstallRezQuoteTargetServerId: "new_remote",
-      postInstallRezQuoteProjectedServerId: "remote_1",
+      postInstallRezQuoteProjectedServerId: "r1",
       postInstallRezQuoteExpiresAtStateVersion: state.stateVersion,
       postInstallRezQuoteFinalCredits: 0,
       postInstallRezQuoteMandatoryAgendaPointCost: 0,
@@ -79,7 +79,7 @@ describe("global root support installation payment facts", () => {
   });
   it("does not add prospective private payment facts for ordinary assets", () => {
     const state = game("sp207-ordinary-asset");
-    const id = moveCorpCardToHq(state, "onr_v1_326_holovid-campaign");
+    const id = moveCorpCardToHq(state, 538);
     expect(
       projectGlobalRootSupportRezAfterInstall(state, id, "new_remote"),
     ).toBeUndefined();

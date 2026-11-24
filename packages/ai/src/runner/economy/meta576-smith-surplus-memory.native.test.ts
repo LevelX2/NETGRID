@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -50,7 +51,7 @@ describe("installed memory liquidation with whole-own-deck capacity", () => {
     delete noDeck.ownDeckSnapshot;
     expect(installedMemorySurplusQuote(noDeck, target)).toBeUndefined();
     input.ownDeckSnapshot!.cards.push({
-      cardId: "unknown-own-program",
+      cardId: syntheticCardDefinitionId("unknown-own-program"),
       quantity: 1,
     });
     expect(installedMemorySurplusQuote(input, target)).toBeUndefined();

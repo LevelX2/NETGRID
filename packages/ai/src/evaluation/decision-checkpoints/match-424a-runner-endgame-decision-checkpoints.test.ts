@@ -44,7 +44,7 @@ describe("match 424A runner endgame decision checkpoints", () => {
     const state = checkpoint.engine.testOnlyGameState;
     const secondShield = getLegalActions(state, "runner").find(
       (action) => action.type === "install_card" &&
-        state.cardInstances[action.source!]?.definitionId === "onr_v1_028_force-shield" &&
+        state.cardInstances[action.source!]?.definitionId === 240 &&
         !action.actionId.includes("runner_program_trash_before_install"),
     );
     expect(secondShield).toBeDefined();
@@ -82,7 +82,7 @@ describe("match 424A runner endgame decision checkpoints", () => {
       secondDamagePreventionJson,
     ],
   ])("uses Force Shield at %s", (_label, json) => {
-    expectCheckpointToPass(fixture(json));
+    expectCheckpointToPass(currentDamagePreventionFixture(json));
   });
 
   it("retains the unique path tools at the historical D93 discard", () => {
@@ -94,7 +94,7 @@ describe("match 424A runner endgame decision checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
 
     const hq = evaluateRunnerRunTargets({ input: result.input }).find(
-      (target) => target.actionId === "runner.start_run.hq",
+      (target) => target.actionId === "rs.hq",
     );
     expect(hq).toMatchObject({
       pathPassability: "blocked_unpayable",
@@ -115,12 +115,12 @@ describe("match 424A runner endgame decision checkpoints", () => {
       const state = checkpoint.engine.testOnlyGameState;
       const krash = state.runner.rig.programs.find(
         (instanceId) =>
-          state.cardInstances[instanceId]?.definitionId === "onr_v1_039_krash",
+          state.cardInstances[instanceId]?.definitionId === 251,
       );
       if (!krash) throw new Error("Expected installed Krash control card");
       const wallBreakers = state.runner.rig.programs.filter(
         (instanceId) =>
-          state.cardInstances[instanceId]?.definitionId === "onr_v1_039_krash",
+          state.cardInstances[instanceId]?.definitionId === 251,
       );
       state.runner.rig.programs = state.runner.rig.programs.filter(
         (instanceId) => !wallBreakers.includes(instanceId),
@@ -136,7 +136,7 @@ describe("match 424A runner endgame decision checkpoints", () => {
       const neuralBlade = hq?.ice.find(
         (instanceId) =>
           state.cardInstances[instanceId]?.definitionId ===
-          "onr_v1_258_neural-blade",
+          470,
       );
       if (!neuralBlade)
         throw new Error("Expected rezzed Neural Blade control ICE");
@@ -149,13 +149,13 @@ describe("match 424A runner endgame decision checkpoints", () => {
       delete checkpoint.expectation.runTargets;
       checkpoint.expectation = {
         acceptableActions: [
-          { sourceDefinitionId: "onr_v1_086_forged-activation-orders" },
+          { sourceDefinitionId: 298 },
         ],
         planExecution: {
           acceptablePlanKinds: ["runner.contest_remote"],
           acceptableCapabilities: ["contest_remote"],
           requiredAssessmentEvidence: [
-            "runner_targeted_ice_trash_preflight:remote_1:hidden_77be81d8",
+            "runner_targeted_ice_trash_preflight:r1:hr1.i2",
           ],
         },
       };
@@ -164,7 +164,7 @@ describe("match 424A runner endgame decision checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
 
     const hq = evaluateRunnerRunTargets({ input: result.input }).find(
-      (target) => target.actionId === "runner.start_run.hq",
+      (target) => target.actionId === "rs.hq",
     );
     expect(hq).toMatchObject({
       pathPassability: "blocked_missing_coverage",
@@ -180,7 +180,7 @@ describe("match 424A runner endgame decision checkpoints", () => {
     });
     const result = runAiDecisionCheckpoint(funded);
     const hq = evaluateRunnerRunTargets({ input: result.input }).find(
-      (target) => target.actionId === "runner.start_run.hq",
+      (target) => target.actionId === "rs.hq",
     );
     expect(hq).toMatchObject({
       pathPassability: "reachable",
@@ -202,6 +202,36 @@ function mutateFixture(
   mutation(result);
   result.engine.stateHash = hashGameState(result.engine.testOnlyGameState);
   return result;
+}
+
+function currentDamagePreventionFixture(value: unknown): AiDecisionCheckpointV1 {
+  return mutateFixture(value, (checkpoint) => {
+    const { imminentEvent, eventModificationWindow, pendingChoice } =
+      checkpoint.engine.testOnlyGameState;
+    if (
+      imminentEvent?.eventType !== "damage" ||
+      eventModificationWindow?.kind !== "prevent" ||
+      eventModificationWindow.side !== "runner" ||
+      pendingChoice?.source !== "v120.event_modification.prevent" ||
+      pendingChoice.side !== "runner"
+    ) {
+      throw new Error("Missing captured Runner damage prevention window");
+    }
+    for (const option of pendingChoice.options) {
+      if (option.id === "pass") continue;
+      const candidate = eventModificationWindow.candidates.find(
+        ({ candidateId, eventId }) =>
+          candidateId === option.id && eventId === imminentEvent.eventId,
+      );
+      const amount = candidate?.preventAmount;
+      if (typeof amount !== "number" || !Number.isSafeInteger(amount) || amount <= 0) {
+        throw new Error("Missing captured damage prevention amount");
+      }
+      option.metadata = { optionKind: "prevent_damage", amount };
+    }
+    checkpoint.source.kind = "synthetic_companion";
+    checkpoint.source.findingId += "-CURRENT-CHOICE-METADATA";
+  });
 }
 
 function expectCheckpointToPass(checkpoint: AiDecisionCheckpointV1): void {

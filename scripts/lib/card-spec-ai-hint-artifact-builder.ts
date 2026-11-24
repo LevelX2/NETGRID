@@ -1,10 +1,7 @@
+import type { CardDefinitionId } from "../../packages/shared/src/index";
 import { fingerprint } from "../../packages/cards/src/index";
-import {
-  cardSpecRuntimeDefinitionIds,
-  cardSpecSourceRefs,
-  CS06_CARD_DEFINITION_IDS,
-} from "../../packages/cards/src/engine/index";
-import { cardSpecPlanningCards } from "../../packages/cards/src/planning/index";
+import { cardSpecRuntimeDefinitionIds } from "../../packages/cards/src/engine/index";
+import { listPlanningCardsWithFacts } from "../../packages/cards/src/planning/index";
 import { format } from "prettier";
 
 import aiSupportScenarioData from "../../data/scenarios/card-support-ai-supported-current.json";
@@ -20,7 +17,7 @@ export {
   type CardSpecAiHintArtifact,
 } from "../../packages/ai/src/ai-hint-contracts";
 
-type PlanningEntry = ReturnType<typeof cardSpecPlanningCards>[number];
+type PlanningEntry = ReturnType<typeof listPlanningCardsWithFacts>[number];
 
 type AiSupportScenarioPack = {
   schemaVersion: string;
@@ -28,7 +25,7 @@ type AiSupportScenarioPack = {
   status: string;
   scenarios: Array<{
     id: string;
-    coversCards: string[];
+    coversCards: CardDefinitionId[];
   }>;
 };
 
@@ -36,78 +33,11 @@ export function buildCardSpecAiHintArtifact(options?: {
   entries?: readonly PlanningEntry[];
   scenarioPack?: AiSupportScenarioPack;
 }): CardSpecAiHintArtifact {
-  const canonicalEntries = cardSpecPlanningCards();
+  const canonicalEntries = listPlanningCardsWithFacts();
   const entries = options?.entries ?? canonicalEntries;
   const scenarioPack = options?.scenarioPack ?? aiSupportScenarioData;
-  const activeIds = new Set(cardSpecRuntimeDefinitionIds());
-  const cs06Ids = new Set<string>(CS06_CARD_DEFINITION_IDS);
-  const sourceRefs = cardSpecSourceRefs();
-  const classicIds = sourceRefs
-    .filter(
-      (ref) =>
-        ref.sourcePath.includes("/specs/classic/") &&
-        activeIds.has(ref.cardDefinitionId),
-    )
-    .map((ref) => ref.cardDefinitionId);
-  const testsetIds = sourceRefs
-    .filter(
-      (ref) =>
-        ref.sourcePath.includes("/specs/testset/") &&
-        activeIds.has(ref.cardDefinitionId),
-    )
-    .map((ref) => ref.cardDefinitionId);
-  const systemIds = sourceRefs
-    .filter(
-      (ref) =>
-        ref.sourcePath.includes("/specs/system/") &&
-        activeIds.has(ref.cardDefinitionId),
-    )
-    .map((ref) => ref.cardDefinitionId);
-  const proteusIds = sourceRefs
-    .filter(
-      (ref) =>
-        ref.sourcePath.includes("/specs/proteus/") &&
-        activeIds.has(ref.cardDefinitionId) &&
-        !cs06Ids.has(ref.cardDefinitionId),
-    )
-    .map((ref) => ref.cardDefinitionId);
-  const originalsetIds = sourceRefs
-    .filter(
-      (ref) =>
-        ref.sourcePath.includes("/specs/originalset-v1/") &&
-        activeIds.has(ref.cardDefinitionId) &&
-        !cs06Ids.has(ref.cardDefinitionId),
-    )
-    .map((ref) => ref.cardDefinitionId);
-  const expectedIds = [
-    ...CS06_CARD_DEFINITION_IDS,
-    ...systemIds,
-    ...testsetIds,
-    ...classicIds,
-    ...proteusIds,
-    ...originalsetIds,
-  ].sort(compareText);
-  if (
-    CS06_CARD_DEFINITION_IDS.length !== 10 ||
-    systemIds.length !== 2 ||
-    testsetIds.length !== 34 ||
-    classicIds.length !== 54 ||
-    proteusIds.length !== 151 ||
-    originalsetIds.length !== 367 ||
-    expectedIds.length !== 618 ||
-    new Set(expectedIds).size !== 618
-  )
-    throw new Error(
-      `card_spec_ai_hint_artifact_expected_partition_mismatch: cs06=${CS06_CARD_DEFINITION_IDS.length},system=${systemIds.length},testset=${testsetIds.length},classic=${classicIds.length},proteus=${proteusIds.length},originalset=${originalsetIds.length},total=${expectedIds.length}`,
-    );
-  assertExactIds(
-    "card_spec_ai_hint_artifact_runtime_partition",
-    [...activeIds].sort(compareText),
-    expectedIds,
-  );
-  const actualIds = entries
-    .map((entry) => entry.definition.id)
-    .sort(compareText);
+  const expectedIds = [...cardSpecRuntimeDefinitionIds()].sort(compareCardIds);
+  const actualIds = entries.map((entry) => entry.facts.id).sort(compareCardIds);
   assertExactIds("card_spec_ai_hint_artifact_input", actualIds, expectedIds);
 
   const scenario = scenarioPack.scenarios.find(
@@ -125,13 +55,13 @@ export function buildCardSpecAiHintArtifact(options?: {
     status: scenarioPack.status,
     scenario: {
       id: scenario.id,
-      coversCards: [...scenario.coversCards].sort(compareText),
+      coversCards: [...scenario.coversCards].sort(compareCardIds),
     },
   };
   const cards = [...entries]
-    .sort((left, right) => compareText(left.definition.id, right.definition.id))
+    .sort((left, right) => compareCardIds(left.facts.id, right.facts.id))
     .map((entry) => ({
-      cardId: entry.definition.id,
+      cardId: entry.facts.id,
       cardRulesFingerprint: entry.planning.cardRulesFingerprint,
       planningAnnotationsFingerprint:
         entry.planning.planningAnnotationsFingerprint,
@@ -160,8 +90,8 @@ export async function serializeCardSpecAiHintArtifact(
 
 function assertExactIds(
   field: string,
-  actual: readonly string[],
-  expected: readonly string[],
+  actual: readonly CardDefinitionId[],
+  expected: readonly CardDefinitionId[],
 ): void {
   if (
     actual.length !== expected.length ||
@@ -170,6 +100,9 @@ function assertExactIds(
     throw new Error(`${field}_mismatch: ${actual.join(",")}`);
 }
 
-function compareText(left: string, right: string): number {
-  return left < right ? -1 : left > right ? 1 : 0;
+function compareCardIds(
+  left: CardDefinitionId,
+  right: CardDefinitionId,
+): number {
+  return left - right;
 }

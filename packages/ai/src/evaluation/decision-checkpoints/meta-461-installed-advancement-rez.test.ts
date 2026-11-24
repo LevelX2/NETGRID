@@ -1,4 +1,5 @@
 import { expect, it } from "vitest";
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import checkpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-461-r9-g5-d207.json";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -32,9 +33,9 @@ it("rezzes installed advancement support as the exact first step of the winning 
   const decision = chooseAiAction(x);
   const action = x.legalActions.find((a) => a.actionId === decision.actionId)!;
   expect(action.type).toBe("rez_card");
-  expect(action.source).toBe("corp_onr_v1_312_chicago-branch_2");
+  expect(action.source).toBe("c38m");
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:corp.score_agenda:agenda%3Acorp_onr_v1_194_corporate-downsizing_2%3Aremote_2",
+    "p9cjat7so2g0t24r7ujibgxn83",
   );
   expect(decision.fallbackUsed).toBe(false);
 });
@@ -43,12 +44,12 @@ it.each(["credits", "stale", "source", "other_server"])(
   (kind) => {
     const x = input();
     const rez = x.legalActions.find(
-      (a) => a.type === "rez_card" && a.source?.includes("chicago"),
+      (a) => a.type === "rez_card" && referencesDefaultDeckCard(a.source, 524),
     )!;
     if (kind === "credits") x.playerView.own.credits = 5;
     if (kind === "stale") rez.expiresAtStateVersion--;
     if (kind === "source") rez.source = "foreign";
-    if (kind === "other_server") rez.payload!.serverId = "remote_99";
+    if (kind === "other_server") rez.payload!.serverId = "r99";
     expect(
       corpSameTurnScoreConversionPaths(x).some((p) =>
         p.steps.some((s) => s.kind === "rez_score_support"),

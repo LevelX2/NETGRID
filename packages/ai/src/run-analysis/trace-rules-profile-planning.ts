@@ -24,50 +24,50 @@ export function planningTraceRulesProfile(
 }
 
 /** Bind visible and hypothetical path quotes to the active game's trace rules. */
+type TraceDecisionContext = Pick<
+  AiDecisionInput,
+  "side" | "playerView" | "legalActions"
+>;
+
 export function visibleIcePathTraceContext(
-  input: AiDecisionInput,
+  input: TraceDecisionContext,
 ): Pick<
   VisibleDeflectorContext,
   "traceRulesProfile" | "onMissingTraceRulesProfile"
 > {
   const { traceRulesProfile } = input.playerView;
   if (traceRulesProfile !== undefined) return { traceRulesProfile };
-  return {
-    onMissingTraceRulesProfile: () => {
-      throw new PlanResolutionFailure("invalid_player_view_card_projection", {
-        side: input.side,
-        stateVersion: input.playerView.stateVersion,
-        timingPoint: input.playerView.timingPoint,
-        legalActionTypes: input.legalActions.map(({ type }) => type),
-        owner: "rules_contract",
-        removalCondition:
-          "A visible ICE Trace path quote requires the current Engine trace rules profile.",
-      });
-    },
-  };
+  return { onMissingTraceRulesProfile: () => missingTraceRulesProfile(input) };
 }
 
-/** Bind visible and hypothetical path quotes to the active game's trace rules. */
-export function visibleIcePathTraceContext(
-  input: AiDecisionInput,
+export function requireVisibleTraceRulesProfile(
+  input: TraceDecisionContext,
+): TraceRulesProfile {
+  return input.playerView.traceRulesProfile ?? missingTraceRulesProfile(input);
+}
+
+function missingTraceRulesProfile(input: TraceDecisionContext): never {
+  throw new PlanResolutionFailure("invalid_player_view_card_projection", {
+    side: input.side,
+    stateVersion: input.playerView.stateVersion,
+    timingPoint: input.playerView.timingPoint,
+    legalActionTypes: input.legalActions.map(({ type }) => type),
+    owner: "rules_contract",
+    removalCondition:
+      "A visible ICE Trace path quote requires the current Engine trace rules profile.",
+  });
+}
+
+export function visibleRunnerPathTraceContext(
+  input: TraceDecisionContext,
 ): Pick<
   VisibleDeflectorContext,
-  "traceRulesProfile" | "onMissingTraceRulesProfile"
+  "traceRulesProfile" | "onMissingTraceRulesProfile" | "runnerTraceSupportQuote"
 > {
-  const { traceRulesProfile } = input.playerView;
-  if (traceRulesProfile !== undefined) return { traceRulesProfile };
+  const support = input.playerView.own.runnerTraceSupportQuote;
   return {
-    onMissingTraceRulesProfile: () => {
-      throw new PlanResolutionFailure("invalid_player_view_card_projection", {
-        side: input.side,
-        stateVersion: input.playerView.stateVersion,
-        timingPoint: input.playerView.timingPoint,
-        legalActionTypes: input.legalActions.map(({ type }) => type),
-        owner: "rules_contract",
-        removalCondition:
-          "A visible ICE Trace path quote requires the current Engine trace rules profile.",
-      });
-    },
+    ...visibleIcePathTraceContext(input),
+    ...(support ? { runnerTraceSupportQuote: support } : {}),
   };
 }
 
@@ -110,7 +110,7 @@ export function planningRunnerNeedsStrictlyMore(
 }
 
 export function planningClassicLinkModifierForBaseLinkOption(option: {
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   activationCost: number;
 }): VisibleClassicLinkModifier | undefined {
   if (!option.sourceDefinitionId) return undefined;
@@ -131,7 +131,7 @@ export function planningClassicLinkModifierForBaseLinkOption(option: {
 }
 
 export function planningDefinitionIsBaseLinkCard(
-  sourceDefinitionId: string | undefined,
+  sourceDefinitionId: number | undefined,
 ): boolean {
   if (!sourceDefinitionId) return false;
   return (

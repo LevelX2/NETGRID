@@ -190,10 +190,6 @@ function combinePairGameResults(
       runnerAgendaSteals: sum((aggregate) => aggregate.runnerAgendaSteals),
       corpFlatlines: sum((aggregate) => aggregate.corpFlatlines),
       scoreWindowMissed: sum((aggregate) => aggregate.scoreWindowMissed),
-      unsafeScoreChosen: sum((aggregate) => aggregate.unsafeScoreChosen),
-      passiveActionWithScoreLineAvailable: sum(
-        (aggregate) => aggregate.passiveActionWithScoreLineAvailable,
-      ),
       actionLimitClusters: sumRecord(
         (aggregate) => aggregate.actionLimitClusters,
       ),

@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
+import { describe, expect, it, vi } from "vitest";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 
 import type {
   AiDecisionInput,
@@ -19,7 +20,10 @@ import {
 import { discardKeepScore } from "../../runtime/discard-keep-score";
 import { selectedSearchChoiceOptionIds } from "../../runtime/search-choice-option";
 import type { DeckCapabilityProfile } from "../../deck-capabilities";
-import { AI_HINTS_BY_CARD, type AiCardHint } from "../../ai-hints";
+import {
+  AI_HINTS_BY_CARD as mockedHints,
+  type AiCardHint,
+} from "../../ai-hints";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
 import {
   breakerVariantDeckCapabilities,
@@ -33,12 +37,24 @@ import {
   visibleIdentity,
 } from "../../runner-hand-development.test-support";
 
+vi.mock(import("../../ai-hints"), async (importOriginal) => {
+  const actual = await importOriginal();
+  const hints = actual.createAiHintsByCard();
+  return {
+    ...actual,
+    AI_HINTS_BY_CARD: hints,
+    createAiHintsByCard: () => new Map(hints),
+  };
+});
+
+const AI_HINTS_BY_CARD = mockedHints as Map<number, AiCardHint>;
+
 describe("RunnerHandDevelopmentEvaluation", () => {
   it.each([0, 1])(
     "uses retained draw yield %i, independently of consuming the event",
     (retained) => {
       const card = visibleCard("jack", {
-        definitionId: "onr_v1_095_jack-n-joe",
+        definitionId: 307,
         title: "Jack ’n’ Joe",
         type: "event",
         cost: 0,
@@ -70,7 +86,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     "requires capacity for an unbound five-card draw with %i cards on the last click",
     (handCount) => {
       const card = visibleCard("bodyweight", {
-        definitionId: "onr_v1_079_bodyweight-synthetic-blood",
+        definitionId: 291,
         title: "Bodyweight Synthetic Blood",
         type: "event",
         cost: 2,
@@ -113,7 +129,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     "uses the current Engine draw yield for a draw event: %s",
     (drawCardsAmount) => {
       const card = visibleCard("jack", {
-        definitionId: "onr_v1_095_jack-n-joe",
+        definitionId: 307,
         title: "Jack ’n’ Joe",
         type: "event",
         cost: 0,
@@ -136,7 +152,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("prefers a legal hosted program route over an optional program-trash install", () => {
     const program = visibleCard("pattels-virus", {
-      definitionId: "onr_v1_046_pattels-virus",
+      definitionId: 258,
       title: "Pattel's Virus",
       type: "program",
       installCost: 1,
@@ -182,7 +198,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("classifies central access payoff from own hand without leaking card identity in redacted facts", () => {
     const accessCard = visibleCard("rd-interface-1", {
-      definitionId: "test-rd-interface",
+      definitionId: syntheticCardDefinitionId("test-rd-interface"),
       title: "R&D Interface",
       type: "hardware",
       installCost: 4,
@@ -222,13 +238,13 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("binds canonical information cards to unknown ICE without inventing a text heuristic", () => {
     const guide = visibleCard("guide-1", {
-      definitionId: "onr_v1_092_ice-and-datas-guide-to-the-net",
+      definitionId: 304,
       title: "Ice and Data’s Guide to the Net",
       type: "event",
       cost: 0,
     });
     const smarteye = visibleCard("smarteye-1", {
-      definitionId: "onr_v1_065_smarteye",
+      definitionId: 277,
       title: "Smarteye",
       type: "program",
       installCost: 2,
@@ -278,7 +294,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("does not assign a current information purpose after all visible ICE is known", () => {
     const smarteye = visibleCard("smarteye-known-path", {
-      definitionId: "onr_v1_065_smarteye",
+      definitionId: 277,
       title: "Smarteye",
       type: "program",
       installCost: 2,
@@ -286,7 +302,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     });
     const knownIce: VisibleCard = {
       instanceId: "known-hq-ice",
-      definitionId: "simple_barrier",
+      definitionId: syntheticCardDefinitionId("simple_barrier"),
       title: "Known ICE",
       type: "ice",
       owner: "corp",
@@ -322,7 +338,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("requires a same-turn access action after turn-limited preparation", () => {
     const preparation = visibleCard("prearranged-drop-1", {
-      definitionId: "onr_proteus_118_prearranged-drop",
+      definitionId: 176,
       title: "Prearranged Drop",
       type: "event",
       cost: 0,
@@ -376,7 +392,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("defers hosted breaker economy until a hostable breaker is in hand", () => {
     const eurocorpse = visibleCard("eurocorpse-1", {
-      definitionId: "onr_proteus_139_eurocorpse-tm-spin-chip",
+      definitionId: 197,
       title: "Eurocorpse (TM) Spin Chip",
       type: "hardware",
       installCost: 6,
@@ -409,17 +425,17 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("recognizes a hostable consumer without inventing savings on an unknown board", () => {
     const eurocorpse = visibleCard("eurocorpse-1", {
-      definitionId: "onr_proteus_139_eurocorpse-tm-spin-chip",
+      definitionId: 197,
       title: "Eurocorpse (TM) Spin Chip",
       type: "hardware",
       installCost: 6,
     });
-    const definition = CARD_DEFINITIONS_BY_ID["onr_v1_039_krash"]!;
+    const definition = planningCardFactsByDefinitionId(251)!;
     const breaker = visibleCard("krash-1", {
       definitionId: definition.id,
       title: definition.title,
       type: definition.type,
-      subtypes: definition.subtypes,
+      subtypes: definition.subtypes.slice(),
       installCost: definition.installCost!,
       memoryCost: definition.memoryCost!,
       rulesText: definition.rulesText,
@@ -450,7 +466,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("separates MU-blocked breaker setup from missing-credit setup", () => {
     const breaker = visibleCard("breaker-1", {
-      definitionId: "test-code-breaker",
+      definitionId: syntheticCardDefinitionId("test-code-breaker"),
       title: "Test Decoder",
       type: "program",
       subtypes: ["icebreaker", "decoder"],
@@ -459,7 +475,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       rulesText: "Icebreaker: break code gate subroutines.",
     });
     const economy = visibleCard("expensive-economy-1", {
-      definitionId: "test-expensive-economy",
+      definitionId: syntheticCardDefinitionId("test-expensive-economy"),
       title: "Expensive Economy",
       type: "resource",
       installCost: 5,
@@ -508,7 +524,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("does not infer memory support from a target-preference annotation", () => {
     const installerEvent = visibleCard("installer-event", {
-      definitionId: "onr_proteus_110_hijack",
+      definitionId: 168,
       title: "Hijack",
       type: "event",
       rulesText:
@@ -532,7 +548,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("marks bank and economy tools as acute setup when the Runner is credit-starved", () => {
     const broker = visibleCard("broker-1", {
-      definitionId: "test-broker",
+      definitionId: syntheticCardDefinitionId("test-broker"),
       title: "Broker",
       type: "resource",
       installCost: 0,
@@ -563,7 +579,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("classifies renewable breaker credits on hybrid hardware as economy", () => {
     const cybermodem = visibleCard("cortical-cybermodem-1", {
-      definitionId: "onr_proteus_134_cortical-cybermodem",
+      definitionId: 192,
       title: "Cortical Cybermodem",
       type: "hardware",
       installCost: 11,
@@ -602,7 +618,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("classifies subtype-restricted recurring breaker credits as economy", () => {
     const corolla = visibleCard("corolla-speed-chip-1", {
-      definitionId: "onr_v1_124_corolla-speed-chip",
+      definitionId: 336,
       title: "Corolla Speed Chip",
       type: "hardware",
       installCost: 1,
@@ -630,7 +646,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("uses source identifiers and ignores label-only hand card titles", () => {
     const console = visibleCard("console-1", {
-      definitionId: "test-console",
+      definitionId: syntheticCardDefinitionId("test-console"),
       title: "Useful Console",
       type: "hardware",
       installCost: 0,
@@ -670,7 +686,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("keeps defense cards without visible threat low and deferred", () => {
     const shield = visibleCard("shield-1", {
-      definitionId: "onr_v1_028_force-shield",
+      definitionId: 240,
       title: "Force Shield",
       type: "program",
       installCost: 0,
@@ -705,7 +721,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("treats an exact tag-removal action as acute only while tags exist", () => {
     const mileage = visibleCard("mileage-1", {
-      definitionId: "onr_v1_102_open-ended-mileage-program",
+      definitionId: 314,
       title: "Open-Ended Mileage Program",
       type: "event",
       cost: 0,
@@ -765,7 +781,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("treats visible net-damage ICE as a setup need without inventing an acute damage window", () => {
     const prevention = visibleCard("green-knight-1", {
-      definitionId: "onr_v1_128_green-knight-surge-buffers",
+      definitionId: 340,
       title: '"Green Knight" Surge Buffers',
       type: "hardware",
       installCost: 0,
@@ -777,7 +793,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       legalActions: [installAction("install-green-knight", prevention, 0)],
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           label: "Remote 1",
           ice: [
             {
@@ -786,7 +802,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
               controller: "corp",
               known: true,
               rezzed: true,
-              definitionId: "onr_v1_269_shotgun-wire",
+              definitionId: 481,
               title: "Shotgun Wire",
               type: "ice",
               subtypes: ["wall"],
@@ -819,7 +835,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("does not install trace defense merely because an unrelated visible damage threat exists", () => {
     const signpost = visibleCard("signpost-1", {
-      definitionId: "onr_v1_063_signpost",
+      definitionId: 275,
       title: "Signpost",
       type: "program",
       installCost: 2,
@@ -837,7 +853,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
           label: "R&D",
           ice: [
             visibleCard("damage-ice", {
-              definitionId: "onr_v1_269_shotgun-wire",
+              definitionId: 481,
               title: "Shotgun Wire",
               type: "ice",
               subtypes: ["wall"],
@@ -864,21 +880,21 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("keeps trace cancellation separate from unrelated tags and damage", () => {
     const source = visibleCard("trace-cancellation", {
-      definitionId: "onr_proteus_129_back-door-to-netwatch",
+      definitionId: 187,
       title: "Back Door to Netwatch",
       type: "resource",
       installCost: 0,
       rulesText: "[3], [T]: Cancel the effect of a successful trace.",
     });
     const damageIce = visibleCard("damage-ice", {
-      definitionId: "onr_v1_269_shotgun-wire",
+      definitionId: 481,
       title: "Shotgun Wire",
       type: "ice",
       rulesText: "Do 2 net damage. End the run.",
       rezzed: true,
     });
     const traceIce = visibleCard("trace-ice", {
-      definitionId: "onr_v1_249_hunter",
+      definitionId: 461,
       title: "Hunter",
       type: "ice",
       rezzed: true,
@@ -928,7 +944,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("opens trace-defense setup only for a visible rezzed trace threat", () => {
     const access = visibleCard("access-1", {
-      definitionId: "onr_v1_149_access-to-arasaka",
+      definitionId: 361,
       title: "Access to Arasaka",
       type: "resource",
       installCost: 2,
@@ -937,7 +953,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
         "[2]: Base link 4. [2]: +1 link. Use only one base link card for each trace attempt made against you.",
     });
     const traceIce = visibleCard("trace-ice", {
-      definitionId: "onr_v1_249_hunter",
+      definitionId: 461,
       title: "Hunter",
       type: "ice",
       subtypes: ["sentry", "bloodhound"],
@@ -945,13 +961,13 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     });
     traceIce.effectiveRunQuote = {
       iceInstanceId: traceIce.instanceId,
-      iceDefinitionId: "onr_v1_249_hunter",
+      iceDefinitionId: 461,
       effectiveStrength: 5,
       subroutines: [
         {
           id: "hunter-trace",
           type: "initiate_trace",
-          sourceDefinitionId: "onr_v1_249_hunter",
+          sourceDefinitionId: 461,
           sourceTitle: "Hunter",
           traceLimit: 5,
           traceSuccessEffect: { type: "add_tag", amount: 1 },
@@ -979,27 +995,27 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("opens Fall Guy setup for a visible tag threat but not unrelated damage", () => {
     const fallGuy = visibleCard("fall-guy-1", {
-      definitionId: "onr_v1_161_fall-guy",
+      definitionId: 373,
       title: "Fall Guy",
       type: "resource",
       installCost: 0,
       rulesText: "Trash: Avoid receiving a tag.",
     });
     const hunter = visibleCard("fall-guy-hunter", {
-      definitionId: "onr_v1_249_hunter",
+      definitionId: 461,
       title: "Hunter",
       type: "ice",
       rezzed: true,
     });
     hunter.effectiveRunQuote = {
       iceInstanceId: hunter.instanceId,
-      iceDefinitionId: "onr_v1_249_hunter",
+      iceDefinitionId: 461,
       effectiveStrength: 5,
       subroutines: [
         {
           id: "hunter-tag-trace",
           type: "initiate_trace",
-          sourceDefinitionId: "onr_v1_249_hunter",
+          sourceDefinitionId: 461,
           sourceTitle: "Hunter",
           traceLimit: 5,
           traceSuccessEffect: { type: "add_tag", amount: 1 },
@@ -1007,7 +1023,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       ],
     };
     const damageIce = visibleCard("fall-guy-damage-ice", {
-      definitionId: "onr_v1_269_shotgun-wire",
+      definitionId: 481,
       title: "Shotgun Wire",
       type: "ice",
       rezzed: true,
@@ -1041,20 +1057,20 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("classifies every dedicated installable Runner trace-defense card by actual trace need", () => {
     const dedicatedTraceDefenseDefinitionIds = [
-      "onr_v1_003_baedekers-net-map",
-      "onr_v1_004_bakdoor",
-      "onr_v1_063_signpost",
-      "onr_v1_148_access-through-alpha",
-      "onr_v1_149_access-to-arasaka",
-      "onr_v1_150_access-to-kiribati",
-      "onr_v1_152_back-door-to-hilliard",
-      "onr_v1_153_back-door-to-orbital-air",
-      "onr_v1_164_hells-run",
-      "onr_v1_181_the-springboard",
-      "onr_v1_182_submarine-uplink",
+      215,
+      216,
+      275,
+      360,
+      361,
+      362,
+      364,
+      365,
+      376,
+      393,
+      394,
     ] as const;
     const hunter = visibleCard("trace-owner-hunter", {
-      definitionId: "onr_v1_249_hunter",
+      definitionId: 461,
       title: "Hunter",
       type: "ice",
       subtypes: ["sentry", "bloodhound"],
@@ -1062,13 +1078,13 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     });
     hunter.effectiveRunQuote = {
       iceInstanceId: hunter.instanceId,
-      iceDefinitionId: "onr_v1_249_hunter",
+      iceDefinitionId: 461,
       effectiveStrength: 5,
       subroutines: [
         {
           id: "trace-owner-hunter-subroutine",
           type: "initiate_trace",
-          sourceDefinitionId: "onr_v1_249_hunter",
+          sourceDefinitionId: 461,
           sourceTitle: "Hunter",
           traceLimit: 5,
           traceSuccessEffect: { type: "add_tag", amount: 1 },
@@ -1080,7 +1096,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       const hint = AI_HINTS_BY_CARD.get(definitionId)!;
       const card = visibleCard(`trace-defense-${definitionId}`, {
         definitionId,
-        title: definitionId,
+        title: String(definitionId),
         type: hint.cardType as "program" | "resource",
         installCost: hint.costProfile?.credits ?? 0,
         memoryCost: hint.costProfile?.memory ?? 0,
@@ -1114,28 +1130,28 @@ describe("RunnerHandDevelopmentEvaluation", () => {
           role: withoutTrace.developmentRole,
           currentNeed: withoutTrace.currentNeed,
         },
-        definitionId,
+        String(definitionId),
       ).toEqual({
         definitionId,
         role: "defense_support",
         currentNeed: "none",
       });
-      expect(withTrace.currentNeed, definitionId).toBe("setup");
+      expect(withTrace.currentNeed, String(definitionId)).toBe("setup");
     }
   });
 
   it("keeps multifunction trace hardware on its primary setup route", () => {
     const multifunctionHardwareDefinitionIds = [
-      "onr_v1_136_pandoras-deck",
-      "onr_v1_138_pk-6089a",
-      "onr_v1_143_techtronica-utility-suit",
+      348,
+      350,
+      355,
     ] as const;
 
     for (const definitionId of multifunctionHardwareDefinitionIds) {
       const hint = AI_HINTS_BY_CARD.get(definitionId)!;
       const card = visibleCard(`trace-hardware-${definitionId}`, {
         definitionId,
-        title: definitionId,
+        title: String(definitionId),
         type: "hardware",
         installCost: hint.costProfile?.credits ?? 0,
       });
@@ -1150,7 +1166,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
         card.instanceId,
       );
 
-      expect(evaluation.developmentRole, definitionId).not.toBe(
+      expect(evaluation.developmentRole, String(definitionId)).not.toBe(
         "defense_support",
       );
     }
@@ -1158,7 +1174,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("keeps trace-supporting run events on the run route", () => {
     const stumble = visibleCard("stumble-through-wilderspace", {
-      definitionId: "onr_v1_112_stumble-through-wilderspace",
+      definitionId: 324,
       title: "Stumble through Wilderspace",
       type: "event",
       cost: 2,
@@ -1181,7 +1197,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("does not treat an unrelated target action as hand-card development", () => {
     const memory = visibleCard("memory-hand", {
-      definitionId: "test-memory-hardware",
+      definitionId: syntheticCardDefinitionId("test-memory-hardware"),
       title: "Memory Hardware",
       type: "hardware",
       installCost: 1,
@@ -1210,14 +1226,14 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("binds duplicate hand cards to their own instance-specific install actions", () => {
     const first = visibleCard("worm-1", {
-      definitionId: "onr_v1_074_worm",
+      definitionId: 286,
       title: "Worm",
       type: "program",
       installCost: 4,
       memoryCost: 1,
     });
     const second = visibleCard("worm-2", {
-      definitionId: "onr_v1_074_worm",
+      definitionId: 286,
       title: "Worm",
       type: "program",
       installCost: 4,
@@ -1243,7 +1259,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("keeps expose tools relevant when the current route needs program displacement", () => {
     const mouse = visibleCard("mouse-1", {
-      definitionId: "onr_v1_042_mouse",
+      definitionId: 254,
       title: "Mouse",
       type: "program",
       installCost: 2,
@@ -1255,7 +1271,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       ...installAction("install-mouse-with-trash", mouse, 2),
       payload: {
         cardId: mouse.instanceId,
-        cardDefinitionId: "onr_v1_042_mouse",
+        cardDefinitionId: 254,
         runnerProgramTrashBeforeInstall: true,
       },
     };
@@ -1268,8 +1284,8 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     });
 
     const evaluation = withAiHint(
-      "onr_v1_042_mouse",
-      structuredRunnerHint("onr_v1_042_mouse", "program", [
+      254,
+      structuredRunnerHint(254, "program", [
         {
           kind: "expose_info",
           timing: "action",
@@ -1308,7 +1324,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("does not assign expose ownership from rules text without the structured fact", () => {
     const textOnlyExpose = visibleCard("text-only-expose-1", {
-      definitionId: "test-text-only-expose",
+      definitionId: syntheticCardDefinitionId("test-text-only-expose"),
       title: "Text-only expose",
       type: "program",
       installCost: 0,
@@ -1333,7 +1349,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("bounds visible remote threat text to exact tokens", () => {
     const shield = visibleCard("shield-noise-1", {
-      definitionId: "test-shield-noise",
+      definitionId: syntheticCardDefinitionId("test-shield-noise"),
       title: "Shield",
       type: "program",
       installCost: 0,
@@ -1349,12 +1365,12 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     });
     input.playerView.servers = [
       {
-        id: "remote_1",
+        id: "r1",
         label: "Remote 1",
         ice: [],
         root: [
           visibleCard("remote-noise", {
-            definitionId: "test-threat-noise",
+            definitionId: syntheticCardDefinitionId("test-threat-noise"),
             title: "Damageish Tagish Traceish",
             type: "asset",
           }),
@@ -1376,7 +1392,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("bounds persistent utility text signals to exact tokens", () => {
     const noisy = visibleCard("utility-noise-1", {
-      definitionId: "test-utility-noise",
+      definitionId: syntheticCardDefinitionId("test-utility-noise"),
       title: "Utility Noise",
       type: "resource",
       installCost: 0,
@@ -1402,7 +1418,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("bounds hand-development role text signals to exact tokens", () => {
     const noisy = visibleCard("role-noise-1", {
-      definitionId: "test-role-noise",
+      definitionId: syntheticCardDefinitionId("test-role-noise"),
       title: "Role Noise",
       type: "resource",
       installCost: 0,
@@ -1425,14 +1441,14 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("keeps duplicate or low-value hand cards conservative", () => {
     const duplicate = visibleCard("spare-resource-1", {
-      definitionId: "test-spare-resource",
+      definitionId: syntheticCardDefinitionId("test-spare-resource"),
       title: "Spare Resource",
       type: "resource",
       installCost: 1,
       rulesText: "A spare connection with no current setup role.",
     });
     const installed = visibleCard("spare-resource-installed", {
-      definitionId: "test-spare-resource",
+      definitionId: syntheticCardDefinitionId("test-spare-resource"),
       title: "Spare Resource",
       type: "resource",
     });
@@ -1459,7 +1475,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 });
 
 function structuredRunnerHint(
-  cardId: string,
+  cardId: number,
   cardType: string,
   effects: NonNullable<AiCardHint["effects"]>,
 ): AiCardHint {
@@ -1474,7 +1490,7 @@ function structuredRunnerHint(
   };
 }
 
-function withAiHint<T>(cardId: string, hint: AiCardHint, run: () => T): T {
+function withAiHint<T>(cardId: number, hint: AiCardHint, run: () => T): T {
   const previous = AI_HINTS_BY_CARD.get(cardId);
   AI_HINTS_BY_CARD.set(cardId, hint);
   try {

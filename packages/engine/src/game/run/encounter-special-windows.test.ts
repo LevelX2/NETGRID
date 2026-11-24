@@ -1,3 +1,4 @@
+import { RandomPurposeCode, type RandomPurpose } from "@netgrid/shared";
 import {
   type CardInstance,
   type CardInstanceId,
@@ -22,7 +23,7 @@ import {
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   zone: CardInstance["zone"],
   options: Partial<CardInstance> = {},
 ): CardInstance {
@@ -43,7 +44,7 @@ function playerChoice(optionId: string): PlayerAction {
   return {
     matchId: "match_1",
     side: "runner",
-    actionId: "runner.resolve_choice",
+    actionId: "rn",
     clientKnownStateVersion: 9,
     selectedChoices: { selectedOptionIds: [optionId] },
   } as PlayerAction;
@@ -87,32 +88,32 @@ function makeState(): GameState {
       ],
     },
     cardInstances: {
-      startup_1: instance("startup_1", "onr_v1_068_startup-immolator", {
+      startup_1: instance("startup_1", 280, {
         side: "runner",
         zone: "rig",
       }),
-      submarine_1: instance("submarine_1", "onr_v1_182_submarine-uplink", {
+      submarine_1: instance("submarine_1", 394, {
         side: "runner",
         zone: "rig",
       }),
-      ice_current: instance("ice_current", "onr_v1_272_too-many-doors", {
+      ice_current: instance("ice_current", 484, {
         side: "corp",
         zone: "serverIce",
         serverId: "rd",
       }),
-      ice_middle: instance("ice_middle", "onr_v1_250_ice-pick-willie", {
+      ice_middle: instance("ice_middle", 462, {
         side: "corp",
         zone: "serverIce",
         serverId: "rd",
       }),
-      ice_outer: instance("ice_outer", "onr_v1_275_vacuum-link", {
+      ice_outer: instance("ice_outer", 487, {
         side: "corp",
         zone: "serverIce",
         serverId: "rd",
       }),
     },
     run: {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "rd",
       phase: "encounter_ice",
       position: { kind: "ice", serverId: "rd", iceIndex: 0 },
@@ -146,7 +147,7 @@ describe("encounter special windows boundary", () => {
 
     const start = resolveEncounterSpecialWindowSubroutine(host, {
       definition: {
-        id: "onr_v1_272_too-many-doors",
+        id: 484,
         title: "Secret Spend Compare",
       } as never,
       subroutine,
@@ -157,7 +158,7 @@ describe("encounter special windows boundary", () => {
     expect(start).toMatchObject({ handled: true, suspended: true });
     expect(state.pendingChoice).toMatchObject({
       choiceId:
-        "card_implementation.secret_spend_compare:run_1:ice_current:2.corp.10",
+        "card_implementation.secret_spend_compare:1:ice_current:2.corp.10",
       side: "corp",
       kind: "bid_amount",
       visibility: "hidden_info_barrier",
@@ -165,7 +166,7 @@ describe("encounter special windows boundary", () => {
     expect(legalAction.payload).toMatchObject({
       secretSpendStarted: true,
       secretSpendAmounts: "0,1,2",
-      sourceDefinitionId: "onr_v1_272_too-many-doors",
+      sourceDefinitionId: 484,
     });
 
     const corpStep = resolveSecretSpendCompareChoice(
@@ -179,7 +180,7 @@ describe("encounter special windows boundary", () => {
     });
     expect(state.pendingChoice).toMatchObject({
       side: "runner",
-      source: "card_implementation.secret_spend_compare:run_1:ice_current:2",
+      source: "card_implementation.secret_spend_compare:1:ice_current:2",
       visibility: "hidden_info_barrier",
     });
     expect(legalAction.payload).not.toHaveProperty("secretSpendCorp");
@@ -215,7 +216,7 @@ describe("encounter special windows boundary", () => {
     const state = makeState();
     state.run!.encounteredIceId = "ice_current" as CardInstanceId;
     const legalAction = { payload: {} } as LegalAction;
-    const purposes: string[] = [];
+    const purposes: RandomPurpose[] = [];
     const host = encounterSpecialWindowHost(state, {
       rollDie: (purpose) => {
         purposes.push(purpose);
@@ -237,7 +238,7 @@ describe("encounter special windows boundary", () => {
       repositionIndex: 2,
     });
     expect(purposes).toEqual([
-      "rewind_run_to_rezzed_ice_by_die.run_1.ice_current",
+      [RandomPurposeCode.RewindEncounterDie, 1, "ice_current"],
     ]);
     expect(state.run?.vacuumLinkRewindChoice).toMatchObject({
       rezzedIceBack: 2,
@@ -360,7 +361,6 @@ describe("encounter special windows boundary", () => {
     const trashed: CardInstanceId[] = [];
     const runnerTrashed: CardInstanceId[] = [];
     const host = encounterSpecialWindowHost(state, {
-      quoteIceRezCost: () => 3,
       spendCredits: (side, amount) => {
         state[side].credits -= amount;
       },
@@ -381,26 +381,36 @@ describe("encounter special windows boundary", () => {
     expect(actions).toHaveLength(1);
     expect(actions[0]).toMatchObject({
       actionId:
-        "runner.trigger_ability.startup_1.startup_1.onr_v1_068_startup-immolator:runner_utility_longtail_trash_fully_broken_passed_ice_after_passing_fully_broken_ice",
+        "rx.startup_1.startup_1.364",
       side: "runner",
       type: "trigger_ability",
       source: "startup_1",
-      costs: [{ credits: 3 }],
+      costs: [{ credits: 1 }],
       payload: {
         cardId: "startup_1",
-        sourceDefinitionId: "onr_v1_068_startup-immolator",
+        sourceDefinitionId: 280,
         cardImplementationCapabilityBindingKind: "card_spec_capability_key",
         cardImplementationAbilityKey:
           "runner_utility_longtail_trash_fully_broken_passed_ice_after_passing_fully_broken_ice",
         targetIceId: "ice_current",
-        targetIceDefinitionId: "onr_v1_272_too-many-doors",
+        targetIceDefinitionId: 484,
         runnerUtilityAbility: "trash_fully_broken_passed_ice",
         abilityKind: "trash_fully_broken_passed_ice",
         cardImplementationTrashSourceCost: true,
         targetRezCost: true,
-        rezCostPaid: 3,
+        rezCostPaid: 1,
       },
     });
+
+    expect(() =>
+      resolveFullyBrokenPassedIceTrash(host, {
+        ...actions[0]!,
+        payload: { ...actions[0]!.payload, rezCostPaid: 0 },
+      }),
+    ).toThrow("muss exakt die Rez-Kosten zahlen");
+    expect(state.runner.credits).toBe(6);
+    expect(trashed).toEqual([]);
+    expect(runnerTrashed).toEqual([]);
 
     const result = resolveFullyBrokenPassedIceTrash(host, actions[0]!);
 
@@ -408,21 +418,21 @@ describe("encounter special windows boundary", () => {
       handled: true,
       sourceCardId: "startup_1",
       iceId: "ice_current",
-      paymentAmount: 3,
+      paymentAmount: 1,
       paid: true,
       iceTrashed: true,
     });
-    expect(state.runner.credits).toBe(3);
+    expect(state.runner.credits).toBe(5);
     expect(trashed).toEqual(["ice_current"]);
     expect(runnerTrashed).toEqual(["startup_1"]);
     expect(state.runner.rig.programs).not.toContain("startup_1");
     expect(state.runner.heap).toContain("startup_1");
     expect(state.run?.fullyBrokenPassedIceTrashPendingId).toBeUndefined();
     expect(actions[0]!.payload).toMatchObject({
-      sourceDefinitionId: "onr_v1_068_startup-immolator",
+      sourceDefinitionId: 280,
       trashedCount: 1,
-      trashedCardDefinitionId: "onr_v1_272_too-many-doors",
-      runnerCreditsAfter: 3,
+      trashedCardDefinitionId: 484,
+      runnerCreditsAfter: 5,
       sourceTrashed: true,
       cardImplementationTrashSourceCost: true,
       targetRezCost: true,
@@ -438,7 +448,7 @@ describe("encounter special windows boundary", () => {
     state.runner.rig.programs.push("superglue_1" as CardInstanceId);
     state.cardInstances.superglue_1 = instance(
       "superglue_1",
-      "onr_classic_033_superglue",
+      37,
       {
         side: "runner",
         zone: "rig",
@@ -468,7 +478,7 @@ describe("encounter special windows boundary", () => {
     expect(actions).toHaveLength(1);
     expect(actions[0]).toMatchObject({
       actionId:
-        "runner.trigger_ability.superglue_1.superglue_1.onr_classic_033_superglue:derez_fully_broken_passed_ice",
+        "rx.superglue_1.superglue_1.51",
       side: "runner",
       type: "trigger_ability",
       source: "superglue_1",
@@ -476,7 +486,7 @@ describe("encounter special windows boundary", () => {
       payload: {
         cardId: "superglue_1",
         targetIceId: "ice_current",
-        targetIceDefinitionId: "onr_v1_272_too-many-doors",
+        targetIceDefinitionId: 484,
         runnerUtilityAbility: "derez_fully_broken_passed_ice",
         abilityKind: "derez_fully_broken_passed_ice",
         cardImplementationTrashSourceCost: true,
@@ -497,7 +507,7 @@ describe("encounter special windows boundary", () => {
     expect(state.runner.rig.programs).not.toContain("superglue_1");
     expect(state.run?.fullyBrokenPassedIcePendingId).toBeUndefined();
     expect(actions[0]!.payload).toMatchObject({
-      sourceDefinitionId: "onr_classic_033_superglue",
+      sourceDefinitionId: 37,
       derezzedCount: 1,
       sourceTrashed: true,
       cardImplementationTrashSourceCost: true,
@@ -517,13 +527,13 @@ describe("encounter special windows boundary", () => {
     expect(result).toMatchObject({
       handled: true,
       sourceCardId: "submarine_1",
-      sourceDefinitionId: "onr_v1_182_submarine-uplink",
+      sourceDefinitionId: 394,
       forcedRunEndAfterEncounter: true,
     });
     expect(state.run?.forceJackOutAfterEncounterSourceId).toBe("submarine_1");
     expect(legalAction.payload).toMatchObject({
       forceRunEndAfterEncounter: true,
-      sourceDefinitionId: "onr_v1_182_submarine-uplink",
+      sourceDefinitionId: 394,
     });
 
     const otherAction = { payload: {} } as LegalAction;

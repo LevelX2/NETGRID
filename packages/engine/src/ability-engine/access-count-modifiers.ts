@@ -51,7 +51,9 @@ export function quoteAccessCountModifiers(
   }
   return {
     amount,
-    sourceDefinitionIds: sourceDefinitionIds.sort(),
+    sourceDefinitionIds: sourceDefinitionIds.sort(
+      (left, right) => left - right,
+    ),
   };
 }
 
@@ -148,7 +150,9 @@ export function quoteCentralAccessCounterModifiers(
 
   return {
     amount,
-    sourceDefinitionIds: sourceDefinitionIds.sort(),
+    sourceDefinitionIds: sourceDefinitionIds.sort(
+      (left, right) => left - right,
+    ),
     effects: effects.sort((left, right) => left.id.localeCompare(right.id)),
   };
 }

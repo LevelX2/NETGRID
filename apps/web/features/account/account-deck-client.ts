@@ -1,3 +1,4 @@
+import { type CardDefinitionId } from "@netgrid/shared";
 import type {
   StandardDeckGuideEntry,
   StandardDeckGuideStatus,
@@ -12,12 +13,12 @@ export type StandardDeck = {
   status: "active";
   name: string;
   side: "runner" | "corp";
-  identityCardId: string;
+  identityCardId: CardDefinitionId;
   cardPoolSnapshotId: string;
   cardPoolVersion?: string;
   formatProfileId: string;
   formatProfileVersion?: string;
-  cards: Array<{ cardId: string; quantity: number }>;
+  cards: Array<{ cardId: CardDefinitionId; quantity: number }>;
   guideStatus: StandardDeckGuideStatus;
   guide?: StandardDeckGuideEntry;
 };

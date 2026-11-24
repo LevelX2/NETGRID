@@ -12,10 +12,10 @@
       "phase": "run",
       "own": {
         "identity": {
-          "instanceId": "corp_corp_identity_001_0",
+          "instanceId": "cs",
           "known": true,
           "title": "Korp",
-          "definitionId": "corp_identity_001",
+          "definitionId": 3,
           "type": "identity",
           "subtypes": [],
           "rulesText": "Technische Seitenidentität ohne aktive Fähigkeit.",
@@ -29,10 +29,10 @@
         "agendaPoints": 0,
         "gripOrHq": [
           {
-            "instanceId": "corp_onr_classic_018_reclamation-project_2",
+            "instanceId": "c52",
             "known": true,
             "title": "Reclamation Project",
-            "definitionId": "onr_classic_018_reclamation-project",
+            "definitionId": 22,
             "type": "operation",
             "subtypes": [
               "double"
@@ -49,10 +49,10 @@
             "controller": "corp"
           },
           {
-            "instanceId": "corp_onr_classic_018_reclamation-project_1",
+            "instanceId": "c51",
             "known": true,
             "title": "Reclamation Project",
-            "definitionId": "onr_classic_018_reclamation-project",
+            "definitionId": 22,
             "type": "operation",
             "subtypes": [
               "double"
@@ -69,10 +69,10 @@
             "controller": "corp"
           },
           {
-            "instanceId": "corp_onr_classic_017_corporate-shuffle_1",
+            "instanceId": "c4t",
             "known": true,
             "title": "Corporate Shuffle",
-            "definitionId": "onr_classic_017_corporate-shuffle",
+            "definitionId": 21,
             "type": "operation",
             "subtypes": [
               "double"
@@ -89,10 +89,10 @@
             "controller": "corp"
           },
           {
-            "instanceId": "corp_onr_classic_014_trapdoor_1",
+            "instanceId": "c45",
             "known": true,
             "title": "Trapdoor",
-            "definitionId": "onr_classic_014_trapdoor",
+            "definitionId": 18,
             "type": "ice",
             "subtypes": [
               "code_gate",
@@ -110,10 +110,10 @@
         "stackOrRdCount": 34,
         "heapOrArchives": [
           {
-            "instanceId": "corp_onr_classic_025_strategic-planning-group_1",
+            "instanceId": "c6l",
             "known": true,
             "title": "Strategic Planning Group",
-            "definitionId": "onr_classic_025_strategic-planning-group",
+            "definitionId": 29,
             "type": "asset",
             "subtypes": [
               "node",
@@ -134,10 +134,10 @@
       },
       "opponent": {
         "identity": {
-          "instanceId": "runner_runner_identity_001_0",
+          "instanceId": "c3mg",
           "known": true,
           "title": "Runner",
-          "definitionId": "runner_identity_001",
+          "definitionId": 587,
           "type": "identity",
           "subtypes": [],
           "rulesText": "Technische Seitenidentität ohne aktive Fähigkeit.",
@@ -159,10 +159,10 @@
         "scoreArea": [],
         "rig": [
           {
-            "instanceId": "runner_onr_proteus_078_armageddon_1",
+            "instanceId": "cu9",
             "known": true,
             "title": "Armageddon",
-            "definitionId": "onr_proteus_078_armageddon",
+            "definitionId": 136,
             "type": "program",
             "subtypes": [
               "random",
@@ -177,10 +177,10 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_onr_v1_014_codecracker_1",
+            "instanceId": "c1e9",
             "known": true,
             "title": "Codecracker",
-            "definitionId": "onr_v1_014_codecracker",
+            "definitionId": 226,
             "type": "program",
             "subtypes": [
               "icebreaker"
@@ -195,10 +195,10 @@
             "controller": "runner"
           },
           {
-            "instanceId": "corp_onr_classic_004_theorem-proof_2",
+            "instanceId": "c1y",
             "known": true,
             "title": "Theorem Proof",
-            "definitionId": "onr_classic_004_theorem-proof",
+            "definitionId": 8,
             "type": "agenda",
             "subtypes": [
               "research"
@@ -218,7 +218,7 @@
             "controller": "runner"
           },
           {
-            "instanceId": "hidden_runner_resource_3d344ba0",
+            "instanceId": "s0",
             "known": false,
             "type": "resource",
             "subtypes": [
@@ -240,10 +240,10 @@
           "label": "HQ",
           "ice": [
             {
-              "instanceId": "corp_onr_classic_006_bolter-swarm_2",
+              "instanceId": "c2e",
               "known": true,
               "title": "Bolter Swarm",
-              "definitionId": "onr_classic_006_bolter-swarm",
+              "definitionId": 10,
               "type": "ice",
               "subtypes": [
                 "ap",
@@ -260,8 +260,8 @@
               "controller": "corp",
               "effectivePostRezRunQuote": {
                 "context": "installed_post_rez",
-                "cardId": "corp_onr_classic_006_bolter-swarm_2",
-                "iceDefinitionId": "onr_classic_006_bolter-swarm",
+                "cardId": "c2e",
+                "iceDefinitionId": 10,
                 "targetServerId": "hq",
                 "projectedServerId": "hq",
                 "expiresAtStateVersion": 42,
@@ -270,7 +270,7 @@
               },
               "effectiveRezCostQuote": {
                 "context": "installed",
-                "cardId": "corp_onr_classic_006_bolter-swarm_2",
+                "cardId": "c2e",
                 "targetServerId": "hq",
                 "projectedServerId": "hq",
                 "expiresAtStateVersion": 42,
@@ -284,7 +284,7 @@
               },
               "effectiveRezResourceExchangeQuote": {
                 "context": "installed",
-                "cardId": "corp_onr_classic_006_bolter-swarm_2",
+                "cardId": "c2e",
                 "targetServerId": "hq",
                 "projectedServerId": "hq",
                 "expiresAtStateVersion": 42,
@@ -295,10 +295,10 @@
           ],
           "root": [
             {
-              "instanceId": "corp_onr_classic_024_sterdroid_1",
+              "instanceId": "c6d",
               "known": true,
               "title": "Sterdroid",
-              "definitionId": "onr_classic_024_sterdroid",
+              "definitionId": 28,
               "type": "upgrade",
               "subtypes": [],
               "rulesText": "[3], [T]: Choose a piece of ice. That ice's strength is doubled until end of turn. If this would raise the ice's strength above 10, its strength becomes 10.",
@@ -316,10 +316,10 @@
           "label": "R&D",
           "ice": [
             {
-              "instanceId": "corp_onr_classic_006_bolter-swarm_1",
+              "instanceId": "c2d",
               "known": true,
               "title": "Bolter Swarm",
-              "definitionId": "onr_classic_006_bolter-swarm",
+              "definitionId": 10,
               "type": "ice",
               "subtypes": [
                 "ap",
@@ -336,8 +336,8 @@
               "controller": "corp",
               "effectivePostRezRunQuote": {
                 "context": "installed_post_rez",
-                "cardId": "corp_onr_classic_006_bolter-swarm_1",
-                "iceDefinitionId": "onr_classic_006_bolter-swarm",
+                "cardId": "c2d",
+                "iceDefinitionId": 10,
                 "targetServerId": "rd",
                 "projectedServerId": "rd",
                 "expiresAtStateVersion": 42,
@@ -346,7 +346,7 @@
               },
               "effectiveRezCostQuote": {
                 "context": "installed",
-                "cardId": "corp_onr_classic_006_bolter-swarm_1",
+                "cardId": "c2d",
                 "targetServerId": "rd",
                 "projectedServerId": "rd",
                 "expiresAtStateVersion": 42,
@@ -360,7 +360,7 @@
               },
               "effectiveRezResourceExchangeQuote": {
                 "context": "installed",
-                "cardId": "corp_onr_classic_006_bolter-swarm_1",
+                "cardId": "c2d",
                 "targetServerId": "rd",
                 "projectedServerId": "rd",
                 "expiresAtStateVersion": 42,
@@ -377,10 +377,10 @@
           "ice": [],
           "root": [
             {
-              "instanceId": "corp_onr_classic_025_strategic-planning-group_1",
+              "instanceId": "c6l",
               "known": true,
               "title": "Strategic Planning Group",
-              "definitionId": "onr_classic_025_strategic-planning-group",
+              "definitionId": 29,
               "type": "asset",
               "subtypes": [
                 "node",
@@ -397,14 +397,14 @@
           ]
         },
         {
-          "id": "remote_1",
+          "id": "r1",
           "label": "Remote 1",
           "ice": [
             {
-              "instanceId": "corp_onr_classic_008_deadeye_1",
+              "instanceId": "c2t",
               "known": true,
               "title": "Deadeye",
-              "definitionId": "onr_classic_008_deadeye",
+              "definitionId": 12,
               "type": "ice",
               "subtypes": [
                 "killer",
@@ -419,32 +419,32 @@
               "owner": "corp",
               "controller": "corp",
               "effectiveRunQuote": {
-                "iceInstanceId": "corp_onr_classic_008_deadeye_1",
-                "iceDefinitionId": "onr_classic_008_deadeye",
+                "iceInstanceId": "c2t",
+                "iceDefinitionId": 12,
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "subroutine_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
-                    "sourceDefinitionId": "onr_classic_008_deadeye",
+                    "sourceDefinitionId": 12,
                     "sourceTitle": "Deadeye",
                     "unbrokenRunEffect": {
                       "causesDamageOrProgramTrash": true
                     }
                   },
                   {
-                    "id": "subroutine_end_run",
+                    "id": "1",
                     "type": "end_the_run",
-                    "sourceDefinitionId": "onr_classic_008_deadeye",
+                    "sourceDefinitionId": 12,
                     "sourceTitle": "Deadeye"
                   }
                 ]
               },
               "effectiveRezResourceExchangeQuote": {
                 "context": "installed",
-                "cardId": "corp_onr_classic_008_deadeye_1",
-                "targetServerId": "remote_1",
-                "projectedServerId": "remote_1",
+                "cardId": "c2t",
+                "targetServerId": "r1",
+                "projectedServerId": "r1",
                 "expiresAtStateVersion": 42,
                 "complete": false,
                 "reason": "not_current_approached_ice"
@@ -453,10 +453,10 @@
           ],
           "root": [
             {
-              "instanceId": "corp_onr_classic_003_unlisted-research-lab_3",
+              "instanceId": "c1r",
               "known": true,
               "title": "Unlisted Research Lab",
-              "definitionId": "onr_classic_003_unlisted-research-lab",
+              "definitionId": 7,
               "type": "agenda",
               "subtypes": [
                 "asset",
@@ -481,8 +481,8 @@
               "controller": "corp",
               "scoreContinuationQuote": {
                 "context": "installed_agenda",
-                "agendaCardId": "corp_onr_classic_003_unlisted-research-lab_3",
-                "serverId": "remote_1",
+                "agendaCardId": "c1r",
+                "serverId": "r1",
                 "expiresAtStateVersion": 42,
                 "complete": true,
                 "remainingAdvancementCounters": 2,
@@ -527,19 +527,19 @@
         }
       ],
       "run": {
-        "runId": "run_39",
-        "attackedServerId": "remote_1",
+        "runId": 39,
+        "attackedServerId": "r1",
         "phase": "encounter_ice",
         "position": {
           "kind": "ice",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "iceIndex": 0
         },
         "encounteredIce": {
-          "instanceId": "corp_onr_classic_008_deadeye_1",
+          "instanceId": "c2t",
           "known": true,
           "title": "Deadeye",
-          "definitionId": "onr_classic_008_deadeye",
+          "definitionId": 12,
           "type": "ice",
           "subtypes": [
             "killer",
@@ -554,23 +554,23 @@
           "owner": "corp",
           "controller": "corp",
           "effectiveRunQuote": {
-            "iceInstanceId": "corp_onr_classic_008_deadeye_1",
-            "iceDefinitionId": "onr_classic_008_deadeye",
+            "iceInstanceId": "c2t",
+            "iceDefinitionId": 12,
             "effectiveStrength": 0,
             "subroutines": [
               {
-                "id": "subroutine_trash_program",
+                "id": "0",
                 "type": "trash_installed_program",
-                "sourceDefinitionId": "onr_classic_008_deadeye",
+                "sourceDefinitionId": 12,
                 "sourceTitle": "Deadeye",
                 "unbrokenRunEffect": {
                   "causesDamageOrProgramTrash": true
                 }
               },
               {
-                "id": "subroutine_end_run",
+                "id": "1",
                 "type": "end_the_run",
-                "sourceDefinitionId": "onr_classic_008_deadeye",
+                "sourceDefinitionId": 12,
                 "sourceTitle": "Deadeye"
               }
             ]
@@ -582,7 +582,7 @@
       "deckMetadata": {
         "own": {
           "side": "corp",
-          "identityCardId": "corp_identity_001",
+          "identityCardId": 3,
           "deckName": "Classic Corp - Remote Lab Deflection",
           "cardPoolSnapshotId": "card-snapshot-0.8",
           "cardPoolVersion": "private-local-onr-v1-plus-classic-playtest",
@@ -592,7 +592,7 @@
         },
         "opponent": {
           "side": "runner",
-          "identityCardId": "runner_identity_001",
+          "identityCardId": 587,
           "deckName": "Purge Window",
           "cardPoolSnapshotId": "card-snapshot-0.8",
           "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
@@ -604,24 +604,24 @@
       "pendingChoice": {
         "choiceId": "trash_installed_program_42",
         "side": "corp",
-        "source": "card_implementation.trash_installed_program:run_39:corp_onr_classic_008_deadeye_1:0:onr_classic_008_deadeye:subroutine_trash_program:trash_installed_program:encounter",
+        "source": "card_implementation.trash_installed_program:39:c2t:0:12:0:trash_installed_program:encounter",
         "prompt": "Deadeye: installiertes Programm zum Trashing wählen.",
         "kind": "select_cards",
         "options": [
           {
-            "id": "card_runner_onr_proteus_078_armageddon_1",
+            "id": "card_cu9",
             "label": "Armageddon",
-            "value": "runner_onr_proteus_078_armageddon_1"
+            "value": "cu9"
           },
           {
-            "id": "card_runner_onr_v1_014_codecracker_1",
+            "id": "card_c1e9",
             "label": "Codecracker",
-            "value": "runner_onr_v1_014_codecracker_1"
+            "value": "c1e9"
           },
           {
-            "id": "card_corp_onr_classic_004_theorem-proof_2",
+            "id": "card_c1y",
             "label": "Theorem Proof",
-            "value": "corp_onr_classic_004_theorem-proof_2"
+            "value": "c1y"
           }
         ],
         "minSelections": 1,
@@ -631,7 +631,7 @@
       },
       "publicEvents": [
         {
-          "eventId": "evt_0",
+          "eventId": 1,
           "type": "game_created",
           "stateVersionBefore": 0,
           "stateVersionAfter": 0,
@@ -657,7 +657,7 @@
               "deckName": "Purge Window",
               "deckHash": "fnv1a:5249fb86",
               "side": "runner",
-              "identityCardId": "runner_identity_001",
+              "identityCardId": 587,
               "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
               "cardPoolSnapshotId": "card-snapshot-0.8"
             },
@@ -665,14 +665,14 @@
               "deckName": "Classic Corp - Remote Lab Deflection",
               "deckHash": "fnv1a:a0f49f33",
               "side": "corp",
-              "identityCardId": "corp_identity_001",
+              "identityCardId": 3,
               "formatProfileId": "netgrid_private_local_classic_playtest_v1",
               "cardPoolSnapshotId": "card-snapshot-0.8"
             }
           }
         },
         {
-          "eventId": "evt_1",
+          "eventId": 2,
           "type": "resolve_choice",
           "stateVersionBefore": 0,
           "stateVersionAfter": 1,
@@ -703,7 +703,7 @@
           }
         },
         {
-          "eventId": "evt_2",
+          "eventId": 3,
           "type": "resolve_choice",
           "stateVersionBefore": 1,
           "stateVersionAfter": 2,
@@ -734,7 +734,7 @@
           }
         },
         {
-          "eventId": "evt_3",
+          "eventId": 4,
           "type": "mandatory_draw",
           "stateVersionBefore": 2,
           "stateVersionAfter": 3,
@@ -761,7 +761,7 @@
           }
         },
         {
-          "eventId": "evt_4",
+          "eventId": 5,
           "type": "install_card",
           "stateVersionBefore": 3,
           "stateVersionAfter": 4,
@@ -789,7 +789,7 @@
           }
         },
         {
-          "eventId": "evt_5",
+          "eventId": 6,
           "type": "install_card",
           "stateVersionBefore": 4,
           "stateVersionAfter": 5,
@@ -817,7 +817,7 @@
           }
         },
         {
-          "eventId": "evt_6",
+          "eventId": 7,
           "type": "draw_card",
           "stateVersionBefore": 5,
           "stateVersionAfter": 6,
@@ -838,7 +838,7 @@
           }
         },
         {
-          "eventId": "evt_7",
+          "eventId": 8,
           "type": "end_turn",
           "stateVersionBefore": 6,
           "stateVersionAfter": 7,
@@ -855,7 +855,7 @@
           }
         },
         {
-          "eventId": "evt_8",
+          "eventId": 9,
           "type": "install_card",
           "stateVersionBefore": 7,
           "stateVersionAfter": 8,
@@ -867,7 +867,7 @@
             "actionType": "install_card",
             "label": "Armageddon installieren",
             "title": "Armageddon",
-            "cardDefinitionId": "onr_proteus_078_armageddon",
+            "cardDefinitionId": 136,
             "effectKind": "install_card",
             "runnerCreditsAfter": 4,
             "amounts": {
@@ -879,7 +879,7 @@
           }
         },
         {
-          "eventId": "evt_9",
+          "eventId": 10,
           "type": "start_run",
           "stateVersionBefore": 8,
           "stateVersionAfter": 9,
@@ -908,7 +908,7 @@
           }
         },
         {
-          "eventId": "evt_10",
+          "eventId": 11,
           "type": "decline_rez",
           "stateVersionBefore": 9,
           "stateVersionAfter": 10,
@@ -925,7 +925,7 @@
           }
         },
         {
-          "eventId": "evt_11",
+          "eventId": 12,
           "type": "continue_run",
           "stateVersionBefore": 10,
           "stateVersionAfter": 11,
@@ -948,7 +948,7 @@
           }
         },
         {
-          "eventId": "evt_12",
+          "eventId": 13,
           "type": "access_card",
           "stateVersionBefore": 11,
           "stateVersionAfter": 12,
@@ -971,7 +971,7 @@
           }
         },
         {
-          "eventId": "evt_13",
+          "eventId": 14,
           "type": "decline_trash",
           "stateVersionBefore": 12,
           "stateVersionAfter": 13,
@@ -992,7 +992,7 @@
           }
         },
         {
-          "eventId": "evt_14",
+          "eventId": 15,
           "type": "install_card",
           "stateVersionBefore": 13,
           "stateVersionAfter": 14,
@@ -1004,7 +1004,7 @@
             "actionType": "install_card",
             "label": "Codecracker installieren",
             "title": "Codecracker",
-            "cardDefinitionId": "onr_v1_014_codecracker",
+            "cardDefinitionId": 226,
             "effectKind": "install_card",
             "runnerCreditsAfter": 2,
             "amounts": {
@@ -1016,7 +1016,7 @@
           }
         },
         {
-          "eventId": "evt_15",
+          "eventId": 16,
           "type": "draw_card",
           "stateVersionBefore": 14,
           "stateVersionAfter": 15,
@@ -1037,7 +1037,7 @@
           }
         },
         {
-          "eventId": "evt_16",
+          "eventId": 17,
           "type": "end_turn",
           "stateVersionBefore": 15,
           "stateVersionAfter": 16,
@@ -1054,7 +1054,7 @@
           }
         },
         {
-          "eventId": "evt_17",
+          "eventId": 18,
           "type": "mandatory_draw",
           "stateVersionBefore": 16,
           "stateVersionAfter": 17,
@@ -1081,7 +1081,7 @@
           }
         },
         {
-          "eventId": "evt_18",
+          "eventId": 19,
           "type": "install_card",
           "stateVersionBefore": 17,
           "stateVersionAfter": 18,
@@ -1109,7 +1109,7 @@
           }
         },
         {
-          "eventId": "evt_19",
+          "eventId": 20,
           "type": "draw_card",
           "stateVersionBefore": 18,
           "stateVersionAfter": 19,
@@ -1130,7 +1130,7 @@
           }
         },
         {
-          "eventId": "evt_20",
+          "eventId": 21,
           "type": "gain_credit",
           "stateVersionBefore": 19,
           "stateVersionAfter": 20,
@@ -1155,7 +1155,7 @@
           }
         },
         {
-          "eventId": "evt_21",
+          "eventId": 22,
           "type": "end_turn",
           "stateVersionBefore": 20,
           "stateVersionAfter": 21,
@@ -1172,7 +1172,7 @@
           }
         },
         {
-          "eventId": "evt_22",
+          "eventId": 23,
           "type": "resolve_choice",
           "stateVersionBefore": 21,
           "stateVersionAfter": 22,
@@ -1203,7 +1203,7 @@
           }
         },
         {
-          "eventId": "evt_23",
+          "eventId": 24,
           "type": "play_event",
           "stateVersionBefore": 22,
           "stateVersionAfter": 23,
@@ -1215,7 +1215,7 @@
             "actionType": "play_event",
             "label": "Bodyweight™ Synthetic Blood spielen",
             "title": "Bodyweight™ Synthetic Blood",
-            "cardDefinitionId": "onr_v1_079_bodyweight-synthetic-blood",
+            "cardDefinitionId": 291,
             "runnerCreditsAfter": 0,
             "amounts": {
               "runnerCreditsAfter": 0
@@ -1225,20 +1225,20 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "onr_v1_079_bodyweight-synthetic-blood.effect.0.draw_cards",
+                "effectId": 0,
                 "kind": "draw_cards",
                 "visibility": "public",
                 "side": "runner",
                 "amount": 5,
                 "reason": "card_resolver",
-                "sourceDefinitionId": "onr_v1_079_bodyweight-synthetic-blood",
+                "sourceDefinitionId": 291,
                 "sourceTitle": "Bodyweight™ Synthetic Blood"
               }
             ]
           }
         },
         {
-          "eventId": "evt_24",
+          "eventId": 25,
           "type": "install_card",
           "stateVersionBefore": 23,
           "stateVersionAfter": 24,
@@ -1250,7 +1250,7 @@
             "actionType": "install_card",
             "label": "Runner installiert eine verdeckte Resource.",
             "redactedKind": "hidden_runner_resource",
-            "hiddenResourceSlotId": "hidden_runner_resource_3d344ba0",
+            "hiddenResourceSlotId": "s1xjc7uf",
             "hiddenRunnerResourceInstall": true,
             "effectKind": "install_card",
             "runnerCreditsAfter": 0,
@@ -1267,7 +1267,7 @@
           }
         },
         {
-          "eventId": "evt_25",
+          "eventId": 26,
           "type": "play_event",
           "stateVersionBefore": 24,
           "stateVersionAfter": 25,
@@ -1279,7 +1279,7 @@
             "actionType": "play_event",
             "label": "Livewire’s Contacts spielen",
             "title": "Livewire’s Contacts",
-            "cardDefinitionId": "onr_v1_097_livewires-contacts",
+            "cardDefinitionId": 309,
             "abilityFamily": "payment-costs",
             "effectKind": "gain_credits",
             "gainedCredits": 3,
@@ -1295,20 +1295,20 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "onr_v1_097_livewires-contacts.effect.0.gain_credits",
+                "effectId": 0,
                 "kind": "gain_credits",
                 "visibility": "public",
                 "side": "runner",
                 "amount": 3,
                 "reason": "card_resolver",
-                "sourceDefinitionId": "onr_v1_097_livewires-contacts",
+                "sourceDefinitionId": 309,
                 "sourceTitle": "Livewire’s Contacts"
               }
             ]
           }
         },
         {
-          "eventId": "evt_26",
+          "eventId": 27,
           "type": "start_run",
           "stateVersionBefore": 25,
           "stateVersionAfter": 26,
@@ -1337,7 +1337,7 @@
           }
         },
         {
-          "eventId": "evt_27",
+          "eventId": 28,
           "type": "decline_rez",
           "stateVersionBefore": 26,
           "stateVersionAfter": 27,
@@ -1354,7 +1354,7 @@
           }
         },
         {
-          "eventId": "evt_28",
+          "eventId": 29,
           "type": "continue_run",
           "stateVersionBefore": 27,
           "stateVersionAfter": 28,
@@ -1377,7 +1377,7 @@
           }
         },
         {
-          "eventId": "evt_29",
+          "eventId": 30,
           "type": "decline_rez",
           "stateVersionBefore": 28,
           "stateVersionAfter": 29,
@@ -1398,7 +1398,7 @@
           }
         },
         {
-          "eventId": "evt_30",
+          "eventId": 31,
           "type": "access_card",
           "stateVersionBefore": 29,
           "stateVersionAfter": 30,
@@ -1421,7 +1421,7 @@
           }
         },
         {
-          "eventId": "evt_31",
+          "eventId": 32,
           "type": "steal_agenda",
           "stateVersionBefore": 30,
           "stateVersionAfter": 31,
@@ -1433,12 +1433,12 @@
             "actionType": "steal_agenda",
             "label": "Theorem Proof als Programm installieren",
             "title": "Theorem Proof",
-            "cardDefinitionId": "onr_classic_004_theorem-proof",
-            "sourceDefinitionId": "onr_classic_004_theorem-proof",
+            "cardDefinitionId": 8,
+            "sourceDefinitionId": 8,
             "serverLabel": "R&D",
             "abilityFamily": "agenda-scoring",
             "targets": {
-              "sourceDefinitionId": "onr_classic_004_theorem-proof",
+              "sourceDefinitionId": 8,
               "serverLabel": "R&D"
             },
             "visibility": {
@@ -1447,7 +1447,7 @@
           }
         },
         {
-          "eventId": "evt_32",
+          "eventId": 33,
           "type": "end_turn",
           "stateVersionBefore": 31,
           "stateVersionAfter": 32,
@@ -1464,7 +1464,7 @@
           }
         },
         {
-          "eventId": "evt_33",
+          "eventId": 34,
           "type": "resolve_choice",
           "stateVersionBefore": 32,
           "stateVersionAfter": 33,
@@ -1495,7 +1495,7 @@
           }
         },
         {
-          "eventId": "evt_34",
+          "eventId": 35,
           "type": "mandatory_draw",
           "stateVersionBefore": 33,
           "stateVersionAfter": 34,
@@ -1522,7 +1522,7 @@
           }
         },
         {
-          "eventId": "evt_35",
+          "eventId": 36,
           "type": "install_card",
           "stateVersionBefore": 34,
           "stateVersionAfter": 35,
@@ -1533,7 +1533,7 @@
             "actor": "corp",
             "actionType": "install_card",
             "label": "Korp installiert eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "ice",
             "redactedKind": "installed_card",
@@ -1550,7 +1550,7 @@
           }
         },
         {
-          "eventId": "evt_36",
+          "eventId": 37,
           "type": "install_card",
           "stateVersionBefore": 35,
           "stateVersionAfter": 36,
@@ -1561,7 +1561,7 @@
             "actor": "corp",
             "actionType": "install_card",
             "label": "Korp installiert eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -1578,7 +1578,7 @@
           }
         },
         {
-          "eventId": "evt_37",
+          "eventId": 38,
           "type": "advance_card",
           "stateVersionBefore": 36,
           "stateVersionAfter": 37,
@@ -1589,7 +1589,7 @@
             "actor": "corp",
             "actionType": "advance_card",
             "label": "Korp advanced eine Karte.",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "root",
             "redactedKind": "installed_card",
@@ -1605,7 +1605,7 @@
           }
         },
         {
-          "eventId": "evt_38",
+          "eventId": 39,
           "type": "end_turn",
           "stateVersionBefore": 37,
           "stateVersionAfter": 38,
@@ -1622,7 +1622,7 @@
           }
         },
         {
-          "eventId": "evt_39",
+          "eventId": 40,
           "type": "start_run",
           "stateVersionBefore": 38,
           "stateVersionAfter": 39,
@@ -1633,7 +1633,7 @@
             "actor": "runner",
             "actionType": "start_run",
             "label": "Run auf Remote 1",
-            "serverId": "remote_1",
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "abilityFamily": "run-access",
             "effectKind": "run",
@@ -1651,7 +1651,7 @@
           }
         },
         {
-          "eventId": "evt_40",
+          "eventId": 41,
           "type": "rez_ice",
           "stateVersionBefore": 39,
           "stateVersionAfter": 40,
@@ -1663,8 +1663,8 @@
             "actionType": "rez_ice",
             "label": "Deadeye rezzen",
             "title": "Deadeye",
-            "cardDefinitionId": "onr_classic_008_deadeye",
-            "serverId": "remote_1",
+            "cardDefinitionId": 12,
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "installPlacement": "ice",
             "installedPositionKey": "installed-position-v1:0169f63b",
@@ -1678,7 +1678,7 @@
           }
         },
         {
-          "eventId": "evt_41",
+          "eventId": 42,
           "type": "decline_rez",
           "stateVersionBefore": 40,
           "stateVersionAfter": 41,
@@ -1695,7 +1695,7 @@
           }
         },
         {
-          "eventId": "evt_42",
+          "eventId": 43,
           "type": "continue_run",
           "stateVersionBefore": 41,
           "stateVersionAfter": 42,
@@ -1706,12 +1706,12 @@
             "actor": "runner",
             "actionType": "continue_run",
             "label": "Subroutinen auslösen (Run endet)",
-            "sourceDefinitionId": "onr_classic_008_deadeye",
-            "serverId": "remote_1",
+            "sourceDefinitionId": 12,
+            "serverId": "r1",
             "serverLabel": "Remote 1",
             "abilityFamily": "run-access",
             "targets": {
-              "sourceDefinitionId": "onr_classic_008_deadeye",
+              "sourceDefinitionId": 12,
               "serverLabel": "Remote 1"
             },
             "visibility": {
@@ -1719,12 +1719,12 @@
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
                 "reason": "ice_subroutine",
-                "sourceDefinitionId": "onr_classic_008_deadeye",
+                "sourceDefinitionId": 12,
                 "sourceTitle": "Deadeye"
               }
             ]
@@ -1733,7 +1733,7 @@
       ],
       "legalActions": [
         {
-          "actionId": "corp.resolve_choice",
+          "actionId": "cn",
           "side": "corp",
           "type": "resolve_choice",
           "label": "Deadeye: installiertes Programm zum Trashing wählen.",
@@ -1747,9 +1747,9 @@
               "minSelections": 1,
               "maxSelections": 1,
               "optionIds": [
-                "card_runner_onr_proteus_078_armageddon_1",
-                "card_runner_onr_v1_014_codecracker_1",
-                "card_corp_onr_classic_004_theorem-proof_2"
+                "card_cu9",
+                "card_c1e9",
+                "card_c1y"
               ]
             }
           ],
@@ -1763,7 +1763,7 @@
     },
     "eventTail": [
       {
-        "eventId": "evt_0",
+        "eventId": 1,
         "type": "game_created",
         "stateVersionBefore": 0,
         "stateVersionAfter": 0,
@@ -1789,7 +1789,7 @@
             "deckName": "Purge Window",
             "deckHash": "fnv1a:5249fb86",
             "side": "runner",
-            "identityCardId": "runner_identity_001",
+            "identityCardId": 587,
             "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
             "cardPoolSnapshotId": "card-snapshot-0.8"
           },
@@ -1797,14 +1797,14 @@
             "deckName": "Classic Corp - Remote Lab Deflection",
             "deckHash": "fnv1a:a0f49f33",
             "side": "corp",
-            "identityCardId": "corp_identity_001",
+            "identityCardId": 3,
             "formatProfileId": "netgrid_private_local_classic_playtest_v1",
             "cardPoolSnapshotId": "card-snapshot-0.8"
           }
         }
       },
       {
-        "eventId": "evt_1",
+        "eventId": 2,
         "type": "resolve_choice",
         "stateVersionBefore": 0,
         "stateVersionAfter": 1,
@@ -1835,7 +1835,7 @@
         }
       },
       {
-        "eventId": "evt_2",
+        "eventId": 3,
         "type": "resolve_choice",
         "stateVersionBefore": 1,
         "stateVersionAfter": 2,
@@ -1866,7 +1866,7 @@
         }
       },
       {
-        "eventId": "evt_3",
+        "eventId": 4,
         "type": "mandatory_draw",
         "stateVersionBefore": 2,
         "stateVersionAfter": 3,
@@ -1893,7 +1893,7 @@
         }
       },
       {
-        "eventId": "evt_4",
+        "eventId": 5,
         "type": "install_card",
         "stateVersionBefore": 3,
         "stateVersionAfter": 4,
@@ -1921,7 +1921,7 @@
         }
       },
       {
-        "eventId": "evt_5",
+        "eventId": 6,
         "type": "install_card",
         "stateVersionBefore": 4,
         "stateVersionAfter": 5,
@@ -1949,7 +1949,7 @@
         }
       },
       {
-        "eventId": "evt_6",
+        "eventId": 7,
         "type": "draw_card",
         "stateVersionBefore": 5,
         "stateVersionAfter": 6,
@@ -1970,7 +1970,7 @@
         }
       },
       {
-        "eventId": "evt_7",
+        "eventId": 8,
         "type": "end_turn",
         "stateVersionBefore": 6,
         "stateVersionAfter": 7,
@@ -1987,7 +1987,7 @@
         }
       },
       {
-        "eventId": "evt_8",
+        "eventId": 9,
         "type": "install_card",
         "stateVersionBefore": 7,
         "stateVersionAfter": 8,
@@ -1999,7 +1999,7 @@
           "actionType": "install_card",
           "label": "Armageddon installieren",
           "title": "Armageddon",
-          "cardDefinitionId": "onr_proteus_078_armageddon",
+          "cardDefinitionId": 136,
           "effectKind": "install_card",
           "runnerCreditsAfter": 4,
           "amounts": {
@@ -2011,7 +2011,7 @@
         }
       },
       {
-        "eventId": "evt_9",
+        "eventId": 10,
         "type": "start_run",
         "stateVersionBefore": 8,
         "stateVersionAfter": 9,
@@ -2040,7 +2040,7 @@
         }
       },
       {
-        "eventId": "evt_10",
+        "eventId": 11,
         "type": "decline_rez",
         "stateVersionBefore": 9,
         "stateVersionAfter": 10,
@@ -2057,7 +2057,7 @@
         }
       },
       {
-        "eventId": "evt_11",
+        "eventId": 12,
         "type": "continue_run",
         "stateVersionBefore": 10,
         "stateVersionAfter": 11,
@@ -2080,7 +2080,7 @@
         }
       },
       {
-        "eventId": "evt_12",
+        "eventId": 13,
         "type": "access_card",
         "stateVersionBefore": 11,
         "stateVersionAfter": 12,
@@ -2103,7 +2103,7 @@
         }
       },
       {
-        "eventId": "evt_13",
+        "eventId": 14,
         "type": "decline_trash",
         "stateVersionBefore": 12,
         "stateVersionAfter": 13,
@@ -2124,7 +2124,7 @@
         }
       },
       {
-        "eventId": "evt_14",
+        "eventId": 15,
         "type": "install_card",
         "stateVersionBefore": 13,
         "stateVersionAfter": 14,
@@ -2136,7 +2136,7 @@
           "actionType": "install_card",
           "label": "Codecracker installieren",
           "title": "Codecracker",
-          "cardDefinitionId": "onr_v1_014_codecracker",
+          "cardDefinitionId": 226,
           "effectKind": "install_card",
           "runnerCreditsAfter": 2,
           "amounts": {
@@ -2148,7 +2148,7 @@
         }
       },
       {
-        "eventId": "evt_15",
+        "eventId": 16,
         "type": "draw_card",
         "stateVersionBefore": 14,
         "stateVersionAfter": 15,
@@ -2169,7 +2169,7 @@
         }
       },
       {
-        "eventId": "evt_16",
+        "eventId": 17,
         "type": "end_turn",
         "stateVersionBefore": 15,
         "stateVersionAfter": 16,
@@ -2186,7 +2186,7 @@
         }
       },
       {
-        "eventId": "evt_17",
+        "eventId": 18,
         "type": "mandatory_draw",
         "stateVersionBefore": 16,
         "stateVersionAfter": 17,
@@ -2213,7 +2213,7 @@
         }
       },
       {
-        "eventId": "evt_18",
+        "eventId": 19,
         "type": "install_card",
         "stateVersionBefore": 17,
         "stateVersionAfter": 18,
@@ -2241,7 +2241,7 @@
         }
       },
       {
-        "eventId": "evt_19",
+        "eventId": 20,
         "type": "draw_card",
         "stateVersionBefore": 18,
         "stateVersionAfter": 19,
@@ -2262,7 +2262,7 @@
         }
       },
       {
-        "eventId": "evt_20",
+        "eventId": 21,
         "type": "gain_credit",
         "stateVersionBefore": 19,
         "stateVersionAfter": 20,
@@ -2287,7 +2287,7 @@
         }
       },
       {
-        "eventId": "evt_21",
+        "eventId": 22,
         "type": "end_turn",
         "stateVersionBefore": 20,
         "stateVersionAfter": 21,
@@ -2304,7 +2304,7 @@
         }
       },
       {
-        "eventId": "evt_22",
+        "eventId": 23,
         "type": "resolve_choice",
         "stateVersionBefore": 21,
         "stateVersionAfter": 22,
@@ -2335,7 +2335,7 @@
         }
       },
       {
-        "eventId": "evt_23",
+        "eventId": 24,
         "type": "play_event",
         "stateVersionBefore": 22,
         "stateVersionAfter": 23,
@@ -2347,7 +2347,7 @@
           "actionType": "play_event",
           "label": "Bodyweight™ Synthetic Blood spielen",
           "title": "Bodyweight™ Synthetic Blood",
-          "cardDefinitionId": "onr_v1_079_bodyweight-synthetic-blood",
+          "cardDefinitionId": 291,
           "runnerCreditsAfter": 0,
           "amounts": {
             "runnerCreditsAfter": 0
@@ -2357,20 +2357,20 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "onr_v1_079_bodyweight-synthetic-blood.effect.0.draw_cards",
+              "effectId": 0,
               "kind": "draw_cards",
               "visibility": "public",
               "side": "runner",
               "amount": 5,
               "reason": "card_resolver",
-              "sourceDefinitionId": "onr_v1_079_bodyweight-synthetic-blood",
+              "sourceDefinitionId": 291,
               "sourceTitle": "Bodyweight™ Synthetic Blood"
             }
           ]
         }
       },
       {
-        "eventId": "evt_24",
+        "eventId": 25,
         "type": "install_card",
         "stateVersionBefore": 23,
         "stateVersionAfter": 24,
@@ -2382,7 +2382,7 @@
           "actionType": "install_card",
           "label": "Runner installiert eine verdeckte Resource.",
           "redactedKind": "hidden_runner_resource",
-          "hiddenResourceSlotId": "hidden_runner_resource_3d344ba0",
+          "hiddenResourceSlotId": "s1xjc7uf",
           "hiddenRunnerResourceInstall": true,
           "effectKind": "install_card",
           "runnerCreditsAfter": 0,
@@ -2399,7 +2399,7 @@
         }
       },
       {
-        "eventId": "evt_25",
+        "eventId": 26,
         "type": "play_event",
         "stateVersionBefore": 24,
         "stateVersionAfter": 25,
@@ -2411,7 +2411,7 @@
           "actionType": "play_event",
           "label": "Livewire’s Contacts spielen",
           "title": "Livewire’s Contacts",
-          "cardDefinitionId": "onr_v1_097_livewires-contacts",
+          "cardDefinitionId": 309,
           "abilityFamily": "payment-costs",
           "effectKind": "gain_credits",
           "gainedCredits": 3,
@@ -2427,20 +2427,20 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "onr_v1_097_livewires-contacts.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
               "amount": 3,
               "reason": "card_resolver",
-              "sourceDefinitionId": "onr_v1_097_livewires-contacts",
+              "sourceDefinitionId": 309,
               "sourceTitle": "Livewire’s Contacts"
             }
           ]
         }
       },
       {
-        "eventId": "evt_26",
+        "eventId": 27,
         "type": "start_run",
         "stateVersionBefore": 25,
         "stateVersionAfter": 26,
@@ -2469,7 +2469,7 @@
         }
       },
       {
-        "eventId": "evt_27",
+        "eventId": 28,
         "type": "decline_rez",
         "stateVersionBefore": 26,
         "stateVersionAfter": 27,
@@ -2486,7 +2486,7 @@
         }
       },
       {
-        "eventId": "evt_28",
+        "eventId": 29,
         "type": "continue_run",
         "stateVersionBefore": 27,
         "stateVersionAfter": 28,
@@ -2509,7 +2509,7 @@
         }
       },
       {
-        "eventId": "evt_29",
+        "eventId": 30,
         "type": "decline_rez",
         "stateVersionBefore": 28,
         "stateVersionAfter": 29,
@@ -2530,7 +2530,7 @@
         }
       },
       {
-        "eventId": "evt_30",
+        "eventId": 31,
         "type": "access_card",
         "stateVersionBefore": 29,
         "stateVersionAfter": 30,
@@ -2553,7 +2553,7 @@
         }
       },
       {
-        "eventId": "evt_31",
+        "eventId": 32,
         "type": "steal_agenda",
         "stateVersionBefore": 30,
         "stateVersionAfter": 31,
@@ -2565,12 +2565,12 @@
           "actionType": "steal_agenda",
           "label": "Theorem Proof als Programm installieren",
           "title": "Theorem Proof",
-          "cardDefinitionId": "onr_classic_004_theorem-proof",
-          "sourceDefinitionId": "onr_classic_004_theorem-proof",
+          "cardDefinitionId": 8,
+          "sourceDefinitionId": 8,
           "serverLabel": "R&D",
           "abilityFamily": "agenda-scoring",
           "targets": {
-            "sourceDefinitionId": "onr_classic_004_theorem-proof",
+            "sourceDefinitionId": 8,
             "serverLabel": "R&D"
           },
           "visibility": {
@@ -2579,7 +2579,7 @@
         }
       },
       {
-        "eventId": "evt_32",
+        "eventId": 33,
         "type": "end_turn",
         "stateVersionBefore": 31,
         "stateVersionAfter": 32,
@@ -2596,7 +2596,7 @@
         }
       },
       {
-        "eventId": "evt_33",
+        "eventId": 34,
         "type": "resolve_choice",
         "stateVersionBefore": 32,
         "stateVersionAfter": 33,
@@ -2627,7 +2627,7 @@
         }
       },
       {
-        "eventId": "evt_34",
+        "eventId": 35,
         "type": "mandatory_draw",
         "stateVersionBefore": 33,
         "stateVersionAfter": 34,
@@ -2654,7 +2654,7 @@
         }
       },
       {
-        "eventId": "evt_35",
+        "eventId": 36,
         "type": "install_card",
         "stateVersionBefore": 34,
         "stateVersionAfter": 35,
@@ -2665,7 +2665,7 @@
           "actor": "corp",
           "actionType": "install_card",
           "label": "Korp installiert eine Karte.",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "ice",
           "redactedKind": "installed_card",
@@ -2682,7 +2682,7 @@
         }
       },
       {
-        "eventId": "evt_36",
+        "eventId": 37,
         "type": "install_card",
         "stateVersionBefore": 35,
         "stateVersionAfter": 36,
@@ -2693,7 +2693,7 @@
           "actor": "corp",
           "actionType": "install_card",
           "label": "Korp installiert eine Karte.",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "root",
           "redactedKind": "installed_card",
@@ -2710,7 +2710,7 @@
         }
       },
       {
-        "eventId": "evt_37",
+        "eventId": 38,
         "type": "advance_card",
         "stateVersionBefore": 36,
         "stateVersionAfter": 37,
@@ -2721,7 +2721,7 @@
           "actor": "corp",
           "actionType": "advance_card",
           "label": "Korp advanced eine Karte.",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "root",
           "redactedKind": "installed_card",
@@ -2737,7 +2737,7 @@
         }
       },
       {
-        "eventId": "evt_38",
+        "eventId": 39,
         "type": "end_turn",
         "stateVersionBefore": 37,
         "stateVersionAfter": 38,
@@ -2754,7 +2754,7 @@
         }
       },
       {
-        "eventId": "evt_39",
+        "eventId": 40,
         "type": "start_run",
         "stateVersionBefore": 38,
         "stateVersionAfter": 39,
@@ -2765,7 +2765,7 @@
           "actor": "runner",
           "actionType": "start_run",
           "label": "Run auf Remote 1",
-          "serverId": "remote_1",
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "abilityFamily": "run-access",
           "effectKind": "run",
@@ -2783,7 +2783,7 @@
         }
       },
       {
-        "eventId": "evt_40",
+        "eventId": 41,
         "type": "rez_ice",
         "stateVersionBefore": 39,
         "stateVersionAfter": 40,
@@ -2795,8 +2795,8 @@
           "actionType": "rez_ice",
           "label": "Deadeye rezzen",
           "title": "Deadeye",
-          "cardDefinitionId": "onr_classic_008_deadeye",
-          "serverId": "remote_1",
+          "cardDefinitionId": 12,
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "installPlacement": "ice",
           "installedPositionKey": "installed-position-v1:0169f63b",
@@ -2810,7 +2810,7 @@
         }
       },
       {
-        "eventId": "evt_41",
+        "eventId": 42,
         "type": "decline_rez",
         "stateVersionBefore": 40,
         "stateVersionAfter": 41,
@@ -2827,7 +2827,7 @@
         }
       },
       {
-        "eventId": "evt_42",
+        "eventId": 43,
         "type": "continue_run",
         "stateVersionBefore": 41,
         "stateVersionAfter": 42,
@@ -2838,12 +2838,12 @@
           "actor": "runner",
           "actionType": "continue_run",
           "label": "Subroutinen auslösen (Run endet)",
-          "sourceDefinitionId": "onr_classic_008_deadeye",
-          "serverId": "remote_1",
+          "sourceDefinitionId": 12,
+          "serverId": "r1",
           "serverLabel": "Remote 1",
           "abilityFamily": "run-access",
           "targets": {
-            "sourceDefinitionId": "onr_classic_008_deadeye",
+            "sourceDefinitionId": 12,
             "serverLabel": "Remote 1"
           },
           "visibility": {
@@ -2851,12 +2851,12 @@
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
               "reason": "ice_subroutine",
-              "sourceDefinitionId": "onr_classic_008_deadeye",
+              "sourceDefinitionId": 12,
               "sourceTitle": "Deadeye"
             }
           ]
@@ -2865,7 +2865,7 @@
     ],
     "legalActions": [
       {
-        "actionId": "corp.resolve_choice",
+        "actionId": "cn",
         "side": "corp",
         "type": "resolve_choice",
         "label": "Deadeye: installiertes Programm zum Trashing wählen.",
@@ -2879,9 +2879,9 @@
             "minSelections": 1,
             "maxSelections": 1,
             "optionIds": [
-              "card_runner_onr_proteus_078_armageddon_1",
-              "card_runner_onr_v1_014_codecracker_1",
-              "card_corp_onr_classic_004_theorem-proof_2"
+              "card_cu9",
+              "card_c1e9",
+              "card_c1y"
             ]
           }
         ],

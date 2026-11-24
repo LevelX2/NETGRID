@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import { aiDeckPoolData } from "@netgrid/runtime-data/ai-deck-pool";
 import {
   deckFormatProfiles08Data as profilesData,
@@ -107,7 +108,7 @@ type CuratedStandardDeck = {
   status: "active";
   name: string;
   side: "runner" | "corp";
-  identityCardId: string;
+  identityCardId: CardDefinitionId;
   cardPoolSnapshotId: string;
   cardPoolVersion?: string;
   formatProfileId: string;
@@ -468,15 +469,17 @@ function profileAllowedForCardPool(
 }
 
 function cardIdAllowedForCardPool(
-  cardId: string,
+  cardId: CardDefinitionId,
   cardPool: MatchCardPool,
   allowTestCards: boolean,
 ): boolean {
-  if (cardsById[cardId]?.setId === TEST_CARD_SET_ID && !allowTestCards)
+  const card = cardsById[cardId];
+  if (!card) return false;
+  if (card.setId === TEST_CARD_SET_ID && !allowTestCards)
     return false;
-  if (cardId.startsWith("onr_classic_") && !cardPoolIncludesClassic(cardPool))
+  if (card.setId === "classic" && !cardPoolIncludesClassic(cardPool))
     return false;
-  if (cardId.startsWith("onr_proteus_") && !cardPoolIncludesProteus(cardPool))
+  if (card.setId === "proteus" && !cardPoolIncludesProteus(cardPool))
     return false;
   return true;
 }
@@ -587,7 +590,7 @@ function assertAiPairReadiness(
   pair: ResolvedParticipantDeckPair,
   policy: AiDeckPolicy,
 ): void {
-  if (!participantPairUsesSet(pair, "onr_proteus_")) return;
+  if (!participantPairUsesSet(pair, "proteus")) return;
   const requiredStage: AiSupportReadinessStage =
     policy === "fixed" || policy === "seeded_random"
       ? "default_pool_ready"
@@ -599,9 +602,9 @@ function assertAiPairReadiness(
 
 function participantPairUsesSet(
   pair: ResolvedParticipantDeckPair,
-  cardIdPrefix: string,
+  setId: string,
 ): boolean {
   return [pair.runnerSnapshot, pair.corpSnapshot].some((snapshot) =>
-    snapshot.cards.some((entry) => entry.cardId.startsWith(cardIdPrefix)),
+    snapshot.cards.some((entry) => cardsById[entry.cardId]?.setId === setId),
   );
 }

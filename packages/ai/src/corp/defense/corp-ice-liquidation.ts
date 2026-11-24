@@ -2,6 +2,7 @@ import { visibleRunnerHeapBreakerPreparations } from "../../runtime/corp-public-
 import { visibleRunnerNextTurnPreparationCreditGain } from "@netgrid/engine";
 import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { assessCorpScoreProtection } from "../../runtime/corp-score-protection-assessment";
 
 /** Defense owns the bounded proof that one sold layer leaves a blocked path.
@@ -40,7 +41,8 @@ export function assessCorpIceLiquidation(
   );
   if (
     !server ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    input.side !== "corp" ||
+    !actionMatchesCurrentDecision(input, action) ||
     action.payload?.gainedCredits !== effect.gainCredits
   )
     return { status: "unknown", reason: "missing_current_liquidation_binding" };

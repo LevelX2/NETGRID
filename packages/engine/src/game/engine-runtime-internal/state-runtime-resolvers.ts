@@ -50,6 +50,7 @@ import {
   type SetupState,
   type Side,
   type StateHash,
+  type TraceId,
   type TraceSuccessEffect,
   type ValidationResult,
   type VisibleCard,
@@ -599,7 +600,7 @@ export function createStateRuntimeResolvers(
     state: GameState,
     sourceDefinitionId: CardDefinitionId,
     sourceCardInstanceId: CardInstanceId,
-    traceId: string,
+    traceId: TraceId,
     damageAmount: number,
     legalAction: LegalAction,
   ): {
@@ -662,7 +663,8 @@ export function createStateRuntimeResolvers(
     if (
       !continuation ||
       continuation.stage !== "select_hardware" ||
-      !choice?.source.startsWith("trace_success.hardware_wrecker:")
+      choice?.source !== `trace_success.hardware_wrecker:${continuation.traceId}` ||
+      choice.choiceId !== `trace_hardware_wrecker_${continuation.traceId}_${choice.stateVersion}`
     )
       throw new Error("Es ist keine Trace-Hardware-Auswahl offen.");
     if (legalAction.side !== "corp" || playerAction.side !== "corp")
@@ -737,6 +739,7 @@ export function createStateRuntimeResolvers(
       damageType: "meat",
       amount: continuation.damageAmount,
       source: `trace_success:${continuation.sourceDefinitionId}`,
+      randomSource: ["c", continuation.sourceDefinitionId, continuation.sourceCardInstanceId],
     });
     event.payload = { ...event.payload, cannotBePrevented: true };
     if (openDamageResolutionWindow(state, event, legalAction)) return;
@@ -756,7 +759,7 @@ export function createStateRuntimeResolvers(
     state: GameState,
     sourceDefinitionId: CardDefinitionId,
     sourceCardInstanceId: CardInstanceId,
-    traceId: string,
+    traceId: TraceId,
     targetCardId: CardInstanceId | undefined,
   ): NonNullable<LegalAction["payload"]> {
     if (
@@ -767,7 +770,10 @@ export function createStateRuntimeResolvers(
         "Die Runner-Resource ist fuer diesen Trace nicht mehr legal.",
       );
     const hiddenResource = isConcealedRunnerResource(state, targetCardId);
-    const hiddenResourceSlotId = hiddenRunnerResourceSlotId(targetCardId);
+    const hiddenResourceSlotId = hiddenRunnerResourceSlotId(
+      state,
+      targetCardId,
+    );
     const targetDefinitionId = definitionFor(state, targetCardId).id;
     deps.trashRunnerInstalledCardToHeap(state, targetCardId);
     return {
@@ -891,6 +897,7 @@ export function createStateRuntimeResolvers(
             damageType: command.damageType,
             amount: command.amount,
             source: command.source ?? "effect_command",
+            randomSource: command.randomSource,
           });
           break;
         case "remove_tag":
@@ -1698,7 +1705,7 @@ export function createStateRuntimeResolvers(
       hostedCreditsSpent: 0,
       recurringCreditsSpent: 0,
       temporaryCreditsSpent: 0,
-      sourceDefinitionIds: [] as string[],
+      sourceDefinitionIds: [] as CardDefinitionId[],
       runnerCreditsAfter: state.runner.credits,
     };
     if (amount <= 0) return result;
@@ -1712,7 +1719,7 @@ export function createStateRuntimeResolvers(
       throw new Error(
         "Der Runner kann die Installationskosten nicht bezahlen.",
       );
-    const sourceDefinitionIds = new Set<string>();
+    const sourceDefinitionIds = new Set<CardDefinitionId>();
     const declaredSourcePayments =
       runnerInstallPaymentSourcePaymentsFromPayload(paymentPayload);
     if (declaredSourcePayments) {
@@ -1766,7 +1773,9 @@ export function createStateRuntimeResolvers(
       }
       spendCredits(state, "runner", remaining);
       result.normalCreditsSpent = remaining;
-      result.sourceDefinitionIds = [...sourceDefinitionIds].sort();
+      result.sourceDefinitionIds = [...sourceDefinitionIds].sort(
+        (left, right) => left - right,
+      );
       result.runnerCreditsAfter = state.runner.credits;
       return result;
     }
@@ -1802,7 +1811,9 @@ export function createStateRuntimeResolvers(
       sourceDefinitionIds.add(definitionId);
     spendCredits(state, "runner", remaining);
     result.normalCreditsSpent = remaining;
-    result.sourceDefinitionIds = [...sourceDefinitionIds].sort();
+    result.sourceDefinitionIds = [...sourceDefinitionIds].sort(
+      (left, right) => left - right,
+    );
     result.runnerCreditsAfter = state.runner.credits;
     return result;
   }
@@ -1834,7 +1845,7 @@ export function createStateRuntimeResolvers(
       throw new Error("Der Runner kann die Tag-Entfernung nicht bezahlen.");
     let remaining = amount;
     let recurringSpent = 0;
-    const recurringSourceDefinitionIds: string[] = [];
+    const recurringSourceDefinitionIds: number[] = [];
     for (const cardId of runnerTagRemovalRecurringCreditSourceIds(state)) {
       if (remaining <= 0) break;
       const spent = Math.min(hostedPaymentCredits(state, cardId), remaining);

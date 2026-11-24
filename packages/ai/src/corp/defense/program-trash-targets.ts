@@ -1,9 +1,12 @@
+import { isRunId, parseRunIdToken, parseTraceIdToken } from "@netgrid/shared";
 import { programTrashCoverageLosses } from "./program-trash-coverage";
 import type {
   AiDecisionInput,
+  CardDefinitionId,
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
+import { parseCardDefinitionId } from "../../card-definition-id-input";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
@@ -22,7 +25,7 @@ type ProgramTrashChoiceContext = {
   contextId: string;
   sourceIceId: string;
   subroutineIndex: number;
-  sourceDefinitionId: string;
+  sourceDefinitionId: CardDefinitionId;
   subroutineId: string;
   subroutineType: string;
   continuation: "encounter" | "trace_success";
@@ -38,11 +41,13 @@ export function corpProgramTrashChoiceContext(
   if (!context) return undefined;
   const run = input.playerView.run;
   if (context.continuation === "encounter") {
+    const runId = parseRunIdToken(context.contextId);
     const ice = run?.encounteredIce;
     const quote = ice?.effectiveRunQuote;
     const subroutine = quote?.subroutines[context.subroutineIndex];
     if (
-      run?.runId !== context.contextId ||
+      runId === undefined ||
+      run?.runId !== runId ||
       ice?.instanceId !== context.sourceIceId ||
       ice.definitionId !== context.sourceDefinitionId ||
       quote?.iceInstanceId !== context.sourceIceId ||
@@ -55,13 +60,11 @@ export function corpProgramTrashChoiceContext(
     return {
       ...context,
       serverId: run.attackedServerId,
-      origin: { kind: "encounter" as const, runId: context.contextId },
+      origin: { kind: "encounter" as const, runId },
     };
   }
   const trace = input.playerView.trace;
-  const traceParts = /^(run_[0-9]+)\.(.+)\.([0-9]+)\.trace$/.exec(
-    context.contextId,
-  );
+  const traceId = parseTraceIdToken(context.contextId);
   const sources = input.playerView.servers.flatMap((server) =>
     server.ice
       .filter((ice) => ice.instanceId === context.sourceIceId)
@@ -74,12 +77,11 @@ export function corpProgramTrashChoiceContext(
   if (
     run !== undefined ||
     trace?.phase !== "trace_success_program_trash" ||
-    trace.traceId !== context.contextId ||
+    trace.traceId !== traceId ||
     trace.sourceCardInstanceId !== context.sourceIceId ||
     trace.sourceDefinitionId !== context.sourceDefinitionId ||
-    !traceParts ||
-    traceParts[2] !== context.sourceIceId ||
-    traceParts[3] !== String(context.subroutineIndex) ||
+    !isRunId(trace.sourceRunId) ||
+    trace.sourceSubroutineIndex !== context.subroutineIndex ||
     ice.known !== true ||
     ice.controller !== "corp" ||
     ice.type !== "ice" ||
@@ -110,7 +112,7 @@ export function rankCorpProgramTrashChoiceOptionIds(
   action: LegalAction,
   choice: PendingChoice,
   selectableOptions: readonly PendingChoiceOption[],
-  rolesForCardId: (cardId: string | undefined) => readonly string[],
+  rolesForCardId: (cardId: CardDefinitionId | undefined) => readonly string[],
 ): string[] | undefined {
   const context = corpProgramTrashChoiceContext(input, choice);
   const requirement = action.choiceRequirements?.[0];
@@ -207,6 +209,8 @@ function parseProgramTrashChoiceSource(
   const decoded = parts.slice(1, 3).concat(parts.slice(4, 6)).map(decodePart);
   if (decoded.some((part) => part === undefined || part.length === 0))
     return undefined;
+  const sourceDefinitionId = parseCardDefinitionId(decoded[2]!);
+  if (sourceDefinitionId === undefined) return undefined;
   const subroutineType = parts[6]!;
   if (!PROGRAM_TRASH_SUBROUTINE_TYPES.has(subroutineType)) return undefined;
   const continuation = parts[7];
@@ -216,7 +220,7 @@ function parseProgramTrashChoiceSource(
     contextId: decoded[0]!,
     sourceIceId: decoded[1]!,
     subroutineIndex,
-    sourceDefinitionId: decoded[2]!,
+    sourceDefinitionId,
     subroutineId: decoded[3]!,
     subroutineType,
     continuation,
@@ -236,8 +240,8 @@ function isKnownInstalledRunnerProgram(card: VisibleCard): boolean {
     card.known === true &&
     card.controller === "runner" &&
     (card.type === "program" || card.installedAsRunnerProgram !== undefined) &&
-    typeof card.definitionId === "string" &&
-    card.definitionId.length > 0
+    typeof card.definitionId === "number" &&
+    card.definitionId > 0
   );
 }
 

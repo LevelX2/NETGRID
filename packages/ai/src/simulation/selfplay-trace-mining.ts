@@ -4,7 +4,8 @@ import type {
   Side,
 } from "@netgrid/shared";
 import { FORBIDDEN_AI_INPUT_FIELDS } from "../runtime/ai-decision-input";
-import { hasConcretePassiveScoreLineAvailable } from "./score-window-counts";
+import { isRemoteServerTarget } from "../runtime/server-target";
+import { fnv1a } from "../runtime/stable-hash";
 import type { AiSimulationConfig } from "./ai-simulation-config";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import type { SimulationControllerMode } from "./simulation-types";
@@ -173,8 +174,6 @@ export type AiSelfplayTraceMiningResult = {
     runnerAgendaSteals: number;
     corpFlatlines: number;
     scoreWindowMissed: number;
-    unsafeScoreChosen: number;
-    passiveActionWithScoreLineAvailable: number;
     actionLimitClusters: Record<AiSelfplayActionLimitClusterId, number>;
     actionLimitSubclusters: Record<AiSelfplayActionLimitSubclusterId, number>;
   };
@@ -424,10 +423,8 @@ function classifySelfplayActionLimitCluster(
   const corpScorelineStall = window.filter(
     (entry) =>
       entry.side === "corp" &&
-      ((entry.corpScoreTerminalSkipped === true &&
-        hasConcretePassiveScoreLineAvailable(entry)) ||
-        ((entry.scoreActionsAvailable ?? 0) > 0 &&
-          entry.actionType !== "score_agenda")),
+      (entry.scoreActionsAvailable ?? 0) > 0 &&
+      entry.actionType !== "score_agenda",
   ).length;
   const setupEconomy = window.filter(actionLimitSetupOrEconomyEntry).length;
   const lowValueRepeat =
@@ -679,8 +676,6 @@ function corpLateGainCreditHasRezScoreOrProtectionNeed(
     entry.corpCreditsBelowCheapestRelevantRez === true ||
     entry.corpCreditsBelowEstimatedCentralRezNeed === true ||
     entry.corpCannotRezAnyNewlyInstalledIce === true ||
-    entry.corpScoreConversionFixGateBlockedByCredits === true ||
-    entry.corpEconomyBeforeScorePlausibleRezOrAdvanceReserve === true ||
     selfplayEntryHasStructuredSignal(entry, [
       "rez_reserve",
       "corpRezReserve",
@@ -695,13 +690,7 @@ function corpLateGainCreditHasRezScoreOrProtectionNeed(
 function corpLateGainCreditHasSafeProgressAlternative(
   entry: AiSimulationSummary["actionSequence"][number],
 ): boolean {
-  // AI110 keeps economy-only and opaque ability references out of "safe
-  // progress"; this bucket needs a scoreline action that was actually legal.
-  return (
-    entry.corpScoreTerminalWindowScoreLegal === true ||
-    entry.corpScoreTerminalWindowAdvanceToScoreLegal === true ||
-    entry.corpScoreTerminalWindowAgendaInstallLegal === true
-  );
+  return (entry.scoreActionsAvailable ?? 0) > 0;
 }
 
 function entryHasFundingNeedSignal(
@@ -1596,8 +1585,8 @@ function selfplayEntryDetectorFindings(
     enabled.has("overdraw_without_urgency") &&
     entry.side === "runner" &&
     entry.runnerDiscardChoice === true &&
-    (entry.runnerDiscardedPlayableEconomy === true ||
-      entry.runnerDiscardedInstallableBreaker === true ||
+    (entry.runnerDiscardedEconomyCard === true ||
+      entry.runnerDiscardedBreaker === true ||
       entry.runnerDiscardedRunPressureCard === true) &&
     recentRunnerDrawBefore(summary.actionSequence, actionIndex)
   ) {
@@ -1608,7 +1597,7 @@ function selfplayEntryDetectorFindings(
         actionIndex,
         "overdraw_without_urgency",
         "medium",
-        "Runner discarded useful cards shortly after draw pressure.",
+        "Runner discarded economy, breaker or pressure cards shortly after drawing.",
       ),
     );
   }
@@ -1962,8 +1951,6 @@ function selfplayEntryIsMeaningfulProgress(
     entry.advancedAgendaStolen === true ||
     entry.runnerCoverageImproved === true ||
     entry.runnerRemoteTrashTaken === true ||
-    entry.corpScoreTerminalScoreTaken === true ||
-    entry.corpScoreTerminalAdvanceTaken === true ||
     entry.protectBeforeAdvance === true ||
     entry.runnerDrawAction === true
   );
@@ -2280,11 +2267,7 @@ function selfplayFixtureName(
   detectorId: AiSelfplayTraceMiningDetectorId,
   stateVersion: number,
 ): string {
-  return `${detectorId}-${fnv1a(`${seed}:${detectorId}:${stateVersion}`).slice(0, 8)}.fixture.json`;
-}
-
-function isRemoteServerTarget(serverId: string | undefined): boolean {
-  return serverId === "new_remote" || serverId?.startsWith("remote_") === true;
+  return `${detectorId}-${fnv1a(`${seed}:${detectorId}:${stateVersion}`)}.fixture.json`;
 }
 
 function sortedUnique(values: string[]): string[] {
@@ -2320,13 +2303,4 @@ function isAsciiLetterOrDigit(character: string): boolean {
     (character >= "A" && character <= "Z") ||
     (character >= "0" && character <= "9")
   );
-}
-
-function fnv1a(value: string): string {
-  let hash = 0x811c9dc5;
-  for (let index = 0; index < value.length; index += 1) {
-    hash ^= value.charCodeAt(index);
-    hash = Math.imul(hash, 0x01000193);
-  }
-  return `fnv1a:${(hash >>> 0).toString(16).padStart(8, "0")}`;
 }

@@ -1,22 +1,23 @@
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import type { CardDefinitionId } from "@netgrid/shared";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 import { AI_HINTS_BY_CARD } from "./ai-hints";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 import { buildCorpIceCardFacts } from "./runtime/corp-ice-placement/corp-ice-placement";
 
-const entries = cardSpecPlanningCards();
-function entry(id: string) {
-  const e = entries.find((c) => c.definition.id === id);
+const entries = listPlanningCardsWithFacts();
+function entry(id: CardDefinitionId) {
+  const e = entries.find((c) => c.facts.id === id);
   if (!e) throw Error(`counter_lock_test_missing_card:${id}`);
   return e;
 }
-function mechanical(id: string) {
+function mechanical(id: CardDefinitionId) {
   const e = entry(id),
     planning = { ...e.planning };
   delete planning.planningAnnotations;
   return deriveCardSpecAiHint({ ...e, planning });
 }
-function hints(id: string) {
+function hints(id: CardDefinitionId) {
   const generated = AI_HINTS_BY_CARD.get(id);
   if (!generated) throw Error(`counter_lock_test_missing_hint:${id}`);
   return [mechanical(id), generated];
@@ -24,9 +25,9 @@ function hints(id: string) {
 
 describe("typed runner-counter and run-duration lock projections", () => {
   it.each([
-    ["onr_v1_236_data-raven", "tags", 1, 1],
-    ["onr_proteus_057_doppelganger-antibody", "credits", 1, 4],
-    ["onr_v1_354_crybaby", undefined, undefined, 2],
+    [448, "tags", 1, 1],
+    [115, "credits", 1, 4],
+    [566, undefined, undefined, 2],
   ] as const)(
     "does not invent damage or run-end counters for %s",
     (id, resource, amount, removal) => {
@@ -70,9 +71,9 @@ describe("typed runner-counter and run-duration lock projections", () => {
     },
   );
   it.each([
-    ["onr_classic_005_baskerville", "net_damage", 2],
-    ["onr_v1_227_cerberus", "net_damage", 2],
-    ["onr_v1_255_mastiff", "brain_damage", 1],
+    [9, "net_damage", 2],
+    [439, "net_damage", 2],
+    [467, "brain_damage", 1],
   ] as const)(
     "keeps the actual run-start damage of %s without adding an ETR",
     (id, resource, amount) => {
@@ -107,7 +108,7 @@ describe("typed runner-counter and run-duration lock projections", () => {
       });
     },
   );
-  it.each(["onr_classic_001_data-fort-remapping", "onr_v1_192_corporate-boon"])(
+  it.each([5, 404])(
     "keeps real scored-agenda run-end counters in %s",
     (id) => {
       for (const h of hints(id))
@@ -119,7 +120,7 @@ describe("typed runner-counter and run-duration lock projections", () => {
       instanceId: "raven",
       known: true,
       type: "ice",
-      definitionId: "onr_v1_236_data-raven",
+      definitionId: 448,
     });
     expect(facts).toMatchObject({
       damage: false,
@@ -129,7 +130,7 @@ describe("typed runner-counter and run-duration lock projections", () => {
     });
   });
   it("projects the printed run-duration jack-out prohibition without annotations", () => {
-    for (const h of hints("onr_v1_251_jack-attack")) {
+    for (const h of hints(463)) {
       expect(h.functionSignals).toEqual(
         expect.arrayContaining(["corp_ice.jack_out_lock", "run.lock"]),
       );
@@ -149,10 +150,10 @@ describe("typed runner-counter and run-duration lock projections", () => {
         instanceId: "jack",
         known: true,
         type: "ice",
-        definitionId: "onr_v1_251_jack-attack",
+        definitionId: 463,
       }).runLock,
     ).toBe(true);
-    for (const id of ["onr_v1_249_hunter", "onr_v1_236_data-raven"]) {
+    for (const id of [461, 448]) {
       expect(
         (mechanical(id).effects ?? []).some((e) => e.kind === "run_lock"),
       ).toBe(false);
@@ -160,19 +161,19 @@ describe("typed runner-counter and run-duration lock projections", () => {
         "corp_ice.jack_out_lock",
       );
     }
-    expect(mechanical("onr_v1_221_asp").functionSignals).not.toContain(
+    expect(mechanical(433).functionSignals).not.toContain(
       "corp_ice.jack_out_lock",
     );
   });
   it("derives counter semantics from typed effects when the supported card identity changes", () => {
-    const e = entry("onr_v1_236_data-raven"),
+    const e = entry(448),
       planning = { ...e.planning };
     delete planning.planningAnnotations;
     const renamed = deriveCardSpecAiHint({
       ...e,
-      definition: {
-        ...e.definition,
-        id: entry("onr_v1_249_hunter").definition.id,
+      facts: {
+        ...e.facts,
+        id: entry(461).facts.id,
       },
       planning,
     });

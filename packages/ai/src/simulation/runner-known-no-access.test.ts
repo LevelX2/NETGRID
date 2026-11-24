@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import {
@@ -18,6 +19,19 @@ describe("runnerCoverageRepairDiagnostic", () => {
     expect(
       diagnosticForRoles(["research_noise", "recoveryish_noise"]),
     ).toMatchObject({
+      runnerCoverageRepairIntentNoFollowup: true,
+    });
+  });
+
+  it("does not count an unrelated choice as a search", () => {
+    expect(
+      runnerCoverageRepairDiagnostic(
+        coverageInput(2),
+        baseAction("resolve_choice"),
+        coverageDependencies(4),
+      ),
+    ).toEqual({
+      runnerCoverageRepairIntentCandidates: true,
       runnerCoverageRepairIntentNoFollowup: true,
     });
   });
@@ -67,7 +81,7 @@ function coverageDependencies(visibleBreakCost: number) {
   return {
     runnerKnownNoAccessLegalRunTargets: () => [
       {
-        serverId: "remote_1",
+        serverId: "r1",
         assessment: { visibleBreakCost } as never,
       },
     ],
@@ -92,11 +106,11 @@ function diagnosticForRoles(roles: string[]) {
   return runnerCoverageRepairDiagnostic(input(), action(), {
     runnerKnownNoAccessLegalRunTargets: () => [
       {
-        serverId: "remote_1",
+        serverId: "r1",
         assessment: {} as never,
       },
     ],
-    sourceDefinitionIdForAction: () => "source",
+    sourceDefinitionIdForAction: () => syntheticCardDefinitionId("source"),
     rolesForCardId: () => roles,
   });
 }
@@ -112,8 +126,8 @@ function action(): LegalAction {
 function startRun(): LegalAction {
   return {
     ...baseAction("start_run"),
-    actionId: "run_remote_1",
-    payload: { serverId: "remote_1" },
+    actionId: "run_r1",
+    payload: { serverId: "r1" },
   };
 }
 
@@ -136,16 +150,26 @@ function pathDiagnosticForRoles(roles: string[]) {
   return runnerKnownPathDiagnosticsForAction(
     pathInput(),
     startRun(),
-    "remote_1",
+    "r1",
     0,
     {
-      assessKnownRezzedIcePath: () =>
-        ({
+      assessKnownRezzedIcePath: (
+        _ice,
+        _rig,
+        _credits,
+        _root,
+        corpCredits,
+        context,
+      ) => {
+        expect(corpCredits).toBe(7);
+        expect(context?.traceRulesProfile).toBe("classic_blind_corp_ties");
+        return {
           assessedKnownIceCount: 1,
           blocked: true,
           canReachAccess: false,
           visibleBreakCost: 5,
-        }) as never,
+        } as never;
+      },
       remoteServerHasScoreThreat: () => false,
       rolesForAction: () => roles,
       rolesForCardId: () => [],
@@ -168,9 +192,11 @@ function pathInput(): AiDecisionInput {
         credits: 0,
         rig: [],
       },
+      opponent: { credits: 7 },
+      traceRulesProfile: "classic_blind_corp_ties",
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           ice: [],
           root: [],
         },

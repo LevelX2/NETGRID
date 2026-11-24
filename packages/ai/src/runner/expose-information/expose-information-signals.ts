@@ -468,7 +468,9 @@ function runnerCurrentExposeInformationSignal(
     rootPlanInstanceId,
     parentPlanInstanceId: boundParentPlanInstanceId,
     serverId: input.playerView.run.attackedServerId,
-    runId: input.playerView.run.runId ?? String(input.playerView.stateVersion),
+    ...(input.playerView.run.runId !== undefined
+      ? { runId: input.playerView.run.runId }
+      : {}),
     sourceCardInstanceId,
     targetIceInstanceId: iceId,
     phase: exposeUnknownIce ? "expose_unknown_ice" : "decline_known_ice",

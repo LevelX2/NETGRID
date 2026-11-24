@@ -3,6 +3,7 @@ import type {
   EngineRandomizedSecretGuessAssessment,
   EngineRandomizedTraceBidCandidate,
 } from "@netgrid/shared";
+import { exactCurrentChoiceAction } from "./plan-bound-choice-contract";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 
 type Choice = NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>;
@@ -26,11 +27,18 @@ export function assessSecretGuessCandidates(
   )
     return undefined;
   const options = choice.options
-    .map((o) => ({ optionId: o.id, bid: o.value }))
+    .map((o) => ({ optionId: o.id, bid: o.value, selectable: o.selectable }))
     .sort((a, b) => Number(a.bid) - Number(b.bid));
   if (
+    !exactCurrentChoiceAction(input, choice) ||
     options.length === 0 ||
-    options.some((o, i) => o.bid !== i + 2 || typeof o.optionId !== "string")
+    options.some(
+      (o, i) =>
+        o.bid !== i + 2 ||
+        typeof o.optionId !== "string" ||
+        o.optionId.length === 0 ||
+        o.selectable === false,
+    )
   )
     throw new PlanResolutionFailure("invalid_support_graph", {
       side: input.side,

@@ -80,6 +80,12 @@ Aufteilung und denselben Endbetrag ausweisen. Ein Aufschlag darf weder als
 Reduktionsbetrag noch als Reduktionsquelle erscheinen. Die Defense-KI prüft
 diese Übereinstimmung vor der Zulassung ihrer Installationsroute.
 
+Data Fort Reclamation prüft jede verdeckte HQ-Karte gegen einen leeren
+Remote. Für ICE gilt die normale ICE-Platzierungsregel, für Agenden,
+Assets und Upgrades die reguläre Root-Regel. Die Engine prüft anschließend
+die gewählte Reihenfolge auf dem entstehenden Server. So bleiben reine
+Zentral-Upgrades wie Simon Francisco bereits aus dem Angebot ausgeschlossen.
+
 Die gemeinsame Corp-Installations-/Rez-Zahlung in
 `card-lifecycle-runtime-hosts.ts` verbraucht auch rungebundene Credits.
 Alle temporären Pools sind bereits im angezeigten Guthaben enthalten.

@@ -92,7 +92,7 @@ export function runnerContestRiskForSimulation(
   return "medium";
 }
 
-function runtimeCardHasSubtype(definitionId: string, subtype: string): boolean {
+function runtimeCardHasSubtype(definitionId: number, subtype: string): boolean {
   return (
     RUNTIME_CARDS[definitionId]?.subtypes.some(
       (entry) => entry.toLocaleLowerCase("en-US") === subtype,

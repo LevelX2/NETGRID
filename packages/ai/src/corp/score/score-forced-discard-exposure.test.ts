@@ -69,10 +69,10 @@ describe("forced agenda discard exposure in P734 G34", () => {
       (action) =>
         action.type === "install_card" &&
         action.source === agenda.instanceId &&
-        action.payload?.serverId === "remote_2",
+        action.payload?.serverId === "r2",
     )!;
     expect(project(input, existing.actionId)).toMatchObject({
-      serverId: "remote_2",
+      serverId: "r2",
       feasible: false,
     });
   });

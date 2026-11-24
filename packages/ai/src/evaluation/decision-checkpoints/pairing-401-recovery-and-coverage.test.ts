@@ -28,11 +28,11 @@ type Capture = {
 function restore(json: unknown) {
   const capture = structuredClone(json) as Capture;
   for (const action of capture.input.legalActions) {
-    if (action.source !== "runner_onr_v1_089_gideons-pawnshop_1") continue;
+    if (action.source !== "c1ux") continue;
     Object.assign(
       action.payload!,
       deterministicOnPlayResourcePayload(
-        CARD_DEFINITIONS_BY_ID["onr_v1_089_gideons-pawnshop"]!,
+        CARD_DEFINITIONS_BY_ID[301]!,
         "runner",
       ),
     );
@@ -70,7 +70,7 @@ describe("pairing 401 source-bound recovery and coverage", () => {
     // Isolate the recovery-origin contract from the independently admitted HQ
     // run. The complete native action set is exercised by the overflow case.
     before.legalActions = before.legalActions.filter(
-      (action) => action.source === "runner_onr_v1_089_gideons-pawnshop_1",
+      (action) => action.source === "c1ux",
     );
     const beforeDecision = chooseAiAction(before as AiDecisionInput);
     const beforeRuntime = exportAiRuntimeCheckpoint(
@@ -89,7 +89,7 @@ describe("pairing 401 source-bound recovery and coverage", () => {
     )!;
     expect(decision).toMatchObject({
       actionId:
-        "runner.play_event.runner_onr_v1_089_gideons-pawnshop_1.runner_onr_v1_089_gideons-pawnshop_1.onr_v1_089_gideons-pawnshop:abilities_on_play_search_trash_to_grip",
+        "rh.c1ux.c1ux.385",
       fallbackUsed: false,
     });
     expect(executor.moduleState).toMatchObject({
@@ -99,7 +99,7 @@ describe("pairing 401 source-bound recovery and coverage", () => {
           selectedAtStateVersion: 193,
           selectedActionId: decision.actionId,
           engineContinuationAtStateVersion: 194,
-          targetCardInstanceId: "runner_onr_classic_037_finders-keepers_1",
+          targetCardInstanceId: "c95",
         },
       },
     });
@@ -113,11 +113,11 @@ describe("pairing 401 source-bound recovery and coverage", () => {
     });
     const choice = chooseAiAction(choiceInput as AiDecisionInput);
     expect(choice).toMatchObject({
-      actionId: "runner.resolve_choice",
+      actionId: "rn",
       fallbackUsed: false,
       selectedChoices: {
         choiceId: "p3_37_search_trash_to_grip_195",
-        selectedOptionIds: ["card_runner_onr_classic_037_finders-keepers_1"],
+        selectedOptionIds: ["card_c95"],
       },
     });
     expect(residentPlanPortfolioSnapshot(choiceInput)?.executorInstanceId).toBe(
@@ -129,7 +129,7 @@ describe("pairing 401 source-bound recovery and coverage", () => {
     expect(input.playerView.own.gripOrHq).toHaveLength(6);
     expect(input.playerView.own.maxHandSize).toBe(5);
     expect(chooseAiAction(input as AiDecisionInput)).toMatchObject({
-      actionId: "runner.start_run.hq",
+      actionId: "rs.hq",
       fallbackUsed: false,
     });
   });
@@ -141,7 +141,7 @@ describe("pairing 401 source-bound recovery and coverage", () => {
       (instance) => instance.instanceId === portfolio.executorInstanceId,
     )!;
     expect(decision).toMatchObject({
-      actionId: "runner.draw_card",
+      actionId: "r8",
       reasonCode: "plan_first.runner.defense_and_recovery",
       fallbackUsed: false,
     });
@@ -164,7 +164,7 @@ describe("pairing 401 source-bound recovery and coverage", () => {
     const recovery = portfolio.instances.find(
       (instance) =>
         instance.instanceId ===
-        "plan:runner.develop_board_and_hand:recovery%3Arunner_onr_v1_089_gideons-pawnshop_1%3Arunner_onr_v1_110_sneak-preview_2",
+        "p3ggw3dmvvj82saxy786ahiu1s",
     )!;
     expect(recovery).toMatchObject({
       moduleId: "runner.develop_board_and_hand",
@@ -173,8 +173,8 @@ describe("pairing 401 source-bound recovery and coverage", () => {
         signal: {
           recoverySearchCommitment: {
             plannedAtStateVersion: 69,
-            sourceCardInstanceId: "runner_onr_v1_089_gideons-pawnshop_1",
-            targetCardInstanceId: "runner_onr_v1_110_sneak-preview_2",
+            sourceCardInstanceId: "c1ux",
+            targetCardInstanceId: "c1zm",
             targetPurpose: "generic_heap_recovery",
           },
         },
@@ -186,20 +186,20 @@ describe("pairing 401 source-bound recovery and coverage", () => {
     );
     expect(
       input.playerView.own.gripOrHq.map((card) => card.instanceId),
-    ).toContain("runner_onr_v1_089_gideons-pawnshop_1");
+    ).toContain("c1ux");
     expect(
       input.playerView.own.heapOrArchives.map((card) => card.instanceId),
-    ).toContain("runner_onr_v1_110_sneak-preview_2");
+    ).toContain("c1zm");
   });
 
   it("carries the exact setup-coverage installation through its payment window", () => {
     const input = restore(installJson);
     chooseAiAction(input as AiDecisionInput);
     const installActionId =
-      "runner.install_card.runner_onr_classic_031_rent-i-con_3.runner_onr_classic_031_rent-i-con_3";
+      "rc.c7v.c7v";
     const portfolio = residentPlanPortfolioSnapshot(input)!;
     const executorId =
-      "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate";
+      "p5s1qdgqrafrs3n2kss1t9ct7m";
     const executor = portfolio.instances.find(
       (instance) => instance.instanceId === executorId,
     )!;
@@ -208,7 +208,7 @@ describe("pairing 401 source-bound recovery and coverage", () => {
       phase: "install_answer",
       gap: { installActionIds: expect.arrayContaining([installActionId]) },
     });
-    const paymentCapture = structuredClone(paymentJson) as Capture;
+    const paymentCapture = structuredClone<unknown>(paymentJson) as Capture;
     // Keep the observed selected origin, supplying its gap from the production
     // producer above; restarting D308 can instead select the Shell Traders plan.
     paymentCapture.runtime.residentPlanPortfolio!.instances.find(
@@ -220,9 +220,9 @@ describe("pairing 401 source-bound recovery and coverage", () => {
     const selected = payment.legalActions.find(
       (action) => action.actionId === continuation.actionId,
     )!;
-    expect(selected.source).toBe("runner_onr_classic_031_rent-i-con_3");
+    expect(selected.source).toBe("c7v");
     expect(selected.payload).toMatchObject({
-      runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.308",
+      runnerCostPenaltySupportWindowId: 308,
       runnerCostPenaltySupportContinuation: true,
     });
     const continued = residentPlanPortfolioSnapshot(payment)!;
@@ -237,7 +237,7 @@ describe("pairing 401 source-bound recovery and coverage", () => {
   });
 
   it("fails closed when the persisted coverage origin has no selected install binding", () => {
-    const capture = structuredClone(paymentJson) as Capture;
+    const capture = structuredClone<unknown>(paymentJson) as Capture;
     delete capture.runtime.residentPlanPortfolio!
       .pendingRunnerCostPenaltySupportOrigin;
     const payment = restore(capture);

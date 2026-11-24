@@ -1,3 +1,5 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
+import { cardInstanceIdForCopy } from "../../../../engine/src/game/state/card-instance-id";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -77,9 +79,9 @@ it.each([
       );
     }
     const result = chooseAiAction(input);
-    const lab = game === 12 ? 2 : 3;
+    const lab = cardInstanceIdForCopy("corp", 7, game === 12 ? 2 : 3);
     expect(result.actionId).toBe(
-      `corp.install_card.corp_onr_classic_003_unlisted-research-lab_${lab}.remote_1.corp_onr_classic_003_unlisted-research-lab_${lab}`,
+      `cc.${lab}.r1.${lab}`,
     );
     expect(result.fallbackUsed).toBe(false);
     expect(result.timeoutUsed).toBe(false);
@@ -114,13 +116,13 @@ it.each([
     const result = chooseAiAction(input);
     const theorem = scoreSignals(input).find(
       (signal) =>
-        signal.serverId === "remote_1" &&
-        signal.agendaInstanceId === "corp_onr_classic_004_theorem-proof_1",
+        signal.serverId === "r1" &&
+        signal.agendaInstanceId === "c1x",
     )!;
     expect(
       theorem.routeAssessment === "corp_shorter_terminal_score_route_dominates",
     ).toBe(dominated);
-    if (dominated) expect(result.actionId).toContain("unlisted-research-lab");
+    if (dominated) expect(result.actionId).toSatisfy((reference: string | undefined) => referencesDefaultDeckCard(reference, 7));
     expect(result.fallbackUsed).toBe(false);
   },
 );
@@ -152,14 +154,14 @@ it.each([
     const signals = scoreSignals(input);
     const shorter = signals.find(
       (signal) =>
-        signal.serverId === "remote_1" &&
+        signal.serverId === "r1" &&
         signal.agendaInstanceId ===
-          "corp_onr_classic_003_unlisted-research-lab_3",
+          "c1r",
     )!;
     const longer = signals.find(
       (signal) =>
-        signal.serverId === "remote_1" &&
-        signal.agendaInstanceId === "corp_onr_classic_004_theorem-proof_1",
+        signal.serverId === "r1" &&
+        signal.agendaInstanceId === "c1x",
     )!;
     // Re-enter the comparison before it marks the dominated route blocked.
     longer.feasible = true;
@@ -177,8 +179,8 @@ it.each([
       head.payload!.agendaInstallScoreHorizonQuoteExpiresAtStateVersion =
         input.playerView.stateVersion - 1;
     if (scenario === "wrong install target")
-      head.payload!.agendaInstallScoreHorizonQuoteTargetServerId = "remote_2";
-    if (scenario === "different remote") longer.serverId = "remote_2";
+      head.payload!.agendaInstallScoreHorizonQuoteTargetServerId = "r2";
+    if (scenario === "different remote") longer.serverId = "r2";
     if (scenario === "installed agenda") longer.phase = "advance_agenda";
     if (scenario === "blocked shorter route") shorter.feasible = false;
     if (scenario === "nonterminal shorter route") shorter.terminalScore = false;
@@ -257,22 +259,22 @@ it.each([
   const signals = scoreSignals(input);
   const shorter = signals.find(
     (s) =>
-      s.serverId === "remote_1" &&
-      s.agendaInstanceId === "corp_onr_classic_003_unlisted-research-lab_1",
+      s.serverId === "r1" &&
+      s.agendaInstanceId === "c1p",
   )!;
   const longer = signals.find(
     (s) =>
-      s.serverId === "remote_1" &&
-      s.agendaInstanceId === "corp_onr_classic_004_theorem-proof_2",
+      s.serverId === "r1" &&
+      s.agendaInstanceId === "c1y",
   )!;
   expect(shorter.protectionNeed!.baseline.knowledge).toBe("unknown");
   expect(longer.routeAssessment).toBe(
     "corp_shorter_terminal_score_route_dominates",
   );
-  expect(result.actionId).toContain("superserum");
+  expect(referencesDefaultDeckCard(result.actionId, 6)).toBe(true);
   longer.feasible = true;
   if (scenario === "unrezzed layer")
-    input.playerView.servers.find((s) => s.id === "remote_1")!.ice[0]!.rezzed =
+    input.playerView.servers.find((s) => s.id === "r1")!.ice[0]!.rezzed =
       false;
   if (scenario === "missing score credits") input.playerView.own.credits = 2;
   if (scenario === "terminal steal")

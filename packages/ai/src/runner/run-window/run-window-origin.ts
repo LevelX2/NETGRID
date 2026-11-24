@@ -3,7 +3,7 @@ import {
   visibleRunnerRunOnlyCredits,
 } from "../../run-analysis/visible-run-credit-budget";
 
-import { type AiDecisionInput } from "@netgrid/shared";
+import { isCardDefinitionId, type AiDecisionInput } from "@netgrid/shared";
 import { currentRunPathContext } from "../../run-analysis/current-run-path-context";
 import {
   assessRandomBreakOrDamageRiskForVisibleRunPath,
@@ -216,6 +216,7 @@ export function reassessActiveInformationRunParent(
     [...currentRunRemainingIce(input), remainingEncounter],
     (ice) => ice.instanceId,
   );
+  const pathContext = currentRunPathContext(input);
   const pathBeforeDamageBudget = assessKnownRezzedIcePath(
     remainingIce,
     input.playerView.own.rig ?? [],
@@ -223,14 +224,17 @@ export function reassessActiveInformationRunParent(
       input.playerView.own.credits +
         visibleRunnerRunOnlyCredits(input.playerView.run),
       input.playerView.own.rig ?? [],
-      { liquidCredits: input.playerView.own.credits },
+      {
+        liquidCredits: input.playerView.own.credits,
+        excludeStealthCredits: pathContext.excludeStealthTraceCredits === true,
+      },
     ),
     input.playerView.servers.find(
       (server) => server.id === run.attackedServerId,
     )?.root ?? [],
     input.playerView.opponent.credits,
     {
-      ...currentRunPathContext(input),
+      ...pathContext,
       quoteNextEncounterDamageForHandBudget: true,
     },
   );
@@ -484,6 +488,7 @@ function accessCommitmentFromModuleState(
   if (
     !commitment ||
     !Array.isArray(commitment.knownTargetDefinitionIds) ||
+    !commitment.knownTargetDefinitionIds.every(isCardDefinitionId) ||
     !(
       commitment.trashBudget === "unknown" ||
       commitment.trashBudget === "not_applicable" ||

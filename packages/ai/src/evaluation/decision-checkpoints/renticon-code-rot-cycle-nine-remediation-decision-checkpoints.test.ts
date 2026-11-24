@@ -8,16 +8,16 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("Rent-I-Con versus CODE ROT cycle-nine remediation checkpoint", () => {
   it("uses the last click for liquidity instead of over-layering HQ", () => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(affordableHqIceJson) as AiDecisionCheckpointV1,
+      structuredClone(affordableHqIceJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
-    expect(result.decision?.actionId).toBe("corp.gain_credit");
+    expect(result.decision?.actionId).toBe("cb");
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
         "plan_module:corp.economy",
         "plan_step_capability:develop_or_convert_corp_economy",
-        "plan_assessment_evidence:corp_last_click_score_install_deferred:remote_1",
+        "plan_assessment_evidence:corp_last_click_score_install_deferred:r1",
       ]),
     );
 
@@ -29,15 +29,15 @@ describe("Rent-I-Con versus CODE ROT cycle-nine remediation checkpoint", () => {
     expect(planning).toMatchObject({
       mode: "cutover",
       shadowComparison: {
-        liveActionId: "corp.gain_credit",
-        shadowActionId: "corp.gain_credit",
+        liveActionId: "cb",
+        shadowActionId: "cb",
         agreement: true,
       },
       commitment: {
         status: "active",
         rematerialization: {
           status: "executable",
-          actionId: "corp.gain_credit",
+          actionId: "cb",
         },
       },
     });
@@ -47,10 +47,10 @@ describe("Rent-I-Con versus CODE ROT cycle-nine remediation checkpoint", () => {
     // before the technical line hash. Keep its selected agenda parent and
     // every delegation/commitment binding under test.
     const scoreParent =
-      "plan:corp.score_agenda:agenda%3Acorp_onr_v1_197_data-fort-reclamation_2%3Aremote_1";
+      "p67hposp6f7x1fw9zv0ogip3z0";
     expect(portfolio?.rootForegroundInstanceId).toBe(scoreParent);
     expect(portfolio?.executorInstanceId).toBe(
-      "plan:corp.economy:score-support%3Aagenda%3Acorp_onr_v1_197_data-fort-reclamation_2%3Aremote_1",
+      "p39559tmrm8c45ipbjzwgbe7h3",
     );
     expect(result.decision?.evidence).toContain(
       `plan_priority_delegated_from:${scoreParent}`,
@@ -58,7 +58,7 @@ describe("Rent-I-Con versus CODE ROT cycle-nine remediation checkpoint", () => {
     expect(portfolio).toMatchObject({
       turnPlanCommitment: { status: "active" },
       turnPlanExecutionLease: {
-        currentBinding: { actionId: "corp.gain_credit" },
+        currentBinding: { actionId: "cb" },
       },
     });
     expect(portfolio?.turnPlanExecutionLease?.sourcePlanId).toBe(

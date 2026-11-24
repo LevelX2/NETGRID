@@ -34,7 +34,7 @@ it("excludes the event whose own hand cost already violates its unknown-ICE rese
     (t) =>
       t.targetServerId === "hq" && t.runActionProjection.sourceKind === "event",
   )!;
-  const basic = targets.find((t) => t.actionId === "runner.start_run.hq")!;
+  const basic = targets.find((t) => t.actionId === "rs.hq")!;
   expect(event.prerunReserveQuote).toMatchObject({
     status: "blocked",
     requiredHandBuffer: 3,

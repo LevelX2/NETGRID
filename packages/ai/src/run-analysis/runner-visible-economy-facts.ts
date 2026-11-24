@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type {
   EvaluateRunnerRunTargetsParams,
@@ -42,7 +43,7 @@ export function runnerRemoteScoreThreat(
 ): RunnerRemoteScoreThreat {
   let threat: RunnerRemoteScoreThreat = "none";
   for (const server of input.playerView.servers) {
-    if (!server.id.startsWith("remote_")) continue;
+    if (!isRemoteServerId(server.id)) continue;
     if (server.root.length === 0) continue;
     const advancedRoot = server.root.some(
       (card) => (card.advancementCounters ?? 0) > 0,

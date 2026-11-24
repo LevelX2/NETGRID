@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import {
   type CardDefinition,
   type CardInstance,
@@ -22,7 +23,7 @@ import type { DamageSummary } from "./encounter-resolution";
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   zone: CardInstance["zone"],
   options: Partial<CardInstance> = {},
 ): CardInstance {
@@ -76,26 +77,26 @@ function makeState(): GameState {
       ],
     },
     cardInstances: {
-      runner_identity: instance("runner_identity", "runner_identity", {
+      runner_identity: instance("runner_identity", 2123179990, {
         side: "runner",
         zone: "rig",
       }),
-      ice_1: instance("ice_1", "onr_v1_001_test-ice", {
+      ice_1: instance("ice_1", 2528423081, {
         side: "corp",
         zone: "serverIce",
         serverId: "rd",
       }),
-      grip_1: instance("grip_1", "grip_card_1", {
+      grip_1: instance("grip_1", 2501560768, {
         side: "runner",
         zone: "grip",
       }),
-      grip_2: instance("grip_2", "grip_card_2", {
+      grip_2: instance("grip_2", 2551893625, {
         side: "runner",
         zone: "grip",
       }),
     },
     run: {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "rd",
       phase: "encounter_ice",
       position: { kind: "ice", serverId: "rd", iceIndex: 0 },
@@ -109,13 +110,13 @@ function makeState(): GameState {
 function definitionFor(cardId: CardInstanceId): CardDefinition {
   const definitions: Record<string, CardDefinition> = {
     ice_1: {
-      id: "onr_v1_001_test-ice",
+      id: 2528423081,
       title: "Test ICE",
       type: "ice",
       subtypes: ["ap"],
     } as CardDefinition,
     runner_identity: {
-      id: "runner_identity",
+      id: 2123179990,
       title: "Runner Identity",
       type: "identity",
       baseLink: 0,
@@ -124,7 +125,7 @@ function definitionFor(cardId: CardInstanceId): CardDefinition {
   return (
     definitions[cardId] ??
     ({
-      id: String(cardId),
+      id: syntheticCardDefinitionId(cardId),
       title: String(cardId),
       type: "program",
     } as CardDefinition)
@@ -272,7 +273,8 @@ describe("encounter printed effects boundary", () => {
       {
         definition: definitionFor("ice_1" as CardInstanceId),
         subroutine: {
-          id: "net_damage",
+          id: "0",
+          provenance: ["p", 2528423081, 0],
           type: "do_damage",
           damageType: "net",
           amount: 2,
@@ -302,7 +304,7 @@ describe("encounter printed effects boundary", () => {
     expect(legalAction.resolvedEffects).toEqual([
       expect.objectContaining({
         kind: "resolve_subroutine",
-        sourceDefinitionId: "onr_v1_001_test-ice",
+        sourceDefinitionId: 2528423081,
         subroutineType: "do_damage",
         amount: 2,
       }),
@@ -319,7 +321,8 @@ describe("encounter printed effects boundary", () => {
       {
         definition: definitionFor("ice_1" as CardInstanceId),
         subroutine: {
-          id: "random_core_damage",
+          id: "0",
+          provenance: ["p", 2528423081, 0],
           type: "random_damage",
           damageType: "core",
           dieFaces: 6,
@@ -366,7 +369,8 @@ describe("encounter printed effects boundary", () => {
       {
         definition: definitionFor("ice_1" as CardInstanceId),
         subroutine: {
-          id: "random_core_damage",
+          id: "0",
+          provenance: ["p", 2528423081, 0],
           type: "random_damage",
           damageType: "core",
           dieFaces: 6,
@@ -481,7 +485,8 @@ describe("encounter printed effects boundary", () => {
       {
         definition: definitionFor("ice_1" as CardInstanceId),
         subroutine: {
-          id: "core_damage",
+          id: "0",
+          provenance: ["p", 2528423081, 0],
           type: "do_damage",
           damageType: "core",
           amount: 1,
@@ -506,7 +511,7 @@ describe("encounter printed effects boundary", () => {
     const state = makeState();
     state.run!.encounterTemporaryTraceCredits = {
       sourceIceId: "ice_1" as CardInstanceId,
-      sourceDefinitionId: "onr_v1_001_test-ice" as never,
+      sourceDefinitionId: 2528423081,
       remaining: 2,
       usableFor: "this_ice_printed_trace_subroutines",
     };
@@ -534,34 +539,36 @@ describe("encounter printed effects boundary", () => {
     expect(result).toMatchObject({
       handled: true,
       suspended: true,
-      traceId: "run_1.ice_1.2.trace",
+      traceId: 10,
       traceLimit: 4,
       corpBidMax: 8,
     });
     expect(state.trace).toMatchObject({
-      traceId: "run_1.ice_1.2.trace",
+      traceId: 10,
+      sourceRunId: 1,
       sourceCardInstanceId: "ice_1",
-      sourceDefinitionId: "onr_v1_001_test-ice",
+      sourceDefinitionId: 2528423081,
       subroutineIndex: 2,
       traceLimit: 4,
       effectiveTraceLimit: 2,
       corpBidMax: 8,
       rabbitTraceLimitReduction: 2,
       encounterTemporaryTraceCreditSourceIceId: "ice_1",
-      encounterTemporaryTraceCreditSourceDefinitionId: "onr_v1_001_test-ice",
+      encounterTemporaryTraceCreditSourceDefinitionId: 2528423081,
       status: "corp_bid",
     });
     expect(state.pendingChoice).toMatchObject({
-      choiceId: "run_1.ice_1.2.trace.corp.bid.10",
-      source: "trace:run_1.ice_1.2.trace",
+      choiceId: "10.corp.bid.10",
+      source: "trace:10",
       kind: "bid_amount",
       visibility: "public",
     });
     expect(legalAction.payload).toMatchObject({
       traceStarted: true,
-      traceId: "run_1.ice_1.2.trace",
+      traceId: 10,
+      traceSourceRunId: 1,
       sourceCardId: "ice_1",
-      sourceDefinitionId: "onr_v1_001_test-ice",
+      sourceDefinitionId: 2528423081,
       traceLimit: 4,
       effectiveTraceLimit: 2,
       corpBidMax: 8,
@@ -576,7 +583,7 @@ describe("encounter printed effects boundary", () => {
       const state = makeState();
       state.run!.encounterTemporaryTraceCredits = {
         sourceIceId: "ice_1" as CardInstanceId,
-        sourceDefinitionId: "onr_v1_001_test-ice" as never,
+        sourceDefinitionId: 2528423081,
         remaining,
         usableFor: "this_ice_printed_trace_subroutines",
       };
@@ -662,9 +669,10 @@ describe("encounter printed effects boundary", () => {
   it("applies printed Trace-success tag and counter followups without changing trace identifiers", () => {
     const state = makeState();
     state.trace = {
-      traceId: "run_1.ice_1.0.trace",
+      traceId: 9,
+      sourceRunId: state.run!.runId,
       sourceCardInstanceId: "ice_1" as CardInstanceId,
-      sourceDefinitionId: "onr_v1_001_test-ice" as never,
+      sourceDefinitionId: 2528423081,
       subroutineIndex: 0,
       traceLimit: 3,
       corpBid: 1,
@@ -708,10 +716,10 @@ describe("encounter printed effects boundary", () => {
     ).toBe(1);
     expect(state.run?.traceSuccessBySubroutineIndex).toEqual({ 0: true });
     expect(legalAction.payload).toMatchObject({
-      traceId: "run_1.ice_1.0.trace",
+      traceId: 9,
       traceStep: "runner_bid",
       traceLimit: 3,
-      sourceDefinitionId: "onr_v1_001_test-ice",
+      sourceDefinitionId: 2528423081,
       corpBid: 1,
       traceValue: 4,
       runnerBid: 0,
@@ -756,9 +764,10 @@ describe("encounter printed effects boundary", () => {
     ({ profile, corp, base, payment, strength, tags }) => {
       const state = makeState();
       state.trace = {
-        traceId: "run_1.ice_1.0.trace",
+        traceId: 9,
+        sourceRunId: state.run!.runId,
         sourceCardInstanceId: "ice_1" as CardInstanceId,
-        sourceDefinitionId: "onr_v1_001_test-ice",
+        sourceDefinitionId: 2528423081,
         subroutineIndex: 0,
         status: "post_bid_link",
         traceRulesProfile: profile,
@@ -789,9 +798,10 @@ describe("encounter printed effects boundary", () => {
   it("applies printed Trace-success run-lock/end-run followups through callbacks", () => {
     const state = makeState();
     state.trace = {
-      traceId: "run_1.ice_1.1.trace",
+      traceId: 9,
+      sourceRunId: state.run!.runId,
       sourceCardInstanceId: "ice_1" as CardInstanceId,
-      sourceDefinitionId: "onr_v1_001_test-ice" as never,
+      sourceDefinitionId: 2528423081,
       subroutineIndex: 1,
       traceLimit: 2,
       corpBid: 1,
@@ -823,7 +833,7 @@ describe("encounter printed effects boundary", () => {
     expect(finishingAction).toBe(legalAction);
     expect(state.runnerTurnFlags?.runnerRunLockCreditCost).toBe(2);
     expect(legalAction.payload).toMatchObject({
-      traceId: "run_1.ice_1.1.trace",
+      traceId: 9,
       traceStep: "post_bid_link",
       traceSuccessful: true,
       tagsAdded: 0,

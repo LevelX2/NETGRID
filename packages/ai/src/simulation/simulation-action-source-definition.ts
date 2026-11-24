@@ -1,4 +1,4 @@
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   type AiDecisionInput,
   type LegalAction,
@@ -12,7 +12,7 @@ export function createSourceDefinitionIdForSimulationAction(
     input: AiDecisionInput,
     instanceId: string,
   ) => VisibleCard | undefined,
-): (input: AiDecisionInput, action: LegalAction) => string | undefined {
+): (input: AiDecisionInput, action: LegalAction) => number | undefined {
   return (input, action) =>
     sourceDefinitionIdForSimulationSource(action, (id) =>
       findVisibleCard(input, id),
@@ -23,12 +23,12 @@ export function createDefinitionForSimulationAction(
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string | undefined,
+  ) => number | undefined | undefined,
 ) {
   return (input: AiDecisionInput, action: LegalAction) => {
     const definitionId = sourceDefinitionIdForAction(input, action);
     return definitionId
-      ? (RUNTIME_CARDS[definitionId] ?? CARD_DEFINITIONS_BY_ID[definitionId])
+      ? (RUNTIME_CARDS[definitionId] ?? planningCardFactsByDefinitionId(definitionId))
       : undefined;
   };
 }

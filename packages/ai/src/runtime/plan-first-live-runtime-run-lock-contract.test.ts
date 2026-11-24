@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import {
+  completeRunnerEconomyFixturePolicy,
   aiInput,
   legalAction,
   server,
@@ -15,14 +16,14 @@ describe("plan-first Runner run-lock parent-plan contract", () => {
   it("uses last productive liquidity when a run lock has no pressure route or bound funding need [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const gainCredit = legalAction(
-      "runner.gain_credit",
+      "rb",
       "runner",
       "gain_credit",
       "Gain 1 credit",
       { credits: 0, clicks: 1 },
     );
     const endTurn = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -64,7 +65,7 @@ describe("plan-first Runner run-lock parent-plan contract", () => {
       },
     );
     const gainCredit = legalAction(
-      "runner.gain_credit",
+      "rb",
       "runner",
       "gain_credit",
       "Gain 1 credit",
@@ -112,7 +113,7 @@ function runLockInput(
   input.playerView.turnSerial = 7;
   input.eventTail = [
     {
-      eventId: "visible-run-lock",
+      eventId: credits + 1,
       type: "resolve_trace",
       stateVersionBefore: Math.max(0, credits - 1),
       stateVersionAfter: credits,
@@ -147,5 +148,12 @@ function liveContext() {
     selectedChoicesForDecision: () => undefined,
     practicalMicroRuntimeCandidates: () => [],
   } as unknown as SemanticRuntimeDecisionContextDependencies;
-  return createSemanticRuntimeDecisionContext(dependencies);
+  return createSemanticRuntimeDecisionContext({
+    ...dependencies,
+    buildRunnerEconomyPosture: (params) =>
+      completeRunnerEconomyFixturePolicy(
+        dependencies.buildRunnerEconomyPosture(params),
+        params.input.playerView.own.credits,
+      ),
+  });
 }

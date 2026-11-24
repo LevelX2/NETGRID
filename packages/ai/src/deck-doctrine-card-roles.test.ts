@@ -35,11 +35,11 @@ describe("deck doctrine card role classification", () => {
   });
 
   it("uses generated CardSpec hint roles without runtime inference fallback", () => {
-    const hint = AI_HINTS_BY_CARD.get("simple_upgrade")!;
-    expect(rolesForDeckDoctrineCard("simple_upgrade")).toEqual(
+    const hint = AI_HINTS_BY_CARD.get(606)!;
+    expect(rolesForDeckDoctrineCard(606)).toEqual(
       [...new Set([...hint.roles, ...hint.planRoles])].sort(),
     );
-    expect(rolesForDeckDoctrineCard("simple_upgrade")).not.toContain(
+    expect(rolesForDeckDoctrineCard(606)).not.toContain(
       "economy_operation",
     );
   });

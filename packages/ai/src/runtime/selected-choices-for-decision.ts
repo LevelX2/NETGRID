@@ -1,3 +1,5 @@
+import { parseCardDefinitionId, validOptionalCardDefinitionIds } from "../card-definition-id-input";
+import { isCardDefinitionId } from "@netgrid/shared";
 import { parseRunnerProgramInstallMemoryContinuation } from "@netgrid/engine";
 import {
   isRunnerProgramTrashBackupWindow,
@@ -16,11 +18,13 @@ import {
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
   type AiDecision,
   type AiDecisionInput,
+  type CardDefinitionId,
   type CorpOptionalRezChoiceQuote,
   type LegalAction,
   type VisibleCard,
 } from "@netgrid/shared";
 import { runnerPartialProgramSearchProfile } from "./runner-partial-program-search-facts";
+import { planBoundStartRunRedirectSelection } from "../corp/defense/start-run-redirect-choice";
 import { selectedRunnerRunProgramSearchOptionIds } from "../runner/run-window/run-window-program-search-binding";
 import {
   selectedCorpAccessPaymentOptionsFromAmbushPlan,
@@ -39,10 +43,10 @@ import type {
 import type { CorpHandManagementSignal } from "../corp/hand-management/hand-management-types";
 import { isExactScoreRecoveryChoiceOwner } from "../corp/score/score-recovery-choice-owner";
 import { isExactDefenseRecoveryChoiceOwner } from "../corp/defense/defense-recovery-choice-owner";
+import { selectedCorpDelayedSuccessOptionId } from "../corp/defense/delayed-success-choice-binding";
 import {
   selectedCorpScoreAdvancementOptionId,
   residentCorpScoredAgendaHqShuffleBinding,
-  selectedCorpDelayedSuccessOptionId,
   selectedCorpSatelliteMonitorsStartOptionId,
   selectedCorpScoredAgendaFreeRezOptionId,
   selectedCorpScoredAgendaIceMarkOptionId,
@@ -112,7 +116,6 @@ import {
   type SearchChoiceFeatureSnapshot,
 } from "./search-choice-option";
 import { selectedForcedChoiceOptionIds } from "./select-card-choice-option";
-import { selectedSetupMulliganChoiceOptionId } from "./setup-mulligan-choice-option";
 import { runnerTagAvoidanceChoiceResolution } from "./tag-avoidance-choice-option";
 import { latestTraceContext } from "./trace-context";
 
@@ -143,9 +146,9 @@ export type SelectedChoicesForDecisionDependencies = {
   readonly extractAiFeatures: (
     input: AiDecisionInput,
   ) => SearchChoiceFeatureSnapshot;
-  readonly rolesForCardId: (cardId: string | undefined) => readonly string[];
+  readonly rolesForCardId: (cardId: CardDefinitionId | undefined) => readonly string[];
   readonly effectsForCardId: (
-    cardId: string | undefined,
+    cardId: CardDefinitionId | undefined,
   ) => readonly AiHintStructuredEffect[];
 };
 
@@ -544,6 +547,13 @@ export function selectedChoicesForDecision(
 ): AiDecision["selectedChoices"] | undefined {
   const choice = input.playerView.pendingChoice;
   if (action.type !== "resolve_choice" || !choice) return undefined;
+  if (exactCurrentChoiceAction(input, choice) !== action) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "Resolve only the exact current Engine choice offer for this actor.",
+    );
+  }
   currentPortfolio ??= residentPlanPortfolioSnapshot(input);
   const selectableOptions = selectableChoiceOptions(choice.options);
   const resolved = (
@@ -578,10 +588,9 @@ export function selectedChoicesForDecision(
       input.side === "corp"
         ? dependencies.evaluateCorpOpeningHand(input)
         : dependencies.evaluateRunnerOpeningHand(input);
-    const selectedOptionId = selectedSetupMulliganChoiceOptionId(
-      choice,
-      opening.decision,
-    );
+    const selectedOptionId = selectableOptions.find(
+      (option) => option.id === opening.decision,
+    )?.id;
     return resolved(
       selectedOptionId !== undefined ? [selectedOptionId] : [],
       "setup_mulligan",
@@ -1173,6 +1182,29 @@ export function selectedChoicesForDecision(
   }
   if (
     input.side === "corp" &&
+    choice.source.startsWith("corp.start_of_run_redirect:")
+  ) {
+    const executor = currentPortfolio?.instances.find(
+      (instance) =>
+        instance.instanceId === currentPortfolio.executorInstanceId &&
+        instance.moduleId === "corp.defend_servers" &&
+        instance.executionState === "executor",
+    );
+    const binding = planBoundStartRunRedirectSelection(
+      input,
+      action,
+      executor?.moduleState,
+    );
+    if (!binding)
+      throw unresolvedChoiceFailure(
+        input,
+        action,
+        "Bind start-of-run redirection to the current defense executor, run and quoted source.",
+      );
+    return resolved(binding.selectedOptionIds, "corp_start_run_redirect");
+  }
+  if (
+    input.side === "corp" &&
     choice.kind === "select_option" &&
     choice.source.startsWith("card_implementation.classic_deflector:")
   ) {
@@ -1211,12 +1243,7 @@ export function selectedChoicesForDecision(
     choice.source === "card_implementation.runner_installed_multi_trash" &&
     corpInstalledHardwareTrashOperationProfile(choice.sourceCardDefinitionId)
   ) {
-    const selected = selectedCorpHardwareTrashChoiceOptionIds(
-      input,
-      action,
-      choice,
-      selectableOptions,
-    );
+    const selected = selectedCorpHardwareTrashChoiceOptionIds(input, action);
     if (!selected) {
       throw unresolvedChoiceFailure(
         input,
@@ -1510,7 +1537,7 @@ export function selectedChoicesForDecision(
     choice.source.startsWith("v1921.playful_ai") ||
     choice.source.startsWith("card_implementation.random_dice_split:")
   ) {
-    const selectedOptionId = selectedPlayfulAiChoiceOptionId(choice);
+    const selectedOptionId = selectedPlayfulAiChoiceOptionId(selectableOptions);
     return resolved(
       selectedOptionId !== undefined ? [selectedOptionId] : [],
       "playful_ai",
@@ -1553,10 +1580,13 @@ export function selectedChoicesForDecision(
       choice,
       latestTraceContext(input),
     );
-    return resolved(
-      selectedOptionId !== undefined ? [selectedOptionId] : [],
-      "post_bid_link",
-    );
+    if (selectedOptionId === undefined)
+      throw unresolvedChoiceFailure(
+        input,
+        action,
+        "The current post-bid Trace choice has no selectable pass or quoted Link option.",
+      );
+    return resolved([selectedOptionId], "post_bid_link");
   }
   if (choice.source.endsWith(":corp_payment")) {
     const selectedOptionId = choice.options
@@ -1759,7 +1789,7 @@ function selectedCorpDamageReplacementChoiceOptionId(
         (card) =>
           card.instanceId === sourceCardId &&
           card.known &&
-          card.definitionId === "onr_proteus_006_please-dont-choke-anyone" &&
+          card.definitionId === 64 &&
           card.type === "agenda",
       )
     : undefined;
@@ -2122,7 +2152,7 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
     searchState !== undefined &&
     searchState.selectedSearchStateVersion === portfolio.stateVersion &&
     binding !== undefined &&
-    typeof binding.targetDefinitionId === "string" &&
+    typeof binding.targetDefinitionId === "number" &&
     typeof targetCardInstanceId === "string" &&
     binding.targetCardInstanceId === targetCardInstanceId &&
     sacrifice?.targetCardInstanceId === targetCardInstanceId &&
@@ -2164,7 +2194,7 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
 function runnerHiddenSearchProgramInstallSourceBinding(source: string):
   | {
       sourceCardInstanceId: string;
-      sourceDefinitionId: string;
+      sourceDefinitionId: number;
       selectedAtStateVersion: number;
     }
   | undefined {
@@ -2173,9 +2203,11 @@ function runnerHiddenSearchProgramInstallSourceBinding(source: string):
       source,
     );
   if (stackOrTrash) {
+    const sourceDefinitionId = parseCardDefinitionId(stackOrTrash[2]!);
+    if (sourceDefinitionId === undefined) return undefined;
     return {
       sourceCardInstanceId: stackOrTrash[1]!,
-      sourceDefinitionId: stackOrTrash[2]!,
+      sourceDefinitionId,
       selectedAtStateVersion: Number(stackOrTrash[4]),
     };
   }
@@ -2184,9 +2216,11 @@ function runnerHiddenSearchProgramInstallSourceBinding(source: string):
       source,
     );
   if (!directStack) return undefined;
+  const sourceDefinitionId = parseCardDefinitionId(directStack[2]!);
+  if (sourceDefinitionId === undefined) return undefined;
   return {
     sourceCardInstanceId: directStack[1]!,
-    sourceDefinitionId: directStack[2]!,
+    sourceDefinitionId,
     selectedAtStateVersion: Number(directStack[5]),
   };
 }
@@ -2600,7 +2634,7 @@ function selectedRunnerInstalledCardLiquidationOptionId(
       card.instanceId === sourceResourceInstanceId &&
       card.known &&
       card.type === "resource" &&
-      typeof card.definitionId === "string",
+      typeof card.definitionId === "number",
   );
   const requirement = action.choiceRequirements?.[0];
   const choiceOptionIds = choice.options.map((option) => option.id);
@@ -2736,8 +2770,8 @@ function validatedChoiceSelection(
   const selectableIds = new Set(selectableOptions.map((option) => option.id));
   const uniqueIds = new Set(selectedOptionIds);
   const selectionIsValid =
-    Number.isInteger(choice.minSelections) &&
-    Number.isInteger(choice.maxSelections) &&
+    Number.isSafeInteger(choice.minSelections) &&
+    Number.isSafeInteger(choice.maxSelections) &&
     choice.minSelections >= 0 &&
     choice.maxSelections >= choice.minSelections &&
     selectedOptionIds.length >= choice.minSelections &&
@@ -2788,7 +2822,7 @@ function runnerCoverageSearchChoiceBinding(
       requiredCoverage: RequiredCapabilityKind;
       serverId?: string;
       targetCardInstanceId?: string;
-      targetDefinitionId?: string;
+      targetDefinitionId?: number;
       optionalExactTargetOnly: boolean;
     }
   | undefined {
@@ -2835,7 +2869,7 @@ function runnerCoverageSearchChoiceBinding(
       (candidate) =>
         candidate.actionId === moduleState.selectedSearchActionId &&
         typeof candidate.sourceCardInstanceId === "string" &&
-        typeof candidate.sourceDefinitionId === "string" &&
+        typeof candidate.sourceDefinitionId === "number" &&
         choice.sourceCardInstanceId === candidate.sourceCardInstanceId &&
         choice.sourceCardDefinitionId === candidate.sourceDefinitionId,
     ) ?? [];
@@ -2847,7 +2881,7 @@ function runnerCoverageSearchChoiceBinding(
     );
   }
   const binding = bindings[0];
-  if (!binding || typeof binding.actionId !== "string") {
+  if (!binding || typeof binding.actionId !== "string" || !isCardDefinitionId(binding.sourceDefinitionId)) {
     throw coverageSearchChoiceBindingFailure(
       input,
       executor.instanceId,
@@ -2856,7 +2890,7 @@ function runnerCoverageSearchChoiceBinding(
   }
   const partialProfile = runnerPartialProgramSearchProfile(
     input,
-    binding.sourceDefinitionId as string,
+    binding.sourceDefinitionId,
   );
   if (
     partialProfile &&
@@ -2888,7 +2922,7 @@ function runnerCoverageSearchChoiceBinding(
     ...(typeof binding.targetCardInstanceId === "string"
       ? { targetCardInstanceId: binding.targetCardInstanceId }
       : {}),
-    ...(typeof binding.targetDefinitionId === "string"
+    ...(typeof binding.targetDefinitionId === "number"
       ? { targetDefinitionId: binding.targetDefinitionId }
       : {}),
   };
@@ -3027,7 +3061,7 @@ function isExactOptionalRezChoiceQuoteBinding(
     quote.stateVersion !== input.playerView.stateVersion ||
     !nonEmptyString(quote.sourceAgendaId) ||
     !nonEmptyString(quote.cardId) ||
-    !nonEmptyString(quote.cardDefinitionId) ||
+    !isCardDefinitionId(quote.cardDefinitionId) ||
     option.value !== quote.cardId ||
     option.card?.known !== true ||
     option.card.instanceId !== quote.cardId ||
@@ -3036,7 +3070,7 @@ function isExactOptionalRezChoiceQuoteBinding(
     sourceAgenda?.known !== true ||
     sourceAgenda.type !== "agenda" ||
     !nonEmptyString(quote.targetServerId) ||
-    !/^remote_[1-9][0-9]*$/.test(quote.targetServerId) ||
+    !/^r[1-9][0-9]*$/.test(quote.targetServerId) ||
     !boundServer ||
     boundServerCard?.known !== true ||
     boundServerCard.definitionId !== quote.cardDefinitionId ||
@@ -3059,8 +3093,8 @@ function isExactOptionalRezChoiceQuoteBinding(
     nonNegativeSafeInteger(quote.baseCredits) &&
     nonNegativeSafeInteger(quote.finalCredits) &&
     nonNegativeSafeInteger(quote.mandatoryAdditionalCosts.agendaPoints) &&
-    validDefinitionIdList(quote.reductionSourceDefinitionIds) &&
-    validDefinitionIdList(quote.increaseSourceDefinitionIds) &&
+    validOptionalCardDefinitionIds(quote.reductionSourceDefinitionIds) &&
+    validOptionalCardDefinitionIds(quote.increaseSourceDefinitionIds) &&
     modifierDefinitionIdListsAreDisjoint(
       quote.reductionSourceDefinitionIds,
       quote.increaseSourceDefinitionIds,
@@ -3089,21 +3123,12 @@ function isExactOptionalRezChoiceQuoteBinding(
 }
 
 function modifierDefinitionIdListsAreDisjoint(
-  reductionIds: readonly string[] | undefined,
-  increaseIds: readonly string[] | undefined,
+  reductionIds: readonly CardDefinitionId[] | undefined,
+  increaseIds: readonly CardDefinitionId[] | undefined,
 ): boolean {
   if (!reductionIds || !increaseIds) return true;
   const reductions = new Set(reductionIds);
   return increaseIds.every((id) => !reductions.has(id));
-}
-
-function validDefinitionIdList(value: readonly string[] | undefined): boolean {
-  return (
-    value === undefined ||
-    (value.every(nonEmptyString) &&
-      new Set(value).size === value.length &&
-      value.every((entry, index) => index === 0 || value[index - 1]! < entry))
-  );
 }
 
 function nonEmptyString(value: unknown): value is string {

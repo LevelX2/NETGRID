@@ -1,5 +1,6 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
 import type { RunnerTargetedIceTrashChoiceContinuation } from "../../runtime/runner-targeted-ice-trash-plan";
@@ -43,7 +44,7 @@ export function selectedRunnerTargetedIceTrashChoiceOptionId(
   const continuation = moduleState?.choiceContinuation;
   const exactOrigin =
     input.side === "runner" &&
-    action.side === "runner" &&
+    actionMatchesCurrentDecision(input, action) &&
     action.type === "resolve_choice" &&
     choice.side === "runner" &&
     choice.kind === "select_cards" &&
@@ -60,9 +61,10 @@ export function selectedRunnerTargetedIceTrashChoiceOptionId(
     continuation.ownerModuleId === executor.moduleId &&
     continuation.sourceCardInstanceId === source?.sourceCardInstanceId &&
     continuation.sourceActionId === continuation.selectedActionId &&
-    continuation.selectedAtStateVersion === portfolio.stateVersion &&
-    continuation.plannedAtStateVersion === portfolio.stateVersion &&
-    continuation.selectedAtStateVersion + 1 === input.playerView.stateVersion &&
+    continuation.plannedAtStateVersion === continuation.selectedAtStateVersion &&
+    (continuation.engineContinuationAtStateVersion ??
+      continuation.selectedAtStateVersion) === portfolio.stateVersion &&
+    portfolio.stateVersion + 1 === input.playerView.stateVersion &&
     (moduleState?.kind === "central_pressure" ||
       moduleState?.kind === "remote_contest");
   if (!exactOrigin) {
@@ -106,10 +108,11 @@ function targetedIceTrashChoiceSource(choice: PendingChoice):
   const separator = suffix.lastIndexOf(":");
   if (separator <= 0) return undefined;
   const sourceCardInstanceId = suffix.slice(0, separator);
-  const choiceStateVersion = Number(suffix.slice(separator + 1));
+  const rawStateVersion = suffix.slice(separator + 1);
+  const choiceStateVersion = Number(rawStateVersion);
   if (
-    sourceCardInstanceId.length === 0 ||
-    !Number.isInteger(choiceStateVersion)
+    !/^\d+$/.test(rawStateVersion) ||
+    !Number.isSafeInteger(choiceStateVersion)
   ) {
     return undefined;
   }

@@ -14,10 +14,10 @@ const runnerDeck: EditableDeck = {
   deckVersion: "0.6.0-local",
   name: "Runner Test",
   side: "runner",
-  identityCardId: "runner_identity_001",
+  identityCardId: 587,
   cardPoolSnapshotId: "card-snapshot-0.8",
   formatProfileId: "local-demo-v0.8",
-  cards: [{ cardId: "v08_runner_event_easy_mark", quantity: 2 }],
+  cards: [{ cardId: 9128, quantity: 2 }],
   createdAt: "2026-05-07T10:00:00.000Z",
   updatedAt: "2026-05-07T10:00:00.000Z",
 };

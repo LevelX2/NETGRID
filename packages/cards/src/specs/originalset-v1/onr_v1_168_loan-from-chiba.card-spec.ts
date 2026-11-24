@@ -5,7 +5,7 @@ const trashAtEndOfTurn = capabilityKey("trash_at_end_of_turn");
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_168_loan-from-chiba"),
+    cardDefinitionId: cardDefinitionId(380),
     title: "Loan from Chiba",
     side: "runner",
     cardType: "resource",

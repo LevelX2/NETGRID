@@ -117,7 +117,7 @@ describe("TargetChoiceShadow", () => {
             id: "server",
             kind: "server",
             visibility: "known_to_actor",
-            allowedServers: ["remote_1", "rd", "hq"],
+            allowedServers: ["r1", "rd", "hq"],
           },
         ],
       }),
@@ -127,7 +127,7 @@ describe("TargetChoiceShadow", () => {
     expect(report.rankedOptions.map((option) => option.optionId)).toEqual([
       "rd",
       "hq",
-      "remote_1",
+      "r1",
     ]);
     expect(report.blockedRequirements).toEqual([]);
   });
@@ -190,16 +190,16 @@ describe("TargetChoiceShadow", () => {
   it("ranks real Engine payload server targets as report-only options", () => {
     const report = buildTargetChoiceShadowReport({
       action: action({
-        actionId: "runner.start_run.remote_1",
+        actionId: "rs.r1",
         type: "start_run",
-        payload: { serverId: "remote_1" },
+        payload: { serverId: "r1" },
       }),
     });
 
     expect(report.rankedOptions).toEqual([
       expect.objectContaining({
         requirementId: "payload.serverId",
-        optionId: "remote_1",
+        optionId: "r1",
         kind: "target_option",
       }),
     ]);
@@ -229,10 +229,10 @@ describe("TargetChoiceShadow", () => {
   it("ranks real Engine payload card targets when the card id is side-safe", () => {
     const report = buildTargetChoiceShadowReport({
       action: action({
-        actionId: "corp.score_agenda.remote_1_agenda",
+        actionId: "cr.r1_agenda",
         side: "corp",
         type: "score_agenda",
-        payload: { cardId: "remote_1_agenda" },
+        payload: { cardId: "r1_agenda" },
       }),
       utilityFamilies: ["corp_scoreline"],
     });
@@ -240,7 +240,7 @@ describe("TargetChoiceShadow", () => {
     expect(report.rankedOptions).toEqual([
       expect.objectContaining({
         requirementId: "payload.cardId",
-        optionId: "remote_1_agenda",
+        optionId: "r1_agenda",
         kind: "target_option",
       }),
     ]);
@@ -251,6 +251,29 @@ describe("TargetChoiceShadow", () => {
         "utility_family:corp_scoreline",
       ]),
     );
+  });
+
+  it("withholds a dry-run selection when only one of two requirements has options", () => {
+    const report = buildTargetChoiceShadowReport({
+      action: action({
+        choiceRequirements: [
+          {
+            choiceId: "offered",
+            minSelections: 1,
+            maxSelections: 1,
+            optionIds: ["one"],
+          },
+          {
+            choiceId: "blocked",
+            minSelections: 1,
+            maxSelections: 1,
+            optionIds: [],
+          },
+        ],
+      }),
+    });
+    expect(report.scorecard.coverageStatus).toBe("partial");
+    expect(report.selectionOutput.wouldSelect).toBeUndefined();
   });
 
   it("blocks empty choice requirements without fabricating options", () => {
@@ -287,7 +310,7 @@ describe("TargetChoiceShadow", () => {
             id: "server",
             kind: "server",
             visibility: "known_to_actor",
-            allowedServers: ["hq", "remote_1"],
+            allowedServers: ["hq", "r1"],
           },
         ],
       }),
@@ -297,14 +320,14 @@ describe("TargetChoiceShadow", () => {
           opportunity: "remote_contest_window",
           priority: "critical",
           side: "runner",
-          targetId: "remote_1",
+          targetId: "r1",
           evidence: ["test:remote_score_threat"],
         },
       ],
     });
 
     expect(report.rankedOptions.map((option) => option.optionId)).toEqual([
-      "remote_1",
+      "r1",
       "hq",
     ]);
     expect(report.rankedOptions[0]?.evidence).toEqual(
@@ -318,7 +341,7 @@ describe("TargetChoiceShadow", () => {
       selectedTargetsCreated: false,
       wouldSelect: {
         requirementId: "server",
-        optionId: "remote_1",
+        optionId: "r1",
         confidence: "high",
       },
     });
@@ -332,7 +355,7 @@ describe("TargetChoiceShadow", () => {
     expect(targetChoiceWouldSelectForAccessDecisionProjection(report)).toEqual(
       expect.objectContaining({
         requirementId: "server",
-        optionId: "remote_1",
+        optionId: "r1",
         selectedChoicesCreated: false,
         selectedTargetsCreated: false,
         evidence: expect.arrayContaining([
@@ -364,7 +387,7 @@ describe("TargetChoiceShadow", () => {
             id: "server",
             kind: "server",
             visibility: "known_to_actor",
-            allowedServers: ["rd", "hq", "remote_1"],
+            allowedServers: ["rd", "hq", "r1"],
           },
         ],
       }),
@@ -383,7 +406,7 @@ describe("TargetChoiceShadow", () => {
     expect(report.rankedOptions.map((option) => option.optionId)).toEqual([
       "hq",
       "rd",
-      "remote_1",
+      "r1",
     ]);
     expect(report.rankedOptions[0]?.evidence).toEqual(
       expect.arrayContaining([
@@ -403,7 +426,7 @@ describe("TargetChoiceShadow", () => {
             id: "server",
             kind: "server",
             visibility: "known_to_actor",
-            allowedServers: ["remote_1", "hq"],
+            allowedServers: ["r1", "hq"],
           },
         ],
       }),
@@ -413,7 +436,7 @@ describe("TargetChoiceShadow", () => {
           threat: "runner_flatline_risk",
           severity: "critical",
           affectedSide: "runner",
-          targetId: "remote_1",
+          targetId: "r1",
           evidence: ["test:damage_risk"],
         },
       ],
@@ -421,7 +444,7 @@ describe("TargetChoiceShadow", () => {
 
     expect(report.rankedOptions.map((option) => option.optionId)).toEqual([
       "hq",
-      "remote_1",
+      "r1",
     ]);
     expect(report.rankedOptions[1]?.evidence).toEqual(
       expect.arrayContaining([
@@ -448,7 +471,7 @@ describe("TargetChoiceShadow", () => {
         ],
       }),
       sideSafeTargetIdsByRequirementId: {
-        target: ["remote_2_asset", "remote_1_agenda"],
+        target: ["r2_asset", "r1_agenda"],
       },
       utilityFamilies: ["corp_scoreline"],
       opportunities: [
@@ -456,15 +479,15 @@ describe("TargetChoiceShadow", () => {
           opportunity: "score_window",
           priority: "high",
           side: "corp",
-          targetId: "remote_1_agenda",
+          targetId: "r1_agenda",
           evidence: ["test:structured_score_window"],
         },
       ],
     });
 
     expect(report.rankedOptions.map((option) => option.optionId)).toEqual([
-      "remote_1_agenda",
-      "remote_2_asset",
+      "r1_agenda",
+      "r2_asset",
     ]);
     expect(report.rankedOptions[0]?.evidence).toEqual(
       expect.arrayContaining(["utility_family:corp_scoreline"]),
@@ -488,14 +511,14 @@ describe("TargetChoiceShadow", () => {
         ],
       }),
       sideSafeTargetIdsByRequirementId: {
-        target: ["remote_1_scoreline_text", "remote_2_asset"],
+        target: ["r1_scoreline_text", "r2_asset"],
       },
       utilityFamilies: ["corp_scoreline"],
     });
 
     expect(
       report.rankedOptions.find(
-        (option) => option.optionId === "remote_1_scoreline_text",
+        (option) => option.optionId === "r1_scoreline_text",
       )?.evidence,
     ).not.toContain("utility_family:corp_scoreline");
   });
@@ -515,7 +538,7 @@ describe("TargetChoiceShadow", () => {
       }),
       candidate: semanticCandidate({
         actionId: "run-server",
-        selectedTargetIds: ["remote_1"],
+        selectedTargetIds: ["r1"],
         availableTargetIds: ["hq", "rd"],
       }),
     });
@@ -523,7 +546,7 @@ describe("TargetChoiceShadow", () => {
     expect(report.rankedOptions.map((option) => option.optionId)).toEqual([
       "hq",
       "rd",
-      "remote_1",
+      "r1",
     ]);
     expect(report.rankedOptions[0]?.evidence).toEqual(
       expect.arrayContaining([
@@ -535,6 +558,15 @@ describe("TargetChoiceShadow", () => {
       selectedChoicesCreated: false,
       selectedTargetsCreated: false,
     });
+  });
+
+  it("rejects semantic target facts from another Engine offer", () => {
+    expect(() =>
+      buildTargetChoiceShadowReport({
+        action: action({ actionId: "different-action" }),
+        candidate: semanticCandidate({ actionId: "run-server" }),
+      }),
+    ).toThrow("target_choice_shadow_candidate_does_not_match_action");
   });
 
   it("keeps explicit side-safe target maps ahead of semantic candidate context", () => {
@@ -552,7 +584,7 @@ describe("TargetChoiceShadow", () => {
       }),
       candidate: semanticCandidate({
         actionId: "run-server",
-        selectedTargetIds: ["remote_1"],
+        selectedTargetIds: ["r1"],
       }),
       sideSafeTargetIdsByRequirementId: {
         server: ["rd"],
@@ -779,13 +811,13 @@ describe("TargetChoiceShadow", () => {
         ],
       }),
       sideSafeTargetIdsByRequirementId: {
-        "installed-card": ["remote_2_agenda", "remote_1_agenda"],
+        "installed-card": ["r2_agenda", "r1_agenda"],
       },
     });
 
     expect(report.rankedOptions.map((option) => option.optionId)).toEqual([
-      "remote_1_agenda",
-      "remote_2_agenda",
+      "r1_agenda",
+      "r2_agenda",
     ]);
   });
 

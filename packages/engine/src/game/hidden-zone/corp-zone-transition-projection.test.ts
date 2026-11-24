@@ -27,7 +27,7 @@ describe("Corp composite zone transition projection", () => {
       state,
       action,
       "rescheduler" as CardInstanceId,
-      "onr_v1_336_rescheduler" as CardDefinitionId,
+      548 as CardDefinitionId,
     );
 
     expect(quote).toMatchObject({
@@ -58,7 +58,7 @@ describe("Corp composite zone transition projection", () => {
       state,
       action,
       "ai-cfo" as CardInstanceId,
-      "onr_v1_188_ai-chief-financial-officer" as CardDefinitionId,
+      400 as CardDefinitionId,
       5,
     );
 

@@ -1,26 +1,34 @@
+import { validOptionalCardDefinitionIds } from "./card-definition-id-input";
+import { toPublicEventForSide } from "@netgrid/engine";
+import { isCardDefinitionId, isMatchEventId, isRunId, type RunId } from "@netgrid/shared";
+import { sanitizeCurrentCorpPunishQuoteSet } from "./corp/punish/punish-route-quote-sanitizer";
 import { sanitizeCorpStartDrawQuote } from "./runtime/corp-start-draw-quote-input";
-import { sanitizeForcedIceRezChoiceQuote } from "./runtime/forced-ice-rez-choice-quote";
+import {
+  forcedIceRezChoiceIceId,
+  sanitizeForcedIceRezChoiceQuote,
+} from "./runtime/forced-ice-rez-choice-quote";
 import {
   ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
   CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
-  CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
   RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION,
+  isPublicResolvedGameEffectId,
   type AiDecisionInput,
   type AiDifficulty,
   type CorpOptionalRezChoiceQuote,
-  type CorpPunishRouteIncompleteReason,
-  type CorpPunishRouteQuote,
   type CorpPunishRouteQuoteSet,
   type CounterType,
   type CounterDisplay,
   type ChoiceRequirement,
   type Cost,
+  type GameState,
+  type EncounterActionTargets,
   type LegalAction,
   type PlayerView,
   type PublicAbilityFamily,
   type PublicGameEvent,
+  type PublicResolvedGameEffect,
   type ResolvedGameEffect,
   type Side,
   type SubroutineType,
@@ -62,6 +70,7 @@ export type BuildAiDecisionInputDtoParams = {
 
 export const AI_DECISION_INPUT_TOP_LEVEL_FIELDS = [
   "matchId",
+  "corpRestrictedCreditRouteQuotes",
   "side",
   "playerView",
   "eventTail",
@@ -93,6 +102,8 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "runnerInstallPaymentSourceAmounts",
   "runnerInstallPaymentHostedCredits",
   "runnerProgramTrashBeforeInstall",
+  "actionEconomyAbility",
+  "restrictedActionFamily",
   "hostOnCardId",
   "restrictedCreditGainAmount",
   "restrictedCreditGainUsableFor",
@@ -132,7 +143,6 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "approachIceExposeJackOut",
   "pumpStrengthAmount",
   "subroutineIndex",
-  "subroutineIndexes",
   "placement",
   "iceInstallBaseCost",
   "iceInstallAdditionalCost",
@@ -264,8 +274,6 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "rootReplacement",
   "encounterContinue",
   "unbrokenSubroutineCount",
-  "encounterSubroutineIds",
-  "encounterRemainingSubroutineIds",
   "encounterRemainingSubroutineCount",
   "encounterFullBreakDamage",
   "delayedInstallAbility",
@@ -426,9 +434,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "obligationDebtCreditCost",
   "obligationDebtScoreAgendaPoints",
   "obligationDebtCountBefore",
-  "payOrTrashProgramSubroutineIndexes",
   "payOrTrashProgramSubroutinePayment",
-  "payOrEndRunSubroutineIndexes",
   "payOrEndRunSubroutinePayment",
   ...ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
 ]);
@@ -516,6 +522,9 @@ const PUBLIC_PAYLOAD_PRIMITIVE_KEYS = new Set<string>([
   "damageResolved",
   "traceStarted",
   "traceId",
+  "traceSourceRunId",
+  "traceSourceCardInstanceId",
+  "traceSourceSubroutineIndex",
   "traceSuccessful",
   "choiceId",
   "traceStep",
@@ -703,13 +712,82 @@ const ALLOWED_ABILITY_FAMILIES: ReadonlySet<PublicAbilityFamily> = new Set([
   "trace-tags",
 ]);
 
+const projectedAiHistories = new WeakMap<
+  PublicGameEvent[],
+  { side: Side; events: PublicGameEvent[] }
+>();
+
+type Chronicle = {
+  lastEventId: PublicGameEvent["eventId"] | undefined;
+  lastStateHash: string | undefined;
+  projected: PublicGameEvent[];
+  sanitized: PublicGameEvent[];
+};
+
+/** The caller releases a match on undo, replacement, or close. A new
+ * process reconstructs the projection from the stored Engine journal. */
+export class AiDecisionChronicle {
+  readonly #matches = new Map<string, Partial<Record<Side, Chronicle>>>();
+
+  project(state: GameState, side: Side): PublicGameEvent[] {
+    const sides = this.#matches.get(state.matchId) ?? {};
+    const previous = sides[side];
+    const last = previous
+      ? state.eventLog[previous.projected.length - 1]
+      : undefined;
+    const prefix =
+      previous &&
+      previous.projected.length <= state.eventLog.length &&
+      previous.lastEventId === last?.eventId &&
+      previous.lastStateHash === last?.stateHashAfter
+        ? previous
+        : undefined;
+    if (prefix && prefix.projected.length === state.eventLog.length)
+      return prefix.projected;
+
+    const added = state.eventLog
+      .slice(prefix?.projected.length ?? 0)
+      .map((event) => toPublicEventForSide(event, side));
+    const projected = (prefix?.projected ?? []).concat(added);
+    const sanitized = (prefix?.sanitized ?? []).concat(
+      added.map((event) => freezeEventValue(sanitizePublicGameEvent(event))),
+    );
+    Object.freeze(projected);
+    projectedAiHistories.set(projected, { side, events: sanitized });
+    const head = state.eventLog.at(-1);
+    sides[side] = {
+      lastEventId: head?.eventId,
+      lastStateHash: head?.stateHashAfter,
+      projected,
+      sanitized,
+    };
+    this.#matches.set(state.matchId, sides);
+    return projected;
+  }
+
+  release(matchId: string): void {
+    this.#matches.delete(matchId);
+  }
+}
+
+function freezeEventValue<T>(value: T): T {
+  if (typeof value === "object" && value !== null) {
+    for (const child of Object.values(value)) freezeEventValue(child);
+    Object.freeze(value);
+  }
+  return value;
+}
+
 export function buildAiDecisionInputDto(
   params: BuildAiDecisionInputDtoParams,
 ): AiDecisionInput {
   assertActorSideContract(params);
-  const sanitizedPublicEvents = params.playerView.publicEvents.map(
-    sanitizePublicGameEvent,
-  );
+  const cached = projectedAiHistories.get(params.playerView.publicEvents);
+  if (cached && cached.side !== params.side)
+    throw new Error("AI input chronicle actor side mismatch.");
+  const sanitizedPublicEvents = cached
+    ? cached.events.slice()
+    : params.playerView.publicEvents.map(sanitizePublicGameEvent);
   return {
     ...(params.matchId !== undefined ? { matchId: params.matchId } : {}),
     ...(params.corpRestrictedCreditRouteQuotes?.length
@@ -739,18 +817,14 @@ export function buildAiDecisionInputDto(
 
 function assertActorSideContract(params: BuildAiDecisionInputDtoParams): void {
   if (params.playerView.side !== params.side) {
-    throw new Error(
-      `AI input actor side mismatch: requested=${params.side};playerView=${params.playerView.side}`,
-    );
+    throw new Error("AI input actor side mismatch.");
   }
   const mismatchedAction = [
     ...params.legalActions,
     ...params.playerView.legalActions,
   ].find((action) => action.side !== params.side);
   if (mismatchedAction) {
-    throw new Error(
-      `AI input LegalAction side mismatch: requested=${params.side};action=${mismatchedAction.actionId};actionSide=${mismatchedAction.side}`,
-    );
+    throw new Error("AI input LegalAction side mismatch.");
   }
 }
 
@@ -777,6 +851,8 @@ function sanitizePlayerView(
   view: PlayerView,
   publicEvents: PublicGameEvent[],
 ): PlayerView {
+  if (view.run?.runId !== undefined && !isRunId(view.run.runId))
+    throw new Error("invalid_current_run_id");
   const fortTrash = view.run?.successfulRunFortIceTrashQuote;
   if (
     fortTrash &&
@@ -859,7 +935,7 @@ function sanitizePlayerView(
     throw new Error("Invalid Engine pending auto-pass ICE binding.");
   if (
     view.run?.encounterTaxForFutureIce !== undefined &&
-    !nonNegativeInteger(view.run.encounterTaxForFutureIce)
+    !isNonNegativeSafeInteger(view.run.encounterTaxForFutureIce)
   ) {
     throw new Error("Invalid Engine run encounter-entry tax quote.");
   }
@@ -869,13 +945,22 @@ function sanitizePlayerView(
       view.runnerNextTurnCreditClicks < 0)
   )
     throw new Error("Invalid Engine Runner next-turn credit-click forecast.");
+  const mandatoryDraw = view.corpMandatoryBaseDrawQuote;
+  if (mandatoryDraw !== undefined &&
+    (view.side !== "corp" ||
+      !isNonNegativeSafeInteger(mandatoryDraw.virusDrawCount) ||
+      !isNonNegativeSafeInteger(mandatoryDraw.baseCount) ||
+      mandatoryDraw.baseCount <= mandatoryDraw.virusDrawCount)
+  ) {
+    throw new Error("Invalid Engine Corp mandatory base draw quote.");
+  }
   const futureCorpClicks = view.own.corpFutureFlexibleClicks;
   if (
     futureCorpClicks !== undefined &&
     (view.side !== "corp" ||
       !Array.isArray(futureCorpClicks) ||
       futureCorpClicks.length !== 2 ||
-      !futureCorpClicks.every(nonNegativeInteger))
+      !futureCorpClicks.every(isNonNegativeSafeInteger))
   ) {
     throw new Error("Invalid Engine Corp future flexible-click forecast.");
   }
@@ -894,6 +979,12 @@ function sanitizePlayerView(
   return {
     side: view.side,
     stateVersion: view.stateVersion,
+    ...(mandatoryDraw
+      ? { corpMandatoryBaseDrawQuote: {
+        baseCount: mandatoryDraw.baseCount,
+        virusDrawCount: mandatoryDraw.virusDrawCount,
+      } }
+      : {}),
     ...(view.runnerNextTurnCreditClicks !== undefined
       ? { runnerNextTurnCreditClicks: view.runnerNextTurnCreditClicks }
       : {}),
@@ -1313,728 +1404,7 @@ function sanitizePlayerView(
 export function sanitizeCorpPunishRouteQuoteSet(
   view: PlayerView,
 ): CorpPunishRouteQuoteSet | undefined {
-  const quoteSet = view.corpPunishRouteQuoteSet;
-  if (
-    view.side !== "corp" ||
-    !quoteSet ||
-    quoteSet.schemaVersion !== CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION ||
-    quoteSet.visibility !== "private_to_actor" ||
-    quoteSet.side !== "corp" ||
-    !nonNegativeInteger(quoteSet.stateVersion) ||
-    quoteSet.stateVersion !== view.stateVersion ||
-    quoteSet.timingPoint !== view.timingPoint ||
-    !validCompleteState(
-      quoteSet.complete,
-      quoteSet.incompleteReasons,
-      quoteSet.complete && quoteSet.routes.length === 0,
-    ) ||
-    !nonNegativeInteger(quoteSet.runnerHandCount) ||
-    quoteSet.runnerHandCount !== view.opponent.handCount ||
-    !nonNegativeInteger(quoteSet.runnerTags) ||
-    quoteSet.runnerTags !== view.opponent.tags ||
-    !nonNegativeInteger(quoteSet.runnerCreditsVisible) ||
-    quoteSet.runnerCreditsVisible !== view.opponent.credits ||
-    !uniqueNonblankStrings(quoteSet.routes.map((route) => route.routeId)) ||
-    !uniqueNonblankStrings(
-      quoteSet.routes.map((route) => route.requestFingerprint),
-    ) ||
-    quoteSet.routes.some(
-      (route) => !validCorpPunishRouteQuote(route, quoteSet, view),
-    )
-  )
-    return undefined;
-
-  return {
-    schemaVersion: CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
-    visibility: "private_to_actor",
-    side: "corp",
-    stateVersion: quoteSet.stateVersion,
-    timingPoint: quoteSet.timingPoint,
-    complete: quoteSet.complete,
-    incompleteReasons: quoteSet.incompleteReasons.slice(),
-    runnerHandCount: quoteSet.runnerHandCount,
-    runnerTags: quoteSet.runnerTags,
-    runnerCreditsVisible: quoteSet.runnerCreditsVisible,
-    routes: quoteSet.routes.map((route) => ({
-      schemaVersion: CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
-      visibility: "private_to_actor",
-      matchId: route.matchId,
-      side: "corp",
-      routeId: route.routeId,
-      campaignId: route.campaignId,
-      campaignIdOrigin: route.campaignIdOrigin,
-      stateVersion: route.stateVersion,
-      timingPoint: route.timingPoint,
-      requestFingerprint: route.requestFingerprint,
-      requestEcho: {
-        schemaVersion: CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
-        matchId: route.requestEcho.matchId,
-        side: "corp",
-        stateVersion: route.requestEcho.stateVersion,
-        timingPoint: route.requestEcho.timingPoint,
-        campaignId: route.requestEcho.campaignId,
-        routeId: route.requestEcho.routeId,
-        steps: route.requestEcho.steps.map((step) => ({ ...step })),
-      },
-      complete: route.complete,
-      incompleteReasons: route.incompleteReasons.slice(),
-      steps: route.steps.map((step, index) => ({
-        stepId: step.stepId,
-        order: step.order,
-        kind: step.kind,
-        sourceCardInstanceId: step.sourceCardInstanceId,
-        sourceCardDefinitionId: step.sourceCardDefinitionId,
-        sourceCapabilityBindingKind: step.sourceCapabilityBindingKind,
-        sourceCapabilityId: step.sourceCapabilityId,
-        clicks: step.clicks,
-        credits: step.credits,
-        ...(step.agendaPointCost !== undefined
-          ? { agendaPointCost: step.agendaPointCost }
-          : {}),
-        ...(step.hardwareTrashProjection
-          ? {
-              hardwareTrashProjection: {
-                ...step.hardwareTrashProjection,
-                eligibleTargetInstanceIds:
-                  step.hardwareTrashProjection.eligibleTargetInstanceIds.slice(),
-              },
-            }
-          : {}),
-        ...(index === 0 && step.currentLegalAction
-          ? { currentLegalAction: sanitizeLegalAction(step.currentLegalAction) }
-          : {}),
-      })),
-      totalClicks: route.totalClicks,
-      totalActionCredits: route.totalActionCredits,
-      ...(route.traceBid
-        ? {
-            traceBid: {
-              sourceStepId: route.traceBid.sourceStepId,
-              amount: route.traceBid.amount,
-            },
-          }
-        : {}),
-      tagTrigger: { ...route.tagTrigger },
-      ...(route.tagOutcomeEnvelope
-        ? {
-            tagOutcomeEnvelope: {
-              currentRunnerTags: route.tagOutcomeEnvelope.currentRunnerTags,
-              addedTags: { ...route.tagOutcomeEnvelope.addedTags },
-              projectedRunnerTags: {
-                ...route.tagOutcomeEnvelope.projectedRunnerTags,
-              },
-            },
-          }
-        : {}),
-      responsePaymentEnvelope: {
-        responseKind: route.responsePaymentEnvelope.responseKind,
-        paymentKnowledge: route.responsePaymentEnvelope.paymentKnowledge,
-        corpCreditsAvailable:
-          route.responsePaymentEnvelope.corpCreditsAvailable,
-        runnerCreditsVisible:
-          route.responsePaymentEnvelope.runnerCreditsVisible,
-        corpResponseCredits: {
-          ...route.responsePaymentEnvelope.corpResponseCredits,
-        },
-        totalCorpCredits: {
-          ...route.responsePaymentEnvelope.totalCorpCredits,
-        },
-        runnerResponseCredits: {
-          ...route.responsePaymentEnvelope.runnerResponseCredits,
-        },
-      },
-      damageEnvelope: {
-        runnerHandCount: route.damageEnvelope.runnerHandCount,
-        rawDamage: { ...route.damageEnvelope.rawDamage },
-        effectiveDamage: { ...route.damageEnvelope.effectiveDamage },
-        visiblePrevention: {
-          knowledge: route.damageEnvelope.visiblePrevention.knowledge,
-          maximumPreventableDamage:
-            route.damageEnvelope.visiblePrevention.maximumPreventableDamage,
-          creditCost: {
-            ...route.damageEnvelope.visiblePrevention.creditCost,
-          },
-        },
-        visiblePiercing: {
-          knowledge: route.damageEnvelope.visiblePiercing.knowledge,
-          maximumBypassedDamage:
-            route.damageEnvelope.visiblePiercing.maximumBypassedDamage,
-          creditCost: {
-            ...route.damageEnvelope.visiblePiercing.creditCost,
-          },
-        },
-      },
-      ...(route.nonDamageEnvelope
-        ? {
-            nonDamageEnvelope: {
-              runnerCreditLoss: {
-                ...route.nonDamageEnvelope.runnerCreditLoss,
-              },
-            },
-          }
-        : {}),
-      guarantee: route.guarantee,
-      responseKnowledge: route.responseKnowledge,
-    })),
-  };
-}
-
-function validCorpPunishRouteQuote(
-  route: CorpPunishRouteQuote,
-  quoteSet: CorpPunishRouteQuoteSet,
-  view: PlayerView,
-): boolean {
-  if (
-    route.schemaVersion !== CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION ||
-    route.visibility !== "private_to_actor" ||
-    !nonblank(route.matchId) ||
-    route.side !== "corp" ||
-    !nonblank(route.routeId) ||
-    !nonblank(route.campaignId) ||
-    route.campaignIdOrigin !== "request_binding" ||
-    route.stateVersion !== quoteSet.stateVersion ||
-    route.timingPoint !== quoteSet.timingPoint ||
-    !validPunishRequestEcho(route) ||
-    route.requestFingerprint !== punishRequestFingerprint(route.requestEcho) ||
-    !validCompleteState(
-      route.complete,
-      route.incompleteReasons,
-      route.complete && route.steps.length === 0,
-    )
-  )
-    return false;
-
-  if (!route.complete) return validCanonicalIncompletePunishRoute(route);
-
-  if (
-    !nonNegativeInteger(route.totalClicks) ||
-    !nonNegativeInteger(route.totalActionCredits) ||
-    !validOrderedPunishSteps(route, quoteSet, view) ||
-    route.steps.reduce((sum, step) => sum + step.clicks, 0) !==
-      route.totalClicks ||
-    route.steps.reduce((sum, step) => sum + step.credits, 0) !==
-      route.totalActionCredits ||
-    !validTagTrigger(route, quoteSet) ||
-    !validTagOutcomeEnvelope(route, quoteSet) ||
-    !validResponsePaymentEnvelope(route, quoteSet, view) ||
-    !validPunishTraceBid(route) ||
-    !validDamageEnvelope(route, quoteSet) ||
-    !validNonDamageEnvelope(route, quoteSet) ||
-    (route.responseKnowledge !== "public_exact" &&
-      route.responseKnowledge !== "public_bounded" &&
-      route.responseKnowledge !== "unknown")
-  )
-    return false;
-
-  return (
-    route.guarantee === "guaranteed" ||
-    route.guarantee === "conditional_on_runner_response" ||
-    route.guarantee === "not_guaranteed" ||
-    route.guarantee === "unknown"
-  );
-}
-
-function validPunishTraceBid(route: CorpPunishRouteQuote): boolean {
-  const traceHead = route.steps.find((step) => step.kind === "trace_tag");
-  if (!traceHead) return route.traceBid === undefined;
-  return (
-    traceHead === route.steps[0] &&
-    route.traceBid != null &&
-    route.traceBid.sourceStepId === traceHead.stepId &&
-    Number.isSafeInteger(route.traceBid.amount) &&
-    route.traceBid.amount >=
-      route.responsePaymentEnvelope.corpResponseCredits.maximum
-  );
-}
-
-function validTagOutcomeEnvelope(
-  route: CorpPunishRouteQuote,
-  quoteSet: CorpPunishRouteQuoteSet,
-): boolean {
-  const envelope = route.tagOutcomeEnvelope;
-  if (!envelope) return true;
-  return (
-    nonNegativeInteger(envelope.currentRunnerTags) &&
-    envelope.currentRunnerTags === quoteSet.runnerTags &&
-    validRange(envelope.addedTags) &&
-    validRange(envelope.projectedRunnerTags) &&
-    envelope.projectedRunnerTags.minimum ===
-      envelope.currentRunnerTags + envelope.addedTags.minimum &&
-    envelope.projectedRunnerTags.maximum ===
-      envelope.currentRunnerTags + envelope.addedTags.maximum
-  );
-}
-
-function validNonDamageEnvelope(
-  route: CorpPunishRouteQuote,
-  quoteSet: CorpPunishRouteQuoteSet,
-): boolean {
-  const envelope = route.nonDamageEnvelope;
-  if (!envelope) return true;
-  return (
-    envelope.runnerCreditLoss.knowledge === "exact_public" &&
-    nonNegativeInteger(envelope.runnerCreditLoss.minimum) &&
-    nonNegativeInteger(envelope.runnerCreditLoss.maximum) &&
-    envelope.runnerCreditLoss.minimum <= envelope.runnerCreditLoss.maximum &&
-    envelope.runnerCreditLoss.maximum <= quoteSet.runnerCreditsVisible
-  );
-}
-
-function validPunishRequestEcho(route: CorpPunishRouteQuote): boolean {
-  const request = route.requestEcho;
-  return (
-    request.schemaVersion === CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION &&
-    request.matchId === route.matchId &&
-    request.side === "corp" &&
-    request.stateVersion === route.stateVersion &&
-    request.timingPoint === route.timingPoint &&
-    request.campaignId === route.campaignId &&
-    request.routeId === route.routeId &&
-    request.steps.length >= 1 &&
-    request.steps.length <= 6 &&
-    uniqueNonblankStrings(request.steps.map((step) => step.stepId)) &&
-    uniqueNonblankStrings(
-      request.steps.map(
-        (step) =>
-          `${step.sourceCardInstanceId}\u0000${step.sourceCapabilityId}`,
-      ),
-    ) &&
-    uniqueNonblankStrings(
-      request.steps.map((step) => step.sourceCardInstanceId),
-    ) &&
-    request.steps.every(
-      (step, index) =>
-        step.order === index &&
-        validPunishStepKind(step.kind) &&
-        nonblank(step.sourceCardInstanceId) &&
-        step.sourceCapabilityBindingKind === "card_spec_capability_key" &&
-        nonblank(step.sourceCapabilityId) &&
-        (step.currentLegalActionId === undefined ||
-          (index === 0 && nonblank(step.currentLegalActionId))),
-    ) &&
-    (!route.complete ||
-      request.steps.every((requested, index) => {
-        const quoted = route.steps[index];
-        return (
-          quoted !== undefined &&
-          requested.stepId === quoted.stepId &&
-          requested.order === quoted.order &&
-          requested.kind === quoted.kind &&
-          requested.sourceCardInstanceId === quoted.sourceCardInstanceId &&
-          requested.sourceCapabilityBindingKind ===
-            quoted.sourceCapabilityBindingKind &&
-          requested.sourceCapabilityId === quoted.sourceCapabilityId
-        );
-      }))
-  );
-}
-
-function validCanonicalIncompletePunishRoute(
-  route: CorpPunishRouteQuote,
-): boolean {
-  return (
-    route.steps.length === 0 &&
-    route.totalClicks === 0 &&
-    route.totalActionCredits === 0 &&
-    route.traceBid === undefined &&
-    route.tagTrigger.kind === "unknown" &&
-    route.tagTrigger.status === "unknown" &&
-    route.tagTrigger.currentRunnerTags === 0 &&
-    route.tagTrigger.requiredRunnerTags === 0 &&
-    route.responsePaymentEnvelope.responseKind === "unknown" &&
-    route.responsePaymentEnvelope.paymentKnowledge === "unknown" &&
-    route.responsePaymentEnvelope.corpCreditsAvailable === 0 &&
-    route.responsePaymentEnvelope.runnerCreditsVisible === 0 &&
-    zeroRange(route.responsePaymentEnvelope.corpResponseCredits) &&
-    zeroRange(route.responsePaymentEnvelope.totalCorpCredits) &&
-    zeroRange(route.responsePaymentEnvelope.runnerResponseCredits) &&
-    route.damageEnvelope.runnerHandCount === 0 &&
-    route.damageEnvelope.rawDamage.meat === 0 &&
-    route.damageEnvelope.rawDamage.net === 0 &&
-    route.damageEnvelope.rawDamage.core === 0 &&
-    route.damageEnvelope.rawDamage.total === 0 &&
-    zeroRange(route.damageEnvelope.effectiveDamage) &&
-    route.damageEnvelope.visiblePrevention.knowledge === "unknown" &&
-    route.damageEnvelope.visiblePrevention.maximumPreventableDamage === 0 &&
-    zeroRange(route.damageEnvelope.visiblePrevention.creditCost) &&
-    route.damageEnvelope.visiblePiercing.knowledge === "unknown" &&
-    route.damageEnvelope.visiblePiercing.maximumBypassedDamage === 0 &&
-    zeroRange(route.damageEnvelope.visiblePiercing.creditCost) &&
-    route.guarantee === "unknown" &&
-    route.responseKnowledge === "unknown"
-  );
-}
-
-function validCompleteState(
-  complete: boolean,
-  reasons: CorpPunishRouteIncompleteReason[],
-  structurallyIncomplete: boolean,
-): boolean {
-  return (
-    typeof complete === "boolean" &&
-    reasons.every(isCorpPunishRouteIncompleteReason) &&
-    (complete
-      ? reasons.length === 0 && !structurallyIncomplete
-      : reasons.length > 0)
-  );
-}
-
-function validOrderedPunishSteps(
-  route: CorpPunishRouteQuote,
-  quoteSet: CorpPunishRouteQuoteSet,
-  view: PlayerView,
-): boolean {
-  if (
-    !uniqueNonblankStrings(route.steps.map((step) => step.stepId)) ||
-    route.steps.some(
-      (step, index) =>
-        step.order !== index ||
-        !nonblank(step.sourceCardInstanceId) ||
-        !nonblank(step.sourceCardDefinitionId) ||
-        !nonblank(step.sourceCapabilityId) ||
-        !validPunishStepKind(step.kind) ||
-        !nonNegativeInteger(step.clicks) ||
-        !nonNegativeInteger(step.credits) ||
-        (step.agendaPointCost !== undefined &&
-          (route.steps.length !== 1 ||
-            step.kind !== "meat_damage" ||
-            !Number.isSafeInteger(step.agendaPointCost) ||
-            step.agendaPointCost <= 0 ||
-            step.agendaPointCost > view.own.agendaPoints ||
-            step.currentLegalAction === undefined ||
-            !canonicalCapabilityMatchesDefinition(
-              step.sourceCapabilityId,
-              step.sourceCardDefinitionId,
-            ))) ||
-        !validHardwareTrashProjection(step, view) ||
-        (index > 0 && step.currentLegalAction !== undefined),
-    )
-  )
-    return false;
-
-  const head = route.steps[0];
-  const action = head?.currentLegalAction;
-  const requestedHeadActionId =
-    route.requestEcho.steps[0]?.currentLegalActionId;
-  const visibleCurrentAction = action
-    ? view.legalActions.find(
-        (candidate) => candidate.actionId === action.actionId,
-      )
-    : undefined;
-  return (
-    (requestedHeadActionId === undefined ||
-      (action !== undefined && action.actionId === requestedHeadActionId)) &&
-    (!action ||
-      (visibleCurrentAction !== undefined &&
-        action.side === "corp" &&
-        action.source === head.sourceCardInstanceId &&
-        action.timingPoint === quoteSet.timingPoint &&
-        action.expiresAtStateVersion === quoteSet.stateVersion &&
-        action.source === visibleCurrentAction.source &&
-        action.timingPoint === visibleCurrentAction.timingPoint &&
-        action.expiresAtStateVersion ===
-          visibleCurrentAction.expiresAtStateVersion &&
-        action.costs.reduce((sum, cost) => sum + (cost.clicks ?? 0), 0) ===
-          head.clicks &&
-        action.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0) ===
-          head.credits &&
-        validCurrentHardwareTrashAction(action, head) &&
-        [action, visibleCurrentAction].every((candidate) =>
-          head.agendaPointCost === undefined
-            ? candidate.payload?.v1920AssetAbility !== "tagged_meat_damage"
-            : candidate.type === "gain_credit" &&
-              candidate.payload?.v1920AssetAbility === "tagged_meat_damage" &&
-              candidate.payload.damageRecipient === "runner" &&
-              candidate.payload.agendaPointCost === head.agendaPointCost,
-        )))
-  );
-}
-
-function validHardwareTrashProjection(
-  step: CorpPunishRouteQuote["steps"][number],
-  view: PlayerView,
-): boolean {
-  const projection = step.hardwareTrashProjection;
-  if (step.kind !== "hardware_trash") return projection === undefined;
-  if (
-    !projection ||
-    !canonicalCapabilityMatchesDefinition(
-      step.sourceCapabilityId,
-      step.sourceCardDefinitionId,
-    ) ||
-    projection.kind !== "installed_runner_hardware" ||
-    projection.targetKnowledge !== "public_exact" ||
-    projection.excludedSubtype !== "cybernetics" ||
-    projection.costKind !== "variable_x" ||
-    projection.preventionKnowledge !== "none_visible" ||
-    !uniqueNonblankStrings(projection.eligibleTargetInstanceIds) ||
-    !nonNegativeInteger(projection.eligibleTargetCount) ||
-    projection.eligibleTargetCount !==
-      projection.eligibleTargetInstanceIds.length ||
-    projection.eligibleTargetCount < 1 ||
-    !nonNegativeInteger(projection.minimumX) ||
-    projection.minimumX < 0 ||
-    !nonNegativeInteger(projection.selectedX) ||
-    projection.selectedX < projection.minimumX ||
-    !nonNegativeInteger(projection.legalMaximumX) ||
-    projection.legalMaximumX < projection.selectedX ||
-    projection.legalMaximumX > projection.eligibleTargetCount ||
-    !nonNegativeInteger(projection.creditsPerX) ||
-    projection.creditsPerX < 1 ||
-    step.credits !== projection.selectedX * projection.creditsPerX
-  ) {
-    return false;
-  }
-  const visibleEligibleIds = (view.opponent.rig ?? [])
-    .filter(
-      (card) =>
-        card.known === true &&
-        card.owner === "runner" &&
-        card.controller === "runner" &&
-        card.type === "hardware" &&
-        card.subtypes?.some(
-          (subtype) =>
-            normalizePunishSubtype(subtype) ===
-            normalizePunishSubtype(projection.excludedSubtype),
-        ) !== true,
-    )
-    .map((card) => card.instanceId)
-    .sort();
-  const quotedIds = projection.eligibleTargetInstanceIds.slice().sort();
-  return (
-    visibleEligibleIds.length === quotedIds.length &&
-    visibleEligibleIds.every((cardId, index) => cardId === quotedIds[index])
-  );
-}
-
-function canonicalCapabilityMatchesDefinition(
-  sourceCapabilityId: string,
-  sourceDefinitionId: string,
-): boolean {
-  try {
-    return (
-      parseCanonicalCapabilityId(sourceCapabilityId).cardDefinitionId ===
-      sourceDefinitionId
-    );
-  } catch {
-    return false;
-  }
-}
-
-function validCurrentHardwareTrashAction(
-  action: LegalAction,
-  step: CorpPunishRouteQuote["steps"][number],
-): boolean {
-  const projection = step.hardwareTrashProjection;
-  if (!projection) return step.kind !== "hardware_trash";
-  return (
-    action.payload?.hardwareTrashByCounterTrashCount === projection.selectedX &&
-    action.payload?.eligibleHardwareCount === projection.eligibleTargetCount &&
-    action.payload?.xValue === projection.selectedX &&
-    action.payload?.xMinimum === projection.minimumX &&
-    action.payload?.xMaximum === projection.legalMaximumX &&
-    action.payload?.xUpperBound === projection.legalMaximumX &&
-    action.payload?.xCreditsPerUnit === projection.creditsPerX &&
-    action.payload?.variableCostKind === "printed_play_cost"
-  );
-}
-
-function normalizePunishSubtype(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
-}
-
-function validTagTrigger(
-  route: CorpPunishRouteQuote,
-  quoteSet: CorpPunishRouteQuoteSet,
-): boolean {
-  const trigger = route.tagTrigger;
-  if (
-    !nonNegativeInteger(trigger.currentRunnerTags) ||
-    trigger.currentRunnerTags !== quoteSet.runnerTags ||
-    !nonNegativeInteger(trigger.requiredRunnerTags)
-  )
-    return false;
-  switch (trigger.kind) {
-    case "existing_tag":
-      return trigger.status === "satisfied";
-    case "direct_tag_step":
-      return (
-        trigger.status === "projected" &&
-        nonblank(trigger.sourceStepId) &&
-        route.steps.some((step) => step.stepId === trigger.sourceStepId)
-      );
-    case "trace_tag_step":
-      return (
-        trigger.status === "response_required" &&
-        nonblank(trigger.sourceStepId) &&
-        route.steps.some((step) => step.stepId === trigger.sourceStepId) &&
-        nonNegativeInteger(trigger.traceLimit)
-      );
-    case "none":
-      return (
-        trigger.status === "not_required" && trigger.requiredRunnerTags === 0
-      );
-    case "unknown":
-      return trigger.status === "unknown";
-    default:
-      return false;
-  }
-}
-
-function validResponsePaymentEnvelope(
-  route: CorpPunishRouteQuote,
-  quoteSet: CorpPunishRouteQuoteSet,
-  view: PlayerView,
-): boolean {
-  const envelope = route.responsePaymentEnvelope;
-  return (
-    (envelope.responseKind === "none" ||
-      envelope.responseKind === "runner_optional" ||
-      envelope.responseKind === "trace_bid" ||
-      envelope.responseKind === "mixed" ||
-      envelope.responseKind === "unknown") &&
-    (envelope.paymentKnowledge === "exact_public" ||
-      envelope.paymentKnowledge === "bounded_public" ||
-      envelope.paymentKnowledge === "unknown") &&
-    nonNegativeInteger(envelope.corpCreditsAvailable) &&
-    envelope.corpCreditsAvailable === view.own.credits &&
-    nonNegativeInteger(envelope.runnerCreditsVisible) &&
-    envelope.runnerCreditsVisible === quoteSet.runnerCreditsVisible &&
-    validRange(envelope.corpResponseCredits) &&
-    validRange(envelope.totalCorpCredits) &&
-    envelope.totalCorpCredits.minimum ===
-      route.totalActionCredits + envelope.corpResponseCredits.minimum &&
-    envelope.totalCorpCredits.maximum ===
-      route.totalActionCredits + envelope.corpResponseCredits.maximum &&
-    validRange(envelope.runnerResponseCredits) &&
-    envelope.runnerResponseCredits.maximum <= quoteSet.runnerCreditsVisible
-  );
-}
-
-function validDamageEnvelope(
-  route: CorpPunishRouteQuote,
-  quoteSet: CorpPunishRouteQuoteSet,
-): boolean {
-  const envelope = route.damageEnvelope;
-  const raw = envelope.rawDamage;
-  return (
-    (envelope.visiblePrevention.knowledge === "none_visible" ||
-      envelope.visiblePrevention.knowledge === "exact_public" ||
-      envelope.visiblePrevention.knowledge === "bounded_public" ||
-      envelope.visiblePrevention.knowledge === "unknown") &&
-    (envelope.visiblePiercing.knowledge === "none_visible" ||
-      envelope.visiblePiercing.knowledge === "exact_public" ||
-      envelope.visiblePiercing.knowledge === "bounded_public" ||
-      envelope.visiblePiercing.knowledge === "unknown") &&
-    nonNegativeInteger(envelope.runnerHandCount) &&
-    envelope.runnerHandCount === quoteSet.runnerHandCount &&
-    nonNegativeInteger(raw.meat) &&
-    nonNegativeInteger(raw.net) &&
-    nonNegativeInteger(raw.core) &&
-    nonNegativeInteger(raw.total) &&
-    raw.total === raw.meat + raw.net + raw.core &&
-    validRange(envelope.effectiveDamage) &&
-    envelope.effectiveDamage.maximum <= raw.total &&
-    nonNegativeInteger(envelope.visiblePrevention.maximumPreventableDamage) &&
-    envelope.visiblePrevention.maximumPreventableDamage <= raw.total &&
-    validRange(envelope.visiblePrevention.creditCost) &&
-    nonNegativeInteger(envelope.visiblePiercing.maximumBypassedDamage) &&
-    envelope.visiblePiercing.maximumBypassedDamage <= raw.total &&
-    validRange(envelope.visiblePiercing.creditCost)
-  );
-}
-
-function validPunishStepKind(
-  value: CorpPunishRouteQuote["steps"][number]["kind"],
-): boolean {
-  return (
-    value === "tag" ||
-    value === "trace_tag" ||
-    value === "meat_damage" ||
-    value === "net_damage" ||
-    value === "core_damage" ||
-    value === "hardware_trash" ||
-    value === "other_punish"
-  );
-}
-
-function validRange(range: { minimum: number; maximum: number }): boolean {
-  return (
-    nonNegativeInteger(range.minimum) &&
-    nonNegativeInteger(range.maximum) &&
-    range.minimum <= range.maximum
-  );
-}
-
-function zeroRange(range: { minimum: number; maximum: number }): boolean {
-  return range.minimum === 0 && range.maximum === 0;
-}
-
-function punishRequestFingerprint(
-  request: CorpPunishRouteQuote["requestEcho"],
-): string {
-  return encodePunishFingerprintParts([
-    CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
-    request.matchId,
-    request.side,
-    String(request.stateVersion),
-    request.timingPoint,
-    request.campaignId,
-    request.routeId,
-    String(request.steps.length),
-    ...request.steps.flatMap((step) => [
-      step.stepId,
-      String(step.order),
-      step.kind,
-      step.sourceCardInstanceId,
-      step.sourceCapabilityBindingKind,
-      step.sourceCapabilityId,
-      ...(step.currentLegalActionId ? [step.currentLegalActionId] : []),
-    ]),
-  ]);
-}
-
-function encodePunishFingerprintParts(parts: readonly string[]): string {
-  return `${parts.length};${parts
-    .map((part) => `${part.length}:${part}`)
-    .join("")}`;
-}
-
-function uniqueNonblankStrings(values: readonly string[]): boolean {
-  return values.every(nonblank) && new Set(values).size === values.length;
-}
-
-function nonblank(value: string): boolean {
-  return typeof value === "string" && value.trim().length > 0;
-}
-
-function nonNegativeInteger(value: number): boolean {
-  return Number.isFinite(value) && Number.isInteger(value) && value >= 0;
-}
-
-function isCorpPunishRouteIncompleteReason(
-  value: CorpPunishRouteIncompleteReason,
-): boolean {
-  return (
-    value === "malformed_route_request" ||
-    value === "source_unavailable" ||
-    value === "source_zone_unsupported" ||
-    value === "source_identity_unknown" ||
-    value === "source_capability_missing" ||
-    value === "source_capability_unsupported" ||
-    value === "source_effects_unsupported" ||
-    value === "source_condition_unsatisfied" ||
-    value === "head_legal_action_unavailable" ||
-    value === "cost_quote_incomplete" ||
-    value === "target_quote_incomplete" ||
-    value === "response_window_unknown" ||
-    value === "trash_prevention_quote_incomplete" ||
-    value === "damage_prevention_quote_incomplete" ||
-    value === "future_state_transition_unavailable"
-  );
+  return sanitizeCurrentCorpPunishQuoteSet(view, sanitizeLegalAction);
 }
 
 function sanitizeVisibleCard(card: VisibleCard): VisibleCard {
@@ -2569,7 +1939,7 @@ function sanitizeCorpCounterBankPreparationQuote(
     quote.schemaVersion !==
       CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION ||
     quote.context !== "corp_counter_bank_preparation" ||
-    !nonblank(quote.sourceCardId) ||
+    !isNonEmptyString(quote.sourceCardId) ||
     !isNonNegativeSafeInteger(quote.expiresAtStateVersion) ||
     !isNonNegativeSafeInteger(quote.advancementCounters) ||
     quote.advanceableBeforeRez !== true ||
@@ -2583,7 +1953,7 @@ function sanitizeCorpCounterBankPreparationQuote(
     quote.transfer.target !== "chosen_installed_advanceable_card" ||
     quote.transfer.maximum !== "all" ||
     (location.kind !== "corp_hq" &&
-      (location.kind !== "installed_root" || !nonblank(location.serverId)))
+      (location.kind !== "installed_root" || !isNonEmptyString(location.serverId)))
   ) {
     return undefined;
   }
@@ -2845,11 +2215,13 @@ function sanitizeInstalledCorpRezCostQuote(
     expiresAtStateVersion: quote.expiresAtStateVersion,
   };
   if (!quote.complete) return { ...binding, complete: false };
-  const reductionSourceDefinitionIds = sanitizedStringArray(
+  const reductionSourceDefinitionIds = sanitizedCardDefinitionIds(
     quote.reductionSourceDefinitionIds,
+    { allowRepeats: true },
   );
-  const increaseSourceDefinitionIds = sanitizedStringArray(
+  const increaseSourceDefinitionIds = sanitizedCardDefinitionIds(
     quote.increaseSourceDefinitionIds,
+    { allowRepeats: true },
   );
   const modifiersValid =
     (quote.reductionSourceDefinitionIds === undefined ||
@@ -3194,7 +2566,7 @@ function sanitizeVisibleEffectiveIceRunQuote(
   const breakSubroutineCostSourceDefinitionIds =
     value.breakSubroutineCostSourceDefinitionIds === undefined
       ? undefined
-      : sanitizeNonEmptyStringArray(
+      : sanitizeCardDefinitionIds(
           value.breakSubroutineCostSourceDefinitionIds,
         );
   const breakSubroutineCostSourceTitles =
@@ -3209,7 +2581,7 @@ function sanitizeVisibleEffectiveIceRunQuote(
         );
   if (
     !isNonEmptyString(value.iceInstanceId) ||
-    !isNonEmptyString(value.iceDefinitionId) ||
+    !isCardDefinitionId(value.iceDefinitionId) ||
     !isNonNegativeSafeInteger(value.effectiveStrength) ||
     (value.encounterStrength !== undefined &&
       !isNonNegativeSafeInteger(value.encounterStrength)) ||
@@ -3301,7 +2673,7 @@ function sanitizeVisibleEffectiveSubroutine(
       typeof value.deflectorAutoBreakIfNoTarget !== "boolean") ||
     (value.breakTags !== undefined && breakTags === undefined) ||
     (value.sourceDefinitionId !== undefined &&
-      !isNonEmptyString(value.sourceDefinitionId)) ||
+      !isCardDefinitionId(value.sourceDefinitionId)) ||
     (value.sourceTitle !== undefined && !isNonEmptyString(value.sourceTitle)) ||
     (value.dynamicSourceKind !== undefined &&
       value.dynamicSourceKind !== "additional_subroutine" &&
@@ -3412,7 +2784,7 @@ function sanitizeVisibleCorpIcePostRezRunQuote(
     !isPlainObjectRecord(value) ||
     value.context !== "installed_post_rez" ||
     !isNonEmptyString(value.cardId) ||
-    !isNonEmptyString(value.iceDefinitionId) ||
+    !isCardDefinitionId(value.iceDefinitionId) ||
     !isExistingRunServerId(value.targetServerId) ||
     !isExistingRunServerId(value.projectedServerId) ||
     !isNonNegativeSafeInteger(value.expiresAtStateVersion)
@@ -3444,7 +2816,7 @@ function sanitizeVisibleCorpIcePostRezRunQuote(
   if (
     bypassContinuation !== undefined &&
     (!isPlainObjectRecord(bypassContinuation) ||
-      !isNonEmptyString(bypassContinuation.runId) ||
+      !isRunId(bypassContinuation.runId) ||
       !isNonEmptyString(bypassContinuation.outerIceId) ||
       !isNonNegativeSafeInteger(bypassContinuation.rezCredits))
   )
@@ -3507,7 +2879,7 @@ function sanitizeVisibleCorpIcePostRezRunQuote(
     ...(bypassContinuation
       ? {
           bypassContinuation: {
-            runId: bypassContinuation.runId as string,
+            runId: bypassContinuation.runId as RunId,
             outerIceId: bypassContinuation.outerIceId as string,
             rezCredits: bypassContinuation.rezCredits as number,
           },
@@ -3635,12 +3007,18 @@ function isExistingRunServerId(
     value === "hq" ||
     value === "rd" ||
     value === "archives" ||
-    (typeof value === "string" && /^remote_[1-9][0-9]*$/.test(value))
+    (typeof value === "string" && /^r[1-9][0-9]*$/.test(value))
   );
 }
 
 function sanitizeNonEmptyStringArray(value: unknown): string[] | undefined {
   return Array.isArray(value) && value.every(isNonEmptyString)
+    ? value.slice()
+    : undefined;
+}
+
+function sanitizeCardDefinitionIds(value: unknown): number[] | undefined {
+  return Array.isArray(value) && value.every(isCardDefinitionId)
     ? value.slice()
     : undefined;
 }
@@ -3707,9 +3085,9 @@ function sanitizeAgendaPurgeArchivesProtectionQuote(
       seen.has(identity) ||
       archives.length === 0 ||
       options[0]?.card.instanceId === options[1]?.card.instanceId ||
-      !nonNegativeInteger(entry.corpCreditsAfter) ||
-      !nonNegativeInteger(entry.corpAgendaPointsAfter) ||
-      !nonNegativeInteger(entry.corpClicksAfter) ||
+      !isNonNegativeSafeInteger(entry.corpCreditsAfter) ||
+      !isNonNegativeSafeInteger(entry.corpAgendaPointsAfter) ||
+      !isNonNegativeSafeInteger(entry.corpClicksAfter) ||
       entry.archivesIce.length !== archives.length ||
       new Set(entry.archivesIce.map((card) => card.instanceId)).size !==
         archives.length ||
@@ -3781,6 +3159,16 @@ function sanitizeVisibleChoiceRequest(
       playerViewStateVersion,
       playerViewSide,
     );
+  const forcedIceId =
+    playerViewSide === "corp" && choice.side === "corp"
+      ? forcedIceRezChoiceIceId(choice.source, playerViewStateVersion)
+      : undefined;
+  const forcedServer = forcedIceId === undefined
+    ? undefined
+    : servers.find((server) =>
+        server.ice.some((ice) => ice.instanceId === forcedIceId),
+      );
+  const forcedIce = forcedServer?.ice.find((ice) => ice.instanceId === forcedIceId);
   return {
     choiceId: choice.choiceId,
     side: choice.side,
@@ -3790,7 +3178,7 @@ function sanitizeVisibleChoiceRequest(
       ? { sourceCardInstanceId: choice.sourceCardInstanceId }
       : {}),
     ...(playerViewSide === choice.side &&
-    isNonEmptyString(choice.sourceCardDefinitionId)
+    isCardDefinitionId(choice.sourceCardDefinitionId)
       ? { sourceCardDefinitionId: choice.sourceCardDefinitionId }
       : {}),
     ...(continuation ? { continuation } : {}),
@@ -3808,6 +3196,17 @@ function sanitizeVisibleChoiceRequest(
         servers,
       );
       const optionKind = option.metadata?.optionKind;
+      if (
+        playerViewSide === "runner" &&
+        choice.side === "runner" &&
+        choice.source === "v120.event_modification.prevent" &&
+        optionKind === "prevent_damage"
+      ) {
+        const amount = option.metadata?.amount;
+        if (typeof amount !== "number" || !Number.isSafeInteger(amount) || amount <= 0)
+          throw new Error("invalid_runner_damage_prevention_amount");
+        metadata = { ...metadata, optionKind, amount };
+      }
       if (
         playerViewSide === "runner" &&
         choice.side === "runner" &&
@@ -3923,9 +3322,6 @@ function sanitizeVisibleChoiceRequest(
           servers,
         },
       );
-      const forcedServer = servers.find((server) =>
-        server.ice.some((ice) => choice.source.includes(`:${ice.instanceId}:`)),
-      );
       const forcedIceRezQuote =
         playerViewSide === "corp" && choice.side === "corp"
           ? sanitizeForcedIceRezChoiceQuote(
@@ -3936,9 +3332,7 @@ function sanitizeVisibleChoiceRequest(
                 stateVersion: playerViewStateVersion,
                 ownCredits,
                 ownAgendaPoints,
-                ice: forcedServer?.ice.find((ice) =>
-                  choice.source.includes(`:${ice.instanceId}:`),
-                ),
+                ice: forcedIce,
                 serverId: forcedServer?.id,
               },
               sanitizeVisibleEffectiveIceRunQuote,
@@ -3978,7 +3372,7 @@ function sanitizeChoiceContinuation(
   playerViewSide: Side,
   choiceSide: Side,
   sourceCardInstanceId: string | undefined,
-  sourceCardDefinitionId: string | undefined,
+  sourceCardDefinitionId: number | undefined,
 ): VisibleChoiceRequest["continuation"] | undefined {
   if (playerViewSide !== choiceSide || !value) return undefined;
   if (
@@ -4011,7 +3405,7 @@ function sanitizeChoiceContinuation(
     choiceSide === "runner" &&
     isNonEmptyString(value.sourceCardInstanceId) &&
     value.sourceCardInstanceId === sourceCardInstanceId &&
-    isNonEmptyString(value.sourceCardDefinitionId) &&
+    isCardDefinitionId(value.sourceCardDefinitionId) &&
     value.sourceCardDefinitionId === sourceCardDefinitionId &&
     value.drawnCardInstanceIds.length > 0 &&
     value.drawnCardInstanceIds.every(isNonEmptyString) &&
@@ -4029,8 +3423,8 @@ function sanitizeChoiceContinuation(
     choiceSide === "runner" &&
     typeof value.sourceCardInstanceId === "string" &&
     value.sourceCardInstanceId.length > 0 &&
-    typeof value.sourceCardDefinitionId === "string" &&
-    value.sourceCardDefinitionId.length > 0 &&
+    typeof value.sourceCardDefinitionId === "number" &&
+    value.sourceCardDefinitionId > 0 &&
     typeof value.sourceCapabilityKey === "string" &&
     value.sourceCapabilityKey.length > 0 &&
     Number.isSafeInteger(value.temporaryCredits) &&
@@ -4062,7 +3456,7 @@ function sanitizeChoiceContinuation(
     choiceSide === "runner" &&
     isNonEmptyString(value.sourceCardInstanceId) &&
     value.sourceCardInstanceId === sourceCardInstanceId &&
-    isNonEmptyString(value.sourceCardDefinitionId) &&
+    isCardDefinitionId(value.sourceCardDefinitionId) &&
     value.sourceCardDefinitionId === sourceCardDefinitionId &&
     (value.selectedCardId === undefined ||
       isNonEmptyString(value.selectedCardId)) &&
@@ -4114,7 +3508,7 @@ function sanitizeCorpOptionalRezChoiceQuote(
     quote.stateVersion !== expected.choiceStateVersion ||
     !isNonEmptyString(quote.sourceAgendaId) ||
     !isNonEmptyString(quote.cardId) ||
-    !isNonEmptyString(quote.cardDefinitionId) ||
+    !isCardDefinitionId(quote.cardDefinitionId) ||
     expected.optionValue !== quote.cardId ||
     expected.optionCard?.known !== true ||
     expected.optionCard.instanceId !== quote.cardId ||
@@ -4163,10 +3557,10 @@ function sanitizeCorpOptionalRezChoiceQuote(
 
   const cardType = quote.cardType;
   const mandatoryAdditionalCosts = quote.mandatoryAdditionalCosts;
-  const reductionSourceDefinitionIds = sanitizedStringArray(
+  const reductionSourceDefinitionIds = sanitizedCardDefinitionIds(
     quote.reductionSourceDefinitionIds,
   );
-  const increaseSourceDefinitionIds = sanitizedStringArray(
+  const increaseSourceDefinitionIds = sanitizedCardDefinitionIds(
     quote.increaseSourceDefinitionIds,
   );
   const optionalModifierIdsValid =
@@ -4260,9 +3654,18 @@ function sanitizedStringArray(value: unknown): string[] | undefined {
   return strings.slice();
 }
 
+function sanitizedCardDefinitionIds(
+  value: unknown,
+  options?: { allowRepeats?: boolean },
+): number[] | undefined {
+  return Array.isArray(value) && validOptionalCardDefinitionIds(value, options)
+    ? value.slice()
+    : undefined;
+}
+
 function modifierDefinitionIdListsAreDisjoint(
-  reductionIds: readonly string[] | undefined,
-  increaseIds: readonly string[] | undefined,
+  reductionIds: readonly number[] | undefined,
+  increaseIds: readonly number[] | undefined,
 ): boolean {
   if (!reductionIds || !increaseIds) return true;
   const reductions = new Set(reductionIds);
@@ -4272,7 +3675,7 @@ function modifierDefinitionIdListsAreDisjoint(
 function isExistingCorpServerId(
   value: string,
 ): value is CorpOptionalRezChoiceQuote["targetServerId"] {
-  return /^remote_[1-9][0-9]*$/.test(value);
+  return /^r[1-9][0-9]*$/.test(value);
 }
 
 const OPTIONAL_REZ_COMPLETE_QUOTE_FIELDS = [
@@ -4302,6 +3705,7 @@ function sanitizeLegalAction(action: LegalAction): LegalAction {
       : undefined;
   return {
     actionId: action.actionId,
+    ...sanitizeSubroutineTargets(action),
     ...(scoreRecoveryQuote
       ? { corpScoreRecoveryQuote: scoreRecoveryQuote }
       : {}),
@@ -4341,6 +3745,40 @@ function sanitizeLegalAction(action: LegalAction): LegalAction {
     expiresAtStateVersion: action.expiresAtStateVersion,
     ...(payload ? { payload } : {}),
   };
+}
+
+function sanitizeSubroutineTargets(
+  action: LegalAction,
+): EncounterActionTargets {
+  const targets: EncounterActionTargets = {};
+  for (const key of [
+    "encounterSubroutineIds",
+    "encounterRemainingSubroutineIds",
+  ] as const) {
+    const ids = action[key];
+    if (ids === undefined) continue;
+    if (
+      !Array.isArray(ids) ||
+      [...ids].some((id) => typeof id !== "string" || id.length === 0)
+    )
+      throw new Error("Invalid Engine encounter subroutine references.");
+    targets[key] = ids.slice();
+  }
+  for (const key of [
+    "subroutineIndexes",
+    "payOrEndRunSubroutineIndexes",
+    "payOrTrashProgramSubroutineIndexes",
+  ] as const) {
+    const indexes = action[key];
+    if (indexes === undefined) continue;
+    if (
+      !Array.isArray(indexes) ||
+      [...indexes].some((index) => !Number.isSafeInteger(index) || index < 0)
+    )
+      throw new Error("Invalid Engine subroutine indexes.");
+    targets[key] = indexes.slice();
+  }
+  return targets;
 }
 
 function sanitizeCost(cost: Cost): Cost {
@@ -4387,9 +3825,9 @@ function sanitizeChoiceRequirement(
   };
 }
 
-function sanitizeResolvedGameEffect(
-  effect: ResolvedGameEffect,
-): ResolvedGameEffect {
+function sanitizeResolvedGameEffect<Id extends string | number>(
+  effect: ResolvedGameEffect<Id>,
+): ResolvedGameEffect<Id> {
   return {
     effectId: effect.effectId,
     kind: effect.kind,
@@ -4414,6 +3852,15 @@ function sanitizeResolvedGameEffect(
     ...(effect.sourceDefinitionId
       ? { sourceDefinitionId: effect.sourceDefinitionId }
       : {}),
+    // Start-of-turn income from the public Runner rig belongs to one copy.
+    ...(effect.kind === "gain_credits" &&
+    effect.side === "runner" &&
+    effect.visibility === "public" &&
+    effect.reason === "start_of_turn" &&
+    typeof effect.sourceCardInstanceId === "string" &&
+    effect.sourceCardInstanceId.length > 0
+      ? { sourceCardInstanceId: effect.sourceCardInstanceId }
+      : {}),
     ...(effect.sourceTitle ? { sourceTitle: effect.sourceTitle } : {}),
     ...(effect.cardDefinitionId
       ? { cardDefinitionId: effect.cardDefinitionId }
@@ -4427,6 +3874,9 @@ function sanitizeResolvedGameEffect(
 }
 
 function sanitizePublicGameEvent(event: PublicGameEvent): PublicGameEvent {
+  if (!isMatchEventId(event.eventId)) {
+    throw new Error("invalid_public_game_event_id");
+  }
   return {
     eventId: event.eventId,
     type: event.type,
@@ -4450,6 +3900,17 @@ function sanitizePublicPayload(
     payload,
     PUBLIC_PAYLOAD_PRIMITIVE_KEYS,
   );
+  for (const key of [
+    "corpHqCountBefore",
+    "corpHqCountAfter",
+    "corpRdDrawnToHqCount",
+  ] as const) {
+    const count = payload[key];
+    if (typeof count === "number" && Number.isSafeInteger(count) && count >= 0)
+      result[key] = count;
+  }
+  if (payload.corpRdDrawOrderUnresolved === true)
+    result.corpRdDrawOrderUnresolved = true;
   for (const key of PUBLIC_PAYLOAD_STRING_ARRAY_KEYS) {
     const value = sanitizeStringArray(payload[key]);
     if (value) result[key] = value;
@@ -4481,13 +3942,17 @@ function sanitizePublicPayload(
   if (Array.isArray(payload.resolvedEffects)) {
     const resolvedEffects = payload.resolvedEffects
       .filter(
-        (effect): effect is ResolvedGameEffect =>
+        (effect): effect is PublicResolvedGameEffect =>
           typeof effect === "object" &&
           effect !== null &&
           !Array.isArray(effect) &&
-          (effect as Partial<ResolvedGameEffect>).visibility === "public",
+          (effect as Partial<PublicResolvedGameEffect>).visibility === "public",
       )
-      .map(sanitizeResolvedGameEffect);
+      .map((effect) => {
+        if (!isPublicResolvedGameEffectId(effect.effectId))
+          throw new Error("invalid_public_resolved_game_effect_id");
+        return sanitizeResolvedGameEffect(effect);
+      });
     if (resolvedEffects.length > 0) result.resolvedEffects = resolvedEffects;
   }
   return result;
@@ -4511,6 +3976,22 @@ function sanitizeLegalActionPayload(
   const result: NonNullable<LegalAction["payload"]> = {
     ...sanitizeAllowedPrimitiveRecord(payload, LEGAL_ACTION_PAYLOAD_KEYS),
   };
+  if (action.side === "runner" && action.type === "trash_accessed_card") {
+    for (const key of [
+      "accessTrashBaseCost",
+      "accessTrashCostModifier",
+      "accessTrashTotalCost",
+      "upgradeTrashRecurringCreditsAvailable",
+      "poltergeistRecurringCreditsAvailable",
+    ] as const) {
+      const amount = payload[key];
+      if (
+        typeof amount === "number" &&
+        Number.isSafeInteger(amount) &&
+        (key === "accessTrashCostModifier" || amount >= 0)
+      ) result[key] = amount;
+    }
+  }
   const runSpendingCap = payload.runSpendingCap;
   if (action.type === "start_run" && isNonNegativeSafeInteger(runSpendingCap)) {
     result.runSpendingCap = runSpendingCap;

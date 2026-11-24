@@ -63,6 +63,13 @@ Die für Action-IDs relevante Teilmenge heißt
 `ACTION_ID_ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS`. Ihre Reihenfolge bleibt
 deterministisch, enthält aber ebenfalls nur aktuelle Producer.
 
+Variable Rez-Varianten und der Pflichttrash vor einer Runner-Installation
+werden anhand der LegalAction-Felder `variableRezKind`, `variableRezValue`
+und `runnerProgramTrashBeforeInstall` ausgewertet. Bei Playful AI bindet die
+Engine die Aufteilung an den numerischen Optionswert und
+`metadata.secondaryAmount`. Falsch oder unvollständig gebundene Werte
+scheitern bei der Auflösung.
+
 ## ResolvedGameEffect
 
 Die Start-of-Turn-Resolver hatten sieben Effektobjekte über
@@ -76,6 +83,16 @@ gemeinsamen Vertrag typgeprüft werden.
 
 ## Sichtbarkeit und Determinismus
 
+`PublicGameEvent.eventId` ist eine positive Ganzzahl pro Partie. Die Engine
+vergibt `stateVersionAfter + 1`, beginnend mit `1` für `game_created`. Der
+Server vergibt für das Ereignis bei Zeitablauf die nächste Nummer. Die
+Versionsfelder dieses Ereignisses zeigen den letzten Engine-Zustand.
+
+Nach einem Undo werden die Ereignisse des verworfenen Spielverlaufs entfernt.
+Neue Aktionen können die freigewordenen Nummern belegen. Eine Undo-Anfrage
+bindet deshalb Match, MatchVersion und Ereignisnummer. Ein Replay prüft die
+Nummer jedes Engine-Ereignisses gegen dessen StateVersion.
+
 Ein innerhalb einer Karte oder Choice neu begonnener Run veröffentlicht einen
 öffentlichen `ResolvedGameEffect` vom Typ `start_run`: `runId`, angegriffene
 `serverId` und tatsächliche `accessServerId` stammen aus dem aufgelösten
@@ -87,6 +104,14 @@ Zugriff, Trash und Steal veröffentlichen das tatsächliche Zugriffsziel aus dem
 Breach beziehungsweise dem aufgelösten Run. Installierte Karten behalten ihre
 konkrete öffentliche Position. Serverlabels sind keine maschinelle Bindung.
 Die KI-DTO erhält die öffentlichen Runbindungen ohne private Replay-Daten.
+
+Ein HQ-Zugriff und eine Änderung der HQ-Größe veröffentlichen die Kartenzahl
+vor und nach genau diesem Ereignis, ohne Angaben zu den Karten. Ein
+abgeschlossener Corp-Draw belegt die Zahl der aus der Spitze von R&D nach HQ
+verschobenen Karten. Bei einer noch offenen Ersetzungsentscheidung oder einer
+unbelegten Reihenfolge enthält das Ereignis stattdessen den entsprechenden
+öffentlichen Status. Die KI verwendet diese Fakten aus dem jeweiligen Ereignis
+für die historischen Hand- und Deckbeobachtungen.
 
 - Nur der normalisierte öffentliche Payload wird in PlayerViews, Chronicle,
   PublicEvents, Serverprojektionen und KI-Inputs übernommen.

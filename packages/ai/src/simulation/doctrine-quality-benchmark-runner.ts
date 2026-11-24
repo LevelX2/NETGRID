@@ -12,6 +12,7 @@ import type { SimulationBenchmarkProfile } from "./simulation-types";
 import {
   type AiSimulationRunResult,
   benchmarkSeeds,
+  countSimulationRuntimeFailures,
 } from "./simulation-quality-gate";
 import { CURRENT_BENCHMARK_PROFILES } from "./benchmark-profile-data";
 
@@ -71,10 +72,13 @@ export function createDoctrineQualityBenchmarkRunner(
       safety: {
         illegalActionDelta:
           candidateRun.illegalActions - baselineRun.illegalActions,
-        runtimeFailureDelta:
+        runtimeFailureEventDelta:
           candidateRun.runtimeFailures - baselineRun.runtimeFailures,
         replayFailureDelta:
           candidateRun.replayFailures - baselineRun.replayFailures,
+        runtimeFailureDelta:
+          countSimulationRuntimeFailures(candidateRun) -
+          countSimulationRuntimeFailures(baselineRun),
         timeoutRateDelta: candidateRun.timeoutRate - baselineRun.timeoutRate,
         fallbackRateDelta: round(
           candidateRun.fallbackRate - baselineRun.fallbackRate,

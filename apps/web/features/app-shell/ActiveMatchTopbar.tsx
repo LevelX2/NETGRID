@@ -216,6 +216,7 @@ export function ActiveMatchTopbar({
               className={canStartNextSeriesGame ? "button" : "button primary"}
               onClick={onLeaveMatch}
               title={t("backToStart")}
+              disabled={seriesTransitioning}
               type="button"
             >
               <Play size={16} />

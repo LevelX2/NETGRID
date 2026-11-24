@@ -5,7 +5,7 @@ import {
   getPlayerView,
   hashState,
 } from "@netgrid/engine";
-import { DEMO_DECKS, type GameState } from "@netgrid/shared";
+import { DEMO_DECKS, type CardDefinitionId, type GameState } from "@netgrid/shared";
 import { expect, it } from "vitest";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
@@ -18,13 +18,13 @@ import { buildAiDecisionInput } from "./ai-decision-input";
 import { currentRunPathContext } from "../run-analysis/current-run-path-context";
 import { assessKnownRezzedIcePath } from "../visible-run-analysis";
 
-const QUANDARY = "onr_v1_261_quandary";
-const WALL = "onr_v1_237_data-wall";
-const INSIDE = "onr_v1_094_inside-job";
-const KRASH = "onr_v1_039_krash";
+const QUANDARY = 473;
+const WALL = 449;
+const INSIDE = 306;
+const KRASH = 251;
 
 it("keeps Classic trace semantics when quoting the live inner path", () => {
-  const f = fixture(false, true, true, 15, "onr_v1_249_hunter");
+  const f = fixture(false, true, true, 15, 461);
   const view = getPlayerView(f.state, "runner");
   const input = {
     ...f.input,
@@ -33,7 +33,7 @@ it("keeps Classic trace semantics when quoting the live inner path", () => {
     legalActions: getLegalActions(f.state, "runner"),
   };
   const path = assessKnownRezzedIcePath(
-    view.servers.find((s) => s.id === "remote_1")!.ice.slice(0, 1),
+    view.servers.find((s) => s.id === "r1")!.ice.slice(0, 1),
     view.own.rig ?? [],
     view.own.credits,
     [],
@@ -53,7 +53,7 @@ it("keeps Classic trace semantics when quoting the live inner path", () => {
 it("keeps the funded bypass-soak route with the Defense owner and its original action", () => {
   resetResidentPlanPortfolioMemory();
   const f = fixture(true, false);
-  const counts = new Map<string, number>();
+  const counts = new Map<CardDefinitionId, number>();
   for (const card of Object.values(f.state.cardInstances)) {
     if (card.owner === "corp" && card.instanceId !== f.state.corp.identity)
       counts.set(card.definitionId, (counts.get(card.definitionId) ?? 0) + 1);
@@ -68,12 +68,16 @@ it("keeps the funded bypass-soak route with the Defense owner and its original a
   const result = chooseAiAction(input);
   expect(result.actionId).toBe(f.candidate.actionId);
   expect(result.fallbackUsed).toBeFalsy();
-  expect(result.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toContain(
-    "corp.defend_servers",
-  );
   expect(
-    result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toContain("corp.defend_servers");
+    result.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === result.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+    )?.moduleId,
+  ).toBe("corp.defend_servers");
+  expect(
+    result.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    )?.moduleId,
+  ).toBe("corp.defend_servers");
   resetResidentPlanPortfolioMemory();
 });
 
@@ -102,7 +106,7 @@ function fixture(
         ...DEMO_DECKS.demo_corp_001.cards,
         { id: QUANDARY, quantity: 1 },
         { id: WALL, quantity: 1 },
-        { id: "onr_v1_249_hunter", quantity: 1 },
+        { id: 461, quantity: 1 },
       ],
     },
   });
@@ -116,17 +120,17 @@ function fixture(
     .withCorpCredits(corpCredits)
     .withRunnerCardInGrip(INSIDE)
     .withRunnerProgramInstalled(KRASH)
-    .withCorpRemoteAgenda("remote_1", 1);
-  if (innerPresent) builder.withCorpIceOnServer("remote_1", innerDefinition);
-  builder.withCorpIceOnServer("remote_1", QUANDARY);
-  const server = state.corp.servers.find((s) => s.id === "remote_1")!;
+    .withCorpRemoteAgenda("r1", 1);
+  if (innerPresent) builder.withCorpIceOnServer("r1", innerDefinition);
+  builder.withCorpIceOnServer("r1", QUANDARY);
+  const server = state.corp.servers.find((s) => s.id === "r1")!;
   if (innerPresent && innerRezzed) {
     state.cardInstances[server.ice[0]!]!.rezzed = true;
     state.cardInstances[server.ice[0]!]!.faceup = true;
   }
   const action = getLegalActions(state, "runner").find(
     (a) =>
-      a.payload?.serverId === "remote_1" &&
+      a.payload?.serverId === "r1" &&
       (inside
         ? a.type === "play_event" &&
           state.cardInstances[a.source!]?.definitionId === INSIDE
@@ -146,7 +150,7 @@ function fixture(
     profileId: "bypass-fort",
   });
   const sourceCard = input.playerView.servers
-    .find((s) => s.id === "remote_1")!
+    .find((s) => s.id === "r1")!
     .ice.at(-1)!;
   const candidate = buildActionSemanticCandidates({
     legalActions: input.legalActions,
@@ -162,7 +166,7 @@ function fixture(
     input,
     sourceCard,
     candidate,
-    targetServerId: "remote_1",
+    targetServerId: "r1",
   });
   return { state, input, sourceCard, candidate, route };
 }
@@ -194,7 +198,7 @@ it.each([true, false])(
       ).toBeGreaterThanOrEqual(1);
       expect(
         getPlayerView(f.state, "runner").servers.find(
-          (s) => s.id === "remote_1",
+          (s) => s.id === "r1",
         )!.ice[0]!.effectivePostRezRunQuote,
       ).toBeUndefined();
     }
@@ -212,11 +216,11 @@ it("does not fund an inner continuation from money already spent on outer rez", 
 
 it("rejects a stale inner continuation quote", () => {
   const f = fixture(true, false);
-  const inner = f.input.playerView.servers.find((s) => s.id === "remote_1")!
+  const inner = f.input.playerView.servers.find((s) => s.id === "r1")!
     .ice[0]!;
   inner.effectivePostRezRunQuote!.expiresAtStateVersion--;
   expect(
-    projectExactCorpIceRezRoute({ ...f, targetServerId: "remote_1" }),
+    projectExactCorpIceRezRoute({ ...f, targetServerId: "r1" }),
   ).toBeUndefined();
 });
 

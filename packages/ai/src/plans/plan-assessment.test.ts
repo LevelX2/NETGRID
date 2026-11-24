@@ -139,7 +139,7 @@ describe("plan assessment and priority claims", () => {
         scope: "tactical",
         evidenceCode: "runner_visible_tactical_window",
         guarantee: "visible_state_forced",
-        target: { kind: "server", id: "remote_1" },
+        target: { kind: "server", id: "r1" },
       },
     ];
     const validated = requireValidatedPlanAssessment(

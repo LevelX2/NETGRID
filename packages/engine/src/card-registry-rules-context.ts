@@ -11,7 +11,7 @@ export const CARD_IMPLEMENTATION_PRIMITIVE_CONTRACT_VERSION =
  */
 export function createCurrentCardRegistryRulesContext(params: {
   cardPoolSnapshotId: string;
-  matchCardPoolDefinitionIds: readonly string[];
+  matchCardPoolDefinitionIds: readonly number[];
 }) {
   return createEngineRegistryRulesContext({
     engineSchemaVersion: CURRENT_RULES_BASELINE.engineSchemaVersion,

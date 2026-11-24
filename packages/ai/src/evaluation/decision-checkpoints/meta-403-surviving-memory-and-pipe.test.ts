@@ -65,9 +65,13 @@ describe("meta 403 surviving observations and persistent action denial", () => {
       const current = capture(json);
       expect(missingCentralDefense(current.input)).toBeUndefined();
       const result = choose(json);
-      expect(result.actionId).toBe("corp.draw_card");
+      expect(result.actionId).toBe("c8");
       const plan = result.decisionDebug?.planFirstDecision;
-      expect(plan?.rootPlanInstanceId).toMatch(/^plan:corp\.score_agenda:/);
+      expect(
+        plan?.portfolio.find(
+          (instance) => instance.instanceId === plan?.rootPlanInstanceId,
+        )?.moduleId,
+      ).toBe("corp.score_agenda");
       expect(plan?.selectedPlan?.moduleId).toBe("corp.defend_servers");
       expect(plan?.route?.capabilityId).toBe("develop_score_protection");
       expect(plan?.selectedStep?.planInstanceId).toBe(
@@ -79,7 +83,7 @@ describe("meta 403 surviving observations and persistent action denial", () => {
     const current = capture(funding18Json);
     current.input.playerView.own.credits = 4;
     expect(missingCentralDefense(current.input)?.serverId).toBe("hq");
-    expect(choose(current).actionId).toBe("corp.draw_card");
+    expect(choose(current).actionId).toBe("c8");
   });
   it("does not treat an expired rez quote as a proved funding alternative", () => {
     const current = capture(funding18Json);
@@ -89,30 +93,30 @@ describe("meta 403 surviving observations and persistent action denial", () => {
       if (ice.effectiveRezCostQuote)
         ice.effectiveRezCostQuote.expiresAtStateVersion--;
     expect(missingCentralDefense(current.input)?.serverId).toBe("hq");
-    expect(choose(current).actionId).toBe("corp.draw_card");
+    expect(choose(current).actionId).toBe("c8");
   });
   it("preserves public opaque identity through the DTO and removes only the stolen root", () => {
     const input = buildAiDecisionInputDto(capture(memoryJson).input);
     const history = input.eventTail;
     expect(
-      history.find((e) => e.eventId === "evt_378")?.publicPayload
+      history.find((e) => e.eventId === 378)?.publicPayload
         .installedPositionKey,
     ).toBe("installed-position-v1:c9dbfb7b");
     expect(
       reconstructBeliefState(
         input,
       ).runnerOpponentModel?.knownPositionMemory.filter(
-        (e) => e.zone === "remote_1" && e.positionKey.startsWith("root:"),
+        (e) => e.zone === "r1" && e.positionKey.startsWith("root:"),
       ),
     ).toEqual([
       expect.objectContaining({
         positionKey: "root:0",
-        definitionId: "onr_v1_353_chimera",
-        sourceEventId: "evt_375",
+        definitionId: 565,
+          sourceEventId: 376,
       }),
     ]);
     expect(
-      deriveObservedRemoteNoProgressAccessMemory(input, "remote_1"),
+      deriveObservedRemoteNoProgressAccessMemory(input, "r1"),
     ).toMatchObject({
       applies: true,
       suppressesPlanBonus: true,
@@ -122,37 +126,37 @@ describe("meta 403 surviving observations and persistent action denial", () => {
   it("shifts the surviving observation when a lower root position is removed", () => {
     const { input } = capture(memoryJson);
     for (const e of [...input.eventTail, ...input.playerView.publicEvents]) {
-      if (e.eventId === "evt_375")
+      if (e.eventId === 375)
         e.publicPayload.accessedCardPositionKey = "root:1";
-      if (e.eventId === "evt_377")
+      if (e.eventId === 377)
         e.publicPayload.accessedCardPositionKey = "root:0";
     }
     expect(
       reconstructBeliefState(
         input,
       ).runnerOpponentModel?.knownPositionMemory.filter(
-        (e) => e.zone === "remote_1" && e.positionKey.startsWith("root:"),
+        (e) => e.zone === "r1" && e.positionKey.startsWith("root:"),
       ),
     ).toEqual([
       expect.objectContaining({
         positionKey: "root:0",
-        definitionId: "onr_v1_353_chimera",
+        definitionId: 565,
       }),
     ]);
   });
   it("does not let a remembered sibling answer a new unknown root", () => {
     const { input } = capture(memoryJson);
     const root = input.playerView.servers.find(
-      (s) => s.id === "remote_1",
+      (s) => s.id === "r1",
     )!.root;
     root.push({ ...root[0]!, instanceId: "new-unobserved-root" });
     expect(
-      deriveObservedRemoteNoProgressAccessMemory(input, "remote_1"),
+      deriveObservedRemoteNoProgressAccessMemory(input, "r1"),
     ).toBeUndefined();
   });
   it("does not repeat the known declined remote after stealing its sibling", () => {
     const result = choose(memoryJson);
-    expect(result.actionId).not.toBe("runner.start_run.remote_1");
+    expect(result.actionId).not.toBe("rs.r1");
     const plan = result.decisionDebug?.planFirstDecision;
     expect(plan?.selectedStep?.planInstanceId).toBe(
       plan?.selectedPlan?.instanceId,

@@ -38,12 +38,12 @@
       },
       "requireIdentity": true,
       "allowedIdentityCards": {
-        "runner": ["runner_identity_001"],
-        "corp": ["corp_identity_001"]
+        "runner": [587],
+        "corp": [3]
       },
       "identityRules": {
         "runner": {
-          "runner_identity_001": {
+          "587": {
             "faction": "neutral_demo",
             "influenceLimit": 15,
             "minimumDeckCards": 12,
@@ -51,7 +51,7 @@
           }
         },
         "corp": {
-          "corp_identity_001": {
+          "3": {
             "faction": "neutral_demo",
             "influenceLimit": 15,
             "minimumDeckCards": 18,
@@ -133,12 +133,12 @@
       },
       "requireIdentity": true,
       "allowedIdentityCards": {
-        "runner": ["runner_identity_001"],
-        "corp": ["corp_identity_001"]
+        "runner": [587],
+        "corp": [3]
       },
       "identityRules": {
         "runner": {
-          "runner_identity_001": {
+          "587": {
             "faction": "neutral_demo",
             "influenceLimit": 15,
             "minimumDeckCards": 45,
@@ -150,7 +150,7 @@
           }
         },
         "corp": {
-          "corp_identity_001": {
+          "3": {
             "faction": "neutral_demo",
             "influenceLimit": 15,
             "minimumDeckCards": 45,
@@ -237,12 +237,12 @@
       },
       "requireIdentity": true,
       "allowedIdentityCards": {
-        "runner": ["runner_identity_001"],
-        "corp": ["corp_identity_001"]
+        "runner": [587],
+        "corp": [3]
       },
       "identityRules": {
         "runner": {
-          "runner_identity_001": {
+          "587": {
             "faction": "neutral_demo",
             "influenceLimit": 15,
             "minimumDeckCards": 45,
@@ -254,7 +254,7 @@
           }
         },
         "corp": {
-          "corp_identity_001": {
+          "3": {
             "faction": "neutral_demo",
             "influenceLimit": 15,
             "minimumDeckCards": 45,
@@ -340,12 +340,12 @@
       },
       "requireIdentity": true,
       "allowedIdentityCards": {
-        "runner": ["runner_identity_001"],
-        "corp": ["corp_identity_001"]
+        "runner": [587],
+        "corp": [3]
       },
       "identityRules": {
         "runner": {
-          "runner_identity_001": {
+          "587": {
             "faction": "neutral_demo",
             "influenceLimit": 15,
             "minimumDeckCards": 45,
@@ -358,7 +358,7 @@
           }
         },
         "corp": {
-          "corp_identity_001": {
+          "3": {
             "faction": "neutral_demo",
             "influenceLimit": 15,
             "minimumDeckCards": 45,

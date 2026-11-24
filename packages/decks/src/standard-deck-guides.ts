@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 export const STANDARD_DECK_GUIDE_SCHEMA_VERSION =
   "netgrid-standard-deck-guides-v2" as const;
 
@@ -10,7 +11,7 @@ export type StandardDeckGuideStatus =
   | "invalid";
 
 export type StandardDeckGuideKeyCard = {
-  cardId: string;
+  cardId: CardDefinitionId;
   title: string;
   role: string;
 };
@@ -65,8 +66,8 @@ export type StandardDeckGuideDeckSource = {
   version: string;
   name: string;
   side: "runner" | "corp";
-  identityCardId: string;
-  cards: Array<{ cardId: string; quantity: number }>;
+  identityCardId: CardDefinitionId;
+  cards: Array<{ cardId: CardDefinitionId; quantity: number }>;
 };
 
 export type StandardDeckGuideResolution = {
@@ -260,23 +261,28 @@ function validateStandardDeckGuideContent(
     issues.push("standard_deck_guide_key_cards_invalid");
   } else {
     const deckCardIds = new Set(deck?.cards.map((card) => card.cardId) ?? []);
-    const seenCardIds = new Set<string>();
+    const seenCardIds = new Set<CardDefinitionId>();
     for (const keyCard of value.keyCards) {
       if (!isRecord(keyCard)) {
         issues.push("standard_deck_guide_key_card_invalid");
         continue;
       }
-      requireString(keyCard, "cardId", issues);
       requireString(keyCard, "title", issues);
       requireString(keyCard, "role", issues);
-      if (typeof keyCard.cardId === "string") {
-        if (seenCardIds.has(keyCard.cardId)) {
-          issues.push("standard_deck_guide_key_card_duplicate");
-        }
-        seenCardIds.add(keyCard.cardId);
-        if (deck && !deckCardIds.has(keyCard.cardId)) {
-          issues.push("standard_deck_guide_key_card_not_in_deck");
-        }
+      if (
+        typeof keyCard.cardId !== "number" ||
+        !Number.isSafeInteger(keyCard.cardId) ||
+        keyCard.cardId <= 0
+      ) {
+        issues.push("standard_deck_guide_cardId_invalid");
+        continue;
+      }
+      if (seenCardIds.has(keyCard.cardId)) {
+        issues.push("standard_deck_guide_key_card_duplicate");
+      }
+      seenCardIds.add(keyCard.cardId);
+      if (deck && !deckCardIds.has(keyCard.cardId)) {
+        issues.push("standard_deck_guide_key_card_not_in_deck");
       }
     }
     if (
@@ -331,9 +337,9 @@ function requireStringArray(
 }
 
 function normalizeCards(
-  cards: Array<{ cardId: string; quantity: number }>,
-): Array<{ cardId: string; quantity: number }> {
-  const quantities = new Map<string, number>();
+  cards: Array<{ cardId: CardDefinitionId; quantity: number }>,
+): Array<{ cardId: CardDefinitionId; quantity: number }> {
+  const quantities = new Map<CardDefinitionId, number>();
   for (const card of cards) {
     quantities.set(
       card.cardId,
@@ -342,7 +348,7 @@ function normalizeCards(
   }
   return [...quantities.entries()]
     .map(([cardId, quantity]) => ({ cardId, quantity }))
-    .sort((left, right) => left.cardId.localeCompare(right.cardId));
+    .sort((left, right) => left.cardId - right.cardId);
 }
 
 function stableStringify(value: unknown): string {

@@ -33,11 +33,11 @@ it("funds the known steal surcharge instead of starting the underfunded remote",
   const original = load(124);
   expect(decide(original).action.type).not.toBe("start_run");
   const server = original.input.playerView.servers.find(
-    (s) => s.id === "remote_1",
+    (s) => s.id === "r1",
   )!;
   server.runnerAgendaStealCostQuote = {
     stateVersion: original.stateVersion,
-    serverId: "remote_1",
+    serverId: "r1",
     minimumCreditCost: 5,
     complete: true,
   };
@@ -47,7 +47,7 @@ it("funds the known steal surcharge instead of starting the underfunded remote",
       input: buildAiDecisionInputDto(original.input),
     }).find(
       (target) =>
-        target.targetServerId === "remote_1" &&
+        target.targetServerId === "r1" &&
         original.input.legalActions.find((a) => a.actionId === target.actionId)
           ?.type === "start_run",
     );
@@ -82,15 +82,15 @@ it.each([
     const cp = load(98),
       input = cp.input;
     input.playerView.own.credits = credits;
-    const server = input.playerView.servers.find((s) => s.id === "remote_1")!;
+    const server = input.playerView.servers.find((s) => s.id === "r1")!;
     server.runnerAgendaStealCostQuote = {
       stateVersion: cp.stateVersion,
-      serverId: "remote_1",
+      serverId: "r1",
       minimumCreditCost: cost,
       complete: true,
     };
     const candidate = candidates(input).find(
-      (c) => c.sourceDefinitionId === "onr_v1_111_social-engineering",
+      (c) => c.sourceDefinitionId === 323,
     )!;
     const result = runnerTargetedBypassPlanCommitment({
       input,
@@ -98,8 +98,8 @@ it.each([
       planTargets: [
         {
           ownerModuleId: "runner.contest_remote",
-          ownerDedupeKey: "remote:remote_1",
-          serverId: "remote_1",
+          ownerDedupeKey: "remote:r1",
+          serverId: "r1",
           payoffValue: 1000,
           knownAgendaThreat: true,
         },
@@ -118,20 +118,20 @@ it.each([
 
 it("does not reuse missing, stale, negative or cross-server steal costs and retains actor-safe bypass facts", () => {
   const cp = load(124),
-    server = cp.input.playerView.servers.find((s) => s.id === "remote_1")!;
+    server = cp.input.playerView.servers.find((s) => s.id === "r1")!;
   expect(
-    runnerAgendaStealCreditRequirement(cp.input, "remote_1"),
+    runnerAgendaStealCreditRequirement(cp.input, "r1"),
   ).toBeUndefined();
   server.runnerAgendaStealCostQuote = {
     stateVersion: cp.stateVersion,
-    serverId: "remote_1",
+    serverId: "r1",
     minimumCreditCost: 5,
     complete: true,
   };
   expect(
     runnerAgendaStealCreditRequirement(
       buildAiDecisionInputDto(cp.input),
-      "remote_1",
+      "r1",
     ),
   ).toBe(5);
   for (const patch of [
@@ -141,7 +141,7 @@ it("does not reuse missing, stale, negative or cross-server steal costs and reta
   ]) {
     const altered = structuredClone(cp);
     Object.assign(
-      altered.input.playerView.servers.find((s) => s.id === "remote_1")!
+      altered.input.playerView.servers.find((s) => s.id === "r1")!
         .runnerAgendaStealCostQuote!,
       patch,
     );
@@ -149,7 +149,7 @@ it("does not reuse missing, stale, negative or cross-server steal costs and reta
       "Invalid Engine public server steal-cost quote",
     );
     expect(
-      runnerAgendaStealCreditRequirement(altered.input, "remote_1"),
+      runnerAgendaStealCreditRequirement(altered.input, "r1"),
     ).toBeUndefined();
   }
   const bypass = load(102);

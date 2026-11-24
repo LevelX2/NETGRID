@@ -1,3 +1,4 @@
+import { shuffleIds, recordRandomMarkers } from "./state/draw-random";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
 // ARCH-3: Setup functions are the first real game-facade extraction step.
 // No run/action/access/payment logic belongs here; GameState types stay in @netgrid/shared.
@@ -7,6 +8,7 @@ import {
   DEMO_DECKS,
   ORIGINALSET_DEFAULT_DECKS,
   type CardDefinition,
+  type CardDefinitionId,
   type CardInstance,
   type CardInstanceId,
   type ChoiceRequest,
@@ -17,6 +19,7 @@ import {
 } from "@netgrid/shared";
 import { cardPoolVersionForDecks, metadataForDeck } from "../card-pool";
 import { hashStateSnapshot } from "../state-hash";
+import { cardInstanceIdForCopy } from "./state/card-instance-id";
 
 const STANDARD_AGENDA_POINTS_TO_WIN = 7;
 const INITIAL_HAND_SIZE = 5;
@@ -73,26 +76,26 @@ export function createGame(config: CreateGameConfig = {}): GameState {
   const runnerStack = shuffleIds(
     runnerDeck,
     seed,
-    "setup.shuffle.runner.start_stack",
+    [1],
     random,
   );
   const corpRd = shuffleIds(
     corpDeck,
     seed,
-    "setup.shuffle.corp.start_rnd",
+    [2],
     random,
   );
   const runnerGrip = runnerStack.splice(0, INITIAL_HAND_SIZE);
   const corpHq = corpRd.splice(0, INITIAL_HAND_SIZE);
   recordRandomMarkers(
     seed,
-    "setup.draw.runner.initial_hand",
+    [3],
     runnerGrip.length,
     random,
   );
   recordRandomMarkers(
     seed,
-    "setup.draw.corp.initial_hand",
+    [4],
     corpHq.length,
     random,
   );
@@ -230,7 +233,7 @@ export function createGame(config: CreateGameConfig = {}): GameState {
 
   const initialHash = hashStateSnapshot(state);
   state.eventLog.push({
-    eventId: "evt_0",
+    eventId: state.stateVersion + 1,
     type: "game_created",
     stateVersionBefore: 0,
     stateVersionAfter: 0,
@@ -256,7 +259,7 @@ export function createGameAfterSetup(config: CreateGameConfig = {}): GameState {
 
 function expandDeck(
   side: Side,
-  cards: Array<{ id: string; quantity: number }>,
+  cards: Array<{ id: CardDefinitionId; quantity: number }>,
   instances: Record<CardInstanceId, CardInstance>,
 ): CardInstanceId[] {
   const ids: CardInstanceId[] = [];
@@ -279,12 +282,12 @@ function expandDeck(
 
 function createInstance(
   side: Side,
-  definitionId: string,
+  definitionId: number,
   copy: number,
   zone: CardInstance["zone"],
 ): CardInstance {
   return {
-    instanceId: `${side}_${definitionId}_${copy}`,
+    instanceId: cardInstanceIdForCopy(side, definitionId, copy),
     definitionId,
     owner: side,
     controller: side,
@@ -298,59 +301,6 @@ function createInstance(
     advancementCounters: 0,
     strengthModifier: 0,
   };
-}
-
-function shuffleIds(
-  ids: CardInstanceId[],
-  seed: string,
-  purpose: string,
-  random: { counter: number; records: GameState["randomDrawRecords"] },
-): CardInstanceId[] {
-  const shuffled = ids.slice();
-  for (let index = shuffled.length - 1; index > 0; index -= 1) {
-    const value = deterministicNumber(`${seed}:${purpose}:${random.counter}`);
-    random.records.push({ counter: random.counter, purpose, value });
-    random.counter += 1;
-    const swapIndex = Math.floor(value * (index + 1));
-    const current = mustArrayValue(shuffled, index, "Shuffle index missing.");
-    shuffled[index] = mustArrayValue(
-      shuffled,
-      swapIndex,
-      "Shuffle swap missing.",
-    );
-    shuffled[swapIndex] = current;
-  }
-  return shuffled;
-}
-
-function recordRandomMarkers(
-  seed: string,
-  purpose: string,
-  amount: number,
-  random: { counter: number; records: GameState["randomDrawRecords"] },
-): void {
-  for (let index = 0; index < amount; index += 1) {
-    const value = deterministicNumber(`${seed}:${purpose}:${random.counter}`);
-    random.records.push({ counter: random.counter, purpose, value });
-    random.counter += 1;
-  }
-}
-
-function deterministicNumber(input: string): number {
-  let hashA = 0xdeadbeef ^ input.length;
-  let hashB = 0x41c6ce57 ^ input.length;
-  for (let index = 0; index < input.length; index += 1) {
-    const code = input.charCodeAt(index);
-    hashA = Math.imul(hashA ^ code, 0x9e3779b1);
-    hashB = Math.imul(hashB ^ code, 0x5f356495);
-  }
-  hashA =
-    Math.imul(hashA ^ (hashA >>> 16), 0x85ebca6b) ^
-    Math.imul(hashB ^ (hashB >>> 13), 0xc2b2ae35);
-  hashB =
-    Math.imul(hashB ^ (hashB >>> 16), 0x85ebca6b) ^
-    Math.imul(hashA ^ (hashA >>> 13), 0xc2b2ae35);
-  return (0x100000000 * (hashB & 0x1fffff) + (hashA >>> 0)) / 0x20000000000000;
 }
 
 function applyIdentityStaticModifiers(state: GameState): void {

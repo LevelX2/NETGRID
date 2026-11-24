@@ -1,4 +1,4 @@
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
 import { AI_HINTS_BY_CARD } from "./ai-hints";
@@ -6,10 +6,10 @@ import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 import { buildActionCardSemanticProfilesByDefinitionId } from "./actions/action-card-semantic-profiles";
 import { rolesForDeckDoctrineCard } from "./deck-doctrine-card-roles";
 
-const cardId = "onr_v1_068_startup-immolator";
+const cardId = 280;
 function entry() {
-  const card = cardSpecPlanningCards().find(
-    (candidate) => candidate.definition.id === cardId,
+  const card = listPlanningCardsWithFacts().find(
+    (candidate) => candidate.facts.id === cardId,
   );
   if (!card) throw new Error("post_break_trash_test_card_missing");
   return structuredClone(card);
@@ -103,14 +103,14 @@ describe("typed post-pass fully-broken ICE trash semantics", () => {
       original.planning;
     const renamed = {
       ...original,
-      definition: {
-        ...original.definition,
-        id: "onr_v1_039_krash" as typeof original.definition.id,
+      facts: {
+        ...original.facts,
+        id: 251 as typeof original.facts.id,
       },
       planning: mechanicalPlanning,
     };
     const hint = deriveCardSpecAiHint(renamed);
-    expect(hint.cardId).toBe("onr_v1_039_krash");
+    expect(hint.cardId).toBe(251);
     expect(hint.effects).toContainEqual(
       expect.objectContaining({
         kind: "ice_trash",

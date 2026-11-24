@@ -10,6 +10,7 @@ import {
 } from "../visible-run-analysis";
 import { actionCreditCost } from "./action-cost";
 import { breakerIdForEncounterAction } from "./encounter-action";
+import { serverBlocksStealthBitPayments } from "./server-target";
 import {
   fundRunnerRunPathPayment,
   runnerPaymentSupportBudgetForRig,
@@ -58,6 +59,10 @@ export function runnerEncounterCreditBudgetForInput(
   const visiblePools = visibleRunnerRunPathCreditBudgetForRig(
     input.playerView.own.rig ?? [],
   );
+  const attackedServer = input.playerView.servers.find(
+    (server) => server.id === input.playerView.run?.attackedServerId,
+  );
+  const excludeStealthCredits = serverBlocksStealthBitPayments(attackedServer);
   return {
     credits: normalizeCreditAmount(input.playerView.own.credits),
     ...runnerPaymentSupportBudgetForRig(
@@ -66,13 +71,18 @@ export function runnerEncounterCreditBudgetForInput(
     ),
     runOnlyCredits: visibleRunnerRunOnlyCredits(input.playerView.run),
     icebreakerCredits: visiblePools.icebreakerCredits,
-    nonNoisyIcebreakerCredits: visiblePools.nonNoisyIcebreakerCredits,
+    nonNoisyIcebreakerCredits: excludeStealthCredits
+      ? visiblePools.nonStealthNonNoisyIcebreakerCredits
+      : visiblePools.nonNoisyIcebreakerCredits,
     nonStealthNonNoisyIcebreakerCredits:
       visiblePools.nonStealthNonNoisyIcebreakerCredits,
     killerCredits: visiblePools.killerCredits,
-    stealthNonNoisyIcebreakerCredits:
-      visiblePools.stealthNonNoisyIcebreakerCredits,
-    stealthCreditsBySourceId: { ...visiblePools.stealthCreditsBySourceId },
+    stealthNonNoisyIcebreakerCredits: excludeStealthCredits
+      ? 0
+      : visiblePools.stealthNonNoisyIcebreakerCredits,
+    stealthCreditsBySourceId: excludeStealthCredits
+      ? {}
+      : { ...visiblePools.stealthCreditsBySourceId },
     hostedIcebreakerCreditsByBreakerInstanceId: {
       ...visiblePools.hostedIcebreakerCreditsByBreakerInstanceId,
     },

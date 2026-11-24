@@ -1,3 +1,5 @@
+import type { RandomPurpose } from "@netgrid/shared";
+import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -79,7 +81,7 @@ export type HiddenZoneSearchChoiceHandlerHost = {
     addToGrip: (cardId: CardInstanceId) => void;
     trashRunnerInstalledCardToHeap: (cardId: CardInstanceId) => void;
   };
-  shuffleRunnerStack: (purpose: string) => void;
+  shuffleRunnerStack: (purpose: RandomPurpose) => void;
   spendRunnerCredits: (amount: number) => void;
   installRunnerProgramFromStackWithoutClick: (
     cardId: CardInstanceId,
@@ -248,7 +250,7 @@ export function handleRevealedStackProgramInstallChoice(
   });
   if (execution.shuffleNeeded)
     host.shuffleRunnerStack(
-      `v1915.revealed_stack_program_install.shuffle.after_install.${sourceCardId}.${execution.installedProgramId}`,
+      [39, sourceCardId, execution.installedProgramId!],
     );
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
@@ -296,7 +298,7 @@ export function handleSearchStackInstallChoice(
     throw new Error("Das Programm kann nicht installiert werden.");
   if (selection.shuffleNeeded)
     host.shuffleRunnerStack(
-      `p3_38_search_stack_install:${choice.choiceId}:shuffle`,
+      [41, choice.stateVersion],
     );
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
@@ -331,8 +333,11 @@ export function handleRevealedStackProgramInstallCorpReviewChoice(
     throw new Error("Es ist keine Revealed-Stack-Korp-Review-Choice offen.");
   if (!selectedChoiceIds(host.playerAction.selectedChoices).includes("done"))
     throw new Error("Die Revealed-Stack-Korp-Review wurde nicht bestaetigt.");
-  const [, sourceCardId = "", sourceDefinitionId = "", topCardsRaw = ""] =
+  const [, sourceCardId = "", sourceDefinitionIdToken = "", topCardsRaw = ""] =
     choice.source.split(":");
+  const sourceDefinitionId = parseCardDefinitionIdToken(
+    sourceDefinitionIdToken,
+  );
   if (
     !sourceCardId ||
     !state.runner.rig.programs.includes(sourceCardId as CardInstanceId) ||
@@ -360,7 +365,7 @@ export function handleRevealedStackProgramInstallCorpReviewChoice(
   );
   if (!installableProgramIds.length) {
     host.shuffleRunnerStack(
-      `p3_38_stack_show_install:no_program:${sourceCardId}:${run.runId}`,
+      [42, sourceCardId, run.runId],
     );
     host.legalAction.payload = {
       ...(host.legalAction.payload ?? {}),
@@ -437,8 +442,11 @@ export function handleLookTopStackShowInstallChoice(
     )
   )
     throw new Error("Es ist keine Stack-Show-Install-Choice offen.");
-  const [, sourceCardId = "", sourceDefinitionId = "", topCardsRaw = ""] =
+  const [, sourceCardId = "", sourceDefinitionIdToken = "", topCardsRaw = ""] =
     choice.source.split(":");
+  const sourceDefinitionId = parseCardDefinitionIdToken(
+    sourceDefinitionIdToken,
+  );
   if (
     !sourceCardId ||
     !state.runner.rig.programs.includes(sourceCardId) ||
@@ -487,7 +495,7 @@ export function handleLookTopStackShowInstallChoice(
   if (!installed)
     throw new Error("Das Programm kann nicht installiert werden.");
   host.shuffleRunnerStack(
-    `p3_38_stack_show_install:${choice.choiceId}:shuffle`,
+    [43, choice.stateVersion],
   );
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
@@ -530,7 +538,7 @@ function handleTemporaryProgramInstallSourceChoice(
     throw new Error("Es ist keine Sneak-Preview-Quellenwahl offen.");
   const parts = choice.source.split(":");
   const sourceCardId = parts[1] as CardInstanceId | undefined;
-  const sourceDefinitionId = parts[2] as CardDefinitionId | undefined;
+  const sourceDefinitionId = parseCardDefinitionIdToken(parts[2]);
   if (!sourceCardId || !sourceDefinitionId)
     throw new Error(
       "Die temporaere Programminstallation ist nicht kanonisch gebunden.",
@@ -602,7 +610,7 @@ function handleTemporaryProgramInstallChoice(
   });
   if (execution.shuffleNeeded)
     host.shuffleRunnerStack(
-      `v1911_temporary_program_install:${choice.choiceId}:shuffle`,
+      [44, choice.stateVersion],
     );
   const sourceTitle = plan.sourceCardId
     ? host.cards.definitionFor(plan.sourceCardId).title
@@ -699,7 +707,7 @@ function handleRunnerStackSearchChoice(
         "Die Stack-Search-to-Grip-Quelle ist nicht mehr installiert.",
       );
   }
-  host.shuffleRunnerStack(`runner_search_stack:${choice.choiceId}:shuffle`);
+  host.shuffleRunnerStack([45, choice.stateVersion]);
   const payload: HiddenZonePayload = {
     ...(host.legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
@@ -760,7 +768,7 @@ function handleCardImplementationSearchToGripChoice(
   });
   if (selection.shuffleNeeded)
     host.shuffleRunnerStack(
-      `p3_37_search_stack_to_grip:${choice.choiceId}:shuffle`,
+      [46, choice.stateVersion],
     );
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
@@ -819,7 +827,7 @@ function handleAujourdOuiTop5Choice(
       zone: { side: "runner", zone: "grip" },
     };
   }
-  host.shuffleRunnerStack(`v1911_aujourdoui_top5:${choice.choiceId}:shuffle`);
+  host.shuffleRunnerStack([47, choice.stateVersion]);
   const revealedDefinitionIds = uniqueSelectedIds.map(
     (cardId) => host.cards.definitionFor(cardId).id,
   );
@@ -887,7 +895,7 @@ function handleCardImplementationLookTopStackTakeMatchingChoice(
   });
   if (moveResult.shuffleNeeded)
     host.shuffleRunnerStack(
-      `p3_37_look_top_stack_take_matching:${choice.choiceId}:shuffle`,
+      [48, choice.stateVersion],
     );
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
@@ -930,7 +938,7 @@ function handlePaidStackProgramInstallStackChoice(
   if (plan.shouldOpenMemoryChoice) {
     if (plan.shuffleNeeded)
       host.shuffleRunnerStack(
-        `paid_stack_program_install:${choice.choiceId}:shuffle`,
+        [49, choice.stateVersion],
       );
     const sourceCardId = choice.source.split(":")[1] as
       | CardInstanceId
@@ -963,7 +971,7 @@ function handlePaidStackProgramInstallStackChoice(
     : false;
   if (plan.shuffleNeeded)
     host.shuffleRunnerStack(
-      `paid_stack_program_install:${choice.choiceId}:shuffle`,
+      [49, choice.stateVersion],
     );
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),

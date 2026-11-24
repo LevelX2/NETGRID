@@ -1,5 +1,9 @@
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
-import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import { isRemoteServerId } from "@netgrid/shared";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
+import type {
+  ActionSemanticCandidate,
+  LegalTargetSummary,
+} from "../action-semantic-candidate-types";
 import type {
   SemanticDecisionFrame,
   TacticalGoalLike,
@@ -39,7 +43,7 @@ function goalSpecsForCandidate(
   const semantic = candidate.semanticActionType;
   const evidence = evidenceForCandidate(candidate);
   const targetServerId = targetServerForCandidate(candidate);
-  const hasRemoteTarget = targetServerId?.startsWith("remote_") === true;
+  const hasRemoteTarget = isRemoteServerId(targetServerId) === true;
   const hasCentralTarget = targetServerId === "hq" || targetServerId === "rd";
   const hasScoreCloseoutSignal = hasVisibleScoreCloseoutBasis(candidate);
   const specs: CorpGoalSpec[] = [];
@@ -137,7 +141,7 @@ function candidateSourceIsVisibleIce(
   const definitionId = candidate.sourceDefinitionId;
   return (
     definitionId !== undefined &&
-    CARD_DEFINITIONS_BY_ID[definitionId]?.type === "ice"
+    planningCardFactsByDefinitionId(definitionId)?.type === "ice"
   );
 }
 
@@ -175,19 +179,28 @@ function evidenceForCandidate(candidate: ActionSemanticCandidate): string[] {
 function targetServerForCandidate(
   candidate: ActionSemanticCandidate,
 ): string | undefined {
-  const selected = candidate.targetContext?.selectedTargets.find(
-    (target) => target.targetKind === "server" || target.targetZone,
+  const boundServer = normalizeServerId(
+    candidate.runProjectionSummary?.serverId,
   );
-  const available = candidate.targetContext?.availableTargets?.find(
-    (target) => target.targetKind === "server" || target.targetZone,
-  );
-  const raw =
-    candidate.runProjectionSummary?.serverId ??
-    selected?.targetZone ??
-    selected?.targetId ??
-    available?.targetZone ??
-    available?.targetId;
-  return normalizeServerId(raw);
+  if (boundServer) return boundServer;
+
+  const targetServerIds = (targets: readonly LegalTargetSummary[] = []) =>
+    new Set(
+      targets.flatMap((target) => {
+        const id =
+          target.targetKind === "server"
+            ? (normalizeServerId(target.targetId) ??
+              normalizeServerId(target.targetZone))
+            : normalizeServerId(target.targetZone);
+        return id ? [id] : [];
+      }),
+    );
+  const selected = targetServerIds(candidate.targetContext?.selectedTargets);
+  const ids =
+    selected.size > 0
+      ? selected
+      : targetServerIds(candidate.targetContext?.availableTargets);
+  return ids.size === 1 ? [...ids][0] : undefined;
 }
 
 function hasVisiblePunishBasis(candidate: ActionSemanticCandidate): boolean {
@@ -255,8 +268,7 @@ function normalizeServerId(value: string | undefined): string | undefined {
   if (normalized === "rnd" || normalized === "r&d") return "rd";
   if (normalized === "archives") return "archives";
   if (normalized === "hq" || normalized === "rd") return normalized;
-  const remoteId = normalizeRemoteServerId(normalized);
-  if (remoteId) return remoteId;
+  if (isRemoteServerId(normalized)) return normalized;
   return undefined;
 }
 
@@ -266,21 +278,6 @@ function stripServerPrefix(value: string): string {
   return value;
 }
 
-function normalizeRemoteServerId(value: string): string | undefined {
-  const prefix = value.startsWith("remote_")
-    ? "remote_"
-    : value.startsWith("remote-")
-      ? "remote-"
-      : undefined;
-  if (!prefix) return undefined;
-  const suffix = value.slice(prefix.length);
-  if (suffix.length === 0 || !onlyAsciiDigits(suffix)) return undefined;
-  return `remote_${suffix}`;
-}
-
-function onlyAsciiDigits(value: string): boolean {
-  return [...value].every((character) => character >= "0" && character <= "9");
-}
 
 function dedupeGoals(goals: readonly TacticalGoalLike[]): TacticalGoalLike[] {
   const byId = new Map<string, TacticalGoalLike>();

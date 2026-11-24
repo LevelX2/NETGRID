@@ -14,7 +14,7 @@ describe("runner payment support", () => {
       cardInstances: {
         [sourceId]: {
           id: sourceId,
-          definitionId: "onr_proteus_152_swiss-bank-account",
+          definitionId: 210,
           owner: "runner",
           controller: "corp",
           tapped: false,
@@ -29,7 +29,7 @@ describe("runner payment support", () => {
 
   it("uses the exact CardSpec authority without a legacy fallback", () => {
     const sourceId = "swiss" as CardInstanceId;
-    const definitionId = "onr_proteus_152_swiss-bank-account";
+    const definitionId = 210;
     const state = {
       runner: {
         credits: 0,
@@ -52,7 +52,7 @@ describe("runner payment support", () => {
             abilities: [
               {
                 kind: "activated",
-                capabilityKey: "support_credit",
+                capabilityKey: "trash_source_gain_two_credits",
                 addressability: ["action"],
                 timing: "runner_cost_penalty_support",
                 costs: [],

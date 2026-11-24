@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_205_main-office-relocation"),
+    cardDefinitionId: cardDefinitionId(417),
     title: "Main-Office Relocation",
     side: "corp",
     cardType: "agenda",

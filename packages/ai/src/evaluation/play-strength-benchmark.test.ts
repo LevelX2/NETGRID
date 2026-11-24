@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
@@ -234,7 +235,7 @@ function legalAction(
 function visibleCard(cardId: string) {
   return {
     instanceId: `${cardId}-instance`,
-    definitionId: cardId,
+    definitionId: syntheticCardDefinitionId(cardId),
     title: cardId,
     side: "runner",
     type: "identity",

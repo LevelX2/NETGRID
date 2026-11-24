@@ -64,38 +64,54 @@ describe("pairing 474: exact coverage identity and complete ETR payment", () => 
       const development = residentPlanPortfolioSnapshot(input)!.instances.find(
         (i) =>
           i.moduleId === "runner.develop_board_and_hand" &&
-          i.target?.id === "onr_v1_021_dwarf",
+          i.target?.id === "233",
       )!;
       expect(development.moduleState).toMatchObject({
         signal: {
           assignedDomainPlanIds: [],
           actionIds: [
-            "runner.install_card.runner_onr_v1_021_dwarf_2.runner_onr_v1_021_dwarf_2",
+            "rc.c1fu.c1fu",
           ],
         },
       });
+      const coverageInstanceId =
+        "p1uk02bt697vbxy382jfm3clk2";
       expect(decision.decisionDebug?.planFirstDecision).toMatchObject(
         name === "r9-g1-d142"
           ? {
               rootPlanInstanceId:
-                "plan:runner.develop_board_and_hand:card%3Arunner_onr_v1_021_dwarf_2",
+                "p3qu7h834spj88cbeoo6iraofk",
               leafExecutorInstanceId: development.instanceId,
               route: {
                 actionId:
-                  "runner.install_card.runner_onr_v1_021_dwarf_2.runner_onr_v1_021_dwarf_2",
+                  "rc.c1fu.c1fu",
               },
             }
           : {
-              rootPlanInstanceId:
-                "plan:runner.contest_remote:remote%3Aremote_1",
-              leafExecutorInstanceId:
-                "plan:runner.rig_and_coverage:coverage%3Abreaker_wall%3Aefficiency%3Aremote_1%3Arun%3Arunner.start_run.remote_1",
+              rootPlanInstanceId: coverageInstanceId,
+              leafExecutorInstanceId: coverageInstanceId,
               route: {
                 actionId:
-                  "runner.install_card.runner_onr_v1_074_worm_1.runner_onr_v1_074_worm_1",
+                  "rc.c1rl.c1rl",
               },
             },
       );
+      if (name === "r9-g17-d176") {
+        // The funded Inside Job path leaves the remote with no open support need.
+        const remote = residentPlanPortfolioSnapshot(input)!.instances.find(
+          (instance) =>
+            instance.instanceId ===
+            "p1p4xezjcxov79rno40lq3f7rv",
+        );
+        expect(remote).toMatchObject({
+          openNeedIds: [],
+          evidenceRefs: expect.arrayContaining([
+            expect.objectContaining({
+              code: "runner_direct_run_converts_now:r1",
+            }),
+          ]),
+        });
+      }
     },
   );
 
@@ -103,11 +119,11 @@ describe("pairing 474: exact coverage identity and complete ETR payment", () => 
     const input = checkpoint("r9-g5-d256");
     const worm = input.legalActions.find(
       (a) =>
-        a.type === "pump_breaker" && a.source === "runner_onr_v1_074_worm_1",
+        a.type === "pump_breaker" && a.source === "c1rl",
     )!;
     const krash = input.legalActions.find(
       (a) =>
-        a.type === "pump_breaker" && a.source === "runner_onr_v1_039_krash_2",
+        a.type === "pump_breaker" && a.source === "c1ju",
     )!;
     expect(pureEndRunEncounterPayment(input, worm)?.cost).toBe(6);
     expect(pureEndRunEncounterPayment(input, krash)?.cost).toBe(10);
@@ -117,11 +133,11 @@ describe("pairing 474: exact coverage identity and complete ETR payment", () => 
     expect(decision.timeoutUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       stateVersion: 255,
-      rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_251",
+      rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+      leafExecutorInstanceId: "p8xsqvjg9aarpc3q6m2unn0qp0",
       selectedStep: {
-        planInstanceId: "plan:runner.convert_run_window:run%3Arun_251",
-        stepId: "plan:runner.convert_run_window:run%3Arun_251:convert",
+        planInstanceId: "p8xsqvjg9aarpc3q6m2unn0qp0",
+        stepId: "p8xsqvjg9aarpc3q6m2unn0qp0:convert",
       },
       route: { actionId: worm.actionId },
     });
@@ -129,11 +145,11 @@ describe("pairing 474: exact coverage identity and complete ETR payment", () => 
   it("prefers breaker-bound funds over spending cash on the nominally cheaper sequence", () => {
     const input = checkpoint("r9-g5-d256");
     input.playerView.own.rig!.find(
-      (c) => c.definitionId === "onr_v1_039_krash",
+      (c) => c.definitionId === 251,
     )!.hostedOn = "spin-chip";
     input.playerView.own.rig!.push({
       instanceId: "spin-chip",
-      definitionId: "onr_proteus_139_eurocorpse-tm-spin-chip",
+      definitionId: 197,
       known: true,
       type: "hardware",
       subtypes: ["chip"],
@@ -154,11 +170,11 @@ describe("pairing 474: exact coverage identity and complete ETR payment", () => 
     });
     const worm = input.legalActions.find(
       (a) =>
-        a.type === "pump_breaker" && a.source === "runner_onr_v1_074_worm_1",
+        a.type === "pump_breaker" && a.source === "c1rl",
     )!;
     const krash = input.legalActions.find(
       (a) =>
-        a.type === "pump_breaker" && a.source === "runner_onr_v1_039_krash_2",
+        a.type === "pump_breaker" && a.source === "c1ju",
     )!;
     const wormPayment = pureEndRunEncounterPayment(input, worm)!;
     const krashPayment = pureEndRunEncounterPayment(input, krash)!;
@@ -184,7 +200,7 @@ describe("pairing 474: exact coverage identity and complete ETR payment", () => 
       iceIndex: 1,
     };
     input.playerView.own.rig!.find(
-      (c) => c.definitionId === "onr_v1_039_krash",
+      (c) => c.definitionId === 251,
     )!.strengthAfterEncounter = 0;
     const payments = input.legalActions
       .filter((a) => a.type === "pump_breaker")

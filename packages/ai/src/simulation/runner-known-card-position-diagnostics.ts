@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 
 import { reconstructBeliefState } from "../belief-state";
@@ -8,7 +9,7 @@ import {
   definitionTypeForMetrics,
   trashCostForDefinitionForMetrics,
 } from "./card-metric-lookup";
-import { visibleBreakCostForKnownIceDefinition } from "./visible-break-cost-metric";
+import { visibleBreakCostForExposedIce } from "./visible-break-cost-metric";
 
 export function runnerKnownCardPositionDiagnosticsForMetrics(
   input: AiDecisionInput,
@@ -17,7 +18,8 @@ export function runnerKnownCardPositionDiagnosticsForMetrics(
 ): Partial<AiSimulationSummary["actionSequence"][number]> {
   if (input.side !== "runner" || action.side !== "runner") return {};
   const belief = reconstructBeliefState(input);
-  const memory = belief.runnerOpponentModel?.knownPositionMemory ?? [];
+  const allMemory = belief.runnerOpponentModel?.knownPositionMemory ?? [];
+  const memory = allMemory.filter((entry) => entry.invalidatedBy.length === 0);
   const hqMemory = belief.runnerOpponentModel?.hqHandMemory;
   const invalidationReasons = [
     ...(belief.runnerOpponentModel?.rndTopFreshness.invalidationReasons ?? []),
@@ -27,7 +29,7 @@ export function runnerKnownCardPositionDiagnosticsForMetrics(
     runnerKnownCardPositionInvalidationFlags(invalidationReasons);
   const knownRemote = memory.filter(
     (entry) =>
-      entry.zone.startsWith("remote_") && entry.positionKey.startsWith("root:"),
+      isRemoteServerId(entry.zone) && entry.positionKey.startsWith("root:"),
   );
   const knownRemoteAgendas = knownRemote.filter(
     (entry) => definitionTypeForMetrics(entry.definitionId) === "agenda",
@@ -52,21 +54,21 @@ export function runnerKnownCardPositionDiagnosticsForMetrics(
   const targetKnownRemote = runTarget
     ? knownRemote.filter((entry) => entry.zone === runTarget)
     : [];
-  const targetKnownUnrezzedIce = runTarget
-    ? knownUnrezzedIce.filter((entry) => entry.zone === runTarget)
-    : [];
-  const runCostAdjusted = targetKnownUnrezzedIce.reduce(
-    (sum, entry) =>
-      sum + visibleBreakCostForKnownIceDefinition(input, entry.definitionId),
-    0,
-  );
+  const runCostAdjusted =
+    action.payload?.approachIceExposeViewDecision === "finish" ||
+    action.payload?.approachIceExposeJackOut === true
+      ? visibleBreakCostForExposedIce(input)
+      : undefined;
   const hqKnownFromRndDraw =
     hqMemory?.invalidationReasons.includes("known_rnd_top_moved_to_hq") ??
     false;
   const hqKnownAgendaFromRnd =
     hqKnownFromRndDraw &&
-    (hqMemory?.knownDefinitions ?? []).some(
-      (definitionId) => definitionTypeForMetrics(definitionId) === "agenda",
+    memory.some(
+      (entry) =>
+        entry.zone === "hq" &&
+        entry.sourceKind === "rd_top_to_hq_draw" &&
+        definitionTypeForMetrics(entry.definitionId) === "agenda",
     );
   const rndFreshness = belief.runnerOpponentModel?.rndTopFreshness;
   const rndTopRemoved = rndFreshness?.freshness === "fresh_after_top_removed";
@@ -78,9 +80,15 @@ export function runnerKnownCardPositionDiagnosticsForMetrics(
   const rndStaleKnownTop = rndFreshness?.freshness === "stale_known_same_top";
   const isRndRun = action.type === "start_run" && runTarget === "rd";
   const rndFreshOpportunity =
-    rndTopRemoved ||
-    rndKnownTopAgenda ||
-    rndFreshness?.freshenedByRunnerAccess === true;
+    (rndTopRemoved ||
+      rndKnownTopAgenda ||
+      rndFreshness?.freshenedByRunnerAccess === true) &&
+    input.legalActions.some(
+      (candidate) =>
+        candidate.side === "runner" &&
+        candidate.type === "start_run" &&
+        candidate.payload?.serverId === "rd",
+    );
   return {
     ...(memory.some(
       (entry) => entry.zone === "rd" && entry.positionKey === "top",
@@ -105,22 +113,13 @@ export function runnerKnownCardPositionDiagnosticsForMetrics(
       "move_to_removed_from_game",
       "move_to_set_aside",
     ].includes(action.type) && targetServerId === "rd"
-      ? { rndAccessRemovedTopCard: true }
+      ? { rndAccessRemovedCard: true }
       : {}),
     ...(action.type === "steal_agenda" && targetServerId === "rd"
       ? { rndAccessStoleAgenda: true }
       : {}),
     ...(action.type === "trash_accessed_card" && targetServerId === "rd"
       ? { rndAccessTrashedCard: true }
-      : {}),
-    ...(action.type === "access_card" &&
-    targetServerId === "rd" &&
-    !input.legalActions.some(
-      (candidate) =>
-        candidate.type === "steal_agenda" ||
-        candidate.type === "trash_accessed_card",
-    )
-      ? { rndAccessLeftTopCardUnchanged: true }
       : {}),
     ...(rndFreshness?.freshenedByRunnerAccess === true
       ? { rndTopFreshenedByRunnerAccess: true }
@@ -177,7 +176,7 @@ export function runnerKnownCardPositionDiagnosticsForMetrics(
       ? { remoteMemoryRetainedAfterAccess: true }
       : {}),
     ...(invalidationFlags.remoteMemoryInvalidatedByInstallOrMove ||
-    memory.some((entry) =>
+    allMemory.some((entry) =>
       entry.invalidatedBy.some(
         knownPositionInvalidationReferencesInstallOrMove,
       ),
@@ -215,7 +214,7 @@ export function runnerKnownCardPositionDiagnosticsForMetrics(
           knownUnrezzedIceRetained: true,
         }
       : {}),
-    ...(runCostAdjusted > 0
+    ...(runCostAdjusted !== undefined && runCostAdjusted > 0
       ? { runCostAdjustedByKnownUnrezzedIce: runCostAdjusted }
       : {}),
     ...(action.type === "jack_out" && knownUnrezzedIce.length > 0

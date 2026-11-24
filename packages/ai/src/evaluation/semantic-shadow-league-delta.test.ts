@@ -40,20 +40,20 @@ describe("SemanticShadowLeagueDelta", () => {
       baseline: baseline.metrics.agreementRate,
       current: current.metrics.agreementRate,
       delta: 0.1,
-      direction: "improved",
+      direction: "not_comparable",
     });
     expect(delta.mistakeCountDelta).toMatchObject({
       baseline: current.metrics.mistakeCount + 2,
       current: current.metrics.mistakeCount,
       delta: -2,
-      direction: "improved",
+      direction: "not_comparable",
     });
     expect(delta.mistakeDelta).toBe(delta.mistakeCountDelta);
     expect(delta.pilotEligibilityDelta).toMatchObject({
       baseline: 0.82,
       current: current.metrics.pilotEligibilityRate,
       delta: roundMetric(current.metrics.pilotEligibilityRate! - 0.82),
-      direction: "improved",
+      direction: "not_comparable",
     });
     expect(delta.pilotReadinessDelta.basic_setup).toMatchObject({
       baselineCandidate:
@@ -89,26 +89,26 @@ describe("SemanticShadowLeagueDelta", () => {
       baseline: current.metrics.doctrineGoalActionFit.doctrineGoalsProduced - 1,
       current: current.metrics.doctrineGoalActionFit.doctrineGoalsProduced,
       delta: 1,
-      direction: "improved",
+      direction: "not_comparable",
     });
     expect(delta.doctrineFitDelta.goalsWithAtLeastOneFitDelta).toMatchObject({
       baseline:
         current.metrics.doctrineGoalActionFit.goalsWithAtLeastOneFit - 1,
       current: current.metrics.doctrineGoalActionFit.goalsWithAtLeastOneFit,
       delta: 1,
-      direction: "improved",
+      direction: "not_comparable",
     });
     expect(delta.doctrineFitDelta.goalsOnlyBlockedDelta).toMatchObject({
       baseline: current.metrics.doctrineGoalActionFit.goalsOnlyBlocked + 1,
       current: current.metrics.doctrineGoalActionFit.goalsOnlyBlocked,
       delta: -1,
-      direction: "improved",
+      direction: "not_comparable",
     });
     expect(delta.doctrineFitDelta.goalsNoCandidateDelta).toMatchObject({
       baseline: current.metrics.doctrineGoalActionFit.goalsNoCandidate + 1,
       current: current.metrics.doctrineGoalActionFit.goalsNoCandidate,
       delta: -1,
-      direction: "improved",
+      direction: "not_comparable",
     });
     const currentDoctrineFamilies = Object.keys(
       current.metrics.doctrineGoalActionFit.topFitByFamily,
@@ -147,13 +147,13 @@ describe("SemanticShadowLeagueDelta", () => {
       baseline: current.followupCandidates.length - 1,
       current: current.followupCandidates.length,
       delta: 1,
-      direction: "regressed",
+      direction: "not_comparable",
     });
     expect(delta.dashboardSummary).toMatchObject({
       scenarioCountDelta: 1,
-      agreementDirection: "improved",
-      mistakeDirection: "improved",
-      followupDirection: "regressed",
+      agreementDirection: "not_comparable",
+      mistakeDirection: "not_comparable",
+      followupDirection: "not_comparable",
       evidence: expect.arrayContaining([
         "shadow_league_delta_dashboard_summary:report_only",
       ]),
@@ -166,6 +166,25 @@ describe("SemanticShadowLeagueDelta", () => {
       ]),
     );
     expect(containsForbiddenSemanticMarker(delta)).toBe(false);
+  });
+
+  it("reports direction for the same scenario set regardless of input order", () => {
+    const current = realShadowLeagueReport();
+    const baseline = {
+      ...current,
+      scenarios: current.scenarios.slice().reverse(),
+      metrics: {
+        ...current.metrics,
+        mistakeCount: current.metrics.mistakeCount + 1,
+      },
+    };
+    expect(
+      buildSemanticShadowLeagueDeltaReport({ baseline, current })
+        .mistakeCountDelta,
+    ).toMatchObject({
+      delta: -1,
+      direction: "improved",
+    });
   });
 
   it("marks null metric baselines as not comparable", () => {

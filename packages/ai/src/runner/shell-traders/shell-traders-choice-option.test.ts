@@ -1,4 +1,5 @@
-import type { AiDecisionInput } from "@netgrid/shared";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
+import type { AiDecisionInput, CardDefinitionId, VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import { selectedShellTradersStartTurnChoiceOptionId } from "./shell-traders-choice-option";
@@ -6,6 +7,11 @@ import { selectedShellTradersStartTurnChoiceOptionId } from "./shell-traders-cho
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
 >;
+
+const DECODER = syntheticCardDefinitionId("decoder");
+const FRACTER = syntheticCardDefinitionId("fracter");
+const KILLER = syntheticCardDefinitionId("killer");
+const MEMORY = syntheticCardDefinitionId("memory");
 
 describe("shell traders choice option", () => {
   it("uses structured remaining-counter metadata instead of label suffixes", () => {
@@ -92,10 +98,10 @@ describe("shell traders choice option", () => {
       },
     ]);
     const input = shellChoiceInput({
-      rig: [program("installed-decoder", "decoder", 1)],
+      rig: [program("installed-decoder", DECODER, 1)],
       setAside: [
-        program("redundant", "decoder", 1),
-        program("missing", "fracter", 1),
+        program("redundant", DECODER, 1),
+        program("missing", FRACTER, 1),
       ],
       memoryUsed: 1,
       memoryLimit: 4,
@@ -125,8 +131,8 @@ describe("shell traders choice option", () => {
       },
     ]);
     const input = shellChoiceInput({
-      rig: [program("installed-fracter", "fracter", 1)],
-      setAside: [program("killer", "killer", 1), hardware("memory", "memory")],
+      rig: [program("installed-fracter", FRACTER, 1)],
+      setAside: [program("killer", KILLER, 1), hardware("memory", MEMORY)],
       memoryUsed: 1,
       memoryLimit: 1,
     });
@@ -181,36 +187,36 @@ function shellChoiceInput(params: {
   } as unknown as AiDecisionInput;
 }
 
-function program(instanceId: string, definitionId: string, memoryCost: number) {
+function program(instanceId: string, definitionId: CardDefinitionId, memoryCost: number): VisibleCard {
   return {
     instanceId,
     definitionId,
     known: true,
-    title: definitionId,
+    title: instanceId,
     type: "program" as const,
     memoryCost,
   };
 }
 
-function hardware(instanceId: string, definitionId: string) {
+function hardware(instanceId: string, definitionId: CardDefinitionId): VisibleCard {
   return {
     instanceId,
     definitionId,
     known: true,
-    title: definitionId,
+    title: instanceId,
     type: "hardware" as const,
   };
 }
 
-function roles(definitionId: string | undefined): readonly string[] {
+function roles(definitionId: CardDefinitionId | undefined): readonly string[] {
   switch (definitionId) {
-    case "decoder":
+    case DECODER:
       return ["breaker_decoder"];
-    case "fracter":
+    case FRACTER:
       return ["breaker_fracter"];
-    case "killer":
+    case KILLER:
       return ["breaker_killer"];
-    case "memory":
+    case MEMORY:
       return ["memory_support"];
     default:
       return [];

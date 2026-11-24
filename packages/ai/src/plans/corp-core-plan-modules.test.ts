@@ -1,3 +1,5 @@
+import { planInstanceIdForProposal } from "./plan-instance";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   assessCorpSpendAgainstScoreFundingMilestones,
   corpScoreFundingMilestone,
@@ -86,7 +88,7 @@ describe("Corp core plan modules", () => {
         phase: "install_agenda" as const,
         deadlinePressure: true,
         sameTurnCloseout: false,
-        serverId: "remote_1",
+        serverId: "r1",
         feasible: false,
         conversion: {
           remainingAdvancementClicks: 3,
@@ -100,7 +102,7 @@ describe("Corp core plan modules", () => {
         },
         protectionNeed: {
           parentProjectId: "emergency",
-          targetServerId: "remote_1",
+          targetServerId: "r1",
           observedAtStateVersion: stale ? 9 : 10,
           baseline: {
             knowledge: "known",
@@ -163,15 +165,15 @@ describe("Corp core plan modules", () => {
     const install = {
       ...cardAction("install-remote-ice", "install.card", "ice-def-1"),
       sourceCardInstanceId: "ice-1",
-      targetContext: targetContext("remote_1", "server"),
+      targetContext: targetContext("r1", "server"),
     };
     const remote = remoteProjectSignal();
     const defense: CorpDefenseSignal = {
       kind: "generic",
       defenseId: "remote-defense:ice-1",
-      serverId: "remote_1",
+      serverId: "r1",
       phase: "install_defense_support",
-      sourceDefinitionIds: ["ice-def-1"],
+      sourceDefinitionIds: [syntheticCardDefinitionId("ice-def-1")],
       actionIds: [install.actionId],
       parentKind: "remote",
       parentProjectId: remote.projectId,
@@ -190,14 +192,14 @@ describe("Corp core plan modules", () => {
     )[0]!;
 
     expect(proposal.parentInstanceId).toBe(
-      "plan:corp.establish_scoring_remote:strategic-score-remote",
+      "p6vrrjl5fc78gjet2n25nst7pp",
     );
     expect(proposal.parentNeedId).toBe(remote.need!.needId);
   });
 
   it("assigns Security Purge ICE targets through corp.defend_servers", () => {
     const revealedCardIds = ["keeper-1", "razor-wire-1"];
-    const serverIds = ["hq", "rd", "remote_1", "new_remote"];
+    const serverIds = ["hq", "rd", "r1", "new_remote"];
     const options = revealedCardIds.flatMap((cardId) =>
       serverIds.flatMap((serverId) =>
         cardId === "keeper-1"
@@ -276,14 +278,14 @@ describe("Corp core plan modules", () => {
           { id: "hq", label: "HQ", ice: [], root: [] },
           { id: "rd", label: "R&D", ice: [], root: [] },
           { id: "archives", label: "Archives", ice: [], root: [] },
-          { id: "remote_1", label: "Remote 1", ice: [], root: [] },
+          { id: "r1", label: "Remote 1", ice: [], root: [] },
         ],
         own: {
           credits: 4,
           scoreArea: [
             {
               instanceId: "security-purge-1",
-              definitionId: "corp_onr_v1_216_security-purge",
+              definitionId: syntheticCardDefinitionId("corp_onr_v1_216_security-purge"),
               type: "agenda",
               known: true,
             },
@@ -319,20 +321,39 @@ describe("Corp core plan modules", () => {
         ],
       },
     });
+
+    for (const option of options) {
+      if (option.id.startsWith("agenda_purge_keeper-1_hq_"))
+        option.metadata.creditCost = 3;
+      if (option.id.startsWith("agenda_purge_razor-wire-1_"))
+        option.metadata.creditCost = 2;
+    }
+    expect(
+      corpAgendaPurgeDefenseChoiceSignal(
+        input,
+        [choiceCandidate],
+        knownCentralAllocation("hq"),
+      )?.choiceResolution,
+    ).toMatchObject({
+      targets: [
+        { cardId: "keeper-1", serverId: "rd" },
+        { cardId: "razor-wire-1", serverId: "hq" },
+      ],
+    });
   });
 
   it("assigns a paid Classic Deflector redirect through corp.defend_servers", () => {
     const choiceId = "classic_deflector_11";
-    const actionId = "corp.resolve_choice";
+    const actionId = "cn";
     const sourceIceId = "deflector-ice";
-    const sourceDefinitionId = "generic-deflector";
+    const sourceDefinitionId = syntheticCardDefinitionId("generic-deflector");
     const subroutineId = "generic-deflector.subroutine.1.deflect_run";
     const options = [
       { id: "decline", label: "Nicht zahlen", value: "decline" },
       { id: "server_hq", label: "HQ", value: "hq" },
       { id: "server_rd", label: "R&D", value: "rd" },
       { id: "server_archives", label: "Archives", value: "archives" },
-      { id: "server_remote_1", label: "Remote 1", value: "remote_1" },
+      { id: "server_r1", label: "Remote 1", value: "r1" },
     ];
     const input = {
       side: "corp",
@@ -364,7 +385,7 @@ describe("Corp core plan modules", () => {
           side: "corp",
           kind: "select_option",
           visibility: "public",
-          source: `card_implementation.classic_deflector:run_8:${sourceIceId}:0:${sourceDefinitionId}:${subroutineId}:any_data_fort:2:0`,
+          source: `card_implementation.classic_deflector:8:${sourceIceId}:0:${sourceDefinitionId}:${subroutineId}:any_data_fort:2:0`,
           stateVersion: 11,
           minSelections: 1,
           maxSelections: 1,
@@ -380,6 +401,7 @@ describe("Corp core plan modules", () => {
           rig: [],
         },
         run: {
+          runId: 8,
           attackedServerId: "rd",
           phase: "encounter_ice",
           badPublicityCredits: 0,
@@ -423,7 +445,7 @@ describe("Corp core plan modules", () => {
           },
           { id: "archives", label: "Archives", ice: [], root: [] },
           {
-            id: "remote_1",
+            id: "r1",
             label: "Remote 1",
             ice: [],
             root: [{ instanceId: "asset", type: "asset", known: true }],
@@ -435,7 +457,10 @@ describe("Corp core plan modules", () => {
     expect(
       corpClassicDeflectorDefenseChoiceSignal(
         input,
-        [candidate(actionId, "resolve_choice", "choice.resolve")],
+        [{
+          ...candidate(actionId, "resolve_choice", "choice.resolve"),
+          stateVersion: 11,
+        }],
         knownCentralAllocation("rd"),
         0,
       ),
@@ -460,7 +485,10 @@ describe("Corp core plan modules", () => {
     expect(
       corpClassicDeflectorDefenseChoiceSignal(
         input,
-        [candidate(actionId, "resolve_choice", "choice.resolve")],
+        [{
+          ...candidate(actionId, "resolve_choice", "choice.resolve"),
+          stateVersion: 11,
+        }],
         knownCentralAllocation("rd"),
         2,
       ),
@@ -477,7 +505,7 @@ describe("Corp core plan modules", () => {
     const mandatoryOptions = options.filter(
       (option) => option.id !== "decline",
     );
-    input.playerView.pendingChoice!.source = `card_implementation.classic_deflector:run_8:${sourceIceId}:0:${sourceDefinitionId}:${subroutineId}:any_data_fort:0:0`;
+    input.playerView.pendingChoice!.source = `card_implementation.classic_deflector:8:${sourceIceId}:0:${sourceDefinitionId}:${subroutineId}:any_data_fort:0:0`;
     input.playerView.pendingChoice!.options = mandatoryOptions;
     input.legalActions[0]!.choiceRequirements![0]!.optionIds =
       mandatoryOptions.map((option) => option.id);
@@ -485,7 +513,10 @@ describe("Corp core plan modules", () => {
     expect(
       corpClassicDeflectorDefenseChoiceSignal(
         input,
-        [candidate(actionId, "resolve_choice", "choice.resolve")],
+        [{
+          ...candidate(actionId, "resolve_choice", "choice.resolve"),
+          stateVersion: 11,
+        }],
         knownCentralAllocation("rd"),
         3,
       ),
@@ -504,9 +535,10 @@ describe("Corp core plan modules", () => {
       "install_agenda",
       {
         ...cardAction("install", "install.card", "agenda-def"),
-        targetContext: targetContext("remote_1", "server"),
+        sourceCardInstanceId: "agenda-1",
+        targetContext: targetContext("r1", "server"),
       },
-      "agenda-def",
+      String(syntheticCardDefinitionId("agenda-def")),
     ],
     [
       "advance_agenda",
@@ -526,10 +558,10 @@ describe("Corp core plan modules", () => {
         scoreProjects: [
           {
             projectId: "score-1",
-            agendaDefinitionId: "agenda-def",
+            agendaDefinitionId: syntheticCardDefinitionId("agenda-def"),
             agendaPoints: 2,
             agendaInstanceId: "agenda-1",
-            serverId: "remote_1",
+            serverId: "r1",
             phase,
             sameTurnCloseout: phase !== "install_agenda",
             terminalScore: false,
@@ -558,22 +590,29 @@ describe("Corp core plan modules", () => {
   it("keeps an explicitly bound score route closed to sibling action variants", () => {
     const committed = {
       ...cardAction("install-committed", "install.card", "agenda-def"),
-      targetContext: targetContext("remote_1", "server"),
+      sourceCardInstanceId: "agenda-1",
+      targetContext: targetContext("r1", "server"),
     };
     const sibling = {
       ...cardAction("install-sibling", "install.card", "agenda-def"),
-      targetContext: targetContext("remote_1", "server"),
+      sourceCardInstanceId: "agenda-1",
+      targetContext: targetContext("r1", "server"),
     };
     const module = corpModule("corp.score_agenda");
-    const corpContext = context([committed, sibling], {
+    const wrongCopy = {
+      ...cardAction("install-wrong-copy", "install.card", "agenda-def"),
+      sourceCardInstanceId: "agenda-2",
+      targetContext: targetContext("r1", "server"),
+    };
+    const corpContext = context([committed, sibling, wrongCopy], {
       scoreProjects: [
         {
           projectId: "score-1",
-          agendaDefinitionId: "agenda-def",
+          agendaDefinitionId: syntheticCardDefinitionId("agenda-def"),
           agendaPoints: 2,
           agendaInstanceId: "agenda-1",
-          serverId: "remote_1",
-          actionIds: ["install-committed"],
+          serverId: "r1",
+          actionIds: ["install-committed", "install-wrong-copy"],
           phase: "install_agenda",
           sameTurnCloseout: true,
           terminalScore: false,
@@ -603,7 +642,7 @@ describe("Corp core plan modules", () => {
       ),
       sourceKind: "card" as const,
       sourceCardInstanceId: "systematic-layoffs-card",
-      sourceDefinitionId: "onr_v1_304_systematic-layoffs",
+      sourceDefinitionId: 516,
     };
     const sibling = {
       ...committed,
@@ -614,10 +653,10 @@ describe("Corp core plan modules", () => {
       scoreProjects: [
         {
           projectId: "score-1",
-          agendaDefinitionId: "agenda-def",
+          agendaDefinitionId: syntheticCardDefinitionId("agenda-def"),
           agendaPoints: 3,
           agendaInstanceId: "agenda-1",
-          serverId: "remote_1",
+          serverId: "r1",
           actionIds: ["systematic-layoffs"],
           routeSemanticActionTypes: ["score_conversion.place_advancement"],
           phase: "convert_agenda",
@@ -655,7 +694,7 @@ describe("Corp core plan modules", () => {
           scoreProjects: [
             {
               projectId: "score-1",
-              agendaDefinitionId: "agenda-def",
+              agendaDefinitionId: syntheticCardDefinitionId("agenda-def"),
               agendaPoints: 2,
               agendaInstanceId: "agenda-1",
               phase: "advance_agenda",
@@ -696,7 +735,7 @@ describe("Corp core plan modules", () => {
       scoreProjects: [
         {
           projectId: "score-1",
-          agendaDefinitionId: "agenda-def",
+          agendaDefinitionId: syntheticCardDefinitionId("agenda-def"),
           agendaPoints: 2,
           agendaInstanceId: "agenda-1",
           phase: "advance_agenda",
@@ -862,8 +901,8 @@ describe("Corp core plan modules", () => {
       .sort(compareValidatedPlanAssessments);
 
     expect(assessments.map((assessment) => assessment.instanceId)).toEqual([
-      "plan:corp.score_agenda:same-turn-closeout",
-      "plan:corp.score_agenda:uncertain-terminal",
+      "p1s6qqyxdjcsrnbj2h3yz2721j",
+      "p9lwe0kug3qij6ewllyl173xx0",
     ]);
     expect(
       assessments.map(
@@ -948,26 +987,26 @@ describe("Corp core plan modules", () => {
   it("publishes score setup only as the exact concrete parent's source-scoped need", () => {
     const module = corpModule("corp.score_agenda");
     const setupNeed = {
-      needId: "score-setup:agenda:agenda-1:remote_1:chicago",
+      needId: "score-setup:agenda:agenda-1:r1:chicago",
       actionId: "install-chicago",
       sourceCardInstanceId: "chicago",
-      sourceDefinitionId: "onr_v1_312_chicago-branch",
+      sourceDefinitionId: 524,
     };
     const corpContext = context([], {
       scoreProjects: [
         {
-          projectId: "agenda:agenda-1:remote_1",
-          agendaDefinitionId: "onr_v1_201_executive-extraction",
+          projectId: "agenda:agenda-1:r1",
+          agendaDefinitionId: 413,
           agendaPoints: 2,
           agendaInstanceId: "agenda-1",
-          serverId: "remote_1",
+          serverId: "r1",
           phase: "install_agenda",
           sameTurnCloseout: false,
           setupNeed,
           terminalScore: false,
           feasible: false,
           routeAssessment: "corp_last_click_score_install_deferred",
-          evidenceCode: "corp_last_click_score_install_deferred:remote_1",
+          evidenceCode: "corp_last_click_score_install_deferred:r1",
         },
       ],
     });
@@ -1060,9 +1099,9 @@ describe("Corp core plan modules", () => {
         {
           kind: "generic",
           defenseId: "rez-ice",
-          serverId: "remote_1",
+          serverId: "r1",
           phase: "rez_response",
-          sourceDefinitionIds: ["ice-def"],
+          sourceDefinitionIds: [syntheticCardDefinitionId("ice-def")],
           targetIceInstanceId: "ice-1",
           urgent: true,
           value: 20,
@@ -1143,7 +1182,7 @@ describe("Corp core plan modules", () => {
           {
             kind: "generic",
             defenseId: "rez:ice-1",
-            serverId: "remote_1",
+            serverId: "r1",
             phase: "rez_response",
             sourceDefinitionIds: [],
             actionIds: ["rez"],
@@ -1160,7 +1199,7 @@ describe("Corp core plan modules", () => {
           {
             kind: "generic",
             defenseId: "decline:ice-1",
-            serverId: "remote_1",
+            serverId: "r1",
             phase: "decline_rez",
             sourceDefinitionIds: [],
             actionIds: ["decline"],
@@ -1200,7 +1239,7 @@ describe("Corp core plan modules", () => {
     const installRemote = {
       ...cardAction("install-remote", "install.card", "ice-shared"),
       sourceCardInstanceId: "ice-shared-1",
-      targetContext: targetContext("remote_1", "server"),
+      targetContext: targetContext("r1", "server"),
     };
     const module = corpModule("corp.defend_servers");
     const corpContext = context([installHq, installRd, installRemote], {
@@ -1211,7 +1250,7 @@ describe("Corp core plan modules", () => {
           defenseId: "install:hq",
           serverId: "hq",
           phase: "install_ice",
-          sourceDefinitionIds: ["ice-shared"],
+          sourceDefinitionIds: [syntheticCardDefinitionId("ice-shared")],
           urgent: false,
           value: 20,
           evidenceCode: "visible_hq_need",
@@ -1221,17 +1260,17 @@ describe("Corp core plan modules", () => {
           defenseId: "install:rd",
           serverId: "rd",
           phase: "install_ice",
-          sourceDefinitionIds: ["ice-shared"],
+          sourceDefinitionIds: [syntheticCardDefinitionId("ice-shared")],
           urgent: false,
           value: 80,
           evidenceCode: "visible_rd_need",
         },
         {
           kind: "generic",
-          defenseId: "install:remote_1",
-          serverId: "remote_1",
+          defenseId: "install:r1",
+          serverId: "r1",
           phase: "install_ice",
-          sourceDefinitionIds: ["ice-shared"],
+          sourceDefinitionIds: [syntheticCardDefinitionId("ice-shared")],
           urgent: false,
           value: 50,
           evidenceCode: "visible_remote_need",
@@ -1278,7 +1317,7 @@ describe("Corp core plan modules", () => {
           defenseId: "install:hq",
           serverId: "hq",
           phase: "install_ice",
-          sourceDefinitionIds: ["ice-shared"],
+          sourceDefinitionIds: [syntheticCardDefinitionId("ice-shared")],
           urgent: false,
           value: 8,
           evidenceCode: "ordinary_hq_floor",
@@ -1288,7 +1327,7 @@ describe("Corp core plan modules", () => {
           defenseId: "install:rd",
           serverId: "rd",
           phase: "install_ice",
-          sourceDefinitionIds: ["ice-shared"],
+          sourceDefinitionIds: [syntheticCardDefinitionId("ice-shared")],
           urgent: false,
           value: 8,
           evidenceCode: "ordinary_rd_floor",
@@ -1362,7 +1401,7 @@ describe("Corp core plan modules", () => {
             actionIds: [gainCredit.actionId],
             immediateDefenseConversion: true,
             parentPlanInstanceId:
-              "plan:corp.defend_servers:server-defense-portfolio",
+              "penw02zfrkklof54c2nuye5att", parentPlanModuleId: "corp.defend_servers" as const,
             parentNeedId: defense.defenseId,
             incrementalDefenseReserve: {
               targetCredits: 2,
@@ -1467,7 +1506,7 @@ describe("Corp core plan modules", () => {
     )!.ice = [
       {
         instanceId: "existing-rd-ice",
-        definitionId: "existing-rd-ice-definition",
+        definitionId: syntheticCardDefinitionId("existing-rd-ice-definition"),
         type: "ice",
         known: true,
         rezzed: false,
@@ -1489,7 +1528,7 @@ describe("Corp core plan modules", () => {
       defenseId: "install:rd",
       serverId: "rd",
       phase: "install_ice" as const,
-      sourceDefinitionIds: ["ice"],
+      sourceDefinitionIds: [syntheticCardDefinitionId("ice")],
       urgent: false,
       value: 1,
       evidenceCode: "central_pressure",
@@ -1551,7 +1590,7 @@ describe("Corp core plan modules", () => {
           defenseId: "install:hq",
           serverId: "hq",
           phase: "install_ice",
-          sourceDefinitionIds: ["ice-shared"],
+          sourceDefinitionIds: [syntheticCardDefinitionId("ice-shared")],
           urgent: true,
           value: 100,
           evidenceCode:
@@ -1562,7 +1601,7 @@ describe("Corp core plan modules", () => {
           defenseId: "install:rd",
           serverId: "rd",
           phase: "install_ice",
-          sourceDefinitionIds: ["ice-shared"],
+          sourceDefinitionIds: [syntheticCardDefinitionId("ice-shared")],
           urgent: true,
           value: 100,
           evidenceCode:
@@ -1650,7 +1689,7 @@ describe("Corp core plan modules", () => {
               defenseId: "install:hq",
               serverId: "hq",
               phase: "install_ice",
-              sourceDefinitionIds: ["ice-shared"],
+              sourceDefinitionIds: [syntheticCardDefinitionId("ice-shared")],
               urgent: true,
               value: 100,
               evidenceCode: "exact_hq_route",
@@ -1660,7 +1699,7 @@ describe("Corp core plan modules", () => {
               defenseId: "install:rd",
               serverId: "rd",
               phase: "install_ice",
-              sourceDefinitionIds: ["ice-shared"],
+              sourceDefinitionIds: [syntheticCardDefinitionId("ice-shared")],
               urgent: true,
               value: rdValue,
               evidenceCode: "exact_rd_route",
@@ -1713,7 +1752,7 @@ describe("Corp core plan modules", () => {
           defenseId: "install:hq",
           serverId: "hq",
           phase: "install_ice",
-          sourceDefinitionIds: ["ice-shared"],
+          sourceDefinitionIds: [syntheticCardDefinitionId("ice-shared")],
           urgent: true,
           value: 100,
           evidenceCode:
@@ -1724,7 +1763,7 @@ describe("Corp core plan modules", () => {
           defenseId: "install:rd",
           serverId: "rd",
           phase: "install_ice",
-          sourceDefinitionIds: ["ice-shared"],
+          sourceDefinitionIds: [syntheticCardDefinitionId("ice-shared")],
           urgent: true,
           value: 100,
           evidenceCode:
@@ -1773,7 +1812,7 @@ describe("Corp core plan modules", () => {
             defenseId: `install:${productiveServerId}`,
             serverId: productiveServerId,
             phase: "install_ice",
-            sourceDefinitionIds: ["ice-shared"],
+            sourceDefinitionIds: [syntheticCardDefinitionId("ice-shared")],
             urgent: true,
             value: 100,
             evidenceCode:
@@ -1868,7 +1907,7 @@ describe("Corp core plan modules", () => {
         projection: knownInstallProjection({
           actionId: actions[0]!.actionId,
           sourceCardInstanceId: "ice-shared-1",
-          sourceDefinitionId: "ice-shared",
+          sourceDefinitionId: syntheticCardDefinitionId("ice-shared"),
           targetServerId: "hq",
           effect,
           probability: {
@@ -1936,7 +1975,7 @@ describe("Corp core plan modules", () => {
           defenseId: "install:hq",
           serverId: "hq",
           phase: "install_ice",
-          sourceDefinitionIds: ["ice-shared"],
+          sourceDefinitionIds: [syntheticCardDefinitionId("ice-shared")],
           urgent: false,
           value: 100,
           evidenceCode:
@@ -1955,8 +1994,11 @@ describe("Corp core plan modules", () => {
     ).toEqual([]);
   });
 
-  it("selects the exact central route class only after global allocation and preserves non-central continuations", () => {
-    const actions = ["hq", "rd", "remote_1"].map((serverId) => ({
+  it.each([
+    { urgentRemote: false, expectedInstall: "install-rd" },
+    { urgentRemote: true, expectedInstall: "install-r1" },
+  ])("preserves central allocation unless the remote route has higher urgency: $urgentRemote", ({ urgentRemote, expectedInstall }) => {
+    const actions = ["hq", "rd", "r1"].map((serverId) => ({
       ...cardAction(`install-${serverId}`, "install.card", "ice-shared"),
       sourceCardInstanceId: "ice-shared-1",
       targetContext: targetContext(serverId, "server"),
@@ -1970,8 +2012,8 @@ describe("Corp core plan modules", () => {
           defenseId: `install:${serverId}`,
           serverId,
           phase: "install_ice" as const,
-          sourceDefinitionIds: ["ice-shared"],
-          urgent: true,
+          sourceDefinitionIds: [syntheticCardDefinitionId("ice-shared")],
+          urgent: !urgentRemote || serverId === "r1",
           value: 100,
           evidenceCode: "engine_certified_global_defense_route",
         };
@@ -1988,7 +2030,7 @@ describe("Corp core plan modules", () => {
         .materialize(instance, {} as never, corpContext)
         .candidates.map((entry) => entry.candidate.actionId)
         .sort(),
-    ).toEqual(["install-rd"]);
+    ).toEqual([expectedInstall]);
   });
 
   it("keeps a non-central route eligible after central allocation", () => {
@@ -2006,7 +2048,7 @@ describe("Corp core plan modules", () => {
           defenseId: `install:${serverId}`,
           serverId,
           phase: "install_ice" as const,
-          sourceDefinitionIds: ["ice-shared"],
+          sourceDefinitionIds: [syntheticCardDefinitionId("ice-shared")],
           urgent: true,
           value: 100,
           evidenceCode: "engine_certified_global_defense_route",
@@ -2027,7 +2069,7 @@ describe("Corp core plan modules", () => {
   });
 
   it("fails closed between two central heads when their allocation facts are unknown while another server route remains executable", () => {
-    const actions = ["hq", "rd", "remote_1"].map((serverId) => ({
+    const actions = ["hq", "rd", "r1"].map((serverId) => ({
       ...cardAction(`install-${serverId}`, "install.card", "ice-shared"),
       sourceCardInstanceId: "ice-shared-1",
       targetContext: targetContext(serverId, "server"),
@@ -2044,7 +2086,7 @@ describe("Corp core plan modules", () => {
           defenseId: `install:${serverId}`,
           serverId,
           phase: "install_ice" as const,
-          sourceDefinitionIds: ["ice-shared"],
+          sourceDefinitionIds: [syntheticCardDefinitionId("ice-shared")],
           urgent: true,
           value: 100,
           evidenceCode: "engine_certified_global_defense_route",
@@ -2061,7 +2103,7 @@ describe("Corp core plan modules", () => {
       module
         .materialize(instance, {} as never, corpContext)
         .candidates.map((entry) => entry.candidate.actionId),
-    ).toEqual(["install-remote_1"]);
+    ).toEqual(["install-r1"]);
   });
 
   it("keeps only the canonical exact route per HQ/R&D near-tie server", () => {
@@ -2091,7 +2133,7 @@ describe("Corp core plan modules", () => {
             defenseId: "install:hq",
             serverId: "hq",
             phase: "install_ice",
-            sourceDefinitionIds: ["universal-ice", "hq-specialist"],
+            sourceDefinitionIds: [syntheticCardDefinitionId("universal-ice"), syntheticCardDefinitionId("hq-specialist")],
             urgent: false,
             value: 100,
             evidenceCode: "visible_hq_need",
@@ -2101,7 +2143,7 @@ describe("Corp core plan modules", () => {
             defenseId: "install:rd",
             serverId: "rd",
             phase: "install_ice",
-            sourceDefinitionIds: ["universal-ice"],
+            sourceDefinitionIds: [syntheticCardDefinitionId("universal-ice")],
             urgent: false,
             value: 90,
             evidenceCode: "visible_rd_need",
@@ -2164,7 +2206,7 @@ describe("Corp core plan modules", () => {
             defenseId: "install:hq",
             serverId: "hq",
             phase: "install_ice",
-            sourceDefinitionIds: ["hq-ice"],
+            sourceDefinitionIds: [syntheticCardDefinitionId("hq-ice")],
             urgent: false,
             value: 100,
             evidenceCode: "visible_hq_need",
@@ -2174,7 +2216,7 @@ describe("Corp core plan modules", () => {
             defenseId: "install:rd",
             serverId: "rd",
             phase: "install_ice",
-            sourceDefinitionIds: ["rd-ice"],
+            sourceDefinitionIds: [syntheticCardDefinitionId("rd-ice")],
             urgent: false,
             value: 90,
             evidenceCode: "visible_rd_need",
@@ -2203,7 +2245,7 @@ describe("Corp core plan modules", () => {
     const firstRemote = {
       ...cardAction("first-remote", "install.card", "first-ice"),
       sourceCardInstanceId: "first-ice-1",
-      targetContext: targetContext("remote_1", "server"),
+      targetContext: targetContext("r1", "server"),
     };
     const firstHq = {
       ...cardAction("first-hq", "install.card", "first-ice"),
@@ -2213,7 +2255,7 @@ describe("Corp core plan modules", () => {
     const secondRemote = {
       ...cardAction("second-remote", "install.card", "second-ice"),
       sourceCardInstanceId: "second-ice-1",
-      targetContext: targetContext("remote_1", "server"),
+      targetContext: targetContext("r1", "server"),
     };
     const secondHq = {
       ...cardAction("second-hq", "install.card", "second-ice"),
@@ -2227,10 +2269,10 @@ describe("Corp core plan modules", () => {
         defenseNeeds: [
           {
             kind: "generic",
-            defenseId: "install:remote_1",
-            serverId: "remote_1",
+            defenseId: "install:r1",
+            serverId: "r1",
             phase: "install_ice",
-            sourceDefinitionIds: ["first-ice", "second-ice"],
+            sourceDefinitionIds: [syntheticCardDefinitionId("first-ice"), syntheticCardDefinitionId("second-ice")],
             urgent: false,
             value: 500,
             evidenceCode: "critical_score_remote",
@@ -2240,7 +2282,7 @@ describe("Corp core plan modules", () => {
             defenseId: "install:hq",
             serverId: "hq",
             phase: "install_ice",
-            sourceDefinitionIds: ["first-ice", "second-ice"],
+            sourceDefinitionIds: [syntheticCardDefinitionId("first-ice"), syntheticCardDefinitionId("second-ice")],
             urgent: false,
             value: 60,
             evidenceCode: "ordinary_hq_floor",
@@ -2272,7 +2314,7 @@ describe("Corp core plan modules", () => {
       defenseId: "install:rd",
       serverId: "rd",
       phase: "install_ice",
-      sourceDefinitionIds: ["rd-ice"],
+      sourceDefinitionIds: [syntheticCardDefinitionId("rd-ice")],
       urgent: false,
       value: 80,
       evidenceCode: "visible_rd_need",
@@ -2305,7 +2347,7 @@ describe("Corp core plan modules", () => {
       defenseId: "install:rd",
       serverId: "rd",
       phase: "install_ice",
-      sourceDefinitionIds: ["rd-ice"],
+      sourceDefinitionIds: [syntheticCardDefinitionId("rd-ice")],
       urgent: false,
       value: 80,
       evidenceCode: "visible_rd_need",
@@ -2357,7 +2399,7 @@ describe("Corp core plan modules", () => {
         defenseId: "install:rd",
         serverId: "rd",
         phase: "install_ice",
-        sourceDefinitionIds: ["rd-ice"],
+        sourceDefinitionIds: [syntheticCardDefinitionId("rd-ice")],
         urgent: false,
         value: 80,
         evidenceCode: "visible_rd_need",
@@ -2393,7 +2435,7 @@ describe("Corp core plan modules", () => {
       defenseId: "install:rd",
       serverId: "rd",
       phase: "install_ice",
-      sourceDefinitionIds: ["rd-ice"],
+      sourceDefinitionIds: [syntheticCardDefinitionId("rd-ice")],
       urgent: false,
       value: 80,
       evidenceCode: "visible_rd_need",
@@ -2427,7 +2469,7 @@ describe("Corp core plan modules", () => {
       defenseId: "install:rd",
       serverId: "rd",
       phase: "install_ice",
-      sourceDefinitionIds: ["cheap-ice", "expensive-ice"],
+      sourceDefinitionIds: [syntheticCardDefinitionId("cheap-ice"), syntheticCardDefinitionId("expensive-ice")],
       urgent: false,
       value: 80,
       evidenceCode: "visible_rd_need",
@@ -2466,7 +2508,7 @@ describe("Corp core plan modules", () => {
       defenseId: "install:rd",
       serverId: "rd",
       phase: "install_ice",
-      sourceDefinitionIds: ["rd-ice"],
+      sourceDefinitionIds: [syntheticCardDefinitionId("rd-ice")],
       urgent: false,
       value: 80,
       evidenceCode: "visible_rd_need",
@@ -2649,7 +2691,7 @@ describe("Corp core plan modules", () => {
       });
       const existingSelection = {
         iceInstanceId: "existing-rd-ice",
-        iceDefinitionId: "existing-rd-ice-definition",
+        iceDefinitionId: syntheticCardDefinitionId("existing-rd-ice-definition"),
         credits: selectedCredits,
         source: "engine_rez_cost_quote" as const,
       };
@@ -2745,7 +2787,7 @@ describe("Corp core plan modules", () => {
       });
       const existingSelection = {
         iceInstanceId: "existing-rd-ice",
-        iceDefinitionId: "existing-rd-ice-definition",
+        iceDefinitionId: syntheticCardDefinitionId("existing-rd-ice-definition"),
         credits: 1,
         source: "engine_rez_cost_quote" as const,
       };
@@ -2756,7 +2798,7 @@ describe("Corp core plan modules", () => {
           ? [
               {
                 iceInstanceId: "ghost-rd-ice",
-                iceDefinitionId: "ghost-rd-ice-definition",
+                iceDefinitionId: syntheticCardDefinitionId("ghost-rd-ice-definition"),
                 credits: 1,
                 source: "engine_rez_cost_quote" as const,
               },
@@ -2845,7 +2887,7 @@ describe("Corp core plan modules", () => {
       defenseId: "install:rd",
       serverId: "rd",
       phase: "install_ice",
-      sourceDefinitionIds: ["rd-ice"],
+      sourceDefinitionIds: [syntheticCardDefinitionId("rd-ice")],
       urgent: false,
       value: 80,
       evidenceCode: "visible_rd_need",
@@ -2873,7 +2915,7 @@ describe("Corp core plan modules", () => {
       defenseId: "install:rd",
       serverId: "rd",
       phase: "install_ice",
-      sourceDefinitionIds: ["rd-ice"],
+      sourceDefinitionIds: [syntheticCardDefinitionId("rd-ice")],
       urgent: false,
       value: 80,
       evidenceCode: "visible_rd_need",
@@ -2927,18 +2969,18 @@ describe("Corp core plan modules", () => {
     const allocationValue = (reduction: number) => {
       const first = {
         ...cardAction("first-remote", "install.card", "first-ice"),
-        targetContext: targetContext("remote_1", "server"),
+        targetContext: targetContext("r1", "server"),
       };
       const second = {
         ...cardAction("second-remote", "install.card", "second-ice"),
-        targetContext: targetContext("remote_1", "server"),
+        targetContext: targetContext("r1", "server"),
       };
       const signal = {
         kind: "generic",
-        defenseId: "install:remote_1",
-        serverId: "remote_1",
+        defenseId: "install:r1",
+        serverId: "r1",
         phase: "install_ice",
-        sourceDefinitionIds: ["first-ice", "second-ice"],
+        sourceDefinitionIds: [syntheticCardDefinitionId("first-ice"), syntheticCardDefinitionId("second-ice")],
         urgent: false,
         value: 500,
         evidenceCode: "critical_score_remote",
@@ -2978,18 +3020,18 @@ describe("Corp core plan modules", () => {
     const projectedValue = (payloadMode: "complete" | "missing" | "drift") => {
       const first = {
         ...cardAction("first-remote", "install.card", "first-ice"),
-        targetContext: targetContext("remote_1", "server"),
+        targetContext: targetContext("r1", "server"),
       };
       const second = {
         ...cardAction("second-remote", "install.card", "second-ice"),
-        targetContext: targetContext("remote_1", "server"),
+        targetContext: targetContext("r1", "server"),
       };
       const signal = {
         kind: "generic",
-        defenseId: "install:remote_1",
-        serverId: "remote_1",
+        defenseId: "install:r1",
+        serverId: "r1",
         phase: "install_ice",
-        sourceDefinitionIds: ["first-ice", "second-ice"],
+        sourceDefinitionIds: [syntheticCardDefinitionId("first-ice"), syntheticCardDefinitionId("second-ice")],
         urgent: false,
         value: 500,
         evidenceCode: "critical_score_remote",
@@ -3048,7 +3090,7 @@ describe("Corp core plan modules", () => {
           defenseId: "install:archives",
           serverId: "archives",
           phase: "install_ice",
-          sourceDefinitionIds: ["held-ice"],
+          sourceDefinitionIds: [syntheticCardDefinitionId("held-ice")],
           urgent: false,
           value: -10,
           evidenceCode: "no_visible_archives_need",
@@ -3083,7 +3125,7 @@ describe("Corp core plan modules", () => {
           defenseId: "install:hq",
           serverId: "hq",
           phase: "install_ice",
-          sourceDefinitionIds: ["held-ice"],
+          sourceDefinitionIds: [syntheticCardDefinitionId("held-ice")],
           urgent: false,
           value: 100,
           evidenceCode: "visible_hq_need",
@@ -3129,7 +3171,7 @@ describe("Corp core plan modules", () => {
             defenseId: "install-support:hq",
             serverId: "hq",
             phase: "install_defense_support",
-            sourceDefinitionIds: ["olivia"],
+            sourceDefinitionIds: [syntheticCardDefinitionId("olivia")],
             actionIds: ["install-hq"],
             urgent: false,
             value: 100,
@@ -3138,9 +3180,9 @@ describe("Corp core plan modules", () => {
           {
             kind: "generic",
             defenseId: "rez:current-ice-1",
-            serverId: "remote_1",
+            serverId: "r1",
             phase: "rez_response",
-            sourceDefinitionIds: ["current-ice"],
+            sourceDefinitionIds: [syntheticCardDefinitionId("current-ice")],
             actionIds: ["rez-current"],
             targetIceInstanceId: "current-ice-1",
             urgent: true,
@@ -3162,7 +3204,7 @@ describe("Corp core plan modules", () => {
       {
         actionId: "install-hq",
         evidenceCode:
-          "corp_defense_global_allocation_rejected:hq:install-support:hq:reason:higher_priority_band:selected:remote_1:rez:current-ice-1:rez-current",
+          "corp_defense_global_allocation_rejected:hq:install-support:hq:reason:higher_priority_band:selected:r1:rez:current-ice-1:rez-current",
       },
     ]);
   });
@@ -3231,10 +3273,10 @@ describe("Corp core plan modules", () => {
         {
           kind: "score_protection_draw",
           defenseId: "score-support-draw-for-ice:agenda-1",
-          serverId: "remote_1",
+          serverId: "r1",
           phase: "draw_for_ice",
-          parentProjectId: "agenda:agenda-1:remote_1",
-          parentNeedId: "score-protection:agenda-1:remote_1",
+          parentProjectId: "agenda:agenda-1:r1",
+          parentNeedId: "score-protection:agenda-1:r1",
           delegatedPriorityClass: "P4",
           actionId: draw.actionId,
           drawAttemptState: {
@@ -3242,7 +3284,7 @@ describe("Corp core plan modules", () => {
             remainingAttempts: 1,
           },
           evidenceCode:
-            "score_plan_requires_targeted_ice_draw:agenda:agenda-1:remote_1:remote_1",
+            "score_plan_requires_targeted_ice_draw:agenda:agenda-1:r1:r1",
         },
       ],
     });
@@ -3261,9 +3303,9 @@ describe("Corp core plan modules", () => {
       corpContext,
     );
     expect(proposal.parentInstanceId).toBe(
-      "plan:corp.score_agenda:agenda%3Aagenda-1%3Aremote_1",
+      "pbdq9qo2j7h919e58ns3d9h9nh",
     );
-    expect(proposal.parentNeedId).toBe("score-protection:agenda-1:remote_1");
+    expect(proposal.parentNeedId).toBe("score-protection:agenda-1:r1");
     expect(materialized.step).toMatchObject({
       stepId: `${instance.instanceId}:develop_score_protection`,
       capability: {
@@ -3283,7 +3325,7 @@ describe("Corp core plan modules", () => {
   it("selects the score parent before materializing its P5 child route and keeps evidence, action, and parent identity aligned", () => {
     const p4Install = {
       ...cardAction("a-p4-install", "install.card", "p4-ice"),
-      targetContext: targetContext("remote_2", "server"),
+      targetContext: targetContext("r2", "server"),
     };
     const p1Draw = candidate("z-p1-draw", "draw_card", "draw.card");
     const urgentDefense = candidate(
@@ -3292,16 +3334,16 @@ describe("Corp core plan modules", () => {
       "card_ability.trigger",
     );
     const module = corpModule("corp.defend_servers");
-    const p1ParentProjectId = "agenda:terminal:remote_1";
+    const p1ParentProjectId = "agenda:terminal:r1";
     const corpContext = context([p4Install, p1Draw, urgentDefense], {
       defenseNeeds: [
         {
           kind: "score_protection_install",
           defenseId: "score:p4-install",
-          serverId: "remote_2",
+          serverId: "r2",
           phase: "install_ice",
-          parentProjectId: "agenda:development:remote_2",
-          parentNeedId: "score-protection:development:remote_2",
+          parentProjectId: "agenda:development:r2",
+          parentNeedId: "score-protection:development:r2",
           delegatedPriorityClass: "P4",
           actionId: p4Install.actionId,
           sourceCardInstanceId: p4Install.sourceCardInstanceId!,
@@ -3316,7 +3358,7 @@ describe("Corp core plan modules", () => {
             actionId: p4Install.actionId,
             sourceCardInstanceId: p4Install.sourceCardInstanceId!,
             sourceDefinitionId: p4Install.sourceDefinitionId!,
-            targetServerId: "remote_2",
+            targetServerId: "r2",
             effect: "satisfied",
             probability: { numerator: 0, denominator: 1 },
             totalCredits: 0,
@@ -3326,10 +3368,10 @@ describe("Corp core plan modules", () => {
         {
           kind: "score_protection_draw",
           defenseId: "score:p1-draw",
-          serverId: "remote_1",
+          serverId: "r1",
           phase: "draw_for_ice",
           parentProjectId: p1ParentProjectId,
-          parentNeedId: "score-protection:terminal:remote_1",
+          parentNeedId: "score-protection:terminal:r1",
           delegatedPriorityClass: "P1",
           actionId: p1Draw.actionId,
           drawAttemptState: {
@@ -3365,9 +3407,9 @@ describe("Corp core plan modules", () => {
     );
 
     expect(proposal.parentInstanceId).toBe(
-      "plan:corp.score_agenda:agenda%3Aterminal%3Aremote_1",
+      "p81k7h0zaw0lmfn04r7zb3nnmb",
     );
-    expect(proposal.parentNeedId).toBe("score-protection:terminal:remote_1");
+    expect(proposal.parentNeedId).toBe("score-protection:terminal:r1");
     expect(planAssessment).toMatchObject({
       priorityValidation: { effectiveClass: "P5" },
       evidenceCodes: ["p1_parent_requires_targeted_draw"],
@@ -3391,10 +3433,10 @@ describe("Corp core plan modules", () => {
         {
           kind: "score_protection_draw",
           defenseId: "score:p4-draw",
-          serverId: "remote_1",
+          serverId: "r1",
           phase: "draw_for_ice",
-          parentProjectId: "agenda:development:remote_1",
-          parentNeedId: "score-protection:development:remote_1",
+          parentProjectId: "agenda:development:r1",
+          parentNeedId: "score-protection:development:r1",
           delegatedPriorityClass: "P4",
           actionId: scoreDraw.actionId,
           drawAttemptState: {
@@ -3439,23 +3481,23 @@ describe("Corp core plan modules", () => {
   it("protects an exposed P3 score parent before adding an equally ranked central layer", () => {
     const scoreInstall = {
       ...cardAction("score-protection-install", "install.card", "score-ice"),
-      targetContext: targetContext("remote_1", "server"),
+      targetContext: targetContext("r1", "server"),
     };
     const centralInstall = {
       ...cardAction("central-install", "install.card", "central-ice"),
       targetContext: targetContext("rd", "server"),
     };
     const module = corpModule("corp.defend_servers");
-    const scoreProjectId = "agenda:exposed:remote_1";
+    const scoreProjectId = "agenda:exposed:r1";
     const corpContext = context([scoreInstall, centralInstall], {
       defenseNeeds: [
         {
           kind: "score_protection_install",
           defenseId: "score:exposed-install",
-          serverId: "remote_1",
+          serverId: "r1",
           phase: "install_ice",
           parentProjectId: scoreProjectId,
-          parentNeedId: "score-protection:exposed:remote_1",
+          parentNeedId: "score-protection:exposed:r1",
           delegatedPriorityClass: "P3",
           actionId: scoreInstall.actionId,
           sourceCardInstanceId: scoreInstall.sourceCardInstanceId!,
@@ -3470,7 +3512,7 @@ describe("Corp core plan modules", () => {
             actionId: scoreInstall.actionId,
             sourceCardInstanceId: scoreInstall.sourceCardInstanceId!,
             sourceDefinitionId: scoreInstall.sourceDefinitionId!,
-            targetServerId: "remote_1",
+            targetServerId: "r1",
             effect: "progress",
             probability: { numerator: 1, denominator: 2 },
             totalCredits: 1,
@@ -3512,7 +3554,7 @@ describe("Corp core plan modules", () => {
     );
 
     expect(proposal.parentInstanceId).toBe(
-      "plan:corp.score_agenda:agenda%3Aexposed%3Aremote_1",
+      "p8d4txvmgrtrabkfrsvn5hwntd",
     );
     expect(planAssessment).toMatchObject({
       priorityValidation: { effectiveClass: "P5" },
@@ -3528,23 +3570,23 @@ describe("Corp core plan modules", () => {
   it("completes a deadline-bound P3 score-protection staging layer before an equally ranked central layer", () => {
     const scoreInstall = {
       ...cardAction("score-staging-install", "install.card", "score-ice"),
-      targetContext: targetContext("remote_1", "server"),
+      targetContext: targetContext("r1", "server"),
     };
     const centralInstall = {
       ...cardAction("central-install", "install.card", "central-ice"),
       targetContext: targetContext("rd", "server"),
     };
     const module = corpModule("corp.defend_servers");
-    const scoreProjectId = "agenda:prepared:remote_1";
+    const scoreProjectId = "agenda:prepared:r1";
     const corpContext = context([scoreInstall, centralInstall], {
       defenseNeeds: [
         {
           kind: "score_protection_staging_install",
           defenseId: "score:prepared-staging-install",
-          serverId: "remote_1",
+          serverId: "r1",
           phase: "install_ice",
           parentProjectId: scoreProjectId,
-          parentNeedId: "score-protection:prepared:remote_1",
+          parentNeedId: "score-protection:prepared:r1",
           delegatedPriorityClass: "P3",
           actionId: scoreInstall.actionId,
           sourceCardInstanceId: scoreInstall.sourceCardInstanceId!,
@@ -3586,7 +3628,7 @@ describe("Corp core plan modules", () => {
     );
 
     expect(proposal.parentInstanceId).toBe(
-      "plan:corp.score_agenda:agenda%3Aprepared%3Aremote_1",
+      "pdheuk3dmq8en77un04t20mjw8",
     );
     expect(planAssessment.evidenceCodes).toEqual([
       "prepared_score_parent_needs_staging_layer",
@@ -3629,10 +3671,10 @@ describe("Corp core plan modules", () => {
         {
           kind: "score_protection_draw",
           defenseId: "score-support-draw-for-ice:agenda-1",
-          serverId: "remote_1",
+          serverId: "r1",
           phase: "draw_for_ice",
-          parentProjectId: "agenda:agenda-1:remote_1",
-          parentNeedId: "score-protection:agenda-1:remote_1",
+          parentProjectId: "agenda:agenda-1:r1",
+          parentNeedId: "score-protection:agenda-1:r1",
           delegatedPriorityClass: "P4",
           actionId: draw.actionId,
           drawAttemptState: {
@@ -3644,10 +3686,10 @@ describe("Corp core plan modules", () => {
         {
           kind: "score_protection_draw",
           defenseId: "score-support-night-shift:agenda-1",
-          serverId: "remote_1",
+          serverId: "r1",
           phase: "draw_for_ice",
-          parentProjectId: "agenda:agenda-1:remote_1",
-          parentNeedId: "score-protection:agenda-1:remote_1",
+          parentProjectId: "agenda:agenda-1:r1",
+          parentNeedId: "score-protection:agenda-1:r1",
           delegatedPriorityClass: "P4",
           actionId: nightShift.actionId,
           drawAttemptState: {
@@ -3716,7 +3758,7 @@ describe("Corp core plan modules", () => {
             defenseId: "rez-support:hq",
             serverId: "hq",
             phase: "rez_response",
-            sourceDefinitionIds: ["hq-support"],
+            sourceDefinitionIds: [syntheticCardDefinitionId("hq-support")],
             actionIds: [deferredRez.actionId],
             urgent: false,
             rezWindowVerdict: "productive",
@@ -3728,7 +3770,7 @@ describe("Corp core plan modules", () => {
             defenseId: "activate-support:hq",
             serverId: "hq",
             phase: "activate_run_defense",
-            sourceDefinitionIds: ["hq-ability"],
+            sourceDefinitionIds: [syntheticCardDefinitionId("hq-ability")],
             actionIds: [deferredAbility.actionId],
             urgent: false,
             value: 100,
@@ -3739,7 +3781,7 @@ describe("Corp core plan modules", () => {
             defenseId: "rez-urgent:rd",
             serverId: "rd",
             phase: "rez_response",
-            sourceDefinitionIds: ["rd-ice"],
+            sourceDefinitionIds: [syntheticCardDefinitionId("rd-ice")],
             actionIds: [urgentRez.actionId],
             urgent: true,
             rezWindowVerdict: "productive",
@@ -3781,7 +3823,7 @@ describe("Corp core plan modules", () => {
     const rezDataMasons = cardAction(
       "rez-data-masons",
       "corp_window.rez",
-      "onr_v1_317_data-masons",
+      529,
     );
     const corpContext = context(
       [installHq, installRd, rezDataMasons],
@@ -3792,7 +3834,7 @@ describe("Corp core plan modules", () => {
             defenseId: "install:hq",
             serverId: "hq",
             phase: "install_ice",
-            sourceDefinitionIds: ["hq-ice"],
+            sourceDefinitionIds: [syntheticCardDefinitionId("hq-ice")],
             actionIds: [installHq.actionId],
             urgent: true,
             value: 1,
@@ -3803,7 +3845,7 @@ describe("Corp core plan modules", () => {
             defenseId: "install:rd",
             serverId: "rd",
             phase: "install_ice",
-            sourceDefinitionIds: ["rd-ice"],
+            sourceDefinitionIds: [syntheticCardDefinitionId("rd-ice")],
             actionIds: [installRd.actionId],
             urgent: true,
             value: 1,
@@ -3812,9 +3854,9 @@ describe("Corp core plan modules", () => {
           {
             kind: "generic",
             defenseId: "rez-exact-card-support:data-masons",
-            serverId: "remote_1",
+            serverId: "r1",
             phase: "rez_response",
-            sourceDefinitionIds: ["onr_v1_317_data-masons"],
+            sourceDefinitionIds: [529],
             actionIds: [rezDataMasons.actionId],
             urgent: false,
             rezWindowVerdict: "productive",
@@ -3862,7 +3904,7 @@ describe("Corp core plan modules", () => {
     const rezDataMasons = cardAction(
       "rez-data-masons",
       "corp_window.rez",
-      "onr_v1_317_data-masons",
+      529,
     );
     const corpContext = context(
       [installHq, installRd, rezDataMasons],
@@ -3873,7 +3915,7 @@ describe("Corp core plan modules", () => {
             defenseId: "install:hq",
             serverId: "hq",
             phase: "install_ice",
-            sourceDefinitionIds: ["hq-ice"],
+            sourceDefinitionIds: [syntheticCardDefinitionId("hq-ice")],
             actionIds: [installHq.actionId],
             urgent: true,
             value: 1,
@@ -3884,7 +3926,7 @@ describe("Corp core plan modules", () => {
             defenseId: "install:rd",
             serverId: "rd",
             phase: "install_ice",
-            sourceDefinitionIds: ["rd-ice"],
+            sourceDefinitionIds: [syntheticCardDefinitionId("rd-ice")],
             actionIds: [installRd.actionId],
             urgent: true,
             value: 1,
@@ -3893,9 +3935,9 @@ describe("Corp core plan modules", () => {
           {
             kind: "generic",
             defenseId: "rez-exact-card-support:data-masons",
-            serverId: "remote_1",
+            serverId: "r1",
             phase: "rez_response",
-            sourceDefinitionIds: ["onr_v1_317_data-masons"],
+            sourceDefinitionIds: [529],
             actionIds: [rezDataMasons.actionId],
             urgent: false,
             rezWindowVerdict: "productive",
@@ -3932,7 +3974,7 @@ describe("Corp core plan modules", () => {
     ).toContainEqual({
       actionId: "rez-data-masons",
       evidenceCode:
-        "corp_defense_global_priority_band_rejected:remote_1:rez-exact-card-support:data-masons:selected:hq:install:hq:install-hq",
+        "corp_defense_global_priority_band_rejected:r1:rez-exact-card-support:data-masons:selected:hq:install:hq:install-hq",
     });
   });
 
@@ -3944,7 +3986,7 @@ describe("Corp core plan modules", () => {
     const rezDataMasons = cardAction(
       "rez-data-masons",
       "corp_window.rez",
-      "onr_v1_317_data-masons",
+      529,
     );
     const dataMasonsEvidence =
       "corp_rez_data_masons_supports_visible_installed_walls:data-wall";
@@ -3957,7 +3999,7 @@ describe("Corp core plan modules", () => {
             defenseId: "install:hq",
             serverId: "hq",
             phase: "install_ice",
-            sourceDefinitionIds: ["hq-ice"],
+            sourceDefinitionIds: [syntheticCardDefinitionId("hq-ice")],
             actionIds: [installHq.actionId],
             urgent: false,
             value: 20,
@@ -3966,9 +4008,9 @@ describe("Corp core plan modules", () => {
           {
             kind: "generic",
             defenseId: "rez-exact-card-support:data-masons",
-            serverId: "remote_1",
+            serverId: "r1",
             phase: "rez_response",
-            sourceDefinitionIds: ["onr_v1_317_data-masons"],
+            sourceDefinitionIds: [529],
             actionIds: [rezDataMasons.actionId],
             urgent: false,
             rezWindowVerdict: "productive",
@@ -4000,7 +4042,7 @@ describe("Corp core plan modules", () => {
     const rezDataMasons = cardAction(
       "rez-data-masons",
       "corp_window.rez",
-      "onr_v1_317_data-masons",
+      529,
     );
     const dataMasonsEvidence =
       "corp_rez_data_masons_supports_visible_installed_walls:data-wall";
@@ -4011,7 +4053,7 @@ describe("Corp core plan modules", () => {
           defenseId: "rez-stale-urgent",
           serverId: "rd",
           phase: "rez_response",
-          sourceDefinitionIds: ["stale-ice"],
+          sourceDefinitionIds: [syntheticCardDefinitionId("stale-ice")],
           actionIds: ["missing-stale-rez-action"],
           urgent: true,
           rezWindowVerdict: "productive",
@@ -4021,9 +4063,9 @@ describe("Corp core plan modules", () => {
         {
           kind: "generic",
           defenseId: "rez-exact-card-support:data-masons",
-          serverId: "remote_1",
+          serverId: "r1",
           phase: "rez_response",
-          sourceDefinitionIds: ["onr_v1_317_data-masons"],
+          sourceDefinitionIds: [529],
           actionIds: [rezDataMasons.actionId],
           urgent: false,
           rezWindowVerdict: "productive",
@@ -4067,7 +4109,7 @@ describe("Corp core plan modules", () => {
     const module = corpModule("corp.defend_servers");
     const scoreSignal = (
       actionId: string,
-      definitionId: string,
+      definitionLabel: string,
       effect: "progress" | "satisfied",
       probability: { numerator: number; denominator: number },
       totalInstallAndRezCredits: number,
@@ -4082,15 +4124,15 @@ describe("Corp core plan modules", () => {
         parentNeedId: "score-protection:agenda-1:new_remote",
         delegatedPriorityClass: "P4",
         actionId,
-        sourceCardInstanceId: `${definitionId}-instance`,
-        sourceDefinitionId: definitionId,
+        sourceCardInstanceId: `${definitionLabel}-instance`,
+        sourceDefinitionId: syntheticCardDefinitionId(definitionLabel),
         effect,
         runnerAccessSuccessProbability: probability,
         totalInstallAndRezCredits,
         projection: knownInstallProjection({
           actionId,
-          sourceCardInstanceId: `${definitionId}-instance`,
-          sourceDefinitionId: definitionId,
+          sourceCardInstanceId: `${definitionLabel}-instance`,
+          sourceDefinitionId: syntheticCardDefinitionId(definitionLabel),
           targetServerId: "new_remote",
           effect,
           probability,
@@ -4105,7 +4147,7 @@ describe("Corp core plan modules", () => {
           defenseId: "install:hq",
           serverId: "hq",
           phase: "install_ice",
-          sourceDefinitionIds: ["ice-hq"],
+          sourceDefinitionIds: [syntheticCardDefinitionId("ice-hq")],
           urgent: false,
           value: 20,
           evidenceCode: "visible_hq_need",
@@ -4220,22 +4262,22 @@ describe("Corp core plan modules", () => {
         {
           kind: "score_protection_install",
           defenseId: "score:missing-install",
-          serverId: "remote_1",
+          serverId: "r1",
           phase: "install_ice",
-          parentProjectId: "agenda:agenda-1:remote_1",
-          parentNeedId: "score-protection:agenda-1:remote_1",
+          parentProjectId: "agenda:agenda-1:r1",
+          parentNeedId: "score-protection:agenda-1:r1",
           delegatedPriorityClass: "P4",
           actionId: "missing-install",
           sourceCardInstanceId: "missing-ice",
-          sourceDefinitionId: "missing-ice-definition",
+          sourceDefinitionId: syntheticCardDefinitionId("missing-ice-definition"),
           effect: "satisfied",
           runnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
           totalInstallAndRezCredits: 0,
           projection: knownInstallProjection({
             actionId: "missing-install",
             sourceCardInstanceId: "missing-ice",
-            sourceDefinitionId: "missing-ice-definition",
-            targetServerId: "remote_1",
+            sourceDefinitionId: syntheticCardDefinitionId("missing-ice-definition"),
+            targetServerId: "r1",
             effect: "satisfied",
             probability: { numerator: 0, denominator: 1 },
             totalCredits: 0,
@@ -4245,10 +4287,10 @@ describe("Corp core plan modules", () => {
         {
           kind: "score_protection_draw",
           defenseId: "score:draw",
-          serverId: "remote_1",
+          serverId: "r1",
           phase: "draw_for_ice",
-          parentProjectId: "agenda:agenda-1:remote_1",
-          parentNeedId: "score-protection:agenda-1:remote_1",
+          parentProjectId: "agenda:agenda-1:r1",
+          parentNeedId: "score-protection:agenda-1:r1",
           delegatedPriorityClass: "P4",
           actionId: draw.actionId,
           drawAttemptState: {
@@ -4274,16 +4316,16 @@ describe("Corp core plan modules", () => {
   it("fails closed on incomplete or legacy score-protection signals", () => {
     const install = {
       ...cardAction("install-score-ice", "install.card", "score-ice"),
-      targetContext: targetContext("remote_1", "server"),
+      targetContext: targetContext("r1", "server"),
     };
     const module = corpModule("corp.defend_servers");
     const incomplete = {
       kind: "score_protection_install",
       defenseId: "score:incomplete",
-      serverId: "remote_1",
+      serverId: "r1",
       phase: "install_ice",
-      parentProjectId: "agenda:agenda-1:remote_1",
-      parentNeedId: "score-protection:agenda-1:remote_1",
+      parentProjectId: "agenda:agenda-1:r1",
+      parentNeedId: "score-protection:agenda-1:r1",
       delegatedPriorityClass: "P4",
       actionId: install.actionId,
       sourceCardInstanceId: install.sourceCardInstanceId,
@@ -4296,7 +4338,7 @@ describe("Corp core plan modules", () => {
     const legacy = {
       kind: "generic",
       defenseId: "score:legacy",
-      serverId: "remote_1",
+      serverId: "r1",
       phase: "install_ice",
       sourceDefinitionIds: [install.sourceDefinitionId],
       actionIds: [install.actionId],
@@ -4313,7 +4355,7 @@ describe("Corp core plan modules", () => {
             {
               kind: "generic",
               defenseId: "generic:otherwise-executable",
-              serverId: "remote_1",
+              serverId: "r1",
               phase: "install_ice",
               sourceDefinitionIds: [install.sourceDefinitionId!],
               actionIds: [install.actionId],
@@ -4332,13 +4374,13 @@ describe("Corp core plan modules", () => {
   it("fails closed when a score signal probability drifts from its exact projection", () => {
     const install = {
       ...cardAction("install-score-ice", "install.card", "score-ice"),
-      targetContext: targetContext("remote_1", "server"),
+      targetContext: targetContext("r1", "server"),
     };
     const projection = knownInstallProjection({
       actionId: install.actionId,
       sourceCardInstanceId: install.sourceCardInstanceId!,
       sourceDefinitionId: install.sourceDefinitionId!,
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       effect: "satisfied",
       probability: { numerator: 0, denominator: 1 },
       totalCredits: 0,
@@ -4346,10 +4388,10 @@ describe("Corp core plan modules", () => {
     const mismatched = {
       kind: "score_protection_install",
       defenseId: "score:probability-drift",
-      serverId: "remote_1",
+      serverId: "r1",
       phase: "install_ice",
-      parentProjectId: "agenda:agenda-1:remote_1",
-      parentNeedId: "score-protection:agenda-1:remote_1",
+      parentProjectId: "agenda:agenda-1:r1",
+      parentNeedId: "score-protection:agenda-1:r1",
       delegatedPriorityClass: "P4",
       actionId: install.actionId,
       sourceCardInstanceId: install.sourceCardInstanceId!,
@@ -4386,7 +4428,7 @@ describe("Corp core plan modules", () => {
           defenseId: "rez:run-ice-1",
           serverId: "hq",
           phase: "rez_response",
-          sourceDefinitionIds: ["run-ice"],
+          sourceDefinitionIds: [syntheticCardDefinitionId("run-ice")],
           targetIceInstanceId: "run-ice-1",
           urgent: true,
           value: 10,
@@ -4397,7 +4439,7 @@ describe("Corp core plan modules", () => {
           defenseId: "install:rd",
           serverId: "rd",
           phase: "install_ice",
-          sourceDefinitionIds: ["ice-rd"],
+          sourceDefinitionIds: [syntheticCardDefinitionId("ice-rd")],
           urgent: false,
           value: 1_000,
           evidenceCode: "visible_rd_need",
@@ -4434,7 +4476,7 @@ describe("Corp core plan modules", () => {
     const experimentalAi = cardAction(
       "install-experimental-ai",
       "install.card",
-      "onr_v1_323_experimental-ai",
+      535,
     );
 
     expect(corpEconomyActionIsOwned(experimentalAi)).toBe(false);
@@ -4451,7 +4493,7 @@ describe("Corp core plan modules", () => {
             needId: "score-support:score-1",
             gap: 5,
             actionIds: ["credit"],
-            parentPlanInstanceId: "plan:corp.score_agenda:score-1",
+            parentPlanInstanceId: "p8t7t4bkn4vru76e26fkeg5wic", parentPlanModuleId: "corp.score_agenda" as const,
             parentNeedId: "score-support:score-1",
             delegatedPriorityClass: "P4",
             urgentForScore: true,
@@ -4476,7 +4518,7 @@ describe("Corp core plan modules", () => {
       }),
     );
 
-    expect(open[0]?.parentInstanceId).toBe("plan:corp.score_agenda:score-1");
+    expect(open[0]?.parentInstanceId).toBe("p8t7t4bkn4vru76e26fkeg5wic");
     expect(open[0]?.parentNeedId).toBe("score-support:score-1");
     expect(satisfied).toEqual([]);
   });
@@ -4574,13 +4616,13 @@ describe("Corp core plan modules", () => {
         "install.card",
         "agenda-def",
       ),
-      targetContext: targetContext("remote_1", "server"),
+      targetContext: targetContext("r1", "server"),
     };
     const project = {
       projectId: "current-terminal-install-with-uncertain-later-route",
-      agendaDefinitionId: "agenda-def",
+      agendaDefinitionId: syntheticCardDefinitionId("agenda-def"),
       agendaPoints: 2,
-      serverId: "remote_1",
+      serverId: "r1",
       actionIds: [install.actionId],
       phase: "install_agenda" as const,
       sameTurnCloseout: false,
@@ -4621,7 +4663,7 @@ describe("Corp core plan modules", () => {
     (delegatedPriorityClass) => {
       const economy = corpModule("corp.economy");
       const credit = candidate("credit", "gain_credit", "economy.gain_credit");
-      const parentPlanInstanceId = `plan:corp.score_agenda:score-${delegatedPriorityClass}`;
+      const parentPlanInstanceId = planInstanceIdForProposal({ moduleId: "corp.score_agenda", dedupeKey: `score-${delegatedPriorityClass}` });
       const corpContext = context([credit], {
         economyNeeds: [
           {
@@ -4679,7 +4721,7 @@ describe("Corp core plan modules", () => {
     const credit = candidate("credit", "gain_credit", "economy.gain_credit");
     const assessmentValue = (gap: number) => {
       const projectId = `score-gap-${gap}`;
-      const parentPlanInstanceId = `plan:corp.score_agenda:${projectId}`;
+      const parentPlanInstanceId = planInstanceIdForProposal({ moduleId: "corp.score_agenda", dedupeKey: projectId });
       const signal = {
         kind: "parent_funding" as const,
         needId: `score-support:${projectId}`,
@@ -4709,7 +4751,7 @@ describe("Corp core plan modules", () => {
 
   it("keeps an exactly bound score-funding child blocked when no current funding route covers its gap", () => {
     const economy = corpModule("corp.economy");
-    const parentPlanInstanceId = "plan:corp.score_agenda:score-P1";
+    const parentPlanInstanceId = "pe8jbc9q762b0ahqgdez5wtp0o";
     const corpContext = context([], {
       economyNeeds: [
         {
@@ -4759,7 +4801,7 @@ describe("Corp core plan modules", () => {
       needId: "score-funding-missing-priority",
       gap: 1,
       actionIds: [credit.actionId],
-      parentPlanInstanceId: "plan:corp.score_agenda:score-1",
+      parentPlanInstanceId: "p8t7t4bkn4vru76e26fkeg5wic", parentPlanModuleId: "corp.score_agenda" as const,
       urgentForScore: true,
       evidenceCode: "incomplete_score_funding",
     };
@@ -4811,10 +4853,10 @@ describe("Corp core plan modules", () => {
       ...cardAction(
         "install-campaign",
         "install.card",
-        "onr_v1_309_bbs-whispering-campaign",
+        521,
       ),
       sourceCardInstanceId: "bbs-card",
-      targetContext: targetContext("remote_1", "server"),
+      targetContext: targetContext("r1", "server"),
     };
     const corpContext = context([credit, campaign], {
       economyNeeds: [
@@ -4937,7 +4979,7 @@ describe("Corp core plan modules", () => {
     );
     nightShift.sourceKind = "card";
     nightShift.sourceCardInstanceId = "night-shift-card";
-    nightShift.sourceDefinitionId = "onr_v1_295_night-shift";
+    nightShift.sourceDefinitionId = 507;
     nightShift.economyProjection = {
       ...nightShift.economyProjection!,
       grossLiquidCreditGain: 2,
@@ -5102,7 +5144,7 @@ describe("Corp core plan modules", () => {
       "economy.gain_credit",
     );
     const project = scoreProject(
-      "agenda:agenda-1:remote_1",
+      "agenda:agenda-1:r1",
       "P2",
       "score_needs_exact_funding",
     );
@@ -5114,7 +5156,7 @@ describe("Corp core plan modules", () => {
       gap: 5,
       actionIds: [basicCredit.actionId],
       parentPlanInstanceId:
-        "plan:corp.score_agenda:agenda%3Aagenda-1%3Aremote_1",
+        "pbdq9qo2j7h919e58ns3d9h9nh", parentPlanModuleId: "corp.score_agenda" as const,
       parentNeedId: `score-support:${project.projectId}`,
       scoreFundingMilestone: project.fundingMilestone,
       delegatedPriorityClass: "P2" as const,
@@ -5181,7 +5223,7 @@ describe("Corp core plan modules", () => {
         "economy.gain_credit",
       );
       const project = scoreProject(
-        "agenda:agenda-1:remote_1",
+        "agenda:agenda-1:r1",
         "P1",
         "score_needs_exact_funding",
       );
@@ -5192,7 +5234,7 @@ describe("Corp core plan modules", () => {
         needId: `score-support:${project.projectId}`,
         parentNeedId: `score-support:${project.projectId}`,
         parentPlanInstanceId:
-          "plan:corp.score_agenda:agenda%3Aagenda-1%3Aremote_1",
+          "pbdq9qo2j7h919e58ns3d9h9nh", parentPlanModuleId: "corp.score_agenda" as const,
         gap: 5,
         actionIds: [basicCredit.actionId],
         scoreFundingMilestone: milestone,
@@ -5247,9 +5289,9 @@ describe("Corp core plan modules", () => {
 
   it("publishes the known installed protection gap even without a currently legal ICE-install head", () => {
     const project = scoreProject(
-      "agenda:agenda-1:remote_1",
+      "agenda:agenda-1:r1",
       "P4",
-      "corp_score_protection_required:remote_1",
+      "corp_score_protection_required:r1",
     );
     project.phase = "install_agenda";
     project.feasible = false;
@@ -5275,9 +5317,9 @@ describe("Corp core plan modules", () => {
 
   it("does not turn an unknown protection future into a score funding objective", () => {
     const project = scoreProject(
-      "agenda:agenda-unknown:remote_1",
+      "agenda:agenda-unknown:r1",
       "P4",
-      "corp_score_protection_unknown:remote_1",
+      "corp_score_protection_unknown:r1",
     );
     project.phase = "install_agenda";
     project.feasible = false;
@@ -5307,9 +5349,9 @@ describe("Corp core plan modules", () => {
 
   it("keeps independently known score-conversion funding progress when protection remains unknown", () => {
     const project = scoreProject(
-      "agenda:agenda-unknown-with-conversion:remote_1",
+      "agenda:agenda-unknown-with-conversion:r1",
       "P4",
-      "corp_score_protection_unknown:remote_1",
+      "corp_score_protection_unknown:r1",
     );
     project.phase = "install_agenda";
     project.feasible = false;
@@ -5404,7 +5446,7 @@ describe("Corp core plan modules", () => {
       defenseId: "install:hq",
       serverId: "hq",
       phase: "install_ice" as const,
-      sourceDefinitionIds: ["pocket-vr"],
+      sourceDefinitionIds: [syntheticCardDefinitionId("pocket-vr")],
       actionIds: ["install-pocket-vr"],
       urgent: true,
       value: 80,
@@ -5414,7 +5456,7 @@ describe("Corp core plan modules", () => {
         projection: knownInstallProjection({
           actionId: "install-pocket-vr",
           sourceCardInstanceId: "pocket-vr",
-          sourceDefinitionId: "pocket-vr",
+          sourceDefinitionId: syntheticCardDefinitionId("pocket-vr"),
           targetServerId: "hq",
           effect: "progress",
           probability: { numerator: 0, denominator: 1 },
@@ -5430,7 +5472,7 @@ describe("Corp core plan modules", () => {
       gap: 4,
       actionIds: [basicCredit.actionId],
       immediateDefenseConversion: true,
-      parentPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      parentPlanInstanceId: "penw02zfrkklof54c2nuye5att", parentPlanModuleId: "corp.defend_servers" as const,
       parentNeedId: defenseParent.defenseId,
       parentPriorityClass: "P2" as const,
       incrementalDefenseReserve: {
@@ -5449,10 +5491,10 @@ describe("Corp core plan modules", () => {
           {
             kind: "score_protection_draw",
             defenseId: "score:draw:p4",
-            serverId: "remote_1",
+            serverId: "r1",
             phase: "draw_for_ice",
-            parentProjectId: "agenda:foreign-p4:remote_1",
-            parentNeedId: "score-protection:foreign-p4:remote_1",
+            parentProjectId: "agenda:foreign-p4:r1",
+            parentNeedId: "score-protection:foreign-p4:r1",
             delegatedPriorityClass: "P4",
             actionId: scoreProtectionDraw.actionId,
             drawAttemptState: {
@@ -5530,7 +5572,7 @@ describe("Corp core plan modules", () => {
       "wrong",
       {
         parentPlanInstanceId:
-          "plan:corp.defend_servers:wrong-defense-portfolio",
+          "p3sjy6onnxlxa4l4aysul1jlr1",
       },
     ],
     ["mismatched gap", { gap: 3 }],
@@ -5568,7 +5610,7 @@ describe("Corp core plan modules", () => {
         defenseId: "install:hq",
         serverId: "hq",
         phase: "install_ice" as const,
-        sourceDefinitionIds: ["pocket-vr"],
+        sourceDefinitionIds: [syntheticCardDefinitionId("pocket-vr")],
         actionIds: ["install-pocket-vr"],
         urgent: true,
         value: 80,
@@ -5578,7 +5620,7 @@ describe("Corp core plan modules", () => {
           projection: knownInstallProjection({
             actionId: "install-pocket-vr",
             sourceCardInstanceId: "pocket-vr",
-            sourceDefinitionId: "pocket-vr",
+            sourceDefinitionId: syntheticCardDefinitionId("pocket-vr"),
             targetServerId: "hq",
             effect: "progress",
             probability: { numerator: 0, denominator: 1 },
@@ -5656,7 +5698,7 @@ describe("Corp core plan modules", () => {
       gap: Number.POSITIVE_INFINITY,
       actionIds: [basicCredit.actionId],
       immediateDefenseConversion: true,
-      parentPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      parentPlanInstanceId: "penw02zfrkklof54c2nuye5att", parentPlanModuleId: "corp.defend_servers" as const,
       parentNeedId: "install:hq",
       incrementalDefenseReserve: {
         targetCredits: Number.POSITIVE_INFINITY,
@@ -5787,10 +5829,10 @@ describe("Corp core plan modules", () => {
       ...cardAction(
         "install-campaign",
         "install.card",
-        "onr_v1_309_bbs-whispering-campaign",
+        521,
       ),
       sourceCardInstanceId: "bbs-card",
-      targetContext: targetContext("remote_1", "server"),
+      targetContext: targetContext("r1", "server"),
     };
     const corpContext = context([campaign], {
       economyNeeds: [
@@ -5798,7 +5840,7 @@ describe("Corp core plan modules", () => {
           kind: "develop_campaign",
           needId: "economy-campaign:bbs-card",
           sourceInstanceId: "bbs-card",
-          sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+          sourceDefinitionId: 521,
           phase: "install",
           actionIds: ["install-campaign"],
           cadence: {
@@ -5842,7 +5884,7 @@ describe("Corp core plan modules", () => {
       ...candidate("play-accounts", "play_operation", "economy.gain_credit"),
       sourceKind: "card" as const,
       sourceCardInstanceId: "accounts-card",
-      sourceDefinitionId: "onr_v1_281_accounts-receivable",
+      sourceDefinitionId: 493,
       costProfile: {
         clickCost: 1,
         creditCost: 5,
@@ -5873,7 +5915,7 @@ describe("Corp core plan modules", () => {
       kind: "convert_immediate_operation" as const,
       needId: "economy-immediate-operation:accounts-card",
       sourceInstanceId: "accounts-card",
-      sourceDefinitionId: "onr_v1_281_accounts-receivable",
+      sourceDefinitionId: 493,
       actionIds: ["play-accounts"] as [string],
       conversion: {
         clickCost: 1,
@@ -5956,7 +5998,7 @@ describe("Corp core plan modules", () => {
           kind: "develop_campaign",
           needId: "economy-campaign:bbs-card",
           sourceInstanceId: "bbs-card",
-          sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+          sourceDefinitionId: 521,
           phase: "install",
           actionIds: [],
           cadence: {
@@ -6030,9 +6072,8 @@ function context(
         (signal.actionIds === undefined ||
           signal.actionIds.includes(candidate.actionId)) &&
         (signal.sourceDefinitionIds.length === 0 ||
-          signal.sourceDefinitionIds.includes(
-            candidate.sourceDefinitionId ?? "",
-          )),
+          (candidate.sourceDefinitionId !== undefined &&
+            signal.sourceDefinitionIds.includes(candidate.sourceDefinitionId))),
     );
     const exactSignals = routeCandidates.flatMap((routeCandidate) => {
       if (
@@ -6125,7 +6166,7 @@ function context(
                   postInstallRezQuoteCardId: value.sourceCardInstanceId,
                   postInstallRezQuoteTargetServerId: serverId,
                   postInstallRezQuoteProjectedServerId:
-                    serverId === "new_remote" ? "remote_1" : serverId,
+                    serverId === "new_remote" ? "r1" : serverId,
                   postInstallRezQuoteExpiresAtStateVersion: 10,
                   postInstallRezQuoteComplete: true,
                   postInstallRezQuoteCostKind: "fixed",
@@ -6319,7 +6360,7 @@ function knownInstallProjection<
 >(params: {
   actionId: string;
   sourceCardInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   targetServerId: string;
   effect: Effect;
   probability: { numerator: number; denominator: number };
@@ -6500,8 +6541,8 @@ function knownProtectionNeed(params: {
   const projection = knownInstallProjection({
     actionId: "not-currently-legal-install",
     sourceCardInstanceId: "ice-1",
-    sourceDefinitionId: "ice-def",
-    targetServerId: "remote_1",
+    sourceDefinitionId: syntheticCardDefinitionId("ice-def"),
+    targetServerId: "r1",
     effect: "no_progress",
     probability: { numerator: 1, denominator: 1 },
     totalCredits: params.minimumAdditionalCreditsToSatisfy,
@@ -6513,7 +6554,7 @@ function knownProtectionNeed(params: {
   return {
     needId: params.needId,
     parentProjectId: params.projectId,
-    targetServerId: "remote_1",
+    targetServerId: "r1",
     observedAtStateVersion: params.observedAtStateVersion,
     objective: {
       kind: "funded_remote_access_risk",
@@ -6535,7 +6576,7 @@ function scoreProject(
 ): CorpCorePlanDomain["scoreProjects"][number] {
   return {
     projectId,
-    agendaDefinitionId: "agenda-def",
+    agendaDefinitionId: syntheticCardDefinitionId("agenda-def"),
     agendaPoints: 2,
     agendaInstanceId: `agenda-${projectId}`,
     phase: "advance_agenda",
@@ -6554,10 +6595,10 @@ function remoteProjectSignal(): CorpCorePlanDomain["remoteProjects"][number] {
     purposes: ["scoreline"],
     target: {
       status: "bound",
-      serverId: "remote_1",
+      serverId: "r1",
       targetBindingRevision: 0,
     },
-    serverId: "remote_1",
+    serverId: "r1",
     protectionTarget: "taxing",
     buildTiming: "prebuild",
     targetRecoveryTurns: 2,
@@ -6570,7 +6611,7 @@ function remoteProjectSignal(): CorpCorePlanDomain["remoteProjects"][number] {
     need: {
       needId: "remote-hardening:strategic-score-remote:0",
       parentProjectId: "strategic-score-remote",
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       observedAtStateVersion: 10,
       capability: "improve_remote_protection_path",
       minimum: 1,
@@ -6583,20 +6624,22 @@ function remoteProjectSignal(): CorpCorePlanDomain["remoteProjects"][number] {
     },
     feasible: true,
     value: 20,
-    evidenceCode: "remote_protection_below_target:remote_1",
+    evidenceCode: "remote_protection_below_target:r1",
   };
 }
 
 function cardAction(
   actionId: string,
   semanticActionType: string,
-  sourceDefinitionId: string,
+  sourceDefinition: number | string,
 ): ActionSemanticCandidate {
   return {
     ...candidate(actionId, "install_card", semanticActionType),
     sourceKind: "card",
-    sourceDefinitionId,
-    sourceCardInstanceId: `${sourceDefinitionId}-instance`,
+    sourceDefinitionId: typeof sourceDefinition === "number"
+      ? sourceDefinition
+      : syntheticCardDefinitionId(sourceDefinition),
+    sourceCardInstanceId: `${sourceDefinition}-instance`,
   };
 }
 

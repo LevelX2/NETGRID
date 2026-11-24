@@ -1,163 +1,24 @@
+import { isRemoteServerId } from "@netgrid/shared";
+import type { MatchEventId } from "@netgrid/shared";
+import { cardDefinitionIdValue } from "../card-definition-id-input";
 import type { AiDecisionInput, PublicGameEvent } from "@netgrid/shared";
 import { reconstructBeliefState } from "../belief-state";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
-import type {
-  AccessDecisionReason,
-  AccessIntent,
-} from "./access-decision-types";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
+import {
+  findLastHistoryIndex,
+  mergedPublicHistory,
+} from "../public-event-history";
 import { observedAccessOutcomeEvidence } from "./access-outcome-projection";
-
-export type AccessOutcomeMemoryKey = {
-  matchId: string;
-  side: "runner" | "corp";
-  profileId: string;
-  serverId: string;
-};
-
-export type AccessOutcomeMemoryEntry = {
-  remoteFingerprint: string;
-  observedDecision: AccessIntent;
-  reason: AccessDecisionReason;
-  creditsAtOutcome: number;
-  desiredReserveAtOutcome: number;
-  generalTrashCost?: number;
-  stateVersion: number;
-};
-
-export type AccessOutcomeMemoryRecord = AccessOutcomeMemoryKey &
-  AccessOutcomeMemoryEntry;
-
-export type AccessOutcomeMemoryInvalidationReason =
-  | "remote_fingerprint_changed"
-  | "credits_or_reserve_improved";
 
 export type AccessOutcomeMemoryStatus = {
   applies: boolean;
-  invalidationReason?: AccessOutcomeMemoryInvalidationReason;
+  invalidationReason?:
+    | "remote_fingerprint_changed"
+    | "credits_or_reserve_improved";
   suppressesPlanBonus: boolean;
   suppressUntilInvalidated?: boolean;
   evidence: string[];
 };
-
-export type AccessOutcomeMemoryState = {
-  records: AccessOutcomeMemoryRecord[];
-};
-
-export function createAccessOutcomeMemory(): AccessOutcomeMemoryState {
-  return { records: [] };
-}
-
-export function rememberAccessOutcome(
-  memory: AccessOutcomeMemoryState,
-  key: AccessOutcomeMemoryKey,
-  entry: AccessOutcomeMemoryEntry,
-): AccessOutcomeMemoryState {
-  const nextRecords = memory.records.filter(
-    (record) => !sameAccessOutcomeKey(record, key),
-  );
-  return {
-    records: [...nextRecords, { ...key, ...entry }],
-  };
-}
-
-export function readAccessOutcomeMemory(
-  memory: AccessOutcomeMemoryState,
-  key: AccessOutcomeMemoryKey,
-): AccessOutcomeMemoryRecord | undefined {
-  return memory.records.find((record) => sameAccessOutcomeKey(record, key));
-}
-
-export function invalidateAccessOutcomeMemory(
-  memory: AccessOutcomeMemoryState,
-  predicate: (record: AccessOutcomeMemoryRecord) => boolean,
-): AccessOutcomeMemoryState {
-  return {
-    records: memory.records.filter((record) => !predicate(record)),
-  };
-}
-
-export function resetAccessOutcomeMemoryForMatch(
-  memory: AccessOutcomeMemoryState,
-  matchId: string,
-): AccessOutcomeMemoryState {
-  return invalidateAccessOutcomeMemory(
-    memory,
-    (record) => record.matchId === matchId,
-  );
-}
-
-export function accessOutcomeMemoryEvidence(
-  record: AccessOutcomeMemoryRecord,
-): string[] {
-  return [
-    `access_outcome_memory_match:${record.matchId}`,
-    `access_outcome_memory_side:${record.side}`,
-    `access_outcome_memory_profile:${record.profileId}`,
-    `access_outcome_memory_server:${record.serverId}`,
-    `access_outcome_memory_fingerprint:${record.remoteFingerprint}`,
-    `access_outcome_memory_decision:${record.observedDecision}`,
-    `access_outcome_memory_reason:${record.reason}`,
-    `access_outcome_memory_credits:${record.creditsAtOutcome}`,
-    `access_outcome_memory_reserve:${record.desiredReserveAtOutcome}`,
-    ...(record.generalTrashCost !== undefined
-      ? [`access_outcome_memory_general_trash_cost:${record.generalTrashCost}`]
-      : []),
-    `access_outcome_memory_state_version:${record.stateVersion}`,
-  ];
-}
-
-export function evaluateAccessOutcomeMemoryStatus(
-  record: AccessOutcomeMemoryRecord,
-  context: {
-    currentRemoteFingerprint: string;
-    currentCredits: number;
-    currentDesiredReserve: number;
-  },
-): AccessOutcomeMemoryStatus {
-  if (record.remoteFingerprint !== context.currentRemoteFingerprint) {
-    return {
-      applies: false,
-      invalidationReason: "remote_fingerprint_changed",
-      suppressesPlanBonus: false,
-      evidence: [
-        ...accessOutcomeMemoryEvidence(record),
-        "access_outcome_memory_applies:false",
-        "access_outcome_memory_invalidated:remote_fingerprint_changed",
-      ],
-    };
-  }
-  if (
-    record.observedDecision === "decline" &&
-    context.currentCredits - context.currentDesiredReserve >
-      record.creditsAtOutcome - record.desiredReserveAtOutcome
-  ) {
-    return {
-      applies: false,
-      invalidationReason: "credits_or_reserve_improved",
-      suppressesPlanBonus: false,
-      evidence: [
-        ...accessOutcomeMemoryEvidence(record),
-        "access_outcome_memory_applies:false",
-        "access_outcome_memory_invalidated:credits_or_reserve_improved",
-      ],
-    };
-  }
-  return {
-    applies: true,
-    suppressesPlanBonus: record.observedDecision === "decline",
-    ...(record.observedDecision === "decline"
-      ? { suppressUntilInvalidated: true }
-      : {}),
-    evidence: [
-      ...accessOutcomeMemoryEvidence(record),
-      "access_outcome_memory_applies:true",
-      `access_outcome_memory_suppresses_plan_bonus:${record.observedDecision === "decline"}`,
-      ...(record.observedDecision === "decline"
-        ? ["access_outcome_memory_suppress_until_invalidated:true"]
-        : []),
-    ],
-  };
-}
 
 export function accessOutcomeMemoryPlanEvidence(
   status: AccessOutcomeMemoryStatus | undefined,
@@ -180,18 +41,18 @@ export function deriveObservedRemoteNoProgressAccessMemory(
   ) {
     return undefined;
   }
-  if (!serverId?.startsWith("remote_")) return undefined;
+  if (!isRemoteServerId(serverId)) return undefined;
   const currentKnownRoots = currentKnownRemoteRoots(input, serverId);
   if (currentKnownRoots.length === 0) return undefined;
   if (
     currentKnownRoots.some(
       ({ definitionId }) =>
-        CARD_DEFINITIONS_BY_ID[definitionId]?.type === "agenda",
+        planningCardFactsByDefinitionId(definitionId)?.type === "agenda",
     )
   )
     return undefined;
   const history = mergedPublicHistory(input);
-  const lastAccessIndex = findLastIndex(
+  const lastAccessIndex = findLastHistoryIndex(
     history,
     (event) =>
       publicActor(event) === "runner" &&
@@ -200,18 +61,10 @@ export function deriveObservedRemoteNoProgressAccessMemory(
       currentKnownRoots.some((root) =>
         root.sourceEventId
           ? root.sourceEventId === event.eventId
-          : root.definitionId === stringPayloadValue(event, "cardDefinitionId"),
+          : root.definitionId === cardDefinitionIdValue(event.publicPayload.cardDefinitionId),
       ),
   );
   if (lastAccessIndex < 0) return undefined;
-  const lastRunIndex = findLastIndex(
-    history.slice(0, lastAccessIndex),
-    (event) =>
-      publicActor(event) === "runner" &&
-      publicActionType(event) === "start_run" &&
-      eventServerId(event) === serverId,
-  );
-  if (lastRunIndex < 0) return undefined;
   const accessEvent = history[lastAccessIndex]!;
   const afterAccess = history.slice(lastAccessIndex + 1);
   const progressEvent = afterAccess.find(
@@ -239,31 +92,13 @@ export function deriveObservedRemoteNoProgressAccessMemory(
       eventServerId(event) === serverId,
   );
   const observedDecision = declineEvent ? "decline" : "access_only";
-  const reason = declineEvent ? "reserve_would_break" : "target_unavailable";
+  const reason = declineEvent ? "unknown" : "target_unavailable";
   const accessedDefinitionId =
-    stringPayloadValue(accessEvent, "cardDefinitionId") ??
+    cardDefinitionIdValue(accessEvent.publicPayload.cardDefinitionId) ??
     currentKnownRoots[0]!.definitionId;
-  const remoteFingerprint = knownRootFingerprint(accessedDefinitionId);
-  const record: AccessOutcomeMemoryRecord = {
-    matchId: input.matchId,
-    side: "runner",
-    profileId: input.profileId,
-    serverId,
-    remoteFingerprint,
-    observedDecision,
-    reason,
-    creditsAtOutcome: input.playerView.own.credits,
-    desiredReserveAtOutcome: input.playerView.own.credits,
-    stateVersion: accessEvent.stateVersionAfter,
-  };
-  const status = evaluateAccessOutcomeMemoryStatus(record, {
-    currentRemoteFingerprint: remoteFingerprint,
-    currentCredits: input.playerView.own.credits,
-    currentDesiredReserve: input.playerView.own.credits,
-  });
   return {
-    applies: status.applies,
-    suppressesPlanBonus: status.applies,
+    applies: true,
+    suppressesPlanBonus: true,
     ...(declineEvent ? { suppressUntilInvalidated: true } : {}),
     evidence: [
       "remote_access_outcome_source:observed_public_access",
@@ -281,35 +116,22 @@ export function deriveObservedRemoteNoProgressAccessMemory(
       ...observedAccessOutcomeEvidence({
         serverId,
         knownRootDefinitionId: accessedDefinitionId,
-        observedIntent: "access_only",
-        reason: "target_unavailable",
+        observedIntent: observedDecision,
+        reason,
         stateVersion: accessEvent.stateVersionAfter,
       }),
-      ...status.evidence,
+      `access_outcome_memory_match:${input.matchId}`,
+      `access_outcome_memory_profile:${input.profileId}`,
+      `access_outcome_memory_server:${serverId}`,
+      `access_outcome_memory_state_version:${accessEvent.stateVersionAfter}`,
     ],
   };
-}
-
-function sameAccessOutcomeKey(
-  record: AccessOutcomeMemoryKey,
-  key: AccessOutcomeMemoryKey,
-): boolean {
-  return (
-    record.matchId === key.matchId &&
-    record.side === key.side &&
-    record.profileId === key.profileId &&
-    record.serverId === key.serverId
-  );
-}
-
-function knownRootFingerprint(knownRootDefinitionId: string): string {
-  return `known_root:${knownRootDefinitionId}`;
 }
 
 function currentKnownRemoteRoots(
   input: AiDecisionInput,
   serverId: string,
-): Array<{ definitionId: string; sourceEventId?: string }> {
+): Array<{ definitionId: number; sourceEventId?: MatchEventId }> {
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === serverId,
   );
@@ -321,7 +143,7 @@ function currentKnownRemoteRoots(
       )
       .map((entry) => [entry.positionKey, entry]),
   );
-  const definitions: Array<{ definitionId: string; sourceEventId?: string }> =
+  const definitions: Array<{ definitionId: number; sourceEventId?: MatchEventId }> =
     [];
   for (const [index, card] of server.root.entries()) {
     const remembered = rememberedRoots.get(`root:${index}`);
@@ -338,16 +160,6 @@ function currentKnownRemoteRoots(
     });
   }
   return definitions;
-}
-
-function mergedPublicHistory(input: AiDecisionInput): PublicGameEvent[] {
-  const byId = new Map<string, PublicGameEvent>();
-  for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
-    byId.set(event.eventId, event);
-  }
-  return [...byId.values()].sort(
-    (left, right) => left.stateVersionAfter - right.stateVersionAfter,
-  );
 }
 
 function remoteChangedAfterAccess(
@@ -423,10 +235,10 @@ function canonicalServerId(serverId: string): string {
   if (normalized === "rd" || normalized === "rnd" || normalized === "r&d")
     return "rd";
   if (normalized === "archives") return "archives";
-  if (normalized.startsWith("remote_")) return normalized;
+  if (isRemoteServerId(normalized)) return normalized;
   const remoteMatch = /^remote[\s_-]+(\d+)$/.exec(normalized);
   const remoteIndex = remoteMatch?.[1];
-  if (remoteIndex) return `remote_${Number.parseInt(remoteIndex, 10)}`;
+  if (remoteIndex) return `r${Number.parseInt(remoteIndex, 10)}`;
   return serverId;
 }
 
@@ -437,7 +249,7 @@ function visibleServerLabelId(label: string | undefined): string | undefined {
     canonical === "hq" ||
     canonical === "rd" ||
     canonical === "archives" ||
-    canonical.startsWith("remote_")
+    isRemoteServerId(canonical)
   ) {
     return canonical;
   }
@@ -462,14 +274,4 @@ function nestedStringPayloadValue(
     return undefined;
   const value = (parent as Record<string, unknown>)[childKey];
   return typeof value === "string" ? value : undefined;
-}
-
-function findLastIndex<T>(
-  values: readonly T[],
-  predicate: (value: T) => boolean,
-): number {
-  for (let index = values.length - 1; index >= 0; index -= 1) {
-    if (predicate(values[index]!)) return index;
-  }
-  return -1;
 }

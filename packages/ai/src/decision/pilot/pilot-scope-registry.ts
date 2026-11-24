@@ -22,12 +22,7 @@ import {
   AI_PLAY_STRENGTH_LOCAL_DEFAULT_ENV,
   localDefaultPilotScopes,
 } from "./local-default-pilot-policy";
-export {
-  AI_PLAY_STRENGTH_LOCAL_DEFAULT_ENV,
-  buildLocalDefaultPilotPolicy,
-  type LocalDefaultPilotPolicy,
-  type LocalDefaultPilotPolicyScope,
-} from "./local-default-pilot-policy";
+export { AI_PLAY_STRENGTH_LOCAL_DEFAULT_ENV };
 
 export {
   AI_PLAY_STRENGTH_PILOT_ENV,

@@ -1,7 +1,9 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import {
   sanitizeAiDecisionDebug,
   type LegalActionPayload,
+  type LegalAction,
   type VisibleCard,
 } from "@netgrid/shared";
 
@@ -12,6 +14,7 @@ import {
   residentPlanPortfolioSnapshot,
 } from "../plans/resident-plan-portfolio-memory";
 import {
+  completeRunnerEconomyFixturePolicy,
   aiInput,
   legalAction,
   safeRuntimeRunTarget,
@@ -30,7 +33,7 @@ describe("plan-first Remote contest continuation", () => {
       "start_run",
       "Run terminal Remote without Wall coverage",
       { credits: 0, clicks: 1 },
-      { payload: { serverId: "remote_1" } },
+      { payload: { serverId: "r1" } },
     );
     const endTurn = legalAction(
       "runner-end-turn-after-no-access-quote",
@@ -39,7 +42,7 @@ describe("plan-first Remote contest continuation", () => {
       "End turn",
       { credits: 0, clicks: 0 },
     );
-    const baseTarget = safeRuntimeRunTarget(startRun.actionId, "remote_1");
+    const baseTarget = safeRuntimeRunTarget(startRun.actionId, "r1");
     const target = {
       ...baseTarget,
       targetKind: "remote" as const,
@@ -86,7 +89,7 @@ describe("plan-first Remote contest continuation", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [hiddenAdvancedRoot]),
+      server("r1", [], [hiddenAdvancedRoot]),
     ];
 
     const decision = context.chooseSemanticRuntimeAction(input, {});
@@ -125,9 +128,9 @@ describe("plan-first Remote contest continuation", () => {
       "start_run",
       "Probe terminal Remote",
       { credits: 0, clicks: 1 },
-      { payload: { serverId: "remote_1" } },
+      { payload: { serverId: "r1" } },
     );
-    const baseTarget = safeRuntimeRunTarget(startRun.actionId, "remote_1");
+    const baseTarget = safeRuntimeRunTarget(startRun.actionId, "r1");
     const target = {
       ...baseTarget,
       targetKind: "remote" as const,
@@ -177,7 +180,7 @@ describe("plan-first Remote contest continuation", () => {
     } as VisibleCard;
     const dataWall = withEffectiveRunQuote(
       visibleCard("terminal-information-data-wall", "corp", "ice", {
-        definitionId: "onr_v1_237_data-wall",
+        definitionId: 449,
         title: "Data Wall",
         subtypes: ["wall"],
         rezzed: true,
@@ -189,7 +192,7 @@ describe("plan-first Remote contest continuation", () => {
           {
             id: "terminal-information-end-run",
             type: "end_the_run",
-            sourceDefinitionId: "onr_v1_237_data-wall",
+            sourceDefinitionId: 449,
             sourceTitle: "Data Wall",
           },
         ],
@@ -203,7 +206,7 @@ describe("plan-first Remote contest continuation", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [hiddenInnerIce, dataWall], [hiddenAdvancedRoot]),
+      server("r1", [hiddenInnerIce, dataWall], [hiddenAdvancedRoot]),
     ];
 
     const startDecision = context.chooseSemanticRuntimeAction(startInput, {});
@@ -215,7 +218,7 @@ describe("plan-first Remote contest continuation", () => {
       reasonCode: "plan_first.runner.contest_remote",
     });
     expect(root).toMatchObject({
-      instanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      instanceId: "p1p4xezjcxov79rno40lq3f7rv",
       moduleState: { signal: { purpose: "information" } },
     });
 
@@ -241,12 +244,7 @@ describe("plan-first Remote contest continuation", () => {
       "End-the-run-Subroutine auslösen",
       { credits: 0, clicks: 0 },
       {
-        payload: {
-          encounterContinue: true,
-          encounterWillEndRun: true,
-          unbrokenSubroutineCount: 1,
-          encounterSubroutineIds: "terminal-information-end-run",
-        },
+        payload: {encounterContinue: true, encounterWillEndRun: true, unbrokenSubroutineCount: 1}, encounterSubroutineIds: ["terminal-information-end-run"],
       },
     );
     const encounterInput = aiInput("runner", [breakWall, fireEndRun]);
@@ -256,7 +254,7 @@ describe("plan-first Remote contest continuation", () => {
     encounterInput.playerView.own.clicks = 3;
     encounterInput.playerView.own.rig = [
       visibleCard("terminal-information-blink", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
+        definitionId: 219,
         title: "Blink",
         subtypes: ["icebreaker"],
         strength: 0,
@@ -267,13 +265,13 @@ describe("plan-first Remote contest continuation", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [hiddenInnerIce, dataWall], [hiddenAdvancedRoot]),
+      server("r1", [hiddenInnerIce, dataWall], [hiddenAdvancedRoot]),
     ];
     encounterInput.playerView.run = {
-      runId: "terminal-information-run",
-      attackedServerId: "remote_1",
+      runId: startInput.playerView.stateVersion + 1,
+      attackedServerId: "r1",
       phase: "encounter_ice",
-      position: { kind: "ice", serverId: "remote_1", iceIndex: 1 },
+      position: { kind: "ice", serverId: "r1", iceIndex: 1 },
       encounteredIce: dataWall,
       successful: false,
     };
@@ -324,7 +322,7 @@ describe("plan-first Remote contest continuation", () => {
       "start_run",
       "Run Remote 1 again",
       { credits: 0, clicks: 1 },
-      { payload: { serverId: "remote_1" } },
+      { payload: { serverId: "r1" } },
     );
     const endTurn = legalAction(
       "runner-end-turn-after-puzzle",
@@ -334,20 +332,20 @@ describe("plan-first Remote contest continuation", () => {
       { credits: 0, clicks: 0 },
     );
     const target = {
-      ...safeRuntimeRunTarget(startRun.actionId, "remote_1"),
+      ...safeRuntimeRunTarget(startRun.actionId, "r1"),
       targetKind: "remote" as const,
       accessTargetKind: "remote" as const,
       scoreThreat: true,
       recommendation: "run_now" as const,
       score: 1_400,
-      evidence: ["runner_direct_run_converts_now:remote_1"],
+      evidence: ["runner_direct_run_converts_now:r1"],
     };
     const context = liveContext({
       evaluateRunnerRunTargets: () => [target],
     });
     const puzzle = withEffectiveRunQuote(
       visibleCard("puzzle", "corp", "ice", {
-        definitionId: "onr_classic_013_puzzle",
+        definitionId: 17,
         title: "Puzzle",
         rezzed: true,
         lifecycleMarkers: [
@@ -364,13 +362,13 @@ describe("plan-first Remote contest continuation", () => {
           {
             id: "puzzle-end-run-a",
             type: "end_the_run_and_trash_source_at_end_of_turn",
-            sourceDefinitionId: "onr_classic_013_puzzle",
+            sourceDefinitionId: 17,
             sourceTitle: "Puzzle",
           },
           {
             id: "puzzle-end-run-b",
             type: "end_the_run_and_trash_source_at_end_of_turn",
-            sourceDefinitionId: "onr_classic_013_puzzle",
+            sourceDefinitionId: 17,
             sourceTitle: "Puzzle",
           },
         ],
@@ -382,7 +380,7 @@ describe("plan-first Remote contest continuation", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [puzzle], []),
+      server("r1", [puzzle], []),
     ];
 
     const decision = context.chooseSemanticRuntimeAction(input, {});
@@ -398,7 +396,7 @@ describe("plan-first Remote contest continuation", () => {
         actionId: startRun.actionId,
         ownerModuleId: "runner.contest_remote",
         evidenceCode:
-          "runner_remote_direct_run_waits_for_scheduled_ice_trash:remote_1",
+          "runner_remote_direct_run_waits_for_scheduled_ice_trash:r1",
       }),
     );
   });
@@ -411,7 +409,7 @@ describe("plan-first Remote contest continuation", () => {
       "start_run",
       "Run Remote 1 after funding",
       { credits: 0, clicks: 1 },
-      { payload: { serverId: "remote_1" } },
+      { payload: { serverId: "r1" } },
     );
     const gainCredit = legalAction(
       "runner-gain-credit-after-puzzle",
@@ -428,7 +426,7 @@ describe("plan-first Remote contest continuation", () => {
       { credits: 0, clicks: 0 },
     );
     const target = {
-      ...safeRuntimeRunTarget(startRun.actionId, "remote_1"),
+      ...safeRuntimeRunTarget(startRun.actionId, "r1"),
       targetKind: "remote" as const,
       accessTargetKind: "remote" as const,
       scoreThreat: true,
@@ -441,7 +439,7 @@ describe("plan-first Remote contest continuation", () => {
         postRunFloorGap: 2,
         protectedLiquidReserve: 4,
       },
-      evidence: ["runner_remote_contest_waits_for_credit_reserve:remote_1"],
+      evidence: ["runner_remote_contest_waits_for_credit_reserve:r1"],
     };
     const context = liveContext({
       evaluateRunnerRunTargets: () => [target],
@@ -454,7 +452,7 @@ describe("plan-first Remote contest continuation", () => {
     });
     const puzzle = withEffectiveRunQuote(
       visibleCard("funded-puzzle", "corp", "ice", {
-        definitionId: "onr_classic_013_puzzle",
+        definitionId: 17,
         title: "Puzzle",
         rezzed: true,
         lifecycleMarkers: [
@@ -471,7 +469,7 @@ describe("plan-first Remote contest continuation", () => {
           {
             id: "funded-puzzle-end-run",
             type: "end_the_run_and_trash_source_at_end_of_turn",
-            sourceDefinitionId: "onr_classic_013_puzzle",
+            sourceDefinitionId: 17,
             sourceTitle: "Puzzle",
           },
         ],
@@ -484,7 +482,7 @@ describe("plan-first Remote contest continuation", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [puzzle], []),
+      server("r1", [puzzle], []),
     ];
 
     const decision = context.chooseSemanticRuntimeAction(input, {});
@@ -497,7 +495,7 @@ describe("plan-first Remote contest continuation", () => {
       residentPlanPortfolioSnapshot(input)?.instances.some(
         (instance) =>
           instance.instanceId ===
-          "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+          "p8dvcw6jj6cbaz1qxlt9ksvoh5",
       ),
     ).toBe(false);
     expect(
@@ -507,7 +505,7 @@ describe("plan-first Remote contest continuation", () => {
         actionId: startRun.actionId,
         ownerModuleId: "runner.contest_remote",
         evidenceCode:
-          "runner_remote_direct_run_waits_for_scheduled_ice_trash:remote_1",
+          "runner_remote_direct_run_waits_for_scheduled_ice_trash:r1",
       }),
     );
   });
@@ -520,7 +518,7 @@ describe("plan-first Remote contest continuation", () => {
       "start_run",
       "Run Remote 1 again",
       { credits: 0, clicks: 1 },
-      { payload: { serverId: "remote_1" } },
+      { payload: { serverId: "r1" } },
     );
     const rdRun = legalAction(
       "run-rd-after-puzzle",
@@ -540,31 +538,31 @@ describe("plan-first Remote contest continuation", () => {
         source: "codecracker-after-puzzle",
         payload: {
           cardId: "codecracker-after-puzzle",
-          sourceDefinitionId: "onr_v1_014_codecracker",
+          sourceDefinitionId: 226,
         },
       },
     );
-    const blockedTarget = (actionId: string, serverId: "remote_1" | "rd") => ({
+    const blockedTarget = (actionId: string, serverId: "r1" | "rd") => ({
       ...safeRuntimeRunTarget(actionId, serverId),
       targetKind:
-        serverId === "remote_1" ? ("remote" as const) : ("rd" as const),
+        serverId === "r1" ? ("remote" as const) : ("rd" as const),
       accessTargetKind:
-        serverId === "remote_1" ? ("remote" as const) : ("rd" as const),
+        serverId === "r1" ? ("remote" as const) : ("rd" as const),
       pathPassability: "blocked_missing_coverage" as const,
       recommendation: "find_breaker_first" as const,
-      scoreThreat: serverId === "remote_1",
-      score: serverId === "remote_1" ? 1_400 : 300,
+      scoreThreat: serverId === "r1",
+      score: serverId === "r1" ? 1_400 : 300,
       evidence: ["missing_coverage:breaker_code_gate"],
     });
     const context = liveContext({
       evaluateRunnerRunTargets: () => [
-        blockedTarget(remoteRun.actionId, "remote_1"),
+        blockedTarget(remoteRun.actionId, "r1"),
         blockedTarget(rdRun.actionId, "rd"),
       ],
     });
     const puzzle = withEffectiveRunQuote(
       visibleCard("coverage-puzzle", "corp", "ice", {
-        definitionId: "onr_classic_013_puzzle",
+        definitionId: 17,
         title: "Puzzle",
         rezzed: true,
         lifecycleMarkers: [
@@ -581,7 +579,7 @@ describe("plan-first Remote contest continuation", () => {
           {
             id: "coverage-puzzle-end-run",
             type: "end_the_run_and_trash_source_at_end_of_turn",
-            sourceDefinitionId: "onr_classic_013_puzzle",
+            sourceDefinitionId: 17,
             sourceTitle: "Puzzle",
           },
         ],
@@ -592,7 +590,7 @@ describe("plan-first Remote contest continuation", () => {
     input.playerView.own.clicks = 3;
     input.playerView.own.gripOrHq = [
       visibleCard("codecracker-after-puzzle", "runner", "program", {
-        definitionId: "onr_v1_014_codecracker",
+        definitionId: 226,
         title: "Codecracker",
         subtypes: ["icebreaker", "decoder"],
         installCost: 2,
@@ -600,9 +598,21 @@ describe("plan-first Remote contest continuation", () => {
     ];
     input.playerView.servers = [
       server("hq"),
-      server("rd"),
+      server("rd", [
+        withEffectiveRunQuote(
+          visibleCard("coverage-rd-code-gate", "corp", "ice", {
+            definitionId: 473,
+            rezzed: true,
+            subtypes: ["code_gate"],
+          }),
+          {
+            effectiveStrength: 2,
+            subroutines: [{ id: "coverage-rd-etr", type: "end_the_run" }],
+          },
+        ),
+      ]),
       server("archives"),
-      server("remote_1", [puzzle], []),
+      server("r1", [puzzle], []),
     ];
 
     const decision = context.chooseSemanticRuntimeAction(input, {});
@@ -632,7 +642,7 @@ describe("plan-first Remote contest continuation", () => {
       parentNeedId: "coverage:breaker_code_gate:run:run-rd-after-puzzle",
     });
     expect(centralParent).toMatchObject({
-      instanceId: "plan:runner.pressure_central:central%3Ard",
+      instanceId: "pa90fufw9vc5bkshp96ztlryxl",
       moduleState: {
         signal: {
           supportNeedId: "coverage:breaker_code_gate:run:run-rd-after-puzzle",
@@ -654,16 +664,16 @@ describe("plan-first Remote contest continuation", () => {
       "start_run",
       "Run Remote 1",
       { credits: 0, clicks: 1 },
-      { payload: { serverId: "remote_1" } },
+      { payload: { serverId: "r1" } },
     );
     const target = {
-      ...safeRuntimeRunTarget(startRun.actionId, "remote_1"),
+      ...safeRuntimeRunTarget(startRun.actionId, "r1"),
       targetKind: "remote" as const,
       accessTargetKind: "remote" as const,
       knownAccessState: "known_payoff" as const,
       accessPayoff: "trash_affordable" as const,
       accessFacts: {
-        knownTargetDefinitionIds: ["onr_v1_347_vapor-ops"],
+        knownTargetDefinitionIds: [559],
         trashBudget: 1,
       },
       recommendation: "run_now" as const,
@@ -685,7 +695,7 @@ describe("plan-first Remote contest continuation", () => {
           : [],
     });
     const vaporOps = visibleCard("vapor-ops", "corp", "asset", {
-      definitionId: "onr_v1_347_vapor-ops",
+      definitionId: 559,
       title: "Vapor Ops",
       rezzed: true,
       trashCost: 1,
@@ -697,7 +707,7 @@ describe("plan-first Remote contest continuation", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [vaporOps]),
+      server("r1", [], [vaporOps]),
     ];
 
     expect(context.chooseSemanticRuntimeAction(startInput, {})).toMatchObject({
@@ -713,7 +723,7 @@ describe("plan-first Remote contest continuation", () => {
           accessCommitment: {
             payoff: "trash_affordable",
             intendedAction: "trash",
-            knownTargetDefinitionIds: ["onr_v1_347_vapor-ops"],
+            knownTargetDefinitionIds: [559],
             trashBudget: 1,
           },
         },
@@ -733,9 +743,8 @@ describe("plan-first Remote contest continuation", () => {
         encounterContinue: true,
         encounterWillEndRun: false,
         unbrokenSubroutineCount: 2,
-        encounterSubroutineIds:
-          "neural-blade-net-damage,neural-blade-break-prohibition",
       },
+      ["neural-blade-net-damage", "neural-blade-break-prohibition"],
     );
     const encounterInput = aiInput("runner", [pump, fireSubroutines]);
     encounterInput.playerView.stateVersion = 113;
@@ -747,26 +756,26 @@ describe("plan-first Remote contest continuation", () => {
     encounterInput.playerView.own.clicks = 3;
     encounterInput.playerView.own.rig = [
       visibleCard("loony-goon", "runner", "program", {
-        definitionId: "onr_v1_040_loony-goon",
+        definitionId: 252,
         title: "Loony Goon",
         subtypes: ["icebreaker"],
         strength: 2,
       }),
       visibleCard("codecracker", "runner", "program", {
-        definitionId: "onr_v1_014_codecracker",
+        definitionId: 226,
         title: "Codecracker",
         subtypes: ["icebreaker"],
         strength: 0,
       }),
       visibleCard("short-term-contract", "runner", "resource", {
-        definitionId: "onr_v1_178_short-term-contract",
+        definitionId: 390,
         title: "Short-Term Contract",
         counters: { bit: 4 },
       }),
     ];
     const neuralBlade = withEffectiveRunQuote(
       visibleCard("neural-blade", "corp", "ice", {
-        definitionId: "onr_v1_258_neural-blade",
+        definitionId: 470,
         title: "Neural Blade",
         subtypes: ["sentry"],
         rezzed: true,
@@ -780,13 +789,13 @@ describe("plan-first Remote contest continuation", () => {
             type: "do_damage",
             amount: 1,
             damageType: "net",
-            sourceDefinitionId: "onr_v1_258_neural-blade",
+            sourceDefinitionId: 470,
             sourceTitle: "Neural Blade",
           },
           {
             id: "neural-blade-break-prohibition",
             type: "set_next_encounter_no_break_subroutines",
-            sourceDefinitionId: "onr_v1_258_neural-blade",
+            sourceDefinitionId: 470,
             sourceTitle: "Neural Blade",
             unbrokenRunEffect: { preventsFutureBreaking: true },
           },
@@ -795,7 +804,7 @@ describe("plan-first Remote contest continuation", () => {
     );
     const keeper = withEffectiveRunQuote(
       visibleCard("keeper", "corp", "ice", {
-        definitionId: "onr_v1_252_keeper",
+        definitionId: 464,
         title: "Keeper",
         subtypes: ["code_gate"],
         rezzed: true,
@@ -807,7 +816,7 @@ describe("plan-first Remote contest continuation", () => {
           {
             id: "keeper-end-the-run",
             type: "end_the_run",
-            sourceDefinitionId: "onr_v1_252_keeper",
+            sourceDefinitionId: 464,
             sourceTitle: "Keeper",
           },
         ],
@@ -817,13 +826,13 @@ describe("plan-first Remote contest continuation", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [keeper, neuralBlade], [vaporOps]),
+      server("r1", [keeper, neuralBlade], [vaporOps]),
     ];
     encounterInput.playerView.run = {
-      runId: "match-df965-remote-1",
-      attackedServerId: "remote_1",
+      runId: startInput.playerView.stateVersion + 1,
+      attackedServerId: "r1",
       phase: "encounter_ice",
-      position: { kind: "ice", serverId: "remote_1", iceIndex: 1 },
+      position: { kind: "ice", serverId: "r1", iceIndex: 1 },
       encounteredIce: neuralBlade,
       successful: false,
     };
@@ -872,16 +881,16 @@ describe("plan-first Remote contest continuation", () => {
       "start_run",
       "Run Remote 1",
       { credits: 0, clicks: 1 },
-      { payload: { serverId: "remote_1" } },
+      { payload: { serverId: "r1" } },
     );
     const target = {
-      ...safeRuntimeRunTarget(startRun.actionId, "remote_1"),
+      ...safeRuntimeRunTarget(startRun.actionId, "r1"),
       targetKind: "remote" as const,
       accessTargetKind: "remote" as const,
       knownAccessState: "known_payoff" as const,
       accessPayoff: "trash_affordable" as const,
       accessFacts: {
-        knownTargetDefinitionIds: ["onr_v1_312_chicago-branch"],
+        knownTargetDefinitionIds: [524],
         trashBudget: 1,
       },
       runCommitment: "full_path" as const,
@@ -936,14 +945,14 @@ describe("plan-first Remote contest continuation", () => {
           : undefined,
     });
     const chicagoBranch = visibleCard("chicago-branch", "corp", "asset", {
-      definitionId: "onr_v1_312_chicago-branch",
+      definitionId: 524,
       title: "Chicago Branch",
       rezzed: true,
       trashCost: 1,
     });
     const filter = withEffectiveRunQuote(
       visibleCard("known-filter", "corp", "ice", {
-        definitionId: "onr_v1_244_filter",
+        definitionId: 456,
         title: "Filter",
         subtypes: ["code_gate"],
         rezzed: true,
@@ -955,7 +964,7 @@ describe("plan-first Remote contest continuation", () => {
           {
             id: "known-filter-end-the-run",
             type: "end_the_run",
-            sourceDefinitionId: "onr_v1_244_filter",
+            sourceDefinitionId: 456,
             sourceTitle: "Filter",
           },
         ],
@@ -968,7 +977,7 @@ describe("plan-first Remote contest continuation", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [filter], [chicagoBranch]),
+      server("r1", [filter], [chicagoBranch]),
     ];
 
     expect(context.chooseSemanticRuntimeAction(startInput, {})).toMatchObject({
@@ -1012,12 +1021,7 @@ describe("plan-first Remote contest continuation", () => {
       "Subroutine auslösen (Run endet)",
       { credits: 0, clicks: 0 },
       {
-        payload: {
-          encounterContinue: true,
-          encounterWillEndRun: true,
-          unbrokenSubroutineCount: 1,
-          encounterSubroutineIds: "known-filter-end-the-run",
-        },
+        payload: {encounterContinue: true, encounterWillEndRun: true, unbrokenSubroutineCount: 1}, encounterSubroutineIds: ["known-filter-end-the-run"],
       },
     );
     const encounterInput = aiInput("runner", [breakFilter, resolveFilter]);
@@ -1030,7 +1034,7 @@ describe("plan-first Remote contest continuation", () => {
     encounterInput.playerView.own.credits = 1;
     encounterInput.playerView.own.rig = [
       visibleCard("codecracker", "runner", "program", {
-        definitionId: "onr_v1_014_codecracker",
+        definitionId: 226,
         title: "Codecracker",
         subtypes: ["icebreaker"],
         strength: 0,
@@ -1041,13 +1045,13 @@ describe("plan-first Remote contest continuation", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [filter], [chicagoBranch]),
+      server("r1", [filter], [chicagoBranch]),
     ];
     encounterInput.playerView.run = {
-      runId: "match-979-known-filter",
-      attackedServerId: "remote_1",
+      runId: startInput.playerView.stateVersion + 1,
+      attackedServerId: "r1",
       phase: "encounter_ice",
-      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      position: { kind: "ice", serverId: "r1", iceIndex: 0 },
       encounteredIce: filter,
       successful: false,
     };
@@ -1096,9 +1100,9 @@ describe("plan-first Remote contest continuation", () => {
       "start_run",
       "Run Remote 1",
       { credits: 0, clicks: 1 },
-      { payload: { serverId: "remote_1" } },
+      { payload: { serverId: "r1" } },
     );
-    const baseTarget = safeRuntimeRunTarget(startRun.actionId, "remote_1");
+    const baseTarget = safeRuntimeRunTarget(startRun.actionId, "r1");
     const target = {
       ...baseTarget,
       targetKind: "remote" as const,
@@ -1148,7 +1152,7 @@ describe("plan-first Remote contest continuation", () => {
     } as VisibleCard;
     const snowbank = withEffectiveRunQuote(
       visibleCard("match-f5f54fac-snowbank", "corp", "ice", {
-        definitionId: "onr_proteus_038_snowbank",
+        definitionId: 96,
         title: "Snowbank",
         subtypes: ["wall"],
         rezzed: true,
@@ -1161,7 +1165,7 @@ describe("plan-first Remote contest continuation", () => {
             id: "match-f5f54fac-snowbank-pay-or-end-run",
             type: "end_the_run_unless_runner_pays",
             amount: 1,
-            sourceDefinitionId: "onr_proteus_038_snowbank",
+            sourceDefinitionId: 96,
             sourceTitle: "Snowbank",
           },
         ],
@@ -1178,7 +1182,7 @@ describe("plan-first Remote contest continuation", () => {
     startInput.playerView.own.credits = 7;
     startInput.playerView.own.rig = [
       visibleCard("match-f5f54fac-boring-bit", "runner", "program", {
-        definitionId: "onr_proteus_081_boring-bit",
+        definitionId: 139,
         title: "Boring Bit",
         subtypes: ["icebreaker"],
         strength: 0,
@@ -1191,7 +1195,7 @@ describe("plan-first Remote contest continuation", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [hiddenInnerIce, snowbank], [advancedRoot]),
+      server("r1", [hiddenInnerIce, snowbank], [advancedRoot]),
     ];
 
     expect(context.chooseSemanticRuntimeAction(startInput, {})).toMatchObject({
@@ -1224,15 +1228,7 @@ describe("plan-first Remote contest continuation", () => {
       "Subroutine auslösen (Runner zahlt 1 Credit)",
       { credits: 1, clicks: 0 },
       {
-        payload: {
-          encounterContinue: true,
-          sourceDefinitionId: "onr_proteus_038_snowbank",
-          unbrokenSubroutineCount: 1,
-          encounterWillEndRun: false,
-          encounterSubroutineIds: "match-f5f54fac-snowbank-pay-or-end-run",
-          payOrEndRunSubroutineIndexes: "0",
-          payOrEndRunSubroutinePayment: 1,
-        },
+        payload: {encounterContinue: true, sourceDefinitionId: 96, unbrokenSubroutineCount: 1, encounterWillEndRun: false, payOrEndRunSubroutinePayment: 1}, encounterSubroutineIds: ["match-f5f54fac-snowbank-pay-or-end-run"], payOrEndRunSubroutineIndexes: [0],
       },
     );
     const letSnowbankEndRun = legalAction(
@@ -1242,15 +1238,10 @@ describe("plan-first Remote contest continuation", () => {
       "Subroutine auslösen (Run endet)",
       { credits: 0, clicks: 0 },
       {
-        payload: {
-          encounterContinue: true,
-          sourceDefinitionId: "onr_proteus_038_snowbank",
-          unbrokenSubroutineCount: 1,
-          encounterWillEndRun: true,
-          encounterSubroutineIds: "match-f5f54fac-snowbank-pay-or-end-run",
-        },
+        payload: {encounterContinue: true, sourceDefinitionId: 96, unbrokenSubroutineCount: 1, encounterWillEndRun: true}, encounterSubroutineIds: ["match-f5f54fac-snowbank-pay-or-end-run"],
       },
     );
+    const runId = startInput.playerView.stateVersion + 1;
     const encounterInput = aiInput("runner", [
       breakSnowbank,
       paySnowbank,
@@ -1269,7 +1260,7 @@ describe("plan-first Remote contest continuation", () => {
     );
     encounterInput.playerView.own.rig = [
       visibleCard("match-f5f54fac-boring-bit", "runner", "program", {
-        definitionId: "onr_proteus_081_boring-bit",
+        definitionId: 139,
         title: "Boring Bit",
         installCost: 6,
         subtypes: ["icebreaker"],
@@ -1281,13 +1272,13 @@ describe("plan-first Remote contest continuation", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [hiddenInnerIce, snowbank], [advancedRoot]),
+      server("r1", [hiddenInnerIce, snowbank], [advancedRoot]),
     ];
     encounterInput.playerView.run = {
-      runId: "match-f5f54fac-remote-1-run",
-      attackedServerId: "remote_1",
+      runId,
+      attackedServerId: "r1",
       phase: "encounter_ice",
-      position: { kind: "ice", serverId: "remote_1", iceIndex: 1 },
+      position: { kind: "ice", serverId: "r1", iceIndex: 1 },
       encounteredIce: snowbank,
       successful: false,
     };
@@ -1340,7 +1331,7 @@ describe("plan-first Remote contest continuation", () => {
       "continue_run",
       "Run fortsetzen",
       { credits: 0, clicks: 0 },
-      { payload: { serverId: "remote_1" } },
+      { payload: { serverId: "r1" } },
     );
     const jackOut = legalAction(
       "match-f5f54fac-jack-out-before-inner-ice",
@@ -1369,13 +1360,13 @@ describe("plan-first Remote contest continuation", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [hiddenInnerIce, snowbank], [advancedRoot]),
+      server("r1", [hiddenInnerIce, snowbank], [advancedRoot]),
     ];
     movementInput.playerView.run = {
-      runId: "match-f5f54fac-remote-1-run",
-      attackedServerId: "remote_1",
+      runId,
+      attackedServerId: "r1",
       phase: "movement",
-      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      position: { kind: "ice", serverId: "r1", iceIndex: 0 },
       successful: false,
     };
 
@@ -1426,7 +1417,7 @@ describe("plan-first Remote contest continuation", () => {
       selectedRunQuote: {
         schemaVersion: "ai-selected-run-quote-v1",
         actionId: "run-remote-1-risk-contract",
-        serverId: "remote_1",
+        serverId: "r1",
         purpose: "contest",
         pathCost: 0,
         creditsBeforeRun: 4,
@@ -1523,7 +1514,7 @@ describe("plan-first Remote contest continuation", () => {
       moduleState: {
         signal: {
           safetyIntent: "jack_out",
-          safetyEvidenceCode: "runner_run_risk_contract_degraded:remote_1",
+          safetyEvidenceCode: "runner_run_risk_contract_degraded:r1",
           runRiskReassessment: {
             decision: "prefer_jack_out",
             baselineReserveQuote: { creditGap: 0 },
@@ -1644,16 +1635,16 @@ function runRiskContractScenario(params: {
     "start_run",
     "Run Remote 1",
     { credits: 0, clicks: 1 },
-    { payload: { serverId: "remote_1" } },
+    { payload: { serverId: "r1" } },
   );
   const target = {
-    ...safeRuntimeRunTarget(startRun.actionId, "remote_1"),
+    ...safeRuntimeRunTarget(startRun.actionId, "r1"),
     targetKind: "remote" as const,
     accessTargetKind: "remote" as const,
     knownAccessState: "known_payoff" as const,
     accessPayoff: "trash_affordable" as const,
     accessFacts: {
-      knownTargetDefinitionIds: ["onr_v1_294_investment-firm"],
+      knownTargetDefinitionIds: [syntheticCardDefinitionId("onr_v1_294_investment-firm")],
       trashBudget: 2,
     },
     runCommitment: "probe_only" as const,
@@ -1700,7 +1691,7 @@ function runRiskContractScenario(params: {
     "corp",
     "asset",
     {
-      definitionId: "onr_v1_294_investment-firm",
+      definitionId: syntheticCardDefinitionId("onr_v1_294_investment-firm"),
       title: "Investment Firm",
       rezzed: true,
       trashCost: 2,
@@ -1715,7 +1706,7 @@ function runRiskContractScenario(params: {
     server("hq"),
     server("rd"),
     server("archives"),
-    server("remote_1", [unknownInnerIce], [valuableRemote]),
+    server("r1", [unknownInnerIce], [valuableRemote]),
   ];
 
   const startDecision = context.chooseSemanticRuntimeAction(startInput, {});
@@ -1733,7 +1724,7 @@ function runRiskContractScenario(params: {
     "continue_run",
     "Continue Remote 1 run",
     { credits: 0, clicks: 0 },
-    { payload: { serverId: "remote_1" } },
+    { payload: { serverId: "r1" } },
   );
   const jackOut = legalAction(
     "jack-out-remote-1-risk-contract",
@@ -1757,7 +1748,7 @@ function runRiskContractScenario(params: {
   );
   continuationInput.playerView.opponent.credits =
     params.currentCorpCredits ?? 14;
-  const currentRemote = server("remote_1", [unknownInnerIce], [valuableRemote]);
+  const currentRemote = server("r1", [unknownInnerIce], [valuableRemote]);
   if (params.currentVisibleRezSupport) {
     currentRemote.statuses = [
       {
@@ -1767,7 +1758,7 @@ function runRiskContractScenario(params: {
         costModel: "half_rez_cost_rounded_down",
         target: "unrezzed_ice_on_this_fort",
         limit: "once_per_run_per_source",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         sourceCardInstanceId: "remote-1-rez-support",
         sourceTitle: "Visible rez support",
         sourceSide: "corp",
@@ -1781,10 +1772,10 @@ function runRiskContractScenario(params: {
     currentRemote,
   ];
   continuationInput.playerView.run = {
-    runId: "remote-1-risk-contract-run",
-    attackedServerId: "remote_1",
+    runId: startInput.playerView.stateVersion + 1,
+    attackedServerId: "r1",
     phase: "movement",
-    position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+    position: { kind: "ice", serverId: "r1", iceIndex: 0 },
     successful: false,
   };
 
@@ -1806,6 +1797,7 @@ function encounterAction(
   type: "pump_breaker" | "continue_run",
   credits: number,
   payload: LegalActionPayload,
+  encounterSubroutineIds?: LegalAction["encounterSubroutineIds"],
 ) {
   const action = legalAction(
     actionId,
@@ -1816,6 +1808,7 @@ function encounterAction(
     {
       source: type === "continue_run" ? "game_rule" : "loony-goon",
       payload,
+      ...(encounterSubroutineIds ? { encounterSubroutineIds } : {}),
     },
   );
   action.timingPoint = "run.encounter_ice";
@@ -1834,6 +1827,11 @@ function liveContext(overrides: Record<string, unknown> = {}) {
     buildRunnerEconomyPosture: () => ({
       minimumCreditFloor: 0,
       desiredCreditReserve: 0,
+      creditReservePolicy: {
+        emergencyReserve: 0,
+        contestReserve: 0,
+        remoteScoreThreat: "none",
+      },
       fundingNeed: false,
       evidence: ["test_remote_contest_continuation"],
     }),
@@ -1844,5 +1842,12 @@ function liveContext(overrides: Record<string, unknown> = {}) {
     practicalMicroRuntimeCandidates: () => [],
     ...overrides,
   } as unknown as SemanticRuntimeDecisionContextDependencies;
-  return createSemanticRuntimeDecisionContext(dependencies);
+  return createSemanticRuntimeDecisionContext({
+    ...dependencies,
+    buildRunnerEconomyPosture: (params) =>
+      completeRunnerEconomyFixturePolicy(
+        dependencies.buildRunnerEconomyPosture(params),
+        params.input.playerView.own.credits,
+      ),
+  });
 }

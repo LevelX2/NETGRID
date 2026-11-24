@@ -1,4 +1,8 @@
 import { type DeckDefinition, type DeckPublicMetadata } from "@netgrid/shared";
+import {
+  cardSpecSetIdsForDefinitionId,
+  cardSpecSourceRefByDefinitionId,
+} from "@netgrid/cards/engine";
 
 export type CardPoolVersion = "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0";
 
@@ -10,16 +14,17 @@ type CardPoolDescriptor = {
 };
 
 const EXPANDED_CARD_POOL_IDS = new Set([
-  "simple_draw_event",
-  "simple_setup_hardware",
-  "efficient_fracter",
-  "simple_priority_agenda",
-  "simple_draw_operation",
-  "simple_taxing_barrier_ice",
-  "simple_upgrade",
-  "simple_tag_ice",
-  "simple_tag_punishment_operation",
+  592,
+  602,
+  4,
+  599,
+  593,
+  605,
+  606,
+  603,
+  604,
 ]);
+const FULL_CARD_POOL_SETS = new Set(["originalset-v1", "classic", "proteus"]);
 
 const CARD_POOL_DESCRIPTORS: CardPoolDescriptor[] = [
   {
@@ -30,11 +35,10 @@ const CARD_POOL_DESCRIPTORS: CardPoolDescriptor[] = [
       deck.id.endsWith("_094") ||
       deck.id.includes("_0_94") ||
       deck.id.includes("_v0_94") ||
-      deck.cards.some(
-        (card) =>
-          card.id.startsWith("onr_v1_") ||
-          card.id.startsWith("onr_proteus_") ||
-          card.id.startsWith("onr_classic_"),
+      deck.cards.some((card) =>
+        cardSpecSetIdsForDefinitionId(card.id)?.some((setId) =>
+          FULL_CARD_POOL_SETS.has(setId),
+        ),
       ),
   },
   {
@@ -45,7 +49,9 @@ const CARD_POOL_DESCRIPTORS: CardPoolDescriptor[] = [
       deck.id.endsWith("_008") ||
       deck.id.includes("_0_8") ||
       deck.id.includes("_v0_8") ||
-      deck.cards.some((card) => card.id.startsWith("v08_")),
+      deck.cards.some((card) =>
+        cardSpecSourceRefByDefinitionId(card.id)?.sourcePath.includes("/testset/v08_"),
+      ),
   },
   {
     version: "0.4.0",

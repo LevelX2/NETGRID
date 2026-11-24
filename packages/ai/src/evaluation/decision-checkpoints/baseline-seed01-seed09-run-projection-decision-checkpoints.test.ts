@@ -17,7 +17,7 @@ describe("baseline Seed 01 and Seed 09 card-run projection checkpoints", () => {
     "does not start the constrained R&D-Protocol run at %s",
     (_label, json) => {
       const result = runAiDecisionCheckpoint(
-        structuredClone(json) as AiDecisionCheckpointV1,
+        structuredClone(json) as unknown as AiDecisionCheckpointV1,
       );
 
       expect(result.ok, `${result.code ?? "ok"}: ${result.message}`).toBe(true);

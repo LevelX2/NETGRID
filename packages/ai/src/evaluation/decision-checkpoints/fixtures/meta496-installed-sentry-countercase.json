@@ -3,12 +3,15 @@
   "game": 31,
   "decision": 169,
   "card": {
-    "instanceId": "runner_onr_v1_054_raptor_1",
+    "instanceId": "c1n5",
     "known": true,
     "title": "Raptor",
-    "definitionId": "onr_v1_054_raptor",
+    "definitionId": 266,
     "type": "program",
-    "subtypes": ["icebreaker", "killer"],
+    "subtypes": [
+      "icebreaker",
+      "killer"
+    ],
     "rulesText": "[2]: Break sentry subroutine.\n[1]: +1 strength.",
     "installCost": 1,
     "memoryCost": 1,

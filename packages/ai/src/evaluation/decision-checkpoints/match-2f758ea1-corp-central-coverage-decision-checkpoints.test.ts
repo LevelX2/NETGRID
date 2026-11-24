@@ -7,7 +7,7 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 describe("match 2f758ea1 Corp central coverage regression", () => {
   it("covers empty R&D when HQ is protected and supported ICE is visible in HQ", () => {
     const result = runAiDecisionCheckpoint(
-      coverEmptyRdJson as AiDecisionCheckpointV1,
+      coverEmptyRdJson as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result).toMatchObject({ ok: true });

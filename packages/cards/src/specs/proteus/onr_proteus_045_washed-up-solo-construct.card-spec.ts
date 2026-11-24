@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_proteus_045_washed-up-solo-construct",
+      103,
     ),
     title: "Washed-Up Solo Construct",
     side: "corp",

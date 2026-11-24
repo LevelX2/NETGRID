@@ -1,117 +1,117 @@
 {
   "source": "589417c8ef8858fafacfcd52c7c8d2a0831a90a3",
   "originalPrefix": 111,
-  "checkpointHash": "fnv1a:0d5cf7f0",
+  "checkpointHash": "fnv1a:8b414fa9",
   "equivalentCurrentEncounterCost": 3,
-  "retainedRent": "runner_onr_classic_031_rent-i-con_2",
+  "retainedRent": "c7u",
   "sameOriginalCurrentRunAccess": true,
   "creditsAfterRun": 9,
   "rows": [
     {
-      "actionId": "runner.pump_breaker.runner_onr_classic_027_early-worm_2.runner_onr_classic_027_early-worm_2.runner_onr_classic_027_early-worm_2.corp_onr_v1_245_fire-wall_2.onr_classic_027_early-worm:pump_strength_three",
+      "actionId": "rj.c6y.c6y.c6y.c2tq.41",
       "type": "pump_breaker",
       "version": 112,
-      "hash": "fnv1a:d3f91438",
+      "hash": "fnv1a:81ccc3fd",
       "credits": [
         11,
         2
       ]
     },
     {
-      "actionId": "runner.break_subroutine.runner_onr_classic_027_early-worm_2.runner_onr_classic_027_early-worm_2.runner_onr_classic_027_early-worm_2.corp_onr_v1_245_fire-wall_2.0.printed_subroutines_end_the_run.onr_classic_027_early-worm:break_wall_subroutine",
+      "actionId": "r3.c6y.c6y.c6y.c2tq.0.0.40",
       "type": "break_subroutine",
       "version": 113,
-      "hash": "fnv1a:e72a8e85",
+      "hash": "fnv1a:4453478a",
       "credits": [
         10,
         2
       ]
     },
     {
-      "actionId": "runner.continue_run",
+      "actionId": "r5",
       "type": "continue_run",
       "version": 114,
-      "hash": "fnv1a:7be03fbb",
+      "hash": "fnv1a:c8d31b5e",
       "credits": [
         10,
         2
       ]
     },
     {
-      "actionId": "runner.continue_run",
+      "actionId": "r5",
       "type": "continue_run",
       "version": 115,
-      "hash": "fnv1a:eb100f53",
+      "hash": "fnv1a:2e431dac",
       "credits": [
         10,
         2
       ]
     },
     {
-      "actionId": "corp.decline_rez.rd",
+      "actionId": "c6.rd",
       "type": "decline_rez",
       "version": 116,
-      "hash": "fnv1a:276bdea9",
+      "hash": "fnv1a:f4ff21e6",
       "credits": [
         10,
         2
       ]
     },
     {
-      "actionId": "corp.decline_rez",
+      "actionId": "c6",
       "type": "decline_rez",
       "version": 117,
-      "hash": "fnv1a:447ee881",
+      "hash": "fnv1a:0ce8b27e",
       "credits": [
         10,
         2
       ]
     },
     {
-      "actionId": "runner.break_subroutine.runner_onr_classic_027_early-worm_2.runner_onr_classic_027_early-worm_2.runner_onr_classic_027_early-worm_2.corp_onr_proteus_038_snowbank_3.0.subroutine_end_run_unless_runner_pays_one.onr_classic_027_early-worm:break_wall_subroutine",
+      "actionId": "r3.c6y.c6y.c6y.clj.0.0.40",
       "type": "break_subroutine",
       "version": 118,
-      "hash": "fnv1a:3858ef42",
+      "hash": "fnv1a:ea327b3d",
       "credits": [
         9,
         2
       ]
     },
     {
-      "actionId": "runner.continue_run",
+      "actionId": "r5",
       "type": "continue_run",
       "version": 119,
-      "hash": "fnv1a:1eb09f24",
+      "hash": "fnv1a:9ef4cd9a",
       "credits": [
         9,
         2
       ]
     },
     {
-      "actionId": "runner.continue_run",
+      "actionId": "r5",
       "type": "continue_run",
       "version": 120,
-      "hash": "fnv1a:4585dae9",
+      "hash": "fnv1a:4d748e73",
       "credits": [
         9,
         2
       ]
     },
     {
-      "actionId": "corp.decline_rez.rd",
+      "actionId": "c6.rd",
       "type": "decline_rez",
       "version": 121,
-      "hash": "fnv1a:77fe072a",
+      "hash": "fnv1a:fe54f45e",
       "credits": [
         9,
         2
       ]
     },
     {
-      "actionId": "runner.access_card",
+      "actionId": "r0",
       "type": "access_card",
       "version": 122,
-      "hash": "fnv1a:28e449d1",
+      "hash": "fnv1a:9fad90e4",
       "credits": [
         9,
         2

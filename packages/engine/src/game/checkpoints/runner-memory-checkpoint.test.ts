@@ -67,12 +67,12 @@ function checkpointState(): GameState {
     cardInstances: {
       [programId]: {
         instanceId: programId,
-        definitionId: "program_two_mu",
+        definitionId: 1649598741,
         installedAsRunnerProgram: { memoryCost: 2 },
       },
       [zeroMuId]: {
         instanceId: zeroMuId,
-        definitionId: "program_zero_mu",
+        definitionId: 868068941,
         installedAsRunnerProgram: { memoryCost: 0 },
       },
     },

@@ -35,7 +35,7 @@ function target(input: AiDecisionInputWithDeckCapabilities) {
   return evaluateRunnerRunTargets({
     input,
     deckCapabilities: input.ownDeckCapabilities!,
-  }).find((t) => t.actionId === "runner.start_run.rd")!;
+  }).find((t) => t.actionId === "rs.rd")!;
 }
 it("prepares for the known Data Darts damage before the unknown access instead of entering an already doomed run", () => {
   const { input, runtime } = checkpoint();
@@ -54,13 +54,15 @@ it("prepares for the known Data Darts damage before the unknown access instead o
     decision = chooseAiAction(input);
   expect(JSON.stringify(input)).toBe(unchanged);
   expect(decision).toMatchObject({
-    actionId: "runner.draw_card",
+    actionId: "r8",
     fallbackUsed: false,
     timeoutUsed: false,
   });
-  expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toMatch(
-    /^plan:runner\.(defense_and_recovery|pressure_central):/,
-  );
+  expect(
+    decision.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+    )?.moduleId,
+  ).toMatch(/^runner\.(defense_and_recovery|pressure_central)$/);
 });
 it("admits the same route once five cards can absorb the three known damage and retain the access floor", () => {
   const { input } = checkpoint();

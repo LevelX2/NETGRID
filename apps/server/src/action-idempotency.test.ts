@@ -34,17 +34,18 @@ describe.each(["memory", "sqlite"] as const)(
         "runner",
         created.hostSessionToken,
       );
-      if ("error" in payload || !payload.legalActions[0])
+      if ("error" in payload || !payload.playerView.legalActions[0])
         throw new Error("Missing setup fixture");
       const request = {
         matchId: created.matchId,
         side: "runner" as const,
         sessionToken: created.hostSessionToken,
-        actionId: payload.legalActions[0].actionId,
+        actionId: payload.playerView.legalActions[0].actionId,
+        clientKnownMatchVersion: payload.matchVersion,
         clientKnownStateVersion: payload.playerView.stateVersion,
         idempotencyKey: "same-action-result",
         selectedChoices: {
-          choiceId: payload.pendingChoice!.choiceId,
+          choiceId: payload.playerView.pendingChoice!.choiceId,
           selectedOptionIds: ["keep"],
         },
       };

@@ -1,6 +1,7 @@
 import { Brain, Building2, Fingerprint, Goal } from "lucide-react";
 import type { ReactNode } from "react";
-import type { PlayerView, Side, VisibleCard } from "@netgrid/shared";
+import type { Side, VisibleCard } from "@netgrid/shared";
+import type { PlayerView } from "../../lib/presented-player-view";
 import { useTranslations } from "use-intl/react";
 
 import { CreditBadge, ScoreAreaStat, Stat } from "./ResourceStrip";

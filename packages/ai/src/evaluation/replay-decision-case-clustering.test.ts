@@ -159,8 +159,7 @@ function caseEntry(
     split,
     source: {
       matchId: `match-${caseId}`,
-      traceId: `trace-${caseId}`,
-      eventId: `event-${caseId}`,
+      eventId: 1,
       mode: "human_corp_vs_runner_ai",
       status: "finished",
       stateVersion: 1,
@@ -193,7 +192,7 @@ function caseEntry(
     },
     reproducibility: {
       stateVersion: 1,
-      eventId: `event-${caseId}`,
+      eventId: 1,
       decisionIndex: 1,
       requiresLocalRuntimeState: true,
       legalActionReconstructionRequired: true,

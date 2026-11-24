@@ -17,6 +17,7 @@ import type {
   ModifierKind,
   PlayerAction,
   Side,
+  TraceId,
 } from "@netgrid/shared";
 import type { ActivatedCardAbilityImplementation } from "../../ability-engine/definition-types";
 import type {
@@ -30,7 +31,7 @@ describe("trace orchestration", () => {
     "offers only the remaining run Link budget after %s spent",
     (spent) => {
       const sourceId = "source_1" as CardInstanceId;
-      const sourceDefinition = definition("trace_source", "operation");
+      const sourceDefinition = definition(2680416230, "operation");
       const state = minimalState({
         cardInstances: {
           [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
@@ -67,10 +68,7 @@ describe("trace orchestration", () => {
   it("excludes a paid base Link source when the run budget is exhausted", () => {
     const sourceId = "source_1" as CardInstanceId;
     const linkId = "access_1" as CardInstanceId;
-    const linkDefinition = definition(
-      "onr_v1_150_access-to-kiribati",
-      "resource",
-    );
+    const linkDefinition = definition(362, "resource");
     const state = minimalState({
       cardInstances: {
         [linkId]: instance(linkId, linkDefinition.id, "runner"),
@@ -79,7 +77,7 @@ describe("trace orchestration", () => {
     });
     state.trace = activeTrace(
       sourceId,
-      "trace_source" as CardDefinitionId,
+      2680416230 as CardDefinitionId,
       "base_link",
     );
     state.run = {
@@ -96,7 +94,7 @@ describe("trace orchestration", () => {
 
   it("starts an operation trace with stable trace choice metadata", () => {
     const sourceId = "source_1" as CardInstanceId;
-    const sourceDefinition = definition("trace_source", "operation");
+    const sourceDefinition = definition(2680416230, "operation");
     const state = minimalState({
       cardInstances: {
         [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
@@ -114,7 +112,7 @@ describe("trace orchestration", () => {
     );
 
     expect(state.trace).toMatchObject({
-      traceId: "op_trace.2.trace_source.source_1",
+      traceId: 2,
       sourceCardInstanceId: sourceId,
       sourceDefinitionId: sourceDefinition.id,
       traceLimit: 2,
@@ -124,9 +122,9 @@ describe("trace orchestration", () => {
       status: "corp_bid",
     });
     expect(state.pendingChoice).toMatchObject({
-      choiceId: "op_trace.2.trace_source.source_1.corp.bid.2",
+      choiceId: "2.corp.bid.2",
       side: "corp",
-      source: "trace:op_trace.2.trace_source.source_1",
+      source: "trace:2",
       kind: "bid_amount",
       stateVersion: 2,
       visibility: "public",
@@ -141,7 +139,7 @@ describe("trace orchestration", () => {
     ]);
     expect(action.payload).toMatchObject({
       traceStarted: true,
-      traceId: "op_trace.2.trace_source.source_1",
+      traceId: 2,
       sourceCardId: sourceId,
       sourceDefinitionId: sourceDefinition.id,
       traceLimit: 2,
@@ -150,7 +148,7 @@ describe("trace orchestration", () => {
 
   it("resolves the Corp bid through existing trace payment primitives", () => {
     const sourceId = "source_1" as CardInstanceId;
-    const sourceDefinition = definition("trace_source", "operation");
+    const sourceDefinition = definition(2680416230, "operation");
     const state = minimalState({
       cardInstances: {
         [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
@@ -177,11 +175,11 @@ describe("trace orchestration", () => {
     });
     expect(state.pendingChoice).toMatchObject({
       side: "runner",
-      source: "trace:trace_1",
+      source: "trace:1",
       kind: "bid_amount",
     });
     expect(action.payload).toMatchObject({
-      traceId: "trace_1",
+      traceId: 1,
       traceStep: "corp_bid",
       traceLimit: 2,
       corpBid: 2,
@@ -195,11 +193,8 @@ describe("trace orchestration", () => {
   it("keeps Classic bids hidden until the Runner commits", () => {
     const sourceId = "source_1" as CardInstanceId;
     const baedekerId = "baedeker_1" as CardInstanceId;
-    const sourceDefinition = definition("trace_source", "operation");
-    const baedekerDefinition = definition(
-      "onr_v1_003_baedekers-net-map",
-      "resource",
-    );
+    const sourceDefinition = definition(2680416230, "operation");
+    const baedekerDefinition = definition(215, "resource");
     const state = minimalState({
       cardInstances: {
         [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
@@ -303,8 +298,8 @@ describe("trace orchestration", () => {
   it("keeps a specialized Blind Corp payment pool unchanged until reveal", () => {
     const sourceId = "source_1" as CardInstanceId;
     const poolId = "krumz_pool" as CardInstanceId;
-    const sourceDefinition = definition("trace_source", "operation");
-    const poolDefinition = definition("onr_v1_330_krumz", "asset");
+    const sourceDefinition = definition(2680416230, "operation");
+    const poolDefinition = definition(542, "asset");
     const state = minimalState({
       cardInstances: {
         [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
@@ -374,7 +369,7 @@ describe("trace orchestration", () => {
 
   it("resolves the Runner bid and completes operation trace success without a run", () => {
     const sourceId = "source_1" as CardInstanceId;
-    const sourceDefinition = definition("trace_source", "operation");
+    const sourceDefinition = definition(2680416230, "operation");
     const state = minimalState({
       cardInstances: {
         [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
@@ -398,11 +393,11 @@ describe("trace orchestration", () => {
     expect(state.runner.credits).toBe(3);
     expect(calls.followups).toEqual([]);
     expect(calls.tagRequests).toEqual([
-      { amount: 1, source: "trace:trace_source:trace_1" },
+      { amount: 1, source: "trace:2680416230:1" },
     ]);
     expect(state.runner.tags).toBe(1);
     expect(action.payload).toMatchObject({
-      traceId: "trace_1",
+      traceId: 1,
       traceStep: "runner_bid",
       traceSuccessful: true,
       tagsAdded: 1,
@@ -414,11 +409,8 @@ describe("trace orchestration", () => {
   it("routes Crash Space's forced-success extra tag through the shared tag request", () => {
     const sourceId = "source_1" as CardInstanceId;
     const crashSpaceId = "crash_space_1" as CardInstanceId;
-    const sourceDefinition = definition("trace_source", "operation");
-    const crashSpaceDefinition = definition(
-      "onr_classic_044_crash-space",
-      "resource",
-    );
+    const sourceDefinition = definition(2680416230, "operation");
+    const crashSpaceDefinition = definition(48, "resource");
     const state = minimalState({
       cardInstances: {
         [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
@@ -453,12 +445,12 @@ describe("trace orchestration", () => {
     );
 
     expect(calls.tagRequests).toEqual([
-      { amount: 2, source: "trace:trace_source:trace_1" },
+      { amount: 2, source: "trace:2680416230:1" },
     ]);
     expect(state.runner.tags).toBe(2);
     expect(action.payload).toMatchObject({
       traceSuccessful: true,
-      traceAutoSuccessSourceDefinitionId: "onr_classic_044_crash-space",
+      traceAutoSuccessSourceDefinitionId: 48,
       traceAutoSuccessAdditionalTagAmount: 1,
       tagsAdded: 2,
     });
@@ -466,17 +458,13 @@ describe("trace orchestration", () => {
 
   it("opens runner cost support when a trace bid exceeds normal credits", () => {
     const sourceId = "source_1" as CardInstanceId;
-    const sourceDefinition = definition("trace_source", "operation");
+    const sourceDefinition = definition(2680416230, "operation");
     const chibaId = "trace_chiba" as CardInstanceId;
     const state = minimalState({
       cardInstances: {
         [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
         [chibaId]: {
-          ...instance(
-            chibaId,
-            "onr_proteus_133_chiba-bank-account" as CardDefinitionId,
-            "runner",
-          ),
+          ...instance(chibaId, 191 as CardDefinitionId, "runner"),
           faceup: false,
           rezzed: false,
         },
@@ -508,7 +496,7 @@ describe("trace orchestration", () => {
     expect(state.trace?.runnerBid).toBeUndefined();
     expect(state.pendingChoice).toMatchObject({
       side: "runner",
-      source: "trace:trace_1",
+      source: "trace:1",
     });
     expect(action.payload).toMatchObject({
       runnerCostPenaltySupportWindowOpened: true,
@@ -517,9 +505,11 @@ describe("trace orchestration", () => {
 
   it("opens post-bid link choices with structured link metadata", () => {
     const sourceId = "source_1" as CardInstanceId;
-    const sourceDefinition = definition("trace_source", "operation");
+    const sourceDefinition = definition(2680416230, "operation");
     const programId = "program_1" as CardInstanceId;
-    const programDefinition = definition("pvr", "program");
+    const programDefinition = definition(1701870619, "program", {
+      title: "pvr",
+    });
     const state = minimalState({
       cardInstances: {
         [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
@@ -527,7 +517,7 @@ describe("trace orchestration", () => {
       },
       runnerPrograms: [programId],
     });
-    state.run = { runId: "run_1", attackedServerId: "rd" } as any;
+    state.run = { runId: 1, attackedServerId: "rd" } as any;
     state.trace = activeTrace(sourceId, sourceDefinition.id, "runner_bid", {
       corpBid: 0,
       traceValue: 3,
@@ -551,7 +541,7 @@ describe("trace orchestration", () => {
     );
 
     expect(state.pendingChoice).toMatchObject({
-      source: "trace_post_bid_link:trace_1",
+      source: "trace_post_bid_link:1",
       side: "runner",
       visibility: "hidden_info_barrier",
     });
@@ -568,11 +558,15 @@ describe("trace orchestration", () => {
 
   it("lets the Runner choose trace-link credit allocation before paying a trace bid", () => {
     const sourceId = "source_1" as CardInstanceId;
-    const sourceDefinition = definition("trace_source", "operation");
+    const sourceDefinition = definition(2680416230, "operation");
     const linkAId = "link_a" as CardInstanceId;
     const linkBId = "link_b" as CardInstanceId;
-    const linkADefinition = definition("link_a_definition", "hardware");
-    const linkBDefinition = definition("link_b_definition", "resource");
+    const linkADefinition = definition(3762792499, "hardware", {
+      title: "link_a_definition",
+    });
+    const linkBDefinition = definition(3596556728, "resource", {
+      title: "link_b_definition",
+    });
     const state = minimalState({
       cardInstances: {
         [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
@@ -616,7 +610,7 @@ describe("trace orchestration", () => {
       allocations: [],
     });
     expect(state.pendingChoice).toMatchObject({
-      source: `trace_runner_bid_payment:trace_1:${linkAId}`,
+      source: `trace_runner_bid_payment:1:${linkAId}`,
       prompt:
         "link_a_definition fuer Runner Link-Bid nutzen (bisher 0/8 Gesamtbid)",
     });
@@ -643,7 +637,7 @@ describe("trace orchestration", () => {
     expect(hostedCredits.get(linkAId)).toBe(5);
     expect(hostedCredits.get(linkBId)).toBe(2);
     expect(state.pendingChoice).toMatchObject({
-      source: `trace_runner_bid_payment:trace_1:${linkBId}`,
+      source: `trace_runner_bid_payment:1:${linkBId}`,
       prompt:
         "link_b_definition fuer Runner Link-Bid nutzen (bisher 3/8 Gesamtbid)",
     });
@@ -668,16 +662,13 @@ describe("trace orchestration", () => {
 
   it("keeps multi-source trace-link allocation reachable with cost support", () => {
     const sourceId = "source_support" as CardInstanceId;
-    const sourceDefinition = definition("trace_source", "operation");
+    const sourceDefinition = definition(2680416230, "operation");
     const linkAId = "link_support_a" as CardInstanceId;
     const linkBId = "link_support_b" as CardInstanceId;
     const swissId = "trace_support_swiss" as CardInstanceId;
-    const linkADefinition = definition("link_support_a_definition", "hardware");
-    const linkBDefinition = definition("link_support_b_definition", "resource");
-    const swissDefinition = definition(
-      "onr_proteus_152_swiss-bank-account",
-      "resource",
-    );
+    const linkADefinition = definition(3614149531, "hardware");
+    const linkBDefinition = definition(3776927360, "resource");
+    const swissDefinition = definition(210, "resource");
     const state = minimalState({
       cardInstances: {
         [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
@@ -745,12 +736,9 @@ describe("trace orchestration", () => {
 
   it("opens a trace success cancel window from a real successful trace result", () => {
     const sourceId = "source_1" as CardInstanceId;
-    const sourceDefinition = definition("trace_source", "operation");
+    const sourceDefinition = definition(2680416230, "operation");
     const backDoorId = "back_door" as CardInstanceId;
-    const backDoorDefinition = definition(
-      "onr_proteus_129_back-door-to-netwatch",
-      "resource",
-    );
+    const backDoorDefinition = definition(187, "resource");
     const state = minimalState({
       cardInstances: {
         [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
@@ -786,7 +774,7 @@ describe("trace orchestration", () => {
     expect(calls.followups).toEqual([]);
     expect(state.trace).toMatchObject({ status: "trace_success_cancel" });
     expect(state.pendingChoice).toMatchObject({
-      source: "trace_success_cancel:trace_1",
+      source: "trace_success_cancel:1",
       side: "runner",
       visibility: "hidden_info_barrier",
     });
@@ -801,9 +789,11 @@ describe("trace orchestration", () => {
 
   it("resolves post-bid link choices through existing runner trace payment", () => {
     const sourceId = "source_1" as CardInstanceId;
-    const sourceDefinition = definition("trace_source", "operation");
+    const sourceDefinition = definition(2680416230, "operation");
     const programId = "program_1" as CardInstanceId;
-    const programDefinition = definition("pvr", "program");
+    const programDefinition = definition(1701870619, "program", {
+      title: "pvr",
+    });
     const state = minimalState({
       cardInstances: {
         [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
@@ -820,11 +810,11 @@ describe("trace orchestration", () => {
       postBidLinkBonus: 0,
       postBidLinkSourceIds: [],
     });
-    state.run = { runId: "run_1", attackedServerId: "rd" } as any;
+    state.run = { runId: 1, attackedServerId: "rd" } as any;
     state.pendingChoice = {
-      choiceId: "trace_1.post_bid_link.2",
+      choiceId: "1.post_bid_link.2",
       side: "runner",
-      source: "trace_post_bid_link:trace_1",
+      source: "trace_post_bid_link:1",
       prompt: "Post-bid Link-Faehigkeit nutzen",
       kind: "select_option",
       options: [
@@ -860,9 +850,9 @@ describe("trace orchestration", () => {
     expect(state.runner.credits).toBe(4);
     expect(calls.runActionCapSpends).toEqual([1]);
     expect(calls.submarineMarkers).toEqual([programId]);
-    expect(calls.followups).toEqual(["post_bid_link:trace_1"]);
+    expect(calls.followups).toEqual(["post_bid_link:1"]);
     expect(action.payload).toMatchObject({
-      traceId: "trace_1",
+      traceId: 1,
       traceStep: "post_bid_link",
       eventModificationDecision: "apply",
       sourceDefinitionId: programDefinition.id,
@@ -878,12 +868,9 @@ describe("trace orchestration", () => {
 
   it("records base-link payments against run-action spending cap", () => {
     const sourceId = "source_1" as CardInstanceId;
-    const sourceDefinition = definition("trace_source", "operation");
+    const sourceDefinition = definition(2680416230, "operation");
     const accessId = "access_kiribati_1" as CardInstanceId;
-    const accessDefinition = definition(
-      "onr_v1_150_access-to-kiribati",
-      "resource",
-    );
+    const accessDefinition = definition(362, "resource");
     const state = minimalState({
       cardInstances: {
         [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
@@ -894,11 +881,11 @@ describe("trace orchestration", () => {
     state.trace = activeTrace(sourceId, sourceDefinition.id, "base_link", {
       traceValue: 4,
     });
-    state.run = { runId: "run_1", attackedServerId: "rd" } as any;
+    state.run = { runId: 1, attackedServerId: "rd" } as any;
     state.pendingChoice = {
-      choiceId: "trace_1.base_link.2",
+      choiceId: "1.base_link.2",
       side: "runner",
-      source: "trace_base_link:trace_1",
+      source: "trace_base_link:1",
       prompt: "Base-Link-Karte fuer Trace nutzen",
       kind: "select_option",
       options: [
@@ -946,7 +933,7 @@ describe("trace orchestration", () => {
 
   it("does not handle legacy Paris City Grid trace trigger payloads", () => {
     const sourceId = "paris_1" as CardInstanceId;
-    const sourceDefinition = definition("paris_city_grid", "upgrade");
+    const sourceDefinition = definition(3963457139, "upgrade");
     const state = minimalState({
       cardInstances: {
         [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
@@ -988,13 +975,13 @@ describe("trace orchestration", () => {
 });
 
 function definition(
-  id: string,
+  id: number,
   type: CardDefinition["type"],
   extras: Partial<CardDefinition> = {},
 ): CardDefinition {
   return {
     id: id as CardDefinitionId,
-    title: id,
+    title: String(id),
     type,
     installCost: 0,
     rezCost: 0,
@@ -1069,7 +1056,7 @@ function minimalState(input: {
     cardInstances: {
       runner_identity: instance(
         "runner_identity" as CardInstanceId,
-        "runner_identity_def" as CardDefinitionId,
+        198573098 as CardDefinitionId,
         "runner",
       ),
       ...input.cardInstances,
@@ -1085,7 +1072,7 @@ function activeTrace(
   extras: Partial<NonNullable<GameState["trace"]>> = {},
 ): NonNullable<GameState["trace"]> {
   return {
-    traceId: "trace_1",
+    traceId: 1,
     sourceCardInstanceId,
     sourceDefinitionId,
     traceLimit: 2,
@@ -1098,7 +1085,7 @@ function activeTrace(
 function bidChoice(
   state: GameState,
   side: Side,
-  traceId: string,
+  traceId: TraceId,
   maxBid: number,
 ) {
   return {
@@ -1186,7 +1173,7 @@ function testHost(
       definitions[state.cardInstances[cardId]!.definitionId];
     if (!foundDefinition) {
       if (cardId === state.runner.identity)
-        return definition("runner_identity_def", "identity", { baseLink: 1 });
+        return definition(198573098, "identity", { baseLink: 1 });
       throw new Error(`Definition fehlt: ${cardId}`);
     }
     return foundDefinition;

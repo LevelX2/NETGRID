@@ -45,6 +45,8 @@ function signal(cp: ReturnType<typeof checkpoint>) {
   )!;
   const candidate = {
     actionId: action.actionId,
+    actorSide: "corp",
+    stateVersion: cp.input.playerView.stateVersion,
     semanticActionType: "choice.resolve",
   } as ActionSemanticCandidate;
   return corpClassicDeflectorDefenseChoiceSignal(
@@ -56,7 +58,7 @@ function signal(cp: ReturnType<typeof checkpoint>) {
 }
 
 it.each([
-  [2, "server_remote_2"],
+  [2, "server_r2"],
   [3, "server_hq"],
 ] as const)(
   "pays the native terminal redirect at %i credits before retaining later score cash",
@@ -65,7 +67,7 @@ it.each([
     expect(Object.values(cp.validation)).toEqual(Array(9).fill(true));
     cp.input.playerView.own.credits = credits;
     const { input, result } = choose(cp);
-    expect(result.actionId).toBe("corp.resolve_choice");
+    expect(result.actionId).toBe("cn");
     expect(result.selectedChoices).toEqual({
       choiceId: "classic_deflector_317",
       selectedOptionIds: [optionId],
@@ -95,7 +97,7 @@ it("preserves the score floor when the current remote cannot supply matchpoint",
 
 it("can spend the reserve on the remaining known agenda-free Archives exit", () => {
   const cp = checkpoint();
-  cp.input.playerView.servers.find((s) => s.id === "remote_2")!.root[0]!.known =
+  cp.input.playerView.servers.find((s) => s.id === "r2")!.root[0]!.known =
     false;
   expect(signal(cp)?.choiceResolution).toMatchObject({
     disposition: "redirect",
@@ -114,7 +116,7 @@ it("does not pay an unaffordable redirect even for current matchpoint", () => {
 it("does not invent the current agenda value when its fact is missing", () => {
   const cp = checkpoint();
   const agenda = cp.input.playerView.servers
-    .find((s) => s.id === "remote_1")!
+    .find((s) => s.id === "r1")!
     .root.find((c) => c.type === "agenda")!;
   delete agenda.agendaPoints;
   expect(signal(cp)?.choiceResolution).toMatchObject({
@@ -125,7 +127,7 @@ it("does not invent the current agenda value when its fact is missing", () => {
 
 it("requires known zero agenda exposure at the redirect destination", () => {
   const cp = checkpoint();
-  cp.input.playerView.servers.find((s) => s.id === "remote_2")!.root[0]!.known =
+  cp.input.playerView.servers.find((s) => s.id === "r2")!.root[0]!.known =
     false;
   cp.input.playerView.own.heapOrArchives[0]!.known = false;
   expect(signal(cp)?.choiceResolution).toMatchObject({
@@ -136,8 +138,8 @@ it("requires known zero agenda exposure at the redirect destination", () => {
 
 it("does not certify a destination with a further ICE continuation as an agenda-free exit", () => {
   const cp = checkpoint();
-  const source = cp.input.playerView.servers.find((s) => s.id === "remote_1")!;
-  cp.input.playerView.servers.find((s) => s.id === "remote_2")!.ice = [
+  const source = cp.input.playerView.servers.find((s) => s.id === "r1")!;
+  cp.input.playerView.servers.find((s) => s.id === "r2")!.ice = [
     structuredClone(source.ice[0]!),
   ];
   cp.input.playerView.servers.find((s) => s.id === "archives")!.ice = [

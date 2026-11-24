@@ -13,7 +13,7 @@ import {
   createRunnerVisibleCardDiscardComposition,
   type RunnerVisibleCardDiscardCompositionDependencies,
 } from "./runner-visible-card-discard-composition";
-import { createRunnerStrategicIntentContext } from "./runner-strategic-intent-context";
+import { runnerStrategicIntentForInput } from "./runner-strategic-intent-context";
 import {
   selectedChoicesForDecision as selectedChoicesForRuntimeDecision,
   type SelectedChoicesForDecisionDependencies,
@@ -24,7 +24,7 @@ import type { AiCardHint } from "../ai-hints";
 
 export type RunnerBaselineSupportCompositionDependencies = {
   visibleBreakerRolesForAi: (card: VisibleCard) => readonly string[];
-  hintForDefinitionId: (definitionId: string) => AiCardHint | undefined;
+  hintForDefinitionId: (definitionId: number) => AiCardHint | undefined;
 } & Omit<
   SelectedChoicesForDecisionDependencies,
   | "discardKeepScore"
@@ -44,8 +44,6 @@ export function createRunnerBaselineSupportComposition(
   dependencies: RunnerBaselineSupportCompositionDependencies,
 ) {
   const { deckCapabilitiesForInput } = createDeckCapabilitiesContext();
-  const { runnerStrategicIntentForInput } =
-    createRunnerStrategicIntentContext();
   const isVisibleIcebreakerProgram = createVisibleIcebreakerProgramPredicate(
     dependencies.visibleBreakerRolesForAi,
   );

@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import standardDeckCatalog from "../../../../data/decks/standard-deck-catalog-1.0.0.json";
 import profilesData from "../../../../data/decks/deck-format-profiles-0.8.json";
 import profilesData130 from "../../../../data/decks/deck-format-profiles-1.3.0.json";
@@ -46,11 +47,11 @@ describe("R&D Express selfplay runtime regressions", () => {
       .withRunnerGripSize(0)
       .withRunnerCredits(5)
       .withRunnerClicks(4)
-      .withRunnerProgramInstalled("onr_v1_075_zetatech-software-installer")
-      .withRunnerCardInGrip("onr_v1_007_blink");
+      .withRunnerProgramInstalled(287)
+      .withRunnerCardInGrip(219);
     const installer = Object.values(state.cardInstances).find(
       (c) =>
-        c.definitionId === "onr_v1_075_zetatech-software-installer" &&
+        c.definitionId === 287 &&
         c.zone.zone === "rig",
     )!;
     installer.counters = { bit: 2 };
@@ -66,7 +67,7 @@ describe("R&D Express selfplay runtime regressions", () => {
     )!;
     expect(action.type).toBe("install_card");
     expect(state.cardInstances[action.source]!.definitionId).toBe(
-      "onr_v1_007_blink",
+      219,
     );
     expect(decision.fallbackUsed).toBe(false);
     const result = applyAction(state, {
@@ -347,7 +348,7 @@ describe("R&D Express selfplay runtime regressions", () => {
     state.runner.clicks = 4;
     state.runner.credits = 0;
     const hardware = Object.values(state.cardInstances).find(
-      (card) => card.definitionId === "onr_v1_139_r-and-d-interface",
+      (card) => card.definitionId === 351,
     )!;
     state.runner.grip = state.runner.grip.filter(
       (id) => id !== hardware.instanceId,
@@ -362,7 +363,7 @@ describe("R&D Express selfplay runtime regressions", () => {
       rezzed: true,
     });
     const asset = Object.values(state.cardInstances).find(
-      (card) => card.definitionId === "onr_v1_320_encoder-inc",
+      (card) => card.definitionId === 532,
     )!;
     state.corp.hq = state.corp.hq.filter((id) => id !== asset.instanceId);
     state.corp.rd = state.corp.rd.filter((id) => id !== asset.instanceId);
@@ -392,7 +393,7 @@ describe("R&D Express selfplay runtime regressions", () => {
     );
     expect(state.run?.breach?.queue).toHaveLength(2);
     const runId = state.run!.runId;
-    const root = `plan:runner.convert_run_window:run%3A${runId}`;
+    const root = planInstanceIdForProposal({ moduleId: "runner.convert_run_window", dedupeKey: `run:${runId}` });
     resetResidentPlanPortfolioMemory();
     for (const actionType of [
       "access_card",
@@ -468,8 +469,8 @@ type StandardDeck = {
   version: string;
   name: string;
   side: "runner" | "corp";
-  identityCardId: string;
-  cards: Array<{ cardId: string; quantity: number }>;
+  identityCardId: number;
+  cards: Array<{ cardId: number; quantity: number }>;
   cardPoolSnapshotId: string;
   cardPoolVersion: string;
   formatProfileId: string;

@@ -1,61 +1,54 @@
 import type {
-  AiDecision,
   AiDecisionInput,
   GameState,
   LegalAction,
+  PublicGameEvent,
 } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 
 import { RUNTIME_CARDS } from "../ai-hints";
 import { classifyTagSourceFromOntology } from "../tag-punish-ontology-consumer";
-import { rolesMatch } from "../role-match";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 
 export type CorpTagCreationDiagnosticsDependencies = {
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string;
+  ) => number | undefined;
 };
 
 export function createCorpTagCreationDiagnosticsContext(
   dependencies: CorpTagCreationDiagnosticsDependencies,
 ): {
-  applyCorpTagSourceWindowDiagnostics: (
-    diagnostics: Partial<AiSimulationSummary["actionSequence"][number]>,
-    input: AiDecisionInput,
-    action: LegalAction,
-  ) => void;
   applyActualTagCreationDiagnostics: (
     diagnostics: Partial<AiSimulationSummary["actionSequence"][number]>,
     input: AiDecisionInput,
     action: LegalAction,
-    decision: AiDecision,
     stateBeforeAction: GameState,
+    result: PublicGameEvent["publicPayload"],
   ) => void;
 } {
-  function applyCorpTagSourceWindowDiagnostics(
+  function classifySource(
     diagnostics: Partial<AiSimulationSummary["actionSequence"][number]>,
-    input: AiDecisionInput,
     action: LegalAction,
+    sourceDefinitionId: number | undefined,
   ): void {
-    const sourceDefinitionId = dependencies.sourceDefinitionIdForAction(
-      input,
-      action,
-    );
-    const sourceType =
-      RUNTIME_CARDS[sourceDefinitionId]?.type ??
-      CARD_DEFINITIONS_BY_ID[sourceDefinitionId]?.type;
+    const sourceType = sourceDefinitionId === undefined
+      ? undefined
+      : RUNTIME_CARDS[sourceDefinitionId]?.type ?? planningCardFactsByDefinitionId(sourceDefinitionId)?.type;
     const tagSourceProfile = classifyTagSourceFromOntology(sourceDefinitionId);
     if (sourceType === "agenda" && tagSourceProfile?.traceTagSource)
       diagnostics.corpTagCreatedByScoredAgendaAction = true;
-    else if (action.type === "play_operation")
+    else if (sourceType === "operation" || action.type === "play_operation")
       diagnostics.corpTagCreatedByOperation = true;
     else if (sourceType === "asset")
       diagnostics.corpTagCreatedByAssetOrNode = true;
     else if (sourceType === "ice" || action.type === "rez_ice")
       diagnostics.corpTagCreatedByIce = true;
-    if (action.type === "trigger_ability")
+    if (
+      action.type === "trigger_ability" ||
+      action.type === "activated_card_ability"
+    )
       diagnostics.corpTagCreatedByPersistentEffect = true;
   }
 
@@ -63,35 +56,41 @@ export function createCorpTagCreationDiagnosticsContext(
     diagnostics: Partial<AiSimulationSummary["actionSequence"][number]>,
     input: AiDecisionInput,
     action: LegalAction,
-    decision: AiDecision,
     stateBeforeAction: GameState,
+    result: PublicGameEvent["publicPayload"],
   ): void {
-    if (input.side === "runner") {
+    const phase =
+      stateBeforeAction.trace?.returnPhase ?? stateBeforeAction.phase;
+    const duringRun = stateBeforeAction.run !== undefined || phase === "run";
+    if (duringRun || phase.startsWith("runner_")) {
       diagnostics.corpTagCreatedDuringRunnerTurn = true;
-      if (
-        stateBeforeAction.run ||
-        action.type === "resolve_choice" ||
-        rolesMatch([decision.reasonCode], ["trace"])
-      ) {
-        diagnostics.corpTagCreatedDuringEncounter = true;
-        diagnostics.corpTagCreatedByTraceSuccess = true;
-      }
-      if (
-        action.type === "access_card" ||
-        action.type === "steal_agenda" ||
-        action.type === "trash_accessed_card" ||
-        action.type === "decline_trash"
-      )
-        diagnostics.corpTagCreatedByAccessOrSteal = true;
-      return;
+    } else if (phase.startsWith("corp_")) {
+      diagnostics.corpTagCreatedDuringCorpTurn = true;
     }
-    if (input.side !== "corp") return;
-    diagnostics.corpTagCreatedDuringCorpTurn = true;
-    applyCorpTagSourceWindowDiagnostics(diagnostics, input, action);
+    if (stateBeforeAction.run?.encounteredIceId !== undefined)
+      diagnostics.corpTagCreatedDuringEncounter = true;
+
+    const traceSucceeded =
+      result.traceSuccessful === true && result.traceEffectCanceled !== true;
+    if (traceSucceeded) {
+      diagnostics.corpTagCreatedByTraceSuccess = true;
+      if (duringRun) diagnostics.runnerTaggedAfterTraceDuringRun = true;
+    }
+    if (
+      action.type === "access_card" ||
+      action.type === "steal_agenda" ||
+      action.type === "trash_accessed_card" ||
+      action.type === "decline_trash" ||
+      stateBeforeAction.pendingAddTagContinuation?.kind === "access_effect"
+    ) {
+      diagnostics.corpTagCreatedByAccessOrSteal = true;
+    }
+    const sourceDefinitionId =
+      typeof result.sourceDefinitionId === "number"
+        ? result.sourceDefinitionId
+        : dependencies.sourceDefinitionIdForAction(input, action);
+    classifySource(diagnostics, action, sourceDefinitionId);
   }
 
-  return {
-    applyCorpTagSourceWindowDiagnostics,
-    applyActualTagCreationDiagnostics,
-  };
+  return { applyActualTagCreationDiagnostics };
 }

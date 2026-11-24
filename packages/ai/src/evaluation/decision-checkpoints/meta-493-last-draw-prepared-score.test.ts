@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
@@ -9,9 +10,9 @@ import {
 } from "./runtime-checkpoint";
 
 afterEach(resetResidentPlanPortfolioMemory);
-const installed = "corp_onr_v1_217_strike-force-kali_1";
+const installed = "c2nh";
 const newInstall =
-  "corp.install_card.corp_onr_v1_212_priority-requisition_1.new_remote.corp_onr_v1_212_priority-requisition_1";
+  "cc.c2md.new_remote.c2md";
 function checkpoint() {
   return JSON.parse(
     readFileSync(
@@ -60,19 +61,22 @@ it("funds the already certified terminal continuation instead of opening an unpr
   });
   const result = decide(cp),
     plan = result.decisionDebug!.planFirstDecision!;
-  expect(result.actionId).toBe("corp.gain_credit");
+  expect(result.actionId).toBe("cb");
   expect(plan.selectedPlan?.moduleId).toBe("corp.economy");
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:corp.score_agenda:agenda%3Acorp_onr_v1_217_strike-force-kali_1%3Aremote_1",
+    "p1rgdikfrnp3ndp5yeqlx1qdaa",
   );
   expect(plan.priority?.effectiveClass).toBe("P2");
   expect(plan.leafExecutorInstanceId).toBe(plan.selectedPlan?.instanceId);
   expect(plan.selectedStep?.planInstanceId).toBe(plan.leafExecutorInstanceId);
+  expect(plan.portfolio).toBeDefined();
   expect(
-    plan.portfolio?.find((p) =>
-      p.dedupeKey.includes("priority-requisition_1:new_remote"),
-    )?.evidenceCodes,
-  ).not.toContain("corp_last_viable_deckout_matchpoint_install:new_remote");
+    plan.portfolio?.some((p) =>
+      referencesDefaultDeckCard(p.dedupeKey, 424, 1) &&
+      p.dedupeKey.endsWith(":new_remote") &&
+      p.evidenceCodes.includes("corp_last_viable_deckout_matchpoint_install:new_remote"),
+    ),
+  ).toBe(false);
 });
 it.each(["stale", "incomplete", "nonterminal", "unfundable"] as const)(
   "does not replace a %s installed continuation with an unfunded emergency install",
@@ -100,7 +104,7 @@ it.each(["stale", "incomplete", "nonterminal", "unfundable"] as const)(
         cp.input.playerView.own.credits + cp.input.playerView.own.clicks + 1;
     const result = decide(cp),
       plan = result.decisionDebug!.planFirstDecision!;
-    expect(result.actionId).toBe("corp.gain_credit");
+    expect(result.actionId).toBe("cb");
     expect(plan.selectedPlan?.moduleId).toBe("corp.economy");
   },
 );

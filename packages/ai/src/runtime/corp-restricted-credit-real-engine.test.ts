@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import {
   applyAction,
   createGameAfterSetup,
@@ -26,10 +27,10 @@ import { allocateCorpCentralDefenseFromAiFacts } from "../corp/defense/corp-cent
 import { corpRestrictedRezPreparationCandidates } from "./corp-restricted-credit-reserve";
 import { corpFundedCentralProtectionReserve } from "../corp/defense/corp-server-protection-reserve";
 
-const CONTRACT = "onr_proteus_059_government-contract";
-const WALL = "onr_v1_279_wall-of-static";
-const CAMPAIGN = "onr_v1_337_rockerboy-promotion";
-const OPERATION = "onr_v1_302_scorched-earth";
+const CONTRACT = 117;
+const WALL = 491;
+const CAMPAIGN = 549;
+const OPERATION = 514;
 const ORIGINAL_ENTRY = standardDeckCatalog.decks.find(
   (deck) =>
     deck.standardDeckId ===
@@ -67,7 +68,7 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
       "end_turn",
     ]);
     const decision = chooseCorpAction(input);
-    expect(decision.actionId).toBe("corp.end_turn");
+    expect(decision.actionId).toBe("c9");
     expect(
       decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
     ).toBe("corp.complete_turn");
@@ -108,8 +109,10 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
         decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
       ).toBe("corp.economy");
       expect(
-        decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-      ).toContain("corp.defend_servers");
+        decision.decisionDebug?.planFirstDecision?.portfolio.find(
+          (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+        )?.moduleId,
+      ).toBe("corp.defend_servers");
       state = apply(state, head);
     }
     expect(state.corp.credits).toBe(0);
@@ -165,7 +168,7 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
     state.corp.credits = 3;
     const input = decisionInput(state, ORIGINAL_DECK);
     expect(preparationsForOriginal(input)).toHaveLength(1);
-    input.playerView.servers.find((server) => server.id === "remote_1")!
+    input.playerView.servers.find((server) => server.id === "r1")!
       .root[0]!.restrictedCreditBankQuote!.expiresAtStateVersion--;
     expect(preparationsForOriginal(input)).toEqual([]);
   });
@@ -196,8 +199,10 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
         choice.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
       ).toBe("corp.economy");
       expect(
-        choice.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-      ).toContain("corp.defend_servers");
+        choice.decisionDebug?.planFirstDecision?.portfolio.find(
+          (instance) => instance.instanceId === choice.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+        )?.moduleId,
+      ).toBe("corp.defend_servers");
       let next = apply(state, head);
       expect(next.corp.credits).toBe(credits - 1);
       expect(next.cardInstances[contractId(state)]!.advancementCounters).toBe(
@@ -298,7 +303,7 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
     tooLate.playerView.own.clicks = 1;
     expect(preparationsForOriginal(tooLate)).toEqual([]);
     const stale = structuredClone(input);
-    stale.playerView.servers.find((server) => server.id === "remote_1")!
+    stale.playerView.servers.find((server) => server.id === "r1")!
       .root[0]!.restrictedCreditBankQuote!.expiresAtStateVersion--;
     expect(preparationsForOriginal(stale)).toEqual([]);
     const missingHead = structuredClone(input);
@@ -321,7 +326,7 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
   it("does not replace defense draw with a bank preparation for visibly breakable ICE", () => {
     const state = preparedOriginalTerminalReserve(3, 2);
     RealEngineFixtureBuilder.forState(state)
-      .withRunnerProgramInstalled("onr_v1_036_jackhammer")
+      .withRunnerProgramInstalled(248)
       .withRunnerCredits(30);
     const input = decisionInput(state, ORIGINAL_DECK);
     const choice = chooseCorpAction(input);
@@ -345,7 +350,7 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
     const source = next.cardInstances[contractId(state)]!;
     // Isolated opponent-removal checkpoint: no claim of a chosen Runner route.
     const remote = next.corp.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     )!;
     remote.root = remote.root.filter((id) => id !== source.instanceId);
     next.corp.archives.push(source.instanceId);
@@ -367,12 +372,12 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
     const state = preparedOriginalTerminalReserve(3, 2);
     const input = decisionInput(state, ORIGINAL_DECK);
     const root = input.playerView.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     )!.root[0]!;
     const original = structuredClone(root.restrictedCreditBankQuote!);
     const sanitizedBank = () =>
       buildAiDecisionInputDto(input).playerView.servers.find(
-        (server) => server.id === "remote_1",
+        (server) => server.id === "r1",
       )!.root[0]!.restrictedCreditBankQuote;
     Object.assign(root.restrictedCreditBankQuote!, {
       secret: "not-transported",
@@ -403,7 +408,7 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
     const state = preparedInstallWindow();
     state.cardInstances[contractId(state)]!.advancementCounters = 0;
     const bank = decisionInput(state).playerView.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     )!.root[0]!.restrictedCreditBankQuote;
     expect(bank).toMatchObject({
       advancementCounters: 0,
@@ -419,7 +424,7 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
     state.cardInstances[contractId(state)]!.rezzed = false;
     expect(
       decisionInput(state).playerView.servers.find(
-        (server) => server.id === "remote_1",
+        (server) => server.id === "r1",
       )!.root[0]!.restrictedCreditBankQuote,
     ).toMatchObject({ setupRoutes: [] });
   });
@@ -431,7 +436,7 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
       (quote) => quote.consumer.actionType === "rez_ice",
     )!;
     expect(funding.consumer).toMatchObject({
-      sourceCardDefinitionId: "onr_proteus_033_mobile-barricade",
+      sourceCardDefinitionId: 91,
       creditCost: 6,
       generalCreditsRequired: 3,
       generalCreditsRemainingAfterConsumer: 0,
@@ -439,7 +444,12 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
     const decision = chooseCorpAction(input);
     expect(decision.actionId).toBe(funding.request.payoutActionId);
     const root = decision.decisionDebug!.planFirstDecision!.rootPlanInstanceId;
-    expect(root).toContain("corp.defend_servers");
+    expect(root).toBe(
+      planInstanceIdForProposal({
+        moduleId: "corp.defend_servers",
+        dedupeKey: "server-defense-portfolio",
+      }),
+    );
     expect(
       decision.decisionDebug!.planFirstDecision!.selectedPlan?.moduleId,
     ).toBe("corp.economy");
@@ -486,7 +496,7 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
   it("does not treat an affordable visible break route as an access block", () => {
     const state = preparedOriginalRun();
     RealEngineFixtureBuilder.forState(state)
-      .withRunnerProgramInstalled("onr_v1_036_jackhammer")
+      .withRunnerProgramInstalled(248)
       .withRunnerCredits(30);
     const input = decisionInput(state, ORIGINAL_DECK);
     expect(input.corpRestrictedCreditRouteQuotes).toHaveLength(1);
@@ -505,7 +515,7 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
         {
           projectId: "agenda:reserve",
           agendaPoints: 2,
-          serverId: "remote_2",
+          serverId: "r2",
           phase: "advance_agenda",
           sameTurnCloseout: false,
           terminalScore: false,
@@ -513,7 +523,7 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
           evidenceCode: "test",
           continuationReserve: {
             agendaCardId: "reserve",
-            serverId: "remote_2",
+            serverId: "r2",
             requiredCreditsBeforeNextCorpTurn: 1,
             remainingAdvancementCounters: 1,
             nextCorpTurnGuaranteedFlexibleClicks: 3,
@@ -742,8 +752,10 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
     // accepting the economic rez does not authorize overriding that need.
     expect(cashout.type).toBe("draw_card");
     expect(
-      cashoutDecision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-    ).toContain("corp.score_agenda");
+      cashoutDecision.decisionDebug?.planFirstDecision?.portfolio.find(
+        (instance) => instance.instanceId === cashoutDecision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+      )?.moduleId,
+    ).toBe("corp.score_agenda");
     const availablePayout = cashoutInput.legalActions.find(
       (action) =>
         action.source === rez.source &&
@@ -760,7 +772,7 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
       sourceCardInstanceId: Object.values(state.cardInstances).find(
         (card) => card.definitionId === CAMPAIGN,
       )!.instanceId,
-      serverId: "remote_2",
+      serverId: "r2",
     };
     expect(quoteCorpRestrictedCreditRoute(state, request)).toMatchObject({
       status: "quoted",
@@ -1062,8 +1074,8 @@ function preparedInstallWindow(): GameState {
   );
   RealEngineFixtureBuilder.forState(state)
     .withCorpHqSize(0)
-    .withCorpRemoteRoot("remote_1", CONTRACT, 1, { faceup: true, rezzed: true })
-    .withCorpIceOnServer("hq", "simple_barrier_ice")
+    .withCorpRemoteRoot("r1", CONTRACT, 1, { faceup: true, rezzed: true })
+    .withCorpIceOnServer("hq", 589)
     .withCorpCardInHq(WALL)
     .withCorpCredits(0)
     .withRunnerCredits(0);
@@ -1080,11 +1092,11 @@ function preparedEconomyWindow(): GameState {
   const state = preparedInstallWindow();
   RealEngineFixtureBuilder.forState(state)
     .withCorpHqSize(0)
-    .withCorpRemoteRoot("remote_2", CAMPAIGN, 0, {
+    .withCorpRemoteRoot("r2", CAMPAIGN, 0, {
       faceup: false,
       rezzed: false,
     })
-    .withCorpCardInHq("simple_agenda")
+    .withCorpCardInHq(588)
     .withCorpCredits(1);
   return state;
 }
@@ -1111,7 +1123,7 @@ function preparedOriginalCorp(): GameState {
       ...DEMO_DECKS.demo_runner_001,
       cards: [
         ...DEMO_DECKS.demo_runner_001.cards,
-        { id: "onr_v1_036_jackhammer", quantity: 1 },
+        { id: 248, quantity: 1 },
       ],
     },
   });
@@ -1123,8 +1135,8 @@ function preparedOriginalCorp(): GameState {
   );
   RealEngineFixtureBuilder.forState(state)
     .withCorpHqSize(0)
-    .withCorpRemoteRoot("remote_1", CONTRACT, 2, { faceup: true, rezzed: true })
-    .withCorpIceOnServer("hq", "onr_proteus_033_mobile-barricade")
+    .withCorpRemoteRoot("r1", CONTRACT, 2, { faceup: true, rezzed: true })
+    .withCorpIceOnServer("hq", 91)
     .withCorpCredits(3)
     .withRunnerCredits(0);
   return state;
@@ -1136,14 +1148,14 @@ function preparedOriginalTerminalReserve(
 ): GameState {
   const state = preparedOriginalCorp();
   RealEngineFixtureBuilder.forState(state)
-    .withCorpIceOnServer("rd", "onr_proteus_033_mobile-barricade")
-    .withCorpCardInHq("onr_v1_281_accounts-receivable")
+    .withCorpIceOnServer("rd", 91)
+    .withCorpCardInHq(493)
     .withCorpCredits(credits);
   state.cardInstances[contractId(state)]!.advancementCounters = 0;
   state.corp.clicks = clicks;
   const stolen = state.corp.rd.filter(
     (id) =>
-      state.cardInstances[id]!.definitionId === "onr_proteus_004_fetal-ai",
+      state.cardInstances[id]!.definitionId === 62,
   );
   expect(stolen).toHaveLength(2);
   state.corp.rd = state.corp.rd.filter((id) => !stolen.includes(id));

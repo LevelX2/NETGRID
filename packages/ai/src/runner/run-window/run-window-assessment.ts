@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { runnerGeneralCreditsAfterCompletedPath } from "../../run-analysis/visible-run-credit-budget";
 import { paidBreakPrecedesHarmlessResolution } from "./run-window-harmless-resolution";
 import {
@@ -20,7 +21,7 @@ import {
 } from "../../actions/risk-action-projection";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import { reconstructBeliefState } from "../../belief-state";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import {
   ActiveRunnerRunRoot,
@@ -56,7 +57,7 @@ import {
   currentRunHasPendingAutoPassIce,
   currentRunRemainingIce,
 } from "../../runtime/current-encounter";
-import { legalActionCreditCost } from "../../runtime/legal-action-credit-cost";
+import { nonNegativeActionCreditCost } from "../../runtime/action-cost";
 import { currentEncounterRequiresDamagePreservingBreak } from "../../runtime/current-encounter-damage";
 import {
   currentEncounterMitigationForAction,
@@ -140,7 +141,7 @@ function runnerRunPaymentSupportAssessment(
     ability.creditCost > 0 &&
     ability.creditCost <= cash &&
     ability.gainCredits > ability.creditCost &&
-    legalActionCreditCost(action) === ability.creditCost &&
+    nonNegativeActionCreditCost(action) === ability.creditCost &&
     action.payload?.gainCreditsAmount === ability.gainCredits;
   const preservesActivationCash =
     validPositivePaymentSource &&
@@ -412,7 +413,7 @@ export function currentRunAbortAssessment(
   ) {
     return {
       evidenceCode: [
-        run.attackedServerId.startsWith("remote_")
+        isRemoteServerId(run.attackedServerId)
           ? "runner_critical_low_grip_unknown_remote_access_requires_jack_out"
           : input.playerView.own.gripOrHq.length === 0
             ? "runner_critical_empty_grip_unknown_central_access_requires_jack_out"
@@ -432,7 +433,7 @@ export function currentRunAbortAssessment(
   if (
     run.phase === "movement" &&
     run.position?.kind === "server" &&
-    run.attackedServerId.startsWith("remote_")
+    isRemoteServerId(run.attackedServerId)
   ) {
     if (
       runnerRemoteHasKnownNoCurrentPayoff(input, run.attackedServerId) &&
@@ -546,7 +547,14 @@ export function runnerRunWindowActionAssessments(
     const action = input.legalActions.find(
       (entry) => entry.actionId === candidate.actionId,
     );
-    if (!action) {
+    if (
+      !action ||
+      action.side !== input.side ||
+      action.expiresAtStateVersion !== input.playerView.stateVersion ||
+      candidate.actorSide !== input.side ||
+      (candidate.stateVersion !== undefined &&
+        candidate.stateVersion !== input.playerView.stateVersion)
+    ) {
       assessments[candidate.actionId] = {
         admissible: false,
         evidenceCodes: [
@@ -769,7 +777,7 @@ function runnerRunWindowActionAssessment(
   if (
     action.type === "trigger_ability" &&
     candidate.sourceKind === "card" &&
-    typeof action.payload?.sourceDefinitionId === "string" &&
+    typeof action.payload?.sourceDefinitionId === "number" &&
     candidate.abilityBindingMethod === "unresolved"
   ) {
     throw new PlanResolutionFailure("missing_plan_module_coverage", {
@@ -805,8 +813,9 @@ function runnerRunWindowActionAssessment(
       commitment.sourceCardInstanceId === postPassTrash.source &&
       commitment.targetIceInstanceId === target?.instanceId &&
       commitment.observedAtStateVersion <= input.playerView.stateVersion &&
-      legalActionCreditCost(postPassTrash) <= commitment.trashCredits &&
-      legalActionCreditCost(postPassTrash) <= input.playerView.own.credits &&
+      nonNegativeActionCreditCost(postPassTrash) <= commitment.trashCredits &&
+      nonNegativeActionCreditCost(postPassTrash) <=
+        input.playerView.own.credits &&
       input.playerView.timingPoint === "run.jack_out_window" &&
       run.phase === "movement" &&
       target?.known === true &&
@@ -1273,6 +1282,9 @@ function runnerEncounterSubtypeChangeAssessment(
         : card,
     ),
     runnerRunWindowCreditBudget(input),
+    [],
+    input.playerView.opponent.credits,
+    currentRunPathContext(input),
   );
   if (!path.canReachAccess || path.blocked) {
     return {
@@ -1365,14 +1377,14 @@ function runnerPostPassDerezAndEndRunAssessment(
     };
   }
   const targetDefinition = targetMatches[0]!.ice.definitionId
-    ? CARD_DEFINITIONS_BY_ID[targetMatches[0]!.ice.definitionId!]
+    ? planningCardFactsByDefinitionId(targetMatches[0]!.ice.definitionId!)
     : undefined;
   const rezCost =
     targetDefinition?.type === "ice" &&
     Number.isFinite(targetDefinition.rezCost)
       ? Math.max(0, targetDefinition.rezCost ?? 0)
       : 0;
-  const paidCredits = legalActionCreditCost(action);
+  const paidCredits = nonNegativeActionCreditCost(action);
   if (rezCost === 0) {
     return {
       admissible: false,
@@ -1447,15 +1459,17 @@ export function runnerExactRunWindowPhaseActionIds(
       .filter((candidate) => candidate.actionType === "jack_out")
       .map((candidate) => candidate.actionId);
   }
-  const viewingFinish = admissibleRunWindowCandidates.filter((candidate) =>
-    actionsById.get(candidate.actionId)?.payload?.approachIceExposeViewDecision ===
-    "finish",
+  const viewingFinish = admissibleRunWindowCandidates.filter(
+    (candidate) =>
+      actionsById.get(candidate.actionId)?.payload
+        ?.approachIceExposeViewDecision === "finish",
   );
   if (viewingFinish.length > 0)
     return viewingFinish.map((candidate) => candidate.actionId);
   const paymentSupport = admissibleRunWindowCandidates.filter(
     (candidate) =>
-      runnerRunPaymentSupportAction(input, candidate, actionsById) !== undefined,
+      runnerRunPaymentSupportAction(input, candidate, actionsById) !==
+      undefined,
   );
   if (paymentSupport.length > 0)
     return paymentSupport.map((candidate) => candidate.actionId);
@@ -1476,8 +1490,11 @@ export function runnerExactRunWindowPhaseActionIds(
         (candidate) =>
           candidate.actionType === "pump_breaker" ||
           candidate.actionType === "break_subroutine" ||
-          runnerRunRemainderStrengthBoostAction(input, candidate, actionsById) !==
-            undefined,
+          runnerRunRemainderStrengthBoostAction(
+            input,
+            candidate,
+            actionsById,
+          ) !== undefined,
       )
       .map((candidate) => candidate.actionId);
     if (directEncounterActionIds.length > 0) {
@@ -1550,7 +1567,7 @@ function runnerExactPayOrEndRunAccessRouteActionIds(
     .map((action) => ({
       action,
       indexes: parseSubroutineIndexes(
-        action.payload?.payOrEndRunSubroutineIndexes,
+        action.payOrEndRunSubroutineIndexes,
       ),
       unbrokenSubroutineCount: Number(
         action.payload?.unbrokenSubroutineCount ?? 0,
@@ -1642,7 +1659,7 @@ function completeInformationLockPumpCost(
       candidate.payload.sourceDefinitionId === quote.iceDefinitionId &&
       candidate.payload.encounterFullBreakDamage === 0 &&
       !candidate.choiceRequirements?.length &&
-      legalActionCreditCost(candidate) === 0,
+      nonNegativeActionCreditCost(candidate) === 0,
   );
   if (!canContinueWithoutPaying) return undefined;
   // The first pump only has value if its complete, current-lock break route
@@ -1718,7 +1735,7 @@ function runnerRunWindowPlanStepExclusion(
     !runnerCurrentEncounterRequiresProgramPreservingBreak(input) &&
     !currentMitigation?.supportsCurrentAction
   ) {
-    const actionCost = legalActionCreditCost(action);
+    const actionCost = nonNegativeActionCreditCost(action);
     const completePayment =
       action.type === "pump_breaker" &&
       informationReassessment?.decision === "retain_information"
@@ -1853,11 +1870,9 @@ export function runnerCurrentEncounterRequiresProgramPreservingBreak(
     ) {
       return false;
     }
-    const quotedIds = action.payload.encounterSubroutineIds;
-    const ids =
-      typeof quotedIds === "string" ? quotedIds.split(",").filter(Boolean) : [];
+    const ids = action.encounterSubroutineIds;
     if (
-      typeof quotedIds !== "string" ||
+      !Array.isArray(ids) ||
       new Set(ids).size !== ids.length ||
       ids.length !== action.payload.unbrokenSubroutineCount ||
       ids.some((id) => !subroutines.some((subroutine) => subroutine.id === id))
@@ -1980,7 +1995,7 @@ export function currentEncounterHasUnbrokenResolvableDeflector(
   if (unbrokenSubroutineCount !== quote.subroutines.length) return false;
   const deflectorContext = {
     visibleRemoteServerCount: input.playerView.servers.filter((server) =>
-      server.id.startsWith("remote_"),
+      isRemoteServerId(server.id),
     ).length,
     visibleCorpCredits: input.playerView.opponent.credits,
   };
@@ -1991,7 +2006,7 @@ export function currentEncounterHasUnbrokenResolvableDeflector(
 
 function currentActiveRunHasKnownNoPayoff(input: AiDecisionInput): boolean {
   const serverId = input.playerView.run?.attackedServerId;
-  if (!serverId?.startsWith("remote_")) return false;
+  if (!isRemoteServerId(serverId)) return false;
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === serverId,
   );

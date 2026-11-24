@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -38,7 +39,7 @@ it("retains the selected urgent coverage search when payment-only rediscovery of
     p = residentPlanPortfolioSnapshot(input)!;
   const pending =
     cp.runtime.residentPlanPortfolio.pendingRunnerCostPenaltySupportOrigin;
-  expect(d.actionId).toContain("chiba-bank-account");
+  expect(referencesDefaultDeckCard(d.actionId, 191)).toBe(true);
   expect(input.legalActions.some((a: any) => a.actionId === d.actionId)).toBe(
     true,
   );

@@ -1,3 +1,5 @@
+import { RandomPurposeCode } from "@netgrid/shared";
+import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
@@ -19,7 +21,6 @@ import {
 } from "../../index";
 import { collectActiveModifiers } from "../../ability-engine/active-modifiers";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
-import { nextRandom } from "../../game/state/draw-random";
 import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
@@ -188,7 +189,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(ONR_V1_2_3_FINAL_CARD_IDS).toHaveLength(11);
     for (const definitionId of ONR_V1_2_3_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
       expect(definition?.mechanics.join(" ")).not.toMatch(
@@ -196,53 +197,53 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       );
     }
 
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_021_dwarf"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[233]).toMatchObject({
       installCost: 6,
       memoryCost: 1,
       strength: 3,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_039_krash"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[251]).toMatchObject({
       installCost: 0,
       memoryCost: 1,
       strength: 0,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_066_snowball"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[278]).toMatchObject({
       installCost: 10,
       memoryCost: 1,
       strength: 0,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_074_worm"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[286]).toMatchObject({
       installCost: 4,
       memoryCost: 1,
       strength: 2,
     });
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_081_custodial-position"],
+      CARD_DEFINITIONS_BY_ID[293],
     ).toMatchObject({
       cost: 2,
     });
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_085_executive-wiretaps"],
+      CARD_DEFINITIONS_BY_ID[297],
     ).toMatchObject({
       cost: 2,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_101_mit-west-tier"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[313]).toMatchObject({
       cost: 3,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_243_fetch-4-0-1"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[455]).toMatchObject({
       rezCost: 0,
       strength: 3,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_249_hunter"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[461]).toMatchObject({
       rezCost: 2,
       strength: 5,
     });
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_297_overtime-incentives"],
+      CARD_DEFINITIONS_BY_ID[509],
     ).toMatchObject({
       cost: 4,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_306_trojan-horse"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[518]).toMatchObject({
       cost: 2,
     });
   });
@@ -272,10 +273,10 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     installState.runner.clicks = 12;
     installState.runner.memoryLimit = 10;
     for (const definitionId of [
-      "onr_v1_021_dwarf",
-      "onr_v1_039_krash",
-      "onr_v1_066_snowball",
-      "onr_v1_074_worm",
+      233,
+      251,
+      278,
+      286,
     ] as const) {
       moveRunnerCardToGrip(installState, definitionId);
       installState = apply(
@@ -290,28 +291,28 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
 
     const breakCases = [
       {
-        breaker: "onr_v1_021_dwarf",
-        ice: "onr_v1_237_data-wall",
+        breaker: 233,
+        ice: 449,
         seed: "dwarf-wall",
       },
       {
-        breaker: "onr_v1_021_dwarf",
-        ice: "onr_v1_279_wall-of-static",
+        breaker: 233,
+        ice: 491,
         seed: "dwarf-wall-of-static",
       },
       {
-        breaker: "onr_v1_074_worm",
-        ice: "onr_v1_237_data-wall",
+        breaker: 286,
+        ice: 449,
         seed: "worm-wall",
       },
       {
-        breaker: "onr_v1_066_snowball",
-        ice: "onr_v1_259_in-the-face",
+        breaker: 278,
+        ice: 471,
         seed: "snowball-sentry",
       },
       {
-        breaker: "onr_v1_039_krash",
-        ice: "onr_v1_261_quandary",
+        breaker: 251,
+        ice: 473,
         seed: "krash-code-gate",
       },
     ] as const;
@@ -322,7 +323,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       state.corp.credits = 20;
       installRunnerProgramForTest(state, testCase.breaker);
       putCorpIceOnServer(state, "rd", testCase.ice);
-      putCorpCardOnTopOfRd(state, "simple_economy_operation");
+      putCorpCardOnTopOfRd(state, 596);
 
       state = apply(
         state,
@@ -391,7 +392,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       );
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         actionType: "access_card",
-        cardDefinitionId: "simple_economy_operation",
+        cardDefinitionId: 596,
       });
     }
   });
@@ -401,9 +402,9 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       v123CardReleaseGame("v123-dwarf-krash-wall-of-static"),
     );
     state.runner.credits = 30;
-    installRunnerProgramForTest(state, "onr_v1_021_dwarf");
-    installRunnerProgramForTest(state, "onr_v1_039_krash");
-    putCorpIceOnServer(state, "rd", "onr_v1_279_wall-of-static");
+    installRunnerProgramForTest(state, 233);
+    installRunnerProgramForTest(state, 251);
+    putCorpIceOnServer(state, "rd", 491);
     state = apply(
       state,
       "runner",
@@ -415,7 +416,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "onr_v1_279_wall-of-static",
+        sourceDefinition(state, action) === 491,
     );
 
     const initialEncounterActions = getLegalActions(state, "runner");
@@ -429,7 +430,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       initialEncounterActions.some(
         (action) =>
           action.type === "break_subroutine" &&
-          sourceDefinition(state, action) === "onr_v1_021_dwarf",
+          sourceDefinition(state, action) === 233,
       ),
     ).toBe(true);
 
@@ -438,21 +439,21 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "runner",
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinition(state, action) === "onr_v1_021_dwarf",
+        sourceDefinition(state, action) === 233,
     );
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinition(state, action) === "onr_v1_021_dwarf",
+        sourceDefinition(state, action) === 233,
     );
     const dwarfBreak = mustAction(
       state,
       "runner",
       (action) =>
         action.type === "break_subroutine" &&
-        sourceDefinition(state, action) === "onr_v1_021_dwarf",
+        sourceDefinition(state, action) === 233,
     );
     expect(dwarfBreak.label).toBe("Dwarf: Subroutine brechen");
   });
@@ -463,9 +464,9 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       id: "v123_krash_encounter_pump_runner",
       name: "V1.2.3 Krash Encounter Pump Runner",
       cards: [
-        { id: "onr_v1_039_krash", quantity: 1 },
+        { id: 251, quantity: 1 },
         ...ONR_V1_RUNNER_DECK.cards.filter(
-          (card) => card.id !== "onr_v1_039_krash",
+          (card) => card.id !== 251,
         ),
       ],
     };
@@ -474,14 +475,14 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       id: "v123_krash_encounter_pump_corp",
       name: "V1.2.3 Krash Encounter Pump Corp",
       cards: [
-        { id: "simple_barrier_ice", quantity: 1 },
-        { id: "simple_code_gate_ice", quantity: 2 },
-        { id: "simple_economy_operation", quantity: 1 },
+        { id: 589, quantity: 1 },
+        { id: 590, quantity: 2 },
+        { id: 596, quantity: 1 },
         ...ONR_V1_CORP_DECK.cards.filter(
           (card) =>
-            card.id !== "simple_barrier_ice" &&
-            card.id !== "simple_code_gate_ice" &&
-            card.id !== "simple_economy_operation",
+            card.id !== 589 &&
+            card.id !== 590 &&
+            card.id !== 596,
         ),
       ],
     };
@@ -495,16 +496,16 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     );
     state.runner.credits = 30;
     state.corp.credits = 20;
-    installRunnerProgramForTest(state, "onr_v1_039_krash");
+    installRunnerProgramForTest(state, 251);
     const krashId = state.runner.rig.programs.find(
-      (id) => state.cardInstances[id]?.definitionId === "onr_v1_039_krash",
+      (id) => state.cardInstances[id]?.definitionId === 251,
     );
     expect(krashId).toBeDefined();
     if (!krashId) return;
 
-    putCorpIceOnServer(state, "rd", "simple_code_gate_ice");
-    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    putCorpIceOnServer(state, "rd", 590);
+    putCorpIceOnServer(state, "rd", 589);
+    putCorpCardOnTopOfRd(state, 596);
 
     state = apply(
       state,
@@ -517,7 +518,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "simple_barrier_ice",
+        sourceDefinition(state, action) === 589,
     );
     state = enterEncounterFromMovementWindow(state);
     state = apply(
@@ -567,7 +568,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "simple_code_gate_ice",
+        sourceDefinition(state, action) === 590,
     );
     state = enterEncounterFromMovementWindow(state);
 
@@ -672,7 +673,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
 
   function p344PutCorpIceOnServer(
     state: GameState,
-    serverId: "hq" | "rd" | "archives" | `remote_${number}`,
+    serverId: "hq" | "rd" | "archives" | `r${number}`,
     definitionId: CardDefinitionId,
   ): CardInstanceId {
     if (
@@ -779,48 +780,48 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
 
   it("runs P3.44 simple icebreaker break and pump matchers without duplicate actions", () => {
     const specs = [
-      ["Krash", "onr_v1_039_krash", "simple_code_gate_ice", 2, true],
+      ["Krash", 251, 590, 2, true],
       [
         "Codecracker",
-        "onr_v1_014_codecracker",
-        "simple_code_gate_ice",
+        226,
+        590,
         0,
         true,
       ],
       [
         "Cyfermaster",
-        "onr_v1_016_cyfermaster",
-        "simple_code_gate_ice",
+        228,
+        590,
         2,
         true,
       ],
-      ["Raffles", "onr_v1_052_raffles", "simple_code_gate_ice", 1, true],
-      ["Tinweasel", "onr_v1_070_tinweasel", "simple_code_gate_ice", 0, false],
+      ["Raffles", 264, 590, 1, true],
+      ["Tinweasel", 282, 590, 0, false],
       [
         "Wizard's Book",
-        "onr_v1_073_wizards-book",
-        "simple_code_gate_ice",
+        285,
+        590,
         0,
         true,
       ],
-      ["Dwarf", "onr_v1_021_dwarf", "onr_v1_237_data-wall", 1, true],
-      ["Worm", "onr_v1_074_worm", "onr_v1_237_data-wall", 0, true],
-      ["Black Dahlia", "onr_v1_006_black-dahlia", "simple_sentry_ice", 2, true],
-      ["Codeslinger", "onr_v1_015_codeslinger", "simple_sentry_ice", 1, false],
-      ["Loony Goon", "onr_v1_040_loony-goon", "simple_sentry_ice", 1, true],
-      ["Raptor", "onr_v1_054_raptor", "simple_sentry_ice", 2, true],
-      ["Shaka", "onr_v1_060_shaka", "simple_sentry_ice", 1, true],
-      ["Wild Card", "onr_v1_072_wild-card", "simple_sentry_ice", 0, true],
-      ["Flak", "onr_v1_027_flak", "onr_v1_224_bolter-cluster", 1, true],
+      ["Dwarf", 233, 449, 1, true],
+      ["Worm", 286, 449, 0, true],
+      ["Black Dahlia", 218, 601, 2, true],
+      ["Codeslinger", 227, 601, 1, false],
+      ["Loony Goon", 252, 601, 1, true],
+      ["Raptor", 266, 601, 2, true],
+      ["Shaka", 272, 601, 1, true],
+      ["Wild Card", 284, 601, 0, true],
+      ["Flak", 239, 436, 1, true],
       [
         "Dogcatcher",
-        "onr_v1_018_dogcatcher",
-        "onr_v1_243_fetch-4-0-1",
+        230,
+        455,
         1,
         true,
       ],
-      ["Reflector", "onr_v1_055_reflector", "onr_v1_271_tko-2-0", 0, false],
-      ["Replicator", "onr_v1_056_replicator", "onr_v1_221_asp", 0, true],
+      ["Reflector", 267, 483, 0, false],
+      ["Replicator", 268, 433, 0, true],
     ] as const;
 
     for (const [
@@ -880,22 +881,22 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
   it("keeps P3.44 negative matchers and killer restricted credits scoped", () => {
     let dogcatcher = p344EncounterState(
       "p344-dogcatcher-negative",
-      "onr_v1_018_dogcatcher",
-      "simple_sentry_ice",
+      230,
+      601,
     ).state;
     dogcatcher = p344PumpUntilBreak(
       dogcatcher,
       dogcatcher.runner.rig.programs.find(
         (id) =>
           dogcatcher.cardInstances[id]?.definitionId ===
-          "onr_v1_018_dogcatcher",
+          230,
       )!,
     );
     expect(
       getLegalActions(dogcatcher, "runner").some(
         (action) =>
           action.type === "break_subroutine" &&
-          sourceDefinition(dogcatcher, action) === "onr_v1_018_dogcatcher",
+          sourceDefinition(dogcatcher, action) === 230,
       ),
     ).toBe(false);
 
@@ -912,29 +913,29 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     state.runner.clicks = 10;
     state.runner.memoryLimit = 10;
     state.corp.credits = 20;
-    p344MoveRunnerCardToGrip(state, "onr_v1_147_zz22-speed-chip");
+    p344MoveRunnerCardToGrip(state, 359);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_147_zz22-speed-chip",
+        sourceDefinition(state, action) === 359,
     );
     const zz22Id = state.runner.rig.hardware.find(
       (id) =>
-        state.cardInstances[id]?.definitionId === "onr_v1_147_zz22-speed-chip",
+        state.cardInstances[id]?.definitionId === 359,
     );
     expect(zz22Id).toBeDefined();
-    p344MoveRunnerCardToGrip(state, "onr_v1_006_black-dahlia");
+    p344MoveRunnerCardToGrip(state, 218);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_006_black-dahlia",
+        sourceDefinition(state, action) === 218,
     );
     state.runner.credits = 0;
-    p344PutCorpIceOnServer(state, "rd", "simple_sentry_ice");
+    p344PutCorpIceOnServer(state, "rd", 601);
     state = apply(
       state,
       "runner",
@@ -946,14 +947,14 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "simple_sentry_ice",
+        sourceDefinition(state, action) === 601,
     );
     const breakAction = mustAction(
       state,
       "runner",
       (action) =>
         action.type === "break_subroutine" &&
-        sourceDefinition(state, action) === "onr_v1_006_black-dahlia",
+        sourceDefinition(state, action) === 218,
     );
     expect(breakAction.costs[0]?.credits).toBe(2);
     state = apply(
@@ -968,15 +969,15 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
   it("runs P3.45 Dropp, Japanese Water Torture and Snowball specials from CardImplementation", () => {
     let droppPump = p344EncounterState(
       "p345-dropp-pump",
-      "onr_v1_019_dropp",
-      "simple_code_gate_ice",
+      231,
+      590,
     ).state;
     const droppPumpAction = mustAction(
       droppPump,
       "runner",
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinition(droppPump, action) === "onr_v1_019_dropp",
+        sourceDefinition(droppPump, action) === 231,
     );
     droppPump = apply(
       droppPump,
@@ -988,8 +989,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
 
     let japanese = p344EncounterState(
       "p345-japanese-variable-pump",
-      "onr_v1_037_japanese-water-torture",
-      "onr_v1_237_data-wall",
+      249,
+      449,
     ).state;
     japanese.runner.credits = 3;
     const japanesePump = mustAction(
@@ -998,7 +999,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       (action) =>
         action.type === "pump_breaker" &&
         sourceDefinition(japanese, action) ===
-          "onr_v1_037_japanese-water-torture" &&
+          249 &&
         action.costs[0]?.credits === 3,
     );
     const japaneseId = String(japanesePump.payload?.breakerId);
@@ -1012,12 +1013,12 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
 
     let snowball = p344EncounterState(
       "p345-snowball-run-strength",
-      "onr_v1_066_snowball",
-      "simple_sentry_ice",
+      278,
+      601,
     ).state;
     const snowballId = snowball.runner.rig.programs.find(
       (id) =>
-        snowball.cardInstances[id]?.definitionId === "onr_v1_066_snowball",
+        snowball.cardInstances[id]?.definitionId === 278,
     );
     expect(snowballId).toBeDefined();
     snowball = p344PumpUntilBreak(snowball, snowballId!);
@@ -1056,11 +1057,11 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           id: "p361_crash_runner",
           name: "P3.61 Crash Runner",
           side: "runner",
-          identity: "runner_identity_001",
+          identity: 587,
           cards: [
-            { id: "onr_v1_157_crash-everett-inventive-fixer", quantity: 1 },
-            { id: "simple_economy_event", quantity: 10 },
-            { id: "simple_agenda", quantity: 6 },
+            { id: 369, quantity: 1 },
+            { id: 595, quantity: 10 },
+            { id: 588, quantity: 6 },
           ],
         },
         corpDeck: MECHANIC_SMOKE_DECKS.traceTags.corp,
@@ -1071,7 +1072,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     state.runner.clicks = 4;
     const crashId = moveRunnerCardToGrip(
       state,
-      "onr_v1_157_crash-everett-inventive-fixer",
+      369,
     );
     state = apply(
       state,
@@ -1104,7 +1105,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       family: "runner_hidden_draw_keep_or_top_replacement",
       originActionId: drawActionId,
       sourceCardInstanceId: crashId,
-      sourceCardDefinitionId: "onr_v1_157_crash-everett-inventive-fixer",
+      sourceCardDefinitionId: 369,
       createdAtStateVersion: state.stateVersion,
     });
     const privateChoice = getPlayerView(state, "runner").pendingChoice;
@@ -1155,11 +1156,11 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           id: "p361_wilson_runner",
           name: "P3.61 Wilson Runner",
           side: "runner",
-          identity: "runner_identity_001",
+          identity: 587,
           cards: [
-            { id: "onr_v1_187_wilson-weeflerunner-apprentice", quantity: 1 },
-            { id: "simple_economy_event", quantity: 10 },
-            { id: "simple_agenda", quantity: 6 },
+            { id: 399, quantity: 1 },
+            { id: 595, quantity: 10 },
+            { id: 588, quantity: 6 },
           ],
         },
         corpDeck: MECHANIC_SMOKE_DECKS.traceTags.corp,
@@ -1170,7 +1171,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     state.runner.clicks = 1;
     const wilsonId = moveRunnerCardToGrip(
       state,
-      "onr_v1_187_wilson-weeflerunner-apprentice",
+      399,
     );
     state = apply(
       state,
@@ -1226,11 +1227,11 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           id: "p361_wilson_saved_action_runner",
           name: "P3.61 Wilson Saved Action Runner",
           side: "runner",
-          identity: "runner_identity_001",
+          identity: 587,
           cards: [
-            { id: "onr_v1_187_wilson-weeflerunner-apprentice", quantity: 1 },
-            { id: "simple_economy_event", quantity: 10 },
-            { id: "simple_agenda", quantity: 6 },
+            { id: 399, quantity: 1 },
+            { id: 595, quantity: 10 },
+            { id: 588, quantity: 6 },
           ],
         },
         corpDeck: MECHANIC_SMOKE_DECKS.traceTags.corp,
@@ -1240,7 +1241,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     state.runner.credits = 10;
     installRunnerResourceForTest(
       state,
-      "onr_v1_187_wilson-weeflerunner-apprentice",
+      399,
     );
     state.runner.clicks = 4;
 
@@ -1295,11 +1296,11 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           id: "p361_wilson_immediate_runner",
           name: "P3.61 Wilson Immediate Runner",
           side: "runner",
-          identity: "runner_identity_001",
+          identity: 587,
           cards: [
-            { id: "onr_v1_187_wilson-weeflerunner-apprentice", quantity: 1 },
-            { id: "simple_economy_event", quantity: 10 },
-            { id: "simple_agenda", quantity: 6 },
+            { id: 399, quantity: 1 },
+            { id: 595, quantity: 10 },
+            { id: 588, quantity: 6 },
           ],
         },
         corpDeck: MECHANIC_SMOKE_DECKS.traceTags.corp,
@@ -1309,7 +1310,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     state.runner.credits = 10;
     const wilsonId = installRunnerResourceForTest(
       state,
-      "onr_v1_187_wilson-weeflerunner-apprentice",
+      399,
     );
     state.runner.clicks = 4;
 
@@ -1342,9 +1343,9 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           id: "p360_karl_runner",
           name: "P3.60 Karl Runner",
           cards: [
-            { id: "onr_v1_166_karl-de-veres-corporate-stooge", quantity: 1 },
+            { id: 378, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
-              (card) => card.id !== "onr_v1_166_karl-de-veres-corporate-stooge",
+              (card) => card.id !== 378,
             ),
           ],
         },
@@ -1355,7 +1356,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     karlState.runner.credits = 10;
     installRunnerResourceForTest(
       karlState,
-      "onr_v1_166_karl-de-veres-corporate-stooge",
+      378,
     );
     const creditsBeforeRun = karlState.runner.credits;
     karlState = apply(
@@ -1410,7 +1411,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     );
     const nevinyrralId = putCorpRootInRemote(
       nevinyrralState,
-      "onr_v1_331_nevinyrral",
+      543,
     );
     nevinyrralState.cardInstances[nevinyrralId] = {
       ...nevinyrralState.cardInstances[nevinyrralId]!,
@@ -1430,8 +1431,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     const p359FieldPreyingRunnerCards =
       MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
         (card) =>
-          card.id !== "onr_v1_162_field-reporter-for-ice-and-data" &&
-          card.id !== "onr_v1_171_preying-mantis",
+          card.id !== 374 &&
+          card.id !== 383,
       );
     let state = toRunnerTurn(
       createGameAfterSetup({
@@ -1442,8 +1443,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           id: "p359_field_preying_runner",
           name: "P3.59 Field/Preying Runner",
           cards: [
-            { id: "onr_v1_162_field-reporter-for-ice-and-data", quantity: 1 },
-            { id: "onr_v1_171_preying-mantis", quantity: 2 },
+            { id: 374, quantity: 1 },
+            { id: 383, quantity: 2 },
             ...p359FieldPreyingRunnerCards,
           ],
         },
@@ -1452,7 +1453,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           id: "p359_i_spy_corp",
           name: "P3.59 I Spy Corp",
           cards: [
-            { id: "simple_barrier_ice", quantity: 1 },
+            { id: 589, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.runAccess.corp.cards,
           ],
         },
@@ -1463,15 +1464,15 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     state.corp.credits = 10;
     installRunnerResourceForTest(
       state,
-      "onr_v1_162_field-reporter-for-ice-and-data",
+      374,
     );
     const mantisId = installRunnerResourceForTest(
       state,
-      "onr_v1_171_preying-mantis",
+      383,
     );
     const secondMantisId = Object.entries(state.cardInstances).find(
       ([id, card]) =>
-        id !== mantisId && card.definitionId === "onr_v1_171_preying-mantis",
+        id !== mantisId && card.definitionId === 383,
     )?.[0] as CardInstanceId | undefined;
     if (!secondMantisId) throw new Error("Second Preying Mantis missing");
     removeEverywhere(state, secondMantisId);
@@ -1482,7 +1483,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       faceup: true,
       rezzed: true,
     };
-    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    putCorpIceOnServer(state, "rd", 589);
 
     const clicksBefore = state.runner.clicks;
     state = apply(
@@ -1517,7 +1518,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "simple_barrier_ice",
+        sourceDefinition(state, action) === 589,
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     expect(state.timingPoint).toBe("runner_action.main");
@@ -1553,9 +1554,9 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           id: "p359_i_spy_runner",
           name: "P3.59 I Spy Runner",
           cards: [
-            { id: "onr_v1_032_i-spy", quantity: 1 },
+            { id: 244, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.runAccess.runner.cards.filter(
-              (card) => card.id !== "onr_v1_032_i-spy",
+              (card) => card.id !== 244,
             ),
           ],
         },
@@ -1564,9 +1565,9 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           id: "p359_i_spy_corp",
           name: "P3.59 I Spy Corp",
           cards: [
-            { id: "simple_barrier_ice", quantity: 1 },
+            { id: 589, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.runAccess.corp.cards.filter(
-              (card) => card.id !== "simple_barrier_ice",
+              (card) => card.id !== 589,
             ),
           ],
         },
@@ -1575,18 +1576,18 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     );
     state.runner.credits = 10;
     state.corp.credits = 10;
-    const iSpyId = installRunnerProgramForTest(state, "onr_v1_032_i-spy");
-    const rootId = putCorpRootInRemote(state, "simple_economy_asset");
-    const iceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+    const iSpyId = installRunnerProgramForTest(state, 244);
+    const rootId = putCorpRootInRemote(state, 594);
+    const iceId = putCorpIceOnServer(state, "r1", 589);
 
     state.phase = "run";
     state.timingPoint = "access.resolve_card";
     state.activeSide = "runner";
     state.run = {
-      runId: "p359_i_spy_run",
-      attackedServerId: "remote_1",
+      runId: 811657,
+      attackedServerId: "r1",
       phase: "access",
-      position: { kind: "server", serverId: "remote_1" },
+      position: { kind: "server", serverId: "r1" },
       brokenSubroutineIndexes: [],
       resolvedSubroutineIndexes: [],
       successful: true,
@@ -1600,7 +1601,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           "successful_run_fort_counter_expose" &&
         action.payload?.cardId === iSpyId,
     );
-    expect(state.spyCountersByServer?.remote_1).toBe(1);
+    expect(state.spyCountersByServer?.r1).toBe(1);
     expect(state.runner.heap).toContain(iSpyId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       addedCounterAmount: 1,
@@ -1610,7 +1611,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       counterMutations: [
         expect.objectContaining({
           operation: "add",
-          scope: { kind: "server", serverId: "remote_1" },
+          scope: { kind: "server", serverId: "r1" },
           before: 0,
           amount: 1,
           after: 1,
@@ -1618,7 +1619,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       ],
     });
     const runnerSpyServerView = getPlayerView(state, "runner").servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     expect(runnerSpyServerView?.counterDisplays).toContainEqual({
       id: "spy",
@@ -1655,15 +1656,15 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       (action) =>
         action.type === "trigger_ability" &&
         action.payload?.corpAbility === "remove_spy_counter" &&
-        action.payload?.serverId === "remote_1",
+        action.payload?.serverId === "r1",
     );
-    expect(state.spyCountersByServer?.remote_1).toBe(0);
+    expect(state.spyCountersByServer?.r1).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       counterMutations: [
         expect.objectContaining({
           operation: "remove",
           counterType: "spy",
-          scope: { kind: "server", serverId: "remote_1" },
+          scope: { kind: "server", serverId: "r1" },
           before: 1,
           amount: 1,
           after: 0,
@@ -1673,20 +1674,20 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         {
           kind: "counter_threshold_identity_visibility_ended",
           counterType: "spy",
-          scope: { kind: "server", serverId: "remote_1" },
+          scope: { kind: "server", serverId: "r1" },
           activeAtOrAbove: 1,
           before: 1,
           after: 0,
           cards: [
             {
-              definitionId: "simple_barrier_ice",
-              serverId: "remote_1",
+              definitionId: 589,
+              serverId: "r1",
               area: "ice",
               positionKey: "ice:0",
             },
             {
-              definitionId: "simple_economy_asset",
-              serverId: "remote_1",
+              definitionId: 594,
+              serverId: "r1",
               area: "root",
               positionKey: "root:0",
             },
@@ -1697,7 +1698,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     const runnerAfterRemovalServerView = getPlayerView(
       state,
       "runner",
-    ).servers.find((server) => server.id === "remote_1");
+    ).servers.find((server) => server.id === "r1");
     expect(runnerAfterRemovalServerView?.counterDisplays).toBeUndefined();
     expect(
       runnerAfterRemovalServerView?.ice.find(
@@ -1727,9 +1728,9 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           id: "p359_quest_runner",
           name: "P3.59 Quest Runner",
           cards: [
-            { id: "onr_v1_172_quest-for-cattekin", quantity: 1 },
+            { id: 384, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
-              (card) => card.id !== "onr_v1_172_quest-for-cattekin",
+              (card) => card.id !== 384,
             ),
           ],
         },
@@ -1737,7 +1738,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         agendaPointsToWin: 7,
       }),
     );
-    installRunnerResourceForTest(state, "onr_v1_172_quest-for-cattekin");
+    installRunnerResourceForTest(state, 384);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     const randomBefore = state.randomDrawRecords.length;
@@ -1748,7 +1749,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(state.randomDrawRecords.length).toBeGreaterThan(randomBefore);
     expect(
       state.randomDrawRecords.some((record) =>
-        record.purpose.includes("start_turn_random_effect_table."),
+        record.purpose[0] === RandomPurposeCode.RunnerStartEffectDie &&
+        record.purpose[1] === 384,
       ),
     ).toBe(true);
     expect(
@@ -1757,8 +1759,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         .flatMap((event) => event.publicPayload.resolvedEffects ?? [])
         .some(
           (effect) =>
-            (effect as { sourceDefinitionId?: string }).sourceDefinitionId ===
-            "onr_v1_172_quest-for-cattekin",
+            (effect as { sourceDefinitionId?: number }).sourceDefinitionId ===
+            384,
         ),
     ).toBe(true);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -1784,9 +1786,9 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
               id: `p359_quest_runner_${targetRoll}_${seedIndex}`,
               name: "P3.59 Quest Runner",
               cards: [
-                { id: "onr_v1_172_quest-for-cattekin", quantity: 1 },
+                { id: 384, quantity: 1 },
                 ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
-                  (card) => card.id !== "onr_v1_172_quest-for-cattekin",
+                  (card) => card.id !== 384,
                 ),
               ],
             },
@@ -1796,10 +1798,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         );
         const questId = installRunnerResourceForTest(
           state,
-          "onr_v1_172_quest-for-cattekin",
+          384,
         );
-        for (let index = 0; index < seedIndex; index += 1)
-          nextRandom(state, `test.quest_outcome_offset.${index}`);
         const randomBefore = state.randomDrawRecords.length;
         const replayStart = state.eventLog.length;
         state = apply(state, "runner", (action) => action.type === "end_turn");
@@ -1809,9 +1809,9 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           .flatMap((event) => event.publicPayload.resolvedEffects ?? [])
           .find(
             (candidate) =>
-              (candidate as { effectId?: string }).effectId?.startsWith(
-                "runner.start.random_effect_table.",
-              ) === true,
+              candidate.sourceDefinitionId === 384 &&
+              candidate.reason === "start_of_turn" &&
+              candidate.randomEffectOutcome !== undefined,
           ) as Record<string, unknown> | undefined;
         if (effect && targetRolls.includes(Number(effect.dieRoll)))
           return { state, effect, questId, randomBefore };
@@ -1853,7 +1853,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       permanentAction.state.runnerTurnFlags?.persistentModifiers,
     ).toContainEqual({
       sourceCardInstanceId: permanentAction.questId,
-      sourceDefinitionId: "onr_v1_172_quest-for-cattekin",
+      sourceDefinitionId: 384,
       kind: "runner_extra_actions_per_turn",
       amount: 1,
     });
@@ -1883,7 +1883,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       state.runner.credits = 12;
       const eventId = moveRunnerCardToGrip(
         state,
-        "onr_v1_111_social-engineering",
+        323,
       );
       const unlockedAction = getLegalActions(state, "runner").find(
         (action) =>
@@ -1919,9 +1919,9 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       id: "p358_social_engineering_corp",
       name: "P3.58 Social Engineering Corp",
       cards: [
-        { id: "simple_barrier_ice", quantity: 2 },
+        { id: 589, quantity: 2 },
         ...MECHANIC_SMOKE_DECKS.runAccess.corp.cards.filter(
-          (card) => card.id !== "simple_barrier_ice",
+          (card) => card.id !== 589,
         ),
       ],
     };
@@ -1936,7 +1936,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     correct.runner.credits = 5;
     const correctEventId = moveRunnerCardToGrip(
       correct,
-      "onr_v1_111_social-engineering",
+      323,
     );
     correct.runner.credits = 2;
     expect(
@@ -1981,7 +1981,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(getPlayerView(correct, "corp").pendingChoice).toBeUndefined();
     correct = applyChoice(correct, "runner", "hide_3");
     expect(correct.eventLog.at(-1)?.publicPayload).toMatchObject({
-      sourceDefinitionId: "onr_v1_111_social-engineering",
+      sourceDefinitionId: 323,
       hiddenZoneBarrier: true,
     });
     expect(correct.pendingChoice?.source).toContain(
@@ -1998,7 +1998,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     ).toBe(true);
     expect(getLegalActions(correct, "corp")).toHaveLength(0);
     expect(correct.eventLog.at(-1)?.publicPayload).toMatchObject({
-      sourceDefinitionId: "onr_v1_111_social-engineering",
+      sourceDefinitionId: 323,
       hiddenZoneBarrier: true,
       amounts: expect.objectContaining({
         secretHiddenAmountRevealed: 3,
@@ -2020,9 +2020,9 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     wrong.runner.credits = 5;
     const wrongEventId = moveRunnerCardToGrip(
       wrong,
-      "onr_v1_111_social-engineering",
+      323,
     );
-    const iceId = putCorpIceOnServer(wrong, "rd", "simple_barrier_ice");
+    const iceId = putCorpIceOnServer(wrong, "rd", 589);
     wrong.cardInstances[iceId] = {
       ...wrong.cardInstances[iceId]!,
       faceup: false,
@@ -2039,8 +2039,10 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(wrong.pendingChoice?.source).toContain(
       "hidden_zone.secret_spend_guess_then_targeted_bypass_run.target",
     );
-    expect(getPlayerView(wrong, "corp").pendingChoice).toBeUndefined();
-    wrong = applyChoice(wrong, "runner", `ice_${iceId}`);
+    const corpBeforeTarget = getPlayerView(wrong, "corp");
+    expect(corpBeforeTarget.pendingChoice).toBeUndefined();
+    expect(corpBeforeTarget.run?.pendingAutoPassIceId).toBeUndefined();
+    wrong = applyChoice(wrong, "runner", "ice_rd.0");
     expect(wrong.timingPoint).toBe("run.approach_ice");
     expect(wrong.activeSide).toBe("corp");
     expect(wrong.run).toMatchObject({
@@ -2049,11 +2051,9 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       secretSpendGuessRunAutoPassIceId: iceId,
     });
     expect(getPlayerView(wrong, "runner").run?.pendingAutoPassIceId).toBe(
-      iceId,
+      "hrd.i0",
     );
-    expect(
-      getPlayerView(wrong, "corp").run?.pendingAutoPassIceId,
-    ).toBeUndefined();
+    expect(getPlayerView(wrong, "corp").run?.pendingAutoPassIceId).toBe(iceId);
     expect(
       getLegalActions(wrong, "corp").some(
         (action) => action.type === "rez_ice" && action.source === iceId,
@@ -2064,7 +2064,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       serverId: "rd",
     });
     expect(wrong.eventLog.at(-1)?.publicPayload).toMatchObject({
-      sourceDefinitionId: "onr_v1_111_social-engineering",
+      sourceDefinitionId: 323,
       secretSpendGuessRun: true,
       hiddenZoneBarrier: true,
       targets: expect.objectContaining({
@@ -2072,8 +2072,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         autoPassChosenIce: true,
       }),
     });
-    expect(JSON.stringify(wrong.eventLog.at(-1)?.publicPayload)).not.toContain(
-      "simple_barrier_ice",
+    expect(serializedDefinitionReferences(JSON.stringify(wrong.eventLog.at(-1)?.publicPayload))).not.toContain(
+      589,
     );
     wrong = apply(
       wrong,
@@ -2087,7 +2087,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       serverId: "rd",
     });
     expect(wrong.eventLog.at(-1)?.publicPayload).toMatchObject({
-      targetCardDefinitionId: "simple_barrier_ice",
+      targetCardDefinitionId: 589,
     });
   });
 
@@ -2097,20 +2097,20 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     );
     state.runner.credits = 0;
     state.corp.credits = 7;
-    putCorpIceOnServer(state, "rd", "onr_v1_260_pocket-virtual-reality");
+    putCorpIceOnServer(state, "rd", 472);
 
-    state = encounterIce(state, "rd", "onr_v1_260_pocket-virtual-reality");
+    state = encounterIce(state, "rd", 472);
     state.corp.credits = 0;
     const pocketVirtualReality = getPlayerView(state, "runner")
       .servers.find((server) => server.id === "rd")
       ?.ice.find(
-        (card) => card.definitionId === "onr_v1_260_pocket-virtual-reality",
+        (card) => card.definitionId === 472,
       );
     expect(pocketVirtualReality?.effectiveRunQuote).toMatchObject({
       encounterTemporaryTraceCredits: 4,
     });
     expect(state.run?.encounterTemporaryTraceCredits).toMatchObject({
-      sourceDefinitionId: "onr_v1_260_pocket-virtual-reality",
+      sourceDefinitionId: 472,
       remaining: 4,
     });
 
@@ -2120,7 +2120,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       traceStarted: true,
       temporaryTraceCreditsAvailable: 4,
       temporaryTraceCreditsSourceDefinitionId:
-        "onr_v1_260_pocket-virtual-reality",
+        472,
     });
 
     state = applyChoice(state, "corp", "bid_4");
@@ -2148,10 +2148,10 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           id: "p351_silver_corp",
           name: "P3.51 Silver Corp",
           cards: [
-            { id: "onr_v1_303_silver-lining-recovery-protocol", quantity: 1 },
+            { id: 515, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp.cards.filter(
               (card) =>
-                card.id !== "onr_v1_303_silver-lining-recovery-protocol",
+                card.id !== 515,
             ),
           ],
         },
@@ -2161,7 +2161,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       (action) => action.type === "mandatory_draw",
     );
     silver.corp.credits = 5;
-    moveCorpCardToHq(silver, "onr_v1_303_silver-lining-recovery-protocol");
+    moveCorpCardToHq(silver, 515);
     silver.runnerTurnFlags = {
       ...(silver.runnerTurnFlags ?? {
         stoleAgendaThisTurn: false,
@@ -2177,7 +2177,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       (action) =>
         action.type === "play_operation" &&
         sourceDefinition(silver, action) ===
-          "onr_v1_303_silver-lining-recovery-protocol",
+          515,
     );
     expect(silver.corp.credits).toBe(17);
     expect(silver.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -2191,7 +2191,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           ...MECHANIC_SMOKE_DECKS.assetNodeEffects.runner,
           id: "p351_omni_fall_guy_runner",
           cards: [
-            { id: "onr_v1_161_fall-guy", quantity: 1 },
+            { id: 373, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.assetNodeEffects.runner.cards,
           ],
         },
@@ -2200,12 +2200,12 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           id: "p351_omni_corp",
           name: "P3.51 Omni Corp",
           cards: [
-            { id: "onr_v1_333_omniscience-foundation", quantity: 1 },
-            { id: "onr_v1_306_trojan-horse", quantity: 1 },
+            { id: 545, quantity: 1 },
+            { id: 518, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp.cards.filter(
               (card) =>
-                card.id !== "onr_v1_333_omniscience-foundation" &&
-                card.id !== "onr_v1_306_trojan-horse",
+                card.id !== 545 &&
+                card.id !== 518,
             ),
           ],
         },
@@ -2216,7 +2216,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     );
     omni.corp.credits = 10;
     omni.runner.tags = 0;
-    const omniId = moveCorpCardToHq(omni, "onr_v1_333_omniscience-foundation");
+    const omniId = moveCorpCardToHq(omni, 545);
     omni = apply(
       omni,
       "corp",
@@ -2231,7 +2231,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       (action) =>
         action.type === "rez_card" && action.payload?.cardId === omniId,
     );
-    moveCorpCardToHq(omni, "onr_v1_306_trojan-horse");
+    moveCorpCardToHq(omni, 518);
     omni.runnerTurnFlags = {
       ...(omni.runnerTurnFlags ?? {
         stoleAgendaThisTurn: false,
@@ -2245,12 +2245,12 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(omni, action) === "onr_v1_306_trojan-horse",
+        sourceDefinition(omni, action) === 518,
     );
     expect(omni.runner.tags).toBe(1);
     const omniFallGuyId = installRunnerResourceForTest(
       omni,
-      "onr_v1_161_fall-guy",
+      373,
     );
     const omniInitial = structuredClone(omni);
     const omniReplayStart = omni.eventLog.length;
@@ -2297,9 +2297,9 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           id: "p351_disinfectant_runner",
           name: "P3.51 Disinfectant Runner",
           cards: [
-            { id: "onr_v1_009_butcher-boy", quantity: 2 },
+            { id: 221, quantity: 2 },
             ...MECHANIC_SMOKE_DECKS.counterRecurring.runner.cards.filter(
-              (card) => card.id !== "onr_v1_009_butcher-boy",
+              (card) => card.id !== 221,
             ),
           ],
         },
@@ -2308,9 +2308,9 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           id: "p351_disinfectant_corp",
           name: "P3.51 Disinfectant Corp",
           cards: [
-            { id: "onr_v1_319_disinfectant-inc", quantity: 2 },
+            { id: 531, quantity: 2 },
             ...MECHANIC_SMOKE_DECKS.counterRecurring.corp.cards.filter(
-              (card) => card.id !== "onr_v1_319_disinfectant-inc",
+              (card) => card.id !== 531,
             ),
           ],
         },
@@ -2321,24 +2321,24 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     const disinfectantIds = [
       addRezzedCorpRootForTest(
         disinfectant,
-        "onr_v1_319_disinfectant-inc",
-        "remote_1",
+        531,
+        "r1",
         "disinfectant_first",
       ),
       addRezzedCorpRootForTest(
         disinfectant,
-        "onr_v1_319_disinfectant-inc",
-        "remote_2",
+        531,
+        "r2",
         "disinfectant_second",
       ),
     ];
     const butcherId = installRunnerProgramForTest(
       disinfectant,
-      "onr_v1_009_butcher-boy",
+      221,
     );
     const secondButcherId = installRunnerProgramCopyForTest(
       disinfectant,
-      "onr_v1_009_butcher-boy",
+      221,
     );
     for (const cardId of disinfectant.corp.hq.slice()) {
       removeEverywhere(disinfectant, cardId);
@@ -2348,7 +2348,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         zone: { side: "corp", zone: "archives" },
       };
     }
-    moveCorpCardToHq(disinfectant, "simple_economy_operation");
+    moveCorpCardToHq(disinfectant, 596);
 
     let noCredit = structuredClone(disinfectant);
     noCredit.corp.credits = 0;
@@ -2455,7 +2455,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           id: "p348_stumble_runner",
           name: "P3.48 Stumble Runner",
           cards: [
-            { id: "onr_v1_112_stumble-through-wilderspace", quantity: 1 },
+            { id: 324, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -2464,7 +2464,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       }),
     );
     state.runner.credits = 10;
-    moveRunnerCardToGrip(state, "onr_v1_112_stumble-through-wilderspace");
+    moveRunnerCardToGrip(state, 324);
 
     state = apply(
       state,
@@ -2472,18 +2472,18 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(state, action) ===
-          "onr_v1_112_stumble-through-wilderspace" &&
+          324 &&
         action.payload?.serverId === "rd",
     );
 
     expect(state.run?.attackedServerId).toBe("rd");
     expect(state.run?.runTraceLinkBonus).toBe(9);
     expect(state.run?.runTraceLinkBonusSourceDefinitionId).toBe(
-      "onr_v1_112_stumble-through-wilderspace",
+      324,
     );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
-      cardDefinitionId: "onr_v1_112_stumble-through-wilderspace",
+      cardDefinitionId: 324,
       serverId: "rd",
       resolvedEffects: expect.arrayContaining([
         expect.objectContaining({
@@ -2511,22 +2511,22 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     state.runner.credits = 80;
     state.runner.clicks = 20;
     state.runner.memoryLimit = 2;
-    p344MoveRunnerCardToGrip(state, "onr_v1_001_afreet");
-    p344MoveRunnerCardToGrip(state, "onr_v1_006_black-dahlia");
-    p344MoveRunnerCardToGrip(state, "onr_v1_015_codeslinger");
-    p344MoveRunnerCardToGrip(state, "onr_v1_016_cyfermaster");
-    p344MoveRunnerCardToGrip(state, "onr_v1_014_codecracker");
-    p344MoveRunnerCardToGrip(state, "onr_v1_069_succubus");
+    p344MoveRunnerCardToGrip(state, 213);
+    p344MoveRunnerCardToGrip(state, 218);
+    p344MoveRunnerCardToGrip(state, 227);
+    p344MoveRunnerCardToGrip(state, 228);
+    p344MoveRunnerCardToGrip(state, 226);
+    p344MoveRunnerCardToGrip(state, 281);
 
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_001_afreet",
+        sourceDefinition(state, action) === 213,
     );
     const afreetId = state.runner.rig.programs.find(
-      (id) => state.cardInstances[id]?.definitionId === "onr_v1_001_afreet",
+      (id) => state.cardInstances[id]?.definitionId === 213,
     );
     expect(afreetId).toBeDefined();
     if (!afreetId) throw new Error("Missing Afreet");
@@ -2537,7 +2537,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_006_black-dahlia" &&
+        sourceDefinition(state, action) === 218 &&
         action.payload?.hostOnCardId === afreetId,
     );
     const staleHostState = structuredClone(state);
@@ -2553,9 +2553,9 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     ).toBe(false);
 
     const hostedDefinitionIds = [
-      "onr_v1_006_black-dahlia",
-      "onr_v1_015_codeslinger",
-      "onr_v1_016_cyfermaster",
+      218,
+      227,
+      228,
     ] as const;
     const hostedIds: CardInstanceId[] = [];
     for (const definitionId of hostedDefinitionIds) {
@@ -2586,7 +2586,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       getLegalActions(state, "runner").some(
         (action) =>
           action.type === "install_card" &&
-          sourceDefinition(state, action) === "onr_v1_014_codecracker" &&
+          sourceDefinition(state, action) === 226 &&
           action.payload?.hostOnCardId === afreetId,
       ),
     ).toBe(false);
@@ -2596,17 +2596,17 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_069_succubus",
+        sourceDefinition(state, action) === 281,
     );
     const succubusId = state.runner.rig.programs.find(
-      (id) => state.cardInstances[id]?.definitionId === "onr_v1_069_succubus",
+      (id) => state.cardInstances[id]?.definitionId === 281,
     );
     expect(succubusId).toBeDefined();
     expect(
       getLegalActions(state, "runner").some(
         (action) =>
           action.type === "install_card" &&
-          sourceDefinition(state, action) === "onr_v1_014_codecracker" &&
+          sourceDefinition(state, action) === 226 &&
           action.payload?.hostOnCardId === succubusId,
       ),
     ).toBe(true);
@@ -2619,17 +2619,17 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     state.runner.credits = 60;
     state.runner.clicks = 20;
     state.runner.memoryLimit = 2;
-    p344MoveRunnerCardToGrip(state, "onr_v1_001_afreet");
-    p344MoveRunnerCardToGrip(state, "onr_v1_006_black-dahlia");
+    p344MoveRunnerCardToGrip(state, 213);
+    p344MoveRunnerCardToGrip(state, 218);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_001_afreet",
+        sourceDefinition(state, action) === 213,
     );
     const afreetId = state.runner.rig.programs.find(
-      (id) => state.cardInstances[id]?.definitionId === "onr_v1_001_afreet",
+      (id) => state.cardInstances[id]?.definitionId === 213,
     );
     if (!afreetId) throw new Error("Missing Afreet");
     const hostedInstall = mustAction(
@@ -2637,7 +2637,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_006_black-dahlia" &&
+        sourceDefinition(state, action) === 218 &&
         action.payload?.hostOnCardId === afreetId,
     );
     const hostedId = String(
@@ -2648,7 +2648,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "runner",
       (action) => action.actionId === hostedInstall.actionId,
     );
-    const chimeraId = putCorpRootInRemote(state, "onr_v1_353_chimera");
+    const chimeraId = putCorpRootInRemote(state, 565);
     state.cardInstances[chimeraId] = {
       ...state.cardInstances[chimeraId]!,
       faceup: true,
@@ -2661,7 +2661,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(state.pendingChoice).toBeUndefined();
@@ -2669,7 +2669,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(state.runner.heap).toContain(hostedId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
-      trashedCardDefinitionId: "onr_v1_001_afreet",
+      trashedCardDefinitionId: 213,
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -2678,17 +2678,17 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
 
   it("plays the unlocked R&D and HQ multiaccess events with hidden queues", () => {
     let rdState = toRunnerTurn(v123CardReleaseGame("v123-custodial-position"));
-    moveRunnerCardToGrip(rdState, "onr_v1_081_custodial-position");
-    putCorpCardOnTopOfRd(rdState, "simple_economy_operation");
-    putCorpCardOnTopOfRd(rdState, "onr_v1_203_hostile-takeover");
-    putCorpCardOnTopOfRd(rdState, "onr_v1_220_tycho-extension");
+    moveRunnerCardToGrip(rdState, 293);
+    putCorpCardOnTopOfRd(rdState, 596);
+    putCorpCardOnTopOfRd(rdState, 415);
+    putCorpCardOnTopOfRd(rdState, 432);
 
     rdState = apply(
       rdState,
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(rdState, action) === "onr_v1_081_custodial-position" &&
+        sourceDefinition(rdState, action) === 293 &&
         action.payload?.serverId === "rd",
     );
 
@@ -2704,10 +2704,10 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     ).not.toContain("Tycho Extension");
 
     let hqState = toRunnerTurn(v123CardReleaseGame("v123-executive-wiretaps"));
-    moveRunnerCardToGrip(hqState, "onr_v1_085_executive-wiretaps");
-    const first = moveCorpCardToHq(hqState, "simple_economy_operation");
-    const second = moveCorpCardToHq(hqState, "onr_v1_203_hostile-takeover");
-    const third = moveCorpCardToHq(hqState, "onr_v1_220_tycho-extension");
+    moveRunnerCardToGrip(hqState, 297);
+    const first = moveCorpCardToHq(hqState, 596);
+    const second = moveCorpCardToHq(hqState, 415);
+    const third = moveCorpCardToHq(hqState, 432);
     keepOnlyCorpHqCards(hqState, [first, second, third]);
 
     hqState = apply(
@@ -2715,7 +2715,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(hqState, action) === "onr_v1_085_executive-wiretaps" &&
+        sourceDefinition(hqState, action) === 297 &&
         action.payload?.serverId === "hq",
     );
 
@@ -2736,7 +2736,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
   it("removes MIT West Tier from the game after a deterministic hidden shuffle and draw", () => {
     let state = toRunnerTurn(v123CardReleaseGame("v123-mit-west-tier"));
     emptyRunnerGripForTest(state);
-    const eventId = moveRunnerCardToGrip(state, "onr_v1_101_mit-west-tier");
+    const eventId = moveRunnerCardToGrip(state, 313);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
 
@@ -2745,7 +2745,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(state, action) === "onr_v1_101_mit-west-tier",
+        sourceDefinition(state, action) === 313,
     );
 
     expect(state.runner.grip).toHaveLength(5);
@@ -2759,13 +2759,13 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(
       getPlayerView(state, "runner").specialZones?.removedFromGame[0],
     ).toMatchObject({
-      definitionId: "onr_v1_101_mit-west-tier",
+      definitionId: 313,
       owner: "runner",
       controller: "runner",
     });
     expect(
       getPlayerView(state, "corp").specialZones?.removedFromGame[0],
-    ).toMatchObject({ definitionId: "onr_v1_101_mit-west-tier" });
+    ).toMatchObject({ definitionId: 313 });
     expect(state.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
       "runner_",
@@ -2781,7 +2781,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.clicks = 3;
     state.corp.credits = 5;
-    moveCorpCardToHq(state, "onr_v1_297_overtime-incentives");
+    moveCorpCardToHq(state, 509);
 
     const before = state.corp.clicks;
     state = apply(
@@ -2789,13 +2789,13 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_297_overtime-incentives",
+        sourceDefinition(state, action) === 509,
     );
 
     expect(state.corp.clicks).toBe(before + 1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_operation",
-      cardDefinitionId: "onr_v1_297_overtime-incentives",
+      cardDefinitionId: 509,
       gainedActions: 2,
     });
     expect(
@@ -2808,7 +2808,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
   it("gates Trojan Horse on runner agenda theft in the last turn and gives 1 tag when legal", () => {
     let state = v123CardReleaseGame("v123-trojan-horse");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    const trojanId = moveCorpCardToHq(state, "onr_v1_306_trojan-horse");
+    const trojanId = moveCorpCardToHq(state, 518);
     keepOnlyCorpHqCard(state, trojanId);
     state.corp.credits = 8;
 
@@ -2821,10 +2821,10 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       (action) =>
         action.type === "play_operation" &&
         sourceDefinition(beforeRunnerTurn, action) ===
-          "onr_v1_306_trojan-horse",
+          518,
     );
     expect(beforeTheftInput).toHaveLength(0);
-    moveCorpCardToArchives(beforeRunnerTurn, "onr_v1_220_tycho-extension");
+    moveCorpCardToArchives(beforeRunnerTurn, 432);
 
     let afterTheft = apply(
       beforeRunnerTurn,
@@ -2854,7 +2854,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     );
     const trojanAfterTheft = moveCorpCardToHq(
       afterTheft,
-      "onr_v1_306_trojan-horse",
+      518,
     );
     keepOnlyCorpHqCard(afterTheft, trojanAfterTheft);
     afterTheft.corp.credits = 8;
@@ -2865,13 +2865,13 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(afterTheft, action) === "onr_v1_306_trojan-horse",
+        sourceDefinition(afterTheft, action) === 518,
     );
 
     expect(afterTheft.runner.tags).toBe(beforeTags + 1);
     expect(afterTheft.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_operation",
-      cardDefinitionId: "onr_v1_306_trojan-horse",
+      cardDefinitionId: 518,
     });
   });
 
@@ -2883,7 +2883,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "p342_fall_guy_runner",
           cards: [
-            { id: "onr_v1_161_fall-guy", quantity: 1 },
+            { id: 373, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -2891,7 +2891,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "p342_fall_guy_corp",
           cards: [
-            { id: "onr_v1_306_trojan-horse", quantity: 1 },
+            { id: 518, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -2900,7 +2900,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     );
     fallGuyState.runner.credits = 8;
     fallGuyState.runner.clicks = 4;
-    const fallGuyId = moveRunnerCardToGrip(fallGuyState, "onr_v1_161_fall-guy");
+    const fallGuyId = moveRunnerCardToGrip(fallGuyState, 373);
     fallGuyState = apply(
       fallGuyState,
       "runner",
@@ -2930,7 +2930,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         fallGuyState.runnerTurnFlags?.stoleAgendaThisTurn ?? false,
       stoleAgendaLastTurn: true,
     };
-    const trojanId = moveCorpCardToHq(fallGuyState, "onr_v1_306_trojan-horse");
+    const trojanId = moveCorpCardToHq(fallGuyState, 518);
     keepOnlyCorpHqCard(fallGuyState, trojanId);
     fallGuyState.corp.credits = 8;
     const fallGuyBefore = structuredClone(fallGuyState);
@@ -2940,7 +2940,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(fallGuyState, action) === "onr_v1_306_trojan-horse",
+        sourceDefinition(fallGuyState, action) === 518,
     );
     expect(fallGuyState.pendingChoice?.source).toContain("event_modification");
     expect(fallGuyState.runner.tags).toBe(0);
@@ -2967,7 +2967,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(fallGuyState.runner.tags).toBe(0);
     expect(fallGuyState.runner.heap).toContain(fallGuyId);
     expect(fallGuyState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      sourceDefinitionId: "onr_v1_161_fall-guy",
+      sourceDefinitionId: 373,
     });
     const avoidReplay = replayEvents(
       fallGuyBefore,
@@ -2983,7 +2983,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "p342_total_genetic_retrofit_runner",
           cards: [
-            { id: "onr_v1_116_total-genetic-retrofit", quantity: 1 },
+            { id: 328, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
@@ -2991,7 +2991,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "p342_total_genetic_retrofit_corp",
           cards: [
-            { id: "onr_v1_306_trojan-horse", quantity: 1 },
+            { id: 518, quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -3003,7 +3003,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     retrofitState.runner.tags = 2;
     const retrofitId = moveRunnerCardToGrip(
       retrofitState,
-      "onr_v1_116_total-genetic-retrofit",
+      328,
     );
     retrofitState = apply(
       retrofitState,
@@ -3038,7 +3038,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     };
     const retrofitTrojanId = moveCorpCardToHq(
       retrofitState,
-      "onr_v1_306_trojan-horse",
+      518,
     );
     keepOnlyCorpHqCard(retrofitState, retrofitTrojanId);
     retrofitState.corp.credits = 8;
@@ -3047,7 +3047,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(retrofitState, action) === "onr_v1_306_trojan-horse",
+        sourceDefinition(retrofitState, action) === 518,
     );
     expect(retrofitState.runner.tags).toBe(0);
     expect(retrofitState.runnerTagAvoidanceCredits).toBe(0);

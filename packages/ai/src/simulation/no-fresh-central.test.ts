@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type {
   AiDecisionInput,
@@ -19,6 +20,16 @@ describe("no-fresh central diagnostics", () => {
     expect(closeoutForRoles(["multiaccessory_noise"])).toMatchObject({
       opportunity: false,
     });
+  });
+
+  it("does not count HQ-only multiaccess as an R&D closeout", () => {
+    const hqOnly = input();
+    hqOnly.playerView.own.rig = [card(341)];
+    expect(closeoutForRoles(["multiaccess"], hqOnly).opportunity).toBe(false);
+
+    const emptyRd = input();
+    emptyRd.playerView.opponent.deckCount = 0;
+    expect(closeoutForRoles(["multiaccess"], emptyRd).opportunity).toBe(false);
   });
 
   it("matches setup search substitutions by bounded role terms", () => {
@@ -71,8 +82,8 @@ describe("no-fresh central diagnostics", () => {
   });
 });
 
-function closeoutForRoles(roles: string[]) {
-  return trueCentralCloseoutProfile(input(), "rd", {
+function closeoutForRoles(roles: string[], position = input()) {
+  return trueCentralCloseoutProfile(position, "rd", {
     assessKnownRezzedIcePath: () =>
       ({ blocked: false, visibleBreakCost: 0 }) as never,
     rolesForCardId: () => roles,
@@ -174,10 +185,10 @@ function startRun(serverId: "hq" | "rd" | "archives"): LegalAction {
   };
 }
 
-function card(definitionId: string): VisibleCard {
+function card(id: number | string): VisibleCard {
   return {
-    instanceId: definitionId,
-    definitionId,
+    instanceId: typeof id === "number" ? "card_" + id : id,
+    definitionId: typeof id === "number" ? id : syntheticCardDefinitionId(id),
     known: true,
   } as VisibleCard;
 }

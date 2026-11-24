@@ -1,6 +1,6 @@
-import { mkdirSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { DatabaseSync } from "node:sqlite";
+import { createRuntimeCardsById } from "@netgrid/catalog";
+import type { CardDefinitionId } from "@netgrid/shared";
+import type { DatabaseSync } from "node:sqlite";
 import type {
   AiDifficulty,
   ApiMatchCardPool,
@@ -13,10 +13,11 @@ import {
   type StandardDeckCatalogEntry,
 } from "./account-decks";
 import {
-  configureSqliteConnection,
+  openSqliteAccountDatabase,
   runSqliteStorageOperation,
-  SqliteMatchStorage,
 } from "./storage-sqlite";
+
+const cardsById = createRuntimeCardsById();
 
 export const ACCOUNT_MATCH_START_PREFERENCES_SCHEMA_VERSION =
   "netgrid-account-match-start-preferences-v1" as const;
@@ -102,15 +103,7 @@ export class SqliteAccountMatchStartPreferenceStorage implements AccountMatchSta
   private readonly db: DatabaseSync;
 
   constructor(options: { dbPath: string; backupDir?: string }) {
-    const dbPath = resolve(options.dbPath);
-    mkdirSync(dirname(dbPath), { recursive: true });
-    const schemaOwner = new SqliteMatchStorage({
-      dbPath,
-      ...(options.backupDir ? { backupDir: resolve(options.backupDir) } : {}),
-    });
-    schemaOwner.close();
-    this.db = new DatabaseSync(dbPath);
-    configureSqliteConnection(this.db);
+    this.db = openSqliteAccountDatabase(options);
   }
 
   async loadForAccount(
@@ -364,7 +357,7 @@ function standardDeckMatches(
 function deckMatchesCardPool(
   deck: {
     formatProfileId: string;
-    cards: readonly { cardId: string }[];
+    cards: readonly { cardId: CardDefinitionId }[];
   },
   cardPool: ApiMatchCardPool,
 ): boolean {
@@ -390,11 +383,12 @@ function deckMatchesCardPool(
     (!hasClassic || !hasProteus)
   )
     return false;
-  return deck.cards.every(
-    (entry) =>
-      (!entry.cardId.startsWith("onr_classic_") || hasClassic) &&
-      (!entry.cardId.startsWith("onr_proteus_") || hasProteus),
-  );
+  return deck.cards.every((entry) => {
+    const card = cardsById[entry.cardId];
+    return card !== undefined &&
+      (card.setId !== "classic" || hasClassic) &&
+      (card.setId !== "proteus" || hasProteus);
+  });
 }
 
 function recordFrom(value: unknown): Record<string, unknown> {

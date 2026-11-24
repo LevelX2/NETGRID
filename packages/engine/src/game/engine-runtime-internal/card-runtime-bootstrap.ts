@@ -1,3 +1,4 @@
+import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import * as runtimePorts from "./runtime-port-bindings";
 import { temporaryIceStrengthPulseBonus } from "../../ability-engine/temporary-ice-strength-pulse";
@@ -62,7 +63,6 @@ import {
 } from "../choices/pending-choice-resolution";
 import { selectedChoiceIds } from "../choices/choice-validation";
 import {
-  corpInstalledCardIds,
   corpRootAssetIdsInServer,
   definitionFor,
   mustInstance,
@@ -696,12 +696,6 @@ export function configureCardRuntimeBootstrap() {
         affordableRezzedInstalledIceIdsForRunner:
           runtimePorts.affordableRezzedInstalledIceIdsForRunner,
         unrezzedInstalledIceIds: runtimePorts.unrezzedInstalledIceIds,
-        installedIceIds: (state) =>
-          corpInstalledCardIds(state).filter(
-            (cardId) =>
-              mustInstance(state.cardInstances, cardId).zone.zone ===
-              "serverIce",
-          ),
         rezzedBlackIceIds: runtimePorts.rezzedBlackIceIds,
         startPayRezCostToTrashRezzedIceChoice:
           runtimePorts.startPayRezCostToTrashRezzedIceChoice,
@@ -993,11 +987,17 @@ export function configureCardRuntimeBootstrap() {
     const [
       ,
       sourceCardId = "",
-      sourceDefinitionId = "",
+      sourceDefinitionIdToken = "",
       targetCardId = "",
-      targetDefinitionId = "",
+      targetDefinitionIdToken = "",
       targetServerId = "",
     ] = choice.source.split(":");
+    const sourceDefinitionId = parseCardDefinitionIdToken(
+      sourceDefinitionIdToken,
+    );
+    const targetDefinitionId = parseCardDefinitionIdToken(
+      targetDefinitionIdToken,
+    );
     if (!state.runner.heap.includes(sourceCardId as CardInstanceId))
       throw new Error("Die Quelle liegt nicht mehr im Heap.");
     if (
@@ -1208,7 +1208,7 @@ export function configureCardRuntimeBootstrap() {
           runtimePorts.discardRandomCorpHqCards(
             state,
             count,
-            `card_implementation.random.${sourceDefinitionId}.hq_discard`,
+            [51, sourceDefinitionId],
           ),
         startDistributeAdvancementCounters:
           runtimePorts.startCardImplementationAdvancementDistributionChoice,

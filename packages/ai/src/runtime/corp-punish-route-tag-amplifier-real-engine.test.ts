@@ -6,6 +6,7 @@ import {
 } from "@netgrid/engine";
 import {
   DEMO_DECKS,
+  type CardDefinitionId,
   type DeckDefinition,
   type GameState,
   type LegalAction,
@@ -19,11 +20,11 @@ import { chooseCorpAction } from "../index";
 import { buildAiDecisionInput } from "./ai-decision-input";
 import { withDecisionLocalCorpPunishRouteQuotes } from "../corp/punish/punish-route-quote-input";
 
-const DATAPOOL = "onr_v1_287_datapool-by-zetatech";
-const VOUCHER = "onr_v1_293_netwatch-credit-voucher";
-const SCORCHED_EARTH = "onr_v1_302_scorched-earth";
-const URBAN_RENEWAL = "onr_v1_307_urban-renewal";
-const WILSON = "onr_v1_187_wilson-weeflerunner-apprentice";
+const DATAPOOL = 499;
+const VOUCHER = 505;
+const SCORCHED_EARTH = 514;
+const URBAN_RENEWAL = 519;
+const WILSON = 399;
 const CORP_DECK = withCards(
   DEMO_DECKS.demo_corp_001,
   "tag-amplifier-quote-corp",
@@ -77,10 +78,10 @@ describe("direct additional-tag punish routes", () => {
     );
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId:
-        "plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
+        "pp3zys3mvrb02r0muk2126s52",
       selectedStep: {
         parentInstanceId:
-          "plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
+          "pp3zys3mvrb02r0muk2126s52",
       },
     });
   });
@@ -142,10 +143,10 @@ describe("direct additional-tag punish routes", () => {
     );
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId:
-        "plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
+        "pp3zys3mvrb02r0muk2126s52",
       selectedStep: {
         parentInstanceId:
-          "plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
+          "pp3zys3mvrb02r0muk2126s52",
       },
     });
     if (!decision.actionId) throw new Error("Missing selected Voucher action.");
@@ -248,7 +249,7 @@ describe("direct additional-tag punish routes", () => {
       }
       expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
         rootPlanInstanceId:
-          "plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
+          "pp3zys3mvrb02r0muk2126s52",
         priority: { effectiveClass: "P1" },
         route: {
           actionId: decision.actionId,
@@ -288,7 +289,7 @@ describe("direct additional-tag punish routes", () => {
       });
       expect(followup.decisionDebug?.planFirstDecision).toMatchObject({
         rootPlanInstanceId:
-          "plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
+          "pp3zys3mvrb02r0muk2126s52",
         priority: { effectiveClass: "P1" },
       });
       const resolved = applyAction(state, {
@@ -305,7 +306,7 @@ describe("direct additional-tag punish routes", () => {
 
 function tagAmplifierState(
   seed: string,
-  amplifierDefinitionId: string,
+  amplifierDefinitionId: number,
   corpCredits: number,
 ): GameState {
   const setupState = createGameAfterSetup({
@@ -334,7 +335,7 @@ function decisionInput(state: GameState, deck = CORP_DECK) {
 
 function routeFor(
   input: ReturnType<typeof decisionInput>,
-  definitionId: string,
+  definitionId: number,
 ) {
   return input.playerView.corpPunishRouteQuoteSet?.routes.find(
     (route) => route.steps[0]?.sourceCardDefinitionId === definitionId,
@@ -344,7 +345,7 @@ function routeFor(
 function playOperation(
   actions: readonly LegalAction[],
   input: ReturnType<typeof decisionInput>,
-  definitionId: string,
+  definitionId: number,
 ): LegalAction {
   const instanceId = input.playerView.own.gripOrHq.find(
     (card) => card.definitionId === definitionId,
@@ -376,7 +377,7 @@ function applyMandatoryDraw(state: GameState): GameState {
 function withCards(
   base: DeckDefinition,
   id: string,
-  additions: readonly string[],
+  additions: readonly CardDefinitionId[],
 ): DeckDefinition {
   return {
     ...base,

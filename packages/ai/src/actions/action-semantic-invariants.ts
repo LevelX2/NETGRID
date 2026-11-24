@@ -4,6 +4,7 @@ import type {
   StrategySupportPair,
   TargetProfileMatch,
 } from "../action-semantic-candidate";
+import { RUNTIME_CARDS } from "../ai-hints";
 
 export const ACTION_SEMANTIC_INVARIANT_REPORT_SCHEMA_VERSION =
   "action-semantic-invariants-v1" as const;
@@ -82,7 +83,7 @@ function profileInvariantIssues(
 
   if (
     options.allowFixtureProfiles !== true &&
-    fixtureLikeCardId(profile.cardId)
+    !Object.hasOwn(RUNTIME_CARDS, profile.cardId)
   ) {
     issues.push(
       issue(
@@ -90,61 +91,48 @@ function profileInvariantIssues(
         "error",
         `${basePath}.cardId`,
         "Fixture or harness semantic profiles must not be mixed into production-profile checks.",
-        [profile.cardId],
+        [String(profile.cardId)],
       ),
     );
   }
 
-  issues.push(
-    ...signalIssues(`${basePath}.tacticSignals`, profile.tacticSignals),
-    ...strategySupportIssues(
-      `${basePath}.strategySupport`,
-      profile.strategySupport ?? [],
-    ),
-    ...broadSignalStrategySupportIssues(
-      `${basePath}.strategySupport`,
-      profile.tacticSignals,
-      profile.strategySupport ?? [],
-    ),
-    ...supportOnlyStrategyIssues(
-      `${basePath}.strategySupport`,
-      profile.tacticSignals,
-      profile.strategySupport ?? [],
-    ),
-    ...targetProfileIssues(
-      `${basePath}.targetProfileMatches`,
-      profile.targetProfileMatches ?? [],
-    ),
-  );
-
+  issues.push(...semanticScopeIssues(basePath, profile));
   for (const [abilityIndex, ability] of (
     profile.abilitySemantics ?? []
   ).entries()) {
-    const abilityPath = `${basePath}.abilitySemantics[${abilityIndex}]`;
     issues.push(
-      ...signalIssues(`${abilityPath}.tacticSignals`, ability.tacticSignals),
-      ...strategySupportIssues(
-        `${abilityPath}.strategySupport`,
-        ability.strategySupport ?? [],
-      ),
-      ...broadSignalStrategySupportIssues(
-        `${abilityPath}.strategySupport`,
-        ability.tacticSignals,
-        ability.strategySupport ?? [],
-      ),
-      ...supportOnlyStrategyIssues(
-        `${abilityPath}.strategySupport`,
-        ability.tacticSignals,
-        ability.strategySupport ?? [],
-      ),
-      ...targetProfileIssues(
-        `${abilityPath}.targetProfileMatches`,
-        ability.targetProfileMatches ?? [],
+      ...semanticScopeIssues(
+        basePath + ".abilitySemantics[" + abilityIndex + "]",
+        ability,
       ),
     );
   }
-
   return issues;
+}
+
+function semanticScopeIssues(
+  path: string,
+  scope: Pick<
+    ActionCardSemanticProfile,
+    "tacticSignals" | "strategySupport" | "targetProfileMatches"
+  >,
+): ActionSemanticInvariantIssue[] {
+  const strategyPath = path + ".strategySupport";
+  const support = scope.strategySupport ?? [];
+  return [
+    ...signalIssues(path + ".tacticSignals", scope.tacticSignals),
+    ...strategySupportIssues(strategyPath, support),
+    ...broadSignalStrategySupportIssues(
+      strategyPath,
+      scope.tacticSignals,
+      support,
+    ),
+    ...supportOnlyStrategyIssues(strategyPath, scope.tacticSignals, support),
+    ...targetProfileIssues(
+      path + ".targetProfileMatches",
+      scope.targetProfileMatches ?? [],
+    ),
+  ];
 }
 
 function signalIssues(
@@ -469,37 +457,6 @@ function tokensIncludePhrase(
       (phraseToken, offset) => tokens[index + offset] === phraseToken,
     ),
   );
-}
-
-function fixtureLikeCardId(cardId: string): boolean {
-  const segments = splitIdentifierSegments(cardId.toLocaleLowerCase("en-US"));
-  const segmentSet = new Set(segments);
-  return (
-    segments[0] === "test" ||
-    segments[0] === "fixture" ||
-    segmentSet.has("fixture") ||
-    segmentSet.has("harness")
-  );
-}
-
-function splitIdentifierSegments(value: string): string[] {
-  const segments: string[] = [];
-  let current = "";
-  for (const character of value) {
-    if (
-      character === "_" ||
-      character === "-" ||
-      character === "." ||
-      character === ":"
-    ) {
-      if (current.length > 0) segments.push(current);
-      current = "";
-      continue;
-    }
-    current += character;
-  }
-  if (current.length > 0) segments.push(current);
-  return segments;
 }
 
 function nonEmptyString(value: unknown): value is string {

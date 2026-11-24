@@ -25,74 +25,74 @@
     "deckHash": "fnv1a:94aba061",
     "cards": [
       {
-        "cardId": "onr_classic_002_superserum",
+        "cardId": 6,
         "quantity": 1
       },
       {
-        "cardId": "onr_proteus_032_misleading-access-menus",
+        "cardId": 90,
         "quantity": 3
       },
       {
-        "cardId": "onr_proteus_038_snowbank",
+        "cardId": 96,
         "quantity": 3
       },
       {
-        "cardId": "onr_v1_194_corporate-downsizing",
+        "cardId": 406,
         "quantity": 3
       },
       {
-        "cardId": "onr_v1_196_corporate-war",
+        "cardId": 408,
         "quantity": 3
       },
       {
-        "cardId": "onr_v1_237_data-wall",
+        "cardId": 449,
         "quantity": 3
       },
       {
-        "cardId": "onr_v1_279_wall-of-static",
+        "cardId": 491,
         "quantity": 3
       },
       {
-        "cardId": "onr_v1_281_accounts-receivable",
+        "cardId": 493,
         "quantity": 3
       },
       {
-        "cardId": "onr_v1_282_annual-reviews",
+        "cardId": 494,
         "quantity": 2
       },
       {
-        "cardId": "onr_v1_288_day-shift",
+        "cardId": 500,
         "quantity": 3
       },
       {
-        "cardId": "onr_v1_290_efficiency-experts",
+        "cardId": 502,
         "quantity": 3
       },
       {
-        "cardId": "onr_v1_292_management-shake-up",
+        "cardId": 504,
         "quantity": 3
       },
       {
-        "cardId": "onr_v1_297_overtime-incentives",
+        "cardId": 509,
         "quantity": 3
       },
       {
-        "cardId": "onr_v1_304_systematic-layoffs",
+        "cardId": 516,
         "quantity": 3
       },
       {
-        "cardId": "onr_v1_312_chicago-branch",
+        "cardId": 524,
         "quantity": 3
       },
       {
-        "cardId": "onr_v1_347_vapor-ops",
+        "cardId": 559,
         "quantity": 3
       }
     ]
   },
   "engine": {
     "stateVersion": 20,
-    "stateHash": "fnv1a:fd397cee",
+    "stateHash": "fnv1a:9bdb669d",
     "testOnlyGameState": {
       "matchId": "match_a36a9664458303fc",
       "baseline": {
@@ -113,493 +113,689 @@
       "randomDrawRecords": [
         {
           "counter": 0,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.6475755247960413
+          "purpose": [
+            1
+          ],
+          "value": 0.4677831343101927
         },
         {
           "counter": 1,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.261149907670713
+          "purpose": [
+            1
+          ],
+          "value": 0.1941513949483562
         },
         {
           "counter": 2,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.054461849897446846
+          "purpose": [
+            1
+          ],
+          "value": 0.752841071322431
         },
         {
           "counter": 3,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.2666811967731434
+          "purpose": [
+            1
+          ],
+          "value": 0.8302894306061291
         },
         {
           "counter": 4,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.7949089382987775
+          "purpose": [
+            1
+          ],
+          "value": 0.8979731431074545
         },
         {
           "counter": 5,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.7816661096283182
+          "purpose": [
+            1
+          ],
+          "value": 0.2697772217851844
         },
         {
           "counter": 6,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.3605339540271555
+          "purpose": [
+            1
+          ],
+          "value": 0.597631367383018
         },
         {
           "counter": 7,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.6217675760633535
+          "purpose": [
+            1
+          ],
+          "value": 0.25476785306560334
         },
         {
           "counter": 8,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.6765156077595316
+          "purpose": [
+            1
+          ],
+          "value": 0.03973945502238818
         },
         {
           "counter": 9,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.9398690370557892
+          "purpose": [
+            1
+          ],
+          "value": 0.19449221424732832
         },
         {
           "counter": 10,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.07260498027471651
+          "purpose": [
+            1
+          ],
+          "value": 0.7099225887931202
         },
         {
           "counter": 11,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.154291164238341
+          "purpose": [
+            1
+          ],
+          "value": 0.7239845715305172
         },
         {
           "counter": 12,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.8405972612512449
+          "purpose": [
+            1
+          ],
+          "value": 0.3179910089432626
         },
         {
           "counter": 13,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.28333559525614005
+          "purpose": [
+            1
+          ],
+          "value": 0.6755241007077342
         },
         {
           "counter": 14,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.07343260845257416
+          "purpose": [
+            1
+          ],
+          "value": 0.1344362281864545
         },
         {
           "counter": 15,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.8917873287017709
+          "purpose": [
+            1
+          ],
+          "value": 0.18127161877702958
         },
         {
           "counter": 16,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.32476277035115786
+          "purpose": [
+            1
+          ],
+          "value": 0.2763691552279801
         },
         {
           "counter": 17,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.8947452276115592
+          "purpose": [
+            1
+          ],
+          "value": 0.5449971378246644
         },
         {
           "counter": 18,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.14737228099499222
+          "purpose": [
+            1
+          ],
+          "value": 0.4432794907349983
         },
         {
           "counter": 19,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.10157052396633748
+          "purpose": [
+            1
+          ],
+          "value": 0.13477205210860155
         },
         {
           "counter": 20,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.4890063450723572
+          "purpose": [
+            1
+          ],
+          "value": 0.8265018962126206
         },
         {
           "counter": 21,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.2922396696544717
+          "purpose": [
+            1
+          ],
+          "value": 0.7595781239203472
         },
         {
           "counter": 22,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.7783043991024348
+          "purpose": [
+            1
+          ],
+          "value": 0.8327113923181088
         },
         {
           "counter": 23,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.20817543517405723
+          "purpose": [
+            1
+          ],
+          "value": 0.9806221229148002
         },
         {
           "counter": 24,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.6436198236247653
+          "purpose": [
+            1
+          ],
+          "value": 0.3620122485097256
         },
         {
           "counter": 25,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.34597910142188903
+          "purpose": [
+            1
+          ],
+          "value": 0.9526267326326637
         },
         {
           "counter": 26,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.9670854801515887
+          "purpose": [
+            1
+          ],
+          "value": 0.3934413471699414
         },
         {
           "counter": 27,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.7302822717870683
+          "purpose": [
+            1
+          ],
+          "value": 0.03084175278181378
         },
         {
           "counter": 28,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.957876181260885
+          "purpose": [
+            1
+          ],
+          "value": 0.9152874723093417
         },
         {
           "counter": 29,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.7830442246683408
+          "purpose": [
+            1
+          ],
+          "value": 0.439012432114147
         },
         {
           "counter": 30,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.307951205750033
+          "purpose": [
+            1
+          ],
+          "value": 0.8946258328188116
         },
         {
           "counter": 31,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.38904568100844295
+          "purpose": [
+            1
+          ],
+          "value": 0.8994787830020152
         },
         {
           "counter": 32,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.578964786669603
+          "purpose": [
+            1
+          ],
+          "value": 0.2723440739015255
         },
         {
           "counter": 33,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.8910281537017866
+          "purpose": [
+            1
+          ],
+          "value": 0.08085674009013555
         },
         {
           "counter": 34,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.9146841795591889
+          "purpose": [
+            1
+          ],
+          "value": 0.5799151695190368
         },
         {
           "counter": 35,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.45505962486958107
+          "purpose": [
+            1
+          ],
+          "value": 0.9098734073435595
         },
         {
           "counter": 36,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.0345510413795721
+          "purpose": [
+            1
+          ],
+          "value": 0.9169537624723054
         },
         {
           "counter": 37,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.44994378587331174
+          "purpose": [
+            1
+          ],
+          "value": 0.5212929541201252
         },
         {
           "counter": 38,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.004101326047613707
+          "purpose": [
+            1
+          ],
+          "value": 0.5976527810641588
         },
         {
           "counter": 39,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.9957417770150541
+          "purpose": [
+            1
+          ],
+          "value": 0.11184746659771161
         },
         {
           "counter": 40,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.8485313696780918
+          "purpose": [
+            1
+          ],
+          "value": 0.33325434627541917
         },
         {
           "counter": 41,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.16014125594607476
+          "purpose": [
+            1
+          ],
+          "value": 0.76532335142732
         },
         {
           "counter": 42,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.9679651405461857
+          "purpose": [
+            1
+          ],
+          "value": 0.2485606364056595
         },
         {
           "counter": 43,
-          "purpose": "setup.shuffle.runner.start_stack",
-          "value": 0.24171459911449955
+          "purpose": [
+            1
+          ],
+          "value": 0.2462153195558331
         },
         {
           "counter": 44,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.3065954457694806
+          "purpose": [
+            2
+          ],
+          "value": 0.5000001711557991
         },
         {
           "counter": 45,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.6212033045513244
+          "purpose": [
+            2
+          ],
+          "value": 0.5000559104778745
         },
         {
           "counter": 46,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.4944970704638044
+          "purpose": [
+            2
+          ],
+          "value": 0.8304189885415473
         },
         {
           "counter": 47,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.20240888522216816
+          "purpose": [
+            2
+          ],
+          "value": 0.638322213832796
         },
         {
           "counter": 48,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.020546269493838087
+          "purpose": [
+            2
+          ],
+          "value": 0.07860751971761026
         },
         {
           "counter": 49,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.06322941032766594
+          "purpose": [
+            2
+          ],
+          "value": 0.4483189026493667
         },
         {
           "counter": 50,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.3421165137010752
+          "purpose": [
+            2
+          ],
+          "value": 0.12391668983444681
         },
         {
           "counter": 51,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.5967510357883985
+          "purpose": [
+            2
+          ],
+          "value": 0.15976361736249467
         },
         {
           "counter": 52,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.6825008988735044
+          "purpose": [
+            2
+          ],
+          "value": 0.5977377882927526
         },
         {
           "counter": 53,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.8387459805403393
+          "purpose": [
+            2
+          ],
+          "value": 0.00941755929809407
         },
         {
           "counter": 54,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.17337605975617343
+          "purpose": [
+            2
+          ],
+          "value": 0.6333086305228446
         },
         {
           "counter": 55,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.7491296141203843
+          "purpose": [
+            2
+          ],
+          "value": 0.6675697927007436
         },
         {
           "counter": 56,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.35147984783496156
+          "purpose": [
+            2
+          ],
+          "value": 0.9061021921538519
         },
         {
           "counter": 57,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.9934515693760383
+          "purpose": [
+            2
+          ],
+          "value": 0.26041853341158705
         },
         {
           "counter": 58,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.8075894645373475
+          "purpose": [
+            2
+          ],
+          "value": 0.3652086530673605
         },
         {
           "counter": 59,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.22396608089361825
+          "purpose": [
+            2
+          ],
+          "value": 0.4583209119272863
         },
         {
           "counter": 60,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.37106751042468444
+          "purpose": [
+            2
+          ],
+          "value": 0.49891607402157523
         },
         {
           "counter": 61,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.5794118112513965
+          "purpose": [
+            2
+          ],
+          "value": 0.27537662076840486
         },
         {
           "counter": 62,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.02285902029365927
+          "purpose": [
+            2
+          ],
+          "value": 0.8310561931401468
         },
         {
           "counter": 63,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.7411515546992746
+          "purpose": [
+            2
+          ],
+          "value": 0.24800068946060905
         },
         {
           "counter": 64,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.3201130179084569
+          "purpose": [
+            2
+          ],
+          "value": 0.6536843311315145
         },
         {
           "counter": 65,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.2663077443335352
+          "purpose": [
+            2
+          ],
+          "value": 0.7653015020621393
         },
         {
           "counter": 66,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.5665653183272065
+          "purpose": [
+            2
+          ],
+          "value": 0.0473444800349756
         },
         {
           "counter": 67,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.18055889106096412
+          "purpose": [
+            2
+          ],
+          "value": 0.11711153365505378
         },
         {
           "counter": 68,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.3915326994591507
+          "purpose": [
+            2
+          ],
+          "value": 0.47626817924032405
         },
         {
           "counter": 69,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.7969083212049732
+          "purpose": [
+            2
+          ],
+          "value": 0.12923791835783294
         },
         {
           "counter": 70,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.05258143358958178
+          "purpose": [
+            2
+          ],
+          "value": 0.06804230540295764
         },
         {
           "counter": 71,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.8446741118213735
+          "purpose": [
+            2
+          ],
+          "value": 0.699533912253196
         },
         {
           "counter": 72,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.9033450290389998
+          "purpose": [
+            2
+          ],
+          "value": 0.14130806358120251
         },
         {
           "counter": 73,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.9802112273795066
+          "purpose": [
+            2
+          ],
+          "value": 0.7705862019104543
         },
         {
           "counter": 74,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.5508256200976227
+          "purpose": [
+            2
+          ],
+          "value": 0.0416508426690001
         },
         {
           "counter": 75,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.9759240577620925
+          "purpose": [
+            2
+          ],
+          "value": 0.18345793389599296
         },
         {
           "counter": 76,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.1553214808650406
+          "purpose": [
+            2
+          ],
+          "value": 0.19952254992376095
         },
         {
           "counter": 77,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.20914763739052178
+          "purpose": [
+            2
+          ],
+          "value": 0.008237125693564606
         },
         {
           "counter": 78,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.025701574911031422
+          "purpose": [
+            2
+          ],
+          "value": 0.6351912930550206
         },
         {
           "counter": 79,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.5833738644741184
+          "purpose": [
+            2
+          ],
+          "value": 0.3796721591024278
         },
         {
           "counter": 80,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.07420111709816557
+          "purpose": [
+            2
+          ],
+          "value": 0.11765212400453229
         },
         {
           "counter": 81,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.7632168536796221
+          "purpose": [
+            2
+          ],
+          "value": 0.2132941928123926
         },
         {
           "counter": 82,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.5258338548284273
+          "purpose": [
+            2
+          ],
+          "value": 0.3874033324140457
         },
         {
           "counter": 83,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.21904636785060672
+          "purpose": [
+            2
+          ],
+          "value": 0.21060233304329712
         },
         {
           "counter": 84,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.8238941965420414
+          "purpose": [
+            2
+          ],
+          "value": 0.28821506720152024
         },
         {
           "counter": 85,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.6990845862492734
+          "purpose": [
+            2
+          ],
+          "value": 0.520042323529075
         },
         {
           "counter": 86,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.38160451970983045
+          "purpose": [
+            2
+          ],
+          "value": 0.6489560379521581
         },
         {
           "counter": 87,
-          "purpose": "setup.shuffle.corp.start_rnd",
-          "value": 0.441605237408242
+          "purpose": [
+            2
+          ],
+          "value": 0.8086964453310913
         },
         {
           "counter": 88,
-          "purpose": "setup.draw.runner.initial_hand",
-          "value": 0.7818786325786978
+          "purpose": [
+            3
+          ],
+          "value": 0.14495354536424188
         },
         {
           "counter": 89,
-          "purpose": "setup.draw.runner.initial_hand",
-          "value": 0.7439710849615884
+          "purpose": [
+            3
+          ],
+          "value": 0.09839292920613474
         },
         {
           "counter": 90,
-          "purpose": "setup.draw.runner.initial_hand",
-          "value": 0.5847466050258382
+          "purpose": [
+            3
+          ],
+          "value": 0.5687675668332718
         },
         {
           "counter": 91,
-          "purpose": "setup.draw.runner.initial_hand",
-          "value": 0.25328933377475116
+          "purpose": [
+            3
+          ],
+          "value": 0.5950526304829566
         },
         {
           "counter": 92,
-          "purpose": "setup.draw.runner.initial_hand",
-          "value": 0.2551025558805584
+          "purpose": [
+            3
+          ],
+          "value": 0.003409782647112558
         },
         {
           "counter": 93,
-          "purpose": "setup.draw.corp.initial_hand",
-          "value": 0.6887658481599298
+          "purpose": [
+            4
+          ],
+          "value": 0.8831850118098997
         },
         {
           "counter": 94,
-          "purpose": "setup.draw.corp.initial_hand",
-          "value": 0.7216644215535573
+          "purpose": [
+            4
+          ],
+          "value": 0.718366714407788
         },
         {
           "counter": 95,
-          "purpose": "setup.draw.corp.initial_hand",
-          "value": 0.20217731347627999
+          "purpose": [
+            4
+          ],
+          "value": 0.13123635249688625
         },
         {
           "counter": 96,
-          "purpose": "setup.draw.corp.initial_hand",
-          "value": 0.7593225050752901
+          "purpose": [
+            4
+          ],
+          "value": 0.13065033416889604
         },
         {
           "counter": 97,
-          "purpose": "setup.draw.corp.initial_hand",
-          "value": 0.4229289160221985
+          "purpose": [
+            4
+          ],
+          "value": 0.006141045963607428
         }
       ],
       "aiTurnPlanRandomCounter": 0,
@@ -608,57 +804,57 @@
       "phase": "corp_action_phase",
       "timingPoint": "corp_action.main",
       "corp": {
-        "identity": "corp_corp_identity_001_0",
+        "identity": "cs",
         "credits": 8,
         "clicks": 2,
         "maxHandSize": 5,
         "badPublicity": 0,
         "hq": [
-          "corp_onr_v1_194_corporate-downsizing_1",
-          "corp_onr_v1_194_corporate-downsizing_3",
-          "corp_onr_v1_292_management-shake-up_3",
-          "corp_onr_proteus_038_snowbank_1",
-          "corp_onr_v1_347_vapor-ops_1",
-          "corp_onr_v1_282_annual-reviews_2"
+          "c2id",
+          "c2if",
+          "c347",
+          "clh",
+          "c3gd",
+          "c31y"
         ],
         "rd": [
-          "corp_onr_v1_290_efficiency-experts_2",
-          "corp_onr_proteus_038_snowbank_2",
-          "corp_onr_v1_279_wall-of-static_3",
-          "corp_onr_v1_196_corporate-war_3",
-          "corp_onr_v1_312_chicago-branch_1",
-          "corp_onr_v1_304_systematic-layoffs_2",
-          "corp_onr_v1_281_accounts-receivable_2",
-          "corp_onr_v1_347_vapor-ops_2",
-          "corp_onr_v1_279_wall-of-static_2",
-          "corp_onr_v1_297_overtime-incentives_3",
-          "corp_onr_v1_288_day-shift_3",
-          "corp_onr_v1_237_data-wall_3",
-          "corp_onr_v1_288_day-shift_1",
-          "corp_onr_proteus_032_misleading-access-menus_3",
-          "corp_onr_v1_304_systematic-layoffs_3",
-          "corp_onr_v1_290_efficiency-experts_3",
-          "corp_onr_v1_312_chicago-branch_3",
-          "corp_onr_v1_281_accounts-receivable_1",
-          "corp_onr_v1_312_chicago-branch_2",
-          "corp_onr_v1_279_wall-of-static_1",
-          "corp_onr_v1_196_corporate-war_1",
-          "corp_onr_v1_297_overtime-incentives_2",
-          "corp_onr_v1_297_overtime-incentives_1",
-          "corp_onr_v1_292_management-shake-up_2",
-          "corp_onr_v1_196_corporate-war_2",
-          "corp_onr_v1_304_systematic-layoffs_1",
-          "corp_onr_proteus_038_snowbank_3",
-          "corp_onr_v1_292_management-shake-up_1",
-          "corp_onr_v1_288_day-shift_2",
-          "corp_onr_v1_282_annual-reviews_1",
-          "corp_onr_v1_347_vapor-ops_3",
-          "corp_onr_proteus_032_misleading-access-menus_2",
-          "corp_onr_classic_002_superserum_1",
-          "corp_onr_v1_194_corporate-downsizing_2",
-          "corp_onr_v1_281_accounts-receivable_3",
-          "corp_onr_v1_290_efficiency-experts_1",
-          "corp_onr_v1_237_data-wall_1"
+          "c33q",
+          "cli",
+          "c31b",
+          "c2iv",
+          "c38l",
+          "c36u",
+          "c31q",
+          "c3ge",
+          "c31a",
+          "c35b",
+          "c33b",
+          "c2rz",
+          "c339",
+          "ck7",
+          "c36v",
+          "c33r",
+          "c38n",
+          "c31p",
+          "c38m",
+          "c319",
+          "c2it",
+          "c35a",
+          "c359",
+          "c346",
+          "c2iu",
+          "c36t",
+          "clj",
+          "c345",
+          "c33a",
+          "c31x",
+          "c3gf",
+          "ck6",
+          "c1h",
+          "c2ie",
+          "c31r",
+          "c33p",
+          "c2rx"
         ],
         "archives": [],
         "scoreArea": [],
@@ -667,14 +863,18 @@
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": ["corp_onr_v1_237_data-wall_2"],
+            "ice": [
+              "c2ry"
+            ],
             "root": []
           },
           {
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": ["corp_onr_proteus_032_misleading-access-menus_1"],
+            "ice": [
+              "ck5"
+            ],
             "root": []
           },
           {
@@ -687,7 +887,7 @@
         ]
       },
       "runner": {
-        "identity": "runner_runner_identity_001_0",
+        "identity": "c3mg",
         "credits": 8,
         "clicks": 0,
         "maxHandSize": 5,
@@ -696,54 +896,56 @@
         "memoryUsed": 0,
         "memoryLimit": 4,
         "grip": [
-          "runner_onr_classic_031_rent-i-con_2",
-          "runner_onr_v1_011_cloak_1",
-          "runner_onr_v1_144_tycho-mem-chip_1",
-          "runner_onr_v1_071_vewy-vewy-quiet_2",
-          "runner_onr_v1_087_forgotten-backup-chip_1"
+          "c7u",
+          "c1dl",
+          "c275",
+          "c1qy",
+          "c1uh"
         ],
         "stack": [
-          "runner_onr_classic_043_running-interference_2",
-          "runner_onr_v1_176_the-shell-traders_3",
-          "runner_onr_classic_031_rent-i-con_1",
-          "runner_onr_v1_114_temple-microcode-outlet_3",
-          "runner_onr_v1_165_junkyard-bbs_1",
-          "runner_onr_proteus_106_disgruntled-ice-technician_1",
-          "runner_onr_v1_114_temple-microcode-outlet_2",
-          "runner_onr_v1_113_synchronized-attack-on-hq_1",
-          "runner_onr_v1_079_bodyweight-synthetic-blood_2",
-          "runner_onr_v1_087_forgotten-backup-chip_3",
-          "runner_onr_v1_035_invisibility_1",
-          "runner_onr_v1_079_bodyweight-synthetic-blood_1",
-          "runner_onr_v1_071_vewy-vewy-quiet_1",
-          "runner_onr_classic_042_panzer-run_2",
-          "runner_onr_proteus_134_cortical-cybermodem_1",
-          "runner_onr_classic_037_finders-keepers_2",
-          "runner_onr_v1_035_invisibility_2",
-          "runner_onr_classic_043_running-interference_1",
-          "runner_onr_proteus_133_chiba-bank-account_1",
-          "runner_onr_v1_108_score_3",
-          "runner_onr_classic_037_finders-keepers_1",
-          "runner_onr_v1_114_temple-microcode-outlet_1",
-          "runner_onr_v1_139_r-and-d-interface_1",
-          "runner_onr_v1_097_livewires-contacts_1",
-          "runner_onr_v1_111_social-engineering_1",
-          "runner_onr_classic_045_elena-laskova_1",
-          "runner_onr_v1_097_livewires-contacts_2",
-          "runner_onr_classic_042_panzer-run_1",
-          "runner_onr_v1_176_the-shell-traders_1",
-          "runner_onr_v1_110_sneak-preview_3",
-          "runner_onr_v1_089_gideons-pawnshop_1",
-          "runner_onr_v1_087_forgotten-backup-chip_2",
-          "runner_onr_proteus_152_swiss-bank-account_1",
-          "runner_onr_v1_110_sneak-preview_1",
-          "runner_onr_v1_110_sneak-preview_2",
-          "runner_onr_v1_176_the-shell-traders_2",
-          "runner_onr_classic_031_rent-i-con_3",
-          "runner_onr_proteus_128_airport-locker_1",
-          "runner_onr_v1_108_score_2"
+          "cai",
+          "c2eb",
+          "c7t",
+          "c20j",
+          "c2bt",
+          "c10h",
+          "c20i",
+          "c209",
+          "c1sq",
+          "c1uj",
+          "c1ix",
+          "c1sp",
+          "c1qx",
+          "caa",
+          "c16p",
+          "c96",
+          "c1iy",
+          "cah",
+          "c16h",
+          "c1z7",
+          "c95",
+          "c20h",
+          "c261",
+          "c1wp",
+          "c1zt",
+          "cax",
+          "c1wq",
+          "ca9",
+          "c2e9",
+          "c1zn",
+          "c1ux",
+          "c1ui",
+          "c1ap",
+          "c1zl",
+          "c1zm",
+          "c2ea",
+          "c7v",
+          "c15d",
+          "c1z6"
         ],
-        "heap": ["runner_onr_v1_108_score_1"],
+        "heap": [
+          "c1z5"
+        ],
         "scoreArea": [],
         "rig": {
           "programs": [],
@@ -756,9 +958,9 @@
         "removedFromGame": []
       },
       "cardInstances": {
-        "runner_runner_identity_001_0": {
-          "instanceId": "runner_runner_identity_001_0",
-          "definitionId": "runner_identity_001",
+        "c3mg": {
+          "instanceId": "c3mg",
+          "definitionId": 587,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -770,9 +972,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_corp_identity_001_0": {
-          "instanceId": "corp_corp_identity_001_0",
-          "definitionId": "corp_identity_001",
+        "cs": {
+          "instanceId": "cs",
+          "definitionId": 3,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -784,9 +986,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_031_rent-i-con_1": {
-          "instanceId": "runner_onr_classic_031_rent-i-con_1",
-          "definitionId": "onr_classic_031_rent-i-con",
+        "c7t": {
+          "instanceId": "c7t",
+          "definitionId": 35,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -798,9 +1000,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_031_rent-i-con_2": {
-          "instanceId": "runner_onr_classic_031_rent-i-con_2",
-          "definitionId": "onr_classic_031_rent-i-con",
+        "c7u": {
+          "instanceId": "c7u",
+          "definitionId": 35,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -812,9 +1014,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_031_rent-i-con_3": {
-          "instanceId": "runner_onr_classic_031_rent-i-con_3",
-          "definitionId": "onr_classic_031_rent-i-con",
+        "c7v": {
+          "instanceId": "c7v",
+          "definitionId": 35,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -826,9 +1028,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_037_finders-keepers_1": {
-          "instanceId": "runner_onr_classic_037_finders-keepers_1",
-          "definitionId": "onr_classic_037_finders-keepers",
+        "c95": {
+          "instanceId": "c95",
+          "definitionId": 41,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -840,9 +1042,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_037_finders-keepers_2": {
-          "instanceId": "runner_onr_classic_037_finders-keepers_2",
-          "definitionId": "onr_classic_037_finders-keepers",
+        "c96": {
+          "instanceId": "c96",
+          "definitionId": 41,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -854,9 +1056,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_042_panzer-run_1": {
-          "instanceId": "runner_onr_classic_042_panzer-run_1",
-          "definitionId": "onr_classic_042_panzer-run",
+        "ca9": {
+          "instanceId": "ca9",
+          "definitionId": 46,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -868,9 +1070,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_042_panzer-run_2": {
-          "instanceId": "runner_onr_classic_042_panzer-run_2",
-          "definitionId": "onr_classic_042_panzer-run",
+        "caa": {
+          "instanceId": "caa",
+          "definitionId": 46,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -882,9 +1084,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_043_running-interference_1": {
-          "instanceId": "runner_onr_classic_043_running-interference_1",
-          "definitionId": "onr_classic_043_running-interference",
+        "cah": {
+          "instanceId": "cah",
+          "definitionId": 47,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -896,9 +1098,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_043_running-interference_2": {
-          "instanceId": "runner_onr_classic_043_running-interference_2",
-          "definitionId": "onr_classic_043_running-interference",
+        "cai": {
+          "instanceId": "cai",
+          "definitionId": 47,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -910,9 +1112,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_classic_045_elena-laskova_1": {
-          "instanceId": "runner_onr_classic_045_elena-laskova_1",
-          "definitionId": "onr_classic_045_elena-laskova",
+        "cax": {
+          "instanceId": "cax",
+          "definitionId": 49,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -924,9 +1126,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_proteus_106_disgruntled-ice-technician_1": {
-          "instanceId": "runner_onr_proteus_106_disgruntled-ice-technician_1",
-          "definitionId": "onr_proteus_106_disgruntled-ice-technician",
+        "c10h": {
+          "instanceId": "c10h",
+          "definitionId": 164,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -938,9 +1140,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_proteus_128_airport-locker_1": {
-          "instanceId": "runner_onr_proteus_128_airport-locker_1",
-          "definitionId": "onr_proteus_128_airport-locker",
+        "c15d": {
+          "instanceId": "c15d",
+          "definitionId": 186,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -952,9 +1154,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_proteus_133_chiba-bank-account_1": {
-          "instanceId": "runner_onr_proteus_133_chiba-bank-account_1",
-          "definitionId": "onr_proteus_133_chiba-bank-account",
+        "c16h": {
+          "instanceId": "c16h",
+          "definitionId": 191,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -966,9 +1168,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_proteus_134_cortical-cybermodem_1": {
-          "instanceId": "runner_onr_proteus_134_cortical-cybermodem_1",
-          "definitionId": "onr_proteus_134_cortical-cybermodem",
+        "c16p": {
+          "instanceId": "c16p",
+          "definitionId": 192,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -980,9 +1182,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_proteus_152_swiss-bank-account_1": {
-          "instanceId": "runner_onr_proteus_152_swiss-bank-account_1",
-          "definitionId": "onr_proteus_152_swiss-bank-account",
+        "c1ap": {
+          "instanceId": "c1ap",
+          "definitionId": 210,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -994,9 +1196,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_011_cloak_1": {
-          "instanceId": "runner_onr_v1_011_cloak_1",
-          "definitionId": "onr_v1_011_cloak",
+        "c1dl": {
+          "instanceId": "c1dl",
+          "definitionId": 223,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1008,9 +1210,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_035_invisibility_1": {
-          "instanceId": "runner_onr_v1_035_invisibility_1",
-          "definitionId": "onr_v1_035_invisibility",
+        "c1ix": {
+          "instanceId": "c1ix",
+          "definitionId": 247,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1022,9 +1224,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_035_invisibility_2": {
-          "instanceId": "runner_onr_v1_035_invisibility_2",
-          "definitionId": "onr_v1_035_invisibility",
+        "c1iy": {
+          "instanceId": "c1iy",
+          "definitionId": 247,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1036,9 +1238,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_071_vewy-vewy-quiet_1": {
-          "instanceId": "runner_onr_v1_071_vewy-vewy-quiet_1",
-          "definitionId": "onr_v1_071_vewy-vewy-quiet",
+        "c1qx": {
+          "instanceId": "c1qx",
+          "definitionId": 283,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1050,9 +1252,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_071_vewy-vewy-quiet_2": {
-          "instanceId": "runner_onr_v1_071_vewy-vewy-quiet_2",
-          "definitionId": "onr_v1_071_vewy-vewy-quiet",
+        "c1qy": {
+          "instanceId": "c1qy",
+          "definitionId": 283,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1064,9 +1266,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_079_bodyweight-synthetic-blood_1": {
-          "instanceId": "runner_onr_v1_079_bodyweight-synthetic-blood_1",
-          "definitionId": "onr_v1_079_bodyweight-synthetic-blood",
+        "c1sp": {
+          "instanceId": "c1sp",
+          "definitionId": 291,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1078,9 +1280,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_079_bodyweight-synthetic-blood_2": {
-          "instanceId": "runner_onr_v1_079_bodyweight-synthetic-blood_2",
-          "definitionId": "onr_v1_079_bodyweight-synthetic-blood",
+        "c1sq": {
+          "instanceId": "c1sq",
+          "definitionId": 291,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1092,9 +1294,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_087_forgotten-backup-chip_1": {
-          "instanceId": "runner_onr_v1_087_forgotten-backup-chip_1",
-          "definitionId": "onr_v1_087_forgotten-backup-chip",
+        "c1uh": {
+          "instanceId": "c1uh",
+          "definitionId": 299,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1106,9 +1308,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_087_forgotten-backup-chip_2": {
-          "instanceId": "runner_onr_v1_087_forgotten-backup-chip_2",
-          "definitionId": "onr_v1_087_forgotten-backup-chip",
+        "c1ui": {
+          "instanceId": "c1ui",
+          "definitionId": 299,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1120,9 +1322,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_087_forgotten-backup-chip_3": {
-          "instanceId": "runner_onr_v1_087_forgotten-backup-chip_3",
-          "definitionId": "onr_v1_087_forgotten-backup-chip",
+        "c1uj": {
+          "instanceId": "c1uj",
+          "definitionId": 299,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1134,9 +1336,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_089_gideons-pawnshop_1": {
-          "instanceId": "runner_onr_v1_089_gideons-pawnshop_1",
-          "definitionId": "onr_v1_089_gideons-pawnshop",
+        "c1ux": {
+          "instanceId": "c1ux",
+          "definitionId": 301,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1148,9 +1350,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_097_livewires-contacts_1": {
-          "instanceId": "runner_onr_v1_097_livewires-contacts_1",
-          "definitionId": "onr_v1_097_livewires-contacts",
+        "c1wp": {
+          "instanceId": "c1wp",
+          "definitionId": 309,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1162,9 +1364,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_097_livewires-contacts_2": {
-          "instanceId": "runner_onr_v1_097_livewires-contacts_2",
-          "definitionId": "onr_v1_097_livewires-contacts",
+        "c1wq": {
+          "instanceId": "c1wq",
+          "definitionId": 309,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1176,9 +1378,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_108_score_1": {
-          "instanceId": "runner_onr_v1_108_score_1",
-          "definitionId": "onr_v1_108_score",
+        "c1z5": {
+          "instanceId": "c1z5",
+          "definitionId": 320,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1190,9 +1392,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_108_score_2": {
-          "instanceId": "runner_onr_v1_108_score_2",
-          "definitionId": "onr_v1_108_score",
+        "c1z6": {
+          "instanceId": "c1z6",
+          "definitionId": 320,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1204,9 +1406,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_108_score_3": {
-          "instanceId": "runner_onr_v1_108_score_3",
-          "definitionId": "onr_v1_108_score",
+        "c1z7": {
+          "instanceId": "c1z7",
+          "definitionId": 320,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1218,9 +1420,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_110_sneak-preview_1": {
-          "instanceId": "runner_onr_v1_110_sneak-preview_1",
-          "definitionId": "onr_v1_110_sneak-preview",
+        "c1zl": {
+          "instanceId": "c1zl",
+          "definitionId": 322,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1232,9 +1434,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_110_sneak-preview_2": {
-          "instanceId": "runner_onr_v1_110_sneak-preview_2",
-          "definitionId": "onr_v1_110_sneak-preview",
+        "c1zm": {
+          "instanceId": "c1zm",
+          "definitionId": 322,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1246,9 +1448,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_110_sneak-preview_3": {
-          "instanceId": "runner_onr_v1_110_sneak-preview_3",
-          "definitionId": "onr_v1_110_sneak-preview",
+        "c1zn": {
+          "instanceId": "c1zn",
+          "definitionId": 322,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1260,9 +1462,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_111_social-engineering_1": {
-          "instanceId": "runner_onr_v1_111_social-engineering_1",
-          "definitionId": "onr_v1_111_social-engineering",
+        "c1zt": {
+          "instanceId": "c1zt",
+          "definitionId": 323,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1274,9 +1476,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_113_synchronized-attack-on-hq_1": {
-          "instanceId": "runner_onr_v1_113_synchronized-attack-on-hq_1",
-          "definitionId": "onr_v1_113_synchronized-attack-on-hq",
+        "c209": {
+          "instanceId": "c209",
+          "definitionId": 325,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1288,9 +1490,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_114_temple-microcode-outlet_1": {
-          "instanceId": "runner_onr_v1_114_temple-microcode-outlet_1",
-          "definitionId": "onr_v1_114_temple-microcode-outlet",
+        "c20h": {
+          "instanceId": "c20h",
+          "definitionId": 326,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1302,9 +1504,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_114_temple-microcode-outlet_2": {
-          "instanceId": "runner_onr_v1_114_temple-microcode-outlet_2",
-          "definitionId": "onr_v1_114_temple-microcode-outlet",
+        "c20i": {
+          "instanceId": "c20i",
+          "definitionId": 326,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1316,9 +1518,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_114_temple-microcode-outlet_3": {
-          "instanceId": "runner_onr_v1_114_temple-microcode-outlet_3",
-          "definitionId": "onr_v1_114_temple-microcode-outlet",
+        "c20j": {
+          "instanceId": "c20j",
+          "definitionId": 326,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1330,9 +1532,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_139_r-and-d-interface_1": {
-          "instanceId": "runner_onr_v1_139_r-and-d-interface_1",
-          "definitionId": "onr_v1_139_r-and-d-interface",
+        "c261": {
+          "instanceId": "c261",
+          "definitionId": 351,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1344,9 +1546,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_144_tycho-mem-chip_1": {
-          "instanceId": "runner_onr_v1_144_tycho-mem-chip_1",
-          "definitionId": "onr_v1_144_tycho-mem-chip",
+        "c275": {
+          "instanceId": "c275",
+          "definitionId": 356,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1358,9 +1560,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_165_junkyard-bbs_1": {
-          "instanceId": "runner_onr_v1_165_junkyard-bbs_1",
-          "definitionId": "onr_v1_165_junkyard-bbs",
+        "c2bt": {
+          "instanceId": "c2bt",
+          "definitionId": 377,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1372,9 +1574,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_176_the-shell-traders_1": {
-          "instanceId": "runner_onr_v1_176_the-shell-traders_1",
-          "definitionId": "onr_v1_176_the-shell-traders",
+        "c2e9": {
+          "instanceId": "c2e9",
+          "definitionId": 388,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1386,9 +1588,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_176_the-shell-traders_2": {
-          "instanceId": "runner_onr_v1_176_the-shell-traders_2",
-          "definitionId": "onr_v1_176_the-shell-traders",
+        "c2ea": {
+          "instanceId": "c2ea",
+          "definitionId": 388,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1400,9 +1602,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "runner_onr_v1_176_the-shell-traders_3": {
-          "instanceId": "runner_onr_v1_176_the-shell-traders_3",
-          "definitionId": "onr_v1_176_the-shell-traders",
+        "c2eb": {
+          "instanceId": "c2eb",
+          "definitionId": 388,
           "owner": "runner",
           "controller": "runner",
           "zone": {
@@ -1414,9 +1616,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_classic_002_superserum_1": {
-          "instanceId": "corp_onr_classic_002_superserum_1",
-          "definitionId": "onr_classic_002_superserum",
+        "c1h": {
+          "instanceId": "c1h",
+          "definitionId": 6,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1428,9 +1630,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_proteus_032_misleading-access-menus_1": {
-          "instanceId": "corp_onr_proteus_032_misleading-access-menus_1",
-          "definitionId": "onr_proteus_032_misleading-access-menus",
+        "ck5": {
+          "instanceId": "ck5",
+          "definitionId": 90,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1443,9 +1645,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_proteus_032_misleading-access-menus_2": {
-          "instanceId": "corp_onr_proteus_032_misleading-access-menus_2",
-          "definitionId": "onr_proteus_032_misleading-access-menus",
+        "ck6": {
+          "instanceId": "ck6",
+          "definitionId": 90,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1457,9 +1659,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_proteus_032_misleading-access-menus_3": {
-          "instanceId": "corp_onr_proteus_032_misleading-access-menus_3",
-          "definitionId": "onr_proteus_032_misleading-access-menus",
+        "ck7": {
+          "instanceId": "ck7",
+          "definitionId": 90,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1471,9 +1673,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_proteus_038_snowbank_1": {
-          "instanceId": "corp_onr_proteus_038_snowbank_1",
-          "definitionId": "onr_proteus_038_snowbank",
+        "clh": {
+          "instanceId": "clh",
+          "definitionId": 96,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1485,9 +1687,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_proteus_038_snowbank_2": {
-          "instanceId": "corp_onr_proteus_038_snowbank_2",
-          "definitionId": "onr_proteus_038_snowbank",
+        "cli": {
+          "instanceId": "cli",
+          "definitionId": 96,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1499,9 +1701,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_proteus_038_snowbank_3": {
-          "instanceId": "corp_onr_proteus_038_snowbank_3",
-          "definitionId": "onr_proteus_038_snowbank",
+        "clj": {
+          "instanceId": "clj",
+          "definitionId": 96,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1513,9 +1715,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_194_corporate-downsizing_1": {
-          "instanceId": "corp_onr_v1_194_corporate-downsizing_1",
-          "definitionId": "onr_v1_194_corporate-downsizing",
+        "c2id": {
+          "instanceId": "c2id",
+          "definitionId": 406,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1527,9 +1729,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_194_corporate-downsizing_2": {
-          "instanceId": "corp_onr_v1_194_corporate-downsizing_2",
-          "definitionId": "onr_v1_194_corporate-downsizing",
+        "c2ie": {
+          "instanceId": "c2ie",
+          "definitionId": 406,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1541,9 +1743,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_194_corporate-downsizing_3": {
-          "instanceId": "corp_onr_v1_194_corporate-downsizing_3",
-          "definitionId": "onr_v1_194_corporate-downsizing",
+        "c2if": {
+          "instanceId": "c2if",
+          "definitionId": 406,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1555,9 +1757,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_196_corporate-war_1": {
-          "instanceId": "corp_onr_v1_196_corporate-war_1",
-          "definitionId": "onr_v1_196_corporate-war",
+        "c2it": {
+          "instanceId": "c2it",
+          "definitionId": 408,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1569,9 +1771,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_196_corporate-war_2": {
-          "instanceId": "corp_onr_v1_196_corporate-war_2",
-          "definitionId": "onr_v1_196_corporate-war",
+        "c2iu": {
+          "instanceId": "c2iu",
+          "definitionId": 408,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1583,9 +1785,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_196_corporate-war_3": {
-          "instanceId": "corp_onr_v1_196_corporate-war_3",
-          "definitionId": "onr_v1_196_corporate-war",
+        "c2iv": {
+          "instanceId": "c2iv",
+          "definitionId": 408,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1597,9 +1799,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_237_data-wall_1": {
-          "instanceId": "corp_onr_v1_237_data-wall_1",
-          "definitionId": "onr_v1_237_data-wall",
+        "c2rx": {
+          "instanceId": "c2rx",
+          "definitionId": 449,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1611,9 +1813,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_237_data-wall_2": {
-          "instanceId": "corp_onr_v1_237_data-wall_2",
-          "definitionId": "onr_v1_237_data-wall",
+        "c2ry": {
+          "instanceId": "c2ry",
+          "definitionId": 449,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1626,9 +1828,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_237_data-wall_3": {
-          "instanceId": "corp_onr_v1_237_data-wall_3",
-          "definitionId": "onr_v1_237_data-wall",
+        "c2rz": {
+          "instanceId": "c2rz",
+          "definitionId": 449,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1640,9 +1842,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_279_wall-of-static_1": {
-          "instanceId": "corp_onr_v1_279_wall-of-static_1",
-          "definitionId": "onr_v1_279_wall-of-static",
+        "c319": {
+          "instanceId": "c319",
+          "definitionId": 491,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1654,9 +1856,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_279_wall-of-static_2": {
-          "instanceId": "corp_onr_v1_279_wall-of-static_2",
-          "definitionId": "onr_v1_279_wall-of-static",
+        "c31a": {
+          "instanceId": "c31a",
+          "definitionId": 491,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1668,9 +1870,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_279_wall-of-static_3": {
-          "instanceId": "corp_onr_v1_279_wall-of-static_3",
-          "definitionId": "onr_v1_279_wall-of-static",
+        "c31b": {
+          "instanceId": "c31b",
+          "definitionId": 491,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1682,9 +1884,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_281_accounts-receivable_1": {
-          "instanceId": "corp_onr_v1_281_accounts-receivable_1",
-          "definitionId": "onr_v1_281_accounts-receivable",
+        "c31p": {
+          "instanceId": "c31p",
+          "definitionId": 493,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1696,9 +1898,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_281_accounts-receivable_2": {
-          "instanceId": "corp_onr_v1_281_accounts-receivable_2",
-          "definitionId": "onr_v1_281_accounts-receivable",
+        "c31q": {
+          "instanceId": "c31q",
+          "definitionId": 493,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1710,9 +1912,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_281_accounts-receivable_3": {
-          "instanceId": "corp_onr_v1_281_accounts-receivable_3",
-          "definitionId": "onr_v1_281_accounts-receivable",
+        "c31r": {
+          "instanceId": "c31r",
+          "definitionId": 493,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1724,9 +1926,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_282_annual-reviews_1": {
-          "instanceId": "corp_onr_v1_282_annual-reviews_1",
-          "definitionId": "onr_v1_282_annual-reviews",
+        "c31x": {
+          "instanceId": "c31x",
+          "definitionId": 494,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1738,9 +1940,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_282_annual-reviews_2": {
-          "instanceId": "corp_onr_v1_282_annual-reviews_2",
-          "definitionId": "onr_v1_282_annual-reviews",
+        "c31y": {
+          "instanceId": "c31y",
+          "definitionId": 494,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1752,9 +1954,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_288_day-shift_1": {
-          "instanceId": "corp_onr_v1_288_day-shift_1",
-          "definitionId": "onr_v1_288_day-shift",
+        "c339": {
+          "instanceId": "c339",
+          "definitionId": 500,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1766,9 +1968,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_288_day-shift_2": {
-          "instanceId": "corp_onr_v1_288_day-shift_2",
-          "definitionId": "onr_v1_288_day-shift",
+        "c33a": {
+          "instanceId": "c33a",
+          "definitionId": 500,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1780,9 +1982,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_288_day-shift_3": {
-          "instanceId": "corp_onr_v1_288_day-shift_3",
-          "definitionId": "onr_v1_288_day-shift",
+        "c33b": {
+          "instanceId": "c33b",
+          "definitionId": 500,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1794,9 +1996,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_290_efficiency-experts_1": {
-          "instanceId": "corp_onr_v1_290_efficiency-experts_1",
-          "definitionId": "onr_v1_290_efficiency-experts",
+        "c33p": {
+          "instanceId": "c33p",
+          "definitionId": 502,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1808,9 +2010,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_290_efficiency-experts_2": {
-          "instanceId": "corp_onr_v1_290_efficiency-experts_2",
-          "definitionId": "onr_v1_290_efficiency-experts",
+        "c33q": {
+          "instanceId": "c33q",
+          "definitionId": 502,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1822,9 +2024,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_290_efficiency-experts_3": {
-          "instanceId": "corp_onr_v1_290_efficiency-experts_3",
-          "definitionId": "onr_v1_290_efficiency-experts",
+        "c33r": {
+          "instanceId": "c33r",
+          "definitionId": 502,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1836,9 +2038,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_292_management-shake-up_1": {
-          "instanceId": "corp_onr_v1_292_management-shake-up_1",
-          "definitionId": "onr_v1_292_management-shake-up",
+        "c345": {
+          "instanceId": "c345",
+          "definitionId": 504,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1850,9 +2052,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_292_management-shake-up_2": {
-          "instanceId": "corp_onr_v1_292_management-shake-up_2",
-          "definitionId": "onr_v1_292_management-shake-up",
+        "c346": {
+          "instanceId": "c346",
+          "definitionId": 504,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1864,9 +2066,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_292_management-shake-up_3": {
-          "instanceId": "corp_onr_v1_292_management-shake-up_3",
-          "definitionId": "onr_v1_292_management-shake-up",
+        "c347": {
+          "instanceId": "c347",
+          "definitionId": 504,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1878,9 +2080,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_297_overtime-incentives_1": {
-          "instanceId": "corp_onr_v1_297_overtime-incentives_1",
-          "definitionId": "onr_v1_297_overtime-incentives",
+        "c359": {
+          "instanceId": "c359",
+          "definitionId": 509,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1892,9 +2094,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_297_overtime-incentives_2": {
-          "instanceId": "corp_onr_v1_297_overtime-incentives_2",
-          "definitionId": "onr_v1_297_overtime-incentives",
+        "c35a": {
+          "instanceId": "c35a",
+          "definitionId": 509,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1906,9 +2108,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_297_overtime-incentives_3": {
-          "instanceId": "corp_onr_v1_297_overtime-incentives_3",
-          "definitionId": "onr_v1_297_overtime-incentives",
+        "c35b": {
+          "instanceId": "c35b",
+          "definitionId": 509,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1920,9 +2122,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_304_systematic-layoffs_1": {
-          "instanceId": "corp_onr_v1_304_systematic-layoffs_1",
-          "definitionId": "onr_v1_304_systematic-layoffs",
+        "c36t": {
+          "instanceId": "c36t",
+          "definitionId": 516,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1934,9 +2136,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_304_systematic-layoffs_2": {
-          "instanceId": "corp_onr_v1_304_systematic-layoffs_2",
-          "definitionId": "onr_v1_304_systematic-layoffs",
+        "c36u": {
+          "instanceId": "c36u",
+          "definitionId": 516,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1948,9 +2150,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_304_systematic-layoffs_3": {
-          "instanceId": "corp_onr_v1_304_systematic-layoffs_3",
-          "definitionId": "onr_v1_304_systematic-layoffs",
+        "c36v": {
+          "instanceId": "c36v",
+          "definitionId": 516,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1962,9 +2164,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_312_chicago-branch_1": {
-          "instanceId": "corp_onr_v1_312_chicago-branch_1",
-          "definitionId": "onr_v1_312_chicago-branch",
+        "c38l": {
+          "instanceId": "c38l",
+          "definitionId": 524,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1976,9 +2178,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_312_chicago-branch_2": {
-          "instanceId": "corp_onr_v1_312_chicago-branch_2",
-          "definitionId": "onr_v1_312_chicago-branch",
+        "c38m": {
+          "instanceId": "c38m",
+          "definitionId": 524,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -1990,9 +2192,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_312_chicago-branch_3": {
-          "instanceId": "corp_onr_v1_312_chicago-branch_3",
-          "definitionId": "onr_v1_312_chicago-branch",
+        "c38n": {
+          "instanceId": "c38n",
+          "definitionId": 524,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -2004,9 +2206,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_347_vapor-ops_1": {
-          "instanceId": "corp_onr_v1_347_vapor-ops_1",
-          "definitionId": "onr_v1_347_vapor-ops",
+        "c3gd": {
+          "instanceId": "c3gd",
+          "definitionId": 559,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -2018,9 +2220,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_347_vapor-ops_2": {
-          "instanceId": "corp_onr_v1_347_vapor-ops_2",
-          "definitionId": "onr_v1_347_vapor-ops",
+        "c3ge": {
+          "instanceId": "c3ge",
+          "definitionId": 559,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -2032,9 +2234,9 @@
           "advancementCounters": 0,
           "strengthModifier": 0
         },
-        "corp_onr_v1_347_vapor-ops_3": {
-          "instanceId": "corp_onr_v1_347_vapor-ops_3",
-          "definitionId": "onr_v1_347_vapor-ops",
+        "c3gf": {
+          "instanceId": "c3gf",
+          "definitionId": 559,
           "owner": "corp",
           "controller": "corp",
           "zone": {
@@ -2064,7 +2266,7 @@
       "deckMetadata": {
         "runner": {
           "side": "runner",
-          "identityCardId": "runner_identity_001",
+          "identityCardId": 587,
           "deckName": "Rent-I-Con: Das Shellspiel",
           "cardPoolSnapshotId": "card-snapshot-0.8",
           "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
@@ -2074,7 +2276,7 @@
         },
         "corp": {
           "side": "corp",
-          "identityCardId": "corp_identity_001",
+          "identityCardId": 3,
           "deckName": "Universal Fast Advance",
           "cardPoolSnapshotId": "card-snapshot-0.8",
           "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
@@ -2138,7 +2340,7 @@
     },
     "eventPrefix": [
       {
-        "eventId": "evt_0",
+        "eventId": 1,
         "type": "game_created",
         "stateVersionBefore": 0,
         "stateVersionAfter": 0,
@@ -2160,7 +2362,7 @@
           "corpDeckId": "standard_standard_corp_universal_fast_advance_1.0.0",
           "runnerDeck": {
             "side": "runner",
-            "identityCardId": "runner_identity_001",
+            "identityCardId": 587,
             "deckName": "Rent-I-Con: Das Shellspiel",
             "cardPoolSnapshotId": "card-snapshot-0.8",
             "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
@@ -2170,7 +2372,7 @@
           },
           "corpDeck": {
             "side": "corp",
-            "identityCardId": "corp_identity_001",
+            "identityCardId": 3,
             "deckName": "Universal Fast Advance",
             "cardPoolSnapshotId": "card-snapshot-0.8",
             "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
@@ -2183,7 +2385,7 @@
         }
       },
       {
-        "eventId": "evt_1",
+        "eventId": 2,
         "type": "resolve_choice",
         "stateVersionBefore": 0,
         "stateVersionAfter": 1,
@@ -2217,7 +2419,7 @@
         }
       },
       {
-        "eventId": "evt_2",
+        "eventId": 3,
         "type": "resolve_choice",
         "stateVersionBefore": 1,
         "stateVersionAfter": 2,
@@ -2251,7 +2453,7 @@
         }
       },
       {
-        "eventId": "evt_3",
+        "eventId": 4,
         "type": "mandatory_draw",
         "stateVersionBefore": 2,
         "stateVersionAfter": 3,
@@ -2268,7 +2470,7 @@
         }
       },
       {
-        "eventId": "evt_4",
+        "eventId": 5,
         "type": "install_card",
         "stateVersionBefore": 3,
         "stateVersionAfter": 4,
@@ -2302,7 +2504,7 @@
         }
       },
       {
-        "eventId": "evt_5",
+        "eventId": 6,
         "type": "install_card",
         "stateVersionBefore": 4,
         "stateVersionAfter": 5,
@@ -2336,7 +2538,7 @@
         }
       },
       {
-        "eventId": "evt_6",
+        "eventId": 7,
         "type": "draw_card",
         "stateVersionBefore": 5,
         "stateVersionAfter": 6,
@@ -2360,7 +2562,7 @@
         }
       },
       {
-        "eventId": "evt_7",
+        "eventId": 8,
         "type": "end_turn",
         "stateVersionBefore": 6,
         "stateVersionAfter": 7,
@@ -2377,7 +2579,7 @@
         }
       },
       {
-        "eventId": "evt_8",
+        "eventId": 9,
         "type": "play_event",
         "stateVersionBefore": 7,
         "stateVersionAfter": 8,
@@ -2393,13 +2595,13 @@
           "turnActionOrdinalEnd": 1,
           "resolvedEffects": [
             {
-              "effectId": "onr_v1_108_score.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "runner",
               "amount": 9,
               "reason": "card_resolver",
-              "sourceDefinitionId": "onr_v1_108_score",
+              "sourceDefinitionId": 320,
               "sourceTitle": "Score!"
             }
           ],
@@ -2415,12 +2617,12 @@
           "visibility": {
             "class": "public"
           },
-          "cardDefinitionId": "onr_v1_108_score",
+          "cardDefinitionId": 320,
           "title": "Score!"
         }
       },
       {
-        "eventId": "evt_9",
+        "eventId": 10,
         "type": "draw_card",
         "stateVersionBefore": 8,
         "stateVersionAfter": 9,
@@ -2445,7 +2647,7 @@
         }
       },
       {
-        "eventId": "evt_10",
+        "eventId": 11,
         "type": "start_run",
         "stateVersionBefore": 9,
         "stateVersionAfter": 10,
@@ -2475,7 +2677,7 @@
         }
       },
       {
-        "eventId": "evt_11",
+        "eventId": 12,
         "type": "rez_ice",
         "stateVersionBefore": 10,
         "stateVersionAfter": 11,
@@ -2488,19 +2690,19 @@
           "label": "Misleading Access Menus rezzen",
           "resolvedEffects": [
             {
-              "effectId": "onr_proteus_032_misleading-access-menus.effect.0.gain_credits",
+              "effectId": 0,
               "kind": "gain_credits",
               "visibility": "public",
               "side": "corp",
               "amount": 3,
               "reason": "card_resolver",
-              "sourceDefinitionId": "onr_proteus_032_misleading-access-menus",
+              "sourceDefinitionId": 90,
               "sourceTitle": "Misleading Access Menus"
             }
           ],
           "serverLabel": "R&D",
           "zoneLabel": "ICE",
-          "sourceDefinitionId": "onr_proteus_032_misleading-access-menus",
+          "sourceDefinitionId": 90,
           "gainedCredits": 3,
           "corpCreditsAfter": 8,
           "runPhase": "encounter_ice",
@@ -2509,18 +2711,18 @@
             "corpCreditsAfter": 8
           },
           "targets": {
-            "sourceDefinitionId": "onr_proteus_032_misleading-access-menus",
+            "sourceDefinitionId": 90,
             "serverLabel": "R&D"
           },
           "visibility": {
             "class": "hidden_info_barrier"
           },
-          "cardDefinitionId": "onr_proteus_032_misleading-access-menus",
+          "cardDefinitionId": 90,
           "title": "Misleading Access Menus"
         }
       },
       {
-        "eventId": "evt_12",
+        "eventId": 13,
         "type": "continue_run",
         "stateVersionBefore": 11,
         "stateVersionAfter": 12,
@@ -2533,12 +2735,12 @@
           "label": "Subroutinen auslösen (Runner zahlt 1 Credit)",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
               "reason": "ice_subroutine",
-              "sourceDefinitionId": "onr_proteus_032_misleading-access-menus",
+              "sourceDefinitionId": 90,
               "sourceTitle": "Misleading Access Menus",
               "subroutineIndex": 0,
               "subroutineType": "end_the_run_unless_runner_pays",
@@ -2550,14 +2752,14 @@
           "encounterContinue": true,
           "unbrokenSubroutineCount": 1,
           "encounterWillEndRun": false,
-          "sourceDefinitionId": "onr_proteus_032_misleading-access-menus",
+          "sourceDefinitionId": 90,
           "passedIcePosition": 1,
           "runPhase": "movement",
           "amounts": {
             "passedIcePosition": 1
           },
           "targets": {
-            "sourceDefinitionId": "onr_proteus_032_misleading-access-menus"
+            "sourceDefinitionId": 90
           },
           "visibility": {
             "class": "private_to_side"
@@ -2565,7 +2767,7 @@
         }
       },
       {
-        "eventId": "evt_13",
+        "eventId": 14,
         "type": "continue_run",
         "stateVersionBefore": 12,
         "stateVersionAfter": 13,
@@ -2587,7 +2789,7 @@
         }
       },
       {
-        "eventId": "evt_14",
+        "eventId": 15,
         "type": "access_card",
         "stateVersionBefore": 13,
         "stateVersionAfter": 14,
@@ -2613,7 +2815,7 @@
         }
       },
       {
-        "eventId": "evt_15",
+        "eventId": 16,
         "type": "start_run",
         "stateVersionBefore": 14,
         "stateVersionAfter": 15,
@@ -2643,7 +2845,7 @@
         }
       },
       {
-        "eventId": "evt_16",
+        "eventId": 17,
         "type": "rez_ice",
         "stateVersionBefore": 15,
         "stateVersionAfter": 16,
@@ -2663,12 +2865,12 @@
           "visibility": {
             "class": "hidden_info_barrier"
           },
-          "cardDefinitionId": "onr_v1_237_data-wall",
+          "cardDefinitionId": 449,
           "title": "Data Wall"
         }
       },
       {
-        "eventId": "evt_17",
+        "eventId": 18,
         "type": "continue_run",
         "stateVersionBefore": 16,
         "stateVersionAfter": 17,
@@ -2681,12 +2883,12 @@
           "label": "Subroutinen auslösen (Run endet)",
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
               "reason": "ice_subroutine",
-              "sourceDefinitionId": "onr_v1_237_data-wall",
+              "sourceDefinitionId": 449,
               "sourceTitle": "Data Wall",
               "subroutineIndex": 0,
               "subroutineType": "end_the_run",
@@ -2697,9 +2899,9 @@
           "encounterContinue": true,
           "unbrokenSubroutineCount": 1,
           "encounterWillEndRun": true,
-          "sourceDefinitionId": "onr_v1_237_data-wall",
+          "sourceDefinitionId": 449,
           "targets": {
-            "sourceDefinitionId": "onr_v1_237_data-wall"
+            "sourceDefinitionId": 449
           },
           "visibility": {
             "class": "private_to_side"
@@ -2707,7 +2909,7 @@
         }
       },
       {
-        "eventId": "evt_18",
+        "eventId": 19,
         "type": "end_turn",
         "stateVersionBefore": 17,
         "stateVersionAfter": 18,
@@ -2724,7 +2926,7 @@
         }
       },
       {
-        "eventId": "evt_19",
+        "eventId": 20,
         "type": "mandatory_draw",
         "stateVersionBefore": 18,
         "stateVersionAfter": 19,
@@ -2741,7 +2943,7 @@
         }
       },
       {
-        "eventId": "evt_20",
+        "eventId": 21,
         "type": "gain_credit",
         "stateVersionBefore": 19,
         "stateVersionAfter": 20,
@@ -2881,7 +3083,9 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.fast_advance",
-          "evidence": ["continued:corp.fast_advance"]
+          "evidence": [
+            "continued:corp.fast_advance"
+          ]
         },
         "commitment": {
           "strategyId": "corp.fast_advance",
@@ -3100,7 +3304,9 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
+              "runtimeBlockers": [
+                "hard_support_gap:weak_remote_protection"
+              ],
               "confidence": "high",
               "score": {
                 "anchor": 82,
@@ -3158,7 +3364,9 @@
               "family": "corp_central_defense",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
+              "runtimeBlockers": [
+                "hard_support_gap:weak_remote_protection"
+              ],
               "confidence": "high",
               "score": {
                 "anchor": 59,
@@ -3190,7 +3398,10 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": ["reserve_source:runtime_context", "reserve:none"]
+                "evidence": [
+                  "reserve_source:runtime_context",
+                  "reserve:none"
+                ]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3209,7 +3420,9 @@
               "family": "corp_economy_reserve",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"],
+              "runtimeBlockers": [
+                "supporting_only:corp.economy_rez_reserve"
+              ],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -3240,7 +3453,10 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": ["reserve_source:runtime_context", "reserve:none"]
+                "evidence": [
+                  "reserve_source:runtime_context",
+                  "reserve:none"
+                ]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3297,7 +3513,10 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": ["reserve_source:runtime_context", "reserve:none"]
+                "evidence": [
+                  "reserve_source:runtime_context",
+                  "reserve:none"
+                ]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3355,7 +3574,10 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": ["reserve_source:runtime_context", "reserve:none"]
+                "evidence": [
+                  "reserve_source:runtime_context",
+                  "reserve:none"
+                ]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3476,7 +3698,10 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": ["reserve_source:runtime_context", "reserve:none"]
+                "evidence": [
+                  "reserve_source:runtime_context",
+                  "reserve:none"
+                ]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3532,7 +3757,10 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": ["reserve_source:runtime_context", "reserve:none"]
+                "evidence": [
+                  "reserve_source:runtime_context",
+                  "reserve:none"
+                ]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3584,7 +3812,7 @@
       "stateVersion": 19,
       "instances": [
         {
-          "instanceId": "plan:corp.economy:economy-visible-liquidity-development%3Acorp%3A2",
+          "instanceId": "p94filkwdcmorc22xdjf2k7u83",
           "dedupeKey": "economy-visible-liquidity-development:corp:2",
           "moduleId": "corp.economy",
           "moduleVersion": "1",
@@ -3620,7 +3848,9 @@
               "currentCreditsAtRevalidation": 7,
               "gap": 1,
               "projectedCreditGain": 1,
-              "actionIds": ["corp.gain_credit"],
+              "actionIds": [
+                "cb"
+              ],
               "priorityClass": "P6",
               "cadence": {
                 "kind": "remaining_turn_capacity",
@@ -3671,8 +3901,8 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Acorp_onr_v1_194_corporate-downsizing_1%3Anew_remote",
-          "dedupeKey": "agenda:corp_onr_v1_194_corporate-downsizing_1:new_remote",
+          "instanceId": "pboimaexk6093vv59re0bp86ej",
+          "dedupeKey": "agenda:c2id:new_remote",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
           "side": "corp",
@@ -3700,20 +3930,20 @@
           "moduleState": {
             "kind": "score",
             "signal": {
-              "projectId": "agenda:corp_onr_v1_194_corporate-downsizing_1:new_remote",
-              "agendaDefinitionId": "onr_v1_194_corporate-downsizing",
+              "projectId": "agenda:c2id:new_remote",
+              "agendaDefinitionId": 406,
               "agendaPoints": 2,
-              "agendaInstanceId": "corp_onr_v1_194_corporate-downsizing_1",
+              "agendaInstanceId": "c2id",
               "actionIds": [
-                "corp.install_card.corp_onr_v1_194_corporate-downsizing_1.new_remote.corp_onr_v1_194_corporate-downsizing_1"
+                "cc.c2id.new_remote.c2id"
               ],
               "serverId": "new_remote",
               "phase": "install_agenda",
               "sameTurnCloseout": false,
               "deadlinePressure": false,
               "protectionNeed": {
-                "needId": "score-protection:agenda:corp_onr_v1_194_corporate-downsizing_1:new_remote",
-                "parentProjectId": "agenda:corp_onr_v1_194_corporate-downsizing_1:new_remote",
+                "needId": "score-protection:agenda:c2id:new_remote",
+                "parentProjectId": "agenda:c2id:new_remote",
                 "targetServerId": "new_remote",
                 "observedAtStateVersion": 19,
                 "objective": {
@@ -3727,15 +3957,15 @@
                 "scoreReserve": {
                   "creditBreakdown": [
                     {
-                      "reserveId": "score_action:corp.install_card.corp_onr_v1_194_corporate-downsizing_1.new_remote.corp_onr_v1_194_corporate-downsizing_1",
+                      "reserveId": "score_action:cc.c2id.new_remote.c2id",
                       "credits": 0
                     },
                     {
-                      "reserveId": "remaining_advancement:corp_onr_v1_194_corporate-downsizing_1",
+                      "reserveId": "remaining_advancement:c2id",
                       "credits": 3
                     },
                     {
-                      "reserveId": "post_score_floor:corp_onr_v1_194_corporate-downsizing_1",
+                      "reserveId": "post_score_floor:c2id",
                       "credits": 0
                     }
                   ],
@@ -3747,7 +3977,7 @@
                   "availableCorpClicks": 3,
                   "totalScoreReserveCredits": 3,
                   "hardClickReserve": 0,
-                  "scoreReserveFingerprint": "clicks:0|119:score_action:corp.install_card.corp_onr_v1_194_corporate-downsizing_1.new_remote.corp_onr_v1_194_corporate-downsizing_1=0|55:post_score_floor:corp_onr_v1_194_corporate-downsizing_1=0|60:remaining_advancement:corp_onr_v1_194_corporate-downsizing_1=3",
+                  "scoreReserveFingerprint": "clicks:0|119:score_action:cc.c2id.new_remote.c2id=0|55:post_score_floor:c2id=0|60:remaining_advancement:c2id=3",
                   "protection": {
                     "knowledge": "known",
                     "runnerAccessSuccessProbability": {
@@ -3800,7 +4030,9 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "missing_existing_remote",
-                "evidence": ["target_server:new_remote"]
+                "evidence": [
+                  "target_server:new_remote"
+                ]
               }
             }
           },
@@ -3847,8 +4079,8 @@
           ]
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Acorp_onr_v1_194_corporate-downsizing_3%3Anew_remote",
-          "dedupeKey": "agenda:corp_onr_v1_194_corporate-downsizing_3:new_remote",
+          "instanceId": "p7ftnpuztcewouvgblye1p76oh",
+          "dedupeKey": "agenda:c2if:new_remote",
           "moduleId": "corp.score_agenda",
           "moduleVersion": "1",
           "side": "corp",
@@ -3876,20 +4108,20 @@
           "moduleState": {
             "kind": "score",
             "signal": {
-              "projectId": "agenda:corp_onr_v1_194_corporate-downsizing_3:new_remote",
-              "agendaDefinitionId": "onr_v1_194_corporate-downsizing",
+              "projectId": "agenda:c2if:new_remote",
+              "agendaDefinitionId": 406,
               "agendaPoints": 2,
-              "agendaInstanceId": "corp_onr_v1_194_corporate-downsizing_3",
+              "agendaInstanceId": "c2if",
               "actionIds": [
-                "corp.install_card.corp_onr_v1_194_corporate-downsizing_3.new_remote.corp_onr_v1_194_corporate-downsizing_3"
+                "cc.c2if.new_remote.c2if"
               ],
               "serverId": "new_remote",
               "phase": "install_agenda",
               "sameTurnCloseout": false,
               "deadlinePressure": false,
               "protectionNeed": {
-                "needId": "score-protection:agenda:corp_onr_v1_194_corporate-downsizing_3:new_remote",
-                "parentProjectId": "agenda:corp_onr_v1_194_corporate-downsizing_3:new_remote",
+                "needId": "score-protection:agenda:c2if:new_remote",
+                "parentProjectId": "agenda:c2if:new_remote",
                 "targetServerId": "new_remote",
                 "observedAtStateVersion": 19,
                 "objective": {
@@ -3903,15 +4135,15 @@
                 "scoreReserve": {
                   "creditBreakdown": [
                     {
-                      "reserveId": "score_action:corp.install_card.corp_onr_v1_194_corporate-downsizing_3.new_remote.corp_onr_v1_194_corporate-downsizing_3",
+                      "reserveId": "score_action:cc.c2if.new_remote.c2if",
                       "credits": 0
                     },
                     {
-                      "reserveId": "remaining_advancement:corp_onr_v1_194_corporate-downsizing_3",
+                      "reserveId": "remaining_advancement:c2if",
                       "credits": 3
                     },
                     {
-                      "reserveId": "post_score_floor:corp_onr_v1_194_corporate-downsizing_3",
+                      "reserveId": "post_score_floor:c2if",
                       "credits": 0
                     }
                   ],
@@ -3923,7 +4155,7 @@
                   "availableCorpClicks": 3,
                   "totalScoreReserveCredits": 3,
                   "hardClickReserve": 0,
-                  "scoreReserveFingerprint": "clicks:0|119:score_action:corp.install_card.corp_onr_v1_194_corporate-downsizing_3.new_remote.corp_onr_v1_194_corporate-downsizing_3=0|55:post_score_floor:corp_onr_v1_194_corporate-downsizing_3=0|60:remaining_advancement:corp_onr_v1_194_corporate-downsizing_3=3",
+                  "scoreReserveFingerprint": "clicks:0|119:score_action:cc.c2if.new_remote.c2if=0|55:post_score_floor:c2if=0|60:remaining_advancement:c2if=3",
                   "protection": {
                     "knowledge": "known",
                     "runnerAccessSuccessProbability": {
@@ -3976,7 +4208,9 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "missing_existing_remote",
-                "evidence": ["target_server:new_remote"]
+                "evidence": [
+                  "target_server:new_remote"
+                ]
               }
             }
           },
@@ -4026,31 +4260,31 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:corp.economy:economy-visible-liquidity-development%3Acorp%3A2",
+          "instanceId": "p94filkwdcmorc22xdjf2k7u83",
           "stateVersion": 19,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Acorp_onr_v1_194_corporate-downsizing_1%3Anew_remote",
+          "instanceId": "pboimaexk6093vv59re0bp86ej",
           "stateVersion": 19,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:corp.score_agenda:agenda%3Acorp_onr_v1_194_corporate-downsizing_3%3Anew_remote",
+          "instanceId": "p7ftnpuztcewouvgblye1p76oh",
           "stateVersion": 19,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:corp.defend_servers:server-defense-portfolio",
+          "instanceId": "penw02zfrkklof54c2nuye5att",
           "stateVersion": 19,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:corp.economy:economy-visible-liquidity-development%3Acorp%3A2",
+          "instanceId": "p94filkwdcmorc22xdjf2k7u83",
           "stateVersion": 19,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
@@ -4061,13 +4295,13 @@
       "campaigns": [
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:agenda:corp_onr_v1_194_corporate-downsizing_1:new_remote",
+          "campaignId": "k2jvyiqnpoo78v7e7a7o5r88d0",
           "kind": "agenda",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.score_agenda:agenda%3Acorp_onr_v1_194_corporate-downsizing_1%3Anew_remote",
+            "rootPlanInstanceId": "pboimaexk6093vv59re0bp86ej",
             "moduleId": "corp.score_agenda",
-            "targetCardInstanceId": "corp_onr_v1_194_corporate-downsizing_1"
+            "targetCardInstanceId": "c2id"
           },
           "milestoneId": "install_agenda",
           "createdAtStateVersion": 3,
@@ -4087,8 +4321,8 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "evt_10:run_declared:campaign:agenda:corp_onr_v1_194_corporate-downsizing_1:new_remote",
-              "eventId": "evt_10",
+              "outcomeId": "11:run_declared:k2jvyiqnpoo78v7e7a7o5r88d0",
+              "eventId": 11,
               "eventType": "start_run",
               "stateVersionAfter": 10,
               "kind": "run_declared",
@@ -4099,8 +4333,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_11:corp_rez:campaign:agenda:corp_onr_v1_194_corporate-downsizing_1:new_remote",
-              "eventId": "evt_11",
+              "outcomeId": "12:corp_rez:k2jvyiqnpoo78v7e7a7o5r88d0",
+              "eventId": 12,
               "eventType": "rez_ice",
               "stateVersionAfter": 11,
               "kind": "corp_rez",
@@ -4110,8 +4344,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_12:run_declared:campaign:agenda:corp_onr_v1_194_corporate-downsizing_1:new_remote",
-              "eventId": "evt_12",
+              "outcomeId": "13:run_declared:k2jvyiqnpoo78v7e7a7o5r88d0",
+              "eventId": 13,
               "eventType": "continue_run",
               "stateVersionAfter": 12,
               "kind": "run_declared",
@@ -4121,8 +4355,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_13:run_declared:campaign:agenda:corp_onr_v1_194_corporate-downsizing_1:new_remote",
-              "eventId": "evt_13",
+              "outcomeId": "14:run_declared:k2jvyiqnpoo78v7e7a7o5r88d0",
+              "eventId": 14,
               "eventType": "continue_run",
               "stateVersionAfter": 13,
               "kind": "run_declared",
@@ -4132,8 +4366,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_14:access_resolved:campaign:agenda:corp_onr_v1_194_corporate-downsizing_1:new_remote",
-              "eventId": "evt_14",
+              "outcomeId": "15:access_resolved:k2jvyiqnpoo78v7e7a7o5r88d0",
+              "eventId": 15,
               "eventType": "access_card",
               "stateVersionAfter": 14,
               "kind": "access_resolved",
@@ -4143,8 +4377,8 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "evt_15:run_declared:campaign:agenda:corp_onr_v1_194_corporate-downsizing_1:new_remote",
-              "eventId": "evt_15",
+              "outcomeId": "16:run_declared:k2jvyiqnpoo78v7e7a7o5r88d0",
+              "eventId": 16,
               "eventType": "start_run",
               "stateVersionAfter": 15,
               "kind": "run_declared",
@@ -4155,8 +4389,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_16:corp_rez:campaign:agenda:corp_onr_v1_194_corporate-downsizing_1:new_remote",
-              "eventId": "evt_16",
+              "outcomeId": "17:corp_rez:k2jvyiqnpoo78v7e7a7o5r88d0",
+              "eventId": 17,
               "eventType": "rez_ice",
               "stateVersionAfter": 16,
               "kind": "corp_rez",
@@ -4166,8 +4400,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_17:run_declared:campaign:agenda:corp_onr_v1_194_corporate-downsizing_1:new_remote",
-              "eventId": "evt_17",
+              "outcomeId": "18:run_declared:k2jvyiqnpoo78v7e7a7o5r88d0",
+              "eventId": 18,
               "eventType": "continue_run",
               "stateVersionAfter": 17,
               "kind": "run_declared",
@@ -4187,17 +4421,21 @@
             "corp-opponent-campaign-continuity-v1",
             "corp_last_click_score_install_deferred:new_remote",
             "corp_score_protection_required:new_remote"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.score_agenda",
+            "objectiveKey": "agenda:c2id:new_remote"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:agenda:corp_onr_v1_194_corporate-downsizing_3:new_remote",
+          "campaignId": "k86kghf1ikf3pk6ajc1v88agva",
           "kind": "agenda",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.score_agenda:agenda%3Acorp_onr_v1_194_corporate-downsizing_3%3Anew_remote",
+            "rootPlanInstanceId": "p7ftnpuztcewouvgblye1p76oh",
             "moduleId": "corp.score_agenda",
-            "targetCardInstanceId": "corp_onr_v1_194_corporate-downsizing_3"
+            "targetCardInstanceId": "c2if"
           },
           "milestoneId": "install_agenda",
           "createdAtStateVersion": 3,
@@ -4217,8 +4455,8 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "evt_10:run_declared:campaign:agenda:corp_onr_v1_194_corporate-downsizing_3:new_remote",
-              "eventId": "evt_10",
+              "outcomeId": "11:run_declared:k86kghf1ikf3pk6ajc1v88agva",
+              "eventId": 11,
               "eventType": "start_run",
               "stateVersionAfter": 10,
               "kind": "run_declared",
@@ -4229,8 +4467,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_11:corp_rez:campaign:agenda:corp_onr_v1_194_corporate-downsizing_3:new_remote",
-              "eventId": "evt_11",
+              "outcomeId": "12:corp_rez:k86kghf1ikf3pk6ajc1v88agva",
+              "eventId": 12,
               "eventType": "rez_ice",
               "stateVersionAfter": 11,
               "kind": "corp_rez",
@@ -4240,8 +4478,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_12:run_declared:campaign:agenda:corp_onr_v1_194_corporate-downsizing_3:new_remote",
-              "eventId": "evt_12",
+              "outcomeId": "13:run_declared:k86kghf1ikf3pk6ajc1v88agva",
+              "eventId": 13,
               "eventType": "continue_run",
               "stateVersionAfter": 12,
               "kind": "run_declared",
@@ -4251,8 +4489,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_13:run_declared:campaign:agenda:corp_onr_v1_194_corporate-downsizing_3:new_remote",
-              "eventId": "evt_13",
+              "outcomeId": "14:run_declared:k86kghf1ikf3pk6ajc1v88agva",
+              "eventId": 14,
               "eventType": "continue_run",
               "stateVersionAfter": 13,
               "kind": "run_declared",
@@ -4262,8 +4500,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_14:access_resolved:campaign:agenda:corp_onr_v1_194_corporate-downsizing_3:new_remote",
-              "eventId": "evt_14",
+              "outcomeId": "15:access_resolved:k86kghf1ikf3pk6ajc1v88agva",
+              "eventId": 15,
               "eventType": "access_card",
               "stateVersionAfter": 14,
               "kind": "access_resolved",
@@ -4273,8 +4511,8 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "evt_15:run_declared:campaign:agenda:corp_onr_v1_194_corporate-downsizing_3:new_remote",
-              "eventId": "evt_15",
+              "outcomeId": "16:run_declared:k86kghf1ikf3pk6ajc1v88agva",
+              "eventId": 16,
               "eventType": "start_run",
               "stateVersionAfter": 15,
               "kind": "run_declared",
@@ -4285,8 +4523,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_16:corp_rez:campaign:agenda:corp_onr_v1_194_corporate-downsizing_3:new_remote",
-              "eventId": "evt_16",
+              "outcomeId": "17:corp_rez:k86kghf1ikf3pk6ajc1v88agva",
+              "eventId": 17,
               "eventType": "rez_ice",
               "stateVersionAfter": 16,
               "kind": "corp_rez",
@@ -4296,8 +4534,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_17:run_declared:campaign:agenda:corp_onr_v1_194_corporate-downsizing_3:new_remote",
-              "eventId": "evt_17",
+              "outcomeId": "18:run_declared:k86kghf1ikf3pk6ajc1v88agva",
+              "eventId": 18,
               "eventType": "continue_run",
               "stateVersionAfter": 17,
               "kind": "run_declared",
@@ -4317,15 +4555,19 @@
             "corp-opponent-campaign-continuity-v1",
             "corp_last_click_score_install_deferred:new_remote",
             "corp_score_protection_required:new_remote"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.score_agenda",
+            "objectiveKey": "agenda:c2if:new_remote"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.hq.corp_onr_proteus_032_misleading-access-menus_1.0",
+          "campaignId": "k331gepf1v0ny6jhx0psu5ijf4",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "hq"
           },
@@ -4347,8 +4589,8 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "evt_11:corp_rez:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.hq.corp_onr_proteus_032_misleading-access-menus_1.0",
-              "eventId": "evt_11",
+              "outcomeId": "12:corp_rez:k331gepf1v0ny6jhx0psu5ijf4",
+              "eventId": 12,
               "eventType": "rez_ice",
               "stateVersionAfter": 11,
               "kind": "corp_rez",
@@ -4358,8 +4600,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_12:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.hq.corp_onr_proteus_032_misleading-access-menus_1.0",
-              "eventId": "evt_12",
+              "outcomeId": "13:run_declared:k331gepf1v0ny6jhx0psu5ijf4",
+              "eventId": 13,
               "eventType": "continue_run",
               "stateVersionAfter": 12,
               "kind": "run_declared",
@@ -4369,8 +4611,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_13:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.hq.corp_onr_proteus_032_misleading-access-menus_1.0",
-              "eventId": "evt_13",
+              "outcomeId": "14:run_declared:k331gepf1v0ny6jhx0psu5ijf4",
+              "eventId": 14,
               "eventType": "continue_run",
               "stateVersionAfter": 13,
               "kind": "run_declared",
@@ -4380,8 +4622,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_14:access_resolved:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.hq.corp_onr_proteus_032_misleading-access-menus_1.0",
-              "eventId": "evt_14",
+              "outcomeId": "15:access_resolved:k331gepf1v0ny6jhx0psu5ijf4",
+              "eventId": 15,
               "eventType": "access_card",
               "stateVersionAfter": 14,
               "kind": "access_resolved",
@@ -4391,8 +4633,8 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "evt_15:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.hq.corp_onr_proteus_032_misleading-access-menus_1.0",
-              "eventId": "evt_15",
+              "outcomeId": "16:run_declared:k331gepf1v0ny6jhx0psu5ijf4",
+              "eventId": 16,
               "eventType": "start_run",
               "stateVersionAfter": 15,
               "kind": "run_declared",
@@ -4403,8 +4645,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_16:corp_rez:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.hq.corp_onr_proteus_032_misleading-access-menus_1.0",
-              "eventId": "evt_16",
+              "outcomeId": "17:corp_rez:k331gepf1v0ny6jhx0psu5ijf4",
+              "eventId": 17,
               "eventType": "rez_ice",
               "stateVersionAfter": 16,
               "kind": "corp_rez",
@@ -4414,8 +4656,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_17:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.hq.corp_onr_proteus_032_misleading-access-menus_1.0",
-              "eventId": "evt_17",
+              "outcomeId": "18:run_declared:k331gepf1v0ny6jhx0psu5ijf4",
+              "eventId": 18,
               "eventType": "continue_run",
               "stateVersionAfter": 17,
               "kind": "run_declared",
@@ -4435,16 +4677,20 @@
             "campaign_status:blocked",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "corp_agenda_capacity_defense_conversion:hq:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.hq.corp_onr_proteus_032_misleading-access-menus_1.0"
-          ]
+            "corp_agenda_capacity_defense_conversion:hq:cc.ck5.hq.ck5.0"
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "install:hq:cc.ck5.hq.ck5.0"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.hq.corp_onr_proteus_032_misleading-access-menus_1.1",
+          "campaignId": "k331g7r7zaupl3e9eq0adswebb",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "hq"
           },
@@ -4466,8 +4712,8 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "evt_11:corp_rez:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.hq.corp_onr_proteus_032_misleading-access-menus_1.1",
-              "eventId": "evt_11",
+              "outcomeId": "12:corp_rez:k331g7r7zaupl3e9eq0adswebb",
+              "eventId": 12,
               "eventType": "rez_ice",
               "stateVersionAfter": 11,
               "kind": "corp_rez",
@@ -4477,8 +4723,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_12:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.hq.corp_onr_proteus_032_misleading-access-menus_1.1",
-              "eventId": "evt_12",
+              "outcomeId": "13:run_declared:k331g7r7zaupl3e9eq0adswebb",
+              "eventId": 13,
               "eventType": "continue_run",
               "stateVersionAfter": 12,
               "kind": "run_declared",
@@ -4488,8 +4734,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_13:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.hq.corp_onr_proteus_032_misleading-access-menus_1.1",
-              "eventId": "evt_13",
+              "outcomeId": "14:run_declared:k331g7r7zaupl3e9eq0adswebb",
+              "eventId": 14,
               "eventType": "continue_run",
               "stateVersionAfter": 13,
               "kind": "run_declared",
@@ -4499,8 +4745,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_14:access_resolved:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.hq.corp_onr_proteus_032_misleading-access-menus_1.1",
-              "eventId": "evt_14",
+              "outcomeId": "15:access_resolved:k331g7r7zaupl3e9eq0adswebb",
+              "eventId": 15,
               "eventType": "access_card",
               "stateVersionAfter": 14,
               "kind": "access_resolved",
@@ -4510,8 +4756,8 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "evt_15:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.hq.corp_onr_proteus_032_misleading-access-menus_1.1",
-              "eventId": "evt_15",
+              "outcomeId": "16:run_declared:k331g7r7zaupl3e9eq0adswebb",
+              "eventId": 16,
               "eventType": "start_run",
               "stateVersionAfter": 15,
               "kind": "run_declared",
@@ -4522,8 +4768,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_16:corp_rez:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.hq.corp_onr_proteus_032_misleading-access-menus_1.1",
-              "eventId": "evt_16",
+              "outcomeId": "17:corp_rez:k331g7r7zaupl3e9eq0adswebb",
+              "eventId": 17,
               "eventType": "rez_ice",
               "stateVersionAfter": 16,
               "kind": "corp_rez",
@@ -4533,8 +4779,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_17:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.hq.corp_onr_proteus_032_misleading-access-menus_1.1",
-              "eventId": "evt_17",
+              "outcomeId": "18:run_declared:k331g7r7zaupl3e9eq0adswebb",
+              "eventId": 18,
               "eventType": "continue_run",
               "stateVersionAfter": 17,
               "kind": "run_declared",
@@ -4554,16 +4800,20 @@
             "campaign_status:blocked",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "corp_agenda_capacity_defense_conversion:hq:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.hq.corp_onr_proteus_032_misleading-access-menus_1.1"
-          ]
+            "corp_agenda_capacity_defense_conversion:hq:cc.ck5.hq.ck5.1"
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "install:hq:cc.ck5.hq.ck5.1"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_038_snowbank_1.hq.corp_onr_proteus_038_snowbank_1.0",
+          "campaignId": "kam5ei5pmwfsvptyhetcmlzgi8",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "hq"
           },
@@ -4585,8 +4835,8 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "evt_11:corp_rez:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_038_snowbank_1.hq.corp_onr_proteus_038_snowbank_1.0",
-              "eventId": "evt_11",
+              "outcomeId": "12:corp_rez:kam5ei5pmwfsvptyhetcmlzgi8",
+              "eventId": 12,
               "eventType": "rez_ice",
               "stateVersionAfter": 11,
               "kind": "corp_rez",
@@ -4596,8 +4846,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_12:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_038_snowbank_1.hq.corp_onr_proteus_038_snowbank_1.0",
-              "eventId": "evt_12",
+              "outcomeId": "13:run_declared:kam5ei5pmwfsvptyhetcmlzgi8",
+              "eventId": 13,
               "eventType": "continue_run",
               "stateVersionAfter": 12,
               "kind": "run_declared",
@@ -4607,8 +4857,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_13:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_038_snowbank_1.hq.corp_onr_proteus_038_snowbank_1.0",
-              "eventId": "evt_13",
+              "outcomeId": "14:run_declared:kam5ei5pmwfsvptyhetcmlzgi8",
+              "eventId": 14,
               "eventType": "continue_run",
               "stateVersionAfter": 13,
               "kind": "run_declared",
@@ -4618,8 +4868,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_14:access_resolved:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_038_snowbank_1.hq.corp_onr_proteus_038_snowbank_1.0",
-              "eventId": "evt_14",
+              "outcomeId": "15:access_resolved:kam5ei5pmwfsvptyhetcmlzgi8",
+              "eventId": 15,
               "eventType": "access_card",
               "stateVersionAfter": 14,
               "kind": "access_resolved",
@@ -4629,8 +4879,8 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "evt_15:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_038_snowbank_1.hq.corp_onr_proteus_038_snowbank_1.0",
-              "eventId": "evt_15",
+              "outcomeId": "16:run_declared:kam5ei5pmwfsvptyhetcmlzgi8",
+              "eventId": 16,
               "eventType": "start_run",
               "stateVersionAfter": 15,
               "kind": "run_declared",
@@ -4641,8 +4891,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_16:corp_rez:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_038_snowbank_1.hq.corp_onr_proteus_038_snowbank_1.0",
-              "eventId": "evt_16",
+              "outcomeId": "17:corp_rez:kam5ei5pmwfsvptyhetcmlzgi8",
+              "eventId": 17,
               "eventType": "rez_ice",
               "stateVersionAfter": 16,
               "kind": "corp_rez",
@@ -4652,8 +4902,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_17:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_038_snowbank_1.hq.corp_onr_proteus_038_snowbank_1.0",
-              "eventId": "evt_17",
+              "outcomeId": "18:run_declared:kam5ei5pmwfsvptyhetcmlzgi8",
+              "eventId": 18,
               "eventType": "continue_run",
               "stateVersionAfter": 17,
               "kind": "run_declared",
@@ -4673,16 +4923,20 @@
             "campaign_status:blocked",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "corp_agenda_capacity_defense_conversion:hq:corp.install_card.corp_onr_proteus_038_snowbank_1.hq.corp_onr_proteus_038_snowbank_1.0"
-          ]
+            "corp_agenda_capacity_defense_conversion:hq:cc.clh.hq.clh.0"
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "install:hq:cc.clh.hq.clh.0"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_038_snowbank_1.hq.corp_onr_proteus_038_snowbank_1.1",
+          "campaignId": "kam5eb7ikc9uimopz43u69dbef",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "hq"
           },
@@ -4704,8 +4958,8 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "evt_11:corp_rez:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_038_snowbank_1.hq.corp_onr_proteus_038_snowbank_1.1",
-              "eventId": "evt_11",
+              "outcomeId": "12:corp_rez:kam5eb7ikc9uimopz43u69dbef",
+              "eventId": 12,
               "eventType": "rez_ice",
               "stateVersionAfter": 11,
               "kind": "corp_rez",
@@ -4715,8 +4969,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_12:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_038_snowbank_1.hq.corp_onr_proteus_038_snowbank_1.1",
-              "eventId": "evt_12",
+              "outcomeId": "13:run_declared:kam5eb7ikc9uimopz43u69dbef",
+              "eventId": 13,
               "eventType": "continue_run",
               "stateVersionAfter": 12,
               "kind": "run_declared",
@@ -4726,8 +4980,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_13:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_038_snowbank_1.hq.corp_onr_proteus_038_snowbank_1.1",
-              "eventId": "evt_13",
+              "outcomeId": "14:run_declared:kam5eb7ikc9uimopz43u69dbef",
+              "eventId": 14,
               "eventType": "continue_run",
               "stateVersionAfter": 13,
               "kind": "run_declared",
@@ -4737,8 +4991,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_14:access_resolved:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_038_snowbank_1.hq.corp_onr_proteus_038_snowbank_1.1",
-              "eventId": "evt_14",
+              "outcomeId": "15:access_resolved:kam5eb7ikc9uimopz43u69dbef",
+              "eventId": 15,
               "eventType": "access_card",
               "stateVersionAfter": 14,
               "kind": "access_resolved",
@@ -4748,8 +5002,8 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "evt_15:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_038_snowbank_1.hq.corp_onr_proteus_038_snowbank_1.1",
-              "eventId": "evt_15",
+              "outcomeId": "16:run_declared:kam5eb7ikc9uimopz43u69dbef",
+              "eventId": 16,
               "eventType": "start_run",
               "stateVersionAfter": 15,
               "kind": "run_declared",
@@ -4760,8 +5014,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_16:corp_rez:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_038_snowbank_1.hq.corp_onr_proteus_038_snowbank_1.1",
-              "eventId": "evt_16",
+              "outcomeId": "17:corp_rez:kam5eb7ikc9uimopz43u69dbef",
+              "eventId": 17,
               "eventType": "rez_ice",
               "stateVersionAfter": 16,
               "kind": "corp_rez",
@@ -4771,8 +5025,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_17:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_proteus_038_snowbank_1.hq.corp_onr_proteus_038_snowbank_1.1",
-              "eventId": "evt_17",
+              "outcomeId": "18:run_declared:kam5eb7ikc9uimopz43u69dbef",
+              "eventId": 18,
               "eventType": "continue_run",
               "stateVersionAfter": 17,
               "kind": "run_declared",
@@ -4792,16 +5046,20 @@
             "campaign_status:blocked",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "corp_agenda_capacity_defense_conversion:hq:corp.install_card.corp_onr_proteus_038_snowbank_1.hq.corp_onr_proteus_038_snowbank_1.1"
-          ]
+            "corp_agenda_capacity_defense_conversion:hq:cc.clh.hq.clh.1"
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "install:hq:cc.clh.hq.clh.1"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_v1_237_data-wall_2.hq.corp_onr_v1_237_data-wall_2.0",
+          "campaignId": "kc64lga75cznax4875qu1drh0k",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "hq"
           },
@@ -4823,8 +5081,8 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "evt_11:corp_rez:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_v1_237_data-wall_2.hq.corp_onr_v1_237_data-wall_2.0",
-              "eventId": "evt_11",
+              "outcomeId": "12:corp_rez:kc64lga75cznax4875qu1drh0k",
+              "eventId": 12,
               "eventType": "rez_ice",
               "stateVersionAfter": 11,
               "kind": "corp_rez",
@@ -4834,8 +5092,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_12:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_v1_237_data-wall_2.hq.corp_onr_v1_237_data-wall_2.0",
-              "eventId": "evt_12",
+              "outcomeId": "13:run_declared:kc64lga75cznax4875qu1drh0k",
+              "eventId": 13,
               "eventType": "continue_run",
               "stateVersionAfter": 12,
               "kind": "run_declared",
@@ -4845,8 +5103,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_13:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_v1_237_data-wall_2.hq.corp_onr_v1_237_data-wall_2.0",
-              "eventId": "evt_13",
+              "outcomeId": "14:run_declared:kc64lga75cznax4875qu1drh0k",
+              "eventId": 14,
               "eventType": "continue_run",
               "stateVersionAfter": 13,
               "kind": "run_declared",
@@ -4856,8 +5114,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_14:access_resolved:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_v1_237_data-wall_2.hq.corp_onr_v1_237_data-wall_2.0",
-              "eventId": "evt_14",
+              "outcomeId": "15:access_resolved:kc64lga75cznax4875qu1drh0k",
+              "eventId": 15,
               "eventType": "access_card",
               "stateVersionAfter": 14,
               "kind": "access_resolved",
@@ -4867,8 +5125,8 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "evt_15:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_v1_237_data-wall_2.hq.corp_onr_v1_237_data-wall_2.0",
-              "eventId": "evt_15",
+              "outcomeId": "16:run_declared:kc64lga75cznax4875qu1drh0k",
+              "eventId": 16,
               "eventType": "start_run",
               "stateVersionAfter": 15,
               "kind": "run_declared",
@@ -4879,8 +5137,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_16:corp_rez:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_v1_237_data-wall_2.hq.corp_onr_v1_237_data-wall_2.0",
-              "eventId": "evt_16",
+              "outcomeId": "17:corp_rez:kc64lga75cznax4875qu1drh0k",
+              "eventId": 17,
               "eventType": "rez_ice",
               "stateVersionAfter": 16,
               "kind": "corp_rez",
@@ -4890,8 +5148,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_17:run_declared:campaign:corp.defend_servers:install:hq:corp.install_card.corp_onr_v1_237_data-wall_2.hq.corp_onr_v1_237_data-wall_2.0",
-              "eventId": "evt_17",
+              "outcomeId": "18:run_declared:kc64lga75cznax4875qu1drh0k",
+              "eventId": 18,
               "eventType": "continue_run",
               "stateVersionAfter": 17,
               "kind": "run_declared",
@@ -4912,15 +5170,19 @@
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
             "engine_certified_global_defense_access_probability_reduced"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "install:hq:cc.c2ry.hq.c2ry.0"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.rd.corp_onr_proteus_032_misleading-access-menus_1.0",
+          "campaignId": "k7tp14rl91hhlk1997i18yot8g",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "rd"
           },
@@ -4942,8 +5204,8 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "evt_10:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.rd.corp_onr_proteus_032_misleading-access-menus_1.0",
-              "eventId": "evt_10",
+              "outcomeId": "11:run_declared:k7tp14rl91hhlk1997i18yot8g",
+              "eventId": 11,
               "eventType": "start_run",
               "stateVersionAfter": 10,
               "kind": "run_declared",
@@ -4954,8 +5216,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_11:corp_rez:campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.rd.corp_onr_proteus_032_misleading-access-menus_1.0",
-              "eventId": "evt_11",
+              "outcomeId": "12:corp_rez:k7tp14rl91hhlk1997i18yot8g",
+              "eventId": 12,
               "eventType": "rez_ice",
               "stateVersionAfter": 11,
               "kind": "corp_rez",
@@ -4965,8 +5227,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_12:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.rd.corp_onr_proteus_032_misleading-access-menus_1.0",
-              "eventId": "evt_12",
+              "outcomeId": "13:run_declared:k7tp14rl91hhlk1997i18yot8g",
+              "eventId": 13,
               "eventType": "continue_run",
               "stateVersionAfter": 12,
               "kind": "run_declared",
@@ -4976,8 +5238,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_13:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.rd.corp_onr_proteus_032_misleading-access-menus_1.0",
-              "eventId": "evt_13",
+              "outcomeId": "14:run_declared:k7tp14rl91hhlk1997i18yot8g",
+              "eventId": 14,
               "eventType": "continue_run",
               "stateVersionAfter": 13,
               "kind": "run_declared",
@@ -4987,8 +5249,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_14:access_resolved:campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.rd.corp_onr_proteus_032_misleading-access-menus_1.0",
-              "eventId": "evt_14",
+              "outcomeId": "15:access_resolved:k7tp14rl91hhlk1997i18yot8g",
+              "eventId": 15,
               "eventType": "access_card",
               "stateVersionAfter": 14,
               "kind": "access_resolved",
@@ -4998,8 +5260,8 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "evt_16:corp_rez:campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.rd.corp_onr_proteus_032_misleading-access-menus_1.0",
-              "eventId": "evt_16",
+              "outcomeId": "17:corp_rez:k7tp14rl91hhlk1997i18yot8g",
+              "eventId": 17,
               "eventType": "rez_ice",
               "stateVersionAfter": 16,
               "kind": "corp_rez",
@@ -5009,8 +5271,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_17:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_proteus_032_misleading-access-menus_1.rd.corp_onr_proteus_032_misleading-access-menus_1.0",
-              "eventId": "evt_17",
+              "outcomeId": "18:run_declared:k7tp14rl91hhlk1997i18yot8g",
+              "eventId": 18,
               "eventType": "continue_run",
               "stateVersionAfter": 17,
               "kind": "run_declared",
@@ -5031,15 +5293,19 @@
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
             "engine_certified_global_defense_access_probability_reduced"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "install:rd:cc.ck5.rd.ck5.0"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_proteus_038_snowbank_1.rd.corp_onr_proteus_038_snowbank_1.0",
+          "campaignId": "kdh63cr2tgqdaopa0f4haiqua8",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "rd"
           },
@@ -5061,8 +5327,8 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "evt_10:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_proteus_038_snowbank_1.rd.corp_onr_proteus_038_snowbank_1.0",
-              "eventId": "evt_10",
+              "outcomeId": "11:run_declared:kdh63cr2tgqdaopa0f4haiqua8",
+              "eventId": 11,
               "eventType": "start_run",
               "stateVersionAfter": 10,
               "kind": "run_declared",
@@ -5073,8 +5339,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_11:corp_rez:campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_proteus_038_snowbank_1.rd.corp_onr_proteus_038_snowbank_1.0",
-              "eventId": "evt_11",
+              "outcomeId": "12:corp_rez:kdh63cr2tgqdaopa0f4haiqua8",
+              "eventId": 12,
               "eventType": "rez_ice",
               "stateVersionAfter": 11,
               "kind": "corp_rez",
@@ -5084,8 +5350,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_12:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_proteus_038_snowbank_1.rd.corp_onr_proteus_038_snowbank_1.0",
-              "eventId": "evt_12",
+              "outcomeId": "13:run_declared:kdh63cr2tgqdaopa0f4haiqua8",
+              "eventId": 13,
               "eventType": "continue_run",
               "stateVersionAfter": 12,
               "kind": "run_declared",
@@ -5095,8 +5361,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_13:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_proteus_038_snowbank_1.rd.corp_onr_proteus_038_snowbank_1.0",
-              "eventId": "evt_13",
+              "outcomeId": "14:run_declared:kdh63cr2tgqdaopa0f4haiqua8",
+              "eventId": 14,
               "eventType": "continue_run",
               "stateVersionAfter": 13,
               "kind": "run_declared",
@@ -5106,8 +5372,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_14:access_resolved:campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_proteus_038_snowbank_1.rd.corp_onr_proteus_038_snowbank_1.0",
-              "eventId": "evt_14",
+              "outcomeId": "15:access_resolved:kdh63cr2tgqdaopa0f4haiqua8",
+              "eventId": 15,
               "eventType": "access_card",
               "stateVersionAfter": 14,
               "kind": "access_resolved",
@@ -5117,8 +5383,8 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "evt_16:corp_rez:campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_proteus_038_snowbank_1.rd.corp_onr_proteus_038_snowbank_1.0",
-              "eventId": "evt_16",
+              "outcomeId": "17:corp_rez:kdh63cr2tgqdaopa0f4haiqua8",
+              "eventId": 17,
               "eventType": "rez_ice",
               "stateVersionAfter": 16,
               "kind": "corp_rez",
@@ -5128,8 +5394,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_17:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_proteus_038_snowbank_1.rd.corp_onr_proteus_038_snowbank_1.0",
-              "eventId": "evt_17",
+              "outcomeId": "18:run_declared:kdh63cr2tgqdaopa0f4haiqua8",
+              "eventId": 18,
               "eventType": "continue_run",
               "stateVersionAfter": 17,
               "kind": "run_declared",
@@ -5150,15 +5416,19 @@
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
             "engine_certified_global_defense_access_probability_reduced"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "install:rd:cc.clh.rd.clh.0"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_v1_237_data-wall_2.rd.corp_onr_v1_237_data-wall_2.0",
+          "campaignId": "k61pvq8i10aah8ckpo0pij1z3u",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "rd"
           },
@@ -5180,8 +5450,8 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "evt_10:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_v1_237_data-wall_2.rd.corp_onr_v1_237_data-wall_2.0",
-              "eventId": "evt_10",
+              "outcomeId": "11:run_declared:k61pvq8i10aah8ckpo0pij1z3u",
+              "eventId": 11,
               "eventType": "start_run",
               "stateVersionAfter": 10,
               "kind": "run_declared",
@@ -5192,8 +5462,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_11:corp_rez:campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_v1_237_data-wall_2.rd.corp_onr_v1_237_data-wall_2.0",
-              "eventId": "evt_11",
+              "outcomeId": "12:corp_rez:k61pvq8i10aah8ckpo0pij1z3u",
+              "eventId": 12,
               "eventType": "rez_ice",
               "stateVersionAfter": 11,
               "kind": "corp_rez",
@@ -5203,8 +5473,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_12:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_v1_237_data-wall_2.rd.corp_onr_v1_237_data-wall_2.0",
-              "eventId": "evt_12",
+              "outcomeId": "13:run_declared:k61pvq8i10aah8ckpo0pij1z3u",
+              "eventId": 13,
               "eventType": "continue_run",
               "stateVersionAfter": 12,
               "kind": "run_declared",
@@ -5214,8 +5484,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_13:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_v1_237_data-wall_2.rd.corp_onr_v1_237_data-wall_2.0",
-              "eventId": "evt_13",
+              "outcomeId": "14:run_declared:k61pvq8i10aah8ckpo0pij1z3u",
+              "eventId": 14,
               "eventType": "continue_run",
               "stateVersionAfter": 13,
               "kind": "run_declared",
@@ -5225,8 +5495,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_14:access_resolved:campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_v1_237_data-wall_2.rd.corp_onr_v1_237_data-wall_2.0",
-              "eventId": "evt_14",
+              "outcomeId": "15:access_resolved:k61pvq8i10aah8ckpo0pij1z3u",
+              "eventId": 15,
               "eventType": "access_card",
               "stateVersionAfter": 14,
               "kind": "access_resolved",
@@ -5236,8 +5506,8 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "evt_16:corp_rez:campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_v1_237_data-wall_2.rd.corp_onr_v1_237_data-wall_2.0",
-              "eventId": "evt_16",
+              "outcomeId": "17:corp_rez:k61pvq8i10aah8ckpo0pij1z3u",
+              "eventId": 17,
               "eventType": "rez_ice",
               "stateVersionAfter": 16,
               "kind": "corp_rez",
@@ -5247,8 +5517,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_17:run_declared:campaign:corp.defend_servers:install:rd:corp.install_card.corp_onr_v1_237_data-wall_2.rd.corp_onr_v1_237_data-wall_2.0",
-              "eventId": "evt_17",
+              "outcomeId": "18:run_declared:k61pvq8i10aah8ckpo0pij1z3u",
+              "eventId": 18,
               "eventType": "continue_run",
               "stateVersionAfter": 17,
               "kind": "run_declared",
@@ -5269,18 +5539,22 @@
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
             "engine_certified_global_defense_access_probability_reduced"
-          ]
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "install:rd:cc.c2ry.rd.c2ry.0"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:rez:corp_onr_proteus_032_misleading-access-menus_1:corp.rez_ice.corp_onr_proteus_032_misleading-access-menus_1.corp_onr_proteus_032_misleading-access-menus_1",
+          "campaignId": "k62l9qxinl2whtd7nt1axotra9",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "rd",
-            "targetCardInstanceId": "corp_onr_proteus_032_misleading-access-menus_1"
+            "targetCardInstanceId": "ck5"
           },
           "milestoneId": "rez_response",
           "createdAtStateVersion": 3,
@@ -5300,8 +5574,8 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "evt_10:run_declared:campaign:corp.defend_servers:rez:corp_onr_proteus_032_misleading-access-menus_1:corp.rez_ice.corp_onr_proteus_032_misleading-access-menus_1.corp_onr_proteus_032_misleading-access-menus_1",
-              "eventId": "evt_10",
+              "outcomeId": "11:run_declared:k62l9qxinl2whtd7nt1axotra9",
+              "eventId": 11,
               "eventType": "start_run",
               "stateVersionAfter": 10,
               "kind": "run_declared",
@@ -5312,8 +5586,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_11:corp_rez:campaign:corp.defend_servers:rez:corp_onr_proteus_032_misleading-access-menus_1:corp.rez_ice.corp_onr_proteus_032_misleading-access-menus_1.corp_onr_proteus_032_misleading-access-menus_1",
-              "eventId": "evt_11",
+              "outcomeId": "12:corp_rez:k62l9qxinl2whtd7nt1axotra9",
+              "eventId": 12,
               "eventType": "rez_ice",
               "stateVersionAfter": 11,
               "kind": "corp_rez",
@@ -5323,8 +5597,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_12:run_declared:campaign:corp.defend_servers:rez:corp_onr_proteus_032_misleading-access-menus_1:corp.rez_ice.corp_onr_proteus_032_misleading-access-menus_1.corp_onr_proteus_032_misleading-access-menus_1",
-              "eventId": "evt_12",
+              "outcomeId": "13:run_declared:k62l9qxinl2whtd7nt1axotra9",
+              "eventId": 13,
               "eventType": "continue_run",
               "stateVersionAfter": 12,
               "kind": "run_declared",
@@ -5334,8 +5608,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_13:run_declared:campaign:corp.defend_servers:rez:corp_onr_proteus_032_misleading-access-menus_1:corp.rez_ice.corp_onr_proteus_032_misleading-access-menus_1.corp_onr_proteus_032_misleading-access-menus_1",
-              "eventId": "evt_13",
+              "outcomeId": "14:run_declared:k62l9qxinl2whtd7nt1axotra9",
+              "eventId": 14,
               "eventType": "continue_run",
               "stateVersionAfter": 13,
               "kind": "run_declared",
@@ -5345,8 +5619,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_14:access_resolved:campaign:corp.defend_servers:rez:corp_onr_proteus_032_misleading-access-menus_1:corp.rez_ice.corp_onr_proteus_032_misleading-access-menus_1.corp_onr_proteus_032_misleading-access-menus_1",
-              "eventId": "evt_14",
+              "outcomeId": "15:access_resolved:k62l9qxinl2whtd7nt1axotra9",
+              "eventId": 15,
               "eventType": "access_card",
               "stateVersionAfter": 14,
               "kind": "access_resolved",
@@ -5356,8 +5630,8 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "evt_16:corp_rez:campaign:corp.defend_servers:rez:corp_onr_proteus_032_misleading-access-menus_1:corp.rez_ice.corp_onr_proteus_032_misleading-access-menus_1.corp_onr_proteus_032_misleading-access-menus_1",
-              "eventId": "evt_16",
+              "outcomeId": "17:corp_rez:k62l9qxinl2whtd7nt1axotra9",
+              "eventId": 17,
               "eventType": "rez_ice",
               "stateVersionAfter": 16,
               "kind": "corp_rez",
@@ -5367,8 +5641,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_17:run_declared:campaign:corp.defend_servers:rez:corp_onr_proteus_032_misleading-access-menus_1:corp.rez_ice.corp_onr_proteus_032_misleading-access-menus_1.corp_onr_proteus_032_misleading-access-menus_1",
-              "eventId": "evt_17",
+              "outcomeId": "18:run_declared:k62l9qxinl2whtd7nt1axotra9",
+              "eventId": 18,
               "eventType": "continue_run",
               "stateVersionAfter": 17,
               "kind": "run_declared",
@@ -5388,19 +5662,23 @@
             "campaign_status:blocked",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "engine_certified_ice_rez_qualitative_encounter_defense:rd:corp.rez_ice.corp_onr_proteus_032_misleading-access-menus_1.corp_onr_proteus_032_misleading-access-menus_1"
-          ]
+            "engine_certified_ice_rez_qualitative_encounter_defense:rd:cq.ck5.ck5"
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "rez:ck5:cq.ck5.ck5"
+          }
         },
         {
           "schemaVersion": "resident-corp-campaign-v1",
-          "campaignId": "campaign:corp.defend_servers:rez:corp_onr_v1_237_data-wall_2:corp.rez_ice.corp_onr_v1_237_data-wall_2.corp_onr_v1_237_data-wall_2",
+          "campaignId": "kb8rtan796p3066xjhzfg6qtc8",
           "kind": "defense",
           "status": "blocked",
           "origin": {
-            "rootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
+            "rootPlanInstanceId": "penw02zfrkklof54c2nuye5att",
             "moduleId": "corp.defend_servers",
             "targetServerId": "hq",
-            "targetCardInstanceId": "corp_onr_v1_237_data-wall_2"
+            "targetCardInstanceId": "c2ry"
           },
           "milestoneId": "rez_response",
           "createdAtStateVersion": 3,
@@ -5420,8 +5698,8 @@
           },
           "publicOutcomes": [
             {
-              "outcomeId": "evt_11:corp_rez:campaign:corp.defend_servers:rez:corp_onr_v1_237_data-wall_2:corp.rez_ice.corp_onr_v1_237_data-wall_2.corp_onr_v1_237_data-wall_2",
-              "eventId": "evt_11",
+              "outcomeId": "12:corp_rez:kb8rtan796p3066xjhzfg6qtc8",
+              "eventId": 12,
               "eventType": "rez_ice",
               "stateVersionAfter": 11,
               "kind": "corp_rez",
@@ -5431,8 +5709,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_12:run_declared:campaign:corp.defend_servers:rez:corp_onr_v1_237_data-wall_2:corp.rez_ice.corp_onr_v1_237_data-wall_2.corp_onr_v1_237_data-wall_2",
-              "eventId": "evt_12",
+              "outcomeId": "13:run_declared:kb8rtan796p3066xjhzfg6qtc8",
+              "eventId": 13,
               "eventType": "continue_run",
               "stateVersionAfter": 12,
               "kind": "run_declared",
@@ -5442,8 +5720,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_13:run_declared:campaign:corp.defend_servers:rez:corp_onr_v1_237_data-wall_2:corp.rez_ice.corp_onr_v1_237_data-wall_2.corp_onr_v1_237_data-wall_2",
-              "eventId": "evt_13",
+              "outcomeId": "14:run_declared:kb8rtan796p3066xjhzfg6qtc8",
+              "eventId": 14,
               "eventType": "continue_run",
               "stateVersionAfter": 13,
               "kind": "run_declared",
@@ -5453,8 +5731,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_14:access_resolved:campaign:corp.defend_servers:rez:corp_onr_v1_237_data-wall_2:corp.rez_ice.corp_onr_v1_237_data-wall_2.corp_onr_v1_237_data-wall_2",
-              "eventId": "evt_14",
+              "outcomeId": "15:access_resolved:kb8rtan796p3066xjhzfg6qtc8",
+              "eventId": 15,
               "eventType": "access_card",
               "stateVersionAfter": 14,
               "kind": "access_resolved",
@@ -5464,8 +5742,8 @@
               "evidenceCode": "campaign_public_access"
             },
             {
-              "outcomeId": "evt_15:run_declared:campaign:corp.defend_servers:rez:corp_onr_v1_237_data-wall_2:corp.rez_ice.corp_onr_v1_237_data-wall_2.corp_onr_v1_237_data-wall_2",
-              "eventId": "evt_15",
+              "outcomeId": "16:run_declared:kb8rtan796p3066xjhzfg6qtc8",
+              "eventId": 16,
               "eventType": "start_run",
               "stateVersionAfter": 15,
               "kind": "run_declared",
@@ -5476,8 +5754,8 @@
               "evidenceCode": "campaign_public_run"
             },
             {
-              "outcomeId": "evt_16:corp_rez:campaign:corp.defend_servers:rez:corp_onr_v1_237_data-wall_2:corp.rez_ice.corp_onr_v1_237_data-wall_2.corp_onr_v1_237_data-wall_2",
-              "eventId": "evt_16",
+              "outcomeId": "17:corp_rez:kb8rtan796p3066xjhzfg6qtc8",
+              "eventId": 17,
               "eventType": "rez_ice",
               "stateVersionAfter": 16,
               "kind": "corp_rez",
@@ -5487,8 +5765,8 @@
               "evidenceCode": "campaign_public_rez"
             },
             {
-              "outcomeId": "evt_17:run_declared:campaign:corp.defend_servers:rez:corp_onr_v1_237_data-wall_2:corp.rez_ice.corp_onr_v1_237_data-wall_2.corp_onr_v1_237_data-wall_2",
-              "eventId": "evt_17",
+              "outcomeId": "18:run_declared:kb8rtan796p3066xjhzfg6qtc8",
+              "eventId": 18,
               "eventType": "continue_run",
               "stateVersionAfter": 17,
               "kind": "run_declared",
@@ -5508,13 +5786,17 @@
             "campaign_status:blocked",
             "campaign_status:continuable",
             "corp-opponent-campaign-continuity-v1",
-            "engine_certified_ice_rez_access_reduction:hq:corp.rez_ice.corp_onr_v1_237_data-wall_2.corp_onr_v1_237_data-wall_2"
-          ]
+            "engine_certified_ice_rez_access_reduction:hq:cq.c2ry.c2ry"
+          ],
+          "identity": {
+            "ownerModuleId": "corp.defend_servers",
+            "objectiveKey": "rez:c2ry:cq.c2ry.c2ry"
+          }
         }
       ],
       "turnPlanCommitment": {
         "schemaVersion": "turn-plan-commitment-v2",
-        "sequenceRootPlanInstanceId": "plan:corp.economy:economy-visible-liquidity-development%3Acorp%3A2",
+        "sequenceRootPlanInstanceId": "p94filkwdcmorc22xdjf2k7u83",
         "commitmentId": "fnv1a:d3c4d927",
         "sourcePlanId": "fnv1a:292c75f1",
         "sourceLineHash": "fnv1a:5666bca3",
@@ -5534,7 +5816,7 @@
           {
             "phaseId": "fnv1a:5be5d1d7",
             "root": {
-              "planInstanceId": "plan:corp.economy:economy-visible-liquidity-development%3Acorp%3A2",
+              "planInstanceId": "p94filkwdcmorc22xdjf2k7u83",
               "moduleId": "corp.economy",
               "milestoneId": "develop_or_convert_corp_economy",
               "provenance": "resident"
@@ -5623,7 +5905,7 @@
           "sideSafePlanningFingerprint": "fnv1a:6e2629eb"
         },
         "currentBinding": {
-          "actionId": "corp.gain_credit",
+          "actionId": "cb",
           "stateVersion": 19,
           "semanticActionSetFingerprint": "fnv1a:6f156104",
           "invocationKey": "fnv1a:43ccf46f"
@@ -5631,15 +5913,15 @@
         "actionType": "gain_credit",
         "expectationId": "fnv1a:21680b9a"
       },
-      "rootForegroundInstanceId": "plan:corp.economy:economy-visible-liquidity-development%3Acorp%3A2",
-      "executorInstanceId": "plan:corp.economy:economy-visible-liquidity-development%3Acorp%3A2"
+      "rootForegroundInstanceId": "p94filkwdcmorc22xdjf2k7u83",
+      "executorInstanceId": "p94filkwdcmorc22xdjf2k7u83"
     }
   },
   "expectation": {
     "acceptableActions": [
       {
         "type": "install_card",
-        "sourceDefinitionId": "onr_proteus_038_snowbank",
+        "sourceDefinitionId": 96,
         "targetServerId": "rd"
       }
     ],
@@ -5649,10 +5931,14 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.defend_servers"],
-      "acceptableCapabilities": ["allocate_server_defense"],
+      "acceptablePlanKinds": [
+        "corp.defend_servers"
+      ],
+      "acceptableCapabilities": [
+        "allocate_server_defense"
+      ],
       "requiredAssessmentEvidence": [
-        "corp_agenda_capacity_defense_conversion:rd:corp.install_card.corp_onr_proteus_038_snowbank_1.rd.corp_onr_proteus_038_snowbank_1.1"
+        "corp_agenda_capacity_defense_conversion:rd:cc.clh.rd.clh.1"
       ]
     }
   }

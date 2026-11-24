@@ -175,25 +175,6 @@ export function buildRunnerEconomySignals(params: {
           },
         ]
       : [];
-  const portfolioReserveRoute = findFundingRoute({
-    demandId: "runner-portfolio-credit-reserve",
-    sourcePlanId: "runner.economy:runner-portfolio-credit-reserve",
-    purpose: "phase_reserve",
-    priority: "phase_reserve",
-    hardness: "soft",
-    deadline: "end_of_current_turn",
-    targetCredits: portfolioReserveTargetCredits,
-    remainingClicks: input.playerView.own.clicks,
-    allowIncrementalProgress: true,
-    requiredEndTurnHandBuffer: preservedHandBuffer,
-    reserveDevelopment: { minimumHandBuffer: params.minimumHandBuffer },
-    evidence: [
-      "runner_finite_portfolio_credit_reserve",
-      `runner_economy_preserved_hand_buffer:${preservedHandBuffer}`,
-      `runner_debt_next_turn_credit_loss:${debtLiability.nextTurnCreditLoss}`,
-      `runner_debt_total_leave_play_cost:${debtLiability.totalLeavePlayPayCost}`,
-    ],
-  });
   const portfolioReserveFundingNeeds: RunnerFundingNeedSignal[] =
     input.playerView.own.clicks > 0 &&
     currentCredits < portfolioReserveTargetCredits
@@ -209,7 +190,27 @@ export function buildRunnerEconomySignals(params: {
               stateVersion: input.playerView.stateVersion,
               status: "portfolio_reserve_open",
             },
-            ...portfolioReserveRoute,
+            ...findFundingRoute({
+              demandId: "runner-portfolio-credit-reserve",
+              sourcePlanId: "runner.economy:runner-portfolio-credit-reserve",
+              purpose: "phase_reserve",
+              priority: "phase_reserve",
+              hardness: "soft",
+              deadline: "end_of_current_turn",
+              targetCredits: portfolioReserveTargetCredits,
+              remainingClicks: input.playerView.own.clicks,
+              allowIncrementalProgress: true,
+              requiredEndTurnHandBuffer: preservedHandBuffer,
+              reserveDevelopment: {
+                minimumHandBuffer: params.minimumHandBuffer,
+              },
+              evidence: [
+                "runner_finite_portfolio_credit_reserve",
+                `runner_economy_preserved_hand_buffer:${preservedHandBuffer}`,
+                `runner_debt_next_turn_credit_loss:${debtLiability.nextTurnCreditLoss}`,
+                `runner_debt_total_leave_play_cost:${debtLiability.totalLeavePlayPayCost}`,
+              ],
+            }),
             evidenceCode: "runner_finite_portfolio_credit_reserve",
           },
         ]

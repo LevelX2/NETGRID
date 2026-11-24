@@ -1,3 +1,4 @@
+import { summarizeRunnerRepeatRemoteNoTrashMetrics } from "./runner-repeat-remote-no-trash-metrics";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import { describe, expect, it } from "vitest";
 import {
@@ -10,6 +11,47 @@ import {
 } from "./selfplay-trace-mining";
 
 describe("SelfplayTraceMining", () => {
+  it("uses the full stable hash in suggested fixture names", () => {
+    const summary = selfplaySummary([]);
+    const [finding] = detectAiSelfplaySuspiciousDecisions([summary], {
+      detectorIds: ["action_limit_reached"],
+    });
+    expect(finding?.suggestedFixtureName).toMatch(/^action_limit_reached-[0-9a-f]{8}[.]fixture[.]json$/);
+  });
+  it("keeps a remote's decline across credit clicks and distinguishes new ICE", () => {
+    const decline = selfplayAction("runner", 1, "decline_trash", {
+      targetServerId: "r1",
+      runnerRemoteAccessWithRelevantTrashableCard: true,
+      runnerRemoteAccessWithTrashableCard: true,
+      runnerRemoteTrashDeclined: true,
+      runnerSkippedAffordableRelevantRemoteTrash: true,
+    });
+    const gain = selfplayAction("runner", 2, "gain_credit");
+    const run = selfplayAction("runner", 4, "play_event", {
+      runnerRunStarted: true,
+      targetServerId: "r1",
+    });
+    const changed = selfplayAction("corp", 3, "install_card", {
+      targetServerId: "r1",
+      installPlacement: "ice",
+    });
+    expect(summarizeRunnerRepeatRemoteNoTrashMetrics([
+      selfplaySummary([decline, gain, run]),
+    ])).toMatchObject({
+      runnerRepeatRunOnSameRemoteAfterDecliningTrash: 1,
+      runnerRepeatRunOnSameRemoteNoNewInfo: 1,
+      runnerRepeatRemoteNoTrashFixGateSuspicious: 1,
+      runnerRepeatRemoteRunSuppressedAfterNoTrash: 0,
+    });
+    expect(summarizeRunnerRepeatRemoteNoTrashMetrics([
+      selfplaySummary([decline, gain, changed, run]),
+    ])).toMatchObject({
+      runnerRepeatRunOnSameRemoteAfterDecliningTrash: 1,
+      runnerRepeatRunOnSameRemoteNoNewInfo: 0,
+      runnerRepeatRemoteNoTrashFixGateSuspicious: 0,
+    });
+  });
+
   it("extracts redaction-safe decision points from selfplay summaries", () => {
     const summary = selfplaySummary([
       selfplayAction("runner", 1, "start_run", {
@@ -77,12 +119,12 @@ describe("SelfplayTraceMining", () => {
     const summary = selfplaySummary([
       selfplayAction("runner", 1, "start_run", {
         selectedActionId: "run-remote-1",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         evidence: ["known_no_current_payoff"],
       }),
       selfplayAction("runner", 2, "start_run", {
         selectedActionId: "run-remote-2",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         evidence: ["known_no_current_payoff"],
         runnerRepeatRunOnKnownUnpayableRemotePath: true,
       }),
@@ -114,14 +156,14 @@ describe("SelfplayTraceMining", () => {
     const positive = selfplaySummary([
       selfplayAction("runner", 1, "start_run", {
         selectedActionId: "run-remote-positive",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         evidence: ["remote_memory_payoff:known_low_value"],
       }),
     ]);
     const noise = selfplaySummary([
       selfplayAction("runner", 1, "start_run", {
         selectedActionId: "run-remote-noise",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         evidence: ["remote_memory_payoff:known_low_valueish"],
       }),
     ]);
@@ -257,19 +299,19 @@ describe("SelfplayTraceMining", () => {
     const stable = selfplaySummary([
       selfplayAction("runner", 1, "start_run", {
         selectedActionId: "run-remote-stable-first",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         evidence: ["runner_run_decision_fingerprint:v1:stable"],
       }),
       selfplayAction("runner", 2, "start_run", {
         selectedActionId: "run-remote-stable-repeat",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         evidence: ["runner_run_decision_fingerprint:v1:stable"],
       }),
     ]);
     const changed = selfplaySummary([
       selfplayAction("runner", 1, "start_run", {
         selectedActionId: "run-remote-before-change",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         evidence: ["runner_run_decision_fingerprint:v1:before"],
       }),
       selfplayAction("runner", 2, "gain_credit", {
@@ -277,7 +319,7 @@ describe("SelfplayTraceMining", () => {
       }),
       selfplayAction("runner", 3, "start_run", {
         selectedActionId: "run-remote-after-change",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         evidence: ["runner_run_decision_fingerprint:v1:after"],
       }),
     ]);
@@ -959,14 +1001,14 @@ describe("SelfplayTraceMining", () => {
       selfplayAction("corp", 1, "gain_credit", {
         selectedActionId: "corp-reserve-positive",
         debugFacts: ["corpRezReserve:true", "protection:central"],
-        corpScoreTerminalWindowScoreLegal: true,
+        scoreActionsAvailable: 1,
       }),
     ]);
     const noise = selfplaySummary([
       selfplayAction("corp", 1, "gain_credit", {
         selectedActionId: "corp-reserve-noise",
         debugFacts: ["corpRezReserveish:true", "protectionist_noise"],
-        corpScoreTerminalWindowScoreLegal: true,
+        scoreActionsAvailable: 1,
       }),
     ]);
 

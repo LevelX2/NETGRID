@@ -8,7 +8,7 @@ import {
 import type { AiDecision, DeckDefinition, GameState } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import decks from "../../../../data/decks/proteus-playtest-decks-2026-05-25.json";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { chooseAiAction } from "../index";
 import { buildAiDecisionInput } from "../runtime/ai-decision-input";
 import { buildPlanningStateIdentity } from "../plans/turn-planning-contracts";
@@ -19,10 +19,10 @@ import {
 } from "../plans/resident-plan-portfolio-memory";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 
-const TEST_SPIN = "onr_proteus_126_test-spin";
-const CONFERENCE = "onr_v1_184_top-runners-conference";
-const DEVELOPMENT_TARGET = "onr_proteus_085_disintegrator";
-const COVERAGE_TARGET = "onr_v1_014_codecracker";
+const TEST_SPIN = 184;
+const CONFERENCE = 396;
+const DEVELOPMENT_TARGET = 143;
+const COVERAGE_TARGET = 226;
 
 describe("Test Spin exact Engine continuation", () => {
   it.each([
@@ -175,7 +175,7 @@ function testSpinFixture(
     runnerDeck,
     corpDeck: deck("proteus_corp_region_fast_score_2026_05_25"),
   });
-  const find = (definitionId: string) => {
+  const find = (definitionId: number) => {
     const card = Object.values(state.cardInstances).find(
       (candidate) =>
         candidate.owner === "runner" && candidate.definitionId === definitionId,
@@ -187,12 +187,12 @@ function testSpinFixture(
   const target = find(
     owner === "development" ? DEVELOPMENT_TARGET : COVERAGE_TARGET,
   );
-  const sacrifice = find("onr_proteus_090_highlighter");
+  const sacrifice = find(148);
   const programs = memoryPressure
     ? [
         sacrifice,
         find(owner === "development" ? COVERAGE_TARGET : DEVELOPMENT_TARGET),
-        find("onr_v1_021_dwarf"),
+        find(233),
       ]
     : [];
   const conferences = Object.values(state.cardInstances).filter(
@@ -212,7 +212,7 @@ function testSpinFixture(
   state.runner.rig.resources = conferences.map((card) => card.instanceId);
   state.runner.memoryUsed = programs.reduce(
     (total, card) =>
-      total + CARD_DEFINITIONS_BY_ID[card.definitionId]!.memoryCost!,
+      total + planningCardFactsByDefinitionId(card.definitionId)!.memoryCost!,
     0,
   );
   state.runner.memoryLimit = 4;

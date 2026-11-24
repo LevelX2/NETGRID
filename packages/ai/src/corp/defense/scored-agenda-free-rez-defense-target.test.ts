@@ -15,12 +15,12 @@ const fixture = (name: string) =>
       "utf8",
     ),
   );
-const sourceAgendaId = "corp_onr_v1_212_priority-requisition_1";
+const sourceAgendaId = "c2md";
 
 describe("Defense-owned scored-agenda free rez", () => {
   it.each([
-    ["free-rez-central-loss", "corp_onr_v1_273_triggerman_1"],
-    ["free-rez-single-remote", "corp_onr_v1_278_wall-of-ice_1"],
+    ["free-rez-central-loss", "c2zx"],
+    ["free-rez-single-remote", "c311"],
   ])(
     "preserves the native Score executor and exact choice binding: %s",
     (name, targetId) => {
@@ -123,16 +123,31 @@ describe("Defense-owned scored-agenda free rez", () => {
   it("prioritizes current R&D agenda exposure over the more expensive HQ ICE", () => {
     const { input } = fixture("free-rez-central-loss");
     const target = corpScoredAgendaFreeRezDefenseTarget(input, sourceAgendaId)!;
-    expect(target.card.instanceId).toBe("corp_onr_v1_273_triggerman_1");
+    expect(target.card.instanceId).toBe("c2zx");
     expect(target.rezCredits).toBe(7);
     expect(
       input.playerView.servers
         .find((server: { id: string }) => server.id === "hq")
         .ice.find(
           (card: { instanceId: string }) =>
-            card.instanceId === "corp_onr_v1_278_wall-of-ice_1",
+            card.instanceId === "c311",
         ).effectiveRezCostQuote.finalCredits,
     ).toBe(13);
+  });
+
+  it("only ranks rez targets with payable additional agenda points after scoring", () => {
+    const { input } = fixture("free-rez-single-remote");
+    const chips = (input as AiDecisionInput).playerView.servers.flatMap(
+      (server) => server.ice,
+    );
+    for (const card of chips) {
+      if (card.effectiveRezCostQuote?.complete) {
+        card.effectiveRezCostQuote.mandatoryAdditionalCosts.agendaPoints = 20;
+      }
+    }
+    expect(
+      corpScoredAgendaFreeRezDefenseTarget(input, sourceAgendaId),
+    ).toBeUndefined();
   });
 
   it("rejects missing central access facts instead of substituting a cost ranking", () => {

@@ -1,3 +1,4 @@
+import { isCardDefinitionId, type CardDefinitionId } from "@netgrid/shared";
 import type {
   AiDeckStrategyProfile,
   DeckStrategyEvidence,
@@ -876,7 +877,7 @@ function isEditableDeckLike(value: unknown): value is EditableDeck {
     typeof deck.deckVersion === "string" &&
     typeof deck.name === "string" &&
     (deck.side === "runner" || deck.side === "corp") &&
-    typeof deck.identityCardId === "string" &&
+    isCardDefinitionId(deck.identityCardId) &&
     typeof deck.cardPoolSnapshotId === "string" &&
     typeof deck.formatProfileId === "string" &&
     Array.isArray(deck.cards) &&
@@ -885,8 +886,8 @@ function isEditableDeckLike(value: unknown): value is EditableDeck {
   );
 }
 
-function cardTitle(cardId: string): string {
-  return CARDS_BY_ID[cardId]?.title ?? cardId;
+function cardTitle(cardId: CardDefinitionId): string {
+  return CARDS_BY_ID[cardId]?.title ?? String(cardId);
 }
 
 function sideLabel(side: Side): string {

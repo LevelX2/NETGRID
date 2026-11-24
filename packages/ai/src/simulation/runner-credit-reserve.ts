@@ -1,4 +1,10 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import type { AiDecisionInput } from "@netgrid/shared";
+import { currentRunPathContext } from "../run-analysis/current-run-path-context";
+import {
+  currentEncounteredIceCard,
+  currentRunRemainingIce,
+} from "../runtime/current-encounter";
 import { rolesMatch } from "../role-match";
 import { isRemoteServerTarget } from "../runtime/server-target";
 import {
@@ -10,24 +16,36 @@ import { remoteTrashRoleForVisibleCard } from "./remote-trash-role";
 
 export function runnerCreditReserveTargetForInput(
   input: AiDecisionInput,
-  rolesForCardId: (cardId: string | undefined) => string[],
+  rolesForCardId: (cardId: CardDefinitionId | undefined) => string[],
 ): number {
   if (input.side !== "runner") return 0;
   let target = 4;
-  const activeRunServerId = input.playerView.run?.attackedServerId;
+  const run = input.playerView.run;
+  const activeRunServerId = run?.attackedServerId;
   if (!activeRunServerId) return target;
   for (const server of input.playerView.servers) {
     if (server.id !== activeRunServerId) continue;
     if (!isRemoteServerTarget(server.id)) continue;
+    const remaining = currentRunRemainingIce(input);
+    const current =
+      run.position?.kind === "ice" && run.phase !== "movement"
+        ? currentEncounteredIceCard(input)
+        : undefined;
+    const path =
+      current && current.instanceId !== run.pendingAutoPassIceId
+        ? [...remaining, current]
+        : remaining;
     const pathCost =
       assessKnownRezzedIcePath(
-        server.ice,
+        path,
         input.playerView.own.rig ?? [],
         runnerRunPathCreditBudgetWithVisiblePools(
           input.playerView.own.credits,
           input.playerView.own.rig ?? [],
         ),
         server.root,
+        input.playerView.opponent.credits,
+        currentRunPathContext(input),
       ).visibleBreakCost ?? 0;
     const hasThreat = server.root.some(
       (card) =>
@@ -63,7 +81,7 @@ export function runnerCreditReserveTargetForInput(
 }
 
 export function createRunnerCreditReserveTargetForInput(dependencies: {
-  rolesForCardId: (cardId: string | undefined) => string[];
+  rolesForCardId: (cardId: CardDefinitionId | undefined) => string[];
 }): (input: AiDecisionInput) => number {
   return (input) =>
     runnerCreditReserveTargetForInput(input, dependencies.rolesForCardId);
@@ -77,7 +95,7 @@ export function runnerPostRunReserveTargetForRemoteInput(
       input: AiDecisionInput,
       serverId: string,
     ) => boolean;
-    rolesForCardId: (cardId: string | undefined) => string[];
+    rolesForCardId: (cardId: CardDefinitionId | undefined) => string[];
   },
 ): number {
   const server = input.playerView.servers.find(
@@ -117,7 +135,7 @@ export function createRunnerPostRunReserveTargetForRemoteInput(dependencies: {
     input: AiDecisionInput,
     serverId: string,
   ) => boolean;
-  rolesForCardId: (cardId: string | undefined) => string[];
+  rolesForCardId: (cardId: CardDefinitionId | undefined) => string[];
 }): (input: AiDecisionInput, serverId: string) => number {
   return (input, serverId) =>
     runnerPostRunReserveTargetForRemoteInput(input, serverId, dependencies);

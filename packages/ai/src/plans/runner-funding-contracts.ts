@@ -21,7 +21,7 @@ export type RunnerFundingRouteAssessment = {
     recoveryActionId: string;
     sourceCardInstanceId: string;
     targetCardInstanceId: string;
-    targetDefinitionId: string;
+    targetDefinitionId: number;
     recoveryClickCost: number;
     recoveryCreditCost: number;
     runActionId: string;

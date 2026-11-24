@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -77,7 +78,7 @@ describe("native trace eligibility of run-only money", () => {
       f.runtime,
     );
     const d = chooseAiAction(f.input);
-    expect(d.actionId).toBe("runner.draw_card");
+    expect(d.actionId).toBe("r8");
     expect(d.fallbackUsed).toBe(false);
     expect(d.timeoutUsed).toBe(false);
     expect(f.input.legalActions.some((a) => a.actionId === d.actionId)).toBe(
@@ -89,7 +90,7 @@ describe("native trace eligibility of run-only money", () => {
       phase: "build_hand_buffer",
     });
     expect(p?.rootPlanInstanceId).toBe(
-      "plan:runner.defense_and_recovery:runner",
+      "p1gzjb6yfcv4zbzow512kexs33",
     );
     expect(p?.route).toMatchObject({
       actionId: d.actionId,
@@ -120,7 +121,7 @@ describe("native trace eligibility of run-only money", () => {
     spendBreakerCredits(b, {
       cost: 11,
       breakerInstanceId: "b",
-      breakerDefinitionId: "b",
+      breakerDefinitionId: syntheticCardDefinitionId("b"),
       breakerSubtypes: ["icebreaker"],
       endingStrength: 1,
       carriesStrengthAcrossIce: false,
@@ -136,7 +137,7 @@ describe("native trace eligibility of run-only money", () => {
       paymentSupportSources: [
         {
           cardInstanceId: "s",
-          sourceAbilityId: "cash",
+          sourceAbilityId: 272,
           creditCost: 1,
           gainCredits: 4,
         },
@@ -189,7 +190,7 @@ describe("native trace eligibility of run-only money", () => {
           traceCreditSources: [
             {
               sourceCardInstanceId: "trace-source",
-              sourceDefinitionId: "trace-source",
+              sourceDefinitionId: syntheticCardDefinitionId("trace-source"),
               amount: 6,
               isStealth: false,
             },

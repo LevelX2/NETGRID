@@ -13,8 +13,7 @@ describe("actual AI decision event trace", () => {
     });
 
     expect(trace).toMatchObject({
-      traceId: "event_trace_ai_7",
-      eventId: "ai_7",
+      eventId: 9,
       side: "corp",
       stateVersion: 7,
       selectedActionId: "corp.draw",
@@ -43,7 +42,7 @@ describe("actual AI decision event trace", () => {
 
 function humanEvent(): PublicGameEvent {
   return {
-    eventId: "human_1",
+    eventId: 3,
     type: "action",
     stateVersionBefore: 1,
     stateVersionAfter: 2,
@@ -54,7 +53,7 @@ function humanEvent(): PublicGameEvent {
 
 function aiEvent(stateVersion: number): PublicGameEvent {
   return {
-    eventId: `ai_${stateVersion}`,
+    eventId: stateVersion + 2,
     type: "action",
     stateVersionBefore: stateVersion,
     stateVersionAfter: stateVersion + 1,

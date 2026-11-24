@@ -1,3 +1,5 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   CURRENT_RULES_BASELINE,
   type AiDecisionInput,
@@ -165,6 +167,21 @@ describe("turn planning contracts", () => {
     ).not.toBe(buildPlanningStateIdentity(second).sideSafePlanningFingerprint);
   });
 
+  it("binds every typed encounter target to the planning state", () => {
+    const first = decisionInput();
+    first.legalActions[0] = {
+      ...first.legalActions[0]!,
+      type: "break_subroutine",
+      subroutineIndexes: [0, 1],
+    };
+    const second = structuredClone(first);
+    second.legalActions[0]!.subroutineIndexes = [0, 2];
+
+    expect(buildPlanningStateIdentity(first)).not.toEqual(
+      buildPlanningStateIdentity(second),
+    );
+  });
+
   it("permits concrete card, server and ability references but no future actionId", () => {
     const identity = stateIdentity();
     const invocation = buildCanonicalLegalActionInvocation({
@@ -173,7 +190,7 @@ describe("turn planning contracts", () => {
       sourceCardInstanceId: "corp_ice_1",
       sourceAbilityBinding: {
         kind: "card_spec_capability_key",
-        sourceAbilityId: "test_corp_ice:install",
+        sourceAbilityId: canonicalCapabilityId(14, capabilityKey("subroutine_paid_deflect_to_data_fort")),
       },
       boundTargets: [
         {
@@ -399,6 +416,37 @@ describe("turn planning contracts", () => {
     ).toThrowError(/invalid_deferred_obligation|violated_priority_obligation/);
   });
 
+  it("requires real coverage for every required priority obligation", () => {
+    const plan = turnPlan();
+    plan.priorityObligations = [
+      {
+        obligationId: "protect-rd",
+        priorityClass: "P3",
+        activatedAtFrameKey: "frame-1",
+        deadline: "turn_end",
+        satisfactionCondition: { code: "rd_protected" },
+        deferrable: false,
+        witnessId: "defense-assessment",
+        guarantee: "guaranteed",
+      },
+    ];
+    plan.priorityCoverage.requiredObligationIds = ["protect-rd"];
+
+    expect(() => assertTurnPlan(plan, rulesContext(), stateIdentity())).toThrow(
+      /uncovered_required_obligation/,
+    );
+
+    plan.priorityCoverage.satisfiedObligationIds = ["protect-rd"];
+    expect(() =>
+      assertTurnPlan(plan, rulesContext(), stateIdentity()),
+    ).not.toThrow();
+
+    plan.priorityCoverage.satisfiedObligationIds.push("unknown-obligation");
+    expect(() => assertTurnPlan(plan, rulesContext(), stateIdentity())).toThrow(
+      /unknown_satisfied_obligation/,
+    );
+  });
+
   it("rejects exclusive cross-campaign double counting and numerical priority", () => {
     const plan = turnPlan();
     plan.campaignValueClaims = [
@@ -609,7 +657,7 @@ function decisionInput(): AiDecisionInput {
       own: {
         identity: {
           instanceId: "corp-identity",
-          definitionId: "corp-identity",
+          definitionId: syntheticCardDefinitionId("corp-identity"),
           title: "Corp",
           side: "corp",
           type: "identity",

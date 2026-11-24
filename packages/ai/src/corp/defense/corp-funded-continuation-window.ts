@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
@@ -124,7 +125,7 @@ export function corpFundedDefenseContinuationWindow(params: {
             ) &&
             !params.input.playerView.servers.some(
               (s) =>
-                s.id.startsWith("remote_") &&
+                isRemoteServerId(s.id) &&
                 s.root.some((c) => c.known && c.type === "agenda"),
             )
           )

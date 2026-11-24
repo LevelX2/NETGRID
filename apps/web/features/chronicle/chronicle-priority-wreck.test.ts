@@ -19,7 +19,7 @@ import en from "../../messages/en.json";
 import fr from "../../messages/fr.json";
 
 const messages = { de, en, fr };
-const definitionId = "onr_v1_105_priority-wreck";
+const definitionId = 317;
 
 function priorityWreckEvents(paid: number, corpCredits: number) {
   let state = toRunnerTurn(

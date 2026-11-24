@@ -1,20 +1,21 @@
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import type { CardDefinitionId } from "@netgrid/shared";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 import { AI_HINTS_BY_CARD } from "./ai-hints";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 import { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
 import { runnerEffectsProvideHeapRecovery, runnerEffectsProvideTopTrashRecovery } from "./runner-canonical-hint-semantics";
 
-function entry(id: string) {
-  const found = cardSpecPlanningCards().find((card) => card.definition.id === id);
+function entry(id: CardDefinitionId) {
+  const found = listPlanningCardsWithFacts().find((card) => card.facts.id === id);
   if (!found) throw new Error("heap_recovery_test_card_missing:" + id);
   return found;
 }
 
 describe("canonical Heap search and recovery facts", () => {
   it.each([
-    ["onr_v1_089_gideons-pawnshop", "any_card"],
-    ["onr_v1_087_forgotten-backup-chip", "program"],
+    [301, "any_card"],
+    [299, "program"],
   ])("projects %s without turning an arbitrary Heap choice into top-card recovery", (id, filter) => {
     for (const hint of [deriveCardSpecAiHint(entry(id)), AI_HINTS_BY_CARD.get(id)!]) {
       expect(hint.effects).toEqual(expect.arrayContaining([
@@ -32,15 +33,15 @@ describe("canonical Heap search and recovery facts", () => {
     const profile = buildDeckStrategyProfile({
       deckSnapshotId: "heap-recovery-profile", side: "runner",
       cards: [
-        { cardId: "onr_v1_089_gideons-pawnshop", quantity: 2 },
-        { cardId: "onr_v1_087_forgotten-backup-chip", quantity: 3 },
-        { cardId: "onr_v1_114_temple-microcode-outlet", quantity: 4 },
+        { cardId: 301, quantity: 2 },
+        { cardId: 299, quantity: 3 },
+        { cardId: 326, quantity: 4 },
       ],
     });
     expect(profile.runnerProfile?.setupProfile).toMatchObject({ recovery: 5, search: 9 });
     for (const family of ["wall", "code_gate", "sentry"] as const)
       expect(profile.runnerProfile?.coverageProfile[family].count).toBe(0);
-    expect(runnerEffectsProvideHeapRecovery(AI_HINTS_BY_CARD.get("onr_v1_114_temple-microcode-outlet")?.effects)).toBe(false);
+    expect(runnerEffectsProvideHeapRecovery(AI_HINTS_BY_CARD.get(326)?.effects)).toBe(false);
     const top = [{ kind: "card_recovery" as const, scope: "heap" as const, timing: "action" as const, target: "move_top_trash_to_grip" }];
     expect(runnerEffectsProvideHeapRecovery(top)).toBe(true);
     expect(runnerEffectsProvideTopTrashRecovery(top)).toBe(true);
@@ -50,7 +51,7 @@ describe("canonical Heap search and recovery facts", () => {
     { filter: "ice", visibility: "hidden_info_barrier" },
     { filter: "any_card", visibility: "public" },
   ])("rejects unsupported Heap shapes instead of dropping their semantics", (effect) => {
-    const source = entry("onr_v1_089_gideons-pawnshop");
+    const source = entry(301);
     const changed = {
       ...source,
       planning: {

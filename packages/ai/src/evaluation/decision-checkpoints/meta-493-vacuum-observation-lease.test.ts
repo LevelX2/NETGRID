@@ -38,7 +38,7 @@ it("retains the executed lease at 140 while the portfolio has observed state 141
   restore(cp);
   const original = JSON.stringify([cp.input.playerView, cp.input.legalActions]);
   const result = chooseAiAction(cp.input);
-  expect(result.actionId).toBe("runner.resolve_choice");
+  expect(result.actionId).toBe("rn");
   expect(result.selectedChoices).toMatchObject({
     choiceId: cp.input.playerView.pendingChoice!.choiceId,
     selectedOptionIds: ["resume_from_rezzed_ice_back"],

@@ -528,7 +528,7 @@ function knownTagPunishFollowup(
 }
 
 function visibleTagKillStrategyIsConfirmed(
-  knownDefinitionIds: ReadonlySet<string>,
+  knownDefinitionIds: ReadonlySet<number>,
 ): boolean {
   return [...knownDefinitionIds].some((definitionId) => {
     const hint = AI_HINTS_BY_CARD.get(definitionId);
@@ -629,7 +629,7 @@ function credibleLethalTagPunishProfile(input: {
 }
 
 function knownLethalTagPunishProfile(
-  definitionId: string,
+  definitionId: number,
   runnerGrip: number,
 ): { damage: number; creditCost: number; clickCost: number } | undefined {
   const hint = AI_HINTS_BY_CARD.get(definitionId);

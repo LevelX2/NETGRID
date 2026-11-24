@@ -60,8 +60,11 @@ Karte oder einen bestimmten Zielserver als Produktregel fest.
   Determinismus sowie erwartete und verbotene Aktionstypen.
 - Die Mutation Witness mit einer kontextblinden Auswahl muss dieses Gate
   nachweislich verletzen.
-- Der Korpus umfasst 53 nicht redundante Engine-Szenarien; reine Engine- oder
-  Shadow-Diagnostikszenarien zählen nicht automatisch als Live-Verhaltensbeleg.
+- Der Korpus umfasst 53 unterschiedliche Engine-Szenarien. Für die
+  Laufzeitentscheidung erhält die KI die tatsächlich verwendete Deckliste.
+  Separat ausgezeichnete Deck-Doctrine-Snapshots sind reine Diagnostik.
+  Fälle mit zufälliger Aktionswahl werden mit Quote und Apply an der Engine
+  geprüft.
 - `packages/ai/src/evaluation/real-engine-default-runtime.test.ts` führt alle
   53 Eingaben zusätzlich durch den öffentlichen Chooser ohne Modusoverride.
   Es prüft die aktuelle LegalAction und StateVersion, Root und Executor,
@@ -78,6 +81,22 @@ Karte oder einen bestimmten Zielserver als Produktregel fest.
   Golden Seed drei verschiedene deterministische Live-Verläufe.
 
 ## Benchmarkprofile
+
+Die Kennzahl `runnerEconomySkippedFor*` ordnet das Ökonomiefenster der
+gewählten Aktion zu. Ungenutzte Gelegenheiten für Druck, Contest,
+Breaker-Installation oder Trash werden separat erfasst. Die Coverage-Metrik
+erfasst nur einen von der Pfadprüfung als fehlende Breaker-Abdeckung
+klassifizierten Block. Kredithürden haben eigene Kennzahlen. Beim Holdout
+prüfen Rekonstruktion, Legalität und Redaction jeweils den eigenen Schritt.
+Ein als ausgewertet markierter Fall ohne bestätigte LegalAction verfehlt
+das Legalitätsgate. Simulator und Holdout führen zufällige ICE-, Trace- und
+TurnPlan-Entscheidungen über das aktuelle Engine-Angebot aus und werten die
+tatsächlich ausgewählte LegalAction aus.
+
+Der Zufallsbenchmark bindet Pflichtauswahlen direkt an das aktuelle
+Engine-Angebot. Er zieht aus den auswählbaren Optionen mit dem gesetzten
+Simulationsseed und beachtet die vorgegebene Anzahl. Die Redaction-Prüfung
+berücksichtigt auch die ausgegebenen Simulationszusammenfassungen.
 
 Die `simulationId` identifiziert die geordnete Seedliste und die effektive
 Konfiguration eines Profils. In den SHA-256-Fingerprint gehen die
@@ -96,6 +115,9 @@ Profilraten. Die Auswahl außerhalb der LegalActions und die Ablehnung
 bei der Engine-Revalidierung zählen zu `illegalActions`. Sonstige
 technische Fehler zählen zu `runtimeFailures`, auch vor der
 ersten Aktion. Das Doctrine-Gate bewertet beide Zähler getrennt.
+Im Bericht zählt `runtimeFailureEventDelta` die Differenz einzelner
+technischer Fehler. `runtimeFailureDelta` vergleicht die Zahl der mit
+`runtime_failure` beendeten Spiele.
 
 Die strategische Planwiederholung ordnet Fortschritt nur der handelnden
 Seite zu. Ein Planabbruch ohne Grund erfordert drei beobachtete eigene
@@ -103,6 +125,22 @@ strategische Entscheidungen mit jeweils einem anderen Plan als dem
 ausgewerteten, ohne Fortschritt, gemeldeten Abbruchgrund oder Ablauf. Ein kürzerer Export lässt die Aussage
 offen. Benchmarks dieser beiden Kennzahlen benötigen denselben Messvertrag.
 Encounter-Effektzähler werten die zugehörige Evidence aus Runner-Aktionen aus.
+Die Remote-Contest-Rate zählt je Spiel, Turn und Fort. Ein Versuch geht in
+den Zähler ein, wenn das angegriffene Fort zum Zeitpunkt des Run-Starts
+contestierbar war. Blocker werden am betroffenen Fort erfasst. Für die
+Run-Reserve zählt die letzte beobachtete Access-Reserve je Run. Bekannte
+ICE-Pfade verwenden das Trace-Profil und Corp-Creditbudget der Entscheidung.
+Bei Trash-Entscheidungen erfasst der Benchmark das legale Angebot, die
+ausgeführte Trash-Aktion und den ausdrücklichen Verzicht. Die Bewertung der
+verbleibenden Creditreserve wird zusätzlich erfasst. Wiederkehrende Credits
+werden getrennt vom erschöpfbaren Vorrat einer Kampagne bewertet.
+
+Advancement, Score und Steal werden im Simulator über dieselbe Instanz einer
+Agenda verbunden. Die Simulationszusammenfassungen enthalten daraus nur
+Zählwerte und Zugabstände. Die Entstehung eines Remotes kommt aus der
+Änderung des Spielzustands. Konversionen zählen die Folgeaktion am konkret
+entstandenen Remote. Im Soak werden unterschiedliche Seeds und die Anzahl
+ihrer tatsächlich gestarteten Spiele getrennt ausgewiesen.
 Das R&D-Regressionsfixture für wiederholten Zugriff erzeugt den beobachteten
 Vorzustand durch Engine-Aktionen mit einer fest gebundenen Deckpaarung.
 Vor der Wahlprüfung muss der aktuelle Belief die bekannte, unveränderte und
@@ -117,6 +155,29 @@ Root-Schutzkarten von einer aktuell Engine-legal bezahlbaren Rez-Option
 im betrachteten Creditbudget. Aktiver Root-Schutz trägt 35 Punkte je Karte.
 Eine bezahlbare weitere Option trägt einmal 28 Punkte. Unbezahlbare
 ungerezzte Root-Karten tragen keine Schutzpunkte.
+
+Zielwechsel und ICE-Installationsreihenfolgen werden innerhalb eines Matches
+gezählt. Die Kreditreserve zählt je Runner-Zug höchstens einmal. Ein Run mit
+beobachtetem Zugriff zählt auch bei Multiaccess einmal. Der Druckindikator
+für spielbare Karten im Runner-Handeinsatz zählt nur Kartenaktionen.
+Das Doctrine-Gate prüft Laufzeitabbrüche des Kandidaten auch bei gültigem Replay.
+Tatsächlich erzeugte Tags werden anhand des Engine-Ergebnisses und der
+unterbrochenen Zugphase zugeordnet. Ein begonnenes Trace-Angebot wird als
+Quellenaktion erfasst, bis ein Engine-Ergebnis den Tag belegt.
+
+Strategische Fortschrittsmetriken verwenden die aktuell erzeugten
+Plan- und Ergebnisnachweise. Der Profilvergleich bildet das Delta für jede
+reell erzeugte Kennzahl. Beide Profile müssen dieselben Kennzahlen mit
+endlichen Werten liefern. Corp-Score-Fenster stützen sich auf aktuell
+angebotene Engine-Score-Aktionen. Die Runner-Ökonomiediagnose erkennt
+Run-Starts am neuen Engine-Run und prüft das tatsächlich angegriffene Ziel.
+Bei umgeleiteten Zugriffen zählt der Zugriff am tatsächlichen Ziel. Die
+Entscheidungsdiagnose ermittelt Alternativen aus auswählbaren Optionen,
+gültigen Anzahlen und der Engine-Vorgabe zur Auswahlreihenfolge.
+Die Qualitätsmetriken zählen unzulässige Aktionsversuche anhand der
+tatsächlichen Ablehnung. Technische Abbrüche gehen in die Gesamtauswertung
+der Laufzeitfehler ein. R&D-Entfernungen zählen auf Ebene der Zugriffsaktion.
+Die Position im Stapel bleibt ohne Engine-Nachweis offen.
 
 ## Vergleichsevidenz und Standardmodus
 

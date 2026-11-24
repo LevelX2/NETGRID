@@ -19,7 +19,7 @@ export function runnerFundingPaymentWindowQuote(
         entry.actionId === installation?.actionId &&
         step.stepId ===
           `payment_window:${entry.sourceCardInstanceId}:${entry.capabilityId}` &&
-        step.projectionId === entry.capabilityId &&
+        step.projectionId === String(entry.capabilityId) &&
         step.sourceDefinitionId === entry.sourceDefinitionId,
     );
     if (
@@ -29,7 +29,7 @@ export function runnerFundingPaymentWindowQuote(
       installation.sourceDefinitionId !== setup.sourceDefinitionId ||
       installation.reliability !== "guaranteed" ||
       installation.creditRestriction !== "general" ||
-      installation.netLiquidCreditGain !== 0 ||
+      installation.netLiquidCreditGain !== -setup.installCreditCost ||
       installation.clickCost !== setup.installClickCost ||
       installation.creditCost !== setup.installCreditCost ||
       installedCardIds.includes(setup.sourceCardInstanceId) ||
@@ -42,7 +42,9 @@ export function runnerFundingPaymentWindowQuote(
     )
       return undefined;
     installedCardIds.push(setup.sourceCardInstanceId);
-    creditGain += setup.netPaymentGain;
+    // General credits already reflect the activation cost. Return the gross
+    // restricted payout when combining it with that balance.
+    creditGain += setup.netPaymentGain + setup.activationCreditCost;
   }
   if (
     !Number.isSafeInteger(creditGain) ||

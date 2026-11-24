@@ -7,6 +7,7 @@ import {
   residentPlanPortfolioSnapshot,
 } from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInputDto } from "../input-dto";
+import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 
 afterEach(resetResidentPlanPortfolioMemory);
 describe("current and future encounter share their break budget", () => {
@@ -23,31 +24,42 @@ describe("current and future encounter share their break budget", () => {
     // The old capture predates this Engine field. The separate Engine view
     // regression proves this quote for Krash's four encounter-only pumps.
     cp.input.playerView.own.rig.find(
-      (c: { definitionId: string }) => c.definitionId === "onr_v1_039_krash",
+      (c: { definitionId: number }) => c.definitionId === 251,
     ).strengthAfterEncounter = 0;
-    const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
+    const input: AiDecisionInputWithDeckCapabilities = {
+      ...cp.input,
+      ...buildAiDecisionInputDto(cp.input),
+    };
     input.playerView.own.credits = credits;
     restoreAiRuntimeCheckpoint(
       input,
-      input.ownDeckSnapshot.deckSnapshotId,
+      input.ownDeckSnapshot!.deckSnapshotId,
       cp.runtime,
     );
     const decision = chooseAiAction(input);
-    expect(decision.actionId).toContain(
-      credits === 6
-        ? "printed_subroutines_prohibit_break_next_ice"
-        : "printed_subroutines_damage_net",
-    );
+    expect(
+      input.legalActions.find(
+        (action) => action.actionId === decision.actionId,
+      ),
+    ).toMatchObject({
+      type: "break_subroutine",
+      payload: { subroutineIndex: credits === 6 ? 1 : 0 },
+    });
     expect(decision.fallbackUsed).toBe(false);
     expect(
-      decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-    ).toContain("runner.contest_remote");
+      decision.decisionDebug?.planFirstDecision?.portfolio.find(
+        (instance) =>
+          instance.instanceId ===
+          decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+      )?.moduleId,
+    ).toBe("runner.contest_remote");
     const owner = residentPlanPortfolioSnapshot(input)!.instances.find(
       (i) => i.moduleId === "runner.convert_run_window",
     )!;
     expect(owner.moduleState).toMatchObject({
       signal: {
-        rootPlanInstanceId: expect.stringContaining("runner.contest_remote"),
+        rootPlanInstanceId:
+          decision.decisionDebug!.planFirstDecision!.rootPlanInstanceId,
       },
     });
   });

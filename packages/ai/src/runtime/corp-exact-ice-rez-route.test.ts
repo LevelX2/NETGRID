@@ -6,6 +6,7 @@ import {
   getPlayerView,
 } from "@netgrid/engine";
 import type {
+  CardDefinitionId,
   CardInstanceId,
   DeckDefinition,
   GameState,
@@ -24,41 +25,42 @@ import {
 import { assessCorpExactIceRezAgainstScoreReserves } from "../corp/defense/corp-defense-score-reserve";
 import { readKnownCorpCentralAgendaThreat } from "../corp/defense/corp-central-defense-facts-adapter";
 import { assessCorpScoreProtection } from "./corp-score-protection-assessment";
+import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 
 describe("exact Corp ICE rez route", () => {
   it.each([
-    "onr_classic_006_bolter-swarm",
-    "onr_classic_007_brain-drain",
-    "onr_classic_008_deadeye",
-    "onr_proteus_011_brain-wash",
-    "onr_proteus_012_bug-zapper",
-    "onr_proteus_019_death-yo-yo",
-    "onr_proteus_020_digiconda",
-    "onr_proteus_021_dog-pile",
-    "onr_proteus_029_marionette",
-    "onr_proteus_030_mastermind",
-    "onr_proteus_035_roadblock",
-    "onr_proteus_037_scaffolding",
-    "onr_v1_223_banpei",
-    "onr_v1_224_bolter-cluster",
-    "onr_v1_233_d-arc-knight",
-    "onr_v1_234_data-darts",
-    "onr_v1_236_data-raven",
-    "onr_v1_249_hunter",
-    "onr_v1_250_ice-pick-willie",
-    "onr_v1_251_jack-attack",
-    "onr_v1_258_neural-blade",
-    "onr_v1_260_pocket-virtual-reality",
-    "onr_v1_275_vacuum-link",
-    "onr_v1_276_viral-15",
+    10,
+    11,
+    12,
+    69,
+    70,
+    77,
+    78,
+    79,
+    87,
+    88,
+    93,
+    95,
+    435,
+    436,
+    445,
+    446,
+    448,
+    461,
+    462,
+    463,
+    470,
+    472,
+    487,
+    488,
   ])("retains a defense route against two Clowns for %s", (definitionId) => {
     const fixture = engineIceRezWindow(definitionId, 0, {
       corpCredits: 50,
       runnerCredits: 10,
       runnerPrograms: [
-        "onr_v1_039_krash",
-        "onr_v1_012_clown",
-        "onr_v1_012_clown",
+        251,
+        224,
+        224,
       ],
       includeAllRezVariants: true,
       includeDecline: true,
@@ -84,18 +86,18 @@ describe("exact Corp ICE rez route", () => {
     { runnerPrograms: [] },
     {
       runnerPrograms: [
-        "onr_v1_039_krash",
-        "onr_v1_012_clown",
-        "onr_v1_012_clown",
+        251,
+        224,
+        224,
       ],
     },
-    { runnerPrograms: ["onr_v1_002_ai-boon"] },
+    { runnerPrograms: [214] },
   ])(
     "rezzes Pocket VR through the defense owner independently of exact access modeling: $runnerPrograms [legacy_compare]",
     ({ runnerPrograms }) => {
       resetResidentPlanPortfolioMemory();
       const fixture = engineIceRezWindow(
-        "onr_v1_260_pocket-virtual-reality",
+        472,
         0,
         {
           corpCredits: 9,
@@ -121,9 +123,9 @@ describe("exact Corp ICE rez route", () => {
         decisionDebug: {
           planFirstDecision: {
             rootPlanInstanceId:
-              "plan:corp.defend_servers:server-defense-portfolio",
+              "penw02zfrkklof54c2nuye5att",
             leafExecutorInstanceId:
-              "plan:corp.defend_servers:server-defense-portfolio",
+              "penw02zfrkklof54c2nuye5att",
           },
         },
       });
@@ -131,7 +133,7 @@ describe("exact Corp ICE rez route", () => {
   );
 
   it("preserves a concrete score reserve before admitting repeatable Pocket VR pressure", () => {
-    const fixture = engineIceRezWindow("onr_v1_260_pocket-virtual-reality", 0, {
+    const fixture = engineIceRezWindow(472, 0, {
       corpCredits: 9,
       runnerCredits: 5,
     });
@@ -139,7 +141,7 @@ describe("exact Corp ICE rez route", () => {
       ...fixture,
       targetServerId: "rd",
     })!;
-    const project = testScoreContinuationProject("remote_1");
+    const project = testScoreContinuationProject("r1");
     const remaining =
       fixture.input.playerView.own.credits - route.totalRezCredits;
     for (const required of [remaining, remaining + 1]) {
@@ -165,10 +167,10 @@ describe("exact Corp ICE rez route", () => {
   });
 
   it("admits repeated break costs below the one-time rez price", () => {
-    const fixture = engineIceRezWindow("onr_v1_238_data-wall-2-0", 0, {
+    const fixture = engineIceRezWindow(450, 0, {
       corpCredits: 20,
       runnerCredits: 20,
-      runnerPrograms: ["onr_classic_027_early-worm"],
+      runnerPrograms: [31],
       runnerProgramStrengthModifiers: [20],
     });
     const route = projectExactCorpIceRezRoute({
@@ -183,7 +185,7 @@ describe("exact Corp ICE rez route", () => {
   });
 
   it("reserves a paid encounter activation as well as the next score action", () => {
-    const fixture = engineIceRezWindow("onr_proteus_034_riddler", 0, {
+    const fixture = engineIceRezWindow(92, 0, {
       corpCredits: 8,
       runnerCredits: 5,
     });
@@ -192,7 +194,7 @@ describe("exact Corp ICE rez route", () => {
       targetServerId: "rd",
     })!;
     expect(route.currentEncounterDefense?.activationCredits).toBe(2);
-    const project = testScoreContinuationProject("remote_1");
+    const project = testScoreContinuationProject("r1");
     expect(
       assessCorpExactIceRezAgainstScoreReserves({
         input: fixture.input,
@@ -215,10 +217,10 @@ describe("exact Corp ICE rez route", () => {
   });
 
   it("binds variable X strength to the selected action and rejects stale projections", () => {
-    const fixture = engineIceRezWindow("onr_proteus_020_digiconda", 0, {
+    const fixture = engineIceRezWindow(78, 0, {
       corpCredits: 50,
       runnerCredits: 10,
-      runnerPrograms: ["onr_v1_039_krash", "onr_v1_012_clown"],
+      runnerPrograms: [251, 224],
       includeAllRezVariants: true,
     });
     const quotes = fixture.sourceCard.effectivePostRezActionRunQuotes!;
@@ -256,8 +258,8 @@ describe("exact Corp ICE rez route", () => {
   });
 
   it("projects stacked encounter-only strength reductions without changing current strength or leaking unrezzed ICE", () => {
-    const fixture = engineIceRezWindow("onr_v1_279_wall-of-static", 0, {
-      runnerPrograms: ["onr_v1_012_clown", "onr_v1_012_clown"],
+    const fixture = engineIceRezWindow(491, 0, {
+      runnerPrograms: [224, 224],
     });
     const quote = fixture.sourceCard.effectivePostRezRunQuote;
     expect(quote).toMatchObject({
@@ -287,7 +289,7 @@ describe("exact Corp ICE rez route", () => {
 
   it("declines an Engine-quoted empty encounter despite native dynamic trace hints [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
-    const fixture = engineIceRezWindow("onr_proteus_026_hunting-pack", 0, {
+    const fixture = engineIceRezWindow(84, 0, {
       corpCredits: 13,
       runnerCredits: 20,
       includeDecline: true,
@@ -313,9 +315,9 @@ describe("exact Corp ICE rez route", () => {
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           leafExecutorInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
         },
       },
     });
@@ -330,10 +332,10 @@ describe("exact Corp ICE rez route", () => {
   });
 
   it("keeps a native current Hunting Pack trace behind a passed rezzed outer ICE", () => {
-    const fixture = engineIceRezWindow("onr_proteus_026_hunting-pack", 0, {
+    const fixture = engineIceRezWindow(84, 0, {
       corpCredits: 13,
       runnerCredits: 20,
-      outsideRezzedIceDefinitionId: "onr_proteus_026_hunting-pack",
+      outsideRezzedIceDefinitionId: 84,
       includeDecline: true,
     });
     expect(fixture.input.playerView.run?.position).toMatchObject({
@@ -362,8 +364,8 @@ describe("exact Corp ICE rez route", () => {
   });
 
   it.each([
-    ["onr_v1_222_ball-and-chain", "set_run_encounter_tax"],
-    ["onr_v1_277_virizz", "set_run_break_subroutine_cost_modifier"],
+    [434, "set_run_encounter_tax"],
+    [489, "set_run_break_subroutine_cost_modifier"],
   ])(
     "declines future-only %s at the innermost ICE [legacy_compare]",
     (definitionId, effectType) => {
@@ -398,20 +400,20 @@ describe("exact Corp ICE rez route", () => {
         decisionDebug: {
           planFirstDecision: {
             rootPlanInstanceId:
-              "plan:corp.defend_servers:server-defense-portfolio",
+              "penw02zfrkklof54c2nuye5att",
             leafExecutorInstanceId:
-              "plan:corp.defend_servers:server-defense-portfolio",
+              "penw02zfrkklof54c2nuye5att",
           },
         },
       });
     },
   );
 
-  it.each(["onr_v1_222_ball-and-chain", "onr_v1_277_virizz"])(
+  it.each([434, 489])(
     "keeps future-only %s when an inner ICE remains on the same run",
     (definitionId) => {
       const fixture = engineIceRezWindow(definitionId, 0, {
-        futureIceDefinitionId: "simple_barrier_ice",
+        futureIceDefinitionId: 589,
         futureIceRezzed: true,
         includeDecline: true,
       });
@@ -428,10 +430,10 @@ describe("exact Corp ICE rez route", () => {
 
   it("keeps Corp defense ownership for a visible run-cap block despite abundant Runner credits [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
-    const fixture = engineIceRezWindow("onr_v1_279_wall-of-static", 0, {
+    const fixture = engineIceRezWindow(491, 0, {
       corpCredits: 27,
       runnerCredits: 11,
-      runnerPrograms: ["onr_v1_039_krash"],
+      runnerPrograms: [251],
       runnerRunOnlyAction: true,
       includeDecline: true,
     });
@@ -450,13 +452,13 @@ describe("exact Corp ICE rez route", () => {
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           leafExecutorInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           selectedStep: {
-            planInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+            planInstanceId: "penw02zfrkklof54c2nuye5att",
             stepId:
-              "plan:corp.defend_servers:server-defense-portfolio:allocate",
+              "penw02zfrkklof54c2nuye5att:allocate",
           },
         },
       },
@@ -465,7 +467,7 @@ describe("exact Corp ICE rez route", () => {
 
   it("accepts the Engine's ordinary rez_ice action without an optional server payload", () => {
     const { input, candidate, sourceCard, engineAction } = engineIceRezWindow(
-      "simple_barrier_ice",
+      589,
       0,
     );
 
@@ -492,7 +494,7 @@ describe("exact Corp ICE rez route", () => {
     expect(projection).toMatchObject({
       actionId: input.legalActions[0]?.actionId,
       sourceCardInstanceId: sourceCard.instanceId,
-      sourceDefinitionId: "simple_barrier_ice",
+      sourceDefinitionId: 589,
       targetServerId: "rd",
       effect: "satisfied",
       totalRezCredits: sourceQuote.finalCredits,
@@ -506,7 +508,7 @@ describe("exact Corp ICE rez route", () => {
 
   it("uses the exact Engine quote for a paid end-the-run rez variant [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
-    const fixture = engineIceRezWindow("onr_proteus_024_gatekeeper", 0, {
+    const fixture = engineIceRezWindow(82, 0, {
       rezSubroutineCount: 1,
       includeDecline: true,
     });
@@ -563,10 +565,10 @@ describe("exact Corp ICE rez route", () => {
 
   it("compares exact alternate-subtype rez variants and chooses the one that blocks the visible rig [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
-    const fixture = engineIceRezWindow("onr_proteus_017_credit-blocks", 0, {
+    const fixture = engineIceRezWindow(75, 0, {
       corpCredits: 14,
       runnerCredits: 9,
-      runnerPrograms: ["onr_v1_040_loony-goon", "onr_v1_014_codecracker"],
+      runnerPrograms: [252, 226],
       selectedSubtypesAfterRez: "wall",
       includeAllRezVariants: true,
       includeDecline: true,
@@ -626,13 +628,13 @@ describe("exact Corp ICE rez route", () => {
       input: fixture.input,
       candidate: fixture.ordinaryCandidate,
       sourceCard: fixture.sourceCard,
-      targetServerId: "remote_1",
+      targetServerId: "r1",
     });
     const discountedProjection = projectExactCorpIceRezRoute({
       input: fixture.input,
       candidate: fixture.discountedCandidate,
       sourceCard: fixture.sourceCard,
-      targetServerId: "remote_1",
+      targetServerId: "r1",
     });
 
     expect(ordinaryProjection).toMatchObject({
@@ -651,7 +653,7 @@ describe("exact Corp ICE rez route", () => {
         context: "installed",
         complete: true,
         finalCredits: 2,
-        reductionSourceDefinitionIds: ["onr_v1_363_olivia-salazar"],
+        reductionSourceDefinitionIds: [575],
       },
     });
 
@@ -665,9 +667,9 @@ describe("exact Corp ICE rez route", () => {
         input: missingReceipt,
         candidate: fixture.discountedCandidate,
         sourceCard: missingReceipt.playerView.servers
-          .find((server) => server.id === "remote_1")!
+          .find((server) => server.id === "r1")!
           .ice.find((ice) => ice.instanceId === fixture.sourceCard.instanceId)!,
-        targetServerId: "remote_1",
+        targetServerId: "r1",
       }),
     ).toBeUndefined();
   });
@@ -692,7 +694,7 @@ describe("exact Corp ICE rez route", () => {
   });
 
   it("echoes the Engine-certified mandatory agenda-point cost and fails closed when it is not payable", () => {
-    const payable = engineIceRezWindow("onr_classic_011_glacier", 1);
+    const payable = engineIceRezWindow(15, 1);
     expect(
       readExactInstalledCorpIceRezQuote({
         input: payable.input,
@@ -702,7 +704,7 @@ describe("exact Corp ICE rez route", () => {
       })?.quote.mandatoryAdditionalCosts.agendaPoints,
     ).toBe(1);
 
-    expect(() => engineIceRezWindow("onr_classic_011_glacier", 0)).toThrow(
+    expect(() => engineIceRezWindow(15, 0)).toThrow(
       "Engine did not expose a payable ICE rez action",
     );
   });
@@ -803,7 +805,7 @@ describe("exact Corp ICE rez route", () => {
       },
     ],
   ])("fails closed on %s", (_label, mutate) => {
-    const fixture = mutableFixture(engineIceRezWindow("simple_barrier_ice", 0));
+    const fixture = mutableFixture(engineIceRezWindow(589, 0));
     mutate(fixture);
 
     expect(
@@ -818,7 +820,7 @@ describe("exact Corp ICE rez route", () => {
 
   it("fails closed when mandatory agenda-point payload and quote drift", () => {
     const fixture = mutableFixture(
-      engineIceRezWindow("onr_classic_011_glacier", 1),
+      engineIceRezWindow(15, 1),
     );
     fixture.input.legalActions[0]!.payload!.agendaPointCost = 0;
 
@@ -833,7 +835,7 @@ describe("exact Corp ICE rez route", () => {
   });
 
   it("uses known encounter pressure on the active run when access probability remains unchanged [legacy_compare]", () => {
-    const fixture = engineIceRezWindow("onr_v1_249_hunter", 0);
+    const fixture = engineIceRezWindow(461, 0);
 
     expect(
       projectExactCorpIceRezRoute({
@@ -856,7 +858,7 @@ describe("exact Corp ICE rez route", () => {
 
   it("rezzes an affordable paid deflector against a terminal central access and preserves Defense ownership [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
-    const fixture = engineIceRezWindow("onr_classic_010_entrapment", 0, {
+    const fixture = engineIceRezWindow(14, 0, {
       corpCredits: 4,
       runnerScoredAgendaPoints: 6,
       includeDecline: true,
@@ -923,9 +925,9 @@ describe("exact Corp ICE rez route", () => {
         planKind: "corp.defend_servers",
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           leafExecutorInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           route: {
             actionId: fixture.engineAction.actionId,
             semanticActionType: "corp_window.rez",
@@ -937,7 +939,7 @@ describe("exact Corp ICE rez route", () => {
 
   it("rezzes Riddler when its Engine-quoted paid encounter ETR is affordable at terminal access [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
-    const fixture = engineIceRezWindow("onr_proteus_034_riddler", 0, {
+    const fixture = engineIceRezWindow(92, 0, {
       corpCredits: 9,
       runnerScoredAgendaPoints: 6,
       includeDecline: true,
@@ -999,9 +1001,9 @@ describe("exact Corp ICE rez route", () => {
         planKind: "corp.defend_servers",
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           leafExecutorInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           route: {
             actionId: fixture.engineAction.actionId,
             semanticActionType: "corp_window.rez",
@@ -1013,7 +1015,7 @@ describe("exact Corp ICE rez route", () => {
 
   it("declines Riddler when rez plus its Engine-quoted encounter ETR is unaffordable [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
-    const fixture = engineIceRezWindow("onr_proteus_034_riddler", 0, {
+    const fixture = engineIceRezWindow(92, 0, {
       corpCredits: 3,
       runnerScoredAgendaPoints: 6,
       includeDecline: true,
@@ -1049,7 +1051,7 @@ describe("exact Corp ICE rez route", () => {
   // projected the exact approached ICE as active_run_context.
   it("keeps the current Brain Wash route despite an intentionally incomplete breaker-exchange quote [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
-    const fixture = engineIceRezWindow("onr_proteus_011_brain-wash", 0, {
+    const fixture = engineIceRezWindow(69, 0, {
       corpCredits: 9,
       runnerScoredAgendaPoints: 6,
       includeDecline: true,
@@ -1101,9 +1103,9 @@ describe("exact Corp ICE rez route", () => {
         planKind: "corp.defend_servers",
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           leafExecutorInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           route: {
             actionId: fixture.engineAction.actionId,
             semanticActionType: "corp_window.rez",
@@ -1117,7 +1119,7 @@ describe("exact Corp ICE rez route", () => {
   // disruption are defense progress even without a hard end-the-run path.
   it("keeps the current Data Darts damage-and-disruption route without a hard end-the-run subroutine [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
-    const fixture = engineIceRezWindow("onr_v1_234_data-darts", 0, {
+    const fixture = engineIceRezWindow(446, 0, {
       corpCredits: 9,
       includeDecline: true,
     });
@@ -1171,9 +1173,9 @@ describe("exact Corp ICE rez route", () => {
         planKind: "corp.defend_servers",
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           leafExecutorInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           route: {
             actionId: fixture.engineAction.actionId,
             semanticActionType: "corp_window.rez",
@@ -1185,7 +1187,7 @@ describe("exact Corp ICE rez route", () => {
 
   it("declines the same paid deflector when rez plus activation is not affordable [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
-    const fixture = engineIceRezWindow("onr_classic_010_entrapment", 0, {
+    const fixture = engineIceRezWindow(14, 0, {
       corpCredits: 2,
       runnerScoredAgendaPoints: 6,
       includeDecline: true,
@@ -1218,7 +1220,7 @@ describe("exact Corp ICE rez route", () => {
   });
 
   it("rezzes free current-encounter damage when a trace keeps the access assessment unknown [legacy_compare]", () => {
-    const fixture = engineIceRezWindow("onr_proteus_014_chihuahua", 0);
+    const fixture = engineIceRezWindow(72, 0);
 
     expect(fixture.sourceCard.effectivePostRezRunQuote).toMatchObject({
       complete: true,
@@ -1258,7 +1260,7 @@ describe("exact Corp ICE rez route", () => {
 
   it("uses a canonical pay-or-end subroutine as qualitative encounter defense without inventing access prevention [legacy_compare]", () => {
     const fixture = engineIceRezWindow(
-      "onr_proteus_032_misleading-access-menus",
+      90,
       0,
     );
 
@@ -1290,9 +1292,9 @@ describe("exact Corp ICE rez route", () => {
 
   it("uses an Engine-certified current-run resource exchange when access remains possible [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
-    const fixture = engineIceRezWindow("onr_v1_244_filter", 0, {
+    const fixture = engineIceRezWindow(456, 0, {
       runnerCredits: 1,
-      runnerPrograms: ["onr_classic_031_rent-i-con"],
+      runnerPrograms: [35],
     });
     const sourceQuote = fixture.sourceCard.effectiveRezResourceExchangeQuote;
     expect(sourceQuote).toMatchObject({
@@ -1327,7 +1329,7 @@ describe("exact Corp ICE rez route", () => {
     });
     expect(projection).toMatchObject({
       actionId: fixture.engineAction.actionId,
-      sourceDefinitionId: "onr_v1_244_filter",
+      sourceDefinitionId: 456,
       routeKind: "exact_resource_exchange",
       totalRezCredits: 0,
       before: {
@@ -1343,7 +1345,7 @@ describe("exact Corp ICE rez route", () => {
         runnerBreakUses: 1,
         runnerNormalCreditsRequired: 1,
         runnerNonNormalRunCreditsApplied: 0,
-        runnerBreakerDefinitionId: "onr_classic_031_rent-i-con",
+        runnerBreakerDefinitionId: 35,
         runnerConsumedCardInstanceIds: ["exact_runner_program_0"],
       },
     });
@@ -1357,16 +1359,16 @@ describe("exact Corp ICE rez route", () => {
 
   it("keeps an exact Pile Driver exchange under the Corp defense plan when Stealth loss is unavailable [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
-    const fixture = engineIceRezWindow("onr_v1_237_data-wall", 0, {
+    const fixture = engineIceRezWindow(449, 0, {
       runnerCredits: 16,
-      runnerPrograms: ["onr_v1_047_pile-driver"],
+      runnerPrograms: [259],
       includeDecline: true,
     });
 
     expect(fixture.sourceCard.effectiveRezResourceExchangeQuote).toMatchObject({
       complete: true,
       runnerBreak: {
-        breakerDefinitionId: "onr_v1_047_pile-driver",
+        breakerDefinitionId: 259,
         requiredCredits: 3,
         canPayFromCurrentCredits: true,
       },
@@ -1383,7 +1385,7 @@ describe("exact Corp ICE rez route", () => {
       routeKind: "exact_resource_exchange",
       resourceExchange: {
         runnerRequiredCredits: 3,
-        runnerBreakerDefinitionId: "onr_v1_047_pile-driver",
+        runnerBreakerDefinitionId: 259,
       },
     });
 
@@ -1398,10 +1400,10 @@ describe("exact Corp ICE rez route", () => {
         planKind: "corp.defend_servers",
         planFirstDecision: {
           rootPlanInstanceId: expect.stringContaining(
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           ),
           leafExecutorInstanceId: expect.stringContaining(
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           ),
           route: {
             actionId: fixture.engineAction.actionId,
@@ -1412,9 +1414,9 @@ describe("exact Corp ICE rez route", () => {
   });
 
   it("uses the exact approached-ICE exchange when the holistic server assessment is unknown", () => {
-    const fixture = engineIceRezWindow("onr_v1_247_haunting-inquisition", 0, {
+    const fixture = engineIceRezWindow(459, 0, {
       runnerCredits: 16,
-      runnerPrograms: ["onr_classic_030_psychic-friend"],
+      runnerPrograms: [34],
     });
 
     expect(fixture.sourceCard.effectiveRezResourceExchangeQuote).toMatchObject({
@@ -1443,9 +1445,9 @@ describe("exact Corp ICE rez route", () => {
   });
 
   it("uses an equal-cost exchange when it consumes all current Runner credits", () => {
-    const fixture = engineIceRezWindow("onr_v1_237_data-wall", 0, {
+    const fixture = engineIceRezWindow(449, 0, {
       runnerCredits: 1,
-      runnerPrograms: ["onr_classic_027_early-worm"],
+      runnerPrograms: [31],
     });
 
     expect(
@@ -1466,7 +1468,7 @@ describe("exact Corp ICE rez route", () => {
   });
 
   it("uses the Engine-certified access block when no visible breaker can answer the approached ICE", () => {
-    const fixture = engineIceRezWindow("onr_v1_237_data-wall", 0, {
+    const fixture = engineIceRezWindow(449, 0, {
       runnerCredits: 6,
       runnerPrograms: [],
     });
@@ -1474,7 +1476,7 @@ describe("exact Corp ICE rez route", () => {
       .find((server) => server.id === "rd")!
       .ice.push({
         instanceId: "known-later-ice-without-run-quote",
-        definitionId: "onr_v1_238_data-wall-2-0",
+        definitionId: 450,
         known: true,
         type: "ice",
         rezzed: true,
@@ -1505,9 +1507,9 @@ describe("exact Corp ICE rez route", () => {
   });
 
   it("uses the Engine-certified access block when the visible break route is unaffordable", () => {
-    const fixture = engineIceRezWindow("onr_v1_237_data-wall", 0, {
+    const fixture = engineIceRezWindow(449, 0, {
       runnerCredits: 0,
-      runnerPrograms: ["onr_classic_027_early-worm"],
+      runnerPrograms: [31],
     });
 
     expect(fixture.sourceCard.effectiveRezResourceExchangeQuote).toMatchObject({
@@ -1535,9 +1537,9 @@ describe("exact Corp ICE rez route", () => {
 
   it("keeps Corp defense ownership when a post-break consequence cannot rescue an unaffordable route [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
-    const fixture = engineIceRezWindow("onr_classic_011_glacier", 2, {
+    const fixture = engineIceRezWindow(15, 2, {
       runnerCredits: 3,
-      runnerPrograms: ["onr_v1_036_jackhammer"],
+      runnerPrograms: [248],
       includeDecline: true,
     });
 
@@ -1545,7 +1547,7 @@ describe("exact Corp ICE rez route", () => {
       complete: true,
       hardEndTheRunSubroutineCount: 2,
       runnerBreak: {
-        breakerDefinitionId: "onr_v1_036_jackhammer",
+        breakerDefinitionId: 248,
         requiredCredits: 5,
         canPayFromCurrentCredits: false,
       },
@@ -1578,9 +1580,9 @@ describe("exact Corp ICE rez route", () => {
   });
 
   it("admits an equal paid exchange as repeatable pressure while the Runner keeps normal credits", () => {
-    const fixture = engineIceRezWindow("onr_v1_237_data-wall", 0, {
+    const fixture = engineIceRezWindow(449, 0, {
       runnerCredits: 2,
-      runnerPrograms: ["onr_classic_027_early-worm"],
+      runnerPrograms: [31],
     });
 
     expect(
@@ -1594,11 +1596,11 @@ describe("exact Corp ICE rez route", () => {
   });
 
   it("keeps a current exact exchange when a recurring credit shifts cash onto later ICE", () => {
-    const fixture = engineIceRezWindow("onr_v1_244_filter", 0, {
+    const fixture = engineIceRezWindow(456, 0, {
       runnerCredits: 8,
-      runnerPrograms: ["onr_classic_031_rent-i-con", "onr_v1_035_invisibility"],
+      runnerPrograms: [35, 247],
       runnerProgramBitCounters: [0, 1],
-      futureIceDefinitionId: "onr_v1_261_quandary",
+      futureIceDefinitionId: 473,
       futureIceRezzed: true,
     });
 
@@ -1630,9 +1632,9 @@ describe("exact Corp ICE rez route", () => {
   });
 
   it("does not treat changed exact resource-exchange facts as the same route", () => {
-    const fixture = engineIceRezWindow("onr_v1_244_filter", 0, {
+    const fixture = engineIceRezWindow(456, 0, {
       runnerCredits: 8,
-      runnerPrograms: ["onr_classic_031_rent-i-con"],
+      runnerPrograms: [35],
     });
     const route = projectExactCorpIceRezRoute({
       input: fixture.input,
@@ -1656,9 +1658,9 @@ describe("exact Corp ICE rez route", () => {
 
   it("carries the chosen Filter/Rent-I-Con rez through the real Engine run and trashes the breaker [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
-    const fixture = engineIceRezWindow("onr_v1_244_filter", 0, {
+    const fixture = engineIceRezWindow(456, 0, {
       runnerCredits: 1,
-      runnerPrograms: ["onr_classic_031_rent-i-con"],
+      runnerPrograms: [35],
     });
     const decision = chooseAiAction(fixture.input, {
       persistTacticalPlanMemory: false,
@@ -1704,9 +1706,9 @@ describe("exact Corp ICE rez route", () => {
   });
 
   it("resolves two Rent-I-Con break uses as separate run-end trash effects", () => {
-    const fixture = engineIceRezWindow("onr_v1_239_endless-corridor", 0, {
+    const fixture = engineIceRezWindow(451, 0, {
       runnerCredits: 2,
-      runnerPrograms: ["onr_classic_031_rent-i-con", "onr_v1_038_joan-of-arc"],
+      runnerPrograms: [35, 250],
     });
     let state = applyEngineAction(
       fixture.state,
@@ -1745,7 +1747,10 @@ describe("exact Corp ICE rez route", () => {
     ) {
       const action = getLegalActions(state, "runner").find(
         (candidate) =>
-          candidate.type === "continue_run" || candidate.type === "access_card",
+          candidate.type === "continue_run" ||
+          candidate.type === "access_card" ||
+          candidate.type === "decline_trash" ||
+          candidate.type === "steal_agenda",
       );
       if (!action) throw new Error("Run completion did not reach prevention");
       state = applyEngineAction(
@@ -1792,15 +1797,15 @@ describe("exact Corp ICE rez route", () => {
     expect(state.runner.heap).toContain(joanId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       trashedCount: 1,
-      trashedCardDefinitionId: "onr_classic_031_rent-i-con",
+      trashedCardDefinitionId: 35,
     });
   });
 
   it("rezzes a free persistent Filter on the active central server even when Codecracker breaks it for free [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
-    const fixture = engineIceRezWindow("onr_v1_244_filter", 0, {
+    const fixture = engineIceRezWindow(456, 0, {
       runnerCredits: 0,
-      runnerPrograms: ["onr_v1_014_codecracker"],
+      runnerPrograms: [226],
     });
 
     expect(fixture.sourceCard.effectiveRezResourceExchangeQuote).toMatchObject({
@@ -1828,7 +1833,7 @@ describe("exact Corp ICE rez route", () => {
 
   it("declines an otherwise stopping R&D rez when the score plan's published next-turn cash and remote rez reserve would be spent [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
-    const fixture = engineIceRezWindow("onr_v1_238_data-wall-2-0", 0);
+    const fixture = engineIceRezWindow(450, 0);
     fixture.state.corp.credits = 5;
     addProtectedNextTurnScoreRemote(fixture.state, 0);
     const input = engineRezDecisionInput(
@@ -1841,9 +1846,9 @@ describe("exact Corp ICE rez route", () => {
     if (!decline) throw new Error("Engine did not expose the rez decline");
 
     const scoreAgenda = input.playerView.servers
-      .find((server) => server.id === "remote_1")!
+      .find((server) => server.id === "r1")!
       .root.find(
-        (card) => card.instanceId === "score_reserve_agenda_remote_1",
+        (card) => card.instanceId === "score_reserve_agenda_r1",
       )!;
     expect(scoreAgenda.type).toBe("agenda");
     const scoreQuote = scoreAgenda.scoreContinuationQuote;
@@ -1856,7 +1861,7 @@ describe("exact Corp ICE rez route", () => {
       observerSide: "corp",
       stateVersion: input.playerView.stateVersion,
       visibleSourceDefinitionsByInstanceId: {
-        [fixture.sourceCard.instanceId]: "onr_v1_238_data-wall-2-0",
+        [fixture.sourceCard.instanceId]: 450,
       },
     }).find((entry) => entry.semanticActionType === "corp_window.rez")!;
     const route = projectExactCorpIceRezRoute({
@@ -1873,17 +1878,17 @@ describe("exact Corp ICE rez route", () => {
         route,
         scoreProjects: [
           {
-            projectId: "agenda:score_reserve_agenda_remote_1:remote_1",
+            projectId: "agenda:score_reserve_agenda_r1:r1",
             agendaPoints: 2,
-            serverId: "remote_1",
+            serverId: "r1",
             phase: "advance_agenda",
             sameTurnCloseout: false,
             terminalScore: false,
             feasible: true,
             evidenceCode: "test",
             continuationReserve: {
-              agendaCardId: "score_reserve_agenda_remote_1",
-              serverId: "remote_1",
+              agendaCardId: "score_reserve_agenda_r1",
+              serverId: "r1",
               requiredCreditsBeforeNextCorpTurn: 3,
               remainingAdvancementCounters: 3,
               nextCorpTurnGuaranteedFlexibleClicks: 3,
@@ -1903,7 +1908,7 @@ describe("exact Corp ICE rez route", () => {
 
   it("uses the score plan's certified surplus-click conversion instead of reserving advancement credits unnecessarily [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
-    const fixture = engineIceRezWindow("onr_v1_238_data-wall-2-0", 0);
+    const fixture = engineIceRezWindow(450, 0);
     fixture.state.corp.credits = 5;
     addProtectedNextTurnScoreRemote(fixture.state, 2);
     const input = engineRezDecisionInput(
@@ -1935,7 +1940,7 @@ describe("exact Corp ICE rez route", () => {
 
     expect(
       fixture.input.playerView.servers.find(
-        (server) => server.id === "remote_1",
+        (server) => server.id === "r1",
       )!.root[0]?.scoreContinuationQuote,
     ).toMatchObject({
       complete: true,
@@ -1951,10 +1956,10 @@ describe("exact Corp ICE rez route", () => {
 
   it("reserves exact stopping rezzes for each additional score server the Runner can still attack [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
-    const fixture = engineIceRezWindow("onr_v1_238_data-wall-2-0", 0);
+    const fixture = engineIceRezWindow(450, 0);
     fixture.state.corp.credits = 7;
-    addProtectedNextTurnScoreRemote(fixture.state, 2, "remote_1");
-    addProtectedNextTurnScoreRemote(fixture.state, 2, "remote_2");
+    addProtectedNextTurnScoreRemote(fixture.state, 2, "r1");
+    addProtectedNextTurnScoreRemote(fixture.state, 2, "r2");
     const input = engineRezDecisionInput(
       fixture.state,
       "multi-score-server-reserve",
@@ -1965,20 +1970,20 @@ describe("exact Corp ICE rez route", () => {
     if (!decline) throw new Error("Engine did not expose the rez decline");
     expect(input.playerView.opponent.clicks).toBeGreaterThanOrEqual(2);
     expect(
-      input.playerView.servers.find((server) => server.id === "remote_1")!
+      input.playerView.servers.find((server) => server.id === "r1")!
         .ice[0]?.effectiveRezCostQuote,
     ).toMatchObject({ complete: true, finalCredits: 3 });
     expect(
       readExactCurrentInstalledCorpIceRezQuote({
         input,
         sourceCard: input.playerView.servers.find(
-          (server) => server.id === "remote_1",
+          (server) => server.id === "r1",
         )!.ice[0]!,
-        targetServerId: "remote_1",
+        targetServerId: "r1",
       }),
     ).toMatchObject({ totalRezCredits: 3 });
     const remoteIce = input.playerView.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     )!.ice[0]!;
     expect(
       assessCorpScoreProtection({
@@ -2007,23 +2012,23 @@ describe("exact Corp ICE rez route", () => {
     const route = currentExactRezRoute(
       input,
       fixture.sourceCard.instanceId,
-      "onr_v1_238_data-wall-2-0",
+      450,
     );
     expect(
       assessCorpExactIceRezAgainstScoreReserves({
         input,
         route,
         scoreProjects: [
-          testScoreContinuationProject("remote_1"),
-          testScoreContinuationProject("remote_2"),
+          testScoreContinuationProject("r1"),
+          testScoreContinuationProject("r2"),
         ],
       }),
     ).toMatchObject({
       preservesReserve: false,
       requiredCreditsAfterRez: 6,
       immediateRezIceIds: [
-        "score_reserve_remote_ice_remote_1",
-        "score_reserve_remote_ice_remote_2",
+        "score_reserve_remote_ice_r1",
+        "score_reserve_remote_ice_r2",
       ],
     });
 
@@ -2041,7 +2046,7 @@ describe("exact Corp ICE rez route", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineOliviaIceRezWindow();
     fixture.state.corp.credits = 5;
-    addProtectedNextTurnScoreRemote(fixture.state, 2, "remote_2");
+    addProtectedNextTurnScoreRemote(fixture.state, 2, "r2");
     const input = engineRezDecisionInput(
       fixture.state,
       "discounted-rez-preserves-remote",
@@ -2064,10 +2069,10 @@ describe("exact Corp ICE rez route", () => {
 
   it("certifies the approached outer tax before a visible inner stopping ICE [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
-    const fixture = engineIceRezWindow("onr_v1_244_filter", 0, {
+    const fixture = engineIceRezWindow(456, 0, {
       runnerCredits: 1,
-      runnerPrograms: ["onr_classic_031_rent-i-con"],
-      futureIceDefinitionId: "simple_barrier_ice",
+      runnerPrograms: [35],
+      futureIceDefinitionId: 589,
     });
     fixture.state.corp.credits = 2;
     const input = engineRezDecisionInput(
@@ -2079,7 +2084,7 @@ describe("exact Corp ICE rez route", () => {
       observerSide: "corp",
       stateVersion: input.playerView.stateVersion,
       visibleSourceDefinitionsByInstanceId: {
-        [fixture.sourceCard.instanceId]: "onr_v1_244_filter",
+        [fixture.sourceCard.instanceId]: 456,
       },
     }).find((entry) => entry.semanticActionType === "corp_window.rez")!;
     expect(
@@ -2093,7 +2098,7 @@ describe("exact Corp ICE rez route", () => {
       }),
     ).toMatchObject({
       actionId: candidate.actionId,
-      sourceDefinitionId: "onr_v1_244_filter",
+      sourceDefinitionId: 456,
       routeKind: "exact_resource_exchange",
       effect: "progress",
       totalRezCredits: 0,
@@ -2110,9 +2115,9 @@ describe("exact Corp ICE rez route", () => {
   });
 
   it("does not promote a paid free break without a certified consumed resource", () => {
-    const fixture = engineIceRezWindow("onr_v1_238_data-wall-2-0", 0, {
+    const fixture = engineIceRezWindow(450, 0, {
       runnerCredits: 0,
-      runnerPrograms: ["onr_v1_037_japanese-water-torture"],
+      runnerPrograms: [249],
       runnerProgramStrengthModifiers: [10],
     });
 
@@ -2156,9 +2161,9 @@ describe("exact Corp ICE rez route", () => {
     ],
   ])("fails closed for %s", (_label, mutate) => {
     const fixture = mutableFixture(
-      engineIceRezWindow("onr_v1_244_filter", 0, {
+      engineIceRezWindow(456, 0, {
         runnerCredits: 1,
-        runnerPrograms: ["onr_classic_031_rent-i-con"],
+        runnerPrograms: [35],
       }),
     );
     mutate(fixture.sourceCard);
@@ -2180,13 +2185,13 @@ const ENTRAPMENT_FIXTURE_CORP_DECK: DeckDefinition = {
   id: "corp_entrapment_exact_rez_fixture",
   name: "Corp Entrapment exact rez fixture",
   side: "corp",
-  identity: "corp_identity_001",
+  identity: 3,
   cards: [
-    { id: "onr_classic_010_entrapment", quantity: 3 },
-    { id: "onr_proteus_034_riddler", quantity: 3 },
-    { id: "onr_classic_003_unlisted-research-lab", quantity: 3 },
-    { id: "onr_classic_004_theorem-proof", quantity: 2 },
-    { id: "onr_classic_018_reclamation-project", quantity: 10 },
+    { id: 14, quantity: 3 },
+    { id: 92, quantity: 3 },
+    { id: 7, quantity: 3 },
+    { id: 8, quantity: 2 },
+    { id: 22, quantity: 10 },
   ],
 };
 
@@ -2200,19 +2205,19 @@ function mutableFixture(fixture: ReturnType<typeof engineIceRezWindow>) {
 }
 
 function engineIceRezWindow(
-  definitionId: string,
+  definitionId: number,
   agendaPoints: number,
   options?: {
     corpCredits?: number;
     runnerCredits?: number;
     runnerRunOnlyAction?: boolean;
     runnerScoredAgendaPoints?: number;
-    runnerPrograms?: readonly string[];
+    runnerPrograms?: readonly CardDefinitionId[];
     runnerProgramStrengthModifiers?: readonly number[];
     runnerProgramBitCounters?: readonly number[];
-    futureIceDefinitionId?: string;
+    futureIceDefinitionId?: number;
     futureIceRezzed?: boolean;
-    outsideRezzedIceDefinitionId?: string;
+    outsideRezzedIceDefinitionId?: number;
     rezSubroutineCount?: number;
     selectedSubtypesAfterRez?: string;
     includeAllRezVariants?: boolean;
@@ -2341,7 +2346,7 @@ function engineIceRezWindow(
     state.runner.rig.resources.push(resourceId);
     state.cardInstances[resourceId] = {
       instanceId: resourceId,
-      definitionId: "onr_v1_187_wilson-weeflerunner-apprentice",
+      definitionId: 399,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "rig" },
@@ -2405,7 +2410,7 @@ function engineIceRezWindow(
     throw new Error("Engine did not expose a payable ICE rez action");
   }
   const playerView = getPlayerView(state, "corp");
-  const input = buildAiDecisionInputDto({
+  const input: AiDecisionInputWithDeckCapabilities = buildAiDecisionInputDto({
     side: "corp",
     playerView,
     eventTail: [],
@@ -2427,15 +2432,7 @@ function engineIceRezWindow(
     profileId: "exact-glacier-rez-test",
   });
   if (options?.useEntrapmentFixtureDeck) {
-    (
-      input as typeof input & {
-        ownDeckSnapshot: {
-          deckSnapshotId: string;
-          side: "corp";
-          cards: Array<{ cardId: string; quantity: number }>;
-        };
-      }
-    ).ownDeckSnapshot = {
+    input.ownDeckSnapshot = {
       deckSnapshotId: ENTRAPMENT_FIXTURE_CORP_DECK.id,
       side: "corp",
       cards: ENTRAPMENT_FIXTURE_CORP_DECK.cards.map((card) => ({
@@ -2464,7 +2461,7 @@ function engineIceRezWindow(
 function addInstalledRunnerProgram(
   state: GameState,
   instanceId: CardInstanceId,
-  definitionId: string,
+  definitionId: number,
   strengthModifier: number,
 ): void {
   state.runner.rig.programs.push(instanceId);
@@ -2493,7 +2490,7 @@ function engineOliviaIceRezWindow() {
   state.runner.credits = 0;
   state.corp.credits = 10;
   state.corp.servers.push({
-    id: "remote_1",
+    id: "r1",
     kind: "remote",
     label: "Remote 1",
     ice: [],
@@ -2501,17 +2498,17 @@ function engineOliviaIceRezWindow() {
   });
   const iceId = "exact_olivia_filter" as CardInstanceId;
   const oliviaId = "exact_olivia_source" as CardInstanceId;
-  addUnrezzedIce(state, iceId, "onr_v1_232_crystal-wall", "remote_1");
+  addUnrezzedIce(state, iceId, 444, "r1");
   const remote = state.corp.servers.find(
-    (candidate) => candidate.id === "remote_1",
+    (candidate) => candidate.id === "r1",
   )!;
   remote.root.push(oliviaId);
   state.cardInstances[oliviaId] = {
     instanceId: oliviaId,
-    definitionId: "onr_v1_363_olivia-salazar",
+    definitionId: 575,
     owner: "corp",
     controller: "corp",
-    zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+    zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
     faceup: true,
     rezzed: true,
     advancementCounters: 0,
@@ -2519,7 +2516,7 @@ function engineOliviaIceRezWindow() {
   };
   const startRun = getLegalActions(state, "runner").find(
     (action) =>
-      action.type === "start_run" && action.payload?.serverId === "remote_1",
+      action.type === "start_run" && action.payload?.serverId === "r1",
   );
   if (!startRun) throw new Error("Engine did not expose the remote run");
   const result = applyAction(state, {
@@ -2559,7 +2556,7 @@ function engineOliviaIceRezWindow() {
     observerSide: "corp",
     stateVersion: input.playerView.stateVersion,
     visibleSourceDefinitionsByInstanceId: {
-      [iceId]: "onr_v1_232_crystal-wall",
+      [iceId]: 444,
     },
   });
   const ordinaryCandidate = candidates.find(
@@ -2569,7 +2566,7 @@ function engineOliviaIceRezWindow() {
     (candidate) => candidate.actionId === discountedAction.actionId,
   );
   const sourceCard = input.playerView.servers
-    .find((server) => server.id === "remote_1")
+    .find((server) => server.id === "r1")
     ?.ice.find((ice) => ice.instanceId === iceId);
   if (!ordinaryCandidate || !discountedCandidate || !sourceCard) {
     throw new Error("Engine-backed Olivia fixture is incomplete");
@@ -2588,8 +2585,8 @@ function engineOliviaIceRezWindow() {
 function addUnrezzedIce(
   state: GameState,
   instanceId: CardInstanceId,
-  definitionId: string,
-  serverId: "rd" | "remote_1" | "remote_2",
+  definitionId: number,
+  serverId: "rd" | "r1" | "r2",
 ): void {
   const server = state.corp.servers.find(
     (candidate) => candidate.id === serverId,
@@ -2612,12 +2609,12 @@ function addUnrezzedIce(
 function addProtectedNextTurnScoreRemote(
   state: GameState,
   advancementCounters: number,
-  serverId: "remote_1" | "remote_2" = "remote_1",
+  serverId: "r1" | "r2" = "r1",
 ): void {
   state.corp.servers.push({
     id: serverId,
     kind: "remote",
-    label: serverId === "remote_1" ? "Remote 1" : "Remote 2",
+    label: serverId === "r1" ? "Remote 1" : "Remote 2",
     ice: [],
     root: [],
   });
@@ -2627,7 +2624,7 @@ function addProtectedNextTurnScoreRemote(
     .root.push(agendaId);
   state.cardInstances[agendaId] = {
     instanceId: agendaId,
-    definitionId: "simple_agenda",
+    definitionId: 588,
     owner: "corp",
     controller: "corp",
     zone: { side: "corp", zone: "serverRoot", serverId },
@@ -2639,7 +2636,7 @@ function addProtectedNextTurnScoreRemote(
   addUnrezzedIce(
     state,
     `score_reserve_remote_ice_${serverId}` as CardInstanceId,
-    "simple_barrier_ice",
+    589,
     serverId,
   );
 }
@@ -2668,7 +2665,7 @@ function engineAgendaServerRezWindow() {
   state.runner.credits = 0;
   state.corp.credits = 2;
   state.corp.servers.push({
-    id: "remote_1",
+    id: "r1",
     kind: "remote",
     label: "Remote 1",
     ice: [],
@@ -2676,14 +2673,14 @@ function engineAgendaServerRezWindow() {
   });
   const agendaId = "agenda_server_priority_agenda" as CardInstanceId;
   state.corp.servers
-    .find((server) => server.id === "remote_1")!
+    .find((server) => server.id === "r1")!
     .root.push(agendaId);
   state.cardInstances[agendaId] = {
     instanceId: agendaId,
-    definitionId: "simple_agenda",
+    definitionId: 588,
     owner: "corp",
     controller: "corp",
-    zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+    zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
     faceup: false,
     rezzed: false,
     advancementCounters: 0,
@@ -2692,12 +2689,12 @@ function engineAgendaServerRezWindow() {
   addUnrezzedIce(
     state,
     "agenda_server_priority_ice" as CardInstanceId,
-    "onr_v1_238_data-wall-2-0",
-    "remote_1",
+    450,
+    "r1",
   );
   const startRun = getLegalActions(state, "runner").find(
     (action) =>
-      action.type === "start_run" && action.payload?.serverId === "remote_1",
+      action.type === "start_run" && action.payload?.serverId === "r1",
   );
   if (!startRun) throw new Error("Engine did not expose the agenda-server run");
   state = applyEngineAction(
@@ -2715,7 +2712,7 @@ function engineAgendaServerRezWindow() {
 function currentExactRezRoute(
   input: ReturnType<typeof engineRezDecisionInput>,
   iceId: CardInstanceId,
-  definitionId: string,
+  definitionId: number,
 ) {
   const candidate = buildActionSemanticCandidates({
     legalActions: input.legalActions,
@@ -2738,7 +2735,7 @@ function currentExactRezRoute(
   return route;
 }
 
-function testScoreContinuationProject(serverId: "remote_1" | "remote_2") {
+function testScoreContinuationProject(serverId: "r1" | "r2") {
   return {
     projectId: `agenda:score_reserve_agenda_${serverId}:${serverId}`,
     agendaPoints: 2,

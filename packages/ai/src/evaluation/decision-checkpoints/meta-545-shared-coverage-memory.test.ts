@@ -58,7 +58,7 @@ describe("shared physical coverage memory", () => {
       wall.every((d) =>
         d.providers.some(
           (p) =>
-            p.definitionId === "onr_proteus_083_corrosion" &&
+            p.definitionId === 141 &&
             p.memoryUnits === 1,
         ),
       ),

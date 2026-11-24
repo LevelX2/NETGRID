@@ -45,15 +45,17 @@ it.each([
     expect(result.actionId).toBe(pump.actionId);
     expect(result.fallbackUsed).toBe(false);
     expect(result.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       route: {
         actionId: pump.actionId,
         stateVersion: input.playerView.stateVersion,
       },
     });
     expect(
-      result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-    ).toContain("plan:runner.convert_run_window:");
+      result.decisionDebug?.planFirstDecision?.portfolio.find(
+        (instance) => instance.instanceId === result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+      )?.moduleId,
+    ).toBe("runner.convert_run_window");
   },
 );
 
@@ -80,21 +82,23 @@ it("resolves the original mandatory placement without inventing a credit head", 
   expect(input.playerView.own.clicks).toBe(1);
   expect(input.legalActions.map((a) => a.type)).toEqual(["resolve_choice"]);
   const result = chooseAiAction(input);
-  expect(result.actionId).toBe("corp.resolve_choice");
+  expect(result.actionId).toBe("cn");
   expect(result.fallbackUsed).toBe(false);
   expect(result.decisionDebug?.planFirstDecision?.route).toMatchObject({
-    actionId: "corp.resolve_choice",
+    actionId: "cn",
     stateVersion: 352,
   });
   expect(
-    result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toContain("corp.defend_servers");
+    result.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    )?.moduleId,
+  ).toBe("corp.defend_servers");
 });
 
 it("uses the exact printed X payment to fund the unaffordable central ICE", () => {
   const { input, state } = corpFreeRezBoardCompanion(
       load(28, 164),
-      "onr_proteus_049_emergency-rig",
+      107,
     ),
     result = chooseAiAction(input);
   const action = input.legalActions.find(
@@ -102,15 +106,15 @@ it("uses the exact printed X payment to fund the unaffordable central ICE", () =
   )!;
   expect(action).toMatchObject({
     type: "play_operation",
-    source: "corp_onr_proteus_049_emergency-rig_1",
+    source: "cnx",
     costs: [{ clicks: 1, credits: 3 }],
     payload: {
       xValue: 3,
-      targetCardId: "corp_onr_proteus_015_colonel-failure_2",
+      targetCardId: "cge",
     },
   });
   expect(result.fallbackUsed).toBe(false);
-  const owner = "plan:corp.defend_servers:server-defense-portfolio";
+  const owner = "penw02zfrkklof54c2nuye5att";
   expect(result.decisionDebug?.planFirstDecision).toMatchObject({
     rootPlanInstanceId: owner,
     leafExecutorInstanceId: owner,
@@ -129,7 +133,7 @@ it("uses the exact printed X payment to fund the unaffordable central ICE", () =
   if (!applied.ok) throw new Error(applied.error.message);
   expect(applied.state.corp.credits).toBe(state.corp.credits - 3);
   expect(
-    applied.state.cardInstances["corp_onr_proteus_015_colonel-failure_2"],
+    applied.state.cardInstances["cge"],
   ).toMatchObject({
     rezzed: true,
     counters: { kludge: 3 },

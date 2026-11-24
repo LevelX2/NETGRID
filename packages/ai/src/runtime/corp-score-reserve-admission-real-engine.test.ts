@@ -1,3 +1,5 @@
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import standardDeckCatalog from "../../../../data/decks/standard-deck-catalog-1.0.0.json";
 import {
   applyAction,
@@ -23,8 +25,8 @@ import { corpSameTurnScoreConversionPaths } from "../plans/tactical-plan-corp-sc
 import { corpInstalledAdvancementPreparations } from "../plans/corp-installed-advancement-preparation";
 import { buildAiDecisionInput } from "./ai-decision-input";
 
-const SUPPORT = "onr_v1_312_chicago-branch",
-  AGENDA = "onr_v1_220_tycho-extension";
+const SUPPORT = 524,
+  AGENDA = 432;
 function deck(id: string): DeckDefinition {
   const current = standardDeckCatalog.decks.find(
     (d) => d.standardDeckId === id,
@@ -44,7 +46,7 @@ const corpDeck: DeckDefinition = {
     id: "score-reserve-native-payout-control",
     cards: [
       ...baseCorpDeck.cards,
-      { id: "onr_v1_203_hostile-takeover", quantity: 1 },
+      { id: 415, quantity: 1 },
     ],
   },
   runnerDeck = deck("standard_runner_last_call_at_rd");
@@ -83,7 +85,7 @@ function nativeFixture(
   );
   if (terminal) {
     RealEngineFixtureBuilder.forState(state).withCorpRemoteRoot(
-      "remote_2",
+      "r2",
       AGENDA,
       4,
     );
@@ -91,30 +93,30 @@ function nativeFixture(
       state,
       getLegalActions(state, "corp").find(
         (a) =>
-          a.type === "score_agenda" && a.source.includes("tycho-extension"),
+          a.type === "score_agenda" && referencesDefaultDeckCard(a.source, 432),
       )!,
     );
     expect(getPlayerView(state, "corp").own.agendaPoints).toBe(4);
   }
   const builder = RealEngineFixtureBuilder.forState(state)
     .withCorpHqSize(0)
-    .withCorpCardInHq("onr_v1_193_corporate-coup")
+    .withCorpCardInHq(405)
     .withCorpCardInHq(SUPPORT)
     .withCorpCredits(20)
-    .withRezzedCorpIceOnServer("rd", "onr_v1_271_tko-2-0")
+    .withRezzedCorpIceOnServer("rd", 483)
     .withRunnerCredits(20)
     .withRunnerGripSize(0)
-    .withRunnerCardInGrip("onr_v1_139_r-and-d-interface")
-    .withRunnerCardInGrip("onr_v1_079_bodyweight-synthetic-blood")
-    .withRunnerCardInGrip("onr_v1_108_score")
-    .withRunnerCardInGrip("onr_v1_097_livewires-contacts");
-  if (reserve) builder.withCorpIceOnServer("rd", "onr_v1_245_fire-wall");
+    .withRunnerCardInGrip(351)
+    .withRunnerCardInGrip(291)
+    .withRunnerCardInGrip(320)
+    .withRunnerCardInGrip(309);
+  if (reserve) builder.withCorpIceOnServer("rd", 457);
   state = apply(
     state,
     getLegalActions(state, "corp").find(
       (a) =>
         a.type === "install_card" &&
-        a.source.includes("chicago-branch") &&
+        referencesDefaultDeckCard(a.source, 524) &&
         a.payload?.serverId === "new_remote",
     )!,
   );
@@ -126,7 +128,7 @@ function nativeFixture(
     state,
     getLegalActions(state, "runner").find(
       (a) =>
-        a.type === "install_card" && a.source.includes("r-and-d-interface"),
+        a.type === "install_card" && referencesDefaultDeckCard(a.source, 351),
     )!,
   );
   state = apply(
@@ -161,16 +163,16 @@ function nativeFixture(
   );
   const current = RealEngineFixtureBuilder.forState(state)
     .withCorpHqSize(0)
-    .withCorpCardInHq("onr_v1_205_main-office-relocation")
+    .withCorpCardInHq(417)
     .withCorpCredits(credits)
     .withRunnerCredits(5)
-    .withRunnerProgramInstalled("onr_v1_074_worm")
-    .withRunnerProgramInstalled("onr_v1_054_raptor")
-    .withRunnerProgramInstalled("onr_v1_014_codecracker");
+    .withRunnerProgramInstalled(286)
+    .withRunnerProgramInstalled(266)
+    .withRunnerProgramInstalled(226);
   if (!terminal)
     current
       .withCorpCardInHq(AGENDA)
-      .withCorpCardInHq("onr_v1_199_employee-empowerment");
+      .withCorpCardInHq(411);
   state.runner.memoryUsed = 3;
   return state;
 }
@@ -222,7 +224,7 @@ function finishNativeScore(
     } else expect(decision.reasonCode).toBe("plan_first.corp.score_agenda");
     if (n === 1) {
       const server = state.corp.servers.find((s) => s.root.includes(target!))!;
-      executor = executor!.replace("%3Anew_remote", `%3A${server.id}`);
+      executor = planInstanceIdForProposal({ moduleId: "corp.score_agenda", dedupeKey: `agenda:${target}:${server.id}` });
     }
     expect(portfolio.executorInstanceId).toBe(executor);
     types.push(action.type);
@@ -253,13 +255,13 @@ it("excludes rezzed support after a native root replacement sends it to Archives
     .withCorpHqSize(0)
     .withCorpCredits(20)
     .withCorpCardInHq(SUPPORT)
-    .withCorpCardInHq("onr_v1_205_main-office-relocation");
+    .withCorpCardInHq(417);
   state = apply(
     state,
     getLegalActions(state, "corp").find(
       (a) =>
         a.type === "install_card" &&
-        a.source.includes("chicago-branch") &&
+        referencesDefaultDeckCard(a.source, 524) &&
         a.payload?.serverId === "new_remote",
     )!,
   );
@@ -278,7 +280,7 @@ it("excludes rezzed support after a native root replacement sends it to Archives
     getLegalActions(state, "corp").find(
       (a) =>
         a.type === "install_card" &&
-        a.source.includes("main-office-relocation") &&
+        referencesDefaultDeckCard(a.source, 417) &&
         a.payload?.serverId === server.id,
     )!,
   );
@@ -316,13 +318,13 @@ it("rejects the exact engine-funded nonterminal score before it consumes current
   expect(
     corpSameTurnScoreConversionPaths(input).find(
       (p) =>
-        p.agendaCardId.includes("tycho-extension") &&
+        referencesDefaultDeckCard(p.agendaCardId, 432) &&
         p.targetServerId === "new_remote",
     ),
   ).toMatchObject({ creditsRequired: 8, clicksRequired: 3 });
   const decision = chooseAiAction(input),
     action = input.legalActions.find((a) => a.actionId === decision.actionId)!;
-  expect(action.source).not.toContain("tycho-extension");
+  expect(referencesDefaultDeckCard(action.source, 432)).toBe(false);
   expect(decision.fallbackUsed).toBe(false);
   const scores = residentPlanPortfolioSnapshot(input)!
     .instances.filter((p) => p.moduleId === "corp.score_agenda")
@@ -331,7 +333,7 @@ it("rejects the exact engine-funded nonterminal score before it consumes current
         p.moduleState as {
           kind: "score";
           signal: {
-            agendaDefinitionId?: string;
+            agendaDefinitionId?: number;
             sameTurnConversionProof?: string;
             routeAssessment?: string;
             feasible: boolean;
@@ -376,7 +378,7 @@ it("admits the same eight-credit native conversion without a funded central prot
       (p) =>
         p.moduleState as {
           signal: {
-            agendaDefinitionId?: string;
+            agendaDefinitionId?: number;
             sameTurnConversionProof?: string;
             feasible: boolean;
           };
@@ -399,10 +401,10 @@ it("keeps the native terminal score at P1 even when the remaining reserve is low
   expect(corpFundedCentralProtectionReserve(input)).toBe(5);
   expect(
     corpSameTurnScoreConversionPaths(input).some((p) =>
-      p.agendaCardId.includes("main-office-relocation"),
+      referencesDefaultDeckCard(p.agendaCardId, 417),
     ),
   ).toBe(true);
-  state = finishNativeScore(state, "onr_v1_205_main-office-relocation");
+  state = finishNativeScore(state, 417);
   expect(getPlayerView(state, "corp").own.agendaPoints).toBe(7);
   expect(state.corp.credits).toBe(1);
 });
@@ -423,7 +425,7 @@ it("quotes the already rezzed support before a new native target exists and comp
   );
   RealEngineFixtureBuilder.forState(state)
     .withCorpHqSize(0)
-    .withCorpCardInHq("onr_v1_205_main-office-relocation")
+    .withCorpCardInHq(417)
     .withCorpCredits(9);
   resetResidentPlanPortfolioMemory();
   const input = inputFor(state);
@@ -432,17 +434,17 @@ it("quotes the already rezzed support before a new native target exists and comp
     input.legalActions.some(
       (a) =>
         a.type === "activated_card_ability" &&
-        a.source.includes("chicago-branch"),
+        referencesDefaultDeckCard(a.source, 524),
     ),
   ).toBe(false);
   expect(
     corpSameTurnScoreConversionPaths(input).find(
       (p) =>
-        p.agendaCardId.includes("main-office-relocation") &&
+        referencesDefaultDeckCard(p.agendaCardId, 417) &&
         p.targetServerId === "new_remote",
     ),
   ).toMatchObject({ creditsRequired: 6, clicksRequired: 3 });
-  state = finishNativeScore(state, "onr_v1_205_main-office-relocation");
+  state = finishNativeScore(state, 417);
   expect(getPlayerView(state, "corp").own.agendaPoints).toBe(7);
   expect(state.corp.credits).toBe(3);
 });
@@ -451,7 +453,7 @@ it("finances the native support costs first and restores the reserve with an unc
   let state = nativeFixture(9);
   RealEngineFixtureBuilder.forState(state)
     .withCorpHqSize(0)
-    .withCorpCardInHq("onr_v1_203_hostile-takeover");
+    .withCorpCardInHq(415);
   const input = inputFor(state);
   expect(corpFundedCentralProtectionReserve(input)).toBe(5);
   expect(
@@ -459,7 +461,7 @@ it("finances the native support costs first and restores the reserve with an unc
       (p) => p.targetServerId === "new_remote",
     ),
   ).toMatchObject({ creditsRequired: 6, clicksRequired: 3 });
-  state = finishNativeScore(state, "onr_v1_203_hostile-takeover", 1);
+  state = finishNativeScore(state, 415, 1);
   expect(getPlayerView(state, "corp").own.agendaPoints).toBe(1);
   expect(state.corp.credits).toBe(8);
 });

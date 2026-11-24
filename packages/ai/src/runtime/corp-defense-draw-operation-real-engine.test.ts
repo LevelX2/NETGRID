@@ -12,8 +12,8 @@ import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfol
 import { buildAiDecisionInput } from "./ai-decision-input";
 import { corpOptionalDrawCapacity } from "./corp-economy/corp-defensive-draw";
 
-const DAY = "onr_v1_288_day-shift";
-const ANNUAL = "onr_v1_282_annual-reviews";
+const DAY = 500;
+const ANNUAL = 494;
 const decks = Object.fromEntries(
   (["corp", "runner"] as const).map((side) => {
     const id =
@@ -49,13 +49,13 @@ function fixture(drawCard = DAY, extraCard = false) {
     .withCorpHqSize(0)
     .withCorpCredits(15)
     .withCorpCardInHq(drawCard)
-    .withCorpCardInHq("onr_v1_347_vapor-ops")
-    .withCorpCardInHq("onr_v1_312_chicago-branch")
-    .withRezzedCorpIceOnServer("hq", "onr_proteus_038_snowbank")
-    .withRezzedCorpIceOnServer("rd", "onr_v1_237_data-wall")
+    .withCorpCardInHq(559)
+    .withCorpCardInHq(524)
+    .withRezzedCorpIceOnServer("hq", 96)
+    .withRezzedCorpIceOnServer("rd", 449)
     .withRunnerCredits(3)
-    .withRunnerProgramInstalled("onr_v1_039_krash");
-  if (extraCard) f.withCorpCardInHq("onr_v1_297_overtime-incentives");
+    .withRunnerProgramInstalled(251);
+  if (extraCard) f.withCorpCardInHq(509);
   state.turnSerial = 6;
   return state;
 }
@@ -71,6 +71,9 @@ function input(state: GameState) {
       })),
     },
   });
+}
+function operationFor(state: GameState, actions: ReturnType<typeof getLegalActions>, definitionId: number) {
+  return actions.find((action) => action.type === "play_operation" && state.cardInstances[action.source]?.definitionId === definitionId)!;
 }
 function apply(
   state: GameState,
@@ -97,7 +100,7 @@ it.each([false, true])(
       (a) => a.actionId === decision.actionId,
     )!;
     expect(action.type).toBe("play_operation");
-    expect(action.actionId).toContain(DAY);
+    expect(state.cardInstances[action.source]?.definitionId).toBe(DAY);
     expect(
       decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
     ).toBe("corp.defend_servers");
@@ -116,7 +119,7 @@ it("prefers an admitted three-card operation for the same defense search", () =>
   const state = fixture(ANNUAL),
     i = input(state),
     decision = chooseCorpAction(i);
-  expect(decision.actionId).toContain(ANNUAL);
+  expect(decision.actionId).toBe(operationFor(state, i.legalActions, ANNUAL).actionId);
   expect(
     decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
   ).toBe("corp.defend_servers");
@@ -129,7 +132,7 @@ it.each([DAY, ANNUAL])(
   (drawCard) => {
     const state = fixture(drawCard, true);
     RealEngineFixtureBuilder.forState(state).withCorpCardInHq(
-      "onr_v1_292_management-shake-up",
+      504,
     );
     const i = input(state),
       decision = chooseCorpAction(i);
@@ -139,7 +142,7 @@ it.each([DAY, ANNUAL])(
       decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
     ).toBe("corp.defend_servers");
     if (drawCard === DAY) {
-      expect(decision.actionId).toContain(DAY);
+      expect(decision.actionId).toBe(operationFor(state, i.legalActions, DAY).actionId);
       expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({
         actionId: decision.actionId,
         stateVersion: state.stateVersion,
@@ -149,7 +152,7 @@ it.each([DAY, ANNUAL])(
       expect(after.corp.credits).toBe(state.corp.credits + 1);
       expect(after.corp.clicks).toBe(state.corp.clicks - 1);
     } else {
-      expect(decision.actionId).toBe("corp.draw_card");
+      expect(decision.actionId).toBe("c8");
     }
   },
 );
@@ -179,15 +182,15 @@ it("admits a net-one draw operation for the full-hand score-protection parent", 
   RealEngineFixtureBuilder.forState(state)
     .withCorpHqSize(0)
     .withCorpCredits(3)
-    .withCorpCardInHq("onr_v1_200_encryption-breakthrough")
+    .withCorpCardInHq(412)
     .withCorpCardInHq(DAY)
-    .withCorpCardInHq("onr_v1_326_holovid-campaign")
-    .withCorpCardInHq("onr_v1_193_corporate-coup")
-    .withCorpCardInHq("onr_v1_353_chimera")
-    .withCorpIceOnServer("hq", "onr_v1_229_code-corpse")
-    .withRezzedCorpIceOnServer("rd", "onr_v1_238_data-wall-2-0")
+    .withCorpCardInHq(538)
+    .withCorpCardInHq(405)
+    .withCorpCardInHq(565)
+    .withCorpIceOnServer("hq", 441)
+    .withRezzedCorpIceOnServer("rd", 450)
     .withRunnerCredits(3)
-    .withRunnerProgramInstalled("onr_proteus_083_corrosion");
+    .withRunnerProgramInstalled(141);
   state.turnSerial = 4;
   const i = buildAiDecisionInput(state, "corp", {
     difficulty: "hard",
@@ -201,10 +204,14 @@ it("admits a net-one draw operation for the full-hand score-protection parent", 
     },
   });
   const decision = chooseCorpAction(i);
-  expect(decision.actionId).toContain(DAY);
+  expect(decision.actionId).toBe(operationFor(state, i.legalActions, DAY).actionId);
   const plan = decision.decisionDebug?.planFirstDecision;
   expect(plan?.selectedPlan?.moduleId).toBe("corp.defend_servers");
-  expect(plan?.selectedStep?.parentInstanceId).toContain("corp.score_agenda");
+  expect(
+    plan?.portfolio.find(
+      (instance) => instance.instanceId === plan?.selectedStep?.parentInstanceId,
+    )?.moduleId,
+  ).toBe("corp.score_agenda");
   expect(plan?.route).toMatchObject({
     actionId: decision.actionId,
     stateVersion: state.stateVersion,
@@ -216,20 +223,20 @@ it("admits a net-one draw operation for the full-hand score-protection parent", 
 it("retains the basic draw when a three-card operation would overflow HQ", () => {
   const state = fixture(ANNUAL, true),
     i = input(state);
-  const operation = i.legalActions.find((a) => a.actionId.includes(ANNUAL))!;
+  const operation = operationFor(state, i.legalActions, ANNUAL);
   expect(corpOptionalDrawCapacity(i, operation).eligible).toBe(false);
-  expect(chooseCorpAction(i).actionId).toBe("corp.draw_card");
+  expect(chooseCorpAction(i).actionId).toBe("c8");
 });
 it("keeps a terminal score ahead of the admitted defense draw", () => {
   const state = fixture();
   RealEngineFixtureBuilder.forState(state).withCorpRemoteRoot(
-    "remote_1",
-    "onr_classic_002_superserum",
+    "r1",
+    6,
     3,
   );
   for (const definitionId of [
-    "onr_v1_196_corporate-war",
-    "onr_v1_194_corporate-downsizing",
+    408,
+    406,
   ]) {
     const id = state.corp.rd.find(
       (id) => state.cardInstances[id]!.definitionId === definitionId,
@@ -264,12 +271,11 @@ it("does not consume the mandatory-draw reserve through the multi-draw operation
   }
   const i = input(state),
     decision = chooseCorpAction(i);
-  expect(decision.actionId).not.toContain(DAY);
+  expect(decision.actionId).not.toBe(operationFor(state, i.legalActions, DAY).actionId);
   expect(decision.decisionDebug?.planFirstDecision?.dispositions).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
-        actionId: i.legalActions.find((a) => a.actionId.includes(DAY))!
-          .actionId,
+        actionId: operationFor(state, i.legalActions, DAY).actionId,
         disposition: "explicitly_nonproductive",
         evidenceCode: expect.stringContaining(
           "corp_voluntary_draw_blocked_deckout_horizon",

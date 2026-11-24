@@ -33,7 +33,7 @@ it.each([
 ])("does not replace current route or payoff evidence: %s", (condition) => {
   const { input } = fixture();
   const target = evaluateRunnerRunTargets({ input }).find(
-    (e) => e.actionId === "runner.start_run.remote_2",
+    (e) => e.actionId === "rs.r2",
   )!;
   if (condition === "guaranteed_access")
     target.routeQuote!.reachability = "guaranteed_access";
@@ -45,7 +45,7 @@ it.each([
   if (condition === "unknown_payoff") target.accessPayoff = "unknown";
   if (condition === "missing_outcome")
     for (const events of [input.eventTail, input.playerView.publicEvents])
-      delete events.find((e: { eventId: string }) => e.eventId === "evt_95")!
+      delete events.find((e: { eventId: number }) => e.eventId === 96)!
         .publicPayload.result;
   expect(
     runnerRemoteRepeatedFreeStopEvidence(structuredClone(input), target),
@@ -55,7 +55,7 @@ it.each([
 it("declines the repeated free remote stop through the exact Remote owner while preserving the known trash payoff", () => {
   const { cp, input } = fixture();
   const target = evaluateRunnerRunTargets({ input }).find(
-    (e) => e.actionId === "runner.start_run.remote_2",
+    (e) => e.actionId === "rs.r2",
   )!;
   expect(target.accessPayoff).toBe("trash_affordable");
   expect(target.runCommitment).toBe("probe_only");
@@ -69,7 +69,7 @@ it("declines the repeated free remote stop through the exact Remote owner while 
   expect(decision.fallbackUsed).toBe(false);
   const owner = residentPlanPortfolioSnapshot(input)!.instances.find(
     (i) =>
-      i.moduleId === "runner.contest_remote" && i.target?.id === "remote_2",
+      i.moduleId === "runner.contest_remote" && i.target?.id === "r2",
   )!;
   expect(owner.moduleState).toMatchObject({
     signal: {
@@ -92,13 +92,13 @@ it.each(["paid_defense", "next_turn", "new_installation"])(
     if (condition === "paid_defense")
       for (const events of [input.eventTail, input.playerView.publicEvents])
         events.find(
-          (e: { eventId: string }) => e.eventId === "evt_94",
+          (e: { eventId: number }) => e.eventId === 95,
         )!.publicPayload.rezCostPaid = 1;
     if (condition === "next_turn") input.playerView.turnSerial++;
     if (condition === "new_installation")
       input.eventTail.push({
         ...input.eventTail.at(-1),
-        eventId: "new-rig-install",
+        eventId: 97,
         stateVersionBefore: 95,
         stateVersionAfter: 96,
         publicPayload: { actor: "runner", actionType: "install_card" },
@@ -109,17 +109,17 @@ it.each(["paid_defense", "next_turn", "new_installation"])(
       cp.runtime,
     );
     const decision = chooseAiAction(input);
-    expect(decision.actionId).toBe("runner.start_run.remote_2");
+    expect(decision.actionId).toBe("rs.r2");
     expect(decision.fallbackUsed).toBe(false);
     expect(
       residentPlanPortfolioSnapshot(input)!.instances.find(
         (i) =>
-          i.moduleId === "runner.contest_remote" && i.target?.id === "remote_2",
+          i.moduleId === "runner.contest_remote" && i.target?.id === "r2",
       )!.moduleState,
     ).toMatchObject({
       signal: {
         runActionAssessments: {
-          "runner.start_run.remote_2": { verdict: "executable" },
+          "rs.r2": { verdict: "executable" },
         },
       },
     });

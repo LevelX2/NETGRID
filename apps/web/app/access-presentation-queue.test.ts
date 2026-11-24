@@ -1,3 +1,4 @@
+import { type CardDefinitionId } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { PublicGameEvent } from "@netgrid/shared";
 
@@ -9,63 +10,63 @@ import {
 describe("access presentation queue", () => {
   it("keeps four public Rush Hour accesses in event order despite repeated definitions", () => {
     const incoming = [
-      access("evt_11", "data_wall", "Data Wall", 0),
-      access("evt_12", "urban_renewal", "Urban Renewal", 1),
-      access("evt_13", "data_wall", "Data Wall", 2),
-      access("evt_14", "urban_renewal", "Urban Renewal", 3),
+      access(12, 9143, "Data Wall", 0),
+      access(13, 9144, "Urban Renewal", 1),
+      access(14, 9143, "Data Wall", 2),
+      access(15, 9144, "Urban Renewal", 3),
     ];
 
     expect(
       appendPendingAccessPresentationEvents([], incoming, []).map(
         (event) => event.eventId,
       ),
-    ).toEqual(["evt_11", "evt_12", "evt_13", "evt_14"]);
+    ).toEqual([12, 13, 14, 15]);
   });
 
   it("retains an access when later unrelated events arrive", () => {
     const pending = appendPendingAccessPresentationEvents(
       [],
-      [access("evt_14", "urban_renewal", "Urban Renewal", 3)],
+      [access(15, 9144, "Urban Renewal", 3)],
       [],
     );
     const next = appendPendingAccessPresentationEvents(
       pending,
-      [event("evt_15", "install_card"), event("evt_16", "end_turn")],
+      [event(16, "install_card"), event(17, "end_turn")],
       [],
     );
 
-    expect(next.map((item) => item.eventId)).toEqual(["evt_14"]);
+    expect(next.map((item) => item.eventId)).toEqual([15]);
   });
 
   it("does not requeue dismissed or redacted accesses", () => {
-    const redacted = event("evt_hidden", "access_card", {
+    const redacted = event(100, "access_card", {
       redactedKind: "accessed_card",
     });
     expect(
       appendPendingAccessPresentationEvents(
         [],
-        [access("evt_13", "data_wall", "Data Wall", 2), redacted],
-        ["evt_13"],
+        [access(14, 9143, "Data Wall", 2), redacted],
+        [14],
       ),
     ).toEqual([]);
   });
 
   it("removes only the acknowledged access", () => {
     const pending = [
-      access("evt_13", "data_wall", "Data Wall", 2),
-      access("evt_14", "urban_renewal", "Urban Renewal", 3),
+      access(14, 9143, "Data Wall", 2),
+      access(15, 9144, "Urban Renewal", 3),
     ];
     expect(
-      dismissPendingAccessPresentationEvent(pending, "evt_13").map(
+      dismissPendingAccessPresentationEvent(pending, 14).map(
         (item) => item.eventId,
       ),
-    ).toEqual(["evt_14"]);
+    ).toEqual([15]);
   });
 });
 
 function access(
-  eventId: string,
-  cardDefinitionId: string,
+  eventId: number,
+  cardDefinitionId: CardDefinitionId,
   title: string,
   accessIndex: number,
 ): PublicGameEvent {
@@ -81,7 +82,7 @@ function access(
 }
 
 function event(
-  eventId: string,
+  eventId: number,
   actionType: string,
   payload: Record<string, unknown> = {},
 ): PublicGameEvent {

@@ -41,7 +41,7 @@ it("classifies an unaffordable next-ICE lock break as funding rather than missin
   const input = restoredInput("g31-d346");
   const rig = input.playerView.own.rig;
   if (!rig) throw Error("checkpoint must include the installed breaker");
-  const server = input.playerView.servers.find((s) => s.id === "remote_1")!;
+  const server = input.playerView.servers.find((s) => s.id === "r1")!;
   const assessment = assessKnownRezzedIcePath(
     server.ice,
     rig,
@@ -71,7 +71,7 @@ it.each([true, false])(
       input.legalActions = input.legalActions.filter(
         (candidate) =>
           !candidate.actionId.includes(
-            "install_card.runner_onr_v1_168_loan-from-chiba",
+            "install_card.runner_380",
           ),
       );
     const result = chooseAiAction(input);
@@ -79,11 +79,11 @@ it.each([true, false])(
       (a) => a.actionId === result.actionId,
     )!;
     expect(action.actionId).toBe(
-      "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:withdraw_credits",
+      "r1.c29d.c29d.activated.441",
     );
     if (loanAvailable) {
       const target = evaluateRunnerRunTargets({ input }).find(
-        (candidate) => candidate.actionId === "runner.start_run.remote_1",
+        (candidate) => candidate.actionId === "rs.r1",
       )!;
       expect(target.pathCost).toBe(12);
       const funded = structuredClone(input);
@@ -97,9 +97,9 @@ it.each([true, false])(
     }
     expect(result.fallbackUsed).toBe(false);
     expect(result.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       leafExecutorInstanceId:
-        "plan:runner.credit_bank:runner_onr_v1_154_broker_1",
+        "pdeck54mcc1lshdzs9k74eyxih",
     });
     expect(result.decisionDebug?.planFirstDecision?.route).toMatchObject({
       actionId: action.actionId,
@@ -170,7 +170,7 @@ it.each([
 
 it("retains missing coverage when the required breaker really is absent", () => {
   const input = restoredInput("g31-d346");
-  const server = input.playerView.servers.find((s) => s.id === "remote_1")!;
+  const server = input.playerView.servers.find((s) => s.id === "r1")!;
   const assessment = assessKnownRezzedIcePath(server.ice, [], 100, server.root);
   expect(assessment.knownPathBlockedByMissingCoverage).toBe(true);
   expect(runnerKnownPathAssessmentIsCostNoAccess(assessment)).toBe(false);
@@ -180,7 +180,7 @@ it.each([4, 6])(
   "retains the funding cause when both source and future breaks exceed %i credits",
   (credits) => {
     const input = restoredInput("g31-d346");
-    const server = input.playerView.servers.find((s) => s.id === "remote_1")!;
+    const server = input.playerView.servers.find((s) => s.id === "r1")!;
     const rig = input.playerView.own.rig;
     if (!rig) throw Error("checkpoint must include the installed breaker");
     const assessment = assessKnownRezzedIcePath(
@@ -218,7 +218,7 @@ it("uses the paid-for break to preserve the bound hand floor despite an unafford
   const action = input.legalActions.find(
     (a) =>
       a.type === "break_subroutine" &&
-      a.actionId.includes("printed_subroutines_damage_net"),
+      a.payload?.subroutineIndex === 0,
   )!;
   expect(action).toBeDefined();
   expect(chooseAiAction(input)).toMatchObject({
@@ -226,8 +226,8 @@ it("uses the paid-for break to preserve the bound hand floor despite an unafford
     fallbackUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_88",
+        rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+        leafExecutorInstanceId: "p8kyx6z8jxbofmjp2gda5k9jn6",
         route: {
           actionId: action.actionId,
           stateVersion: input.playerView.stateVersion,

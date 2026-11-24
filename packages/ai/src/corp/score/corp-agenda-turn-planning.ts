@@ -6,8 +6,10 @@ import { scoreQuotedResourceCost } from "./score-quoted-resource-cost";
 import type { CorpEconomyNeedSignal } from "../economy/economy-types";
 
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
+import { candidateTargetIds } from "../../actions/action-candidate-facts";
 
 import { planInstanceIdForProposal } from "../../plans/plan-instance";
+import { agendaCampaignIdentity, compactCampaignId } from "../../plans/compact-plan-identity";
 import {
   buildCanonicalLegalActionInvocation,
   turnPlanningFingerprint,
@@ -471,11 +473,17 @@ function createLine(
   const totalCreditCost =
     line.actions.reduce((sum, candidate) => sum + creditCost(candidate), 0) +
     (projectedAdvance ? 1 : 0);
-  const economyGain = line.actions.reduce(
-    (sum, candidate) =>
-      sum + (candidate.economyProjection?.netLiquidCreditGain ?? 0),
-    0,
-  );
+  let grossLiquidity = 0;
+  let economyGain = 0;
+  for (const candidate of line.actions) {
+    const gain = currentGeneralLiquidGain(candidate);
+    if (gain === undefined) continue;
+    grossLiquidity += gain;
+    economyGain += gain - creditCost(candidate);
+  }
+  const remainingClicks = params.input.playerView.own.clicks - totalClickCost;
+  const remainingCredits =
+    params.input.playerView.own.credits - totalCreditCost + grossLiquidity;
   const exposure = scoreRouteExposure(
     params.project,
     params.input.playerView.stateVersion,
@@ -562,7 +570,7 @@ function createLine(
     lineId,
     nodeKeys: nodes.map((node) => node.invocation.invocationKey),
   });
-  const campaignId = `campaign:${params.project.projectId}`;
+  const campaignId = compactCampaignId(agendaCampaignIdentity(params.project.projectId));
   const campaignQuote: CampaignMilestoneQuote = {
     quoteId: afterQuoteId,
     campaignId,
@@ -572,9 +580,8 @@ function createLine(
       baseStateVersion: params.stateIdentity.stateVersion,
       projectedFrameKey: turnPlanningFingerprint("agenda-projected-frame", {
         lineId,
-        remainingClicks: params.input.playerView.own.clicks - totalClickCost,
-        remainingCredits:
-          params.input.playerView.own.credits - totalCreditCost + economyGain,
+        remainingClicks,
+        remainingCredits,
       }),
       linePrefixHash: turnPlanningFingerprint(
         "agenda-line-prefix",
@@ -685,9 +692,8 @@ function createLine(
     nodes,
     totalClickCost,
     totalCreditCost,
-    remainingClicks: params.input.playerView.own.clicks - totalClickCost,
-    remainingCredits:
-      params.input.playerView.own.credits - totalCreditCost + economyGain,
+    remainingClicks,
+    remainingCredits,
     evaluation: {
       agendaProgress,
       defense,
@@ -746,8 +752,7 @@ function boundScoreFundingProviders(
           (entry) =>
             entry.actionId === actionId &&
             exactCurrentCost(entry) &&
-            entry.economyProjection?.reliability === "guaranteed" &&
-            (entry.economyProjection.netLiquidCreditGain ?? 0) > 0,
+            (currentGeneralLiquidGain(entry) ?? 0) > creditCost(entry),
         );
         return candidate
           ? [
@@ -870,6 +875,24 @@ function boundScoreProtectionProvider(
   )[0];
 }
 
+function currentGeneralLiquidGain(
+  candidate: ActionSemanticCandidate,
+): number | undefined {
+  const projection = candidate.economyProjection;
+  const gross = projection?.grossLiquidCreditGain;
+  return projection?.kind === "immediate_liquid" &&
+    projection.timing === "immediate" &&
+    projection.reliability === "guaranteed" &&
+    projection.creditRestriction === "general" &&
+    projection.creditCost === creditCost(candidate) &&
+    typeof gross === "number" &&
+    Number.isSafeInteger(gross) &&
+    gross >= 0 &&
+    projection.netLiquidCreditGain === gross - projection.creditCost
+    ? gross
+    : undefined;
+}
+
 function compareCandidateCost(
   left: ActionSemanticCandidate,
   right: ActionSemanticCandidate,
@@ -900,27 +923,21 @@ function creditCost(candidate: ActionSemanticCandidate): number {
   return candidate.costProfile.creditCost ?? 0;
 }
 
-function candidateTargetIds(candidate: ActionSemanticCandidate): string[] {
-  return [
-    ...(candidate.targetContext?.selectedTargets ?? []),
-    ...(candidate.targetContext?.availableTargets ?? []),
-  ]
-    .map((target) => target.targetId)
-    .filter((targetId): targetId is string => typeof targetId === "string");
-}
-
 function invocationFor(
   stateIdentity: PlanningStateIdentity,
   candidate: ActionSemanticCandidate,
 ): CanonicalLegalActionInvocation {
-  const targetIds = candidateTargetIds(candidate);
+  const context = candidate.targetContext;
+  const targets = context?.selectedTargets.length
+    ? context.selectedTargets
+    : (context?.availableTargets ?? []);
   return buildCanonicalLegalActionInvocation({
     stateIdentity,
     semanticActionType: candidate.semanticActionType,
     ...(candidate.sourceCardInstanceId
       ? { sourceCardInstanceId: candidate.sourceCardInstanceId }
       : {}),
-    ...(candidate.abilityId &&
+    ...(typeof candidate.abilityId === "number" &&
     candidate.abilityBindingMethod === "canonical_capability_id"
       ? {
           sourceAbilityBinding: {
@@ -929,20 +946,17 @@ function invocationFor(
           },
         }
       : {}),
-    ...(targetIds.length > 0
+    ...(targets.length > 0
       ? {
           boundTargets: [
             {
               slotId: "target",
-              values: targetIds.map((id) => ({
+              values: targets.map((target) => ({
                 kind:
-                  id === "hq" ||
-                  id === "rd" ||
-                  id === "archives" ||
-                  id.startsWith("remote_")
-                    ? ("server" as const)
-                    : ("card" as const),
-                id,
+                  target.targetKind === "server" || target.targetKind === "ice"
+                    ? target.targetKind
+                    : "card",
+                id: target.targetId,
               })),
               ordering: "unordered" as const,
             },

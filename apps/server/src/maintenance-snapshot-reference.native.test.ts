@@ -5,6 +5,11 @@ import { DatabaseSync } from "node:sqlite";
 import { afterEach, expect, it } from "vitest";
 import { MultiplayerService } from "./multiplayer";
 import { SqliteMatchStorage } from "./storage-sqlite";
+import {
+  INITIAL_STATE_SNAPSHOT_ID,
+  preActionStateSnapshotId,
+  type StateSnapshotId,
+} from "./state-snapshot-id";
 
 const handles: Array<{ dir: string; service: MultiplayerService }> = [];
 afterEach(async () => {
@@ -52,16 +57,16 @@ async function setup() {
   };
 }
 
-it("binds both real mulligan decisions to their named snapshots despite duplicate initial StateVersion", async () => {
+it("binds real mulligan decisions to their exact snapshots despite duplicate initial StateVersion", async () => {
   const { storage, service, record, matchId } = await setup();
   const initial = record.stateSnapshots.filter((s) => s.stateVersion === 0);
   expect(initial.map((s) => s.snapshotId).sort()).toEqual([
-    "snap_before_1",
-    "snap_initial",
+    INITIAL_STATE_SNAPSHOT_ID,
+    preActionStateSnapshotId(1),
   ]);
   expect(initial[0]!.stateHash).toBe(initial[1]!.stateHash);
   const source = await storage.maintenanceDecisionAnalysisSource(matchId, 1);
-  expect(source?.snapshot?.snapshotId).toBe("snap_before_1");
+  expect(source?.snapshot?.snapshotId).toBe(preActionStateSnapshotId(1));
   for (const index of [1, 2]) {
     const analysis = await service.storageMaintenanceDecisionAnalysis(
       matchId,
@@ -79,14 +84,14 @@ it("binds both real mulligan decisions to their named snapshots despite duplicat
 
 it.each([
   [undefined, "snapshot_reference_missing"],
-  ["not-a-snapshot", "snapshot_missing"],
-  ["snap_before_2", "snapshot_binding_mismatch"],
+  [preActionStateSnapshotId(1000), "snapshot_missing"],
+  [preActionStateSnapshotId(2), "snapshot_binding_mismatch"],
 ] as const)(
   "fails closed for invalid persisted snapshot reference %s",
   async (snapshotId, reason) => {
     const { storage, service, record, matchId, dbPath } = await setup();
     const audit = record.aiDecisionTraces![0]!.traceJson.historicalAudit as {
-      analysisSnapshot: { snapshotId?: string };
+      analysisSnapshot: { snapshotId?: StateSnapshotId };
     };
     if (snapshotId === undefined) delete audit.analysisSnapshot.snapshotId;
     else audit.analysisSnapshot.snapshotId = snapshotId;

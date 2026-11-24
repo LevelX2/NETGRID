@@ -3,6 +3,7 @@ import type { CardSpec, PrintingId, SetId, SetSpec } from "./contracts";
 import type {
   CanonicalCapabilityId,
   CapabilityKey,
+  ResolveCapabilityId,
 } from "./capability-identity";
 import type { CardMechanicalSpec } from "./engine/card-mechanical-contracts";
 import type {
@@ -216,6 +217,7 @@ export function projectEngineCard(
 export function projectPlanningCard(
   spec: DeepReadonly<CardSpec>,
   fingerprints: DeepReadonly<CardSectionFingerprints>,
+  resolveCapabilityId: ResolveCapabilityId,
 ): DeepReadonly<PlanningCardView> {
   return deepFreezeSerializable({
     schemaVersion: "planning-card-view-v1",
@@ -223,7 +225,7 @@ export function projectPlanningCard(
     side: spec.identity.side,
     cardType: spec.identity.cardType,
     engine: spec.engine,
-    prospectiveCapabilities: compileProspectiveCapabilities(spec),
+    prospectiveCapabilities: compileProspectiveCapabilities(spec, resolveCapabilityId),
     ...(spec.planningAnnotations !== undefined
       ? { planningAnnotations: spec.planningAnnotations }
       : {}),

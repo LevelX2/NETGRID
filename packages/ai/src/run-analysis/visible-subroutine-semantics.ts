@@ -30,7 +30,7 @@ export function isVisiblePayEndRunSubroutine(
   return subroutine.type === "end_the_run_unless_runner_pays";
 }
 
-export function isVisibleSecretSpendEndRunSubroutine(
+export function isVisibleSecretSpendCompareSubroutine(
   subroutine: VisibleEffectiveSubroutine,
 ): boolean {
   return (
@@ -51,18 +51,5 @@ export function isVisibleTrashUnlessRunnerPaysSubroutine(
   return subroutine.type === "trash_installed_program_unless_runner_pays";
 }
 
-/**
- * Too Many Doors permits bids from zero through two. A Runner can guarantee
- * access only by exceeding the Corp's largest legal visible bid; at two Corp
- * credits that is impossible and the route stays explicitly conditional.
- */
-export function secretSpendAccessPaymentForVisibleCorpCredits(
-  visibleCorpCredits: number,
-): number | undefined {
-  const maximumCorpBid = Math.min(
-    2,
-    Math.max(0, Math.floor(visibleCorpCredits)),
-  );
-  const requiredRunnerBid = maximumCorpBid + 1;
-  return requiredRunnerBid <= 2 ? requiredRunnerBid : undefined;
-}
+/** Every legal Corp bid is at least zero, so a Runner bid of zero preserves access. */
+export const ACCESS_PRESERVING_SECRET_COMPARE_BID = 0;

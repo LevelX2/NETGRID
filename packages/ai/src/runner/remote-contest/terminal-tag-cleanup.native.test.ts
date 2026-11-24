@@ -23,7 +23,7 @@ const load = () =>
       "utf8",
     ),
   );
-const root = "plan:runner.contest_remote:remote%3Aremote_1";
+const root = "p1p4xezjcxov79rno40lq3f7rv";
 afterEach(resetResidentPlanPortfolioMemory);
 function nativeInput() {
   const f = load(),
@@ -47,7 +47,7 @@ it("replaces the fulfilled coverage need with the currently executable terminal 
     decision = chooseAiAction(input);
   expect(JSON.stringify(input)).toBe(before);
   expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
-  expect(decision.actionId).toBe("runner.start_run.remote_1");
+  expect(decision.actionId).toBe("rs.r1");
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
     root,
   );
@@ -126,7 +126,7 @@ it("steals Tycho and clears the fixed tag through normal choices in the whole na
 it("admits the fully financed fixed tag cleanup from the native quote", () => {
   const { input } = nativeInput();
   const target = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.remote_1",
+    (t) => t.actionId === "rs.r1",
   )!;
   expect(target.routeQuote).toMatchObject({
     reachability: "guaranteed_access",
@@ -159,7 +159,7 @@ it.each([
 ])("keeps %s outside the fixed tag cleanup admission", (kind) => {
   const { input } = nativeInput();
   const target = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.remote_1",
+    (t) => t.actionId === "rs.r1",
   )!;
   if (kind === "last_click") input.playerView.own.clicks = 1;
   if (kind === "insufficient_cash") input.playerView.own.credits = 5;

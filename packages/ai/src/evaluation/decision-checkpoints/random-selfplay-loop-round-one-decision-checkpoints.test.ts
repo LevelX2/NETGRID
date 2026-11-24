@@ -28,13 +28,13 @@ describe("random standard selfplay loop round one", () => {
     const checkpoint = fixture(json);
     if (json === safeStagedScoreJson) {
       checkpoint.expectation.acceptableActions = [
-        { actionId: "corp.draw_card" },
+        { actionId: "c8" },
       ];
       checkpoint.expectation.planExecution = {
         acceptablePlanKinds: ["corp.defend_servers"],
         acceptableCapabilities: ["develop_score_protection"],
         requiredAssessmentEvidence: [
-          "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_209_political-coup_2:remote_1:remote_1",
+          "score_plan_requires_effective_ice_draw:agenda:c2lq:r1:r1",
         ],
       };
     }
@@ -50,7 +50,7 @@ describe("random standard selfplay loop round one", () => {
     if (json === terminalBrokerFundingJson) {
       expect(
         evaluateRunnerRunTargets({ input: result.input }).find(
-          (target) => target.actionId === "runner.start_run.remote_1",
+          (target) => target.actionId === "rs.r1",
         ),
       ).toMatchObject({ visibleTraceTagHazardUnavoidable: true });
     }
@@ -88,7 +88,7 @@ describe("random standard selfplay loop round one", () => {
         evidence.some(
           (entry) =>
             entry ===
-            "runner_credit_bank_bound_run_action:runner.start_run.remote_1",
+            "runner_credit_bank_bound_run_action:rs.r1",
         ),
       ).toBe(true);
       const before = checkpoint.engine.testOnlyGameState;
@@ -105,7 +105,7 @@ describe("random standard selfplay loop round one", () => {
         difficulty: "hard",
       });
       const decision = chooseAiAction(next);
-      expect(decision.actionId).toBe("runner.start_run.remote_1");
+      expect(decision.actionId).toBe("rs.r1");
       const started = applyAction(paid.state, {
         matchId: paid.state.matchId,
         side: "runner",

@@ -5,7 +5,7 @@ import { resetResidentPlanPortfolioMemory } from "../../../plans/resident-plan-p
 
 import { describe, expect, it } from "vitest";
 import selfplayExploitLeagueData from "../../../../../../data/ai/ai-selfplay-exploit-league-2026-05-17.json";
-import { listExploitFixtures } from "./fixture-data";
+import { EXPLOIT_FIXTURES } from "./fixture-data";
 import { applyFixtureAction } from "../../fixture-actions";
 import {
   buildRndRepeatAccessFixtureInput,
@@ -46,7 +46,7 @@ describe("V1.4.3 regression fixture contracts", () => {
   });
 
   it("provides the historical exploit fixtures", () => {
-    const fixtures = listExploitFixtures();
+    const { fixtures } = EXPLOIT_FIXTURES;
 
     expect(fixtures.map((fixture) => fixture.fixtureId)).toEqual([
       "v143-rnd-repeat-access-freshness",

@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
@@ -25,7 +26,7 @@ type ReconstructedDecisionCapture = {
 
 describe("pairing 343 Runner strategic MU control checkpoint", () => {
   it("does not force MU support when the current R&D route is already economical", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       captureJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
@@ -37,7 +38,7 @@ describe("pairing 343 Runner strategic MU control checkpoint", () => {
     const portfolio = residentPlanPortfolioSnapshot(capture.input);
 
     expect(decision).toMatchObject({
-      actionId: "runner.start_run.rd",
+      actionId: "rs.rd",
       reasonCode: "plan_first.runner.pressure_central",
       fallbackUsed: false,
     });
@@ -54,7 +55,7 @@ describe("pairing 343 Runner strategic MU control checkpoint", () => {
     ).toBe(false);
     expect(
       decision.decisionDebug?.actionAlternatives?.find((alternative) =>
-        alternative.actionId.includes("wutech-mem-chip"),
+        referencesDefaultDeckCard(alternative.actionId, 357),
       ),
     ).toMatchObject({
       selected: false,

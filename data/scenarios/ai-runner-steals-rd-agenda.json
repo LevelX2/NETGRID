@@ -2,12 +2,15 @@
   "schemaVersion": "scenario-v0.3",
   "id": "SCN-AI-001",
   "title": "Runner AI steals R&D agenda",
-  "requirementIds": ["V03-REQ-004", "V03-REQ-006"],
+  "requirementIds": [
+    "V03-REQ-004",
+    "V03-REQ-006"
+  ],
   "seed": "ai-runner-steals-rd-agenda",
   "setup": {
     "activeSide": "runner",
     "timingPoint": "access.resolve_card",
-    "accessedCardDefinitionId": "simple_agenda"
+    "accessedCardDefinitionId": 588
   },
   "expected": {
     "chosenActionType": "steal_agenda",

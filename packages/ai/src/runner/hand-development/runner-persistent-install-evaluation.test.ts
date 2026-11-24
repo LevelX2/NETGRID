@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
+import { describe, expect, it, vi } from "vitest";
 
 import type {
   AiDecisionInput,
@@ -17,9 +18,16 @@ import {
 } from "../../runner-strategic-intent";
 import { discardKeepScore } from "../../runtime/discard-keep-score";
 import { selectedSearchChoiceOptionIds } from "../../runtime/search-choice-option";
-import { AI_HINTS_BY_CARD } from "../../ai-hints";
+import {
+  AI_HINTS_BY_CARD as mockedHints,
+  type AiCardHint,
+} from "../../ai-hints";
 import type { DeckCapabilityProfile } from "../../deck-capabilities";
-import { persistentEngineProfileForCard } from "./runner-persistent-install-evaluation";
+import {
+  actionMatchesCard,
+  concreteBreakerCoverageOverlaps,
+  persistentEngineProfileForCard,
+} from "./runner-persistent-install-evaluation";
 import {
   breakerVariantDeckCapabilities,
   findByInstance,
@@ -32,11 +40,39 @@ import {
   visibleIdentity,
 } from "../../runner-hand-development.test-support";
 
+vi.mock(import("../../ai-hints"), async (importOriginal) => {
+  const actual = await importOriginal();
+  const hints = actual.createAiHintsByCard();
+  return {
+    ...actual,
+    AI_HINTS_BY_CARD: hints,
+    createAiHintsByCard: () => new Map(hints),
+  };
+});
+
+const AI_HINTS_BY_CARD = mockedHints as Map<number, AiCardHint>;
+
 describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
+  it("does not treat an ordinary installed program as an overlapping universal breaker", () => {
+    expect(concreteBreakerCoverageOverlaps(["universal"], [])).toBe(false);
+    expect(concreteBreakerCoverageOverlaps([], ["universal"])).toBe(false);
+    expect(concreteBreakerCoverageOverlaps(["universal"], ["wall"])).toBe(true);
+  });
+
+  it("requires an instance or actual definition to bind a grip action", () => {
+    const card = visibleCard("unbound", { type: "event" });
+    delete card.definitionId;
+    expect(actionMatchesCard({
+      ...playEventAction("event", card, 0),
+      source: "basic_action",
+      payload: {},
+    }, card)).toBe(false);
+  });
+
   it("recognizes the first delayed-install engine as an actionable doctrine provider", () => {
     const shellTraders = shellTradersCard("shell-traders-hand");
     const rentICon = visibleCard("rent-i-con-hand", {
-      definitionId: "onr_classic_031_rent-i-con",
+      definitionId: 35,
       title: "Rent-I-Con",
       type: "program",
       subtypes: ["icebreaker"],
@@ -85,7 +121,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("keeps the second and third delayed-install engines useful through bounded trigger cadence", () => {
     const target = visibleCard("expensive-program-hand", {
-      definitionId: "onr_classic_031_rent-i-con",
+      definitionId: 35,
       title: "Rent-I-Con",
       type: "program",
       subtypes: ["icebreaker"],
@@ -178,7 +214,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("keeps first risky universal breaker install valuable when coverage is missing", () => {
     const blink = visibleCard("blink-1", {
-      definitionId: "test-risky-universal-breaker",
+      definitionId: syntheticCardDefinitionId("test-risky-universal-breaker"),
       title: "Blink",
       type: "program",
       subtypes: ["icebreaker"],
@@ -217,14 +253,14 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("values a second structured random breaker by its independent success gain", () => {
     const installedBlink = visibleCard("blink-installed", {
-      definitionId: "onr_v1_007_blink",
+      definitionId: 219,
       title: "Blink",
       type: "program",
       subtypes: ["icebreaker"],
       memoryCost: 1,
     });
     const secondBlink = visibleCard("blink-2", {
-      definitionId: "onr_v1_007_blink",
+      definitionId: 219,
       title: "Blink",
       type: "program",
       subtypes: ["icebreaker"],
@@ -233,7 +269,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
     });
     const handBuffer = Array.from({ length: 4 }, (_, index) =>
       visibleCard(`buffer-${index}`, {
-        definitionId: `buffer-${index}`,
+        definitionId: syntheticCardDefinitionId(`buffer-${index}`),
         title: "Buffer",
         type: "event",
       }),
@@ -278,7 +314,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("bounds persistent breaker coverage terms to exact tokens", () => {
     const fracter = visibleCard("fracter-1", {
-      definitionId: "test-text-fracter",
+      definitionId: syntheticCardDefinitionId("test-text-fracter"),
       title: "Text Fracter",
       type: "program",
       installCost: 0,
@@ -286,7 +322,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
       rulesText: "Fracter. Break one ice subroutine.",
     });
     const noise = visibleCard("fracteroid-1", {
-      definitionId: "test-fracteroid-noise",
+      definitionId: syntheticCardDefinitionId("test-fracteroid-noise"),
       title: "Fracteroid",
       type: "program",
       installCost: 0,
@@ -321,7 +357,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("values breaker support programs without misclassifying them as duplicate breakers", () => {
     const krash = visibleCard("krash-installed", {
-      definitionId: "onr_v1_039_krash",
+      definitionId: 251,
       title: "Krash",
       type: "program",
       subtypes: ["icebreaker"],
@@ -329,7 +365,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
       memoryCost: 1,
     });
     const lockjaw = visibleCard("lockjaw-1", {
-      definitionId: "onr_proteus_091_lockjaw",
+      definitionId: 149,
       title: "Lockjaw",
       type: "program",
       rulesText:
@@ -338,7 +374,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
       memoryCost: 1,
     });
     const clown = visibleCard("clown-1", {
-      definitionId: "onr_v1_012_clown",
+      definitionId: 224,
       title: "Clown",
       type: "program",
       rulesText: "All ice is encountered with its strength reduced by 1.",
@@ -346,7 +382,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
       memoryCost: 1,
     });
     const vewy = visibleCard("vewy-1", {
-      definitionId: "onr_v1_071_vewy-vewy-quiet",
+      definitionId: 283,
       title: "Vewy Vewy Quiet",
       type: "program",
       rulesText:
@@ -382,7 +418,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("carries a Krash support search through install evaluation and discard", () => {
     const krash = visibleCard("krash-installed", {
-      definitionId: "onr_v1_039_krash",
+      definitionId: 251,
       title: "Krash",
       type: "program",
       subtypes: ["icebreaker"],
@@ -390,7 +426,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
       memoryCost: 1,
     });
     const duplicateKrash = visibleCard("krash-copy", {
-      definitionId: "onr_v1_039_krash",
+      definitionId: 251,
       title: "Krash",
       type: "program",
       subtypes: ["icebreaker"],
@@ -398,7 +434,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
       memoryCost: 1,
     });
     const lockjaw = visibleCard("lockjaw", {
-      definitionId: "onr_proteus_091_lockjaw",
+      definitionId: 149,
       title: "Lockjaw",
       type: "program",
       rulesText:
@@ -407,7 +443,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
       memoryCost: 1,
     });
     const clown = visibleCard("clown", {
-      definitionId: "onr_v1_012_clown",
+      definitionId: 224,
       title: "Clown",
       type: "program",
       rulesText: "All ice is encountered with its strength reduced by 1.",
@@ -415,8 +451,8 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
       memoryCost: 1,
     });
     // Consumer checks must use the same generated roles as the productive path.
-    const rolesForCardId = (id: string | undefined) =>
-      AI_HINTS_BY_CARD.get(id ?? "")?.roles ?? [];
+    const rolesForCardId = (id: number | undefined) =>
+      id === undefined ? [] : AI_HINTS_BY_CARD.get(id)?.roles ?? [];
     const searchChoice = {
       id: "short-circuit-search",
       source: "stack search",
@@ -442,7 +478,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
         },
         rolesForCardId,
         effectsForCardId: (cardId) =>
-          AI_HINTS_BY_CARD.get(cardId ?? "")?.effects ?? [],
+          cardId === undefined ? [] : AI_HINTS_BY_CARD.get(cardId)?.effects ?? [],
       }),
     ).toEqual([lockjaw.definitionId, clown.definitionId]);
 
@@ -491,7 +527,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("devalues a second risky universal breaker when it adds no capability and reduces buffer", () => {
     const secondBlink = visibleCard("blink-2", {
-      definitionId: "test-risky-universal-breaker",
+      definitionId: syntheticCardDefinitionId("test-risky-universal-breaker"),
       title: "Blink",
       type: "program",
       subtypes: ["icebreaker"],
@@ -501,7 +537,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
         "Icebreaker. Break any ice subroutine. Whenever you use this breaker, suffer 2 net damage.",
     });
     const installedBlink = visibleCard("blink-installed", {
-      definitionId: "test-risky-universal-breaker",
+      definitionId: syntheticCardDefinitionId("test-risky-universal-breaker"),
       title: "Blink",
       type: "program",
       subtypes: ["icebreaker"],
@@ -546,7 +582,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("carries breaker marginal utility through a Shell Traders preparation route", () => {
     const dwarf = visibleCard("dwarf-hand", {
-      definitionId: "onr_v1_021_dwarf",
+      definitionId: 233,
       title: "Dwarf",
       type: "program",
       subtypes: ["icebreaker"],
@@ -555,7 +591,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
       rulesText: "Break wall subroutine. +1 strength.",
     });
     const pileDriver = visibleCard("pile-driver-installed", {
-      definitionId: "onr_v1_047_pile-driver",
+      definitionId: 259,
       title: "Pile Driver",
       type: "program",
       subtypes: ["icebreaker", "noisy"],
@@ -607,7 +643,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("allows a deck-supported cheaper breaker variant after primary coverage is complete", () => {
     const dwarf = visibleCard("dwarf-variant", {
-      definitionId: "onr_v1_021_dwarf",
+      definitionId: 233,
       title: "Dwarf",
       type: "program",
       subtypes: ["icebreaker"],
@@ -616,7 +652,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
       rulesText: "1 credit: Break wall subroutine. 1 credit: +1 strength.",
     });
     const pileDriver = visibleCard("pile-driver-installed", {
-      definitionId: "onr_v1_047_pile-driver",
+      definitionId: 259,
       title: "Pile Driver",
       type: "program",
       subtypes: ["icebreaker", "noisy"],
@@ -640,8 +676,8 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
             deckSnapshotId: "breaker-variant-deck",
             side: "runner",
             cards: [
-              { cardId: "onr_v1_021_dwarf", quantity: 2 },
-              { cardId: "onr_v1_047_pile-driver", quantity: 2 },
+              { cardId: 233, quantity: 2 },
+              { cardId: 259, quantity: 2 },
             ],
           },
         } as AiDecisionInput,
@@ -678,8 +714,8 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
             deckSnapshotId: "breaker-variant-deck",
             side: "runner",
             cards: [
-              { cardId: "onr_v1_021_dwarf", quantity: 2 },
-              { cardId: "onr_v1_047_pile-driver", quantity: 2 },
+              { cardId: 233, quantity: 2 },
+              { cardId: 259, quantity: 2 },
             ],
           },
         } as AiDecisionInput,
@@ -703,14 +739,14 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("devalues a second Junkyard BBS as non-additive recovery utility", () => {
     const secondJunkyard = visibleCard("junkyard-2", {
-      definitionId: "onr_v1_165_junkyard-bbs",
+      definitionId: 377,
       title: "Junkyard BBS",
       type: "resource",
       installCost: 0,
       rulesText: "A, [1]: Bring the top card from your trash into your hand.",
     });
     const installedJunkyard = visibleCard("junkyard-installed", {
-      definitionId: "onr_v1_165_junkyard-bbs",
+      definitionId: 377,
       title: "Junkyard BBS",
       type: "resource",
       rulesText: "A, [1]: Bring the top card from your trash into your hand.",
@@ -764,7 +800,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("devalues a functionally similar second search resource", () => {
     const shortCircuit = visibleCard("short-circuit-2", {
-      definitionId: "onr_v1_177_the-short-circuit",
+      definitionId: 389,
       title: "The Short Circuit",
       type: "resource",
       installCost: 2,
@@ -772,7 +808,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
         "A, [1]: Search your stack for a program. Show that program to the Corp, and then bring it into your hand. Reshuffle your stack afterwards.",
     });
     const installedAujourdOui = visibleCard("aujourdoui-installed", {
-      definitionId: "onr_v1_151_aujourdoui",
+      definitionId: 363,
       title: "Aujourd'Oui",
       type: "resource",
       rulesText:
@@ -827,14 +863,14 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("bounds non-additive search utility signals to exact tokens", () => {
     const searchResource = visibleCard("search-resource-1", {
-      definitionId: "onr_v1_177_the-short-circuit",
+      definitionId: 389,
       title: "The Short Circuit",
       type: "resource",
       installCost: 0,
       rulesText: "program_search hidden_zone_tool search",
     });
     const noisyResource = visibleCard("search-resource-noise", {
-      definitionId: "test-search-resource-noise",
+      definitionId: syntheticCardDefinitionId("test-search-resource-noise"),
       title: "Search Resource Noise",
       type: "resource",
       installCost: 0,
@@ -871,7 +907,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("defers recovery-only setup while the visible heap is empty", () => {
     const junkyard = visibleCard("junkyard-empty-heap", {
-      definitionId: "onr_v1_165_junkyard-bbs",
+      definitionId: 377,
       title: "Junkyard BBS",
       type: "resource",
       installCost: 0,
@@ -898,7 +934,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("prepares the first recovery provider for a coherent consumable-coverage engine", () => {
     const junkyard = visibleCard("junkyard-doctrine", {
-      definitionId: "onr_v1_165_junkyard-bbs",
+      definitionId: 377,
       title: "Junkyard BBS",
       type: "resource",
       installCost: 0,
@@ -919,7 +955,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
           engineProviders: [
             {
               providerId: "runner.provider:recovery",
-              cardId: "onr_v1_165_junkyard-bbs",
+              cardId: 377,
               copies: 2,
               capabilities: ["runner.recovery.program_or_hardware"],
               supportCapabilities: [],
@@ -949,14 +985,14 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("keeps recovery as new coverage when another action-gated search family is installed", () => {
     const junkyard = visibleCard("junkyard-after-search", {
-      definitionId: "onr_v1_165_junkyard-bbs",
+      definitionId: 377,
       title: "Junkyard BBS",
       type: "resource",
       installCost: 1,
       rulesText: "A, [1]: Bring the top card from your trash into your hand.",
     });
     const installedProgramSearch = visibleCard("installed-program-search", {
-      definitionId: "test-installed-program-search",
+      definitionId: syntheticCardDefinitionId("test-installed-program-search"),
       title: "Program Search",
       type: "resource",
       rulesText: "A: Search your stack for a program.",
@@ -978,7 +1014,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
           engineProviders: [
             {
               providerId: "runner.provider:recovery",
-              cardId: "onr_v1_165_junkyard-bbs",
+              cardId: 377,
               copies: 1,
               capabilities: ["runner.recovery.program_or_hardware"],
               supportCapabilities: [],
@@ -1007,7 +1043,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("allows recovery utility setup when the visible heap has a target", () => {
     const replacementJunkyard = visibleCard("junkyard-replacement", {
-      definitionId: "onr_v1_165_junkyard-bbs",
+      definitionId: 377,
       title: "Junkyard BBS",
       type: "resource",
       installCost: 0,
@@ -1047,20 +1083,20 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("keeps cumulative damage prevention useful under risky breaker pressure", () => {
     const prevention = visibleCard("prevention-2", {
-      definitionId: "onr_v1_061_shield",
+      definitionId: 273,
       title: "Shield",
       type: "program",
       installCost: 0,
       rulesText: "Prevent 2 net damage.",
     });
     const installedPrevention = visibleCard("prevention-installed", {
-      definitionId: "onr_v1_061_shield",
+      definitionId: 273,
       title: "Shield",
       type: "program",
       rulesText: "Prevent 2 net damage.",
     });
     const installedBlink = visibleCard("blink-installed", {
-      definitionId: "onr_v1_007_blink",
+      definitionId: 219,
       title: "Blink",
       type: "program",
       subtypes: ["icebreaker"],
@@ -1101,8 +1137,8 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
   });
 
   it.each([
-    ["Militech MRAM Chip", "onr_v1_133_militech-mram-chip", 2, 3],
-    ["MRAM Chip", "onr_v1_134_mram-chip", 1, 2],
+    ["Militech MRAM Chip", 345, 2, 3],
+    ["MRAM Chip", 346, 1, 2],
   ])(
     "values %s as proactive option capacity and damage-buffer setup",
     (title, definitionId, installCost, maxHandSizeBonus) => {
@@ -1159,7 +1195,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("values a stable breaker alternative over already installed risky coverage", () => {
     const stableWallBreaker = visibleCard("stable-wall-breaker", {
-      definitionId: "test-stable-wall-breaker",
+      definitionId: syntheticCardDefinitionId("test-stable-wall-breaker"),
       title: "Stable Wall Breaker",
       type: "program",
       subtypes: ["icebreaker", "fracter"],
@@ -1168,7 +1204,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
       rulesText: "Icebreaker. Break wall subroutines.",
     });
     const installedBlink = visibleCard("blink-installed", {
-      definitionId: "test-risky-universal-breaker",
+      definitionId: syntheticCardDefinitionId("test-risky-universal-breaker"),
       title: "Blink",
       type: "program",
       subtypes: ["icebreaker"],
@@ -1210,7 +1246,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("marks useful but currently unavailable run events as timing-blocked", () => {
     const runEvent = visibleCard("run-event-1", {
-      definitionId: "test-run-event",
+      definitionId: syntheticCardDefinitionId("test-run-event"),
       title: "Run Event",
       type: "event",
       cost: 2,
@@ -1242,26 +1278,26 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("recognizes a combined economy and draw engine without false duplicate overlap", () => {
     const saloon = visibleCard("saloon-candidate", {
-      definitionId: "onr_v1_179_silicon-saloon-franchise",
+      definitionId: 391,
       title: "Silicon Saloon Franchise",
       type: "resource",
       installCost: 8,
       rulesText: "A: Gain 1 credit and draw one card.",
     });
     const installedEconomy = visibleCard("installed-economy", {
-      definitionId: "test-installed-economy",
+      definitionId: syntheticCardDefinitionId("test-installed-economy"),
       title: "Installed Economy",
       type: "resource",
       rulesText: "A: Gain 1 credit.",
     });
     const installedDraw = visibleCard("installed-draw", {
-      definitionId: "test-installed-draw",
+      definitionId: syntheticCardDefinitionId("test-installed-draw"),
       title: "Installed Draw",
       type: "resource",
       rulesText: "A: Draw one card.",
     });
     const installedActionEconomy = visibleCard("installed-action-economy", {
-      definitionId: "test-installed-action-economy",
+      definitionId: syntheticCardDefinitionId("test-installed-action-economy"),
       title: "Installed Action Economy",
       type: "resource",
       rulesText: "Action economy: gain 1 credit.",
@@ -1317,12 +1353,12 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("keeps a second identical combined engine redundant", () => {
     const candidate = visibleCard("saloon-second-copy", {
-      definitionId: "onr_v1_179_silicon-saloon-franchise",
+      definitionId: 391,
       type: "resource",
       installCost: 8,
     });
     const installed = visibleCard("saloon-installed-copy", {
-      definitionId: "onr_v1_179_silicon-saloon-franchise",
+      definitionId: 391,
       type: "resource",
     });
     const evaluation = findByInstance(
@@ -1358,7 +1394,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
   });
 
   it("recognizes the same combined engine semantics without a known card id", () => {
-    const definitionId = "test-generic-combined-action-engine";
+    const definitionId = syntheticCardDefinitionId("test-generic-combined-action-engine");
     AI_HINTS_BY_CARD.set(definitionId, {
       cardId: definitionId,
       side: "runner",
@@ -1424,7 +1460,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
   });
 
   it("does not treat a consuming multi-output ability as a persistent engine", () => {
-    const definitionId = "test-consuming-combined-action";
+    const definitionId = syntheticCardDefinitionId("test-consuming-combined-action");
     AI_HINTS_BY_CARD.set(definitionId, {
       cardId: definitionId,
       side: "runner",
@@ -1499,7 +1535,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
   ])(
     "excludes a multi-output ability constrained by %s",
     (mechanic, expectedBlocker) => {
-      const definitionId = `test-limited-combined-action-${mechanic}`;
+      const definitionId = syntheticCardDefinitionId(`test-limited-combined-action-${mechanic}`);
       AI_HINTS_BY_CARD.set(definitionId, {
         cardId: definitionId,
         side: "runner",
@@ -1552,7 +1588,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("creates a desired-reserve funding demand for a payable expensive engine", () => {
     const saloon = visibleCard("saloon-reserve-candidate", {
-      definitionId: "onr_v1_179_silicon-saloon-franchise",
+      definitionId: 391,
       title: "Silicon Saloon Franchise",
       type: "resource",
       installCost: 8,
@@ -1598,12 +1634,12 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("raises the engine target to five credits with an installed risky breaker", () => {
     const saloon = visibleCard("saloon-risk-reserve", {
-      definitionId: "onr_v1_179_silicon-saloon-franchise",
+      definitionId: 391,
       type: "resource",
       installCost: 8,
     });
     const riskyBreaker = visibleCard("installed-risky-breaker", {
-      definitionId: "onr_v1_007_blink",
+      definitionId: 219,
       type: "program",
       subtypes: ["icebreaker"],
       rulesText:
@@ -1640,7 +1676,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("raises the engine target to six credits for a visible remote score threat", () => {
     const saloon = visibleCard("saloon-remote-reserve", {
-      definitionId: "onr_v1_179_silicon-saloon-franchise",
+      definitionId: 391,
       type: "resource",
       installCost: 8,
     });
@@ -1652,7 +1688,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
           legalActions: [installAction("install-saloon-remote", saloon, 8)],
           servers: [
             {
-              id: "remote_1",
+              id: "r1",
               label: "Remote 1",
               ice: [],
               root: [
@@ -1687,7 +1723,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("recognizes Data Creche as a conditional successful-run followup engine", () => {
     const creche = visibleCard("creche-candidate", {
-      definitionId: "onr_v1_123_bodyweight-data-creche",
+      definitionId: 335,
       title: "Bodyweight Data Creche",
       type: "hardware",
       subtypes: ["deck"],
@@ -1736,7 +1772,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
   });
 
   it("admits an exclusive deck replacement that strictly adds coverage", () => {
-    const installedDefinitionId = "test-exclusive-memory-deck";
+    const installedDefinitionId = syntheticCardDefinitionId("test-exclusive-memory-deck");
     AI_HINTS_BY_CARD.set(
       installedDefinitionId,
       exclusiveDeckHint(installedDefinitionId, false),
@@ -1749,7 +1785,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
         rulesText: "Provides +1 MU.",
       });
       const creche = visibleCard("creche-positive-replacement", {
-        definitionId: "onr_v1_123_bodyweight-data-creche",
+        definitionId: 335,
         type: "hardware",
         subtypes: ["deck"],
         installCost: 3,
@@ -1791,7 +1827,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
   });
 
   it("blocks an exclusive deck replacement that would lose unique coverage", () => {
-    const installedDefinitionId = "test-exclusive-hand-buffer-deck";
+    const installedDefinitionId = syntheticCardDefinitionId("test-exclusive-hand-buffer-deck");
     AI_HINTS_BY_CARD.set(
       installedDefinitionId,
       exclusiveDeckHint(installedDefinitionId, true),
@@ -1804,7 +1840,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
         rulesText: "Provides +1 MU and increases maximum hand size by 2.",
       });
       const creche = visibleCard("creche-negative-replacement", {
-        definitionId: "onr_v1_123_bodyweight-data-creche",
+        definitionId: 335,
         type: "hardware",
         subtypes: ["deck"],
         installCost: 3,
@@ -1849,12 +1885,12 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("fails closed when the installed exclusive deck has no assessable coverage", () => {
     const installedDeck = visibleCard("installed-unassessed-deck", {
-      definitionId: "test-unassessed-exclusive-deck",
+      definitionId: syntheticCardDefinitionId("test-unassessed-exclusive-deck"),
       type: "hardware",
       subtypes: ["deck"],
     });
     const creche = visibleCard("creche-unassessed-replacement", {
-      definitionId: "onr_v1_123_bodyweight-data-creche",
+      definitionId: 335,
       type: "hardware",
       subtypes: ["deck"],
       installCost: 3,
@@ -1883,15 +1919,15 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
         replacementAssessment: {
           status: "blocked_unvalued_loss",
           admitted: false,
-          conflictingDefinitionIds: ["test-unassessed-exclusive-deck"],
-          unassessedDefinitionIds: ["test-unassessed-exclusive-deck"],
+          conflictingDefinitionIds: [syntheticCardDefinitionId("test-unassessed-exclusive-deck")],
+          unassessedDefinitionIds: [syntheticCardDefinitionId("test-unassessed-exclusive-deck")],
         },
       },
     });
   });
 });
 
-function exclusiveDeckHint(cardId: string, handSize: boolean) {
+function exclusiveDeckHint(cardId: number, handSize: boolean) {
   return {
     cardId,
     side: "runner" as const,
@@ -1932,7 +1968,7 @@ function exclusiveDeckHint(cardId: string, handSize: boolean) {
 
 function shellTradersCard(instanceId: string): VisibleCard {
   return visibleCard(instanceId, {
-    definitionId: "onr_v1_176_the-shell-traders",
+    definitionId: 388,
     title: "The Shell Traders",
     type: "resource",
     installCost: 0,
@@ -1945,7 +1981,7 @@ function shellTradersStrategicIntent(): RunnerStrategicIntentProfile {
     engineProviders: [
       {
         providerId: "runner.provider:onr_v1_176_the-shell-traders",
-        cardId: "onr_v1_176_the-shell-traders",
+        cardId: 388,
         copies: 3,
         capabilities: ["runner.staging.delayed_install"],
         supportCapabilities: [],

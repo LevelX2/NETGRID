@@ -3,12 +3,18 @@ import { afterEach, expect, it } from "vitest";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import { buildPlanningStateIdentity } from "../../plans/turn-planning-contracts";
+import { assessCorpTerminalAgendaDefense } from "../defense/corp-terminal-agenda-defense";
 import { restoreAiRuntimeCheckpoint } from "../../evaluation/decision-checkpoints/runtime-checkpoint";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 afterEach(resetResidentPlanPortfolioMemory);
-it.each([303, 304])(
-  "keeps exact advance ownership at terminal defense boundary D%i",
-  (d) => {
+it.each([
+  { d: 303, stackExhausted: false },
+  { d: 304, stackExhausted: false },
+  { d: 304, stackExhausted: true },
+])(
+  "keeps the terminal advance defense contract at D$d (empty Stack: $stackExhausted)",
+  ({ d, stackExhausted }) => {
     const cp = JSON.parse(
       readFileSync(
         new URL(
@@ -21,10 +27,15 @@ it.each([303, 304])(
     expect(Object.values(cp.validation).every((value) => value === true)).toBe(
       true,
     );
+    if (stackExhausted) cp.input.playerView.opponent.deckCount = 0;
     const input: AiDecisionInput = {
       ...cp.input,
       ...buildAiDecisionInputDto(cp.input),
     };
+    if (stackExhausted)
+      Object.assign(input, {
+        planningStateIdentity: buildPlanningStateIdentity(input),
+      });
     expect(input.playerView.opponent).not.toHaveProperty("gripOrHq");
     restoreAiRuntimeCheckpoint(
       input,
@@ -40,6 +51,23 @@ it.each([303, 304])(
     if (d === 303) {
       expect(result.actionId).toBe(advance.actionId);
       expect(result.reasonCode).toBe("plan_first.corp.score_agenda");
+    } else if (!stackExhausted) {
+      expect(
+        input.playerView.opponent.rig?.some(
+          (card) => card.definitionId === 271,
+        ),
+      ).toBe(true);
+      expect(input.playerView.opponent.deckCount).toBeGreaterThan(0);
+      expect(
+        assessCorpTerminalAgendaDefense(input, "r2", "terminal-test")
+          ?.best,
+      ).toMatchObject({
+        fundedProtection: false,
+        evidence: expect.arrayContaining([
+          "unknownSubsetReason:unsupported_runner_access_effect",
+        ]),
+      });
+      expect(result.actionId).not.toBe(advance.actionId);
     } else {
       expect(result.actionId).not.toBe(advance.actionId);
       expect(
@@ -49,7 +77,7 @@ it.each([303, 304])(
           actionId: advance.actionId,
           ownerModuleId: "corp.score_agenda",
           disposition: "explicitly_nonproductive",
-          evidenceCode: "corp_terminal_agenda_defense:remote_2:0/1",
+          evidenceCode: "corp_terminal_agenda_defense:r2:0/1",
         }),
       );
     }

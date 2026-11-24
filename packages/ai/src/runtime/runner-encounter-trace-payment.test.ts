@@ -21,10 +21,9 @@ describe("encounter trace payment preserves the quoted access route", () => {
       ),
     );
     const input: AiDecisionInput = cp.input;
-    delete input.legalActions.find((a) => a.type === "continue_run")!.payload!
-      .encounterSubroutineIds;
+    delete input.legalActions.find((a) => a.type === "continue_run")!.encounterSubroutineIds;
     const breaker = input.playerView.own.rig!.find(
-      (c) => c.definitionId === "onr_v1_039_krash",
+      (c) => c.definitionId === 251,
     )!;
     const assess = () =>
       cheaperSafeCurrentTracePayment(
@@ -61,7 +60,7 @@ describe("encounter trace payment preserves the quoted access route", () => {
     if (condition === "missing_trace_quote")
       delete input.playerView.own.runnerTraceSupportQuote;
     const breaker = input.playerView.own.rig!.find(
-      (c) => c.definitionId === "onr_v1_039_krash",
+      (c) => c.definitionId === 251,
     )!;
     expect(
       cheaperSafeCurrentTracePayment(
@@ -90,14 +89,18 @@ describe("encounter trace payment preserves the quoted access route", () => {
     );
     const decision = chooseAiAction(input);
     expect(decision.actionId).toBe(
-      "runner.continue_run.printed_subroutines_trace",
+      "r5.0",
     );
     expect(decision.fallbackUsed).toBe(false);
     expect(
-      decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-    ).toContain("runner.pressure_central");
+      decision.decisionDebug?.planFirstDecision?.portfolio.find(
+        (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+      )?.moduleId,
+    ).toBe("runner.pressure_central");
     expect(
-      decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-    ).toContain("runner.convert_run_window");
+      decision.decisionDebug?.planFirstDecision?.portfolio.find(
+        (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+      )?.moduleId,
+    ).toBe("runner.convert_run_window");
   });
 });

@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_classic_038_gypsytm-schedule-analyzer",
+      42,
     ),
     title: "Gypsy™ Schedule Analyzer",
     side: "runner",

@@ -1,3 +1,4 @@
+import type { RandomPurpose } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
@@ -753,7 +754,7 @@ export function createRunFlowRuntimeHosts(
     const outcomes: string[] = [];
     for (const sourceCardId of sourceCardIds) {
       const definition = definitionFor(state, sourceCardId);
-      const randomPurpose = `v1921.die.${definition.id}.run_start_strength`;
+      const randomPurpose: RandomPurpose = [29, definition.id];
       const dieRoll = Math.floor(nextRandom(state, randomPurpose) * 6) + 1;
       const runStrength = dieRoll;
       state.run.runStartRandomStrengthByBreaker = {
@@ -769,7 +770,7 @@ export function createRunFlowRuntimeHosts(
           v1921RunnerProgramAbility: "run_start_random_strength_bonus",
           sourceDefinitionId: definition.id,
           runStartRandomStrengthSourceCardId: sourceCardId,
-          randomPurpose,
+          randomPurpose: randomPurpose[0],
           v1921DieRoll: dieRoll,
           runStartRandomStrength: runStrength,
           randomCounterAfter: state.randomCounter,

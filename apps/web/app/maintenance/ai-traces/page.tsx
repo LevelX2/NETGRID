@@ -15,10 +15,11 @@ import {
   aiTraceMetaRows,
   aiTraceTitle,
   buildMaintenanceAiTraceEnablePath,
+  buildMaintenanceAiTraceDetailPath,
   buildMaintenanceAiTraceIndexPath,
   buildMaintenanceAiTraceNdjsonExport,
   findForbiddenMaintenanceMarkers,
-  latestMaintenanceAiTraceId,
+  latestMaintenanceAiDecisionIndex,
   mergeMaintenanceAiTraceIndex,
   mergeMaintenanceAiTraceMatches,
   modeLabel,
@@ -44,7 +45,9 @@ export default function AiTraceMaintenancePage() {
   const [traceIndex, setTraceIndex] = useState<MaintenanceAiTraceIndexEntry[]>(
     [],
   );
-  const [selectedTraceId, setSelectedTraceId] = useState("");
+  const [selectedDecisionIndex, setSelectedDecisionIndex] = useState<
+    number | null
+  >(null);
   const [traceDetail, setTraceDetail] =
     useState<MaintenanceAiTraceDetail | null>(null);
   const [loading, setLoading] = useState(false);
@@ -128,7 +131,7 @@ export default function AiTraceMaintenancePage() {
   const loadTraceIndex = async (matchId: string) => {
     if (!matchId) {
       setTraceIndex([]);
-      setSelectedTraceId("");
+      setSelectedDecisionIndex(null);
       setTraceDetail(null);
       return;
     }
@@ -152,10 +155,10 @@ export default function AiTraceMaintenancePage() {
       );
     const traces = payload.traces ?? [];
     setTraceIndex(traces);
-    setSelectedTraceId((current) =>
-      current && traces.some((trace) => trace.traceId === current)
+    setSelectedDecisionIndex((current) =>
+      current && traces.some((trace) => trace.decisionIndex === current)
         ? current
-        : latestMaintenanceAiTraceId(traces),
+        : latestMaintenanceAiDecisionIndex(traces),
     );
   };
 
@@ -182,18 +185,18 @@ export default function AiTraceMaintenancePage() {
     const incoming = payload.traces ?? [];
     if (incoming.length === 0) return;
     setTraceIndex((current) => mergeMaintenanceAiTraceIndex(current, incoming));
-    setSelectedTraceId(latestMaintenanceAiTraceId(incoming));
+    setSelectedDecisionIndex(latestMaintenanceAiDecisionIndex(incoming));
     await loadTraceMatches();
   };
 
-  const loadTraceDetail = async (traceId: string) => {
-    if (!traceId) {
-      setTraceDetail(null);
-      return;
-    }
+  const loadTraceDetail = async (
+    matchId: string,
+    decisionIndex: number,
+    signal: AbortSignal,
+  ) => {
     const response = await auth.request(
-      `/api/storage/maintenance/ai-decision-traces/${encodeURIComponent(traceId)}`,
-      { cache: "no-store" },
+      buildMaintenanceAiTraceDetailPath(matchId, decisionIndex),
+      { cache: "no-store", signal },
     );
     const payload = (await response.json()) as
       | MaintenanceAiTraceDetail
@@ -210,7 +213,7 @@ export default function AiTraceMaintenancePage() {
       throw new Error(
         "KI-Trace-Detail wurde wegen Redaktionsprüfung blockiert.",
       );
-    setTraceDetail(payload as MaintenanceAiTraceDetail);
+    if (!signal.aborted) setTraceDetail(payload as MaintenanceAiTraceDetail);
   };
 
   const refresh = async () => {
@@ -325,15 +328,26 @@ export default function AiTraceMaintenancePage() {
     });
   }, [selectedMatchId, auth.status]);
 
+  const activeDecisionIndex = traceIndex.find(
+    (trace) =>
+      trace.matchId === selectedMatchId &&
+      trace.decisionIndex === selectedDecisionIndex,
+  )?.decisionIndex;
+
   useEffect(() => {
-    if (auth.status !== "authenticated" || !selectedTraceId) {
-      setTraceDetail(null);
+    setTraceDetail(null);
+    if (auth.status !== "authenticated" || activeDecisionIndex === undefined)
       return;
-    }
-    void loadTraceDetail(selectedTraceId).catch((detailError) =>
-      setError(t("m005")),
-    );
-  }, [selectedTraceId, auth.status]);
+    const controller = new AbortController();
+    void loadTraceDetail(
+      selectedMatchId,
+      activeDecisionIndex,
+      controller.signal,
+    ).catch(() => {
+      if (!controller.signal.aborted) setError(t("m005"));
+    });
+    return () => controller.abort();
+  }, [activeDecisionIndex, selectedMatchId, auth.status]);
 
   useEffect(() => {
     if (
@@ -523,17 +537,18 @@ export default function AiTraceMaintenancePage() {
             <div style={traceListWide}>
               {traceIndex.map((trace) => (
                 <button
-                  key={trace.traceId}
+                  key={trace.decisionIndex}
                   type="button"
                   style={
-                    selectedTraceId === trace.traceId
+                    selectedDecisionIndex === trace.decisionIndex
                       ? traceItemSelected
                       : traceItem
                   }
                   onClick={() => {
-                    setSelectedTraceId(trace.traceId);
+                    setSelectedDecisionIndex(trace.decisionIndex);
                     if (
-                      trace.traceId !== latestMaintenanceAiTraceId(traceIndex)
+                      trace.decisionIndex !==
+                      latestMaintenanceAiDecisionIndex(traceIndex)
                     )
                       setFollowPaused(true);
                   }}
@@ -615,7 +630,7 @@ function AiTraceDetailView({ trace }: { trace: MaintenanceAiTraceDetail }) {
               : trace.eventId}
           </p>
         </div>
-        <code>{trace.traceId}</code>
+        <code>{trace.decisionIndex}</code>
       </div>
       <div style={detailGrid}>
         {aiTraceMetaRows(trace, locale).map(([label, value]) => (

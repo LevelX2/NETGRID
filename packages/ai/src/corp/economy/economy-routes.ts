@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import {
   candidateTargetIds,
   exactBasicLiquidCreditCandidate,
@@ -401,8 +402,7 @@ export function assessCorpEconomyFundingRoute(
   const exactIncrementalScoreFunding =
     signal.kind === "parent_funding" &&
     signal.needId.startsWith("score-support:") &&
-    signal.parentPlanInstanceId?.startsWith("plan:corp.score_agenda:") ===
-      true &&
+    signal.parentPlanModuleId === "corp.score_agenda" &&
     signal.delegatedPriorityClass !== undefined &&
     signal.urgentForScore === true &&
     signal.scoreFundingMilestone?.deadline === "multi_turn" &&
@@ -428,8 +428,7 @@ export function assessCorpEconomyFundingRoute(
     signal.kind === "parent_funding" &&
     (signal.needId.startsWith("ambush-funding:") ||
       signal.needId.startsWith("ambush-defense-funding:")) &&
-    signal.parentPlanInstanceId?.startsWith("plan:corp.ambush_and_bluff:") ===
-      true &&
+    signal.parentPlanModuleId === "corp.ambush_and_bluff" &&
     signal.parentNeedId === signal.needId &&
     signal.delegatedPriorityClass === undefined &&
     (signal.parentPriorityClass === "P5" ||
@@ -605,7 +604,7 @@ function economyDevelopmentStepValue(
     return Math.max(1, signal.payback.projectedNetCredits * 10);
 
   const targetServerId = candidateTargetIds(candidate).find(
-    (targetId) => targetId === "new_remote" || targetId.startsWith("remote_"),
+    (targetId) => targetId === "new_remote" || isRemoteServerId(targetId),
   );
   if (!targetServerId) return 10;
   if (targetServerId === "new_remote") {
@@ -618,7 +617,14 @@ function economyDevelopmentStepValue(
     (candidateServer) => candidateServer.id === targetServerId,
   );
   if (!server) return 10;
-  if (server.root.length > 0) return 10;
+  if (
+    server.root.length > 0 &&
+    !(
+      signal.riskAdjustment?.fundedLightProtection &&
+      server.root.every((card) => card.known && card.type === "upgrade")
+    )
+  )
+    return 10;
   return 60 + Math.min(3, server.ice.length) * 10;
 }
 

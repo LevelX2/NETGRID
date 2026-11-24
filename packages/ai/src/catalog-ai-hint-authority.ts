@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import { cardSpecAiHintsGeneratedData as generatedCardSpecAiHints } from "@netgrid/runtime-data/card-spec-ai-hints";
 import {
   CARD_SPEC_AI_HINT_ARTIFACT_SCHEMA_VERSION,
@@ -13,19 +14,45 @@ export { validateGeneratedArtifact } from "./generated-ai-hint-artifact-validati
 export type { AiCardHint, AiRuntimeValueHintKey, AiRuntimeValueHints };
 
 const generatedArtifact = validateGeneratedArtifact(generatedCardSpecAiHints);
-export const AI_HINTS_BY_CARD = new Map<string, AiCardHint>();
-const derivedCardSpecAiHintIds = new Set(generatedArtifact.cardIds);
+const canonicalHints = new Map<CardDefinitionId, AiCardHint>();
+const recordsByCardId = new Map(
+  generatedArtifact.cards.map((record) => [record.cardId, record]),
+);
 
-export function cardIdHasGeneratedCardSpecAiHint(cardId: string): boolean {
-  return derivedCardSpecAiHintIds.has(cardId);
+export function cardIdHasGeneratedCardSpecAiHint(cardId: CardDefinitionId): boolean {
+  return recordsByCardId.has(cardId);
 }
 
 for (const record of generatedArtifact.cards) {
-  AI_HINTS_BY_CARD.set(record.cardId, deepFreezeCatalogReadModel(record.hint));
+  canonicalHints.set(record.cardId, deepFreezeCatalogReadModel(record.hint));
 }
 
-export function createAiHintsByCard(): Map<string, AiCardHint> {
-  return new Map(AI_HINTS_BY_CARD);
+export const AI_HINTS_BY_CARD: ReadonlyMap<CardDefinitionId, AiCardHint> = Object.freeze({
+  get size() {
+    return canonicalHints.size;
+  },
+  get: canonicalHints.get.bind(canonicalHints),
+  has: canonicalHints.has.bind(canonicalHints),
+  entries: canonicalHints.entries.bind(canonicalHints),
+  keys: canonicalHints.keys.bind(canonicalHints),
+  values: canonicalHints.values.bind(canonicalHints),
+  [Symbol.iterator]: canonicalHints[Symbol.iterator].bind(canonicalHints),
+  forEach(
+    callback: (
+      value: AiCardHint,
+      key: CardDefinitionId,
+      map: ReadonlyMap<CardDefinitionId, AiCardHint>,
+    ) => void,
+    thisArg?: unknown,
+  ) {
+    for (const [key, hint] of canonicalHints)
+      callback.call(thisArg, hint, key, AI_HINTS_BY_CARD);
+  },
+});
+
+/** An owned copy for callers constructing a custom hint context. */
+export function createAiHintsByCard(): Map<CardDefinitionId, AiCardHint> {
+  return new Map(canonicalHints);
 }
 
 export type CatalogAiHintProvenance = {
@@ -49,7 +76,7 @@ export type CatalogAiHintReadModel = {
 };
 
 export type CatalogAiHintSummaryReadModel = {
-  cardId: string;
+  cardId: CardDefinitionId;
   aiSupportStatus: AiCardHint["aiSupportStatus"];
   mechanicalFactsFound: boolean;
   hasClassifications: boolean;
@@ -58,14 +85,12 @@ export type CatalogAiHintSummaryReadModel = {
 
 /** Keyed server/API detail view from the canonical generated artifact. */
 export function catalogAiHintReadModelForCardId(
-  cardId: string,
+  cardId: CardDefinitionId,
 ): CatalogAiHintReadModel | undefined {
   const hint = AI_HINTS_BY_CARD.get(cardId);
   if (hint === undefined) return undefined;
 
-  const record = generatedArtifact.cards.find(
-    (candidate) => candidate.cardId === cardId,
-  );
+  const record = recordsByCardId.get(cardId);
   if (record === undefined)
     throw new Error(`missing_generated_ai_hint_provenance: ${cardId}`);
   return Object.freeze({
@@ -89,7 +114,7 @@ export function catalogAiHintReadModelForCardId(
 
 /** Primitive-only list view; never clones or exposes the legacy hint graph. */
 export function catalogAiHintSummaryForCardId(
-  cardId: string,
+  cardId: CardDefinitionId,
 ): CatalogAiHintSummaryReadModel | undefined {
   const hint = AI_HINTS_BY_CARD.get(cardId);
   if (hint === undefined) return undefined;

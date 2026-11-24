@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import standardDeckCatalog from "../../../../data/decks/standard-deck-catalog-1.0.0.json";
 import type {
@@ -79,10 +80,10 @@ describe("strategic runtime context", () => {
       deckSnapshotId: "conditional-wall-bypass-contract",
       side: "runner",
       cards: [
-        { cardId: "onr_v1_006_black-dahlia", quantity: 1 },
-        { cardId: "onr_v1_016_cyfermaster", quantity: 1 },
-        { cardId: "onr_v1_094_inside-job", quantity: 2 },
-        { cardId: "onr_v1_107_romp-through-hq", quantity: 2 },
+        { cardId: 218, quantity: 1 },
+        { cardId: 228, quantity: 1 },
+        { cardId: 306, quantity: 2 },
+        { cardId: 319, quantity: 2 },
       ],
     };
     const strategyProfile = buildDeckStrategyProfile(snapshot);
@@ -151,7 +152,7 @@ describe("strategic runtime context", () => {
           server("rd"),
           server("archives"),
           server(
-            "remote_1",
+            "r1",
             [],
             [
               visibleCard("agenda-remote", "corp", "agenda", {
@@ -222,10 +223,10 @@ describe("strategic runtime context", () => {
           action("trigger", "corp", "trigger_ability", 0, {
             sourceDefinitionId:
               strategyId === "corp.deck_recycle_engine"
-                ? "onr_v1_188_ai-chief-financial-officer"
+                ? 400
                 : strategyId === "corp.action_tempo"
-                  ? "onr_proteus_001_ai-board-member"
-                  : "onr_classic_025_strategic-planning-group",
+                  ? 59
+                  : 29,
           }),
           action("advance", "corp", "advance_card", 1),
         ],
@@ -262,7 +263,7 @@ describe("strategic runtime context", () => {
           server("rd"),
           server("archives"),
           server(
-            "remote_1",
+            "r1",
             [],
             [
               visibleCard("agenda-remote", "corp", "agenda", {
@@ -344,13 +345,22 @@ describe("strategic runtime context", () => {
   });
 
   it("hard-blocks a Corp scoreline when the deck cannot reach the agenda win target", () => {
+    const view = playerView("corp", {
+      credits: 4,
+      ownAgendaPoints: 4,
+      opponentAgendaPoints: 2,
+    });
+    const corporateWar = (copy: number): VisibleCard => ({
+      instanceId: "corporate-war-" + copy,
+      definitionId: 408,
+      known: true,
+      type: "agenda",
+    });
+    view.own.scoreArea = [corporateWar(1), corporateWar(2)];
+    view.opponent.scoreArea = [corporateWar(3)];
     const context = buildStrategicRuntimeContext({
       side: "corp",
-      playerView: playerView("corp", {
-        credits: 4,
-        ownAgendaPoints: 3,
-        opponentAgendaPoints: 6,
-      }),
+      playerView: view,
       legalActions: [action("draw", "corp", "draw_card", 0)],
       strategyProfile: multiStrategyProfile("corp", {
         primary: ["corp.fast_advance", "corp.tag_trace_punish"],
@@ -365,7 +375,7 @@ describe("strategic runtime context", () => {
       deckSnapshot: {
         deckSnapshotId: "three-corporate-war",
         side: "corp",
-        cards: [{ cardId: "onr_v1_196_corporate-war", quantity: 3 }],
+        cards: [{ cardId: 408, quantity: 3 }],
       },
     });
 
@@ -617,7 +627,7 @@ function score(
     supportGaps: [],
     anchorEvidence: [
       {
-        cardId: "fixture-anchor",
+        cardId: syntheticCardDefinitionId("fixture-anchor"),
         quantity: 1,
         source: "derivedStrategyAnchor",
         strategyId,
@@ -818,7 +828,7 @@ function visibleCard(
 ): VisibleCard {
   return {
     instanceId,
-    definitionId: instanceId,
+    definitionId: syntheticCardDefinitionId(instanceId),
     title: instanceId,
     known: true,
     owner,

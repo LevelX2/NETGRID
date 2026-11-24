@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type {
   AiDecisionInput,
   AiDecisionScoreComponent,
@@ -15,7 +16,7 @@ import {
   corpLegalActions,
   corpRemoteScoringStrategyWantsRemoteDevelopment,
   corpTriageVisibleAgendaPoints,
-  inputWithOpponentDefaults,
+  requireCorpTriageOpponentView,
   legalEconomyActionExists,
   normalizedCorpBoardTriageValue,
 } from "./corp-scoreline/semantic-runtime-corp-board-triage-actions";
@@ -50,7 +51,7 @@ import {
   corpScorelineAllowsMultiTurnDevelopment,
   corpScorelineFeasibilityForDecisionInput,
 } from "./corp-scoreline-feasibility";
-import { decisionDerivedValue } from "./decision-derived-cache";
+import { decisionDerivedValue } from "../decision-derived-cache";
 
 export type {
   CorpBoardTriage,
@@ -64,9 +65,9 @@ export { normalizedCorpBoardTriageValue } from "./corp-scoreline/semantic-runtim
 const CORP_BOARD_TRIAGE_DECISION_CACHE_KEY = Symbol("corp-board-triage");
 type CorpBoardTriageDecisionCache = WeakMap<object, CorpBoardTriage>;
 
-export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
+export function semanticRuntimeCorpBoardTriage(
   input: AiDecisionInput,
-  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  dependencies: CorpBoardTriageDependencies,
 ): CorpBoardTriage {
   const cache = decisionDerivedValue<CorpBoardTriageDecisionCache>(
     input,
@@ -80,9 +81,9 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
   return triage;
 }
 
-function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
+function buildSemanticRuntimeCorpBoardTriage(
   input: AiDecisionInput,
-  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  dependencies: CorpBoardTriageDependencies,
 ): CorpBoardTriage {
   const actions = corpLegalActions(input).map((action) =>
     scoredLegalAction(input, action, dependencies),
@@ -153,7 +154,7 @@ function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
     return forceScorelineTriage(forcedScorelinePressure, currentCredits);
   }
 
-  const pressureInput = inputWithOpponentDefaults(input);
+  const pressureInput = requireCorpTriageOpponentView(input);
   const centralPressure = highestPriorityTriageCentralPressure(pressureInput);
   const centralPressureSeverity = centralPressure
     ? centralTriageSeverity(pressureInput, centralPressure)
@@ -383,18 +384,18 @@ function corpScoreNowAgendaPoints(
   return source ? corpTriageVisibleAgendaPoints(source) : 0;
 }
 
-function openingCentralBaselineTriage<TConsumer extends string>(
+function openingCentralBaselineTriage(
   input: AiDecisionInput,
   actions: readonly ScoredLegalAction[],
   currentCredits: number,
-  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  dependencies: CorpBoardTriageDependencies,
 ): CorpBoardTriage | undefined {
   if (typeof input.actionNumber !== "number" || input.actionNumber > 8) {
     return undefined;
   }
   const hasDevelopedRemote = input.playerView.servers.some(
     (server) =>
-      server.id.startsWith("remote_") &&
+      isRemoteServerId(server.id) &&
       (server.ice.length > 0 || server.root.length > 0),
   );
   if (hasDevelopedRemote) return undefined;
@@ -402,7 +403,7 @@ function openingCentralBaselineTriage<TConsumer extends string>(
     (entry) =>
       entry.action.type === "install_card" &&
       (entry.serverId === "new_remote" ||
-        entry.serverId?.startsWith("remote_")) &&
+        isRemoteServerId(entry.serverId)) &&
       entry.action.payload?.placement !== "root_agenda",
   );
   if (!hasCompetingEmptyRemoteDevelopment) return undefined;
@@ -432,12 +433,10 @@ function openingCentralBaselineTriage<TConsumer extends string>(
   };
 }
 
-export function semanticRuntimeCorpBoardTriageActionComponent<
-  TConsumer extends string,
->(
+export function semanticRuntimeCorpBoardTriageActionComponent(
   input: AiDecisionInput,
   action: LegalAction,
-  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  dependencies: CorpBoardTriageDependencies,
   actionSemanticCandidate?: ActionSemanticCandidate,
 ): AiDecisionScoreComponent | undefined {
   return semanticRuntimeCorpBoardTriageActionComponentForTriage(

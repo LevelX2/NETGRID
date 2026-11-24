@@ -16,7 +16,7 @@ export type CorpHandManagementSignal = {
     | "rd_reorder_window"
     | "optional_start_draw_window"
     | "preserve_draw_horizon";
-  sourceDefinitionIds?: string[];
+  sourceDefinitionIds?: number[];
   sourceInstanceId?: string;
   actionIds?: string[];
   exactActionRoute?: boolean;
@@ -77,7 +77,7 @@ export type CorpHandManagementSignal = {
     choiceId: string;
     stateVersion: number;
     sourceCardInstanceId: string;
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
     optionIds: string[];
     selectedOptionIds: string[];
     effectiveAccessCount: number;

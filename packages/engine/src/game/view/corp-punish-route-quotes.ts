@@ -1,6 +1,8 @@
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
+  isCanonicalCapabilityId,
+  type CanonicalCapabilityId,
   type CardInstanceId,
   type CorpPunishRouteIncompleteReason,
   type CorpPunishRouteQuote,
@@ -12,6 +14,7 @@ import {
   type GameEvent,
   type GameState,
   type LegalAction,
+  type TraceId,
 } from "@netgrid/shared";
 import {
   CapabilityIdentityError,
@@ -881,7 +884,7 @@ function certifyExactTraceTagResponse(
 
 function exactCorpTracePaymentCredits(
   event: GameEvent,
-  traceId: string,
+  traceId: TraceId,
   bid: number,
 ): number | undefined {
   const {
@@ -1027,7 +1030,7 @@ export function corpPunishRouteRequestFingerprint(
       step.kind,
       step.sourceCardInstanceId,
       step.sourceCapabilityBindingKind,
-      step.sourceCapabilityId,
+      String(step.sourceCapabilityId),
       ...(step.currentLegalActionId ? [step.currentLegalActionId] : []),
     ]),
   ]);
@@ -1312,7 +1315,7 @@ function certifyActivatedStep(
 function certifyEncounterTagStep(
   state: GameState,
   request: CorpPunishRouteQuoteRequest["steps"][number],
-  definition: (typeof CARD_DEFINITIONS_BY_ID)[string],
+  definition: (typeof CARD_DEFINITIONS_BY_ID)[number],
 ):
   | { ok: true; step: CertifiedStep }
   | { ok: false; reason: CorpPunishRouteIncompleteReason }
@@ -1373,7 +1376,7 @@ function certifyEncounterTagStep(
 function certifyHardwareTrashStep(
   state: GameState,
   request: CorpPunishRouteQuoteRequest["steps"][number],
-  definition: (typeof CARD_DEFINITIONS_BY_ID)[string],
+  definition: (typeof CARD_DEFINITIONS_BY_ID)[number],
 ):
   | { ok: true; step: CertifiedStep }
   | { ok: false; reason: CorpPunishRouteIncompleteReason } {
@@ -1567,9 +1570,9 @@ function exactRequestedHardwareTrashAction(
 }
 
 function onPlayCapability(
-  definition: (typeof CARD_DEFINITIONS_BY_ID)[string] & {},
+  definition: (typeof CARD_DEFINITIONS_BY_ID)[number] & {},
   bindingKind: "card_spec_capability_key",
-  capabilityId: string,
+  capabilityId: CanonicalCapabilityId,
 ): OnPlayCardAbilityImplementation | undefined {
   return onPlayAbilityForCapabilityIdentity(definition, {
     kind: bindingKind,
@@ -1898,6 +1901,7 @@ function quoteOneShotDamagePrevention(
                   damageType: effect.damageType,
                   amount: effect.amount,
                   source: step.quote.sourceCardInstanceId,
+                  randomSource: ["c", step.quote.sourceCardDefinitionId, step.quote.sourceCardInstanceId],
                 }),
               },
             ]
@@ -2084,7 +2088,7 @@ function isCorpPunishRouteQuoteRequest(request: unknown): boolean {
         step.order === index &&
         validStepKind(step.kind) &&
         nonblank(step.sourceCardInstanceId) &&
-        nonblank(step.sourceCapabilityId) &&
+        isCanonicalCapabilityId(step.sourceCapabilityId) &&
         (step.currentLegalActionId === undefined ||
           (index === 0 && nonblank(step.currentLegalActionId))),
     )

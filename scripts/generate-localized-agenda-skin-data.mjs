@@ -485,7 +485,7 @@ await Promise.all([
 
 const cards = [];
 for (const sourceCard of agendas) {
-  const localization = localizations[sourceCard.cardId];
+  const localization = localizations[sourceCard.printingId];
   if (!localization) {
     throw new Error(`Missing German localization for ${sourceCard.cardId}.`);
   }
@@ -570,7 +570,7 @@ console.log(
 );
 
 async function generateProceduralArt(sourceCard, localization, outPath) {
-  const svgPath = path.join(tmpArtRoot, `${sourceCard.cardId}.svg`);
+  const svgPath = path.join(tmpArtRoot, `${sourceCard.printingId}.svg`);
   await writeFile(svgPath, artSvg(sourceCard, localization), "utf8");
   execFileSync("magick", [svgPath, outPath], { stdio: "inherit" });
 }
@@ -602,7 +602,7 @@ function plainText(blocks) {
 
 function artSvg(sourceCard, localization) {
   const [dark, primary, secondary, accent] = localization.palette;
-  const seed = hashString(sourceCard.cardId);
+  const seed = hashString(sourceCard.printingId);
   const nodes = Array.from({ length: 34 }, (_, index) => {
     const localSeed = seed + index * 7919;
     return {

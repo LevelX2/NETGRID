@@ -63,7 +63,7 @@ it("binds the exact hidden Stack target and sufficient MU sacrifice before the r
   const choice = chooseAiAction(before.input);
   expect(choice.selectedChoices).toMatchObject({
     choiceId: before.input.playerView.pendingChoice!.choiceId,
-    selectedOptionIds: ["card_runner_onr_classic_031_rent-i-con_3"],
+    selectedOptionIds: ["card_c7v"],
   });
   const continued = residentPlanPortfolioSnapshot(before.input)!;
   expect(continued.rootForegroundInstanceId).toBe(root);
@@ -85,7 +85,7 @@ it("binds the exact hidden Stack target and sufficient MU sacrifice before the r
   const binding = state.gap.directSearchChoiceBindings[0]!;
   expect(state.selectedSearchStateVersion).toBe(225);
   expect(binding.targetCardInstanceId).toBe(
-    "runner_onr_classic_031_rent-i-con_3",
+    "c7v",
   );
   expect(binding.resolvedSearchChoice.stateVersion).toBe(225);
   expect(binding.installMemorySacrificeBinding.requiredMemoryToFree).toBe(1);
@@ -103,7 +103,7 @@ it("binds the exact hidden Stack target and sufficient MU sacrifice before the r
     runtime,
   );
   const decision = chooseAiAction(next.input);
-  expect(decision.actionId).toBe("runner.resolve_choice");
+  expect(decision.actionId).toBe("rn");
   expect(decision.selectedChoices).toEqual({
     choiceId: next.input.playerView.pendingChoice!.choiceId,
     selectedOptionIds: sacrifices.map((c) => "card_" + c.cardInstanceId),

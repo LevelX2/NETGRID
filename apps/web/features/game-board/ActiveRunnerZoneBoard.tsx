@@ -1,13 +1,9 @@
 "use client";
 
+import { type SelectionId } from "../../lib/presented-player-view";
 import type { CSSProperties } from "react";
-import type {
-  LegalAction,
-  PlayerView,
-  Side,
-  VisibleCard,
-  VisibleRunnerPaymentSupportAbility,
-} from "@netgrid/shared";
+import type { Side, VisibleCard, VisibleRunnerPaymentSupportAbility } from "@netgrid/shared";
+import type { LegalAction, PlayerView } from "../../lib/presented-player-view";
 import { useTranslations } from "use-intl/react";
 
 import type { BoardHighlight } from "../../app/action-cues";
@@ -36,7 +32,7 @@ type RigGroup = {
 };
 
 type DiscardOption = {
-  id: string;
+  id: SelectionId;
 };
 
 export function ActiveRunnerZoneBoard({
@@ -67,7 +63,7 @@ export function ActiveRunnerZoneBoard({
   actionDisabled: boolean;
   activeHighlight: BoardHighlight | null;
   selectedActionContext: ActionContext | null;
-  selectedDiscardOptionIdSet: ReadonlySet<string>;
+  selectedDiscardOptionIdSet: ReadonlySet<SelectionId>;
   ownRigGroups: RigGroup[];
   ownRigCardsStyle: CSSProperties;
   handCardsStyle: CSSProperties;
@@ -78,7 +74,7 @@ export function ActiveRunnerZoneBoard({
   cardActionsFor(card: VisibleCard): LegalAction[];
   enrichCard(card: VisibleCard): DisplayVisibleCard;
   discardOptionForCard(card: VisibleCard): DiscardOption | null;
-  toggleDiscardOption(optionId: string): void;
+  toggleDiscardOption(optionId: SelectionId): void;
   fieldChoiceCardProps(card: VisibleCard): FieldChoiceCardProps;
   paymentSupportPreselection: HiddenResourcePaymentPreselection | null;
   onAction(action: LegalAction): void;

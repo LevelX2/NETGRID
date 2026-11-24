@@ -1,3 +1,4 @@
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { runnerPartialProgramSearchProfile } from "../../runtime/runner-partial-program-search-facts";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -30,7 +31,7 @@ export function runnerAffordableCoverageSearchActionIds(
     const action = input.legalActions.find((a) => a.actionId === actionId);
     const candidate = candidates.find((c) => c.actionId === actionId);
     if (
-      !action ||
+      !actionMatchesCurrentDecision(input, action) ||
       runnerPartialProgramSearchProfile(input, binding?.sourceDefinitionId) !==
         undefined ||
       candidate?.functionalEffects?.some(

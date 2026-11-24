@@ -82,13 +82,23 @@ describe("current simulation quality gate", () => {
     const benchmark = runDoctrineQualityBenchmark({ seeds: ["metric-units"] });
     expect(benchmark.safety).toMatchObject({
       illegalActionDelta: 1,
-      runtimeFailureDelta: 1,
+      runtimeFailureEventDelta: 1,
       timeoutRateDelta: 0.5,
     });
     expect(evaluateSimulationQualityGate(benchmark.candidateRun, benchmark.baselineRun))
       .toMatchObject({ holdoutDelta: { timeoutRate: 0.5 } });
     expect(evaluateDoctrineQualityGate(benchmark, { maxTimeoutRateDelta: 0.5 }).hardFailures)
-      .toEqual(["candidate_illegal_actions:1", "candidate_runtime_failures:1"]);
+      .toEqual(["candidate_illegal_actions:1", "candidate_runtime_failure_events:1"]);
+  });
+
+  it("rejects even one excess timeout in a long benchmark", () => {
+    const baseline = simulationRun({ games: 10_000 });
+    const candidate = simulationRun({ games: 10_000, timeouts: 1, timeoutRate: 0.0001 });
+    expect(evaluateSimulationQualityGate(candidate, baseline)).toMatchObject({
+      accepted: false,
+      reason: "holdout_regression_on_safety_or_replay",
+      holdoutDelta: { timeoutRate: 0.0001 },
+    });
   });
 
   it("reports zero actions at the action limit and fingerprints different limits", () => {
@@ -140,8 +150,8 @@ describe("current simulation quality gate", () => {
       id: "custom-runner",
       name: "Custom Runner",
       side: "runner" as const,
-      identity: "runner_identity",
-      cards: [{ id: "simple_fracter", quantity: 2 }],
+      identity: 587,
+      cards: [{ id: 597, quantity: 2 }],
     };
     const customId = runSimulationProfile(randomProfile, seeds, {
       runnerDeck,
@@ -162,7 +172,7 @@ describe("current simulation quality gate", () => {
       runSimulationProfile(randomProfile, seeds, {
         runnerDeck: {
           ...runnerDeck,
-          cards: [{ id: "simple_fracter", quantity: 3 }],
+          cards: [{ id: 597, quantity: 3 }],
         },
       }).simulationId,
     ).not.toBe(customId);

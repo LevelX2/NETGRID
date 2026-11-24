@@ -1,3 +1,5 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
+import { planInstanceIdForProposal } from "./plan-instance";
 import {
   ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION,
   type AiDecisionInput,
@@ -29,12 +31,12 @@ import {
   type PlanAssessment,
   type PriorityClass,
 } from "./plan-assessment";
+import { isStandardEndTurnCandidate } from "./plan-early-end-turn";
 import type { PlanProposal } from "./plan-kernel-types";
 import { PlanResolutionFailure } from "./plan-resolution-failure";
 import {
   createSidePlanRegistry,
   enumerateCurrentPlanSchedulerRoutes,
-  isStandardEndTurnCandidate,
   runPlanScheduler,
   type PlanModule,
   type PlanSchedulerContext,
@@ -52,12 +54,50 @@ describe("shared plan scheduler", () => {
     };
     const standardEndTurn = {
       ...cardEndTurn,
-      actionId: "runner.end_turn",
+      actionId: "r9",
       sourceKind: "game_rule" as const,
     };
 
     expect(isStandardEndTurnCandidate(cardEndTurn)).toBe(false);
     expect(isStandardEndTurnCandidate(standardEndTurn)).toBe(true);
+  });
+
+  it("rejects a stale Engine offer behind an otherwise current selected route", () => {
+    const action = candidate("corp-credit", "corp");
+    const schedulerContext = context("corp", [action]);
+    schedulerContext.input.legalActions[0]!.expiresAtStateVersion -= 1;
+    const registry = createSidePlanRegistry({
+      side: "corp",
+      priorityPolicy: CORP_PLAN_PRIORITY_POLICY,
+      modules: [module("corp", "corp.economy", "P5", action)],
+    });
+
+    expect(() =>
+      runPlanScheduler({
+        context: schedulerContext,
+        registry,
+        resolveEngineWindow: () => undefined,
+      }),
+    ).toThrow("missing_plan_module_coverage");
+  });
+
+  it("rejects an assessment bound to another resident plan", () => {
+    const action = candidate("corp-credit", "corp");
+    const drifted = module("corp", "corp.economy", "P5", action);
+    drifted.assess = () => assessment("p3260cqcpd55zebb0q6jxqe90w", "corp", "P1");
+    const registry = createSidePlanRegistry({
+      side: "corp",
+      priorityPolicy: CORP_PLAN_PRIORITY_POLICY,
+      modules: [drifted, module("corp", "corp.draw_cycle", "P5", action)],
+    });
+
+    expect(() =>
+      runPlanScheduler({
+        context: context("corp", [action]),
+        registry,
+        resolveEngineWindow: () => undefined,
+      }),
+    ).toThrow("invalid_plan_identity");
   });
 
   it.each([
@@ -79,7 +119,7 @@ describe("shared plan scheduler", () => {
     if (result.lane === "plan") {
       expect(result.route.head.actionId).toBe(`${side}-credit`);
       expect(result.portfolio.executorInstanceId).toBe(
-        `plan:${side}.economy:general`,
+        planInstanceIdForProposal({ moduleId: `${side}.economy`, dedupeKey: "general" }),
       );
     }
   });
@@ -467,7 +507,7 @@ describe("shared plan scheduler", () => {
     });
     expect(enumerateCurrentPlanSchedulerRoutes(params).issues).toEqual([
       {
-        instanceId: "plan:corp.defend_servers:general",
+        instanceId: "pepx1igf7a6vgcjpi9jntyhs5g",
         moduleId: "corp.defend_servers",
         code: "no_current_compatible_candidate",
       },
@@ -490,7 +530,7 @@ describe("shared plan scheduler", () => {
         code: failure.code,
         cause: failure,
         context: expect.objectContaining({
-          planInstanceId: "plan:corp.defend_servers:general",
+          planInstanceId: "pepx1igf7a6vgcjpi9jntyhs5g",
           stateVersion: schedulerContext.input.playerView.stateVersion,
           unresolvedActionIds: [blocked.actionId],
           removalCondition: expect.stringContaining(defense.moduleId),
@@ -506,7 +546,7 @@ describe("shared plan scheduler", () => {
       semanticActionType: "play.operation",
       sourceKind: "card" as const,
       sourceCardInstanceId: "copy-a",
-      sourceDefinitionId: "same-operation",
+      sourceDefinitionId: syntheticCardDefinitionId("same-operation"),
     };
     const copyB = {
       ...copyA,
@@ -546,7 +586,7 @@ describe("shared plan scheduler", () => {
 
     expect(choose([copyB, copyA])).toEqual({
       actionId: "action-z",
-      executor: "plan:corp.economy:general",
+      executor: "p4e71671o1xr33brpcqfj9p953",
       capability: "play-equivalent-operation",
     });
     expect(choose([copyA, copyB])).toEqual(choose([copyB, copyA]));
@@ -567,7 +607,7 @@ describe("shared plan scheduler", () => {
         scope: "tactical",
         evidenceCode: "runner_visible_remote_window",
         guarantee: "visible_state_forced",
-        target: { kind: "server", id: "remote_1" },
+        target: { kind: "server", id: "r1" },
       },
     ];
     const tactical = module("runner", "runner.contest_remote", "P4", action);
@@ -578,7 +618,7 @@ describe("shared plan scheduler", () => {
       return [
         {
           ...proposal("runner", "runner.contest_remote"),
-          target: { kind: "server" as const, id: "remote_1" },
+          target: { kind: "server" as const, id: "r1" },
         },
       ];
     });
@@ -615,14 +655,14 @@ describe("shared plan scheduler", () => {
       label: "foreign plan",
       signal: {
         planModuleId: "runner.pressure_central" as const,
-        target: { kind: "server" as const, id: "remote_1" },
+        target: { kind: "server" as const, id: "r1" },
       },
     },
     {
       label: "foreign target",
       signal: {
         planModuleId: "runner.contest_remote" as const,
-        target: { kind: "server" as const, id: "remote_2" },
+        target: { kind: "server" as const, id: "r2" },
       },
     },
     {
@@ -630,7 +670,7 @@ describe("shared plan scheduler", () => {
       signal: {
         planModuleId: "runner.contest_remote" as const,
         planDedupeKey: "other-remote",
-        target: { kind: "server" as const, id: "remote_1" },
+        target: { kind: "server" as const, id: "r1" },
       },
     },
     {
@@ -662,7 +702,7 @@ describe("shared plan scheduler", () => {
       tactical.discover = () => [
         {
           ...proposal("runner", "runner.contest_remote"),
-          target: { kind: "server", id: "remote_1" },
+          target: { kind: "server", id: "r1" },
         },
       ];
       tactical.assess = (instance) => ({
@@ -708,7 +748,7 @@ describe("shared plan scheduler", () => {
         scope: "tactical",
         evidenceCode: "stale_remote",
         guarantee: "visible_state_forced",
-        target: { kind: "server", id: "remote_1" },
+        target: { kind: "server", id: "r1" },
       },
     ];
     const discover = vi.fn();
@@ -852,7 +892,7 @@ describe("shared plan scheduler", () => {
       expect.objectContaining({
         code: "step_capability_mismatch",
         context: expect.objectContaining({
-          planInstanceId: "plan:runner.first:general",
+          planInstanceId: "pc9dqv7q9rh8ihqp10so3t39n",
         }),
       }),
     );
@@ -1635,7 +1675,7 @@ describe("shared plan scheduler", () => {
   it("selects an exact support leaf with the validated priority of its persistent parent", () => {
     const credit = candidate("corp-credit", "corp");
     const competingSetup = candidate("corp-competing-setup", "corp");
-    const parentInstanceId = "plan:corp.score_agenda:general";
+    const parentInstanceId = "pa1d7j8c33k25iup8n8nyo9r2g";
 
     const parent = module("corp", "corp.score_agenda", "P4", credit, 1);
     parent.assess = (instance) => ({
@@ -1699,7 +1739,7 @@ describe("shared plan scheduler", () => {
     );
     expect(result.portfolio.rootForegroundInstanceId).toBe(parentInstanceId);
     expect(result.portfolio.executorInstanceId).toBe(
-      "plan:corp.economy:score-funding",
+      "pdjwz1rtaw5u9az9o5xceia3d5",
     );
     expect(
       result.portfolio.instances.find(
@@ -1711,7 +1751,7 @@ describe("shared plan scheduler", () => {
   it("does not delegate parent priority to a provider for a different need", () => {
     const credit = candidate("corp-credit", "corp");
     const competingSetup = candidate("corp-competing-setup", "corp");
-    const parentInstanceId = "plan:corp.score_agenda:general";
+    const parentInstanceId = "pa1d7j8c33k25iup8n8nyo9r2g";
     const parent = module("corp", "corp.score_agenda", "P4", credit, 1);
     parent.assess = (instance) => ({
       ...assessment(instance.instanceId, "corp", "P4"),
@@ -1769,7 +1809,7 @@ describe("shared plan scheduler", () => {
 
   it("rejects two resident provider plans for the same exact parent need", () => {
     const credit = candidate("corp-credit", "corp");
-    const parentInstanceId = "plan:corp.score_agenda:general";
+    const parentInstanceId = "pa1d7j8c33k25iup8n8nyo9r2g";
     const parent = module("corp", "corp.score_agenda", "P4", credit, 1);
     parent.assess = (instance) => ({
       ...assessment(instance.instanceId, "corp", "P4"),
@@ -1836,7 +1876,7 @@ describe("shared plan scheduler", () => {
   it("keeps an executable P1 parent ahead of a P4 parent's exact funding child", () => {
     const fundingCredit = candidate("corp-credit", "corp");
     const terminalAction = candidate("corp-terminal-score", "corp");
-    const supportParentInstanceId = "plan:corp.score_agenda:development-score";
+    const supportParentInstanceId = "p4ovzey0w8xgtnmiqhklfsjz9y";
     const supportParent = module(
       "corp",
       "corp.score_agenda",
@@ -1903,10 +1943,10 @@ describe("shared plan scheduler", () => {
       "P1",
     );
     expect(result.portfolio.rootForegroundInstanceId).toBe(
-      "plan:corp.terminal_score:general",
+      "peqydjncus85mpc8ry5a9pfn0m",
     );
     expect(result.portfolio.executorInstanceId).toBe(
-      "plan:corp.terminal_score:general",
+      "peqydjncus85mpc8ry5a9pfn0m",
     );
     expect(
       result.portfolio.instances.find(
@@ -2139,6 +2179,9 @@ function context(
       legalActions: actionCandidates.map((candidate) => ({
         actionId: candidate.actionId,
         type: candidate.actionType,
+        side,
+        timingPoint: `${side}_action.main`,
+        expiresAtStateVersion: 10,
         source:
           candidate.sourceKind === "basic_action"
             ? "basic_action"

@@ -17,67 +17,67 @@ describe("Express Shutdown standard deck", () => {
     });
     expect(deck?.cards).toEqual([
       {
-        cardId: "onr_proteus_004_fetal-ai",
+        cardId: 62,
         quantity: 3,
       },
       {
-        cardId: "onr_v1_196_corporate-war",
+        cardId: 408,
         quantity: 3,
       },
       {
-        cardId: "onr_v1_212_priority-requisition",
+        cardId: 424,
         quantity: 1,
       },
       {
-        cardId: "onr_v1_302_scorched-earth",
+        cardId: 514,
         quantity: 3,
       },
       {
-        cardId: "onr_v1_301_punitive-counterstrike",
+        cardId: 513,
         quantity: 3,
       },
       {
-        cardId: "onr_v1_284_chance-observation",
+        cardId: 496,
         quantity: 3,
       },
       {
-        cardId: "onr_v1_306_trojan-horse",
+        cardId: 518,
         quantity: 2,
       },
       {
-        cardId: "onr_v1_340_setup",
+        cardId: 552,
         quantity: 3,
       },
       {
-        cardId: "onr_v1_345_trap",
+        cardId: 557,
         quantity: 3,
       },
       {
-        cardId: "onr_v1_290_efficiency-experts",
+        cardId: 502,
         quantity: 3,
       },
       {
-        cardId: "onr_v1_295_night-shift",
+        cardId: 507,
         quantity: 3,
       },
       {
-        cardId: "onr_v1_281_accounts-receivable",
+        cardId: 493,
         quantity: 3,
       },
       {
-        cardId: "onr_v1_261_quandary",
+        cardId: 473,
         quantity: 3,
       },
       {
-        cardId: "onr_v1_279_wall-of-static",
+        cardId: 491,
         quantity: 3,
       },
       {
-        cardId: "onr_proteus_032_misleading-access-menus",
+        cardId: 90,
         quantity: 3,
       },
       {
-        cardId: "onr_proteus_038_snowbank",
+        cardId: 96,
         quantity: 3,
       },
     ]);
@@ -91,7 +91,7 @@ describe("Express Shutdown standard deck", () => {
       ),
     ).toBe(21);
     for (const card of deck!.cards)
-      expect(cards[card.cardId], card.cardId).toBeDefined();
+      expect(cards[card.cardId], String(card.cardId)).toBeDefined();
     expect(
       curation.localDeckLibrary.entries.find(
         (entry) => entry.standardDeckId === deck!.standardDeckId,

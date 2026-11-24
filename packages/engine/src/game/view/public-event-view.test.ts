@@ -16,7 +16,7 @@ describe("PublicEvent projection", () => {
   it("preserves the Engine turn serial as a public cadence fact", () => {
     expect(
       toPublicEvent({
-        eventId: "event_turn_7",
+        eventId: 8,
         type: "gain_credit",
         stateVersionBefore: 10,
         stateVersionAfter: 11,
@@ -38,7 +38,7 @@ describe("PublicEvent projection", () => {
         corpDeckId: "demo_corp_008",
       }),
     );
-    putCorpCardOnTopOfRd(state, "v08_project_agenda");
+    putCorpCardOnTopOfRd(state, 617);
 
     state = apply(
       state,
@@ -68,7 +68,7 @@ describe("PublicEvent projection", () => {
   it("rejects hidden card lists at the public event projection boundary", () => {
     expect(() =>
       toPublicEvent({
-        eventId: "event_1",
+        eventId: 2,
         type: "test",
         stateVersionBefore: 1,
         stateVersionAfter: 2,

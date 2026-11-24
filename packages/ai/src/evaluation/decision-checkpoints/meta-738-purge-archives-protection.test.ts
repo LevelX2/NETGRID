@@ -19,14 +19,14 @@ const checkpoint = capture as unknown as {
 const nativeQuote =
   quoteFixture as unknown as VisibleAgendaPurgeArchivesProtectionQuote;
 const split = [
-  "agenda_purge_corp_onr_classic_013_puzzle_1_rd_fixed",
-  "agenda_purge_corp_onr_classic_013_puzzle_3_archives_fixed",
+  "agenda_purge_c3x_rd_fixed",
+  "agenda_purge_c3z_archives_fixed",
 ];
 const together = [
-  "agenda_purge_corp_onr_classic_013_puzzle_1_archives_fixed",
-  "agenda_purge_corp_onr_classic_013_puzzle_3_archives_fixed",
+  "agenda_purge_c3x_archives_fixed",
+  "agenda_purge_c3z_archives_fixed",
 ];
-const owner = "plan:corp.defend_servers:server-defense-portfolio";
+const owner = "penw02zfrkklof54c2nuye5att";
 afterEach(resetResidentPlanPortfolioMemory);
 
 function decide(
@@ -51,7 +51,7 @@ function decide(
     checkpoint.runtime,
   );
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("corp.resolve_choice");
+  expect(decision.actionId).toBe("cn");
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
     rootPlanInstanceId: owner,

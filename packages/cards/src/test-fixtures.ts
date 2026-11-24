@@ -1,11 +1,10 @@
-import type { CardDefinitionId } from "@netgrid/shared";
 import type { CardSpec } from "./contracts";
 
 export function minimalCardSpec(): CardSpec {
   return {
     schemaVersion: "card-spec-v1",
     identity: {
-      cardDefinitionId: "test_card" as CardDefinitionId,
+      cardDefinitionId: 901,
       title: "Test Card",
       side: "runner",
       cardType: "event",

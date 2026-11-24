@@ -72,7 +72,7 @@ describe("pairing 560: exact score before redundant material-capacity release", 
       for (const type of ["advance_card", "advance_card", "score_agenda"]) {
         const { action, plan } = choose(input);
         expect(action.type).toBe(type);
-        expect(action.source).toBe("corp_onr_v1_205_main-office-relocation_1");
+        expect(action.source).toBe("c2kt");
         expect(plan.selectedPlan?.moduleId).toBe("corp.score_agenda");
         expect(state.activeSide).toBe("corp");
         const applied = applyAction(state, {
@@ -98,7 +98,7 @@ describe("pairing 560: exact score before redundant material-capacity release", 
       });
       expect(
         getPlayerView(state, "corp").own.gripOrHq.some(
-          (x: any) => x.instanceId === "corp_onr_v1_238_data-wall-2-0_1",
+          (x: any) => x.instanceId === "c2s5",
         ),
       ).toBe(true);
       const replay = replayEvents(
@@ -115,7 +115,7 @@ describe("pairing 560: exact score before redundant material-capacity release", 
       (x: any) => x.type !== "advance_card",
     );
     const { action, plan } = choose(input);
-    expect(action.source).toBe("corp_onr_v1_238_data-wall-2-0_1");
+    expect(action.source).toBe("c2s5");
     expect(action.payload.serverId).toBe("rd");
     expect(plan.selectedPlan?.moduleId).toBe("corp.defend_servers");
   });

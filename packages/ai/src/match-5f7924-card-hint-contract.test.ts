@@ -5,7 +5,7 @@ import generatedArtifact from "../../../data/ai/card-spec-ai-hints-generated.jso
 describe("match 5F7924 card-hint contracts", () => {
   it("models Marked Accounts as an access-triggered tag source", () => {
     const hint = generatedArtifact.cards.find(
-      (record) => record.cardId === "onr_proteus_005_marked-accounts",
+      (record) => record.cardId === 63,
     )?.hint;
 
     expect(hint?.strategySupportPairs).toContainEqual(

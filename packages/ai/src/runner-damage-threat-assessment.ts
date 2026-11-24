@@ -1,3 +1,5 @@
+import { isRemoteServerId } from "@netgrid/shared";
+import { isCardDefinitionId, type MatchEventId } from "@netgrid/shared";
 import {
   runnerFortPassTollWindow,
   runnerRunExitAction,
@@ -107,7 +109,7 @@ export type RunnerDamageThreatAssessment = {
 };
 
 export type RunnerFutureEncounterDamageJackOutAssessment = {
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   projectedDamage: number;
   damageType?: "net" | "meat" | "core";
   handCount: number;
@@ -134,7 +136,7 @@ export type RunnerVisibleLethalIceDamageOptions = {
   postPathDamage?: {
     amount: number;
     damageType: "net" | "meat" | "core";
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
   };
 };
 
@@ -490,7 +492,7 @@ export function runnerCriticalUnknownAccessRequiredHandFloor(
   const unknownAccess =
     serverId === "hq" ||
     serverId === "rd" ||
-    (serverId.startsWith("remote_") &&
+    (isRemoteServerId(serverId) &&
       input.playerView.servers.some(
         (server) =>
           server.id === serverId && server.root.some((card) => !card.known),
@@ -506,13 +508,13 @@ export function runnerCriticalUnknownAccessRequiredHandFloor(
 
 export type RunnerRecentFutureEncounterDamageSafetyAbort = {
   serverId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   evidenceCode: string;
 };
 
 export type RunnerKnownAccessDamageJackOutAssessment = {
   serverId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   advancementCounters: number;
   damageRisk: number;
   evidenceCode: string;
@@ -670,7 +672,7 @@ export function runnerFutureEncounterDamageJackOutAssessment(
       // Engine run-core-execution binds every run origin, including events
       // and abilities, to the state version of its creating action. The
       // action type alone cannot delimit an event-started run's effects.
-      input.playerView.run?.runId === `run_${event.stateVersionAfter}`,
+      input.playerView.run?.runId === event.stateVersionAfter,
   );
   const triggerEvent = futureEncounterDamageTrigger(
     history,
@@ -678,7 +680,7 @@ export function runnerFutureEncounterDamageJackOutAssessment(
     history.length,
   );
   const sourceDefinitionId = triggerEvent?.publicPayload?.sourceDefinitionId;
-  if (typeof sourceDefinitionId !== "string") return undefined;
+  if (typeof sourceDefinitionId !== "number") return undefined;
   const hint = AI_HINTS.get(sourceDefinitionId);
   const futureEffects = (hint?.effects ?? []).filter(
     (effect) => effect.kind === "future_encounter_effect",
@@ -785,7 +787,7 @@ export function runnerRecentFutureEncounterDamageSafetyAbort(
   );
   const sourceDefinitionId = triggerEvent?.publicPayload?.sourceDefinitionId;
   const serverId = history[runStartIndex]?.publicPayload?.serverId;
-  if (typeof sourceDefinitionId !== "string" || typeof serverId !== "string")
+  if (typeof sourceDefinitionId !== "number" || typeof serverId !== "string")
     return undefined;
   const routeChangedAfterAbort = history
     .slice(jackOutIndex + 1)
@@ -867,7 +869,7 @@ export function runnerKnownRemoteAccessDamageAmbushAssessment(
     (candidate) => candidate.id === serverId,
   );
   if (
-    !server?.id.startsWith("remote_") ||
+    !isRemoteServerId(server?.id) ||
     server.root.length !== 1 ||
     server.root[0]?.known === false ||
     server.root[0]?.rezzed !== true
@@ -875,7 +877,8 @@ export function runnerKnownRemoteAccessDamageAmbushAssessment(
     return undefined;
   }
   const root = server.root[0];
-  const hint = root.definitionId ? AI_HINTS.get(root.definitionId) : undefined;
+  if (root.definitionId === undefined) return undefined;
+  const hint = AI_HINTS.get(root.definitionId);
   const accessDamage = hint?.effects?.some(
     (effect) => effect.kind === "damage" && effect.timing === "on_access",
   );
@@ -895,7 +898,7 @@ export function runnerKnownRemoteAccessDamageAmbushAssessment(
     : Math.max(1, hint?.valueHints?.damage ?? 1);
   return {
     serverId: server.id,
-    sourceDefinitionId: root.definitionId ?? root.instanceId,
+    sourceDefinitionId: root.definitionId,
     advancementCounters,
     damageRisk,
     evidenceCode: [
@@ -1030,7 +1033,7 @@ function runnerDamageDeckBelief(
   damageEvents: CorpDamageEventEvidence,
   signals: VisibleOpponentDamageSignals,
 ): RunnerDamageDeckBelief {
-  const independentSignalDefinitionCount = signals.signalDefinitionIds.size;
+  const independentSignalDefinitionCount = signals.independentSignalCount;
   const independentDeliveryAndPayoff =
     signals.deliveryDefinitionIds.size > 0 &&
     signals.payoffDefinitionIds.size > 0 &&
@@ -1043,7 +1046,7 @@ function runnerDamageDeckBelief(
     (signals.score >= 4 && independentSignalDefinitionCount >= 2);
   const suspected =
     damageEvents.attempted.length > 0 ||
-    signals.signalDefinitionIds.size > 0 ||
+    signals.independentSignalCount > 0 ||
     signals.fallbackDamageSourceCount > 0;
   const level: RunnerDamageDeckBeliefLevel = confirmed
     ? "confirmed"
@@ -1088,7 +1091,7 @@ function runnerFlatlineRiskLevel(params: {
 }): RunnerFlatlineRiskLevel {
   const activeSignalScore = params.activeSignals.score;
   const activeDamageSources = params.activeSignals.damageSourceCount;
-  const activePunishSources = params.activeSignals.signalDefinitionIds.size;
+  const activePunishSources = params.activeSignals.independentSignalCount;
   const recentResolvedDamage = params.recentResolvedCorpDamageEvents > 0;
   const hasDamageEvidence =
     params.deckBelief.level !== "none" ||
@@ -1139,7 +1142,7 @@ function runnerDamageThreatHandFloor(level: RunnerFlatlineRiskLevel): number {
 }
 
 function mergedHistory(input: AiDecisionInput): PublicGameEvent[] {
-  const byId = new Map<string, PublicGameEvent>();
+  const byId = new Map<MatchEventId, PublicGameEvent>();
   for (const event of [
     ...(input.playerView.publicEvents ?? []),
     ...(input.eventTail ?? []),
@@ -1191,7 +1194,7 @@ function futureEncounterDamageTrigger(
       seenCompletedEncounter = true;
     }
     const sourceDefinitionId = payload.sourceDefinitionId;
-    if (typeof sourceDefinitionId !== "string") continue;
+    if (typeof sourceDefinitionId !== "number") continue;
     const futureEffectResolved = payload.resolvedEffects?.some(
       (effect) =>
         effect.kind === "resolve_subroutine" &&
@@ -1248,7 +1251,7 @@ function corpDamageEventEvidence(
 function publicEventCanBeCorpDamage(event: PublicGameEvent): boolean {
   const payload = event.publicPayload ?? {};
   const sourceDefinitionId =
-    typeof payload.sourceDefinitionId === "string"
+    typeof payload.sourceDefinitionId === "number"
       ? payload.sourceDefinitionId
       : undefined;
   // The action actor is not necessarily the damage source: Runner
@@ -1259,7 +1262,7 @@ function publicEventCanBeCorpDamage(event: PublicGameEvent): boolean {
   const resolvedCorpDamageSource = payload.resolvedEffects?.some(
     (effect) =>
       effect.kind === "damage" &&
-      typeof effect.sourceDefinitionId === "string" &&
+      typeof effect.sourceDefinitionId === "number" &&
       AI_HINTS.get(effect.sourceDefinitionId)?.side === "corp",
   );
   // Access-triggered damage is bound to the publicly accessed card, not
@@ -1268,7 +1271,7 @@ function publicEventCanBeCorpDamage(event: PublicGameEvent): boolean {
   const accessedCorpDamageSource =
     event.type === "access_card" &&
     payload.damageResolved === true &&
-    typeof payload.cardDefinitionId === "string" &&
+    typeof payload.cardDefinitionId === "number" &&
     AI_HINTS.get(payload.cardDefinitionId)?.side === "corp";
   if (
     payload.actor !== "corp" &&
@@ -1353,10 +1356,10 @@ type VisibleOpponentDamageSignals = {
   fallbackDamageSourceCount: number;
   score: number;
   kinds: string[];
-  signalDefinitionIds: Set<string>;
-  damageDefinitionIds: Set<string>;
-  deliveryDefinitionIds: Set<string>;
-  payoffDefinitionIds: Set<string>;
+  independentSignalCount: number;
+  damageDefinitionIds: Set<number>;
+  deliveryDefinitionIds: Set<number>;
+  payoffDefinitionIds: Set<number>;
 };
 
 function visibleOpponentDamageSignals(
@@ -1368,7 +1371,7 @@ function visibleOpponentDamageSignals(
   const definitionIds = new Set(
     visibleCards
       .map((card) => card.definitionId)
-      .filter((definitionId): definitionId is string => Boolean(definitionId)),
+      .filter(isCardDefinitionId),
   );
   for (const event of history) {
     for (const definitionId of publicEventDefinitionIds(event)) {
@@ -1389,9 +1392,7 @@ function activeOpponentDamageSignals(
     new Set(
       visibleCards
         .map((card) => card.definitionId)
-        .filter((definitionId): definitionId is string =>
-          Boolean(definitionId),
-        ),
+        .filter(isCardDefinitionId),
     ),
     damageTypes,
   );
@@ -1399,16 +1400,16 @@ function activeOpponentDamageSignals(
 
 function damageSignalsForKnownSources(
   visibleCards: readonly VisibleCard[],
-  definitionIds: ReadonlySet<string>,
+  definitionIds: ReadonlySet<number>,
   damageTypes?: readonly RunnerPreventableDamageType[],
 ): VisibleOpponentDamageSignals {
   let score = 0;
   const kinds = new Set<string>();
-  const signalDefinitionIds = new Set<string>();
-  const damageDefinitionIds = new Set<string>();
-  const deliveryDefinitionIds = new Set<string>();
-  const payoffDefinitionIds = new Set<string>();
-  const compatibleDamage = (definitionId: string): boolean =>
+  let structuredSignalCount = 0;
+  const damageDefinitionIds = new Set<number>();
+  const deliveryDefinitionIds = new Set<number>();
+  const payoffDefinitionIds = new Set<number>();
+  const compatibleDamage = (definitionId: number): boolean =>
     AI_HINTS.get(definitionId)?.effects?.some((effect) => {
       if (effect.kind !== "damage") return false;
       if (damageTypes === undefined) return true;
@@ -1440,7 +1441,7 @@ function damageSignalsForKnownSources(
       effectKinds.has("tag_punish_payoff") &&
       (damageTypes === undefined || directDamage);
     if (!directDamage && !traceTag && !punishPayoff) continue;
-    signalDefinitionIds.add(definitionId);
+    structuredSignalCount++;
     if (directDamage) {
       damageDefinitionIds.add(definitionId);
       score += 2;
@@ -1458,7 +1459,7 @@ function damageSignalsForKnownSources(
     }
   }
 
-  const fallbackSignalIds = new Set<string>();
+  const fallbackSignalIds = new Set<number | string>();
   for (const card of visibleCards) {
     // Untyped text evidence still informs the general hand buffer, but cannot
     // certify a type-specific prevention provider.
@@ -1473,9 +1474,6 @@ function damageSignalsForKnownSources(
   if (fallbackSignalIds.size > 0) {
     score += fallbackSignalIds.size;
     kinds.add("text_damage_fallback");
-    for (const signalId of fallbackSignalIds) {
-      signalDefinitionIds.add(`fallback:${signalId}`);
-    }
   }
   if (damageDefinitionIds.size > 0 && deliveryDefinitionIds.size > 0) {
     score += 1;
@@ -1488,7 +1486,7 @@ function damageSignalsForKnownSources(
     fallbackDamageSourceCount: fallbackSignalIds.size,
     score,
     kinds: [...kinds].sort(),
-    signalDefinitionIds,
+    independentSignalCount: structuredSignalCount + fallbackSignalIds.size,
     damageDefinitionIds,
     deliveryDefinitionIds,
     payoffDefinitionIds,
@@ -1523,23 +1521,21 @@ function activeOpponentCards(input: AiDecisionInput): VisibleCard[] {
   ].filter((card) => card.known !== false);
 }
 
-function publicEventDefinitionIds(event: PublicGameEvent): string[] {
+function publicEventDefinitionIds(event: PublicGameEvent): number[] {
   const payload = event.publicPayload ?? {};
   return [
     payload.sourceDefinitionId,
     payload.cardDefinitionId,
     payload.rezzedCardDefinitionId,
-  ].filter((value): value is string => typeof value === "string");
+  ].filter(isCardDefinitionId);
 }
 
 function visibleCardShowsDamageSourceFallback(card: VisibleCard): boolean {
   if (card.known === false) return false;
-  const text = `${card.title ?? ""} ${card.rulesText ?? ""} ${
-    card.definitionId ?? ""
-  }`.toLowerCase();
+  const text = `${card.title ?? ""} ${card.rulesText ?? ""}`.toLowerCase();
   if (/\b(?:prevent|avoid|reduce)\b.{0,48}\bdamage\b/.test(text)) return false;
   return damageTokensIncludeAny(
-    damageTokens([card.title, card.rulesText, card.definitionId]),
+    damageTokens([card.title, card.rulesText]),
   );
 }
 
@@ -1548,7 +1544,7 @@ function serverHasRunnerExposureRisk(
 ): boolean {
   return (
     server.ice.some((ice) => ice.known === false || ice.rezzed !== true) ||
-    (server.id.startsWith("remote_") &&
+    (isRemoteServerId(server.id) &&
       server.root.some((card) => card.known === false))
   );
 }

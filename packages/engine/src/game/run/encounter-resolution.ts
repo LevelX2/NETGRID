@@ -4,6 +4,7 @@ import {
   type CardInstance,
   type CardInstanceId,
   type DamageType,
+  type DamageRandomSource,
   type GameState,
   type ImminentEvent,
   type LegalAction,
@@ -47,7 +48,7 @@ export type DamageSummary = {
 
 export type SubroutineEffectResolutionResult = {
   handled: boolean;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   subroutineId?: string;
   setRunMarkers?: string[];
   encounterTaxAmount?: number;
@@ -81,7 +82,7 @@ export type PostEncounterResult = {
 export type PassIceFollowupResult = {
   handled: boolean;
   choiceOpened?: boolean;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   stateChanged?: boolean;
 };
 
@@ -123,46 +124,29 @@ export function preparePayOrEndRunSubroutinePayment(
     ...payOrEndRunIndexesForThisContinue,
     ...payOrTrashProgramIndexesForThisContinue,
   ][0];
-  const expectedSubroutineIds =
-    typeof legalAction?.payload?.encounterSubroutineIds === "string"
-      ? String(legalAction.payload.encounterSubroutineIds)
-      : undefined;
+  const expectedSubroutineIds = legalAction?.encounterSubroutineIds;
   if (expectedSubroutineIds !== undefined) {
     const currentSubroutineIds = encounterSubroutinesForNextContinue(
       host.state,
       iceDefinition,
       run,
       subroutines,
+    ).map((subroutine) => subroutine.id);
+    if (
+      !Array.isArray(expectedSubroutineIds) ||
+      expectedSubroutineIds.length !== currentSubroutineIds.length ||
+      currentSubroutineIds.some(
+        (id, index) => id !== expectedSubroutineIds[index],
+      )
     )
-      .map((subroutine) => subroutine.id)
-      .join(",");
-    if (currentSubroutineIds !== expectedSubroutineIds)
       throw new Error("Die Encounter-Subroutinen sind nicht mehr gueltig.");
   }
-  const paidPayOrEndRunIndexes = new Set<number>();
-  const paidPayOrTrashProgramIndexes = new Set<number>();
-  const payOrEndRunIndexPayload =
-    typeof legalAction?.payload?.payOrEndRunSubroutineIndexes === "string"
-      ? String(legalAction.payload.payOrEndRunSubroutineIndexes)
-      : "";
-  for (const rawIndex of payOrEndRunIndexPayload.split(",")) {
-    if (!rawIndex) continue;
-    const index = Number(rawIndex);
-    if (!Number.isInteger(index) || index < 0)
-      throw new Error("Die Pay-or-End-the-Run-Subroutine ist ungueltig.");
-    paidPayOrEndRunIndexes.add(index);
-  }
-  const payOrTrashProgramIndexPayload =
-    typeof legalAction?.payload?.payOrTrashProgramSubroutineIndexes === "string"
-      ? String(legalAction.payload.payOrTrashProgramSubroutineIndexes)
-      : "";
-  for (const rawIndex of payOrTrashProgramIndexPayload.split(",")) {
-    if (!rawIndex) continue;
-    const index = Number(rawIndex);
-    if (!Number.isInteger(index) || index < 0)
-      throw new Error("Die Pay-or-Trash-Program-Subroutine ist ungueltig.");
-    paidPayOrTrashProgramIndexes.add(index);
-  }
+  const paidPayOrEndRunIndexes = new Set(
+    legalAction?.payOrEndRunSubroutineIndexes,
+  );
+  const paidPayOrTrashProgramIndexes = new Set(
+    legalAction?.payOrTrashProgramSubroutineIndexes,
+  );
   let expectedPayOrEndRunPayment = 0;
   for (const index of paidPayOrEndRunIndexes) {
     const subroutine = subroutines[index];
@@ -504,6 +488,7 @@ export function resolvePostEncounterNetDamage(
       damageType: "net";
       amount: number;
       source: string;
+      randomSource: DamageRandomSource;
     }) => ImminentEvent;
     openDamageResolutionWindow: (
       event: ImminentEvent,
@@ -526,11 +511,15 @@ export function resolvePostEncounterNetDamage(
       Math.floor(run.fatalDamageAmountForEncounter ?? 0),
     );
     if (!encounterFullyBroken && fatalDamageAmount > 0 && encounteredIceId) {
+      const sourceDefinitionId = run.fatalDamageSourceDefinitionId;
+      if (!sourceDefinitionId)
+        throw new Error("Nächster Encounter-Schaden hat keine Quellenbindung.");
       const event = options.createDamageImminentEvent({
         damageId: `${run.runId}.${encounteredIceId}.post_encounter_net_damage`,
         damageType: "net",
         amount: fatalDamageAmount,
-        source: nextEncounterFatalDamageSource(run),
+        source: `subroutine:${sourceDefinitionId}:next_encounter`,
+        randomSource: ["c", sourceDefinitionId],
       });
       run.fatalDamageActiveForEncounter = false;
       delete run.fatalDamageAmountForEncounter;
@@ -558,12 +547,6 @@ export function cleanupEncounterDurationMarkers(
   delete run.fatalDamageAmountForEncounter;
   run.noBreakSubroutinesActive = false;
   run.jackOutLockedUntilEncounterEnds = false;
-}
-
-function nextEncounterFatalDamageSource(run: ActiveRun): string {
-  if (!run.fatalDamageSourceDefinitionId)
-    throw new Error("Naechste-Encounter-Schaden hat keine Quellenbindung.");
-  return `subroutine:${run.fatalDamageSourceDefinitionId}:next_encounter`;
 }
 
 export function passedIceFollowupMarkersForCurrentIce(
@@ -944,7 +927,7 @@ export function appendResolvedSubroutineEffect(
     amount?: number;
     paidCredits?: number;
     endedRun?: boolean;
-    cardDefinitionId?: string;
+    cardDefinitionId?: number;
     cardTitle?: string;
     cardsTrashed?: number;
     dieRoll?: number;

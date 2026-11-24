@@ -11,7 +11,7 @@
     "deckVersion": "1",
     "name": "Shadoe Tag & Bag",
     "side": "corp",
-    "identityCardId": "corp_identity_001",
+    "identityCardId": 3,
     "cardPoolSnapshotId": "card-snapshot-0.8",
     "cardPoolVersion": "private-local-onr-v1",
     "formatProfileId": "netgrid_private_local_v1",
@@ -20,103 +20,103 @@
     "immutable": true,
     "cards": [
       {
-        "cardId": "onr_v1_192_corporate-boon",
+        "cardId": 404,
         "quantity": 1
       },
       {
-        "cardId": "onr_v1_193_corporate-coup",
+        "cardId": 405,
         "quantity": 1
       },
       {
-        "cardId": "onr_v1_194_corporate-downsizing",
+        "cardId": 406,
         "quantity": 1
       },
       {
-        "cardId": "onr_v1_197_data-fort-reclamation",
+        "cardId": 409,
         "quantity": 1
       },
       {
-        "cardId": "onr_v1_203_hostile-takeover",
+        "cardId": 415,
         "quantity": 1
       },
       {
-        "cardId": "onr_v1_207_netwatch-operations-office",
+        "cardId": 419,
         "quantity": 1
       },
       {
-        "cardId": "onr_v1_208_on-call-solo-team",
+        "cardId": 420,
         "quantity": 1
       },
       {
-        "cardId": "onr_v1_209_political-coup",
+        "cardId": 421,
         "quantity": 2
       },
       {
-        "cardId": "onr_v1_214_project-babylon",
+        "cardId": 426,
         "quantity": 1
       },
       {
-        "cardId": "onr_v1_218_subsidiary-branch",
+        "cardId": 430,
         "quantity": 1
       },
       {
-        "cardId": "onr_v1_237_data-wall",
+        "cardId": 449,
         "quantity": 2
       },
       {
-        "cardId": "onr_v1_244_filter",
+        "cardId": 456,
         "quantity": 2
       },
       {
-        "cardId": "onr_v1_249_hunter",
+        "cardId": 461,
         "quantity": 2
       },
       {
-        "cardId": "onr_v1_261_quandary",
+        "cardId": 473,
         "quantity": 2
       },
       {
-        "cardId": "onr_v1_268_shock-r",
+        "cardId": 480,
         "quantity": 2
       },
       {
-        "cardId": "onr_v1_279_wall-of-static",
+        "cardId": 491,
         "quantity": 2
       },
       {
-        "cardId": "onr_v1_281_accounts-receivable",
+        "cardId": 493,
         "quantity": 3
       },
       {
-        "cardId": "onr_v1_283_audit-of-call-records",
+        "cardId": 495,
         "quantity": 3
       },
       {
-        "cardId": "onr_v1_284_chance-observation",
+        "cardId": 496,
         "quantity": 2
       },
       {
-        "cardId": "onr_v1_290_efficiency-experts",
+        "cardId": 502,
         "quantity": 3
       },
       {
-        "cardId": "onr_v1_297_overtime-incentives",
+        "cardId": 509,
         "quantity": 2
       },
       {
-        "cardId": "onr_v1_301_punitive-counterstrike",
+        "cardId": 513,
         "quantity": 3
       },
       {
-        "cardId": "onr_v1_302_scorched-earth",
+        "cardId": 514,
         "quantity": 3
       },
       {
-        "cardId": "onr_v1_306_trojan-horse",
+        "cardId": 518,
         "quantity": 3
       },
       {
-        "cardId": "onr_v1_307_urban-renewal",
+        "cardId": 519,
         "quantity": 3
       }
     ],
@@ -131,14 +131,14 @@
     },
     "publicMetadata": {
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "deckName": "Shadoe Tag & Bag",
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
-      "deckHash": "fnv1a:8879372f"
+      "deckHash": "fnv1a:80ee51be"
     },
-    "deckHash": "fnv1a:8879372f"
+    "deckHash": "fnv1a:80ee51be"
   }
 }

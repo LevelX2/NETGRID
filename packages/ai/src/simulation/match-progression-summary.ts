@@ -1,15 +1,20 @@
+import { summarizeRunnerReserveAfterRuns } from "./runner-reserve-diagnostics";
 import { minNumberOrZero as minDefined } from "../runtime/collection";
 import { roundNumber as round } from "../runtime/number-rounding";
-import { isRemoteServerTarget } from "../runtime/server-target";
+import {
+  centralServerId,
+  isRemoteServerTarget,
+} from "../runtime/server-target";
 import { summarizeActionLimitEndgameMetrics } from "./action-limit-endgame-metrics";
 import { summarizeAdvancedRemoteThreatMetrics } from "./advanced-remote-threat-metrics";
 import type { AiMatchProgressionMetrics } from "./ai-match-progression-types";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import { summarizeCentralCloseoutRepeatMetrics } from "./central-closeout-repeat-metrics";
 import { summarizeCorpEffectiveRemoteSafetyMetrics } from "./corp-effective-remote-safety-metrics";
-import { summarizeCorpEconomyBeforeScoreMetrics } from "./corp-economy-before-score-metrics";
-import { summarizeCorpIcePortfolioMetrics } from "./corp-ice-portfolio-metrics";
-import { corpScoreTerminalFollowupMetrics } from "./corp-score-terminal-followup-metrics";
+import {
+  summarizeCorpFutureRunIceMetrics,
+  summarizeCorpIcePortfolioMetrics,
+} from "./corp-ice-portfolio-metrics";
 import { summarizeCorpUnsafeRemoteScoreConversionMetrics } from "./corp-unsafe-remote-score-conversion-metrics";
 import { isMeaningfulBoardProgress } from "./meaningful-board-progress";
 import {
@@ -17,17 +22,18 @@ import {
   averageFirstProgressionTurn,
   averageRunnerContestRisk,
   averageTurnsFromFirstAdvanceToScore,
+  averageTurnsFromFinalAdvanceToScoreOrSteal,
   countFinalAdvancesResolvedBySameTurnCorpScore,
   countFinalAdvancesStolenBeforeCorpScore,
   countRunnerDrawThenDiscardSameTurn,
 } from "./match-progression-average-metrics";
 import { summarizePlanConversionMetrics } from "./plan-conversion-metrics";
 import {
-  averageTurnsFromFinalAdvanceToScoreOrSteal,
-  countCorpMultiIceInstallOrderFutureEffectDead,
-  countCorpMultiIceInstallOrderOptimized,
+  countRunnerTurnsBelowContestReserve,
+  countPressureTargetSwitches,
   isCorpRemoteAdvancementProgress,
   progressionEntriesWithRunTargets,
+  successfulRunAccessTargets,
 } from "./progression-action-sequence";
 import { summarizeRemoteRoleOntologyMetrics } from "./remote-role-ontology-metrics";
 import { summarizeRunnerRepeatRemoteNoTrashMetrics } from "./runner-repeat-remote-no-trash-metrics";
@@ -39,15 +45,18 @@ import {
 } from "./runner-setup-metric-counts";
 import { summarizeRunnerSetupAttributionMetrics } from "./runner-setup-attribution-types";
 import { averageNumber, medianNumber } from "./simulation-metric-aggregation";
-import { summarizeStrategicLineMetrics } from "./strategic-line-metrics";
 import { summarizeTagPunishWindowMetrics } from "./tag-punish-window-metrics";
 
 export function summarizeMatchProgressionMetrics(
   summaries: AiSimulationSummary[],
 ): AiMatchProgressionMetrics {
   const games = summaries.length;
-  const actionSequence = summaries.flatMap((summary) =>
+  const gameActionSequences = summaries.map((summary) =>
     progressionEntriesWithRunTargets(summary.actionSequence),
+  );
+  const actionSequence = gameActionSequences.flat();
+  const successfulRunTargets = gameActionSequences.flatMap(
+    successfulRunAccessTargets,
   );
   const runnerRuns = actionSequence.filter(
     (entry) => entry.side === "runner" && entry.actionType === "start_run",
@@ -127,12 +136,6 @@ export function summarizeMatchProgressionMetrics(
   );
   const runnerContestRiskAtFinalAdvance =
     averageRunnerContestRisk(finalAdvanceEntries);
-  const remoteAgendaAdvancementActions = actionSequence.filter(
-    (entry) =>
-      isCorpRemoteAdvancementProgress(entry) &&
-      (entry.advancementTargetTypes?.includes("agenda") ||
-        entry.targetCardType === "agenda"),
-  ).length;
   const advancementActionsOnAgendas = actionSequence.filter(
     (entry) =>
       isCorpRemoteAdvancementProgress(entry) &&
@@ -187,13 +190,6 @@ export function summarizeMatchProgressionMetrics(
     (entry) => entry.targetServerId ?? "unknown",
   );
   const totalActions = actionSequence.length || 1;
-  const pressureTargetSwitches = pressureTargets.reduce(
-    (switches, target, index) => {
-      if (index === 0) return switches;
-      return target !== pressureTargets[index - 1] ? switches + 1 : switches;
-    },
-    0,
-  );
   const turnsToFirstCorpScore = averageFirstProgressionTurn(
     summaries,
     (entry) => entry.side === "corp" && entry.actionType === "score_agenda",
@@ -236,9 +232,6 @@ export function summarizeMatchProgressionMetrics(
   ).length;
   const repeatRemoteNoTrashMetrics =
     summarizeRunnerRepeatRemoteNoTrashMetrics(summaries);
-  const runnerRemoteTrashDecisionWindows = actionSequence.filter(
-    (entry) => entry.runnerRemoteAccessWithTrashableCard === true,
-  ).length;
   const runnerRemoteTrashLegalActions = actionSequence.reduce(
     (sum, entry) => sum + (entry.runnerRemoteTrashLegalActionCount ?? 0),
     0,
@@ -302,10 +295,6 @@ export function summarizeMatchProgressionMetrics(
   const centralCloseoutRepeatMetrics =
     summarizeCentralCloseoutRepeatMetrics(summaries);
   const planConversionMetrics = summarizePlanConversionMetrics(summaries);
-  const strategicLineMetrics = summarizeStrategicLineMetrics(
-    summaries,
-    isMeaningfulBoardProgress,
-  );
   const corpEffectiveRemoteSafetyMetrics =
     summarizeCorpEffectiveRemoteSafetyMetrics(summaries);
   const corpScoreConversionMetrics =
@@ -347,14 +336,6 @@ export function summarizeMatchProgressionMetrics(
   const runnerKnownPathRunEntries = runnerRuns.filter(
     (entry) => typeof entry.runKnownPathCostAtStart === "number",
   );
-  const corpFutureRunIceEntries = actionSequence.filter(
-    (entry) => entry.corpFutureRunIceInstalled === true,
-  );
-  const corpScoreTerminalEntries = actionSequence.filter(
-    (entry) => entry.corpScoreTerminalWindow === true,
-  );
-  const corpEconomyBeforeScoreMetrics =
-    summarizeCorpEconomyBeforeScoreMetrics(summaries);
   const hqMemoryEntries = actionSequence.filter(
     (entry) =>
       entry.side === "runner" && typeof entry.hqKnownCards === "number",
@@ -393,186 +374,14 @@ export function summarizeMatchProgressionMetrics(
       (runnerSteals + corpScores) / Math.max(games, 1),
     ),
     ...planConversionMetrics,
-    ...strategicLineMetrics,
     ...corpEffectiveRemoteSafetyMetrics,
     ...corpScoreConversionMetrics,
     ...corpIcePortfolioMetrics,
+    ...summarizeCorpFutureRunIceMetrics(summaries, actionSequence),
     ...actionLimitEndgameMetrics,
     ...tagPunishWindowMetrics,
     ...remoteRoleOntologyMetrics,
     ...runnerSetupAttributionMetrics,
-    ...corpEconomyBeforeScoreMetrics,
-    corpScoreTerminalWindow: corpScoreTerminalEntries.length,
-    corpScoreTerminalWindowScoreLegal: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalWindowScoreLegal === true,
-    ).length,
-    corpScoreTerminalWindowAdvanceToScoreLegal: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalWindowAdvanceToScoreLegal === true,
-    ).length,
-    corpScoreTerminalWindowAgendaInstallLegal: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalWindowAgendaInstallLegal === true,
-    ).length,
-    corpScoreTerminalWindowProtectedRemoteReady:
-      corpScoreTerminalEntries.filter(
-        (entry) => entry.corpScoreTerminalWindowProtectedRemoteReady === true,
-      ).length,
-    corpScoreTerminalWindowRemoteContestLow: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalWindowRemoteContestLow === true,
-    ).length,
-    corpScoreTerminalWindowCreditsSufficient: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalWindowCreditsSufficient === true,
-    ).length,
-    corpScoreTerminalWindowRunnerAccessThreatHigh:
-      corpScoreTerminalEntries.filter(
-        (entry) => entry.corpScoreTerminalWindowRunnerAccessThreatHigh === true,
-      ).length,
-    corpScoreTerminalScoreTaken: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalScoreTaken === true,
-    ).length,
-    corpScoreTerminalAdvanceTaken: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalAdvanceTaken === true,
-    ).length,
-    corpScoreTerminalAgendaInstalled: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalAgendaInstalled === true,
-    ).length,
-    corpScoreTerminalSkipped: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalSkipped === true,
-    ).length,
-    corpScoreTerminalSkippedForProtection: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalSkippedForProtection === true,
-    ).length,
-    corpScoreTerminalSkippedForEconomy: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalSkippedForEconomy === true,
-    ).length,
-    corpScoreTerminalSkippedForDraw: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalSkippedForDraw === true,
-    ).length,
-    corpScoreTerminalSkippedForInstallIce: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalSkippedForInstallIce === true,
-    ).length,
-    corpScoreTerminalSkippedForInstallAssetOrUpgrade:
-      corpScoreTerminalEntries.filter(
-        (entry) =>
-          entry.corpScoreTerminalSkippedForInstallAssetOrUpgrade === true,
-      ).length,
-    corpScoreTerminalSkippedForHqProtection: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalSkippedForHqProtection === true,
-    ).length,
-    corpScoreTerminalSkippedForRndProtection: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalSkippedForRndProtection === true,
-    ).length,
-    corpScoreTerminalSkippedForRemotePortfolio: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreTerminalSkippedForRemotePortfolio === true,
-    ).length,
-    corpScoreTerminalSkippedForUnknownHigherPriority:
-      corpScoreTerminalEntries.filter(
-        (entry) =>
-          entry.corpScoreTerminalSkippedForUnknownHigherPriority === true,
-      ).length,
-    ...corpScoreTerminalFollowupMetrics(actionSequence),
-    corpScoreConversionFixGateEligible: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreConversionFixGateEligible === true,
-    ).length,
-    corpScoreConversionFixGateBlockedByCheapContest:
-      corpScoreTerminalEntries.filter(
-        (entry) =>
-          entry.corpScoreConversionFixGateBlockedByCheapContest === true,
-      ).length,
-    corpScoreConversionFixGateBlockedByCredits: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreConversionFixGateBlockedByCredits === true,
-    ).length,
-    corpScoreConversionFixGateBlockedByRunnerContest:
-      corpScoreTerminalEntries.filter(
-        (entry) =>
-          entry.corpScoreConversionFixGateBlockedByRunnerContest === true,
-      ).length,
-    corpScoreConversionFixGateBlockedByHqThreat:
-      corpScoreTerminalEntries.filter(
-        (entry) => entry.corpScoreConversionFixGateBlockedByHqThreat === true,
-      ).length,
-    corpScoreConversionFixGateSuspiciousProtectionLoop:
-      corpScoreTerminalEntries.filter(
-        (entry) =>
-          entry.corpScoreConversionFixGateSuspiciousProtectionLoop === true,
-      ).length,
-    corpScoreConversionFixGateSuspiciousEconomyLoop:
-      corpScoreTerminalEntries.filter(
-        (entry) =>
-          entry.corpScoreConversionFixGateSuspiciousEconomyLoop === true,
-      ).length,
-    corpScoreConversionFixGateSuspiciousDraw: corpScoreTerminalEntries.filter(
-      (entry) => entry.corpScoreConversionFixGateSuspiciousDraw === true,
-    ).length,
-    corpScoreConversionFixGateSuspiciousRemotePortfolio:
-      corpScoreTerminalEntries.filter(
-        (entry) =>
-          entry.corpScoreConversionFixGateSuspiciousRemotePortfolio === true,
-      ).length,
-    corpScoreConversionFixGateSuspiciousUnknown:
-      corpScoreTerminalEntries.filter(
-        (entry) => entry.corpScoreConversionFixGateSuspiciousUnknown === true,
-      ).length,
-    corpFutureRunIceInstallOpportunities: actionSequence.filter(
-      (entry) => entry.corpFutureRunIceInstallOpportunity === true,
-    ).length,
-    corpFutureRunIceInstalled: corpFutureRunIceEntries.length,
-    corpFutureRunIceInstalledAsInnermost: corpFutureRunIceEntries.filter(
-      (entry) => entry.corpFutureRunIceInstalledAsInnermost === true,
-    ).length,
-    corpFutureRunIceInstalledAsOutermost: corpFutureRunIceEntries.filter(
-      (entry) => entry.corpFutureRunIceInstalledAsOutermost === true,
-    ).length,
-    corpFutureRunIceInstalledWithLaterIce: corpFutureRunIceEntries.filter(
-      (entry) => entry.corpFutureRunIceInstalledWithLaterIce === true,
-    ).length,
-    corpFutureRunIceInstalledWithoutLaterIce: corpFutureRunIceEntries.filter(
-      (entry) => entry.corpFutureRunIceInstalledWithoutLaterIce === true,
-    ).length,
-    corpFutureRunIceInstalledOnEmptyServer: corpFutureRunIceEntries.filter(
-      (entry) => entry.corpFutureRunIceInstalledOnEmptyServer === true,
-    ).length,
-    corpFutureRunIceInstalledFirstOnEmptyServer: corpFutureRunIceEntries.filter(
-      (entry) => entry.corpFutureRunIceInstalledFirstOnEmptyServer === true,
-    ).length,
-    corpFutureRunIceInstalledAfterInnerIceExists:
-      corpFutureRunIceEntries.filter(
-        (entry) => entry.corpFutureRunIceInstalledAfterInnerIceExists === true,
-      ).length,
-    corpFutureRunIceInstalledAsDeadEffect: corpFutureRunIceEntries.filter(
-      (entry) => entry.corpFutureRunIceInstalledAsDeadEffect === true,
-    ).length,
-    corpFutureRunIceInstalledAsLiveEffect: corpFutureRunIceEntries.filter(
-      (entry) => entry.corpFutureRunIceInstalledAsLiveEffect === true,
-    ).length,
-    corpNextIceEffectInstalledLast: corpFutureRunIceEntries.filter(
-      (entry) => entry.corpNextIceEffectInstalledLast === true,
-    ).length,
-    corpIceOrderFutureEffectDead: corpFutureRunIceEntries.filter(
-      (entry) => entry.corpIceOrderFutureEffectDead === true,
-    ).length,
-    corpIceOrderFutureEffectLive: corpFutureRunIceEntries.filter(
-      (entry) => entry.corpIceOrderFutureEffectLive === true,
-    ).length,
-    corpMultiIceInstallOrderFutureEffectDead:
-      countCorpMultiIceInstallOrderFutureEffectDead(actionSequence),
-    corpMultiIceInstallOrderOptimized:
-      countCorpMultiIceInstallOrderOptimized(actionSequence),
-    corpBallAndChainInstalledInnermost: corpFutureRunIceEntries.filter(
-      (entry) => entry.corpBallAndChainInstalledInnermost === true,
-    ).length,
-    corpBallAndChainInstalledWithoutLaterIce: corpFutureRunIceEntries.filter(
-      (entry) => entry.corpBallAndChainInstalledWithoutLaterIce === true,
-    ).length,
-    corpBallAndChainInstalledWithLaterIce: corpFutureRunIceEntries.filter(
-      (entry) => entry.corpBallAndChainInstalledWithLaterIce === true,
-    ).length,
-    corpCanisInstalledWithoutLaterIce: corpFutureRunIceEntries.filter(
-      (entry) => entry.corpCanisInstalledWithoutLaterIce === true,
-    ).length,
-    corpBolterOrDataDartsInstalledWithoutNextIce:
-      corpFutureRunIceEntries.filter(
-        (entry) => entry.corpBolterOrDataDartsInstalledWithoutNextIce === true,
-      ).length,
     advancedAgendaSteals,
     advancedAgendaStealsFromRemote,
     advancedAgendaStealsFromCentral,
@@ -600,12 +409,7 @@ export function summarizeMatchProgressionMetrics(
     remotePressureRuns: runnerRuns.filter((entry) =>
       isRemoteServerTarget(entry.targetServerId),
     ).length,
-    successfulCentralRuns: successfulRunActions.filter(
-      (entry) =>
-        entry.targetServerId === "hq" ||
-        entry.targetServerId === "rd" ||
-        entry.targetServerId === "archives",
-    ).length,
+    successfulCentralRuns: successfulRunTargets.filter(centralServerId).length,
     centralAgendaSteals,
     hqAgendaSteals: centralAgendaStealEntries.filter(
       (entry) => entry.targetServerId === "hq",
@@ -654,24 +458,16 @@ export function summarizeMatchProgressionMetrics(
     repeatedLowValueCentralRuns: runnerRuns.filter(
       (entry) => entry.runnerRepeatedLowValueCentralRun === true,
     ).length,
-    centralRunStreakWithoutValue: Math.max(
-      0,
-      ...runnerRuns.map(
-        (entry) => entry.runnerCentralRunStreakWithoutValue ?? 0,
-      ),
+    centralRunStreakWithoutValue: maximumMetric(
+      runnerRuns,
+      "runnerCentralRunStreakWithoutValue",
     ),
     centralRunStartedWithInsufficientPostRunReserve: runnerRuns.filter(
       (entry) =>
         entry.runnerCentralRunStartedWithInsufficientPostRunReserve === true,
     ).length,
-    hqKnownCards: Math.max(
-      0,
-      ...hqMemoryEntries.map((entry) => entry.hqKnownCards ?? 0),
-    ),
-    hqUnknownCards: Math.max(
-      0,
-      ...hqMemoryEntries.map((entry) => entry.hqUnknownCards ?? 0),
-    ),
+    hqKnownCards: maximumMetric(hqMemoryEntries, "hqKnownCards"),
+    hqUnknownCards: maximumMetric(hqMemoryEntries, "hqUnknownCards"),
     hqKnownFraction: round(
       averageNumber(
         hqMemoryEntries
@@ -681,18 +477,12 @@ export function summarizeMatchProgressionMetrics(
     ),
     hqFullyKnown: hqMemoryEntries.filter((entry) => entry.hqFullyKnown === true)
       .length,
-    hqKnownAgendaCount: Math.max(
-      0,
-      ...hqMemoryEntries.map((entry) => entry.hqKnownAgendaCount ?? 0),
+    hqKnownAgendaCount: maximumMetric(hqMemoryEntries, "hqKnownAgendaCount"),
+    hqKnownNonAgendaCount: maximumMetric(
+      hqMemoryEntries,
+      "hqKnownNonAgendaCount",
     ),
-    hqKnownNonAgendaCount: Math.max(
-      0,
-      ...hqMemoryEntries.map((entry) => entry.hqKnownNonAgendaCount ?? 0),
-    ),
-    hqKnownAgendaPoints: Math.max(
-      0,
-      ...hqMemoryEntries.map((entry) => entry.hqKnownAgendaPoints ?? 0),
-    ),
+    hqKnownAgendaPoints: maximumMetric(hqMemoryEntries, "hqKnownAgendaPoints"),
     hqMemoryInvalidatedByDraw: hqMemoryEntries.filter(
       (entry) => entry.hqMemoryInvalidatedByDraw === true,
     ).length,
@@ -708,13 +498,13 @@ export function summarizeMatchProgressionMetrics(
     hqMemoryInvalidatedByShuffleOrReorder: hqMemoryEntries.filter(
       (entry) => entry.hqMemoryInvalidatedByShuffleOrReorder === true,
     ).length,
-    hqRunValueFromKnownCards: Math.max(
-      0,
-      ...runnerRuns.map((entry) => entry.hqRunValueFromKnownCards ?? 0),
+    hqRunValueFromKnownCards: maximumMetric(
+      runnerRuns,
+      "hqRunValueFromKnownCards",
     ),
-    hqRunValueFromUnknownCards: Math.max(
-      0,
-      ...runnerRuns.map((entry) => entry.hqRunValueFromUnknownCards ?? 0),
+    hqRunValueFromUnknownCards: maximumMetric(
+      runnerRuns,
+      "hqRunValueFromUnknownCards",
     ),
     hqRunSuppressedBecauseFullyKnownNoAgenda: runnerRuns.filter(
       (entry) => entry.hqRunSuppressedBecauseFullyKnownNoAgenda === true,
@@ -752,17 +542,14 @@ export function summarizeMatchProgressionMetrics(
         entry.actionType === "access_card" &&
         entry.targetServerId === "rd",
     ).length,
-    rndAccessRemovedTopCard: actionSequence.filter(
-      (entry) => entry.rndAccessRemovedTopCard === true,
+    rndAccessRemovedCard: actionSequence.filter(
+      (entry) => entry.rndAccessRemovedCard === true,
     ).length,
     rndAccessStoleAgenda: actionSequence.filter(
       (entry) => entry.rndAccessStoleAgenda === true,
     ).length,
     rndAccessTrashedCard: actionSequence.filter(
       (entry) => entry.rndAccessTrashedCard === true,
-    ).length,
-    rndAccessLeftTopCardUnchanged: actionSequence.filter(
-      (entry) => entry.rndAccessLeftTopCardUnchanged === true,
     ).length,
     rndTopFreshenedByRunnerAccess: actionSequence.filter(
       (entry) => entry.rndTopFreshenedByRunnerAccess === true,
@@ -809,17 +596,11 @@ export function summarizeMatchProgressionMetrics(
     rndCloseoutOpportunityAfterTopRemoved: actionSequence.filter(
       (entry) => entry.rndCloseoutOpportunityAfterTopRemoved === true,
     ).length,
-    knownRemoteCards: Math.max(
-      0,
-      ...actionSequence.map((entry) => entry.knownRemoteCards ?? 0),
-    ),
-    knownRemoteAgendas: Math.max(
-      0,
-      ...actionSequence.map((entry) => entry.knownRemoteAgendas ?? 0),
-    ),
-    knownRemoteTrashableCards: Math.max(
-      0,
-      ...actionSequence.map((entry) => entry.knownRemoteTrashableCards ?? 0),
+    knownRemoteCards: maximumMetric(actionSequence, "knownRemoteCards"),
+    knownRemoteAgendas: maximumMetric(actionSequence, "knownRemoteAgendas"),
+    knownRemoteTrashableCards: maximumMetric(
+      actionSequence,
+      "knownRemoteTrashableCards",
     ),
     remoteMemoryRetainedAfterAccess: actionSequence.filter(
       (entry) => entry.remoteMemoryRetainedAfterAccess === true,
@@ -836,9 +617,9 @@ export function summarizeMatchProgressionMetrics(
     remoteTrashBoostedByKnownRemoteTrashable: runnerRuns.filter(
       (entry) => entry.remoteTrashBoostedByKnownRemoteTrashable === true,
     ).length,
-    knownUnrezzedIceFromExpose: Math.max(
-      0,
-      ...actionSequence.map((entry) => entry.knownUnrezzedIceFromExpose ?? 0),
+    knownUnrezzedIceFromExpose: maximumMetric(
+      actionSequence,
+      "knownUnrezzedIceFromExpose",
     ),
     knownUnrezzedIceRetained: actionSequence.filter(
       (entry) => entry.knownUnrezzedIceRetained === true,
@@ -846,11 +627,9 @@ export function summarizeMatchProgressionMetrics(
     knownUnrezzedIceInvalidated: actionSequence.filter(
       (entry) => entry.knownUnrezzedIceInvalidated === true,
     ).length,
-    runCostAdjustedByKnownUnrezzedIce: Math.max(
-      0,
-      ...runnerRuns.map(
-        (entry) => entry.runCostAdjustedByKnownUnrezzedIce ?? 0,
-      ),
+    runCostAdjustedByKnownUnrezzedIce: maximumMetric(
+      runnerRuns,
+      "runCostAdjustedByKnownUnrezzedIce",
     ),
     jackOutInfluencedByKnownUnrezzedIce: actionSequence.filter(
       (entry) => entry.jackOutInfluencedByKnownUnrezzedIce === true,
@@ -858,21 +637,17 @@ export function summarizeMatchProgressionMetrics(
     rigPlanInfluencedByKnownUnrezzedIce: actionSequence.filter(
       (entry) => entry.rigPlanInfluencedByKnownUnrezzedIce === true,
     ).length,
-    runnerMissingBreakerCoverageByType: Math.max(
-      0,
-      ...actionSequence.map(
-        (entry) => entry.runnerMissingBreakerCoverageByType ?? 0,
-      ),
+    runnerMissingBreakerCoverageByType: maximumMetric(
+      actionSequence,
+      "runnerMissingBreakerCoverageByType",
     ),
-    runnerVisibleIceBlockingByType: Math.max(
-      0,
-      ...actionSequence.map(
-        (entry) => entry.runnerVisibleIceBlockingByType ?? 0,
-      ),
+    runnerVisibleIceBlockingByType: maximumMetric(
+      actionSequence,
+      "runnerVisibleIceBlockingByType",
     ),
-    runnerKnownIceBlockingByType: Math.max(
-      0,
-      ...actionSequence.map((entry) => entry.runnerKnownIceBlockingByType ?? 0),
+    runnerKnownIceBlockingByType: maximumMetric(
+      actionSequence,
+      "runnerKnownIceBlockingByType",
     ),
     runnerPathBlockedByMissingCoverage: actionSequence.filter(
       (entry) => entry.runnerPathBlockedByMissingCoverage === true,
@@ -888,9 +663,6 @@ export function summarizeMatchProgressionMetrics(
     ).length,
     runnerSearchCardAvailableButUnused: actionSequence.filter(
       (entry) => entry.runnerSearchCardAvailableButUnused === true,
-    ).length,
-    runnerTutorConvertedToBreakerInstall: actionSequence.filter(
-      (entry) => entry.runnerTutorConvertedToBreakerInstall === true,
     ).length,
     runnerTutorConvertedToUsefulRun: countRunnerCoverageConversions(
       actionSequence,
@@ -1002,12 +774,6 @@ export function summarizeMatchProgressionMetrics(
     runnerPhaseExitBlockedByTargetValue: actionSequence.filter(
       (entry) => entry.runnerPhaseExitBlockedByTargetValue === true,
     ).length,
-    runnerProbeRevealedIceThenSearchedBreaker: actionSequence.filter(
-      (entry) => entry.runnerProbeRevealedIceThenSearchedBreaker === true,
-    ).length,
-    runnerProbeRevealedIceButDidNotReact: actionSequence.filter(
-      (entry) => entry.runnerProbeRevealedIceButDidNotReact === true,
-    ).length,
     runnerSetupBreakerSearchStalled: actionSequence.filter(
       (entry) => entry.runnerSetupBreakerSearchStalled === true,
     ).length,
@@ -1027,9 +793,8 @@ export function summarizeMatchProgressionMetrics(
     interfaceInstalledButUnusedTurns: actionSequence.filter(
       (entry) => entry.runnerInterfaceInstalledButUnusedTurn === true,
     ).length,
-    successfulRemoteRuns: successfulRunActions.filter((entry) =>
-      isRemoteServerTarget(entry.targetServerId),
-    ).length,
+    successfulRemoteRuns:
+      successfulRunTargets.filter(isRemoteServerTarget).length,
     successfulRemoteAccesses,
     remoteTrashActions,
     remoteAccessesWithTrashableCards,
@@ -1192,13 +957,16 @@ export function summarizeMatchProgressionMetrics(
     remoteContestActions:
       runnerRuns.filter((entry) => isRemoteServerTarget(entry.targetServerId))
         .length + remoteTrashActions,
-    pressureTargetSwitches,
+    pressureTargetSwitches: gameActionSequences.reduce(
+      (sum, sequence) => sum + countPressureTargetSwitches(sequence),
+      0,
+    ),
     distinctPressureTargets: new Set(pressureTargets).size,
     remoteInstalls: remoteRootInstalls + remoteIceInstalls,
     remoteRootInstalls,
     remoteIceInstalls,
     remoteAdvances,
-    advancedAgendaInstalledInRemote: remoteAgendaAdvancementActions,
+    advancedAgendaInstalledInRemote: advancementActionsOnAgendas,
     advancementActionsOnAgendas,
     advancementActionsOnAssets,
     advancementActionsOnUpgrades,
@@ -1238,11 +1006,11 @@ export function summarizeMatchProgressionMetrics(
       (entry) => entry.runnerDrawWhileRemoteTrashAvailable === true,
     ).length,
     drawThenDiscardSameTurn: countRunnerDrawThenDiscardSameTurn(summaries),
-    discardedPlayableEconomy: actionSequence.filter(
-      (entry) => entry.runnerDiscardedPlayableEconomy === true,
+    discardedEconomyCard: actionSequence.filter(
+      (entry) => entry.runnerDiscardedEconomyCard === true,
     ).length,
-    discardedInstallableBreaker: actionSequence.filter(
-      (entry) => entry.runnerDiscardedInstallableBreaker === true,
+    discardedBreaker: actionSequence.filter(
+      (entry) => entry.runnerDiscardedBreaker === true,
     ).length,
     discardedRunPressureCard: actionSequence.filter(
       (entry) => entry.runnerDiscardedRunPressureCard === true,
@@ -1601,7 +1369,7 @@ export function summarizeMatchProgressionMetrics(
     ).length,
     runnerRemoteTrashOpportunities,
     runnerRemoteTrashTaken,
-    runnerRemoteTrashDecisionWindows,
+    runnerRemoteTrashDecisionWindows: remoteAccessesWithTrashableCards,
     runnerRemoteTrashLegalActions,
     runnerRemoteTrashSkipped,
     runnerRemoteTrashSkippedAffordableRelevant,
@@ -1661,8 +1429,6 @@ export function summarizeMatchProgressionMetrics(
     runnerRemoteTrashFixGateSuspicious: actionSequence.filter(
       (entry) => entry.runnerRemoteTrashFixGateSuspicious === true,
     ).length,
-    runnerRepeatRemoteNoTrashFixGateSuspicious:
-      repeatRemoteNoTrashMetrics.runnerRepeatRemoteNoTrashFixGateSuspicious,
     handUseRate:
       runnerHandUseOpportunityWindows > 0
         ? round(runnerHandUseActionsTaken / runnerHandUseOpportunityWindows)
@@ -1680,9 +1446,11 @@ export function summarizeMatchProgressionMetrics(
       (entry) => entry.runnerBelowReserveAfter === true,
     ).length,
     runnerCreditReserveTargetAverage: averageNumber(runnerCreditReserveTargets),
-    runnerTurnsBelowContestReserve: runnerCreditEntries.filter(
-      (entry) => entry.runnerBelowReserveBefore === true,
-    ).length,
+    runnerTurnsBelowContestReserve: summaries.reduce(
+      (sum, summary) =>
+        sum + countRunnerTurnsBelowContestReserve(summary.actionSequence),
+      0,
+    ),
     runnerEconomyCreditsGained: actionSequence.reduce(
       (sum, entry) => sum + (entry.runnerEconomyCreditsGained ?? 0),
       0,
@@ -1728,21 +1496,7 @@ export function summarizeMatchProgressionMetrics(
     runnerReservePreservingEconomyActions: actionSequence.filter(
       (entry) => entry.runnerReservePreservingEconomy === true,
     ).length,
-    runnerReserveAfterSuccessfulRun: averageNumber(
-      actionSequence
-        .map((entry) => entry.runnerReserveAfterSuccessfulRun)
-        .filter((value): value is number => typeof value === "number"),
-    ),
-    runnerReserveAfterRemoteAccess: averageNumber(
-      actionSequence
-        .map((entry) => entry.runnerReserveAfterRemoteAccess)
-        .filter((value): value is number => typeof value === "number"),
-    ),
-    runnerReserveAfterCentralRun: averageNumber(
-      actionSequence
-        .map((entry) => entry.runnerReserveAfterCentralRun)
-        .filter((value): value is number => typeof value === "number"),
-    ),
+    ...summarizeRunnerReserveAfterRuns(summaries),
     runnerReserveBeforeAdvancedRemoteContest: averageNumber(
       actionSequence
         .map((entry) => entry.runnerReserveBeforeAdvancedRemoteContest)
@@ -1994,4 +1748,14 @@ export function summarizeMatchProgressionMetrics(
       actionSequence.filter((entry) => entry.timeoutUsed).length / totalActions,
     ),
   };
+}
+
+function maximumMetric(
+  entries: AiSimulationSummary["actionSequence"],
+  key: keyof AiSimulationSummary["actionSequence"][number],
+): number {
+  return entries.reduce((peak, entry) => {
+    const value = entry[key];
+    return typeof value === "number" ? Math.max(peak, value) : peak;
+  }, 0);
 }

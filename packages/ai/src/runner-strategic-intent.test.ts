@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { CardDefinitionId } from "@netgrid/shared";
 
 import benchmarkSnapshotsData from "../../../data/ai/ai-local-realistic-benchmark-deck-snapshots-2026-05-23.json";
 import standardDeckCatalog from "../../../data/decks/standard-deck-catalog-1.0.0.json";
@@ -6,12 +7,6 @@ import { buildDeckCapabilityProfile } from "./deck-capabilities";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
 import { buildRunnerStrategicIntentProfile } from "./runner-strategic-intent";
-
-const benchmarkSnapshots = benchmarkSnapshotsData.snapshots as Array<{
-  deckSnapshotId: string;
-  side: "runner" | "corp";
-  cards: Array<{ cardId: string; quantity: number }>;
-}>;
 
 describe("Runner StrategicIntentProjection", () => {
   it("projects King of the Road through its explicit conditional access line", () => {
@@ -187,15 +182,15 @@ describe("Runner StrategicIntentProjection", () => {
     {
       name: "synthetic HQ pressure deck",
       snapshot: syntheticSnapshot("synthetic_runner_hq_pressure_fixture", [
-        ["onr_v1_024_expert-schedule-analyzer", 2],
-        ["onr_v1_085_executive-wiretaps", 2],
-        ["onr_v1_129_hq-interface", 2],
-        ["onr_v1_016_cyfermaster", 1],
-        ["onr_v1_021_dwarf", 1],
-        ["onr_v1_066_snowball", 1],
-        ["onr_v1_079_bodyweight-synthetic-blood", 3],
-        ["onr_v1_097_livewires-contacts", 3],
-        ["onr_v1_154_broker", 2],
+        [236, 2],
+        [297, 2],
+        [341, 2],
+        [228, 1],
+        [233, 1],
+        [278, 1],
+        [291, 3],
+        [309, 3],
+        [366, 2],
       ]),
       executionStyle: "runner.run_event_tempo",
       setupEngine: ["runner.rig_first", "runner.economy_setup_before_pressure"],
@@ -219,16 +214,16 @@ describe("Runner StrategicIntentProjection", () => {
       snapshot: syntheticSnapshot(
         "synthetic_runner_economy_remote_contest_fixture",
         [
-          ["onr_v1_156_corporate-ally", 2],
-          ["onr_v1_173_restrictive-net-zoning", 2],
-          ["onr_v1_016_cyfermaster", 1],
-          ["onr_v1_021_dwarf", 1],
-          ["onr_v1_066_snowball", 1],
-          ["onr_v1_079_bodyweight-synthetic-blood", 3],
-          ["onr_v1_097_livewires-contacts", 3],
-          ["onr_v1_154_broker", 3],
-          ["onr_v1_168_loan-from-chiba", 3],
-          ["onr_v1_184_top-runners-conference", 2],
+          [368, 2],
+          [385, 2],
+          [228, 1],
+          [233, 1],
+          [278, 1],
+          [291, 3],
+          [309, 3],
+          [366, 3],
+          [380, 3],
+          [396, 2],
         ],
       ),
       executionStyle: undefined,
@@ -301,9 +296,9 @@ describe("Runner StrategicIntentProjection", () => {
       deckSnapshotId: "runner-support-only-strategy-fixture",
       side: "runner",
       cards: [
-        { cardId: "onr_v1_059_self-modifying-code", quantity: 2 },
-        { cardId: "onr_v1_108_score", quantity: 3 },
-        { cardId: "onr_v1_154_broker", quantity: 2 },
+        { cardId: 271, quantity: 2 },
+        { cardId: 320, quantity: 3 },
+        { cardId: 366, quantity: 2 },
       ],
     });
     const deckCapabilities = buildDeckCapabilityProfile({
@@ -312,9 +307,9 @@ describe("Runner StrategicIntentProjection", () => {
         deckSnapshotId: "runner-support-only-capability-fixture",
         side: "runner",
         cards: [
-          { cardId: "onr_v1_059_self-modifying-code", quantity: 2 },
-          { cardId: "onr_v1_108_score", quantity: 3 },
-          { cardId: "onr_v1_154_broker", quantity: 2 },
+          { cardId: 271, quantity: 2 },
+          { cardId: 320, quantity: 3 },
+          { cardId: 366, quantity: 2 },
         ],
       },
       legalActions: [],
@@ -351,8 +346,8 @@ describe("Runner StrategicIntentProjection", () => {
         deckSnapshotId: "runner-capability-only-fixture",
         side: "runner",
         cards: [
-          { cardId: "onr_v1_059_self-modifying-code", quantity: 2 },
-          { cardId: "onr_v1_154_broker", quantity: 2 },
+          { cardId: 271, quantity: 2 },
+          { cardId: 366, quantity: 2 },
         ],
       },
       legalActions: [],
@@ -406,7 +401,7 @@ function runnerStrategicIntentForSnapshot(
 
 function syntheticSnapshot(
   deckSnapshotId: string,
-  cards: Array<[cardId: string, quantity: number]>,
+  cards: Array<[cardId: CardDefinitionId, quantity: number]>,
 ): AiDeckStrategyDeckSnapshot {
   return {
     deckSnapshotId,
@@ -416,10 +411,11 @@ function syntheticSnapshot(
 }
 
 function benchmarkSnapshotById(snapshotId: string): AiDeckStrategyDeckSnapshot {
-  const snapshot = benchmarkSnapshots.find(
+  const snapshot = benchmarkSnapshotsData.snapshots.find(
     (candidate) => candidate.deckSnapshotId === snapshotId,
   );
-  if (!snapshot) throw new Error(`Missing benchmark snapshot ${snapshotId}`);
+  if (!snapshot || (snapshot.side !== "runner" && snapshot.side !== "corp"))
+    throw new Error(`Invalid benchmark snapshot ${snapshotId}`);
   return {
     deckSnapshotId: snapshot.deckSnapshotId,
     side: snapshot.side,

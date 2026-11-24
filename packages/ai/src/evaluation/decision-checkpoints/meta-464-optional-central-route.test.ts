@@ -20,7 +20,7 @@ it("preserves a Central-owner admitted optional Archives run with qualified hidd
   );
   const d = chooseAiAction(c.input);
   expect(d.actionId).toBe(
-    "runner.start_run.archives.bonus_run.onr_v1_123_bodyweight-data-creche",
+    "rs.archives.bonus_run.335",
   );
   const p = residentPlanPortfolioSnapshot(c.input)!;
   expect(

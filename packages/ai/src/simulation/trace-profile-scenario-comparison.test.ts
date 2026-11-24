@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   applyAction,
   applyRandomizedTraceBidSelection,
@@ -29,7 +30,7 @@ const PROFILES = [
 const SCENARIOS = [
   {
     id: "low",
-    sourceDefinitionId: "trace_comparison_low" as CardDefinitionId,
+    sourceDefinitionId: syntheticCardDefinitionId("trace_comparison_low"),
     traceLimit: 3,
     runnerLink: 1,
     corpCredits: 6,
@@ -39,7 +40,7 @@ const SCENARIOS = [
   },
   {
     id: "tag",
-    sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
+    sourceDefinitionId: 448 as CardDefinitionId,
     traceLimit: 5,
     runnerLink: 1,
     corpCredits: 8,
@@ -54,12 +55,12 @@ const SCENARIOS = [
   },
   {
     id: "terminal",
-    sourceDefinitionId: "onr_v1_248_homewrecker" as CardDefinitionId,
+    sourceDefinitionId: 460 as CardDefinitionId,
     traceLimit: 5,
     runnerLink: 0,
     corpCredits: 8,
     runnerCredits: 6,
-    runnerGripCount: 2,
+    runnerGripCount: 1,
     successEffect: {
       type: "end_run_trash_hardware_and_unpreventable_meat_damage",
       amount: 2,
@@ -141,9 +142,13 @@ describe("Trace profile scenario comparison", () => {
       (sample) =>
         sample.scenario === "terminal" && sample.profile !== "modern_open",
     );
-    expect(terminalBlindSamples.every((sample) => sample.corpBid >= 3)).toBe(
-      true,
-    );
+    // The Runner has neither starting Link nor a Classic Link converter.
+    // A guaranteed terminal trace needs one credit when ties favor the Runner.
+    for (const sample of terminalBlindSamples) {
+      expect(sample.runnerBidMax).toBe(0);
+      expect(sample.successful).toBe(true);
+      expect(sample.corpBid).toBe(sample.profile === "classic_blind" ? 1 : 0);
+    }
     expect(
       first.metrics.classic_blind_corp_ties.successRate,
     ).toBeGreaterThanOrEqual(first.metrics.classic_blind.successRate);
@@ -279,7 +284,7 @@ function traceState(
   const corpBidMax =
     profile === "modern_open" ? scenario.corpCredits : scenario.traceLimit;
   state.trace = {
-    traceId: "trace_comparison_1",
+    traceId: 1,
     sourceCardInstanceId: state.corp.identity,
     sourceDefinitionId: scenario.sourceDefinitionId,
     traceRulesProfile: profile,
@@ -307,9 +312,9 @@ function bidChoice(
   visibility: "public" | "hidden_info_barrier",
 ): NonNullable<GameState["pendingChoice"]> {
   return {
-    choiceId: `trace_comparison_1.${side}.bid.${state.stateVersion}`,
+    choiceId: `1.${side}.bid.${state.stateVersion}`,
     side,
-    source: "trace:trace_comparison_1",
+    source: "trace:1",
     prompt: "Trace-Gebot wählen",
     kind: "bid_amount",
     options: Array.from({ length: maximum + 1 }, (_, bid) => ({
@@ -343,7 +348,7 @@ function deckSnapshot(
     side === "corp"
       ? [...state.corp.hq, ...state.corp.rd, ...state.corp.archives]
       : [...state.runner.grip, ...state.runner.stack, ...state.runner.heap];
-  const counts = new Map<string, number>();
+  const counts = new Map<CardDefinitionId, number>();
   for (const instanceId of zones) {
     const definitionId = state.cardInstances[instanceId]?.definitionId;
     if (!definitionId) continue;

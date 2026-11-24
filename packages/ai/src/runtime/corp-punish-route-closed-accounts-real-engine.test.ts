@@ -6,6 +6,7 @@ import {
 } from "@netgrid/engine";
 import {
   DEMO_DECKS,
+  type CardDefinitionId,
   type DeckDefinition,
   type GameState,
   type LegalAction,
@@ -17,7 +18,7 @@ import { chooseCorpAction } from "../index";
 import { buildAiDecisionInput } from "./ai-decision-input";
 import { withDecisionLocalCorpPunishRouteQuotes } from "../corp/punish/punish-route-quote-input";
 
-const CLOSED_ACCOUNTS = "onr_v1_285_closed-accounts";
+const CLOSED_ACCOUNTS = 497;
 const CORP_DECK = withCards(
   DEMO_DECKS.demo_corp_001,
   "closed-accounts-quote-corp",
@@ -71,7 +72,7 @@ describe("Closed Accounts decision-local real-Engine punish quote", () => {
           kind: "other_punish",
           sourceCardDefinitionId: CLOSED_ACCOUNTS,
           sourceCapabilityId:
-            "onr_v1_285_closed-accounts:abilities_on_play_lose_credits",
+            611,
           currentLegalAction: {
             actionId: currentAction.actionId,
             source: currentAction.source,
@@ -163,7 +164,7 @@ describe("Closed Accounts decision-local real-Engine punish quote", () => {
     expect(decision.actionId).toBe(fundingAction.actionId);
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.evidence).toContain(
-      "plan_priority_delegated_from:plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
+      "plan_priority_delegated_from:pp3zys3mvrb02r0muk2126s52",
     );
     expect(JSON.stringify(decision.decisionDebug)).toContain(
       "|module:corp.punish_campaign|phase:fund",
@@ -247,7 +248,7 @@ function apply(state: GameState, action: LegalAction | undefined): GameState {
 function withCards(
   base: DeckDefinition,
   id: string,
-  additions: readonly string[],
+  additions: readonly CardDefinitionId[],
 ): DeckDefinition {
   return {
     ...base,

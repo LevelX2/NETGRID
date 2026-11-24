@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import type { Side } from "@netgrid/shared";
 import {
   AI_HINTS_BY_CARD,
@@ -6,12 +7,12 @@ import {
 } from "./ai-hints";
 import { rolesMatch } from "./role-match";
 
-export function deckDoctrineCardIsAiSupported(cardId: string): boolean {
+export function deckDoctrineCardIsAiSupported(cardId: CardDefinitionId): boolean {
   return RUNTIME_CARDS[cardId]?.statuses?.ai_supported === true;
 }
 
-export function rolesForDeckDoctrineCard(cardId: string): string[] {
-  if (!cardId) return [];
+export function rolesForDeckDoctrineCard(cardId: CardDefinitionId | undefined): string[] {
+  if (cardId === undefined) return [];
   const runtimeCard = RUNTIME_CARDS[cardId];
   const hint = AI_HINTS_BY_CARD.get(cardId);
   if (

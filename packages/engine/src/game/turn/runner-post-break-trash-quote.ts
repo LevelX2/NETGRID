@@ -1,6 +1,6 @@
 import type { GameState, LegalAction } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import { rezCostForCard } from "../payment/corp-rez-cost";
+import { printedIceRezCost } from "../payment/corp-rez-cost";
 
 /** Current public targets and controller-owned sources, never future actions. */
 export function withRunnerPostBreakTrashQuote(
@@ -40,7 +40,7 @@ export function withRunnerPostBreakTrashQuote(
           {
             targetIceInstanceId: id,
             targetDefinitionId: card.definitionId,
-            trashCredits: rezCostForCard(state, id),
+            trashCredits: printedIceRezCost(state, id),
           },
         ]
       : [];

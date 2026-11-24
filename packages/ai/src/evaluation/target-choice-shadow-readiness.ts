@@ -229,12 +229,9 @@ function categoryForReport(
     return "blocked_no_side_safe_options";
   }
   if (report.scorecard.coverageStatus === "covered") {
-    const top = report.rankedOptions[0];
-    const second = report.rankedOptions[1];
-    if (top && (!second || top.score - second.score >= 20)) {
-      return "ready_for_local_dry_run";
-    }
-    return "ready_for_shadow_only";
+    return report.selectionOutput.wouldSelect
+      ? "ready_for_local_dry_run"
+      : "ready_for_shadow_only";
   }
   if (report.scorecard.coverageStatus === "partial") {
     return "ready_for_shadow_only";

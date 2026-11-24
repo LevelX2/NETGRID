@@ -44,11 +44,7 @@ describe("counter utility trigger execution", () => {
     const state = baseState();
     state.runner.clicks = 1;
     state.runner.rig.resources = [sourceId];
-    state.cardInstances[sourceId] = instance(
-      sourceId,
-      "preying_mantis",
-      "runner",
-    );
+    state.cardInstances[sourceId] = instance(sourceId, 3954350644, "runner");
     const action = triggerAction(state, "runner", {
       cardId: sourceId,
       runnerUtilityAbility: "optional_extra_action_with_delayed_damage",
@@ -58,7 +54,7 @@ describe("counter utility trigger execution", () => {
       handleCounterUtilityTriggerExecution(
         testHost(state, {
           definitions: {
-            preying_mantis: definition("preying_mantis", "resource"),
+            3954350644: definition(3954350644, "resource"),
           },
           runnerUtilityImplementation: {
             kind: "optional_extra_action_with_delayed_damage",
@@ -84,7 +80,7 @@ describe("counter utility trigger execution", () => {
     expect(state.runnerTurnFlags?.delayedEndTurnEffects).toEqual([
       {
         sourceCardInstanceId: sourceId,
-        sourceDefinitionId: "preying_mantis",
+        sourceDefinitionId: 3954350644,
         abilityKey: "optional_extra_action_with_delayed_damage",
         kind: "damage",
         damageType: "core",
@@ -93,7 +89,7 @@ describe("counter utility trigger execution", () => {
       },
     ]);
     expect(action.payload).toMatchObject({
-      sourceDefinitionId: "preying_mantis",
+      sourceDefinitionId: 3954350644,
       gainedActions: 1,
       runnerClicksAfter: 2,
       delayedDamageDueAtEndOfTurn: true,
@@ -111,8 +107,8 @@ describe("counter utility trigger execution", () => {
     state.spyCountersByServer = { rd: 1 } as Record<string, number>;
     state.corp.servers[0]!.root = [rootId];
     state.corp.servers[0]!.ice = [iceId];
-    state.cardInstances[rootId] = instance(rootId, "root_definition", "corp");
-    state.cardInstances[iceId] = instance(iceId, "ice_definition", "corp");
+    state.cardInstances[rootId] = instance(rootId, 2072368119, "corp");
+    state.cardInstances[iceId] = instance(iceId, 2630481112, "corp");
     const action = triggerAction(
       state,
       "corp",
@@ -125,7 +121,7 @@ describe("counter utility trigger execution", () => {
 
     state.corpTemporaryInstallRezCredits = {
       sourceCardInstanceId: "contract",
-      sourceDefinitionId: "onr_proteus_059_government-contract",
+      sourceDefinitionId: 117,
       remaining: 3,
       usableFor: "corp_install_or_rez",
       returnUnusedAtTurnEnd: true,
@@ -140,8 +136,8 @@ describe("counter utility trigger execution", () => {
       testHost(state, {
         serverLabel: "R&D",
         definitions: {
-          root_definition: definition("root_definition", "asset"),
-          ice_definition: definition("ice_definition", "ice"),
+          2072368119: definition(2072368119, "asset"),
+          2630481112: definition(2630481112, "ice"),
         },
       }),
       action,
@@ -179,13 +175,13 @@ describe("counter utility trigger execution", () => {
         after: 0,
         cards: [
           {
-            definitionId: "ice_definition",
+            definitionId: 2630481112,
             serverId: "rd",
             area: "ice",
             positionKey: "ice:0",
           },
           {
-            definitionId: "root_definition",
+            definitionId: 2072368119,
             serverId: "rd",
             area: "root",
             positionKey: "root:0",
@@ -222,11 +218,7 @@ describe("counter utility trigger execution", () => {
     state.runner.identity = identityId;
     state.runner.clicks = 2;
     state.runner.credits = 5;
-    state.cardInstances[identityId] = instance(
-      identityId,
-      "runner_identity_def",
-      "runner",
-    );
+    state.cardInstances[identityId] = instance(identityId, 198573098, "runner");
     setCounter(state, identityId, "trace_tag_counter", 1);
     const action = triggerAction(
       state,
@@ -246,7 +238,7 @@ describe("counter utility trigger execution", () => {
         traceCounterEffect: {
           counterType: "trace_tag_counter",
           removeCost: 2,
-          sourceDefinitionId: "trace_tag_counter_source",
+          sourceDefinitionId: 284051578,
         },
       }),
       action,
@@ -256,7 +248,7 @@ describe("counter utility trigger execution", () => {
     expect(state.runner.credits).toBe(3);
     expect(counter(state, identityId, "trace_tag_counter")).toBe(0);
     expect(action.payload).toMatchObject({
-      sourceDefinitionId: "trace_tag_counter_source",
+      sourceDefinitionId: 284051578,
       counterType: "trace_tag_counter",
       removedCounterAmount: 1,
       remainingCounters: 0,
@@ -284,11 +276,7 @@ describe("counter utility trigger execution", () => {
     state.corp.clicks = 3;
     state.corp.credits = 5;
     state.runner.rig.resources = [sourceId];
-    state.cardInstances[sourceId] = instance(
-      sourceId,
-      "lock_source_def",
-      "runner",
-    );
+    state.cardInstances[sourceId] = instance(sourceId, 106069206, "runner");
     const action = triggerAction(
       state,
       "corp",
@@ -301,7 +289,7 @@ describe("counter utility trigger execution", () => {
 
     state.corpTemporaryInstallRezCredits = {
       sourceCardInstanceId: "contract",
-      sourceDefinitionId: "onr_proteus_059_government-contract",
+      sourceDefinitionId: 117,
       remaining: 3,
       usableFor: "corp_install_or_rez",
       returnUnusedAtTurnEnd: true,
@@ -311,7 +299,7 @@ describe("counter utility trigger execution", () => {
       handleCounterUtilityTriggerExecution(
         testHost(state, {
           dataFortLock: {
-            sourceDefinitionId: "lock_source_def",
+            sourceDefinitionId: 106069206,
             modifier: { corpTrashSourceCost: { clicks: 2, credits: 3 } },
           },
         }),
@@ -323,7 +311,7 @@ describe("counter utility trigger execution", () => {
     handleCounterUtilityTriggerExecution(
       testHost(state, {
         dataFortLock: {
-          sourceDefinitionId: "lock_source_def",
+          sourceDefinitionId: 106069206,
           modifier: { corpTrashSourceCost: { clicks: 2, credits: 3 } },
         },
       }),
@@ -335,8 +323,8 @@ describe("counter utility trigger execution", () => {
     expect(state.runner.rig.resources).toEqual([]);
     expect(state.runner.heap).toEqual([sourceId]);
     expect(action.payload).toMatchObject({
-      sourceDefinitionId: "lock_source_def",
-      trashedCardDefinitionId: "lock_source_def",
+      sourceDefinitionId: 106069206,
+      trashedCardDefinitionId: 106069206,
       trashCostPaid: 3,
       newDataFortCreationLockRemoved: true,
       corpCreditsAfter: 2,
@@ -370,10 +358,10 @@ type HostOptions = {
   traceCounterEffect?: {
     counterType: CounterType;
     removeCost: number;
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
   };
   dataFortLock?: {
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
     modifier: { corpTrashSourceCost: { clicks: number; credits: number } };
   };
 };
@@ -547,7 +535,7 @@ function setCounter(
 
 function instance(
   id: CardInstanceId,
-  definitionId: string,
+  definitionId: number,
   owner: Side,
 ): CardInstance {
   return {
@@ -564,7 +552,7 @@ function instance(
   } as unknown as CardInstance;
 }
 
-function definition(id: string, type: CardDefinition["type"]): CardDefinition {
+function definition(id: number, type: CardDefinition["type"]): CardDefinition {
   return {
     id,
     title: id,

@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../input-dto";
+import { buildPlanningStateIdentity } from "../plans/turn-planning-contracts";
+import { visibleSourceDefinitionsByInstanceId } from "../runtime/visible-source-definitions";
 import { restoreAiRuntimeCheckpoint } from "../evaluation/decision-checkpoints/runtime-checkpoint";
 import {
   resetResidentPlanPortfolioMemory,
@@ -22,6 +24,7 @@ function fixture(name: string) {
     ...cp.input,
     ...buildAiDecisionInputDto(cp.input),
   } as AiDecisionInputWithDeckCapabilities;
+  input.planningStateIdentity = buildPlanningStateIdentity(input);
   return { cp, input };
 }
 afterEach(resetResidentPlanPortfolioMemory);
@@ -121,7 +124,7 @@ it.each([0, 1, 2])(
     const { input } = fixture("meta592-g30-d547-fee-break"),
       v = input.playerView,
       rig = v.own.rig!,
-      server = v.servers.find((s) => s.id === "remote_1")!,
+      server = v.servers.find((s) => s.id === "r1")!,
       budget = runnerRunPathCreditBudgetWithVisiblePools(cash, rig, {
         liquidCredits: cash,
       }),
@@ -137,9 +140,8 @@ it.each([0, 1, 2])(
     if (cash === 1) {
       expect(path.visibleBreakCost).toBe(8);
       expect(path.creditBudgetAfterPath?.credits).toBe(0);
-      expect(path.runEndTrashSourceIds).toContain(
-        "runner_onr_classic_031_rent-i-con_2",
-      );
+      const rentICon = rig.find((card) => card.definitionId === 35)!;
+      expect(path.runEndTrashSourceIds).toContain(rentICon.instanceId);
     }
     if (cash === 2) {
       expect(path.visibleBreakCost).toBe(6);
@@ -152,7 +154,7 @@ it("does not admit an unpayable break when the restricted pool is depleted", () 
   const { input } = fixture("meta592-g30-d547-fee-break"),
     v = input.playerView,
     rig = v.own.rig!,
-    ice = v.servers.find((s) => s.id === "remote_1")!.ice;
+    ice = v.servers.find((s) => s.id === "r1")!.ice;
   expect(
     assessKnownRezzedIcePath(
       ice,
@@ -173,7 +175,7 @@ it("does not build a lasting recurring engine from the actual end-of-turn-bounce
   const before = JSON.stringify(input),
     d = chooseAiAction(input);
   expect(input.legalActions.some((a) => a.actionId === d.actionId)).toBe(true);
-  expect(d.actionId).toBe("runner.gain_credit");
+  expect(d.actionId).toBe("rb");
   expect(
     residentPlanPortfolioSnapshot(input)!.instances.some(
       (x) =>
@@ -195,19 +197,19 @@ it("binds the actual last-chance remote funding head to the one-credit break rou
     cp.runtime,
   );
   const d = chooseAiAction(input);
-  expect(d.actionId).toBe("runner.gain_credit");
+  expect(d.actionId).toBe("rb");
   expect(d.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
     "runner.economy",
   );
   const p = residentPlanPortfolioSnapshot(input)!,
     fund = p.instances.find(
       (x) =>
-        x.moduleId === "runner.economy" && x.instanceId.includes("run-support"),
+        x.moduleId === "runner.economy" && x.dedupeKey.includes("run-support"),
     );
   expect((fund!.moduleState as any).need).toMatchObject({
     gap: 1,
     targetCredits: 1,
-    parentPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+    parentPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
   });
   expect(d.fallbackUsed || d.timeoutUsed).toBe(false);
 });
@@ -219,10 +221,10 @@ it("preserves the real temporary coverage search for the immediately contested r
     input.ownDeckSnapshot!.deckSnapshotId,
     cp.runtime,
   );
-  const d = chooseAiAction(input),
-    a = input.legalActions.find((x) => x.actionId === d.actionId);
-  expect(a?.type).toBe("play_event");
-  expect(a?.actionId).toContain("onr_v1_110_sneak-preview");
+  const d = chooseAiAction(input);
+  const action = input.legalActions.find((x) => x.actionId === d.actionId)!;
+  expect(action.type).toBe("play_event");
+  expect(visibleSourceDefinitionsByInstanceId(input.playerView)[action.source]).toBe(322);
   expect(d.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
     "runner.rig_and_coverage",
   );

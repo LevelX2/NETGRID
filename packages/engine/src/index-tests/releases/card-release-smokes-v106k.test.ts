@@ -188,35 +188,35 @@ describe("V1.0.6K Card Release", () => {
     for (const definitionId of ONR_V1_0_6K_FINAL_CARD_IDS) {
       expect(
         CARD_DEFINITIONS_BY_ID[definitionId]?.implementationStatus,
-        definitionId,
+        String(definitionId),
       ).toBe("playable_mvp");
     }
 
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_072_wild-card"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[284]).toMatchObject({
       installCost: 0,
       memoryCost: 1,
       strength: 0,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_145_wutech-mem-chip"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[357]).toMatchObject({
       installCost: 1,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_220_tycho-extension"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[432]).toMatchObject({
       advancementRequirement: 4,
       agendaPoints: 4,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_244_filter"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[456]).toMatchObject({
       rezCost: 0,
       strength: 0,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_245_fire-wall"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[457]).toMatchObject({
       rezCost: 5,
       strength: 4,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_252_keeper"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[464]).toMatchObject({
       rezCost: 4,
       strength: 4,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_256_mazer"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[468]).toMatchObject({
       rezCost: 5,
       strength: 5,
     });
@@ -237,20 +237,20 @@ describe("V1.0.6K Card Release", () => {
     expect(corpValidation.errors).toEqual([]);
     expect(corpValidation.ok).toBe(true);
     expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_015_codeslinger"]).toBeDefined();
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_203_hostile-takeover"]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID[227]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID[415]).toBeDefined();
   });
 
   it("plays V1.0.6K Runner economy/draw cards, installs WuTech and uses Wild Card", () => {
     let state = toRunnerTurn(v106kCardReleaseGame("v106k-runner-cards"));
     state.runner.credits = 40;
     state.runner.clicks = 12;
-    moveRunnerCardToGrip(state, "onr_v1_079_bodyweight-synthetic-blood");
-    moveRunnerCardToGrip(state, "onr_v1_095_jack-n-joe");
-    moveRunnerCardToGrip(state, "onr_v1_097_livewires-contacts");
-    moveRunnerCardToGrip(state, "onr_v1_108_score");
-    moveRunnerCardToGrip(state, "onr_v1_145_wutech-mem-chip");
-    moveRunnerCardToGrip(state, "onr_v1_072_wild-card");
+    moveRunnerCardToGrip(state, 291);
+    moveRunnerCardToGrip(state, 307);
+    moveRunnerCardToGrip(state, 309);
+    moveRunnerCardToGrip(state, 320);
+    moveRunnerCardToGrip(state, 357);
+    moveRunnerCardToGrip(state, 284);
 
     const beforeBodyweightGrip = state.runner.grip.length;
     state = apply(
@@ -259,7 +259,7 @@ describe("V1.0.6K Card Release", () => {
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(state, action) ===
-          "onr_v1_079_bodyweight-synthetic-blood",
+          291,
     );
     expect(state.runner.grip.length).toBe(beforeBodyweightGrip + 4);
 
@@ -269,7 +269,7 @@ describe("V1.0.6K Card Release", () => {
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(state, action) === "onr_v1_095_jack-n-joe",
+        sourceDefinition(state, action) === 307,
     );
     expect(state.runner.grip.length).toBe(beforeJackGrip + 2);
 
@@ -277,7 +277,7 @@ describe("V1.0.6K Card Release", () => {
     const contactsAction = getLegalActions(state, "runner").find(
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(state, action) === "onr_v1_097_livewires-contacts",
+        sourceDefinition(state, action) === 309,
     );
     expect(contactsAction?.payload).toMatchObject({ gainCreditsAmount: 3 });
     state = apply(
@@ -285,7 +285,7 @@ describe("V1.0.6K Card Release", () => {
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(state, action) === "onr_v1_097_livewires-contacts",
+        sourceDefinition(state, action) === 309,
     );
     expect(state.runner.credits).toBe(beforeContactsCredits + 3);
 
@@ -295,7 +295,7 @@ describe("V1.0.6K Card Release", () => {
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(state, action) === "onr_v1_108_score",
+        sourceDefinition(state, action) === 320,
     );
     expect(state.runner.credits).toBe(beforeScoreCredits + 4);
 
@@ -304,14 +304,14 @@ describe("V1.0.6K Card Release", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_145_wutech-mem-chip",
+        sourceDefinition(state, action) === 357,
     );
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_072_wild-card",
+        sourceDefinition(state, action) === 284,
     );
     expect(state.runner.memoryLimit).toBe(4);
     expect(getPlayerView(state, "runner").own.memoryLimit).toBe(5);
@@ -319,15 +319,15 @@ describe("V1.0.6K Card Release", () => {
       state.runner.rig.programs.map(
         (id) => state.cardInstances[id]?.definitionId,
       ),
-    ).toContain("onr_v1_072_wild-card");
+    ).toContain(284);
 
     let sentryRun = toRunnerTurn(
       v106kCardReleaseGame("v106k-wild-card-sentry"),
     );
     sentryRun.runner.credits = 20;
-    installRunnerProgramForTest(sentryRun, "onr_v1_072_wild-card");
-    putCorpIceOnServer(sentryRun, "rd", "simple_sentry_ice");
-    putCorpCardOnTopOfRd(sentryRun, "simple_economy_operation");
+    installRunnerProgramForTest(sentryRun, 284);
+    putCorpIceOnServer(sentryRun, "rd", 601);
+    putCorpCardOnTopOfRd(sentryRun, 596);
     sentryRun.corp.credits = 20;
 
     sentryRun = apply(
@@ -341,7 +341,7 @@ describe("V1.0.6K Card Release", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(sentryRun, action) === "simple_sentry_ice",
+        sourceDefinition(sentryRun, action) === 601,
     );
     sentryRun = enterEncounterFromMovementWindow(sentryRun);
     sentryRun = apply(
@@ -349,35 +349,35 @@ describe("V1.0.6K Card Release", () => {
       "runner",
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinition(sentryRun, action) === "onr_v1_072_wild-card",
+        sourceDefinition(sentryRun, action) === 284,
     );
     sentryRun = apply(
       sentryRun,
       "runner",
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinition(sentryRun, action) === "onr_v1_072_wild-card",
+        sourceDefinition(sentryRun, action) === 284,
     );
     sentryRun = apply(
       sentryRun,
       "runner",
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinition(sentryRun, action) === "onr_v1_072_wild-card",
+        sourceDefinition(sentryRun, action) === 284,
     );
     sentryRun = apply(
       sentryRun,
       "runner",
       (action) =>
         action.type === "break_subroutine" &&
-        sourceDefinition(sentryRun, action) === "onr_v1_072_wild-card",
+        sourceDefinition(sentryRun, action) === 284,
     );
     sentryRun = apply(
       sentryRun,
       "runner",
       (action) =>
         action.type === "break_subroutine" &&
-        sourceDefinition(sentryRun, action) === "onr_v1_072_wild-card",
+        sourceDefinition(sentryRun, action) === 284,
     );
     sentryRun = continueRunThroughMovement(sentryRun);
     sentryRun = apply(
@@ -387,7 +387,7 @@ describe("V1.0.6K Card Release", () => {
     );
     expect(sentryRun.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
-      cardDefinitionId: "simple_economy_operation",
+      cardDefinitionId: 596,
     });
   });
 
@@ -403,12 +403,12 @@ describe("V1.0.6K Card Release", () => {
     state.corp.clicks = 20;
     state.runner.tags = 1;
     state.runner.credits = 9;
-    moveCorpCardToHq(state, "onr_v1_281_accounts-receivable");
-    moveCorpCardToHq(state, "onr_v1_282_annual-reviews");
-    moveCorpCardToHq(state, "onr_v1_288_day-shift");
-    moveCorpCardToHq(state, "onr_v1_290_efficiency-experts");
-    moveCorpCardToHq(state, "onr_v1_285_closed-accounts");
-    moveCorpCardToHq(state, "onr_v1_287_datapool-by-zetatech");
+    moveCorpCardToHq(state, 493);
+    moveCorpCardToHq(state, 494);
+    moveCorpCardToHq(state, 500);
+    moveCorpCardToHq(state, 502);
+    moveCorpCardToHq(state, 497);
+    moveCorpCardToHq(state, 499);
 
     const beforeAccounts = state.corp.credits;
     state = apply(
@@ -416,7 +416,7 @@ describe("V1.0.6K Card Release", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_281_accounts-receivable",
+        sourceDefinition(state, action) === 493,
     );
     expect(state.corp.credits).toBe(beforeAccounts + 4);
 
@@ -426,7 +426,7 @@ describe("V1.0.6K Card Release", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_282_annual-reviews",
+        sourceDefinition(state, action) === 494,
     );
     expect(state.corp.hq.length).toBe(beforeReviewsHq + 2);
 
@@ -437,7 +437,7 @@ describe("V1.0.6K Card Release", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_288_day-shift",
+        sourceDefinition(state, action) === 500,
     );
     expect(state.corp.hq.length).toBe(beforeDayShiftHq + 1);
     expect(state.corp.credits).toBe(beforeDayShiftCredits + 1);
@@ -448,7 +448,7 @@ describe("V1.0.6K Card Release", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_290_efficiency-experts",
+        sourceDefinition(state, action) === 502,
     );
     expect(state.corp.credits).toBe(beforeEfficiency + 3);
 
@@ -458,7 +458,7 @@ describe("V1.0.6K Card Release", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_287_datapool-by-zetatech",
+        sourceDefinition(state, action) === 499,
     );
     expect(state.runner.tags).toBe(beforeDatapoolTags + 2);
 
@@ -467,14 +467,14 @@ describe("V1.0.6K Card Release", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_285_closed-accounts",
+        sourceDefinition(state, action) === 497,
     );
     expect(state.runner.credits).toBe(0);
 
     for (const [definitionId, amount] of [
-      ["onr_v1_301_punitive-counterstrike", 2],
-      ["onr_v1_302_scorched-earth", 4],
-      ["onr_v1_307_urban-renewal", 5],
+      [513, 2],
+      [514, 4],
+      [519, 5],
     ] as const) {
       let damageState = createGameAfterSetup({
         seed: `v106k-${definitionId}`,
@@ -512,10 +512,10 @@ describe("V1.0.6K Card Release", () => {
 
   it("rezzes V1.0.6K simple ICE and keeps unrezzed titles hidden", () => {
     for (const definitionId of [
-      "onr_v1_244_filter",
-      "onr_v1_245_fire-wall",
-      "onr_v1_252_keeper",
-      "onr_v1_256_mazer",
+      456,
+      457,
+      464,
+      468,
     ] as const) {
       let state = toRunnerTurn(
         v106kCardReleaseGame(`v106k-ice-${definitionId}`),
@@ -555,7 +555,7 @@ describe("V1.0.6K Card Release", () => {
 
   it("does not offer Fire Wall rez actions below its printed 5-credit rez cost", () => {
     let state = toRunnerTurn(v106kCardReleaseGame("v106k-fire-wall-rez-cost"));
-    const fireWallId = putCorpIceOnServer(state, "rd", "onr_v1_245_fire-wall");
+    const fireWallId = putCorpIceOnServer(state, "rd", 457);
     state.corp.credits = 4;
 
     expect(quoteCorpRezCost(state, fireWallId).finalCredits).toBe(5);
@@ -571,7 +571,7 @@ describe("V1.0.6K Card Release", () => {
       getLegalActions(state, "corp").some(
         (action) =>
           action.type === "rez_ice" &&
-          sourceDefinition(state, action) === "onr_v1_245_fire-wall",
+          sourceDefinition(state, action) === 457,
       ),
     ).toBe(false);
   });

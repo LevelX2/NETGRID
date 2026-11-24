@@ -8,7 +8,7 @@ export type RunnerSelfTagPreventionNeed = {
   runActionId: string;
   installActionId: string;
   sourceCardInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   creditSaving: number;
   parentValue: number;
 };
@@ -31,7 +31,7 @@ export type RunnerDefenseSignals = {
   persistentHazardCounterRemovalAvailable: boolean;
   persistentHazardCounterFundingNeed?: {
     needId: "runner-defense-persistent-hazard-counter-funding";
-    parentPlanInstanceId: "plan:runner.defense_and_recovery:runner";
+    parentPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33";
     counterType: string;
     observedAmount: number;
     targetCredits: number;
@@ -63,14 +63,14 @@ export type RunnerDefenseSignals = {
     choiceId: string;
     stateVersion: number;
     sourceCardInstanceId: string;
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
     replacementKind: "flatline_to_tag" | "prevent_meat_add_bad_publicity";
     selectedOptionId: string;
     optionIds: string[];
   };
   tagClearFundingNeed?: {
     needId: "runner-defense-tag-clear-funding";
-    parentPlanInstanceId: "plan:runner.defense_and_recovery:runner";
+    parentPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33";
     targetCredits: number;
     currentCreditsAtRevalidation: number;
     gap: number;
@@ -87,7 +87,7 @@ export type RunnerDefenseSignals = {
   };
   reactionReserveNeed?: {
     needId: "runner-defense-reaction-reserve";
-    parentPlanInstanceId: "plan:runner.defense_and_recovery:runner";
+    parentPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33";
     targetCredits: number;
     currentCreditsAtRevalidation: number;
     gap: number;

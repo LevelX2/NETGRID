@@ -1,3 +1,5 @@
+import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-source-definitions";
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
@@ -19,7 +21,7 @@ type ReconstructedDecisionCapture = {
 
 describe("selfplay cycle 185 decision checkpoints", () => {
   it("starts the exact HQ-agenda recycle score plan before the final mandatory draw", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       deckoutAgendaRecycleJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
@@ -31,15 +33,15 @@ describe("selfplay cycle 185 decision checkpoints", () => {
 
     expect(decision).toMatchObject({
       actionId:
-        "corp.install_card.corp_onr_v1_194_corporate-downsizing_2.remote_2.corp_onr_v1_194_corporate-downsizing_2",
+        "cc.c2ie.r2.c2ie",
       reasonCode: "plan_first.corp.score_agenda",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.score_agenda:agenda%3Acorp_onr_v1_194_corporate-downsizing_2%3Aremote_2",
+            "p9cjat7so2g0t24r7ujibgxn83",
           leafExecutorInstanceId:
-            "plan:corp.score_agenda:agenda%3Acorp_onr_v1_194_corporate-downsizing_2%3Aremote_2",
+            "p9cjat7so2g0t24r7ujibgxn83",
           route: {
             actionType: "install_card",
             capabilityId: "install_score_agenda",
@@ -50,23 +52,28 @@ describe("selfplay cycle 185 decision checkpoints", () => {
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         expect.stringContaining(
-          "corp_last_draw_hq_agenda_recycle_install:remote_2",
+          "corp_last_draw_hq_agenda_recycle_install:r2",
         ),
       ]),
     );
+    const definitions = visibleSourceDefinitionsByInstanceId(capture.input.playerView);
+    const war = capture.input.legalActions.find((action) =>
+      action.type === "install_card" && definitions[action.source] === 408 && action.payload?.serverId === "r2",
+    );
+    expect(war).toBeDefined();
     expect(
       decision.decisionDebug?.planFirstDecision?.dispositions.find((entry) =>
-        entry.actionId.includes("corporate-war_1.remote_2"),
+        entry.actionId === war?.actionId,
       ),
     ).toMatchObject({
       disposition: "explicitly_nonproductive",
       ownerModuleId: "corp.score_agenda",
-      evidenceCode: "corp_score_protection_required:remote_2",
+      evidenceCode: "corp_score_protection_required:r2",
     });
   });
 
   it("does not treat archive recovery as an exact HQ-overflow reduction", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       hqOverflowRecoveryLoopJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
@@ -76,10 +83,10 @@ describe("selfplay cycle 185 decision checkpoints", () => {
 
     const decision = chooseAiAction(capture.input as AiDecisionInput);
 
-    expect(decision.actionId).not.toContain("off-site-backups");
+    expect(decision.actionId).not.toSatisfy((reference: string | undefined) => referencesDefaultDeckCard(reference, 508));
     expect(
       decision.decisionDebug?.planFirstDecision?.dispositions.find((entry) =>
-        entry.actionId.includes("off-site-backups"),
+        referencesDefaultDeckCard(entry.actionId, 508),
       ),
     ).toMatchObject({
       disposition: "explicitly_nonproductive",

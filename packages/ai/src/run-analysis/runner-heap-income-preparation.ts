@@ -1,6 +1,7 @@
 import { cardImplementationForDefinitionId } from "@netgrid/engine";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import { exactBasicLiquidCreditCandidate } from "../actions/action-candidate-facts";
 import type {
   RunnerFundingRouteAssessment,
@@ -36,10 +37,10 @@ function exactTopHeapIncomeSource(
       )
     : undefined;
   if (
+    input.side !== "runner" ||
     input.playerView.timingPoint !== "runner_action.main" ||
-    action?.type !== "activated_card_ability" ||
-    action.side !== "runner" ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    !actionMatchesCurrentDecision(input, action) ||
+    action.type !== "activated_card_ability" ||
     action.payload?.cardImplementationEffectKind !== "move_top_trash_to_grip" ||
     (action.choiceRequirements?.length ?? 0) !== 0 ||
     !target?.known ||
@@ -108,15 +109,26 @@ export function runnerHeapIncomePreparation(
     (action) => action.actionId === target.actionId,
   );
   if (
-    !run ||
+    input.side !== "runner" ||
+    !actionMatchesCurrentDecision(input, run) ||
     run.type !== "start_run" ||
     run.source !== "basic_action" ||
-    run.expiresAtStateVersion !== input.playerView.stateVersion ||
+    run.payload?.serverId !== target.targetServerId ||
     run.costs.reduce((sum, cost) => sum + (cost.clicks ?? 0), 0) !== 1 ||
     run.costs.some((cost) => (cost.credits ?? 0) !== 0)
   )
     return undefined;
-  const basic = candidates.find(exactBasicLiquidCreditCandidate);
+  const basic = candidates.find(
+    (candidate) =>
+      exactBasicLiquidCreditCandidate(candidate) &&
+      input.legalActions.some(
+        (action) =>
+          actionMatchesCurrentDecision(input, action) &&
+          action.actionId === candidate.actionId &&
+          action.type === "gain_credit" &&
+          action.source === "basic_action",
+      ),
+  );
   for (const candidate of candidates) {
     const recovery = exactTopHeapIncomeSource(input, candidate);
     if (!recovery) continue;
@@ -237,9 +249,11 @@ export function runnerHeapIncomePreparationMatchesCandidate(
     preparation.recoveryCreditCost === recovery.creditCost &&
     input.legalActions.some(
       (action) =>
+        actionMatchesCurrentDecision(input, action) &&
         action.actionId === preparation.runActionId &&
-        action.payload?.serverId === preparation.targetServerId &&
-        action.expiresAtStateVersion === preparation.stateVersion,
+        action.type === "start_run" &&
+        action.source === "basic_action" &&
+        action.payload?.serverId === preparation.targetServerId,
     )
   );
 }

@@ -1,3 +1,4 @@
+import { coverageKindForAssessment } from "../../plans/tactical-plan-coverage-kinds";
 import {
   runnerCostlyCentralRunIsBelowHandBuffer,
   runPurposeForEvaluation,
@@ -26,7 +27,7 @@ import {
   runnerHandBreakerForCoverage,
 } from "../../plans/tactical-plan-breaker-coverage";
 import { runnerTerminalContestThreat } from "../../runtime/runner-terminal-contest-threat";
-import { mergedPublicHistory } from "../../runtime/public-event-history";
+import { mergedPublicHistory } from "../../public-event-history";
 import { runnerBreakerCoverageUpgrade } from "./coverage-breaker-upgrades";
 import { runnerSameTurnBreakerPreparation } from "./coverage-same-turn-breaker-preparation";
 import { runnerBreakerUpgradeSupportActions } from "./coverage-breaker-upgrades";
@@ -144,17 +145,14 @@ export function uniqueCoverageGaps(
     if (
       (evaluation.pathPassability !== "blocked_missing_coverage" &&
         evaluation.pathPassability !== "blocked_unbreakable") ||
-      !evaluation.evidence.some((entry) =>
-        entry.startsWith("missing_coverage:"),
-      )
+      !evaluation.missingCoverage?.length
     ) {
       return false;
     }
-    const preciseCoverage = missingBreakerCoverageKind(
-      input,
-      evaluation.targetServerId,
-    );
-    const role = planFirstCoverageRole(preciseCoverage, evaluation.evidence);
+    const preciseCoverage =
+      coverageKindForAssessment(evaluation) ??
+      missingBreakerCoverageKind(input.playerView, evaluation.targetServerId);
+    const role = planFirstCoverageRole(preciseCoverage);
     return (
       runnerDeckHasCoverageAnswer(deckCapabilities, role) &&
       coverageSupportActionIds(input, candidates, deckCapabilities, role, {
@@ -333,11 +331,10 @@ export function uniqueCoverageGaps(
       )
     )
       continue;
-    const preciseCoverage = missingBreakerCoverageKind(
-      input,
-      evaluation.targetServerId,
-    );
-    const role = planFirstCoverageRole(preciseCoverage, evaluation.evidence);
+    const preciseCoverage =
+      coverageKindForAssessment(evaluation) ??
+      missingBreakerCoverageKind(input.playerView, evaluation.targetServerId);
+    const role = planFirstCoverageRole(preciseCoverage);
     const costRecovery =
       runnerSameTurnBreakerPreparation(
         input,
@@ -351,6 +348,7 @@ export function uniqueCoverageGaps(
         candidates,
         evaluation,
         deckCapabilities,
+        handBuffer.minimumHandBuffer,
       );
     const coverageUpgrade = costRecovery
       ? undefined
@@ -471,22 +469,24 @@ export function uniqueCoverageGaps(
     // No selected hand answer means no current installation. An open set
     // would admit unrelated or already installed breakers, then change the
     // phase when their later disposition rejects them.
-    const installActionIds = visibleAnswer
-      ? coverageDevelopment
-        ? candidates
-            .filter((candidate) => {
-              const action = input.legalActions.find(
-                (legalAction) => legalAction.actionId === candidate.actionId,
-              );
-              return (
-                candidate.semanticActionType === "install.card" &&
-                runnerInstallSourceInstanceId(candidate, action) ===
-                  visibleAnswer.instanceId
-              );
-            })
-            .map((candidate) => candidate.actionId)
-        : legalCoverageInstallActionIds
-      : [];
+    const installActionIds = costRecovery?.installActionId
+      ? [costRecovery.installActionId]
+      : visibleAnswer
+        ? coverageDevelopment
+          ? candidates
+              .filter((candidate) => {
+                const action = input.legalActions.find(
+                  (legalAction) => legalAction.actionId === candidate.actionId,
+                );
+                return (
+                  candidate.semanticActionType === "install.card" &&
+                  runnerInstallSourceInstanceId(candidate, action) ===
+                    visibleAnswer.instanceId
+                );
+              })
+              .map((candidate) => candidate.actionId)
+          : legalCoverageInstallActionIds
+        : [];
     const sameTurnRunConversion =
       costRecovery?.sameTurnRunConversion ??
       runnerUrgentRemoteCoverageConversionQuote(

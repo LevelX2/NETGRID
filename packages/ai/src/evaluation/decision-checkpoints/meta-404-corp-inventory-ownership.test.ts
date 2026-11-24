@@ -16,7 +16,7 @@ it("SP-293 keeps a Runner bonus-point card outside Corp inventory and rezzes the
   };
   expect(input.playerView.opponent.scoreArea).toContainEqual(
     expect.objectContaining({
-      definitionId: "onr_v1_083_desperate-competitor",
+      definitionId: 295,
       owner: "runner",
     }),
   );
@@ -40,9 +40,9 @@ it("SP-293 keeps a Runner bonus-point card outside Corp inventory and rezzes the
     fallbackUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+        rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
         leafExecutorInstanceId:
-          "plan:corp.defend_servers:server-defense-portfolio",
+          "penw02zfrkklof54c2nuye5att",
         route: { actionId: rez.actionId, stateVersion: 320 },
       },
     },

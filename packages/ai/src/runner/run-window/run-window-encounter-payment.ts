@@ -4,8 +4,8 @@ import type {
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
-import { legalActionCreditCost } from "../../runtime/legal-action-credit-cost";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
+import { nonNegativeActionCreditCost } from "../../runtime/action-cost";
 import { runnerRunStrengthPumpSavingsForAction } from "./run-window-strength-preparation";
 import { creditsToBreakVisibleSubroutinesWithBreaker } from "../../visible-run-analysis";
 import {
@@ -37,6 +37,13 @@ type CompleteEncounterPayment = {
   runEndTrashSourceIds: string[];
   budget: ReturnType<typeof runnerRunPathCreditBudgetAfterEncounter>;
 };
+
+function currentRunnerEncounterOffer(input: AiDecisionInput, action: LegalAction): boolean {
+  return input.side === "runner" &&
+    action.side === "runner" &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    input.legalActions.includes(action);
+}
 
 /** Complete, general-credit payment for a pure program-preservation encounter. */
 export function programProtectionEncounterPayment(
@@ -80,15 +87,14 @@ export function programProtectionEncounterPayment(
     return invalid();
   const next = currentEncounterUnbrokenSubroutineIndexes(input);
   const selected = parseSubroutineIndexes(
-    action.payload?.payOrTrashProgramSubroutineIndexes,
+    action.payOrTrashProgramSubroutineIndexes,
   );
   const immediate = ice.effectiveRunQuote.subroutines.reduce(
     (sum, s, i) => sum + (next.has(i) ? s.amount! : 0),
     0,
   );
   if (
-    !input.legalActions.includes(action) ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    !currentRunnerEncounterOffer(input, action) ||
     payload.sourceDefinitionId !== ice.definitionId ||
     payload.encounterContinue !== true ||
     payload.encounterWillEndRun !== false ||
@@ -96,7 +102,7 @@ export function programProtectionEncounterPayment(
     selected.size !== next.size ||
     [...next].some((i) => !selected.has(i)) ||
     amount !== immediate ||
-    legalActionCreditCost(action) !== immediate ||
+    nonNegativeActionCreditCost(action) !== immediate ||
     payload.payOrEndRunSubroutinePayment !== 0
   )
     return invalid();
@@ -166,10 +172,11 @@ export function completeCancellableEncounterPayment(
     action.type !== "continue_run" ||
     action.payload?.encounterContinue !== true ||
     action.payload.encounterWillEndRun !== false ||
+    !currentRunnerEncounterOffer(input, action) ||
     action.payload.encounterSourceWillTrashAtEndOfTurn !== false ||
     Number(action.payload.encounterFullBreakDamage ?? 0) !== 0 ||
     action.choiceRequirements?.length ||
-    legalActionCreditCost(action) !== 0 ||
+    nonNegativeActionCreditCost(action) !== 0 ||
     currentEncounterRequiresFullBreak(input)
   )
     return undefined;
@@ -219,6 +226,7 @@ export function completeEncounterBreakerPayment(
   input: AiDecisionInput,
   action: LegalAction,
 ): CompleteEncounterPayment | undefined {
+  if (!currentRunnerEncounterOffer(input, action)) return undefined;
   const strengthPreparation = runStrengthPreparation(input, action);
   if (
     input.playerView.run?.phase !== "encounter_ice" ||
@@ -232,14 +240,16 @@ export function completeEncounterBreakerPayment(
     const { source, breaker, amount } = strengthPreparation;
     const pump = input.legalActions.find(
       (entry) =>
-        entry.type === "pump_breaker" && entry.source === breaker.instanceId,
+        entry.type === "pump_breaker" &&
+        entry.source === breaker.instanceId &&
+        currentRunnerEncounterOffer(input, entry),
     );
     if (!pump) return undefined;
     const preparation = spendRunnerEncounterActionCost({
       input,
       action,
       budget: runnerEncounterCreditBudgetForInput(input),
-      cost: legalActionCreditCost(action),
+      cost: nonNegativeActionCreditCost(action),
     });
     if (!preparation.affordable || preparation.restrictedSpent > 0)
       return undefined;
@@ -274,7 +284,7 @@ export function completeEncounterBreakerPayment(
     if (!payment) return undefined;
     return {
       ...payment,
-      cost: legalActionCreditCost(action) + payment.cost,
+      cost: nonNegativeActionCreditCost(action) + payment.cost,
       cashCost: preparation.cashCost + payment.cashCost,
       // The run boost is already in the projected boundary base. Keep the
       // ordinary pump's carry flag: a carry-pump still needs whole-path pricing,
@@ -282,7 +292,10 @@ export function completeEncounterBreakerPayment(
     };
   }
   const continuation = input.legalActions.find(
-    (a) => a.type === "continue_run" && a.payload?.encounterContinue === true,
+    (entry) =>
+      entry.type === "continue_run" &&
+      entry.payload?.encounterContinue === true &&
+      currentRunnerEncounterOffer(input, entry),
   );
   if (
     !continuation ||
@@ -384,7 +397,7 @@ function runStrengthPreparation(input: AiDecisionInput, action: LegalAction) {
     (card) => card.known && card.instanceId === action.source,
   );
   const boost = source?.definitionId
-    ? cardSpecPlanningCardByDefinitionId(source.definitionId)?.planning.engine
+    ? planningCardByDefinitionId(source.definitionId)?.engine
         .runnerRunStrengthBoost
     : undefined;
   const breaker = input.playerView.own.rig?.find(

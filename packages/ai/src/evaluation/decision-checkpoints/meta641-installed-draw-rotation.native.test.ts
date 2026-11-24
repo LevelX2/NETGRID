@@ -34,7 +34,7 @@ it("uses an installed single-card draw for the native full-hand rotation", () =>
   );
   const before = JSON.stringify(input.playerView);
   const action = input.legalActions.find(
-    (a) => a.payload?.cardId === "runner_onr_v1_179_silicon-saloon-franchise_1",
+    (a) => a.payload?.cardId === "c2ex",
   );
   expect(action).toBeDefined();
   const decision = chooseAiAction(input);
@@ -45,8 +45,8 @@ it("uses an installed single-card draw for the native full-hand rotation", () =>
     timeoutUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:runner.develop_board_and_hand:generic%3Adraw-options",
-        leafExecutorInstanceId: "plan:runner.develop_board_and_hand:generic%3Adraw-options",
+        rootPlanInstanceId: "p6hb5l9cujr02om3vqn7gbqr35",
+        leafExecutorInstanceId: "p6hb5l9cujr02om3vqn7gbqr35",
         route: { actionId: action!.actionId, stateVersion: 174 },
       },
     },

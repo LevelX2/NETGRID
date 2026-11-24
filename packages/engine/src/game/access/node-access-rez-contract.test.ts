@@ -8,25 +8,25 @@ import {
 } from "../../card-implementations/registry";
 
 const DEFAULT_REZ_NODE_IDS = [
-  "onr_v1_315_corprunners-shattered-remains",
-  "onr_v1_323_experimental-ai",
-  "onr_v1_340_setup",
-  "onr_v1_345_trap",
-  "onr_v1_346_vacant-soulkiller",
-  "onr_proteus_057_doppelganger-antibody",
-  "onr_proteus_068_pattel-antibody",
+  527,
+  535,
+  552,
+  557,
+  558,
+  115,
+  126,
 ] as const satisfies readonly CardDefinitionId[];
 
 const ANY_REZ_STATE_NODE_IDS =
   [] as const satisfies readonly CardDefinitionId[];
 
 const NON_INSTALLED_NODE_IDS = [
-  "onr_proteus_054_bel-digmo-antibody",
-  "onr_proteus_075_stereogram-antibody",
+  112,
+  133,
 ] as const satisfies readonly CardDefinitionId[];
 
 const VIRUS_TEST_SITE_ID =
-  "onr_v1_348_virus-test-site" as const satisfies CardDefinitionId;
+  560 as const satisfies CardDefinitionId;
 
 const EXPECTED_NODE_ACCESS_IDS = [
   ...DEFAULT_REZ_NODE_IDS,

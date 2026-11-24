@@ -52,7 +52,7 @@ export function runnerEventInstallChoiceCommitment(
     legalAction.expiresAtStateVersion === input.playerView.stateVersion &&
     candidate.sourceCardInstanceId === legalAction.payload?.cardId &&
     typeof candidate.sourceCardInstanceId === "string" &&
-    typeof candidate.sourceDefinitionId === "string";
+    typeof candidate.sourceDefinitionId === "number";
   if (!exactQuote) {
     throw new PlanResolutionFailure("invalid_plan_identity", {
       side: input.side,
@@ -208,7 +208,7 @@ export function runnerRecoveryActionContract(
   ) {
     const { targetCardId, targetDefinitionId } = action.payload;
     const definition =
-      typeof targetDefinitionId === "string"
+      typeof targetDefinitionId === "number"
         ? runtimeCardDefinitionForAi(targetDefinitionId)
         : undefined;
     const source = input.playerView.own.rig?.find(
@@ -226,7 +226,7 @@ export function runnerRecoveryActionContract(
       action.payload.cardId !== source.instanceId ||
       typeof targetCardId !== "string" ||
       !targetCardId ||
-      typeof targetDefinitionId !== "string" ||
+      typeof targetDefinitionId !== "number" ||
       definition?.type !== "program" ||
       definition.engineCardId !== targetDefinitionId
     )
@@ -285,7 +285,7 @@ export function runnerRecoveryActionTargets(
   return candidates.filter(
     (card) =>
       card.known &&
-      typeof card.definitionId === "string" &&
+      typeof card.definitionId === "number" &&
       (contract.searchFilter === "any_card" || card.type === "program") &&
       (contract.exactTargetCardId === undefined ||
         card.instanceId === contract.exactTargetCardId),

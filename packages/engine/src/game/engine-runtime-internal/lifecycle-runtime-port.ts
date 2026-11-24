@@ -1,3 +1,4 @@
+import type { RandomHqDiscardContext } from "@netgrid/shared";
 /** Declarative typed port for the lifecycleRuntime composition group. */
 import type {
   CardDefinitionId,
@@ -14,7 +15,7 @@ export type LifecycleRuntimePort = {
   discardRandomCorpHqCards: (
     state: GameState,
     maxCount: number,
-    purposePrefix: string,
+    purposePrefix: RandomHqDiscardContext,
   ) => CardInstanceId[];
   trashRunnerInstalledProgram: (
     state: GameState,

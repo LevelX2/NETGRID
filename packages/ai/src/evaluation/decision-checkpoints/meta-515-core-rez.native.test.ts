@@ -11,6 +11,7 @@ import type { AiDecisionInput, GameState, PlayerAction } from "@netgrid/shared";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
+import { runnerArchivesHasQualifiedHiddenPayoff } from "../../runtime/runner-archives-score";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 
@@ -113,7 +114,7 @@ it.each([
   (key, knownCost, fundingGap) => {
     const { input } = native(key);
     const target = evaluateRunnerRunTargets({ input }).find(
-      (e) => e.actionId === "runner.start_run.rd",
+      (e) => e.actionId === "rs.rd",
     )!;
     expect(target).toMatchObject({
       pathPassability: "blocked_unpayable",
@@ -125,31 +126,38 @@ it.each([
       },
     });
     const { d } = decide(input);
-    expect(d.actionId).not.toBe("runner.start_run.rd");
+    expect(d.actionId).not.toBe("rs.rd");
   },
 );
-it("keeps the native positive Core path payable while funding the following ordinary run", () => {
-  const { input } = native("g17d139"),
-    { d, pf } = decide(input);
+it("keeps the positive Core path and cash floor funded despite a free Archives alternative", () => {
+  const { input, state } = native("g17d139");
+  expect(runnerArchivesHasQualifiedHiddenPayoff(input)).toBe(true);
   expect(
     evaluateRunnerRunTargets({ input }).find(
-      (e) => e.actionId === "runner.start_run.rd",
-    )!.routeQuote,
+      (e) => e.actionId === "rs.rd",
+    ),
   ).toMatchObject({
-    reachability: "guaranteed_access",
-    knownCost: 5,
-    fundingGap: 0,
+    creditsAfterRun: 0,
+    fundingNeed: { reason: "post_run_floor_gap" },
+    routeQuote: {
+      reachability: "guaranteed_access",
+      knownCost: 5,
+      fundingGap: 0,
+    },
   });
+  const { d, pf } = decide(input);
   expect(
     input.legalActions.find((a) => a.actionId === d.actionId),
   ).toMatchObject({
     type: "play_event",
     payload: {
-      cardImplementationAbilityId:
-        "onr_v1_108_score:abilities_on_play_gain_credits",
+      cardImplementationAbilityId: 404,
     },
   });
   expect(pf.selectedPlan?.moduleId).toBe("runner.economy");
+  expect(
+    apply(state, "runner", d.actionId!, d.selectedChoices).runner.credits,
+  ).toBe(9);
 });
 it("does not charge for the native outer Mastermind's exact zero Core", () => {
   const { input } = native("g33d175");
@@ -160,7 +168,7 @@ it("does not charge for the native outer Mastermind's exact zero Core", () => {
   expect(zero.amount).toBe(0);
   expect(
     evaluateRunnerRunTargets({ input }).find(
-      (e) => e.actionId === "runner.start_run.rd",
+      (e) => e.actionId === "rs.rd",
     )!.routeQuote,
   ).toMatchObject({
     reachability: "guaranteed_access",
@@ -168,9 +176,9 @@ it("does not charge for the native outer Mastermind's exact zero Core", () => {
     fundingGap: 0,
   });
   const { d, pf } = decide(input);
-  expect(d.actionId).toBe("runner.gain_credit");
+  expect(d.actionId).toBe("rb");
   expect(pf.rootPlanInstanceId).toBe(
-    "plan:runner.pressure_central:central%3Ard",
+    "pa90fufw9vc5bkshp96ztlryxl",
   );
 });
 it.each([
@@ -217,8 +225,8 @@ it.each([
     expect(started).toBe(expectAccess);
     expect(access).toBe(expectAccess);
     if (!expectAccess) {
-      expect(rows).toContain("runner.draw_card");
-      expect(rows.at(-1)).toBe("runner.end_turn");
+      expect(rows).toContain("r8");
+      expect(rows.at(-1)).toBe("r9");
     }
     if (!state.winner) expect(state.run).toBeUndefined();
     expect(state.runner.coreDamage).toBe(initial.runner.coreDamage);
@@ -227,10 +235,10 @@ it.each([
     expect(replay.ok).toBe(true);
     expect(hashGameState(replay.state)).toBe(hashGameState(state));
     if (key === "g17d164" && credits === undefined) {
-      expect(rows[0]).toBe("runner.gain_credit");
+      expect(rows.slice(0, 2)).toEqual(["rb", "rb"]);
     }
     if (expectAccess)
-      expect(rows.some((id) => id.startsWith("runner.break_subroutine"))).toBe(
+      expect(rows.some((id) => id.startsWith("r3"))).toBe(
         true,
       );
   },
@@ -239,8 +247,8 @@ it("feeds the native Corp defense owner complete public fixed-credit post-rez qu
   const { input, state } = native("g5d55"),
     before = hashGameState(state);
   const ice = getPlayerView(state, "corp")
-    .servers.find((s) => s.id === "remote_1")!
-    .ice.find((i) => i.definitionId === "onr_proteus_038_snowbank")!;
+    .servers.find((s) => s.id === "r1")!
+    .ice.find((i) => i.definitionId === 96)!;
   expect(ice.effectivePostRezRunQuote).toMatchObject({
     complete: true,
     expiresAtStateVersion: state.stateVersion,
@@ -248,9 +256,7 @@ it("feeds the native Corp defense owner complete public fixed-credit post-rez qu
   expect(hashGameState(state)).toBe(before);
   const { d, pf } = decide(input);
   expect(pf.selectedPlan?.moduleId).toBe("corp.defend_servers");
-  expect(d.actionId).toContain(
-    "corp.install_card.corp_onr_proteus_045_washed-up-solo-construct_2.rd.",
-  );
+  expect(d.actionId).toContain("cc.cn2.rd.");
   expect(
     apply(state, "corp", d.actionId!, d.selectedChoices).stateVersion,
   ).toBe(state.stateVersion + 1);

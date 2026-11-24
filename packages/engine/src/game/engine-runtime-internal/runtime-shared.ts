@@ -1,5 +1,6 @@
 import type {
   CardDefinition,
+  CardDefinitionId,
   ChoiceRequest,
   CounterType,
   CorpServer,
@@ -56,7 +57,7 @@ export type {
   Side,
   CardDefinition,
 };
-export type CardDefinitionId = string;
+export type { CardDefinitionId } from "@netgrid/shared";
 export type CardInstanceId = string;
 export type {
   CorpServer,

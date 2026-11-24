@@ -1,10 +1,12 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import {
   type AiDecisionInput,
   type VisibleCard,
   type VisibleCorpCounterBankPreparationQuote,
 } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import type { CorpAmbushSignal } from "../../plans/corp-tactical-plan-contracts";
 import { corpSameTurnScoreConversionPaths } from "../../plans/tactical-plan-corp-score-conversion";
@@ -123,6 +125,9 @@ function counterBankAdvanceProjects(
         candidate.sourceDefinitionId === card.definitionId,
     );
     if (!advance) return [];
+    const action = exactCurrentLegalAction(input, advance.actionId);
+    if (action?.type !== "advance_card" || action.source !== card.instanceId)
+      return [];
     const advanceCredits = finiteNonNegativeIntegerOrResolutionFailure(
       input,
       advance.costProfile.creditCost,
@@ -249,7 +254,7 @@ function counterBankAgendaInstallProjects(
             phase: "install_agenda_from_counter_bank",
             evidenceCode: `engine_certified_counter_bank_cross_remote_handoff:${bank.card.instanceId}:${agenda.instanceId}:${bank.serverId}:${targetServerId}`,
           }),
-          agendaDefinitionId: agenda.definitionId ?? agenda.instanceId,
+          agendaDefinitionId: agenda.definitionId,
           agendaPoints,
           agendaInstanceId: agenda.instanceId,
           serverId: targetServerId,
@@ -267,8 +272,11 @@ function counterBankHandoffRezProjects(
   bank: InstalledCounterBank,
 ): CorpScoreProjectSignal[] {
   if (bank.card.rezzed) return [];
+  const rezAction = exactCounterBankRezAction(input, bank.card.instanceId);
+  if (!rezAction) return [];
   const rez = candidates.find(
     (candidate) =>
+      candidate.actionId === rezAction.actionId &&
       candidate.semanticActionType === "corp_window.rez" &&
       candidate.sourceCardInstanceId === bank.card.instanceId &&
       candidate.sourceDefinitionId === bank.card.definitionId,
@@ -287,7 +295,7 @@ function counterBankHandoffRezProjects(
         phase: "rez_counter_bank_for_handoff",
         evidenceCode: `engine_certified_counter_bank_rez_for_cross_remote_handoff:${bank.card.instanceId}:${agenda.instanceId}:${bank.serverId}:${targetServerId}`,
       }),
-      agendaDefinitionId: agenda.definitionId ?? agenda.instanceId,
+      agendaDefinitionId: agenda.definitionId,
       agendaPoints: agenda.agendaPoints ?? 0,
       agendaInstanceId: agenda.instanceId,
       serverId: targetServerId,
@@ -304,7 +312,7 @@ function counterBankInstalledScoreTargets(
   return input.playerView.servers
     .filter(
       (server) =>
-        server.id.startsWith("remote_") && server.id !== bank.serverId,
+        isRemoteServerId(server.id) && server.id !== bank.serverId,
     )
     .flatMap((server) =>
       server.root.flatMap((card) => {
@@ -477,11 +485,13 @@ function counterBankTargetFromKnownDeck(
   const deckRequirements = (
     (input as AiDecisionInputWithDeckCapabilities).ownDeckSnapshot?.cards ?? []
   ).flatMap((entry) => {
-    const definition = CARD_DEFINITIONS_BY_ID[entry.cardId];
+    if (entry.quantity <= 0) return [];
+    const definition = planningCardFactsByDefinitionId(entry.cardId);
     const requirement = definition?.advancementRequirement;
     return definition?.side === "corp" &&
       definition.type === "agenda" &&
       typeof requirement === "number" &&
+      Number.isSafeInteger(requirement) &&
       requirement > 0
       ? [requirement]
       : [];
@@ -495,7 +505,7 @@ function counterBankRemoteIsSecure(
   input: AiDecisionInput,
   serverId: string,
 ): boolean {
-  if (!serverId.startsWith("remote_")) return false;
+  if (!isRemoteServerId(serverId)) return false;
   const assessment = corpRemoteContestabilityAssessment(input, serverId);
   return (
     assessment !== undefined &&
@@ -556,8 +566,7 @@ function exactCounterBankRezAction(
       action.type === "rez_card" &&
       action.source === sourceCardId &&
       action.payload?.cardId === sourceCardId &&
-      action.expiresAtStateVersion === input.playerView.stateVersion &&
-      action.timingPoint === input.playerView.timingPoint,
+      actionMatchesCurrentDecision(input, action),
   );
 }
 
@@ -597,8 +606,15 @@ function legalActionCost(
   );
 }
 
-function isKnownAgenda(card: VisibleCard): boolean {
-  return card.known === true && card.type === "agenda";
+function isKnownAgenda(
+  card: VisibleCard,
+): card is VisibleCard & { definitionId: number } {
+  return (
+    card.known === true &&
+    card.type === "agenda" &&
+    typeof card.definitionId === "number" &&
+    card.definitionId > 0
+  );
 }
 
 function agendaAdvancementRequirement(card: VisibleCard): number | undefined {
@@ -606,7 +622,7 @@ function agendaAdvancementRequirement(card: VisibleCard): number | undefined {
   const requirement =
     card.advancementRequirement ??
     (card.definitionId
-      ? CARD_DEFINITIONS_BY_ID[card.definitionId]?.advancementRequirement
+      ? planningCardFactsByDefinitionId(card.definitionId)?.advancementRequirement
       : undefined);
   return typeof requirement === "number" &&
     Number.isSafeInteger(requirement) &&

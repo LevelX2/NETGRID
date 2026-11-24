@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
+import { isCardDefinitionId, type CardDefinitionId } from "@netgrid/shared";
 import { createRuntimeCardsById } from "../packages/catalog/src/index";
 import {
   buildEngineDeck,
@@ -22,7 +23,7 @@ const value = (name: string, fallback?: string) => {
 const config = JSON.parse(readFileSync(resolve(value("--config")), "utf8")) as {
   label: string;
   games: { runnerId: string; seed: string }[];
-  changes?: { cardId: string; delta: number }[];
+  changes?: { cardId: CardDefinitionId; delta: number }[];
   captureActionIndices?: number[];
 };
 const out = resolve(value("--out"));
@@ -45,7 +46,7 @@ const profiles: DeckFormatProfile[] = ["0.8", "1.3.0"].flatMap(
 const cardsById = createRuntimeCardsById();
 function snapshot(
   id: string,
-  changes: { cardId: string; delta: number }[] = [],
+  changes: { cardId: CardDefinitionId; delta: number }[] = [],
 ) {
   const original = catalog.decks.find(
     (deck: { standardDeckId: string }) => deck.standardDeckId === id,
@@ -53,8 +54,10 @@ function snapshot(
   if (!original) throw new Error(`deck_not_found:${id}`);
   const deck = structuredClone(original);
   for (const change of changes) {
+    if (!isCardDefinitionId(change.cardId))
+      throw new Error("invalid_deck_change_card_definition");
     const card = deck.cards.find(
-      (entry: { cardId: string }) => entry.cardId === change.cardId,
+      (entry: { cardId: CardDefinitionId }) => entry.cardId === change.cardId,
     );
     if (card) card.quantity += change.delta;
     else deck.cards.push({ cardId: change.cardId, quantity: change.delta });

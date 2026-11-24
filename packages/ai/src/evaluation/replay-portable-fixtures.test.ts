@@ -5,7 +5,7 @@ import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfol
 import {
   coverageRunGapNoRunNegativeFixture,
   coverageRunGapPortableFixture,
-} from "./replay-portable-fixtures";
+} from "./replay-portable-fixtures.test-support";
 
 describe("replay portable fixtures", () => {
   afterEach(() => {

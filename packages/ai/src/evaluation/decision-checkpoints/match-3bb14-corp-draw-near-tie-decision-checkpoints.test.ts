@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { hashGameState } from "@netgrid/engine";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 
 import defensiveDrawD9Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-3bb14-03-defensive-draw-d9.json";
 import defensiveDrawD10Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-3bb14-04-defensive-draw-d10.json";
@@ -39,7 +39,7 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
       acceptableActions: [
         {
           type: "install_card",
-          sourceDefinitionId: "onr_v1_237_data-wall",
+          sourceDefinitionId: 449,
           targetServerId: "rd",
         },
       ],
@@ -61,7 +61,7 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
   it("does not claim access prevention from Shock.r alone on empty R&D", () => {
     const checkpoint = structuredClone(
       defensiveDrawD9Json,
-    ) as AiDecisionCheckpointV1;
+    ) as unknown as AiDecisionCheckpointV1;
     checkpoint.expectation = {
       acceptableActions: [{ type: "draw_card" }],
       forbiddenActions: [{ type: "install_card", targetServerId: "rd" }],
@@ -69,7 +69,7 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
         acceptablePlanKinds: ["corp.defend_servers"],
         acceptableCapabilities: ["develop_score_protection"],
         requiredAssessmentEvidence: [
-          "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_217_strike-force-kali_1:new_remote:new_remote",
+          "score_plan_requires_effective_ice_draw:agenda:c2nh:new_remote:new_remote",
         ],
       },
     };
@@ -80,7 +80,7 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
   it("uses last-click liquidity instead of overflowing HQ", () => {
     const checkpoint = structuredClone(
       defensiveDrawD11Json,
-    ) as AiDecisionCheckpointV1;
+    ) as unknown as AiDecisionCheckpointV1;
     checkpoint.engine.testOnlyGameState.corp.maxHandSize = 4;
     checkpoint.engine.stateHash = hashGameState(
       checkpoint.engine.testOnlyGameState,
@@ -110,10 +110,10 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
     const checkpoint = fixture(defensiveDrawD9Json);
     const shock =
       checkpoint.engine.testOnlyGameState.cardInstances[
-        "corp_onr_v1_268_shock-r_2"
+        "c2yu"
       ];
     if (!shock) throw new Error("Missing captured Shock.r instance");
-    shock.definitionId = "onr_v1_263_reinforced-wall";
+    shock.definitionId = 475;
     checkpoint.engine.stateHash = hashGameState(
       checkpoint.engine.testOnlyGameState,
     );
@@ -124,7 +124,7 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
         acceptablePlanKinds: ["corp.economy"],
         acceptableCapabilities: ["develop_or_convert_corp_economy"],
         requiredAssessmentEvidence: [
-          "corp_defense_exact_route_funding_required:rd:corp.install_card.corp_onr_v1_268_shock-r_2.rd.corp_onr_v1_268_shock-r_2.0",
+          "corp_defense_exact_route_funding_required:rd:cc.c2yu.rd.c2yu.0",
         ],
       },
     };
@@ -133,7 +133,7 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     expect(result.decision?.evidence).toContain(
-      "plan_priority_delegated_from:plan:corp.defend_servers:server-defense-portfolio",
+      "plan_priority_delegated_from:penw02zfrkklof54c2nuye5att",
     );
   });
 
@@ -174,7 +174,7 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
     expect(
       [...selected].every(
         (actionId) =>
-          actionId === "corp.gain_credit" || actionId === "corp.draw_card",
+          actionId === "cb" || actionId === "c8",
       ),
     ).toBe(true);
     expect(
@@ -192,16 +192,16 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  const checkpoint = structuredClone(value) as AiDecisionCheckpointV1;
+  const checkpoint = structuredClone(value) as unknown as AiDecisionCheckpointV1;
   // Current positive control: Shock.r's next-encounter lock cannot protect
   // an empty server. Give this installation test a canonical stopping ICE.
   checkpoint.engine.testOnlyGameState.cardInstances[
-    "corp_onr_v1_268_shock-r_2"
-  ]!.definitionId = "onr_v1_237_data-wall";
+    "c2yu"
+  ]!.definitionId = 449;
   const state = checkpoint.engine.testOnlyGameState;
   const agendas = state.corp.hq.filter(
     (id) =>
-      CARD_DEFINITIONS_BY_ID[state.cardInstances[id]!.definitionId]?.type ===
+      planningCardFactsByDefinitionId(state.cardInstances[id]!.definitionId)?.type ===
       "agenda",
   );
   state.corp.hq = state.corp.hq.filter((id) => !agendas.includes(id));
@@ -211,8 +211,8 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
   checkpoint.engine.stateHash = hashGameState(state);
   checkpoint.source.kind = "synthetic_companion";
   for (const action of checkpoint.expectation.acceptableActions ?? []) {
-    if (action.sourceDefinitionId === "onr_v1_268_shock-r")
-      action.sourceDefinitionId = "onr_v1_237_data-wall";
+    if (action.sourceDefinitionId === 480)
+      action.sourceDefinitionId = 449;
   }
   return checkpoint;
 }

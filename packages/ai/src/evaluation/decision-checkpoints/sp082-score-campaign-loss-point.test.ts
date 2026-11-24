@@ -7,9 +7,15 @@ import { sp082KnownProtectionFundingCompanion } from "./sp082-score-campaign.tes
 
 describe("SP-082 score-campaign loss-point checkpoints", () => {
   it("binds game 36's exact current funding step to the known score-conversion floor", () => {
-    const result = runAiDecisionCheckpoint(
-      sp082KnownProtectionFundingCompanion(),
+    const checkpoint = sp082KnownProtectionFundingCompanion();
+    const agendaIds = checkpoint.engine.testOnlyGameState.corp.hq.filter(
+      (id) =>
+        checkpoint.engine.testOnlyGameState.cardInstances[id]?.definitionId ===
+        63,
     );
+    expect(agendaIds).toHaveLength(1);
+    const fundingNeedId = `score-support:agenda:${agendaIds[0]}:r1`;
+    const result = runAiDecisionCheckpoint(checkpoint);
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     expect(result.selectedAction?.type).toBe("gain_credit");
@@ -25,16 +31,13 @@ describe("SP-082 score-campaign loss-point checkpoints", () => {
     expect(scoreParent).toMatchObject({
       viability: "ready",
       portfolioRole: "foreground",
-      openNeedIds: [
-        "score-support:agenda:corp_onr_proteus_005_marked-accounts_1:remote_1",
-      ],
+      openNeedIds: [fundingNeedId],
     });
     expect(planFirst?.rootPlanInstanceId).toBe(scoreParent?.instanceId);
     expect(supportLeaf).toMatchObject({
       moduleId: "corp.economy",
       parentInstanceId: scoreParent?.instanceId,
-      parentNeedId:
-        "score-support:agenda:corp_onr_proteus_005_marked-accounts_1:remote_1",
+      parentNeedId: fundingNeedId,
       executionState: "executor",
     });
     expect(planFirst?.leafExecutorInstanceId).toBe(supportLeaf?.instanceId);
@@ -85,9 +88,14 @@ describe("SP-082 score-campaign loss-point checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     expect(result.selectedAction?.type).toBe("gain_credit");
     const planFirst = result.decision?.decisionDebug?.planFirstDecision;
-    expect(planFirst?.rootPlanInstanceId).toMatch(
-      /^plan:corp\.economy:economy-immediate-operation/,
-    );
+    expect(
+      planFirst?.portfolio.find(
+        (instance) => instance.instanceId === planFirst.rootPlanInstanceId,
+      ),
+    ).toMatchObject({
+      moduleId: "corp.economy",
+      dedupeKey: expect.stringMatching(/^economy-immediate-operation:/),
+    });
     const blockedScoreParents = planFirst?.portfolio.filter(
       (instance) =>
         instance.moduleId === "corp.score_agenda" &&

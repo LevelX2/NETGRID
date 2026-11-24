@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_proteus_150_streetware-distributor",
+      208,
     ),
     title: "Streetware Distributor",
     side: "runner",

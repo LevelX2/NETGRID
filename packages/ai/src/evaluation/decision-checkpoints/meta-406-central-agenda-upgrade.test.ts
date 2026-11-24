@@ -20,15 +20,15 @@ it("SP-297 does not spend seven credits on a central agenda discount to clear HQ
     runtime,
   );
   const actionId =
-    "corp.install_card.corp_onr_v1_374_washington-d-c-city-grid_1.hq.corp_onr_v1_374_washington-d-c-city-grid_1";
+    "cc.c3md.hq.c3md";
   expect(input.legalActions.some((a) => a.actionId === actionId)).toBe(true);
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("corp.gain_credit");
+  expect(decision.actionId).toBe("cb");
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
     rootPlanInstanceId:
-      "plan:corp.economy:economy-residual-capacity%3Acorp%3A16",
+      "p37hwqpz2stsm5nyrch309q9pr",
     leafExecutorInstanceId:
-      "plan:corp.economy:economy-residual-capacity%3Acorp%3A16",
+      "p37hwqpz2stsm5nyrch309q9pr",
     route: {
       actionId: decision.actionId,
       stateVersion: input.playerView.stateVersion,

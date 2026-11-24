@@ -9,6 +9,7 @@ import {
 } from "../../plans/resident-plan-portfolio-memory";
 import { corpWinningScoreSiblingDominates } from "./score-terminal-route-dominance";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
+import { buildPlanningStateIdentity } from "../../plans/turn-planning-contracts";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 function state() {
   const cp = JSON.parse(
@@ -24,6 +25,7 @@ function state() {
     ...cp.input,
     ...buildAiDecisionInputDto(cp.input),
   } as AiDecisionInputWithDeckCapabilities;
+  input.planningStateIdentity = buildPlanningStateIdentity(input);
   return { cp, input };
 }
 afterEach(resetResidentPlanPortfolioMemory);
@@ -38,7 +40,7 @@ it("admits a funded protected winning HQ agenda before preserving a nonwinning p
   const before = JSON.stringify(input),
     decision = chooseAiAction(input);
   expect(decision.actionId).toBe(
-    "corp.install_card.corp_onr_classic_004_theorem-proof_2.remote_1.corp_onr_classic_004_theorem-proof_2",
+    "cc.c1y.r1.c1y",
   );
   expect(
     decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
@@ -51,15 +53,15 @@ it("admits a funded protected winning HQ agenda before preserving a nonwinning p
   expect(
     projects.find(
       (x) =>
-        x.agendaInstanceId === "corp_onr_classic_004_theorem-proof_2" &&
-        x.serverId === "remote_1",
+        x.agendaInstanceId === "c1y" &&
+        x.serverId === "r1",
     ),
   ).toMatchObject({ terminalScore: true, feasible: true });
   expect(
     projects.find(
       (x) =>
-        x.agendaInstanceId === "corp_onr_classic_004_theorem-proof_2" &&
-        x.serverId === "remote_2",
+        x.agendaInstanceId === "c1y" &&
+        x.serverId === "r2",
     )?.feasible,
   ).toBe(false);
 });
@@ -73,7 +75,7 @@ it("retains the current prepared agenda when that agenda already wins", () => {
   );
   const decision = chooseAiAction(input);
   expect(decision.actionId).toBe(
-    "corp.install_card.corp_onr_classic_002_superserum_1.remote_1.corp_onr_classic_002_superserum_1",
+    "cc.c1h.r1.c1h",
   );
   expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
 });
@@ -102,15 +104,15 @@ it.each([
   const winning = structuredClone(
     signals.find(
       (x) =>
-        x.agendaInstanceId === "corp_onr_classic_004_theorem-proof_2" &&
-        x.serverId === "remote_1",
+        x.agendaInstanceId === "c1y" &&
+        x.serverId === "r1",
     ),
   );
   const previous = structuredClone(
     signals.find(
       (x) =>
-        x.agendaInstanceId === "corp_onr_classic_002_superserum_1" &&
-        x.serverId === "remote_1",
+        x.agendaInstanceId === "c1h" &&
+        x.serverId === "r1",
     ),
   );
   previous.feasible = true;
@@ -136,7 +138,7 @@ it.each([
     input.legalActions.find(
       (x) => x.actionId === winning.actionIds[0],
     )!.payload!.agendaInstallScoreHorizonQuoteExpiresAtStateVersion = 0;
-  if (kind === "different_target") previous.serverId = "remote_2";
+  if (kind === "different_target") previous.serverId = "r2";
   if (kind === "empty_deck") input.playerView.own.stackOrRdCount = 0;
   if (kind === "winning_preparation") previous.terminalScore = true;
   expect(

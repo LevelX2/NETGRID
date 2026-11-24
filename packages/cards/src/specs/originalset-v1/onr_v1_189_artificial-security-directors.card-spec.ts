@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_v1_189_artificial-security-directors",
+      401,
     ),
     title: "Artificial Security Directors",
     side: "corp",

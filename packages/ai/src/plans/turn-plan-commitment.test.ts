@@ -1,3 +1,4 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import {
   CURRENT_RULES_BASELINE,
   type AiDecisionInput,
@@ -60,6 +61,8 @@ describe("turn plan commitment", () => {
 
   it("rematerializes a canonical capability only from one exact current LegalAction", () => {
     const setup = scenario();
+    const key = "abilities_activated_corp_main_gain_credits";
+    const abilityId = canonicalCapabilityId(418, capabilityKey(key));
     const rawCanonicalAction: LegalAction = {
       ...setup.firstAction,
       actionId: "action:canonical:10",
@@ -67,12 +70,12 @@ describe("turn plan commitment", () => {
       payload: {
         cardId: "card:source",
         cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-        cardImplementationAbilityId: "test_card:gain",
-        cardImplementationAbilityKey: "gain",
+        cardImplementationAbilityId: abilityId,
+        cardImplementationAbilityKey: key,
       },
       abilityRef: {
         sourceCardInstanceId: "card:source",
-        sourceAbilityId: "test_card:gain",
+        sourceAbilityId: abilityId,
       },
     };
     const canonicalAction = buildAiDecisionInputDto({
@@ -92,7 +95,7 @@ describe("turn plan commitment", () => {
       sourceCardInstanceId: "card:source",
       sourceAbilityBinding: {
         kind: "card_spec_capability_key",
-        sourceAbilityId: "test_card:gain",
+        sourceAbilityId: abilityId,
       },
     });
     setup.firstAction = canonicalAction;
@@ -158,7 +161,7 @@ describe("turn plan commitment", () => {
         ...canonicalAction,
         abilityRef: {
           sourceCardInstanceId: "other-source",
-          sourceAbilityId: "test_card:gain",
+          sourceAbilityId: abilityId,
         },
       },
     ]) {
@@ -477,6 +480,29 @@ describe("turn plan commitment", () => {
     });
   });
 
+  it("rejects a receipt from a divergent planning fingerprint at the same state version", () => {
+    const setup = scenario({ samePhase: true });
+    const commitment = createCommitment(setup);
+    const { lease } = executableLease(
+      commitment,
+      setup,
+      setup.firstAction,
+      identity(10, "safe:10"),
+    );
+    expect(
+      advanceTurnPlanCommitment(commitment, {
+        lease: { ...lease, stateIdentity: identity(10, "divergent:10") },
+        runtimeInstanceId: "runtime:a",
+        turnKey: "corp:1",
+        stateIdentityAfter: identity(11, "safe:11"),
+        outcomeCodes: ["credits:+1", "clicks:-1"],
+      }),
+    ).toMatchObject({
+      commitment: { status: "invalidated" },
+      replanReason: "commitment_contract_invalid",
+    });
+  });
+
   it("replans on a scheduled boundary, material outcome deviation or urgent interrupt", () => {
     const boundarySetup = scenario({ boundary: true });
     const boundaryCommitment = createCommitment(boundarySetup);
@@ -609,7 +635,7 @@ describe("turn plan commitment", () => {
         hardPlanCommitments: [],
         campaignRequotes: [
           {
-            campaignId: "campaign:score",
+            campaignId: "kdew3x411mv2u8vyg6qn6ko59b",
             status: "valid",
             evidenceCodes: [],
           },
@@ -982,7 +1008,7 @@ function validContinuationEvidence(): TurnPlanContinuationEvidence {
     ],
     campaignRequotes: [
       {
-        campaignId: "campaign:score",
+        campaignId: "kdew3x411mv2u8vyg6qn6ko59b",
         status: "valid",
         evidenceCodes: [],
       },
@@ -1204,7 +1230,7 @@ function emptyCoverage() {
 function campaignClaim(): CampaignValueClaim {
   return {
     claimId: "claim:score",
-    campaignId: "campaign:score",
+    campaignId: "kdew3x411mv2u8vyg6qn6ko59b",
     ownerModuleId: "corp.economy",
     objectiveKey: "score",
     componentKey: "funding",

@@ -49,6 +49,8 @@ function signal(cp: ReturnType<typeof checkpoint>) {
     [
       {
         actionId: action.actionId,
+        actorSide: "corp",
+        stateVersion: cp.input.playerView.stateVersion,
         semanticActionType: "choice.resolve",
       } as ActionSemanticCandidate,
     ],
@@ -76,7 +78,7 @@ it.each([
     const cp = checkpoint(game);
     expect(Object.values(cp.validation)).toEqual(Array(9).fill(true));
     const result = choose(cp);
-    expect(result.actionId).toBe("corp.resolve_choice");
+    expect(result.actionId).toBe("cn");
     expect(result.selectedChoices).toEqual({
       choiceId: cp.input.playerView.pendingChoice!.choiceId,
       selectedOptionIds: [optionId],
@@ -112,6 +114,12 @@ it.each([
   },
 );
 
+it("declines to materialize a deflector choice from a previous run", () => {
+  const cp = checkpoint(10);
+  cp.input.playerView.run!.runId = cp.input.playerView.stateVersion + 1;
+  expect(signal(cp)).toBeUndefined();
+});
+
 it("keeps the low-exposure route when its entry can be broken", () => {
   const cp = checkpoint(10);
   cp.input.playerView.opponent.credits = 8;
@@ -121,23 +129,23 @@ it("keeps the low-exposure route when its entry can be broken", () => {
 it("does not certify a return when another subsidiary destination exists", () => {
   const cp = checkpoint(10);
   const remote = structuredClone(
-    cp.input.playerView.servers.find((s) => s.id === "remote_1")!,
+    cp.input.playerView.servers.find((s) => s.id === "r1")!,
   );
-  remote.id = "remote_2";
+  remote.id = "r2";
   remote.ice = [];
   remote.root = [];
   cp.input.playerView.servers.push(remote);
   cp.input.playerView.pendingChoice!.options.push({
-    id: "server_remote_2",
+    id: "server_r2",
     label: "Remote 2",
-    value: "remote_2",
+    value: "r2",
   });
   cp.input.legalActions
     .find((a) => a.type === "resolve_choice")!
-    .choiceRequirements![0]!.optionIds.push("server_remote_2");
+    .choiceRequirements![0]!.optionIds.push("server_r2");
   // Keep the new empty remote out of the minimum-exposure comparison.
   remote.root = structuredClone(
-    cp.input.playerView.servers.find((s) => s.id === "remote_1")!.root,
+    cp.input.playerView.servers.find((s) => s.id === "r1")!.root,
   );
   expect(signal(cp)).toMatchObject({ selectedOptionId: "server_rd" });
 });

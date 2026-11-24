@@ -1,4 +1,4 @@
-import type { AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInput, TraceRulesProfile } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import d52CaptureJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-76497164832f078c-52-terminal-rd-defense-draw.json";
@@ -27,16 +27,21 @@ type PersistedDecisionCapture = {
   };
 };
 
-function captureWithTraceProfile(): PersistedDecisionCapture {
+// The recorded position predates the profiles and used a different bid
+// flow. Exercise its defense decision under the current explicit profiles.
+function captureForProfile(traceRulesProfile: TraceRulesProfile) {
   const capture = structuredClone(d52CaptureJson) as PersistedDecisionCapture;
-  // This capture is from the default Modern rules and omits that field.
-  capture.input.playerView.traceRulesProfile = "modern_open";
+  capture.input.playerView.traceRulesProfile = traceRulesProfile;
   return capture;
 }
 
-describe("match 76497164832f078c terminal R&D defense", () => {
+describe.each([
+  "modern_open",
+  "classic_blind",
+  "classic_blind_corp_ties",
+] as const)("match 76497164832f078c terminal R&D defense under %s", (profile) => {
   it("draws toward terminal R&D defense when no concrete installation remains", () => {
-    const capture = captureWithTraceProfile();
+    const capture = captureForProfile(profile);
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
     expect(deckSnapshotId).toBeDefined();
     // A proved installation/funding route suppresses speculative search.
@@ -53,7 +58,7 @@ describe("match 76497164832f078c terminal R&D defense", () => {
     restoreAiRuntimeCheckpoint(capture.input, deckSnapshotId!, capture.runtime);
 
     const decision = chooseAiAction(capture.input as AiDecisionInput);
-    expect(decision.actionId).toBe("corp.draw_card");
+    expect(decision.actionId).toBe("c8");
     expect(decision.decisionDebug?.planKind).toBe("corp.defend_servers");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
@@ -64,7 +69,7 @@ describe("match 76497164832f078c terminal R&D defense", () => {
     expect(
       decision.decisionDebug?.planFirstDecision?.selectedPlan,
     ).toMatchObject({
-      instanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      instanceId: "penw02zfrkklof54c2nuye5att",
       moduleId: "corp.defend_servers",
       executionState: "executor",
     });
@@ -72,7 +77,7 @@ describe("match 76497164832f078c terminal R&D defense", () => {
       decision.decisionDebug?.planFirstDecision?.turnPlanning?.selectedLine;
     expect(selectedLine?.cursor).toMatchObject({ phaseIndex: 0, nodeIndex: 0 });
     expect(selectedLine?.phases.at(0)).toMatchObject({
-      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
       rootModuleId: "corp.defend_servers",
       nodes: [{ semanticActionType: "draw.card" }],
     });
@@ -81,7 +86,7 @@ describe("match 76497164832f078c terminal R&D defense", () => {
     ).toMatchObject({
       rematerialization: {
         status: "executable",
-        actionId: "corp.draw_card",
+        actionId: "c8",
       },
       observationClass: "scheduled_information_boundary",
     });
@@ -92,7 +97,7 @@ describe("match 76497164832f078c terminal R&D defense", () => {
   });
 
   it("keeps the native known preparation route without inventing a repeated missing-ICE draw", () => {
-    const capture = captureWithTraceProfile();
+    const capture = captureForProfile(profile);
     resetResidentPlanPortfolioMemory();
     restoreAiRuntimeCheckpoint(
       capture.input,
@@ -101,7 +106,7 @@ describe("match 76497164832f078c terminal R&D defense", () => {
     );
     const decision = chooseAiAction(capture.input);
     expect(decision.actionId).toBe(
-      "corp.install_card.corp_onr_v1_365_paris-city-grid_1.remote_1.corp_onr_v1_365_paris-city-grid_1",
+      "cc.c3kd.r1.c3kd",
     );
     expect(decision.fallbackUsed).toBe(false);
     expect(
@@ -113,7 +118,7 @@ describe("match 76497164832f078c terminal R&D defense", () => {
     expect(decision.decisionDebug?.actionAlternatives).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          actionId: "corp.draw_card",
+          actionId: "c8",
           excluded: true,
           whyNot: expect.arrayContaining([
             "explicitly_nonproductive:corp.hand_and_agenda_management:corp_exact_draw_projection_exceeds_hand_capacity",

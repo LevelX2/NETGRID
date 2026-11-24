@@ -42,7 +42,7 @@ export type SafetyGate = {
   evidence: string[];
 };
 
-export type CorpBoardTriageDependencies<TConsumer extends string> = {
+export type CorpBoardTriageDependencies = {
   actionCreditCost: (action: LegalAction) => number;
   rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
   corpScoreNowSafetyGate: (

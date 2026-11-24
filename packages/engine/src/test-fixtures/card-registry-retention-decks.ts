@@ -1,29 +1,29 @@
-import { DEMO_DECKS, type DeckDefinition } from "@netgrid/shared";
+import { DEMO_DECKS, type CardDefinitionId, type DeckDefinition } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
 
 export const CARD_REGISTRY_RETENTION_STRESS_IDS = Object.freeze([
-  "onr_classic_005_baskerville",
-  "onr_classic_019_indiscriminate-response-team",
-  "onr_classic_020_london-city-grid",
-  "onr_classic_022_self-destruct",
-  "onr_classic_024_sterdroid",
-  "onr_classic_031_rent-i-con",
-  "onr_classic_039_library-search",
-  "onr_classic_044_crash-space",
-  "onr_classic_047_little-black-box",
-  "onr_classic_051_vintage-camaro",
+  9,
+  23,
+  24,
+  26,
+  28,
+  35,
+  43,
+  48,
+  51,
+  55,
 ]);
 export const CARD_REGISTRY_RETENTION_CARD_SPEC_CONTROL_IDS = Object.freeze([
-  "onr_proteus_014_chihuahua",
-  "onr_v1_336_rescheduler",
-  "onr_proteus_063_lisa-blight",
-  "onr_proteus_060_herman-revista",
-  "onr_proteus_062_lesley-major",
-  "onr_proteus_109_frame-up",
-  "onr_proteus_134_cortical-cybermodem",
-  "onr_proteus_135_cortical-stimulators",
-  "onr_proteus_090_highlighter",
-  "onr_v1_154_broker",
+  72,
+  548,
+  121,
+  118,
+  120,
+  167,
+  192,
+  193,
+  148,
+  366,
 ]);
 
 export function cardRegistryRetentionDecks(lane: "stress" | "control"): {
@@ -34,7 +34,10 @@ export function cardRegistryRetentionDecks(lane: "stress" | "control"): {
     lane === "stress"
       ? CARD_REGISTRY_RETENTION_STRESS_IDS
       : CARD_REGISTRY_RETENTION_CARD_SPEC_CONTROL_IDS;
-  const cardsBySide = { runner: [] as string[], corp: [] as string[] };
+  const cardsBySide = {
+    runner: [] as CardDefinitionId[],
+    corp: [] as CardDefinitionId[],
+  };
   for (const definitionId of definitionIds) {
     const definition = CARD_DEFINITIONS_BY_ID[definitionId];
     if (!definition)

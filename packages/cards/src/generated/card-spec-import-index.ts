@@ -1251,3093 +1251,3093 @@ export const GENERATED_CARD_SPECS = [
 ] as const satisfies readonly CardSpec[];
 export const GENERATED_CARD_SPEC_SOURCE_REFS = [
   {
-    cardDefinitionId: "catalog_preview_operation_001",
+    cardDefinitionId: 1,
     sourcePath:
       "packages/cards/src/specs/testset/catalog_preview_operation_001.card-spec.ts",
   },
   {
-    cardDefinitionId: "catalog_preview_resource_001",
+    cardDefinitionId: 2,
     sourcePath:
       "packages/cards/src/specs/testset/catalog_preview_resource_001.card-spec.ts",
   },
   {
-    cardDefinitionId: "corp_identity_001",
+    cardDefinitionId: 3,
     sourcePath:
       "packages/cards/src/specs/system/corp_identity_001.card-spec.ts",
   },
   {
-    cardDefinitionId: "efficient_fracter",
+    cardDefinitionId: 4,
     sourcePath:
       "packages/cards/src/specs/testset/efficient_fracter.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_001_data-fort-remapping",
+    cardDefinitionId: 5,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_001_data-fort-remapping.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_002_superserum",
+    cardDefinitionId: 6,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_002_superserum.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_003_unlisted-research-lab",
+    cardDefinitionId: 7,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_003_unlisted-research-lab.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_004_theorem-proof",
+    cardDefinitionId: 8,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_004_theorem-proof.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_005_baskerville",
+    cardDefinitionId: 9,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_005_baskerville.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_006_bolter-swarm",
+    cardDefinitionId: 10,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_006_bolter-swarm.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_007_brain-drain",
+    cardDefinitionId: 11,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_007_brain-drain.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_008_deadeye",
+    cardDefinitionId: 12,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_008_deadeye.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_009_dumpster",
+    cardDefinitionId: 13,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_009_dumpster.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_010_entrapment",
+    cardDefinitionId: 14,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_010_entrapment.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_011_glacier",
+    cardDefinitionId: 15,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_011_glacier.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_012_imperial-guard",
+    cardDefinitionId: 16,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_012_imperial-guard.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_013_puzzle",
+    cardDefinitionId: 17,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_013_puzzle.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_014_trapdoor",
+    cardDefinitionId: 18,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_014_trapdoor.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_015_vortex",
+    cardDefinitionId: 19,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_015_vortex.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_016_badtimes",
+    cardDefinitionId: 20,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_016_badtimes.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_017_corporate-shuffle",
+    cardDefinitionId: 21,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_017_corporate-shuffle.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_018_reclamation-project",
+    cardDefinitionId: 22,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_018_reclamation-project.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_019_indiscriminate-response-team",
+    cardDefinitionId: 23,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_019_indiscriminate-response-team.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_020_london-city-grid",
+    cardDefinitionId: 24,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_020_london-city-grid.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_021_satellite-monitors",
+    cardDefinitionId: 25,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_021_satellite-monitors.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_022_self-destruct",
+    cardDefinitionId: 26,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_022_self-destruct.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_023_shock-treatment",
+    cardDefinitionId: 27,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_023_shock-treatment.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_024_sterdroid",
+    cardDefinitionId: 28,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_024_sterdroid.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_025_strategic-planning-group",
+    cardDefinitionId: 29,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_025_strategic-planning-group.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_026_street-enforcer",
+    cardDefinitionId: 30,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_026_street-enforcer.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_027_early-worm",
+    cardDefinitionId: 31,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_027_early-worm.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_028_matador",
+    cardDefinitionId: 32,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_028_matador.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_029_ms-todon",
+    cardDefinitionId: 33,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_029_ms-todon.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_030_psychic-friend",
+    cardDefinitionId: 34,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_030_psychic-friend.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_031_rent-i-con",
+    cardDefinitionId: 35,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_031_rent-i-con.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_032_schematics-search-engine",
+    cardDefinitionId: 36,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_032_schematics-search-engine.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_033_superglue",
+    cardDefinitionId: 37,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_033_superglue.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_034_boostergang-connections",
+    cardDefinitionId: 38,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_034_boostergang-connections.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_035_corruption",
+    cardDefinitionId: 39,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_035_corruption.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_036_do-the-drine",
+    cardDefinitionId: 40,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_036_do-the-drine.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_037_finders-keepers",
+    cardDefinitionId: 41,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_037_finders-keepers.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_038_gypsytm-schedule-analyzer",
+    cardDefinitionId: 42,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_038_gypsytm-schedule-analyzer.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_039_library-search",
+    cardDefinitionId: 43,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_039_library-search.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_040_meat-upgrade",
+    cardDefinitionId: 44,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_040_meat-upgrade.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_041_networking",
+    cardDefinitionId: 45,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_041_networking.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_042_panzer-run",
+    cardDefinitionId: 46,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_042_panzer-run.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_043_running-interference",
+    cardDefinitionId: 47,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_043_running-interference.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_044_crash-space",
+    cardDefinitionId: 48,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_044_crash-space.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_045_elena-laskova",
+    cardDefinitionId: 49,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_045_elena-laskova.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_046_executive-file-clerk",
+    cardDefinitionId: 50,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_046_executive-file-clerk.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_047_little-black-box",
+    cardDefinitionId: 51,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_047_little-black-box.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_048_omnitech-spinal-tap-cybermodem",
+    cardDefinitionId: 52,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_048_omnitech-spinal-tap-cybermodem.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_049_omnitech-wet-drive",
+    cardDefinitionId: 53,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_049_omnitech-wet-drive.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_050_sandbox-dig",
+    cardDefinitionId: 54,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_050_sandbox-dig.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_051_vintage-camaro",
+    cardDefinitionId: 55,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_051_vintage-camaro.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_052_zetatech-portastation",
+    cardDefinitionId: 56,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_052_zetatech-portastation.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_053_protected-resources",
+    cardDefinitionId: 57,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_053_protected-resources.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_classic_054_phone-freak",
+    cardDefinitionId: 58,
     sourcePath:
       "packages/cards/src/specs/classic/onr_classic_054_phone-freak.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_001_ai-board-member",
+    cardDefinitionId: 59,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_001_ai-board-member.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_002_charity-takeover",
+    cardDefinitionId: 60,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_002_charity-takeover.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_003_corporate-headhunters",
+    cardDefinitionId: 61,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_003_corporate-headhunters.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_004_fetal-ai",
+    cardDefinitionId: 62,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_004_fetal-ai.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_005_marked-accounts",
+    cardDefinitionId: 63,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_005_marked-accounts.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_006_please-dont-choke-anyone",
+    cardDefinitionId: 64,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_006_please-dont-choke-anyone.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_007_project-venice",
+    cardDefinitionId: 65,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_007_project-venice.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_008_project-zurich",
+    cardDefinitionId: 66,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_008_project-zurich.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_009_viral-breeding-ground",
+    cardDefinitionId: 67,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_009_viral-breeding-ground.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_010_world-domination",
+    cardDefinitionId: 68,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_010_world-domination.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_011_brain-wash",
+    cardDefinitionId: 69,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_011_brain-wash.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_012_bug-zapper",
+    cardDefinitionId: 70,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_012_bug-zapper.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_013_caryatid",
+    cardDefinitionId: 71,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_013_caryatid.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_014_chihuahua",
+    cardDefinitionId: 72,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_014_chihuahua.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_015_colonel-failure",
+    cardDefinitionId: 73,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_015_colonel-failure.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_016_coyote",
+    cardDefinitionId: 74,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_016_coyote.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_017_credit-blocks",
+    cardDefinitionId: 75,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_017_credit-blocks.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_018_datacomb",
+    cardDefinitionId: 76,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_018_datacomb.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_019_death-yo-yo",
+    cardDefinitionId: 77,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_019_death-yo-yo.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_020_digiconda",
+    cardDefinitionId: 78,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_020_digiconda.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_021_dog-pile",
+    cardDefinitionId: 79,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_021_dog-pile.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_022_food-fight",
+    cardDefinitionId: 80,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_022_food-fight.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_023_galatea",
+    cardDefinitionId: 81,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_023_galatea.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_024_gatekeeper",
+    cardDefinitionId: 82,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_024_gatekeeper.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_025_homing-missile",
+    cardDefinitionId: 83,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_025_homing-missile.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_026_hunting-pack",
+    cardDefinitionId: 84,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_026_hunting-pack.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_027_iceberg",
+    cardDefinitionId: 85,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_027_iceberg.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_028_lesser-arcana",
+    cardDefinitionId: 86,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_028_lesser-arcana.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_029_marionette",
+    cardDefinitionId: 87,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_029_marionette.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_030_mastermind",
+    cardDefinitionId: 88,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_030_mastermind.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_031_minotaur",
+    cardDefinitionId: 89,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_031_minotaur.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_032_misleading-access-menus",
+    cardDefinitionId: 90,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_032_misleading-access-menus.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_033_mobile-barricade",
+    cardDefinitionId: 91,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_033_mobile-barricade.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_034_riddler",
+    cardDefinitionId: 92,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_034_riddler.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_035_roadblock",
+    cardDefinitionId: 93,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_035_roadblock.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_036_sandstorm",
+    cardDefinitionId: 94,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_036_sandstorm.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_037_scaffolding",
+    cardDefinitionId: 95,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_037_scaffolding.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_038_snowbank",
+    cardDefinitionId: 96,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_038_snowbank.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_039_sphinx-2006",
+    cardDefinitionId: 97,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_039_sphinx-2006.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_040_sumo-2008",
+    cardDefinitionId: 98,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_040_sumo-2008.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_041_toughoniumtm-wall",
+    cardDefinitionId: 99,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_041_toughoniumtm-wall.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_042_tumblers",
+    cardDefinitionId: 100,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_042_tumblers.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_043_twisty-passages",
+    cardDefinitionId: 101,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_043_twisty-passages.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_044_walking-wall",
+    cardDefinitionId: 102,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_044_walking-wall.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_045_washed-up-solo-construct",
+    cardDefinitionId: 103,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_045_washed-up-solo-construct.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_046_corporate-guard-r-temps",
+    cardDefinitionId: 104,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_046_corporate-guard-r-temps.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_047_credit-consolidation",
+    cardDefinitionId: 105,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_047_credit-consolidation.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_048_data-sifters",
+    cardDefinitionId: 106,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_048_data-sifters.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_049_emergency-rig",
+    cardDefinitionId: 107,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_049_emergency-rig.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_050_manhunt",
+    cardDefinitionId: 108,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_050_manhunt.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_051_rent-to-own-contract",
+    cardDefinitionId: 109,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_051_rent-to-own-contract.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_052_schlaghund-pointers",
+    cardDefinitionId: 110,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_052_schlaghund-pointers.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_053_underworld-mole",
+    cardDefinitionId: 111,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_053_underworld-mole.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_054_bel-digmo-antibody",
+    cardDefinitionId: 112,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_054_bel-digmo-antibody.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_055_cybertech-think-tank",
+    cardDefinitionId: 113,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_055_cybertech-think-tank.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_056_department-of-misinformation",
+    cardDefinitionId: 114,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_056_department-of-misinformation.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_057_doppelganger-antibody",
+    cardDefinitionId: 115,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_057_doppelganger-antibody.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_058_executive-boot-camp",
+    cardDefinitionId: 116,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_058_executive-boot-camp.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_059_government-contract",
+    cardDefinitionId: 117,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_059_government-contract.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_060_herman-revista",
+    cardDefinitionId: 118,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_060_herman-revista.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_061_ldl-traffic-analyzers",
+    cardDefinitionId: 119,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_061_ldl-traffic-analyzers.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_062_lesley-major",
+    cardDefinitionId: 120,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_062_lesley-major.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_063_lisa-blight",
+    cardDefinitionId: 121,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_063_lisa-blight.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_064_marcel-desoleil",
+    cardDefinitionId: 122,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_064_marcel-desoleil.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_065_networked-center",
+    cardDefinitionId: 123,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_065_networked-center.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_066_obfuscated-fortress",
+    cardDefinitionId: 124,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_066_obfuscated-fortress.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_067_panic-button",
+    cardDefinitionId: 125,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_067_panic-button.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_068_pattel-antibody",
+    cardDefinitionId: 126,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_068_pattel-antibody.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_069_pavit-bharat",
+    cardDefinitionId: 127,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_069_pavit-bharat.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_070_rasmin-bridger",
+    cardDefinitionId: 128,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_070_rasmin-bridger.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_071_raymond-ellison",
+    cardDefinitionId: 129,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_071_raymond-ellison.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_072_research-bunker",
+    cardDefinitionId: 130,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_072_research-bunker.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_073_simon-francisco",
+    cardDefinitionId: 131,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_073_simon-francisco.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_074_siren",
+    cardDefinitionId: 132,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_074_siren.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_075_stereogram-antibody",
+    cardDefinitionId: 133,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_075_stereogram-antibody.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_076_syd-meyer-superstores",
+    cardDefinitionId: 134,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_076_syd-meyer-superstores.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_077_weapons-depot",
+    cardDefinitionId: 135,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_077_weapons-depot.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_078_armageddon",
+    cardDefinitionId: 136,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_078_armageddon.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_079_big-frackin-gun",
+    cardDefinitionId: 137,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_079_big-frackin-gun.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_080_black-widow",
+    cardDefinitionId: 138,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_080_black-widow.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_081_boring-bit",
+    cardDefinitionId: 139,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_081_boring-bit.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_082_bulldozer",
+    cardDefinitionId: 140,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_082_bulldozer.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_083_corrosion",
+    cardDefinitionId: 141,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_083_corrosion.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_084_crumble",
+    cardDefinitionId: 142,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_084_crumble.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_085_disintegrator",
+    cardDefinitionId: 143,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_085_disintegrator.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_086_enterprise-inc-shields",
+    cardDefinitionId: 144,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_086_enterprise-inc-shields.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_087_forwards-legacy",
+    cardDefinitionId: 145,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_087_forwards-legacy.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_088_fubar",
+    cardDefinitionId: 146,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_088_fubar.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_089_garbage-in",
+    cardDefinitionId: 147,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_089_garbage-in.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_090_highlighter",
+    cardDefinitionId: 148,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_090_highlighter.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_091_lockjaw",
+    cardDefinitionId: 149,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_091_lockjaw.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_092_morphing-tool",
+    cardDefinitionId: 150,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_092_morphing-tool.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_093_redecorator",
+    cardDefinitionId: 151,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_093_redecorator.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_094_scaldan",
+    cardDefinitionId: 152,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_094_scaldan.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_095_skeleton-passkeys",
+    cardDefinitionId: 153,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_095_skeleton-passkeys.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_096_skullcap",
+    cardDefinitionId: 154,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_096_skullcap.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_097_taxman",
+    cardDefinitionId: 155,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_097_taxman.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_098_vienna-22",
+    cardDefinitionId: 156,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_098_vienna-22.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_099_viral-pipeline",
+    cardDefinitionId: 157,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_099_viral-pipeline.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_100_wrecking-ball",
+    cardDefinitionId: 158,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_100_wrecking-ball.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_101_all-hands",
+    cardDefinitionId: 159,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_101_all-hands.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_102_blackmail",
+    cardDefinitionId: 160,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_102_blackmail.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_103_cruising-for-netwatch",
+    cardDefinitionId: 161,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_103_cruising-for-netwatch.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_104_decoy-signal",
+    cardDefinitionId: 162,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_104_decoy-signal.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_105_demolition-run",
+    cardDefinitionId: 163,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_105_demolition-run.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
+    cardDefinitionId: 164,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_106_disgruntled-ice-technician.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_107_drone-for-a-day",
+    cardDefinitionId: 165,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_107_drone-for-a-day.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_108_faked-hit",
+    cardDefinitionId: 166,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_108_faked-hit.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_109_frame-up",
+    cardDefinitionId: 167,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_109_frame-up.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_110_hijack",
+    cardDefinitionId: 168,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_110_hijack.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_111_ice-and-data-special-report",
+    cardDefinitionId: 169,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_111_ice-and-data-special-report.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_112_identity-donor",
+    cardDefinitionId: 170,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_112_identity-donor.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_113_live-news-feed",
+    cardDefinitionId: 171,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_113_live-news-feed.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_114_on-the-fast-track",
+    cardDefinitionId: 172,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_114_on-the-fast-track.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_115_personal-touch-the",
+    cardDefinitionId: 173,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_115_personal-touch-the.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_116_pirate-broadcast",
+    cardDefinitionId: 174,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_116_pirate-broadcast.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_117_poisoned-water-supply",
+    cardDefinitionId: 175,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_117_poisoned-water-supply.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_118_prearranged-drop",
+    cardDefinitionId: 176,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_118_prearranged-drop.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_119_promises-promises",
+    cardDefinitionId: 177,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_119_promises-promises.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_120_reconnaissance",
+    cardDefinitionId: 178,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_120_reconnaissance.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_121_remote-detonator",
+    cardDefinitionId: 179,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_121_remote-detonator.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_122_rush-hour",
+    cardDefinitionId: 180,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_122_rush-hour.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_123_senatorial-field-trip",
+    cardDefinitionId: 181,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_123_senatorial-field-trip.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_124_stakeout",
+    cardDefinitionId: 182,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_124_stakeout.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_125_subliminal-corruption",
+    cardDefinitionId: 183,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_125_subliminal-corruption.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_126_test-spin",
+    cardDefinitionId: 184,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_126_test-spin.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_127_weefle-initiation",
+    cardDefinitionId: 185,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_127_weefle-initiation.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_128_airport-locker",
+    cardDefinitionId: 186,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_128_airport-locker.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_129_back-door-to-netwatch",
+    cardDefinitionId: 187,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_129_back-door-to-netwatch.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_130_back-door-to-rivals",
+    cardDefinitionId: 188,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_130_back-door-to-rivals.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_131_bargain-with-viacox",
+    cardDefinitionId: 189,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_131_bargain-with-viacox.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_132_bolt-hole",
+    cardDefinitionId: 190,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_132_bolt-hole.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_133_chiba-bank-account",
+    cardDefinitionId: 191,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_133_chiba-bank-account.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_134_cortical-cybermodem",
+    cardDefinitionId: 192,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_134_cortical-cybermodem.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_135_cortical-stimulators",
+    cardDefinitionId: 193,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_135_cortical-stimulators.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_136_credit-subversion",
+    cardDefinitionId: 194,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_136_credit-subversion.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_137_death-from-above",
+    cardDefinitionId: 195,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_137_death-from-above.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_138_deck-the",
+    cardDefinitionId: 196,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_138_deck-the.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_139_eurocorpse-tm-spin-chip",
+    cardDefinitionId: 197,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_139_eurocorpse-tm-spin-chip.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_140_expendable-family-member",
+    cardDefinitionId: 198,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_140_expendable-family-member.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_141_get-ready-to-rumble",
+    cardDefinitionId: 199,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_141_get-ready-to-rumble.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_142_hq-mole",
+    cardDefinitionId: 200,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_142_hq-mole.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_143_liberated-savings-account",
+    cardDefinitionId: 201,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_143_liberated-savings-account.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_144_lucidrinetm-drip-feed",
+    cardDefinitionId: 202,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_144_lucidrinetm-drip-feed.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_145_mercenary-subcontract",
+    cardDefinitionId: 203,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_145_mercenary-subcontract.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_146_precision-bribery",
+    cardDefinitionId: 204,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_146_precision-bribery.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_147_r-and-d-mole",
+    cardDefinitionId: 205,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_147_r-and-d-mole.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_148_runner-sensei",
+    cardDefinitionId: 206,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_148_runner-sensei.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_149_simulacrum",
+    cardDefinitionId: 207,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_149_simulacrum.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_150_streetware-distributor",
+    cardDefinitionId: 208,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_150_streetware-distributor.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_151_sunburst-cranial-interface",
+    cardDefinitionId: 209,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_151_sunburst-cranial-interface.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_152_swiss-bank-account",
+    cardDefinitionId: 210,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_152_swiss-bank-account.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_153_time-to-collect",
+    cardDefinitionId: 211,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_153_time-to-collect.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_proteus_154_wired-switchboard",
+    cardDefinitionId: 212,
     sourcePath:
       "packages/cards/src/specs/proteus/onr_proteus_154_wired-switchboard.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_001_afreet",
+    cardDefinitionId: 213,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_001_afreet.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_002_ai-boon",
+    cardDefinitionId: 214,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_002_ai-boon.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_003_baedekers-net-map",
+    cardDefinitionId: 215,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_003_baedekers-net-map.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_004_bakdoor",
+    cardDefinitionId: 216,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_004_bakdoor.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_005_bartmoss-memorial-icebreaker",
+    cardDefinitionId: 217,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_005_bartmoss-memorial-icebreaker.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_006_black-dahlia",
+    cardDefinitionId: 218,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_006_black-dahlia.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_007_blink",
+    cardDefinitionId: 219,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_007_blink.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_008_boardwalk",
+    cardDefinitionId: 220,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_008_boardwalk.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_009_butcher-boy",
+    cardDefinitionId: 221,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_009_butcher-boy.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_010_cascade",
+    cardDefinitionId: 222,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_010_cascade.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_011_cloak",
+    cardDefinitionId: 223,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_011_cloak.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_012_clown",
+    cardDefinitionId: 224,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_012_clown.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_013_cockroach",
+    cardDefinitionId: 225,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_013_cockroach.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_014_codecracker",
+    cardDefinitionId: 226,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_014_codecracker.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_015_codeslinger",
+    cardDefinitionId: 227,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_015_codeslinger.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_016_cyfermaster",
+    cardDefinitionId: 228,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_016_cyfermaster.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_017_deep-thought",
+    cardDefinitionId: 229,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_017_deep-thought.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_018_dogcatcher",
+    cardDefinitionId: 230,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_018_dogcatcher.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_019_dropp",
+    cardDefinitionId: 231,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_019_dropp.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_020_dupre",
+    cardDefinitionId: 232,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_020_dupre.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_021_dwarf",
+    cardDefinitionId: 233,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_021_dwarf.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_022_emergency-self-construct",
+    cardDefinitionId: 234,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_022_emergency-self-construct.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_023_evil-twin",
+    cardDefinitionId: 235,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_023_evil-twin.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_024_expert-schedule-analyzer",
+    cardDefinitionId: 236,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_024_expert-schedule-analyzer.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_025_fait-accompli",
+    cardDefinitionId: 237,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_025_fait-accompli.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_026_false-echo",
+    cardDefinitionId: 238,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_026_false-echo.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_027_flak",
+    cardDefinitionId: 239,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_027_flak.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_028_force-shield",
+    cardDefinitionId: 240,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_028_force-shield.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_029_gremlins",
+    cardDefinitionId: 241,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_029_gremlins.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_030_grubb",
+    cardDefinitionId: 242,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_030_grubb.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_031_hammer",
+    cardDefinitionId: 243,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_031_hammer.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_032_i-spy",
+    cardDefinitionId: 244,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_032_i-spy.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_033_imp",
+    cardDefinitionId: 245,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_033_imp.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_034_incubator",
+    cardDefinitionId: 246,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_034_incubator.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_035_invisibility",
+    cardDefinitionId: 247,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_035_invisibility.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_036_jackhammer",
+    cardDefinitionId: 248,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_036_jackhammer.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_037_japanese-water-torture",
+    cardDefinitionId: 249,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_037_japanese-water-torture.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_038_joan-of-arc",
+    cardDefinitionId: 250,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_038_joan-of-arc.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_039_krash",
+    cardDefinitionId: 251,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_039_krash.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_040_loony-goon",
+    cardDefinitionId: 252,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_040_loony-goon.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_041_microtech-ai-interface",
+    cardDefinitionId: 253,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_041_microtech-ai-interface.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_042_mouse",
+    cardDefinitionId: 254,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_042_mouse.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_043_mystery-box",
+    cardDefinitionId: 255,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_043_mystery-box.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_044_netspace-inverter",
+    cardDefinitionId: 256,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_044_netspace-inverter.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_045_newsgroup-filter",
+    cardDefinitionId: 257,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_045_newsgroup-filter.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_046_pattels-virus",
+    cardDefinitionId: 258,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_046_pattels-virus.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_047_pile-driver",
+    cardDefinitionId: 259,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_047_pile-driver.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_048_poltergeist",
+    cardDefinitionId: 260,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_048_poltergeist.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_049_pox",
+    cardDefinitionId: 261,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_049_pox.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_050_r-and-d-protocol-files",
+    cardDefinitionId: 262,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_050_r-and-d-protocol-files.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_051_rabbit",
+    cardDefinitionId: 263,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_051_rabbit.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_052_raffles",
+    cardDefinitionId: 264,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_052_raffles.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_053_ramming-piston",
+    cardDefinitionId: 265,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_053_ramming-piston.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_054_raptor",
+    cardDefinitionId: 266,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_054_raptor.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_055_reflector",
+    cardDefinitionId: 267,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_055_reflector.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_056_replicator",
+    cardDefinitionId: 268,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_056_replicator.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_057_scatter-shot",
+    cardDefinitionId: 269,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_057_scatter-shot.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_058_seeya",
+    cardDefinitionId: 270,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_058_seeya.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_059_self-modifying-code",
+    cardDefinitionId: 271,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_059_self-modifying-code.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_060_shaka",
+    cardDefinitionId: 272,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_060_shaka.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_061_shield",
+    cardDefinitionId: 273,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_061_shield.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_062_shredder-uplink-protocol",
+    cardDefinitionId: 274,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_062_shredder-uplink-protocol.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_063_signpost",
+    cardDefinitionId: 275,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_063_signpost.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_064_skivviss",
+    cardDefinitionId: 276,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_064_skivviss.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_065_smarteye",
+    cardDefinitionId: 277,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_065_smarteye.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_066_snowball",
+    cardDefinitionId: 278,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_066_snowball.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_067_speed-trap",
+    cardDefinitionId: 279,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_067_speed-trap.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_068_startup-immolator",
+    cardDefinitionId: 280,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_068_startup-immolator.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_069_succubus",
+    cardDefinitionId: 281,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_069_succubus.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_070_tinweasel",
+    cardDefinitionId: 282,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_070_tinweasel.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_071_vewy-vewy-quiet",
+    cardDefinitionId: 283,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_071_vewy-vewy-quiet.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_072_wild-card",
+    cardDefinitionId: 284,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_072_wild-card.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_073_wizards-book",
+    cardDefinitionId: 285,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_073_wizards-book.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_074_worm",
+    cardDefinitionId: 286,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_074_worm.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_075_zetatech-software-installer",
+    cardDefinitionId: 287,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_075_zetatech-software-installer.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_076_all-nighter",
+    cardDefinitionId: 288,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_076_all-nighter.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_077_anonymous-tip",
+    cardDefinitionId: 289,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_077_anonymous-tip.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_078_arasaka-owns-you",
+    cardDefinitionId: 290,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_078_arasaka-owns-you.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_079_bodyweight-synthetic-blood",
+    cardDefinitionId: 291,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_079_bodyweight-synthetic-blood.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_080_core-command-jettison-ice",
+    cardDefinitionId: 292,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_080_core-command-jettison-ice.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_081_custodial-position",
+    cardDefinitionId: 293,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_081_custodial-position.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_082_deal-with-militech",
+    cardDefinitionId: 294,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_082_deal-with-militech.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_083_desperate-competitor",
+    cardDefinitionId: 295,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_083_desperate-competitor.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_084_edited-shipping-manifests",
+    cardDefinitionId: 296,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_084_edited-shipping-manifests.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_085_executive-wiretaps",
+    cardDefinitionId: 297,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_085_executive-wiretaps.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_086_forged-activation-orders",
+    cardDefinitionId: 298,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_086_forged-activation-orders.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_087_forgotten-backup-chip",
+    cardDefinitionId: 299,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_087_forgotten-backup-chip.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_088_fortress-respecification",
+    cardDefinitionId: 300,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_088_fortress-respecification.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_089_gideons-pawnshop",
+    cardDefinitionId: 301,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_089_gideons-pawnshop.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_090_hot-tip-for-wns",
+    cardDefinitionId: 302,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_090_hot-tip-for-wns.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_091_hunt-club-bbs",
+    cardDefinitionId: 303,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_091_hunt-club-bbs.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_092_ice-and-datas-guide-to-the-net",
+    cardDefinitionId: 304,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_092_ice-and-datas-guide-to-the-net.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_093_if-you-want-it-done-right",
+    cardDefinitionId: 305,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_093_if-you-want-it-done-right.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_094_inside-job",
+    cardDefinitionId: 306,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_094_inside-job.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_095_jack-n-joe",
+    cardDefinitionId: 307,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_095_jack-n-joe.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_096_kilroy-was-here",
+    cardDefinitionId: 308,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_096_kilroy-was-here.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_097_livewires-contacts",
+    cardDefinitionId: 309,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_097_livewires-contacts.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_098_lucidrine-booster-drug",
+    cardDefinitionId: 310,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_098_lucidrine-booster-drug.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_099_mantis-fixer-at-large",
+    cardDefinitionId: 311,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_099_mantis-fixer-at-large.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_100_misc-for-sale",
+    cardDefinitionId: 312,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_100_misc-for-sale.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_101_mit-west-tier",
+    cardDefinitionId: 313,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_101_mit-west-tier.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_102_open-ended-mileage-program",
+    cardDefinitionId: 314,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_102_open-ended-mileage-program.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_103_organ-donor",
+    cardDefinitionId: 315,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_103_organ-donor.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_104_playful-ai",
+    cardDefinitionId: 316,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_104_playful-ai.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_105_priority-wreck",
+    cardDefinitionId: 317,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_105_priority-wreck.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_106_private-ldl-access",
+    cardDefinitionId: 318,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_106_private-ldl-access.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_107_romp-through-hq",
+    cardDefinitionId: 319,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_107_romp-through-hq.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_108_score",
+    cardDefinitionId: 320,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_108_score.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_109_security-code-worm-chip",
+    cardDefinitionId: 321,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_109_security-code-worm-chip.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_110_sneak-preview",
+    cardDefinitionId: 322,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_110_sneak-preview.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_111_social-engineering",
+    cardDefinitionId: 323,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_111_social-engineering.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_112_stumble-through-wilderspace",
+    cardDefinitionId: 324,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_112_stumble-through-wilderspace.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_113_synchronized-attack-on-hq",
+    cardDefinitionId: 325,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_113_synchronized-attack-on-hq.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_114_temple-microcode-outlet",
+    cardDefinitionId: 326,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_114_temple-microcode-outlet.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_115_terrorist-reprisal",
+    cardDefinitionId: 327,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_115_terrorist-reprisal.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_116_total-genetic-retrofit",
+    cardDefinitionId: 328,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_116_total-genetic-retrofit.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_117_valu-pak-software-bundle",
+    cardDefinitionId: 329,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_117_valu-pak-software-bundle.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_118_weather-to-finance-pipe",
+    cardDefinitionId: 330,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_118_weather-to-finance-pipe.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_119_arasaka-portable-prototype",
+    cardDefinitionId: 331,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_119_arasaka-portable-prototype.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_120_armadillo-armored-road-home",
+    cardDefinitionId: 332,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_120_armadillo-armored-road-home.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_121_armored-fridge",
+    cardDefinitionId: 333,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_121_armored-fridge.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_122_artemis-2020",
+    cardDefinitionId: 334,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_122_artemis-2020.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_123_bodyweight-data-creche",
+    cardDefinitionId: 335,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_123_bodyweight-data-creche.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_124_corolla-speed-chip",
+    cardDefinitionId: 336,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_124_corolla-speed-chip.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_125_dermatech-bodyplating",
+    cardDefinitionId: 337,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_125_dermatech-bodyplating.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_126_drifter-mobile-environment",
+    cardDefinitionId: 338,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_126_drifter-mobile-environment.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_127_full-body-conversion",
+    cardDefinitionId: 339,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_127_full-body-conversion.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_128_green-knight-surge-buffers",
+    cardDefinitionId: 340,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_128_green-knight-surge-buffers.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_129_hq-interface",
+    cardDefinitionId: 341,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_129_hq-interface.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_130_lifesaver-nanosurgeons",
+    cardDefinitionId: 342,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_130_lifesaver-nanosurgeons.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_131_microtech-backup-drive",
+    cardDefinitionId: 343,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_131_microtech-backup-drive.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_132_microtech-trode-set",
+    cardDefinitionId: 344,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_132_microtech-trode-set.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_133_militech-mram-chip",
+    cardDefinitionId: 345,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_133_militech-mram-chip.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_134_mram-chip",
+    cardDefinitionId: 346,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_134_mram-chip.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_135_nasuko-cycle",
+    cardDefinitionId: 347,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_135_nasuko-cycle.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_136_pandoras-deck",
+    cardDefinitionId: 348,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_136_pandoras-deck.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_137_parraline-5750",
+    cardDefinitionId: 349,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_137_parraline-5750.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_138_pk-6089a",
+    cardDefinitionId: 350,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_138_pk-6089a.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_139_r-and-d-interface",
+    cardDefinitionId: 351,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_139_r-and-d-interface.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_140_raven-microcyb-eagle",
+    cardDefinitionId: 352,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_140_raven-microcyb-eagle.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_141_raven-microcyb-owl",
+    cardDefinitionId: 353,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_141_raven-microcyb-owl.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_142_record-reconstructor",
+    cardDefinitionId: 354,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_142_record-reconstructor.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_143_techtronica-utility-suit",
+    cardDefinitionId: 355,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_143_techtronica-utility-suit.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_144_tycho-mem-chip",
+    cardDefinitionId: 356,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_144_tycho-mem-chip.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_145_wutech-mem-chip",
+    cardDefinitionId: 357,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_145_wutech-mem-chip.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_146_zetatech-mem-chip",
+    cardDefinitionId: 358,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_146_zetatech-mem-chip.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_147_zz22-speed-chip",
+    cardDefinitionId: 359,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_147_zz22-speed-chip.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_148_access-through-alpha",
+    cardDefinitionId: 360,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_148_access-through-alpha.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_149_access-to-arasaka",
+    cardDefinitionId: 361,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_149_access-to-arasaka.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_150_access-to-kiribati",
+    cardDefinitionId: 362,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_150_access-to-kiribati.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_151_aujourdoui",
+    cardDefinitionId: 363,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_151_aujourdoui.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_152_back-door-to-hilliard",
+    cardDefinitionId: 364,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_152_back-door-to-hilliard.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_153_back-door-to-orbital-air",
+    cardDefinitionId: 365,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_153_back-door-to-orbital-air.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_154_broker",
+    cardDefinitionId: 366,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_154_broker.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_155_code-viral-cache",
+    cardDefinitionId: 367,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_155_code-viral-cache.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_156_corporate-ally",
+    cardDefinitionId: 368,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_156_corporate-ally.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_157_crash-everett-inventive-fixer",
+    cardDefinitionId: 369,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_157_crash-everett-inventive-fixer.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_158_danshis-second-id",
+    cardDefinitionId: 370,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_158_danshis-second-id.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_159_databroker",
+    cardDefinitionId: 371,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_159_databroker.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_160_diplomatic-immunity",
+    cardDefinitionId: 372,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_160_diplomatic-immunity.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_161_fall-guy",
+    cardDefinitionId: 373,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_161_fall-guy.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_162_field-reporter-for-ice-and-data",
+    cardDefinitionId: 374,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_162_field-reporter-for-ice-and-data.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_163_floating-runner-bbs",
+    cardDefinitionId: 375,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_163_floating-runner-bbs.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_164_hells-run",
+    cardDefinitionId: 376,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_164_hells-run.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_165_junkyard-bbs",
+    cardDefinitionId: 377,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_165_junkyard-bbs.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_166_karl-de-veres-corporate-stooge",
+    cardDefinitionId: 378,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_166_karl-de-veres-corporate-stooge.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_167_leland-corporate-bodyguard",
+    cardDefinitionId: 379,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_167_leland-corporate-bodyguard.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_168_loan-from-chiba",
+    cardDefinitionId: 380,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_168_loan-from-chiba.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_169_n-e-t-o",
+    cardDefinitionId: 381,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_169_n-e-t-o.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_170_nomad-allies",
+    cardDefinitionId: 382,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_170_nomad-allies.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_171_preying-mantis",
+    cardDefinitionId: 383,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_171_preying-mantis.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_172_quest-for-cattekin",
+    cardDefinitionId: 384,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_172_quest-for-cattekin.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_173_restrictive-net-zoning",
+    cardDefinitionId: 385,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_173_restrictive-net-zoning.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_174_rigged-investments",
+    cardDefinitionId: 386,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_174_rigged-investments.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_175_ronin-around",
+    cardDefinitionId: 387,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_175_ronin-around.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_176_the-shell-traders",
+    cardDefinitionId: 388,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_176_the-shell-traders.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_177_the-short-circuit",
+    cardDefinitionId: 389,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_177_the-short-circuit.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_178_short-term-contract",
+    cardDefinitionId: 390,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_178_short-term-contract.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_179_silicon-saloon-franchise",
+    cardDefinitionId: 391,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_179_silicon-saloon-franchise.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_180_smiths-pawnshop",
+    cardDefinitionId: 392,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_180_smiths-pawnshop.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_181_the-springboard",
+    cardDefinitionId: 393,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_181_the-springboard.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_182_submarine-uplink",
+    cardDefinitionId: 394,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_182_submarine-uplink.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_183_technician-lover",
+    cardDefinitionId: 395,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_183_technician-lover.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_184_top-runners-conference",
+    cardDefinitionId: 396,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_184_top-runners-conference.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_185_trauma-team",
+    cardDefinitionId: 397,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_185_trauma-team.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_186_umbrella-policy",
+    cardDefinitionId: 398,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_186_umbrella-policy.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_187_wilson-weeflerunner-apprentice",
+    cardDefinitionId: 399,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_187_wilson-weeflerunner-apprentice.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_188_ai-chief-financial-officer",
+    cardDefinitionId: 400,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_188_ai-chief-financial-officer.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_189_artificial-security-directors",
+    cardDefinitionId: 401,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_189_artificial-security-directors.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_190_bioweapons-engineering",
+    cardDefinitionId: 402,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_190_bioweapons-engineering.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_191_black-ice-quality-assurance",
+    cardDefinitionId: 403,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_191_black-ice-quality-assurance.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_192_corporate-boon",
+    cardDefinitionId: 404,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_192_corporate-boon.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_193_corporate-coup",
+    cardDefinitionId: 405,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_193_corporate-coup.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_194_corporate-downsizing",
+    cardDefinitionId: 406,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_194_corporate-downsizing.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_195_corporate-retreat",
+    cardDefinitionId: 407,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_195_corporate-retreat.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_196_corporate-war",
+    cardDefinitionId: 408,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_196_corporate-war.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_197_data-fort-reclamation",
+    cardDefinitionId: 409,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_197_data-fort-reclamation.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_198_detroit-police-contract",
+    cardDefinitionId: 410,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_198_detroit-police-contract.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_199_employee-empowerment",
+    cardDefinitionId: 411,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_199_employee-empowerment.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_200_encryption-breakthrough",
+    cardDefinitionId: 412,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_200_encryption-breakthrough.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_201_executive-extraction",
+    cardDefinitionId: 413,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_201_executive-extraction.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_202_genetics-visionary-acquisition",
+    cardDefinitionId: 414,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_202_genetics-visionary-acquisition.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_203_hostile-takeover",
+    cardDefinitionId: 415,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_203_hostile-takeover.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_204_ice-transmutation",
+    cardDefinitionId: 416,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_204_ice-transmutation.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_205_main-office-relocation",
+    cardDefinitionId: 417,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_205_main-office-relocation.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_206_marine-arcology",
+    cardDefinitionId: 418,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_206_marine-arcology.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_207_netwatch-operations-office",
+    cardDefinitionId: 419,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_207_netwatch-operations-office.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_208_on-call-solo-team",
+    cardDefinitionId: 420,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_208_on-call-solo-team.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_209_political-coup",
+    cardDefinitionId: 421,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_209_political-coup.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_210_political-overthrow",
+    cardDefinitionId: 422,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_210_political-overthrow.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_211_polymer-breakthrough",
+    cardDefinitionId: 423,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_211_polymer-breakthrough.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_212_priority-requisition",
+    cardDefinitionId: 424,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_212_priority-requisition.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_213_private-cybernet-police",
+    cardDefinitionId: 425,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_213_private-cybernet-police.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_214_project-babylon",
+    cardDefinitionId: 426,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_214_project-babylon.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_215_security-net-optimization",
+    cardDefinitionId: 427,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_215_security-net-optimization.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_216_security-purge",
+    cardDefinitionId: 428,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_216_security-purge.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_217_strike-force-kali",
+    cardDefinitionId: 429,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_217_strike-force-kali.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_218_subsidiary-branch",
+    cardDefinitionId: 430,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_218_subsidiary-branch.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_219_superior-net-barriers",
+    cardDefinitionId: 431,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_219_superior-net-barriers.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_220_tycho-extension",
+    cardDefinitionId: 432,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_220_tycho-extension.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_221_asp",
+    cardDefinitionId: 433,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_221_asp.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_222_ball-and-chain",
+    cardDefinitionId: 434,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_222_ball-and-chain.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_223_banpei",
+    cardDefinitionId: 435,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_223_banpei.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_224_bolter-cluster",
+    cardDefinitionId: 436,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_224_bolter-cluster.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_225_canis-major",
+    cardDefinitionId: 437,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_225_canis-major.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_226_canis-minor",
+    cardDefinitionId: 438,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_226_canis-minor.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_227_cerberus",
+    cardDefinitionId: 439,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_227_cerberus.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_228_cinderella",
+    cardDefinitionId: 440,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_228_cinderella.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_229_code-corpse",
+    cardDefinitionId: 441,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_229_code-corpse.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_230_cortical-scanner",
+    cardDefinitionId: 442,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_230_cortical-scanner.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_231_cortical-scrub",
+    cardDefinitionId: 443,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_231_cortical-scrub.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_232_crystal-wall",
+    cardDefinitionId: 444,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_232_crystal-wall.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_233_d-arc-knight",
+    cardDefinitionId: 445,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_233_d-arc-knight.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_234_data-darts",
+    cardDefinitionId: 446,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_234_data-darts.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_235_data-naga",
+    cardDefinitionId: 447,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_235_data-naga.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_236_data-raven",
+    cardDefinitionId: 448,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_236_data-raven.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_237_data-wall",
+    cardDefinitionId: 449,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_237_data-wall.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_238_data-wall-2-0",
+    cardDefinitionId: 450,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_238_data-wall-2-0.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_239_endless-corridor",
+    cardDefinitionId: 451,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_239_endless-corridor.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_240_fang",
+    cardDefinitionId: 452,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_240_fang.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_241_fang-2-0",
+    cardDefinitionId: 453,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_241_fang-2-0.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_242_fatal-attractor",
+    cardDefinitionId: 454,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_242_fatal-attractor.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_243_fetch-4-0-1",
+    cardDefinitionId: 455,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_243_fetch-4-0-1.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_244_filter",
+    cardDefinitionId: 456,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_244_filter.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_245_fire-wall",
+    cardDefinitionId: 457,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_245_fire-wall.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_246_fragmentation-storm",
+    cardDefinitionId: 458,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_246_fragmentation-storm.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_247_haunting-inquisition",
+    cardDefinitionId: 459,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_247_haunting-inquisition.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_248_homewrecker",
+    cardDefinitionId: 460,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_248_homewrecker.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_249_hunter",
+    cardDefinitionId: 461,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_249_hunter.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_250_ice-pick-willie",
+    cardDefinitionId: 462,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_250_ice-pick-willie.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_251_jack-attack",
+    cardDefinitionId: 463,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_251_jack-attack.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_252_keeper",
+    cardDefinitionId: 464,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_252_keeper.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_253_laser-wire",
+    cardDefinitionId: 465,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_253_laser-wire.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_254_liche",
+    cardDefinitionId: 466,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_254_liche.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_255_mastiff",
+    cardDefinitionId: 467,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_255_mastiff.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_256_mazer",
+    cardDefinitionId: 468,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_256_mazer.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_257_nerve-labyrinth",
+    cardDefinitionId: 469,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_257_nerve-labyrinth.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_258_neural-blade",
+    cardDefinitionId: 470,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_258_neural-blade.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_259_in-the-face",
+    cardDefinitionId: 471,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_259_in-the-face.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_260_pocket-virtual-reality",
+    cardDefinitionId: 472,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_260_pocket-virtual-reality.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_261_quandary",
+    cardDefinitionId: 473,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_261_quandary.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_262_razor-wire",
+    cardDefinitionId: 474,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_262_razor-wire.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_263_reinforced-wall",
+    cardDefinitionId: 475,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_263_reinforced-wall.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_264_rex",
+    cardDefinitionId: 476,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_264_rex.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_265_rock-is-strong",
+    cardDefinitionId: 477,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_265_rock-is-strong.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_266_scramble",
+    cardDefinitionId: 478,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_266_scramble.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_267_sentinels-prime",
+    cardDefinitionId: 479,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_267_sentinels-prime.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_268_shock-r",
+    cardDefinitionId: 480,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_268_shock-r.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_269_shotgun-wire",
+    cardDefinitionId: 481,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_269_shotgun-wire.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_270_sleeper",
+    cardDefinitionId: 482,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_270_sleeper.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_271_tko-2-0",
+    cardDefinitionId: 483,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_271_tko-2-0.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_272_too-many-doors",
+    cardDefinitionId: 484,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_272_too-many-doors.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_273_triggerman",
+    cardDefinitionId: 485,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_273_triggerman.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_274_tutor",
+    cardDefinitionId: 486,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_274_tutor.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_275_vacuum-link",
+    cardDefinitionId: 487,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_275_vacuum-link.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_276_viral-15",
+    cardDefinitionId: 488,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_276_viral-15.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_277_virizz",
+    cardDefinitionId: 489,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_277_virizz.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_278_wall-of-ice",
+    cardDefinitionId: 490,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_278_wall-of-ice.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_279_wall-of-static",
+    cardDefinitionId: 491,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_279_wall-of-static.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_280_zombie",
+    cardDefinitionId: 492,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_280_zombie.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_281_accounts-receivable",
+    cardDefinitionId: 493,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_281_accounts-receivable.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_282_annual-reviews",
+    cardDefinitionId: 494,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_282_annual-reviews.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_283_audit-of-call-records",
+    cardDefinitionId: 495,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_283_audit-of-call-records.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_284_chance-observation",
+    cardDefinitionId: 496,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_284_chance-observation.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_285_closed-accounts",
+    cardDefinitionId: 497,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_285_closed-accounts.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_286_corporate-detective-agency",
+    cardDefinitionId: 498,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_286_corporate-detective-agency.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_287_datapool-by-zetatech",
+    cardDefinitionId: 499,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_287_datapool-by-zetatech.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_288_day-shift",
+    cardDefinitionId: 500,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_288_day-shift.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_289_edgerunner-inc-temps",
+    cardDefinitionId: 501,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_289_edgerunner-inc-temps.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_290_efficiency-experts",
+    cardDefinitionId: 502,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_290_efficiency-experts.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_291_falsified-transactions-expert",
+    cardDefinitionId: 503,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_291_falsified-transactions-expert.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_292_management-shake-up",
+    cardDefinitionId: 504,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_292_management-shake-up.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_293_netwatch-credit-voucher",
+    cardDefinitionId: 505,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_293_netwatch-credit-voucher.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_294_new-blood",
+    cardDefinitionId: 506,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_294_new-blood.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_295_night-shift",
+    cardDefinitionId: 507,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_295_night-shift.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_296_off-site-backups",
+    cardDefinitionId: 508,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_296_off-site-backups.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_297_overtime-incentives",
+    cardDefinitionId: 509,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_297_overtime-incentives.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_298_planning-consultants",
+    cardDefinitionId: 510,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_298_planning-consultants.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_299_power-grid-overload",
+    cardDefinitionId: 511,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_299_power-grid-overload.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_300_project-consultants",
+    cardDefinitionId: 512,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_300_project-consultants.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_301_punitive-counterstrike",
+    cardDefinitionId: 513,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_301_punitive-counterstrike.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_302_scorched-earth",
+    cardDefinitionId: 514,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_302_scorched-earth.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_303_silver-lining-recovery-protocol",
+    cardDefinitionId: 515,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_303_silver-lining-recovery-protocol.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_304_systematic-layoffs",
+    cardDefinitionId: 516,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_304_systematic-layoffs.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_305_team-restructuring",
+    cardDefinitionId: 517,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_305_team-restructuring.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_306_trojan-horse",
+    cardDefinitionId: 518,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_306_trojan-horse.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_307_urban-renewal",
+    cardDefinitionId: 519,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_307_urban-renewal.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_308_acme-savings-and-loan",
+    cardDefinitionId: 520,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_308_acme-savings-and-loan.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+    cardDefinitionId: 521,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_309_bbs-whispering-campaign.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_310_blood-cat",
+    cardDefinitionId: 522,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_310_blood-cat.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_311_braindance-campaign",
+    cardDefinitionId: 523,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_311_braindance-campaign.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_312_chicago-branch",
+    cardDefinitionId: 524,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_312_chicago-branch.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_313_city-surveillance",
+    cardDefinitionId: 525,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_313_city-surveillance.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_314_corporate-negotiating-center",
+    cardDefinitionId: 526,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_314_corporate-negotiating-center.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_315_corprunners-shattered-remains",
+    cardDefinitionId: 527,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_315_corprunners-shattered-remains.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_316_cowboy-sysop",
+    cardDefinitionId: 528,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_316_cowboy-sysop.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_317_data-masons",
+    cardDefinitionId: 529,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_317_data-masons.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_318_department-of-truth-enhancement",
+    cardDefinitionId: 530,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_318_department-of-truth-enhancement.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_319_disinfectant-inc",
+    cardDefinitionId: 531,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_319_disinfectant-inc.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_320_encoder-inc",
+    cardDefinitionId: 532,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_320_encoder-inc.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_321_esa-contract",
+    cardDefinitionId: 533,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_321_esa-contract.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_322_euromarket-consortium",
+    cardDefinitionId: 534,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_322_euromarket-consortium.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_323_experimental-ai",
+    cardDefinitionId: 535,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_323_experimental-ai.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_324_fortress-architects",
+    cardDefinitionId: 536,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_324_fortress-architects.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_325_hacker-tracker-central",
+    cardDefinitionId: 537,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_325_hacker-tracker-central.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_326_holovid-campaign",
+    cardDefinitionId: 538,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_326_holovid-campaign.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_327_i-got-a-rock",
+    cardDefinitionId: 539,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_327_i-got-a-rock.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_328_information-laundering",
+    cardDefinitionId: 540,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_328_information-laundering.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_329_investment-firm",
+    cardDefinitionId: 541,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_329_investment-firm.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_330_krumz",
+    cardDefinitionId: 542,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_330_krumz.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_331_nevinyrral",
+    cardDefinitionId: 543,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_331_nevinyrral.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_332_newsgroup-taunting",
+    cardDefinitionId: 544,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_332_newsgroup-taunting.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_333_omniscience-foundation",
+    cardDefinitionId: 545,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_333_omniscience-foundation.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_334_pacifica-regional-ai",
+    cardDefinitionId: 546,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_334_pacifica-regional-ai.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_335_remote-facility",
+    cardDefinitionId: 547,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_335_remote-facility.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_336_rescheduler",
+    cardDefinitionId: 548,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_336_rescheduler.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_337_rockerboy-promotion",
+    cardDefinitionId: 549,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_337_rockerboy-promotion.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_338_rustbelt-hq-branch",
+    cardDefinitionId: 550,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_338_rustbelt-hq-branch.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_339_schlaghund",
+    cardDefinitionId: 551,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_339_schlaghund.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_340_setup",
+    cardDefinitionId: 552,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_340_setup.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_341_skalderviken-sa-beta-test-site",
+    cardDefinitionId: 553,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_341_skalderviken-sa-beta-test-site.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_342_solo-squad",
+    cardDefinitionId: 554,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_342_solo-squad.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_343_south-african-mining-corp",
+    cardDefinitionId: 555,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_343_south-african-mining-corp.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_344_spinn-public-relations",
+    cardDefinitionId: 556,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_344_spinn-public-relations.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_345_trap",
+    cardDefinitionId: 557,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_345_trap.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_346_vacant-soulkiller",
+    cardDefinitionId: 558,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_346_vacant-soulkiller.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_347_vapor-ops",
+    cardDefinitionId: 559,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_347_vapor-ops.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_348_virus-test-site",
+    cardDefinitionId: 560,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_348_virus-test-site.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_349_aardvark",
+    cardDefinitionId: 561,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_349_aardvark.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_350_antiquated-interface-routines",
+    cardDefinitionId: 562,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_350_antiquated-interface-routines.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_351_bizarre-encryption-scheme",
+    cardDefinitionId: 563,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_351_bizarre-encryption-scheme.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_352_chester-mix",
+    cardDefinitionId: 564,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_352_chester-mix.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_353_chimera",
+    cardDefinitionId: 565,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_353_chimera.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_354_crybaby",
+    cardDefinitionId: 566,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_354_crybaby.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_355_crystal-palace-station-grid",
+    cardDefinitionId: 567,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_355_crystal-palace-station-grid.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_356_dedicated-response-team",
+    cardDefinitionId: 568,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_356_dedicated-response-team.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_357_dieter-esslin",
+    cardDefinitionId: 569,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_357_dieter-esslin.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_358_dr-dreff",
+    cardDefinitionId: 570,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_358_dr-dreff.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_359_jenny-jett",
+    cardDefinitionId: 571,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_359_jenny-jett.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_360_jerusalem-city-grid",
+    cardDefinitionId: 572,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_360_jerusalem-city-grid.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_361_namatoki-plaza",
+    cardDefinitionId: 573,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_361_namatoki-plaza.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_362_new-galveston-city-grid",
+    cardDefinitionId: 574,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_362_new-galveston-city-grid.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_363_olivia-salazar",
+    cardDefinitionId: 575,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_363_olivia-salazar.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_364_omni-kismet-ph-d",
+    cardDefinitionId: 576,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_364_omni-kismet-ph-d.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_365_paris-city-grid",
+    cardDefinitionId: 577,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_365_paris-city-grid.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_366_red-herrings",
+    cardDefinitionId: 578,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_366_red-herrings.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_367_rio-de-janeiro-city-grid",
+    cardDefinitionId: 579,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_367_rio-de-janeiro-city-grid.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_368_roving-submarine",
+    cardDefinitionId: 580,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_368_roving-submarine.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_369_singapore-city-grid",
+    cardDefinitionId: 581,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_369_singapore-city-grid.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_370_tesseract-fort-construction",
+    cardDefinitionId: 582,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_370_tesseract-fort-construction.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_371_tokyo-chiba-infighting",
+    cardDefinitionId: 583,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_371_tokyo-chiba-infighting.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_372_turbeau-delacroix",
+    cardDefinitionId: 584,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_372_turbeau-delacroix.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_373_twenty-four-hour-surveillance",
+    cardDefinitionId: 585,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_373_twenty-four-hour-surveillance.card-spec.ts",
   },
   {
-    cardDefinitionId: "onr_v1_374_washington-d-c-city-grid",
+    cardDefinitionId: 586,
     sourcePath:
       "packages/cards/src/specs/originalset-v1/onr_v1_374_washington-d-c-city-grid.card-spec.ts",
   },
   {
-    cardDefinitionId: "runner_identity_001",
+    cardDefinitionId: 587,
     sourcePath:
       "packages/cards/src/specs/system/runner_identity_001.card-spec.ts",
   },
   {
-    cardDefinitionId: "simple_agenda",
+    cardDefinitionId: 588,
     sourcePath: "packages/cards/src/specs/testset/simple_agenda.card-spec.ts",
   },
   {
-    cardDefinitionId: "simple_barrier_ice",
+    cardDefinitionId: 589,
     sourcePath:
       "packages/cards/src/specs/testset/simple_barrier_ice.card-spec.ts",
   },
   {
-    cardDefinitionId: "simple_code_gate_ice",
+    cardDefinitionId: 590,
     sourcePath:
       "packages/cards/src/specs/testset/simple_code_gate_ice.card-spec.ts",
   },
   {
-    cardDefinitionId: "simple_decoder",
+    cardDefinitionId: 591,
     sourcePath: "packages/cards/src/specs/testset/simple_decoder.card-spec.ts",
   },
   {
-    cardDefinitionId: "simple_draw_event",
+    cardDefinitionId: 592,
     sourcePath:
       "packages/cards/src/specs/testset/simple_draw_event.card-spec.ts",
   },
   {
-    cardDefinitionId: "simple_draw_operation",
+    cardDefinitionId: 593,
     sourcePath:
       "packages/cards/src/specs/testset/simple_draw_operation.card-spec.ts",
   },
   {
-    cardDefinitionId: "simple_economy_asset",
+    cardDefinitionId: 594,
     sourcePath:
       "packages/cards/src/specs/testset/simple_economy_asset.card-spec.ts",
   },
   {
-    cardDefinitionId: "simple_economy_event",
+    cardDefinitionId: 595,
     sourcePath:
       "packages/cards/src/specs/testset/simple_economy_event.card-spec.ts",
   },
   {
-    cardDefinitionId: "simple_economy_operation",
+    cardDefinitionId: 596,
     sourcePath:
       "packages/cards/src/specs/testset/simple_economy_operation.card-spec.ts",
   },
   {
-    cardDefinitionId: "simple_fracter",
+    cardDefinitionId: 597,
     sourcePath: "packages/cards/src/specs/testset/simple_fracter.card-spec.ts",
   },
   {
-    cardDefinitionId: "simple_killer",
+    cardDefinitionId: 598,
     sourcePath: "packages/cards/src/specs/testset/simple_killer.card-spec.ts",
   },
   {
-    cardDefinitionId: "simple_priority_agenda",
+    cardDefinitionId: 599,
     sourcePath:
       "packages/cards/src/specs/testset/simple_priority_agenda.card-spec.ts",
   },
   {
-    cardDefinitionId: "simple_run_event",
+    cardDefinitionId: 600,
     sourcePath:
       "packages/cards/src/specs/testset/simple_run_event.card-spec.ts",
   },
   {
-    cardDefinitionId: "simple_sentry_ice",
+    cardDefinitionId: 601,
     sourcePath:
       "packages/cards/src/specs/testset/simple_sentry_ice.card-spec.ts",
   },
   {
-    cardDefinitionId: "simple_setup_hardware",
+    cardDefinitionId: 602,
     sourcePath:
       "packages/cards/src/specs/testset/simple_setup_hardware.card-spec.ts",
   },
   {
-    cardDefinitionId: "simple_tag_ice",
+    cardDefinitionId: 603,
     sourcePath: "packages/cards/src/specs/testset/simple_tag_ice.card-spec.ts",
   },
   {
-    cardDefinitionId: "simple_tag_punishment_operation",
+    cardDefinitionId: 604,
     sourcePath:
       "packages/cards/src/specs/testset/simple_tag_punishment_operation.card-spec.ts",
   },
   {
-    cardDefinitionId: "simple_taxing_barrier_ice",
+    cardDefinitionId: 605,
     sourcePath:
       "packages/cards/src/specs/testset/simple_taxing_barrier_ice.card-spec.ts",
   },
   {
-    cardDefinitionId: "simple_upgrade",
+    cardDefinitionId: 606,
     sourcePath: "packages/cards/src/specs/testset/simple_upgrade.card-spec.ts",
   },
   {
-    cardDefinitionId: "v08_adaptive_killer",
+    cardDefinitionId: 607,
     sourcePath:
       "packages/cards/src/specs/testset/v08_adaptive_killer.card-spec.ts",
   },
   {
-    cardDefinitionId: "v08_archive_planning_operation",
+    cardDefinitionId: 608,
     sourcePath:
       "packages/cards/src/specs/testset/v08_archive_planning_operation.card-spec.ts",
   },
   {
-    cardDefinitionId: "v08_burst_credit_event",
+    cardDefinitionId: 609,
     sourcePath:
       "packages/cards/src/specs/testset/v08_burst_credit_event.card-spec.ts",
   },
   {
-    cardDefinitionId: "v08_cashout_asset",
+    cardDefinitionId: 610,
     sourcePath:
       "packages/cards/src/specs/testset/v08_cashout_asset.card-spec.ts",
   },
   {
-    cardDefinitionId: "v08_credit_surge_operation",
+    cardDefinitionId: 611,
     sourcePath:
       "packages/cards/src/specs/testset/v08_credit_surge_operation.card-spec.ts",
   },
   {
-    cardDefinitionId: "v08_deep_draw_event",
+    cardDefinitionId: 612,
     sourcePath:
       "packages/cards/src/specs/testset/v08_deep_draw_event.card-spec.ts",
   },
   {
-    cardDefinitionId: "v08_gate_ice",
+    cardDefinitionId: 613,
     sourcePath: "packages/cards/src/specs/testset/v08_gate_ice.card-spec.ts",
   },
   {
-    cardDefinitionId: "v08_memory_chip",
+    cardDefinitionId: 614,
     sourcePath: "packages/cards/src/specs/testset/v08_memory_chip.card-spec.ts",
   },
   {
-    cardDefinitionId: "v08_overclock_run_event",
+    cardDefinitionId: 615,
     sourcePath:
       "packages/cards/src/specs/testset/v08_overclock_run_event.card-spec.ts",
   },
   {
-    cardDefinitionId: "v08_precise_decoder",
+    cardDefinitionId: 616,
     sourcePath:
       "packages/cards/src/specs/testset/v08_precise_decoder.card-spec.ts",
   },
   {
-    cardDefinitionId: "v08_project_agenda",
+    cardDefinitionId: 617,
     sourcePath:
       "packages/cards/src/specs/testset/v08_project_agenda.card-spec.ts",
   },
   {
-    cardDefinitionId: "v08_steady_fracter",
+    cardDefinitionId: 618,
     sourcePath:
       "packages/cards/src/specs/testset/v08_steady_fracter.card-spec.ts",
   },
   {
-    cardDefinitionId: "v08_wall_ice",
+    cardDefinitionId: 619,
     sourcePath: "packages/cards/src/specs/testset/v08_wall_ice.card-spec.ts",
   },
   {
-    cardDefinitionId: "v08_watchdog_ice",
+    cardDefinitionId: 620,
     sourcePath:
       "packages/cards/src/specs/testset/v08_watchdog_ice.card-spec.ts",
   },

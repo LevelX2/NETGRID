@@ -1,7 +1,8 @@
-import type { AiDecisionInput } from "@netgrid/shared";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
+import type { AiDecisionInput, CardDefinitionId } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { AI_HINTS_BY_CARD } from "../ai-hints";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   isSearchChoice,
   selectedSearchChoiceOptionIds,
@@ -31,7 +32,7 @@ describe("selectedSearchChoiceOptionIds", () => {
           rigRoles: new Set(),
           rigDefinitionIds: new Set(),
         },
-        preferredCardDefinitionId: "target",
+        preferredCardDefinitionId: syntheticCardDefinitionId("target"),
         optionalExactTargetOnly: true,
         effectsForCardId: () => {
           throw Error("No strategic reevaluation during bounded choice");
@@ -43,6 +44,30 @@ describe("selectedSearchChoiceOptionIds", () => {
       expect(selected).toEqual(hasTarget ? ["target"] : []);
     },
   );
+  it("leaves an optional exact-instance search empty when only another copy is offered", () => {
+    const choice = searchChoice([
+      option("target", "Another copy", "program", {
+        instanceId: "other-copy",
+      }),
+    ]);
+    choice.minSelections = 0;
+    expect(
+      selectedSearchChoiceOptionIds(choice, choice.options, {
+        features: {
+          credits: 2,
+          memoryRemaining: 2,
+          hasInstalledNonNoisyIcebreaker: false,
+          rigRoles: new Set(),
+          rigDefinitionIds: new Set(),
+        },
+        preferredCardInstanceId: "specific-copy",
+        preferredCardDefinitionId: syntheticCardDefinitionId("target"),
+        optionalExactTargetOnly: true,
+        effectsForCardId: () => [],
+        rolesForCardId: () => [],
+      }),
+    ).toEqual([]);
+  });
   it("matches search choices by bounded source tokens", () => {
     expect(isSearchChoice(sourceOnlyChoice("stack search"))).toBe(true);
     expect(isSearchChoice(sourceOnlyChoice("searchlight stackish"))).toBe(
@@ -66,8 +91,10 @@ describe("selectedSearchChoiceOptionIds", () => {
       },
       effectsForCardId: () => [],
       rolesForCardId: (cardId) => {
-        if (cardId === "memory") return ["support_memory"];
-        if (cardId === "economy") return ["runner_economy"];
+        if (cardId === syntheticCardDefinitionId("memory"))
+          return ["support_memory"];
+        if (cardId === syntheticCardDefinitionId("economy"))
+          return ["runner_economy"];
         return ["memoryish_noise", "economyish_noise"];
       },
     });
@@ -91,8 +118,10 @@ describe("selectedSearchChoiceOptionIds", () => {
       },
       effectsForCardId: () => [],
       rolesForCardId: (cardId) => {
-        if (cardId === "duplicate") return ["support_breaker_fracter"];
-        if (cardId === "fresh") return ["breaker_decoder"];
+        if (cardId === syntheticCardDefinitionId("duplicate"))
+          return ["support_breaker_fracter"];
+        if (cardId === syntheticCardDefinitionId("fresh"))
+          return ["breaker_decoder"];
         return ["breaker_fracterish_noise"];
       },
     });
@@ -131,12 +160,12 @@ describe("selectedSearchChoiceOptionIds", () => {
     const choice = searchChoice(
       [
         option("psychic-friend", "Psychic Friend", "program", {
-          definitionId: "onr_classic_030_psychic-friend",
+          definitionId: 34,
           installCost: 2,
           memoryCost: 1,
         }),
         option("rent-i-con-a", "Rent-I-Con", "program", {
-          definitionId: "onr_classic_031_rent-i-con",
+          definitionId: 35,
           installCost: 3,
           memoryCost: 2,
         }),
@@ -151,15 +180,15 @@ describe("selectedSearchChoiceOptionIds", () => {
           memoryRemaining: 4,
           hasInstalledNonNoisyIcebreaker: true,
           rigRoles: new Set(["breaker_killer"]),
-          rigDefinitionIds: new Set(["onr_classic_028_matador"]),
+          rigDefinitionIds: new Set([32]),
         },
         effectsForCardId: () => [],
         rolesForCardId: (definitionId) =>
-          definitionId === "onr_classic_031_rent-i-con"
+          definitionId === 35
             ? ["breaker_universal"]
             : ["breaker_code_gate"],
         requiredCoverage: "breaker_code_gate",
-        preferredCardDefinitionId: "onr_classic_031_rent-i-con",
+        preferredCardDefinitionId: 35,
       }),
     ).toEqual(["rent-i-con-a"]);
   });
@@ -187,7 +216,7 @@ describe("selectedSearchChoiceOptionIds", () => {
         rolesForCardId: () => [],
         requiredCoverage: "breaker_code_gate",
         preferredCardInstanceId: "rent-i-con-3",
-        preferredCardDefinitionId: "onr_classic_031_rent-i-con",
+        preferredCardDefinitionId: 35,
       }),
     ).toEqual(["option-rent-i-con-3"]);
   });
@@ -195,8 +224,8 @@ describe("selectedSearchChoiceOptionIds", () => {
   it("prefers a new installable support program over breaker copies already in rig and grip", () => {
     const choice = searchChoice(
       [
-        canonicalProgramOption("krash", "onr_v1_039_krash"),
-        canonicalProgramOption("lockjaw", "onr_proteus_091_lockjaw"),
+        canonicalProgramOption("krash", 251),
+        canonicalProgramOption("lockjaw", 149),
       ],
       1,
     );
@@ -205,9 +234,9 @@ describe("selectedSearchChoiceOptionIds", () => {
         credits: 4,
         memoryRemaining: 2,
         hasInstalledNonNoisyIcebreaker: true,
-        rigRoles: new Set(AI_HINTS_BY_CARD.get("onr_v1_039_krash")!.roles),
-        rigDefinitionIds: new Set(["onr_v1_039_krash"]),
-        gripDefinitionCounts: new Map([["onr_v1_039_krash", 1]]),
+        rigRoles: new Set(AI_HINTS_BY_CARD.get(251)!.roles),
+        rigDefinitionIds: new Set([251]),
+        gripDefinitionCounts: new Map([[251, 1]]),
       },
       effectsForCardId: (id) => AI_HINTS_BY_CARD.get(id!)!.effects ?? [],
       rolesForCardId: (id) => AI_HINTS_BY_CARD.get(id!)!.roles,
@@ -219,8 +248,8 @@ describe("selectedSearchChoiceOptionIds", () => {
   it("prefers a fresh support definition over another copy already in grip", () => {
     const choice = searchChoice(
       [
-        canonicalProgramOption("lockjaw", "onr_proteus_091_lockjaw"),
-        canonicalProgramOption("clown", "onr_v1_012_clown"),
+        canonicalProgramOption("lockjaw", 149),
+        canonicalProgramOption("clown", 224),
       ],
       1,
     );
@@ -229,9 +258,9 @@ describe("selectedSearchChoiceOptionIds", () => {
         credits: 4,
         memoryRemaining: 2,
         hasInstalledNonNoisyIcebreaker: true,
-        rigRoles: new Set(AI_HINTS_BY_CARD.get("onr_v1_039_krash")!.roles),
-        rigDefinitionIds: new Set(["onr_v1_039_krash"]),
-        gripDefinitionCounts: new Map([["onr_proteus_091_lockjaw", 1]]),
+        rigRoles: new Set(AI_HINTS_BY_CARD.get(251)!.roles),
+        rigDefinitionIds: new Set([251]),
+        gripDefinitionCounts: new Map([[149, 1]]),
       },
       effectsForCardId: (id) => AI_HINTS_BY_CARD.get(id!)!.effects ?? [],
       rolesForCardId: (id) => AI_HINTS_BY_CARD.get(id!)!.roles,
@@ -243,17 +272,17 @@ describe("selectedSearchChoiceOptionIds", () => {
   it("takes an affordable plan-aligned event before ordering an unusable program", () => {
     const choice = takeOneArrangeRestChoice([
       option("cloak-a", "Cloak", "program", {
-        definitionId: "cloak",
+        definitionId: syntheticCardDefinitionId("cloak"),
         memoryCost: 1,
         installCost: 7,
       }),
       option("wiretaps", "Executive Wiretaps", "event", {
-        definitionId: "wiretaps",
+        definitionId: syntheticCardDefinitionId("wiretaps"),
         cost: 2,
         playCost: { kind: "fixed", credits: 2 },
       }),
       option("mouse", "Mouse", "program", {
-        definitionId: "mouse",
+        definitionId: syntheticCardDefinitionId("mouse"),
         memoryCost: 1,
         installCost: 2,
       }),
@@ -268,8 +297,10 @@ describe("selectedSearchChoiceOptionIds", () => {
       },
       effectsForCardId: () => [],
       rolesForCardId: (cardId) => {
-        if (cardId === "cloak") return ["icebreaker_support"];
-        if (cardId === "wiretaps") return ["multiaccess", "pressure_hq"];
+        if (cardId === syntheticCardDefinitionId("cloak"))
+          return ["icebreaker_support"];
+        if (cardId === syntheticCardDefinitionId("wiretaps"))
+          return ["multiaccess", "pressure_hq"];
         return ["hidden_zone_tool"];
       },
       preferredServerId: "hq",
@@ -283,22 +314,22 @@ describe("selectedSearchChoiceOptionIds", () => {
   it("keeps a funded Cloak first and devalues its duplicate in the rest order", () => {
     const choice = takeOneArrangeRestChoice([
       option("cloak-a", "Cloak A", "program", {
-        definitionId: "cloak",
+        definitionId: syntheticCardDefinitionId("cloak"),
         memoryCost: 1,
         installCost: 7,
       }),
       option("cloak-b", "Cloak B", "program", {
-        definitionId: "cloak",
+        definitionId: syntheticCardDefinitionId("cloak"),
         memoryCost: 1,
         installCost: 7,
       }),
       option("wiretaps", "Executive Wiretaps", "event", {
-        definitionId: "wiretaps",
+        definitionId: syntheticCardDefinitionId("wiretaps"),
         cost: 2,
         playCost: { kind: "fixed", credits: 2 },
       }),
       option("mouse", "Mouse", "program", {
-        definitionId: "mouse",
+        definitionId: syntheticCardDefinitionId("mouse"),
         memoryCost: 1,
         installCost: 2,
       }),
@@ -312,7 +343,7 @@ describe("selectedSearchChoiceOptionIds", () => {
         rigDefinitionIds: new Set(),
       },
       effectsForCardId: (cardId) =>
-        cardId === "cloak"
+        cardId === syntheticCardDefinitionId("cloak")
           ? [
               {
                 kind: "recurring_economy",
@@ -327,8 +358,10 @@ describe("selectedSearchChoiceOptionIds", () => {
             ]
           : [],
       rolesForCardId: (cardId) => {
-        if (cardId === "cloak") return ["economy", "icebreaker_support"];
-        if (cardId === "wiretaps") return ["multiaccess", "pressure_hq"];
+        if (cardId === syntheticCardDefinitionId("cloak"))
+          return ["economy", "icebreaker_support"];
+        if (cardId === syntheticCardDefinitionId("wiretaps"))
+          return ["multiaccess", "pressure_hq"];
         return ["hidden_zone_tool"];
       },
       preferredServerId: "hq",
@@ -375,7 +408,7 @@ describe("selectedSearchChoiceOptionIds", () => {
         rigDefinitionIds: new Set(),
       },
       effectsForCardId: (cardId) =>
-        cardId === "cloak"
+        cardId === syntheticCardDefinitionId("cloak")
           ? [
               {
                 kind: "recurring_economy",
@@ -390,7 +423,9 @@ describe("selectedSearchChoiceOptionIds", () => {
             ]
           : [],
       rolesForCardId: (cardId) =>
-        cardId === "cloak" ? ["icebreaker_support"] : ["hidden_zone_tool"],
+        cardId === syntheticCardDefinitionId("cloak")
+          ? ["icebreaker_support"]
+          : ["hidden_zone_tool"],
     });
 
     expect(selected?.[0]).toBe("mouse");
@@ -476,7 +511,7 @@ function option(
     id,
     label,
     card: {
-      definitionId: id,
+      definitionId: syntheticCardDefinitionId(id),
       title: label,
       type,
       known: true,
@@ -499,8 +534,8 @@ function hiddenOption(
   } as PendingChoice["options"][number];
 }
 
-function canonicalProgramOption(optionId: string, definitionId: string) {
-  const card = CARD_DEFINITIONS_BY_ID[definitionId]!;
+function canonicalProgramOption(optionId: string, definitionId: CardDefinitionId) {
+  const card = planningCardFactsByDefinitionId(definitionId)!;
   return option(optionId, card.title, card.type, {
     definitionId: card.id,
     subtypes: card.subtypes,

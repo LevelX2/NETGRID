@@ -334,7 +334,13 @@ export function executeCardImplementationStartOfRunnerTurnEffects(
         },
         ability.effects,
       );
-      effects?.push(...result.resolvedEffects);
+      effects?.push(
+        ...result.resolvedEffects.map((effect) =>
+          effect.kind === "gain_credits" && effect.visibility === "public"
+            ? { ...effect, sourceCardInstanceId: cardId }
+            : effect,
+        ),
+      );
       if (
         !isActiveCardImplementationStartOfRunnerTurnSource(deps, state, cardId)
       )

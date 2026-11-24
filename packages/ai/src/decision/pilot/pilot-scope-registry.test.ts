@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { afterEach, describe, expect, it } from "vitest";
 import type { LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate";
@@ -8,7 +9,6 @@ import {
   CORP_SCORE_WINDOW_PILOT_MODE,
   PLAY_STRENGTH_PILOT_ALL_TOKEN,
   RUNNER_SAFE_ACCESS_PILOT_MODE,
-  buildLocalDefaultPilotPolicy,
   buildPilotScopeDecisionMatrix,
   parsePilotScopes,
   pilotScopeAllowsAction,
@@ -79,33 +79,6 @@ describe("pilot-scope-registry", () => {
     ]);
   });
 
-  it("keeps the prepared local default policy default-off", () => {
-    const policy = buildLocalDefaultPilotPolicy();
-
-    expect(policy).toMatchObject({
-      version: "ai-play-strength-local-default-pilot-policy-v1",
-      scope: "local_default_pilot_policy_report_only",
-      productiveUseAllowed: false,
-      runtimeConsumerStatus: "none",
-      noRuntimeEffect: true,
-      defaultEnabledScopes: [],
-    });
-    expect(policy.scopes.map((scope) => scope.scope)).toEqual(
-      ALL_PLAY_STRENGTH_PILOT_SCOPES,
-    );
-    expect(
-      policy.scopes.every((scope) => scope.enabledByDefault === false),
-    ).toBe(true);
-    expect(policy.scopes.every((scope) => scope.envGateRequired === true)).toBe(
-      true,
-    );
-    expect(
-      policy.scopes.find(
-        (scope) => scope.scope === CORP_SCORE_WINDOW_PILOT_MODE,
-      ),
-    ).toEqual(expect.objectContaining({ status: "keep_env_gated" }));
-  });
-
   it("uses only NETGRID_AI_PLAY_STRENGTH_PILOT as the runtime env contract", () => {
     process.env.AI_PLAY_STRENGTH_PILOT_SCOPE = BASIC_SETUP_PILOT_MODE;
     delete process.env[AI_PLAY_STRENGTH_PILOT_ENV];
@@ -173,7 +146,7 @@ describe("pilot-scope-registry", () => {
         runner: {
           runTargets: [
             {
-              ...safeCentralRunTarget("run-remote", "remote_1"),
+              ...safeCentralRunTarget("run-remote", "r1"),
               targetKind: "remote",
               accessTargetKind: "remote",
               scoreThreat: true,
@@ -181,7 +154,7 @@ describe("pilot-scope-registry", () => {
           ],
         },
       }),
-      action: legalAction("run-remote", "start_run", { serverId: "remote_1" }),
+      action: legalAction("run-remote", "start_run", { serverId: "r1" }),
       top: rankedAction("run-remote", 160, "remote_contest"),
     });
 
@@ -427,7 +400,7 @@ function runCandidateFromTarget(
   const serverKind =
     serverId === "hq" || serverId === "rd" || serverId === "archives"
       ? serverId
-      : serverId.startsWith("remote_")
+      : isRemoteServerId(serverId)
         ? "remote"
         : undefined;
   return {

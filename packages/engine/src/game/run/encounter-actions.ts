@@ -1,4 +1,5 @@
 import type {
+  EncounterActionTargets,
   CardDefinition,
   CardInstance,
   CardInstanceId,
@@ -85,13 +86,14 @@ export type RunnerEncounterActionHost = {
       source: LegalAction["source"],
       costs?: LegalAction["costs"],
       payload?: LegalAction["payload"],
-      metadata?: Partial<
-        Pick<LegalAction, "abilityRef" | "effectRef" | "targetRequirements">
-      >,
+      metadata?: EncounterActionTargets &
+        Partial<
+          Pick<LegalAction, "abilityRef" | "effectRef" | "targetRequirements">
+        >,
     ) => LegalAction;
     abilityMetadata: (
       sourceCardInstanceId: CardInstanceId,
-      abilityId: string,
+      abilityId: number,
       encounteredIceId?: CardInstanceId,
     ) => Pick<LegalAction, "abilityRef" | "effectRef" | "targetRequirements">;
   };
@@ -462,19 +464,19 @@ export function buildRunnerEncounterActions(
     (sum, entry) => sum + Math.max(0, Math.floor(entry.subroutine.amount ?? 0)),
     0,
   );
-  const encounterSubroutineIds = nextSubroutines
-    .map((subroutine) => subroutine.id)
-    .join(",");
+  const encounterSubroutineIds = nextSubroutines.map(
+    (subroutine) => subroutine.id,
+  );
   const remainingSubroutines = encounterSubroutines.filter(
     (subroutine, index) =>
       !subroutineIsUnavailable(run, index) &&
       !trodeSetIgnoresSubroutine(host.state, iceDefinition, subroutine),
   );
-  const remainingEncounterQuote = {
-    encounterRemainingSubroutineIds: remainingSubroutines
-      .map((subroutine) => subroutine.id)
-      .join(","),
-    encounterRemainingSubroutineCount: remainingSubroutines.length,
+  const encounterTargets = {
+    encounterSubroutineIds,
+    encounterRemainingSubroutineIds: remainingSubroutines.map(
+      (subroutine) => subroutine.id,
+    ),
   };
   const encounterFullBreakDamage =
     run.fatalDamageActiveForEncounter &&
@@ -506,17 +508,19 @@ export function buildRunnerEncounterActions(
           unbrokenSubroutineCount: nextSubroutines.length,
           encounterWillEndRun: false,
           encounterSourceWillTrashAtEndOfTurn,
-          encounterSubroutineIds,
-          ...remainingEncounterQuote,
+          encounterRemainingSubroutineCount: remainingSubroutines.length,
           encounterFullBreakDamage,
-          payOrEndRunSubroutineIndexes: payOrEndRunEntries
-            .map((entry) => entry.index)
-            .join(","),
           payOrEndRunSubroutinePayment: payOrEndRunAmount,
-          payOrTrashProgramSubroutineIndexes: payOrTrashProgramEntries
-            .map((entry) => entry.index)
-            .join(","),
           payOrTrashProgramSubroutinePayment: payOrTrashProgramAmount,
+        },
+        {
+          ...encounterTargets,
+          payOrEndRunSubroutineIndexes: payOrEndRunEntries.map(
+            (entry) => entry.index,
+          ),
+          payOrTrashProgramSubroutineIndexes: payOrTrashProgramEntries.map(
+            (entry) => entry.index,
+          ),
         },
       ),
     );
@@ -533,16 +537,16 @@ export function buildRunnerEncounterActions(
         unbrokenSubroutineCount: nextSubroutines.length,
         encounterWillEndRun: willEndRun,
         encounterSourceWillTrashAtEndOfTurn,
-        encounterSubroutineIds,
-        ...remainingEncounterQuote,
+        encounterRemainingSubroutineCount: remainingSubroutines.length,
         encounterFullBreakDamage,
       },
+      encounterTargets,
     ),
   );
   return {
     handled: true,
     legalActions: actions,
-    encounterId: run.runId,
+    encounterId: String(run.runId),
     iceId: encounteredIceId,
   };
 }
@@ -773,7 +777,6 @@ function multiBreakSubroutineActions(
         {
           breakerId,
           iceId: encounteredIceId,
-          subroutineIndexes: eligibleIndexes.join(","),
           ...(eligibleIndexes.every((index) =>
             breakHasNoDamageOrSecondaryPurpose(
               host,
@@ -794,11 +797,14 @@ function multiBreakSubroutineActions(
           ...breakCost.publicPayload,
           ...icebreakerAbilityBindingPayload(breakAbility, breakerId),
         },
-        host.actions.abilityMetadata(
-          breakerId,
-          breakAbility.id,
-          encounteredIceId,
-        ),
+        {
+          ...host.actions.abilityMetadata(
+            breakerId,
+            breakAbility.id,
+            encounteredIceId,
+          ),
+          subroutineIndexes: eligibleIndexes,
+        },
       ),
     ];
   }
@@ -840,7 +846,6 @@ function multiBreakSubroutineActions(
             {
               breakerId,
               iceId: encounteredIceId,
-              subroutineIndexes: subroutineIndexes.join(","),
               ...(subroutineIndexes.every((index) =>
                 breakHasNoDamageOrSecondaryPurpose(
                   host,
@@ -857,11 +862,14 @@ function multiBreakSubroutineActions(
               ...breakCost.publicPayload,
               ...icebreakerAbilityBindingPayload(breakAbility, breakerId),
             },
-            host.actions.abilityMetadata(
-              breakerId,
-              breakAbility.id,
-              encounteredIceId,
-            ),
+            {
+              ...host.actions.abilityMetadata(
+                breakerId,
+                breakAbility.id,
+                encounteredIceId,
+              ),
+              subroutineIndexes,
+            },
           ),
         );
       }
@@ -885,7 +893,7 @@ function subroutineBreakEffectSignature(subroutine: Subroutine): string {
 export function breakAbilityMatchesIce(
   ability: RuntimeIcebreakerAbility,
   iceSubtypes: readonly string[],
-  iceDefinitionId?: string,
+  iceDefinitionId?: number,
 ): boolean {
   if (ability.type !== "break_subroutine") return false;
   if (

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { AI_HINTS_BY_CARD } from "../ai-hints";
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
@@ -54,7 +55,7 @@ describe("discard keep score", () => {
 
   it("never discounts Corp agendas merely because HQ contains a duplicate", () => {
     const tycho = {
-      ...corpCard("onr_v1_220_tycho-extension", "agenda"),
+      ...corpCard(432, "agenda"),
       agendaPoints: 4,
     };
     const duplicateTycho = {
@@ -91,9 +92,9 @@ describe("discard keep score", () => {
   });
 
   it("ranks agenda score efficiency and redundancy only under real Corp overflow", () => {
-    const tycho = corpCard("onr_v1_220_tycho-extension", "agenda");
+    const tycho = corpCard(432, "agenda");
     const firstCfo = corpCard(
-      "onr_v1_188_ai-chief-financial-officer",
+      400,
       "agenda",
     );
     const secondCfo = { ...firstCfo, instanceId: "cfo-duplicate" };
@@ -150,10 +151,10 @@ describe("discard keep score", () => {
 
   it("preserves a reviewed advancement burst while a visible agenda can use it", () => {
     const systematicLayoffs = corpCard(
-      "onr_v1_304_systematic-layoffs",
+      516,
       "operation",
     );
-    const agenda = corpCard("simple_agenda", "agenda");
+    const agenda = corpCard(588, "agenda");
     const burst = score(
       systematicLayoffs,
       ["operation"],
@@ -180,33 +181,90 @@ describe("discard keep score", () => {
   });
 
   it("does not count counter movement as new advancement without an installed donor", () => {
-    const transfer = corpCard("onr_v1_291_falsified-transactions-expert", "operation");
-    const agenda = corpCard("simple_agenda", "agenda");
-    const donor = { ...corpCard("onr_v1_347_vapor-ops", "asset"), owner: "corp" as const, advancementCounters: 1 };
-    const withDonor = score(transfer, ["operation"], "corp", [], {}, {
-      extraGrip: [agenda], servers: [{ id: "remote_1", label: "Remote", ice: [], root: [donor] }],
-    });
-    const withoutDonor = score(transfer, ["operation"], "corp", [], {}, { extraGrip: [agenda] });
-    const emptyDonor = score(transfer, ["operation"], "corp", [], {}, {
-      extraGrip: [agenda], servers: [{ id: "remote_1", label: "Remote", ice: [], root: [{ ...donor, advancementCounters: 0 }] }],
-    });
+    const transfer = corpCard(
+      503,
+      "operation",
+    );
+    const agenda = corpCard(588, "agenda");
+    const donor = {
+      ...corpCard(559, "asset"),
+      owner: "corp" as const,
+      advancementCounters: 1,
+    };
+    const withDonor = score(
+      transfer,
+      ["operation"],
+      "corp",
+      [],
+      {},
+      {
+        extraGrip: [agenda],
+        servers: [{ id: "r1", label: "Remote", ice: [], root: [donor] }],
+      },
+    );
+    const withoutDonor = score(
+      transfer,
+      ["operation"],
+      "corp",
+      [],
+      {},
+      { extraGrip: [agenda] },
+    );
+    const emptyDonor = score(
+      transfer,
+      ["operation"],
+      "corp",
+      [],
+      {},
+      {
+        extraGrip: [agenda],
+        servers: [
+          {
+            id: "r1",
+            label: "Remote",
+            ice: [],
+            root: [{ ...donor, advancementCounters: 0 }],
+          },
+        ],
+      },
+    );
     expect(withDonor.baseValue).toBe(withoutDonor.baseValue + 420);
     expect(emptyDonor.baseValue).toBe(withoutDonor.baseValue);
-    expect(withoutDonor.evidence).not.toContain("discard_score:corp_visible_agenda_advancement_burst");
-    expect(withDonor.evidence).toContain("discard_score:corp_visible_agenda_advancement_burst");
+    expect(withoutDonor.evidence).not.toContain(
+      "discard_score:corp_visible_agenda_advancement_burst",
+    );
+    expect(withDonor.evidence).toContain(
+      "discard_score:corp_visible_agenda_advancement_burst",
+    );
   });
 
   it("does not retain movement for a sole agenda that would have to donate to itself", () => {
-    const transfer = corpCard("onr_v1_291_falsified-transactions-expert", "operation");
-    const agenda = { ...corpCard("simple_agenda", "agenda"), owner: "corp" as const, advancementCounters: 1 };
-    const result = score(transfer, ["operation"], "corp", [], {}, {
-      servers: [{ id: "remote_1", label: "Remote", ice: [], root: [agenda] }],
-    });
-    expect(result.evidence).not.toContain("discard_score:corp_visible_agenda_advancement_burst");
+    const transfer = corpCard(
+      503,
+      "operation",
+    );
+    const agenda = {
+      ...corpCard(588, "agenda"),
+      owner: "corp" as const,
+      advancementCounters: 1,
+    };
+    const result = score(
+      transfer,
+      ["operation"],
+      "corp",
+      [],
+      {},
+      {
+        servers: [{ id: "r1", label: "Remote", ice: [], root: [agenda] }],
+      },
+    );
+    expect(result.evidence).not.toContain(
+      "discard_score:corp_visible_agenda_advancement_burst",
+    );
   });
 
   it("preserves a conditional Corp payoff only while a tag source remains reachable", () => {
-    const payoff = corpCard("onr_v1_327_i-got-a-rock", "asset");
+    const payoff = corpCard(539, "asset");
     const reachable = score(
       payoff,
       [],
@@ -240,8 +298,8 @@ describe("discard keep score", () => {
   });
 
   it("preserves a visible Corp tag source while a coupled payoff remains reachable", () => {
-    const tagSource = corpCard("onr_v1_283_audit-of-call-records", "operation");
-    const payoff = corpCard("onr_v1_327_i-got-a-rock", "asset");
+    const tagSource = corpCard(495, "operation");
+    const payoff = corpCard(539, "asset");
     const paired = score(
       tagSource,
       [],
@@ -262,10 +320,10 @@ describe("discard keep score", () => {
 
   it("recognizes an access-tag agenda through reviewed action/function signals", () => {
     const markedAccounts = corpCard(
-      "onr_proteus_005_marked-accounts",
+      63,
       "agenda",
     );
-    const payoff = corpCard("onr_v1_327_i-got-a-rock", "asset");
+    const payoff = corpCard(539, "asset");
     const result = score(
       markedAccounts,
       [],
@@ -282,7 +340,7 @@ describe("discard keep score", () => {
   });
 
   it("applies diminishing conditional-enabler value to redundant Corp copies", () => {
-    const tagSource = corpCard("onr_v1_283_audit-of-call-records", "operation");
+    const tagSource = corpCard(495, "operation");
     const duplicateTwo = {
       ...tagSource,
       instanceId: "tag-source-2",
@@ -291,7 +349,7 @@ describe("discard keep score", () => {
       ...tagSource,
       instanceId: "tag-source-3",
     };
-    const payoff = corpCard("onr_v1_327_i-got-a-rock", "asset");
+    const payoff = corpCard(539, "asset");
     const unique = score(
       tagSource,
       [],
@@ -381,7 +439,7 @@ describe("discard keep score", () => {
       "runner",
       [runnerCard("installed-fracter", "program")],
       {
-        "installed-fracter": ["support_breaker_fracter"],
+        [syntheticCardDefinitionId("installed-fracter")]: ["support_breaker_fracter"],
       },
     ).baseValue;
     const installedNoise = score(
@@ -390,7 +448,7 @@ describe("discard keep score", () => {
       "runner",
       [runnerCard("installed-noise", "program")],
       {
-        "installed-noise": ["breaker_fracterish_noise"],
+        [syntheticCardDefinitionId("installed-noise")]: ["breaker_fracterish_noise"],
       },
     ).baseValue;
     const supportBreaker = score(
@@ -435,7 +493,7 @@ describe("discard keep score", () => {
 
   it("preserves immediate Runner liquidity over an unaffordable payout", () => {
     const livewire = score(
-      runnerCard("onr_v1_097_livewires-contacts", "event"),
+      runnerCard(309, "event"),
       ["economy", "tempo"],
       "runner",
       [],
@@ -443,7 +501,7 @@ describe("discard keep score", () => {
       { credits: 1, cardCost: 0 },
     );
     const scoreEvent = score(
-      runnerCard("onr_v1_108_score", "event"),
+      runnerCard(320, "event"),
       ["economy"],
       "runner",
       [],
@@ -461,7 +519,7 @@ describe("discard keep score", () => {
   });
 
   it("devalues a canonical finite burst only after current liquidity is already saturated", () => {
-    const scoreEvent = runnerCard("onr_v1_108_score", "event");
+    const scoreEvent = runnerCard(320, "event");
     const saturated = score(
       scoreEvent,
       ["economy", "event"],
@@ -489,12 +547,12 @@ describe("discard keep score", () => {
   });
 
   it("keeps canonical non-noisy breaker credits only when a compatible breaker is installed", () => {
-    const cloak = runnerCard("onr_v1_011_cloak", "program");
+    const cloak = runnerCard(223, "program");
     const compatibleBreaker = runnerCard("compatible-breaker", "program");
     const noisyBreaker = runnerCard("noisy-breaker", "program");
     const rolesByCardId = {
-      "compatible-breaker": ["icebreaker"],
-      "noisy-breaker": ["icebreaker", "noisy"],
+      [compatibleBreaker.definitionId!]: ["icebreaker"],
+      [noisyBreaker.definitionId!]: ["icebreaker", "noisy"],
     };
     const usable = score(
       cloak,
@@ -535,7 +593,7 @@ describe("discard keep score", () => {
   });
 
   it("adds unique strategy-aligned multiaccess value only at matchpoint", () => {
-    const hqInterface = runnerCard("onr_v1_129_hq-interface", "hardware");
+    const hqInterface = runnerCard(341, "hardware");
     const matchpoint = score(
       hqInterface,
       ["hardware", "hq_pressure", "multiaccess"],
@@ -610,7 +668,7 @@ describe("discard keep score", () => {
 
   it("protects a reachable hard damage payoff over an inactive soft tag payoff", () => {
     const hardDamage = score(
-      corpCard("onr_v1_302_scorched-earth", "operation"),
+      corpCard(514, "operation"),
       [],
       "corp",
       [],
@@ -618,7 +676,7 @@ describe("discard keep score", () => {
       { corpTagSourceState: "stack" },
     );
     const softCreditPunish = score(
-      corpCard("onr_v1_285_closed-accounts", "operation"),
+      corpCard(497, "operation"),
       [],
       "corp",
       [],
@@ -634,18 +692,43 @@ describe("discard keep score", () => {
     );
   });
 
+  it("does not count a discarded tag source surfaced in the Archives server view", () => {
+    const damage = score(
+      corpCard(514, "operation"),
+      [],
+      "corp",
+      [],
+      {},
+      {
+        corpTagSourceState: "archives",
+        servers: [
+          {
+            id: "archives",
+            label: "Archives",
+            ice: [],
+            root: [corpCard(496, "operation")],
+          },
+        ],
+      },
+    );
+
+    expect(damage.evidence).toContain(
+      "discard_score:corp_tag_payoff_prerequisite_missing",
+    );
+  });
+
   it("devalues non-additive Runner utility duplicates already represented in the rig", () => {
     const freshUtility = score(
-      runnerCard("onr_v1_177_the-short-circuit", "resource"),
+      runnerCard(389, "resource"),
       ["program_search"],
       "runner",
       [],
     ).baseValue;
     const installedDuplicate = score(
-      runnerCard("onr_v1_177_the-short-circuit", "resource"),
+      runnerCard(389, "resource"),
       ["program_search"],
       "runner",
-      [runnerCard("onr_v1_177_the-short-circuit", "resource")],
+      [runnerCard(389, "resource")],
     ).baseValue;
 
     expect(installedDuplicate).toBeLessThan(freshUtility - 100);
@@ -679,9 +762,9 @@ describe("discard keep score", () => {
   });
 
   it("devalues installed duplicate Runner expose utility", () => {
-    const seeYa = runnerCard("onr_v1_058_seeya", "program");
+    const seeYa = runnerCard(270, "program");
     const installedSeeYa = {
-      ...runnerCard("onr_v1_058_seeya", "program"),
+      ...runnerCard(270, "program"),
       instanceId: "installed-seeya-instance",
     };
     const roles = [
@@ -698,8 +781,8 @@ describe("discard keep score", () => {
   });
 
   it("protects unique structured path tools only while a visible path has ICE", () => {
-    const insideJob = runnerCard("onr_v1_094_inside-job", "event");
-    const forged = runnerCard("onr_v1_086_forged-activation-orders", "event");
+    const insideJob = runnerCard(306, "event");
+    const forged = runnerCard(298, "event");
     const icedServer = {
       id: "rd",
       label: "R&D",
@@ -759,7 +842,7 @@ describe("discard keep score", () => {
 
   it("protects a unique HQ-success ICE-trash follow-up while rezzed ICE is visible", () => {
     const jettison = runnerCard(
-      "onr_v1_080_core-command-jettison-ice",
+      292,
       "event",
     );
     const neutral = runnerCard("runner-neutral-event", "event");
@@ -795,33 +878,33 @@ describe("discard keep score", () => {
   });
 
   it("discards excess copies of an installed breaker before a unique support program", () => {
-    const krash = runnerCard("onr_v1_039_krash", "program");
+    const krash = runnerCard(251, "program");
     const secondKrash = {
-      ...runnerCard("onr_v1_039_krash", "program"),
+      ...runnerCard(251, "program"),
       instanceId: "krash-second-instance",
     };
     const installedKrash = {
-      ...runnerCard("onr_v1_039_krash", "program"),
+      ...runnerCard(251, "program"),
       instanceId: "krash-installed-instance",
     };
-    const support = runnerCard("onr_v1_012_clown", "program");
+    const support = runnerCard(224, "program");
     const redundantBreaker = score(
       krash,
-      AI_HINTS_BY_CARD.get("onr_v1_039_krash")!.roles!,
+      AI_HINTS_BY_CARD.get(251)!.roles!,
       "runner",
       [installedKrash],
       {
-        onr_v1_039_krash: AI_HINTS_BY_CARD.get("onr_v1_039_krash")!.roles!,
+        251: AI_HINTS_BY_CARD.get(251)!.roles!,
       },
       { extraGrip: [secondKrash, support] },
     );
     const uniqueSupport = score(
       support,
-      AI_HINTS_BY_CARD.get("onr_v1_012_clown")!.roles!,
+      AI_HINTS_BY_CARD.get(224)!.roles!,
       "runner",
       [installedKrash],
       {
-        onr_v1_039_krash: AI_HINTS_BY_CARD.get("onr_v1_039_krash")!.roles!,
+        251: AI_HINTS_BY_CARD.get(251)!.roles!,
       },
       { extraGrip: [krash, secondKrash] },
     );
@@ -831,31 +914,31 @@ describe("discard keep score", () => {
 
   it("keeps Streetware over redundant Krash copies despite persisted breaker-search intent", () => {
     const streetware = runnerCard(
-      "onr_proteus_150_streetware-distributor",
+      208,
       "resource",
     );
-    const firstKrash = runnerCard("onr_v1_039_krash", "program");
+    const firstKrash = runnerCard(251, "program");
     const secondKrash = {
-      ...runnerCard("onr_v1_039_krash", "program"),
+      ...runnerCard(251, "program"),
       instanceId: "krash-second-instance",
     };
-    const pattelsVirus = runnerCard("onr_v1_046_pattels-virus", "program");
-    const cloak = runnerCard("onr_v1_011_cloak", "program");
+    const pattelsVirus = runnerCard(258, "program");
+    const cloak = runnerCard(223, "program");
     const installedKrash = {
-      ...runnerCard("onr_v1_039_krash", "program"),
+      ...runnerCard(251, "program"),
       instanceId: "krash-installed-instance",
     };
     const rolesByCardId = Object.fromEntries(
       [
-        "onr_v1_039_krash",
-        "onr_v1_046_pattels-virus",
-        "onr_v1_011_cloak",
-        "onr_proteus_150_streetware-distributor",
+        251,
+        258,
+        223,
+        208,
       ].map((id) => [id, AI_HINTS_BY_CARD.get(id)!.roles ?? []]),
     );
     const redundantKrash = score(
       firstKrash,
-      rolesByCardId["onr_v1_039_krash"],
+      rolesByCardId[251],
       "runner",
       [installedKrash],
       rolesByCardId,
@@ -867,7 +950,7 @@ describe("discard keep score", () => {
     );
     const persistentEconomy = score(
       streetware,
-      rolesByCardId["onr_proteus_150_streetware-distributor"],
+      rolesByCardId[208],
       "runner",
       [installedKrash],
       rolesByCardId,
@@ -954,7 +1037,7 @@ function input(
         stackOrRdCount: 20,
         heapOrArchives:
           side === "corp" && options.corpTagSourceState === "archives"
-            ? [corpCard("onr_v1_284_chance-observation", "operation")]
+            ? [corpCard(496, "operation")]
             : [],
         scoreArea: [],
         maxHandSize: 5,
@@ -1022,7 +1105,7 @@ function input(
       ownDeckSnapshot: {
         cards: [
           { cardId: card.definitionId, quantity: 1 },
-          { cardId: "onr_v1_284_chance-observation", quantity: 1 },
+          { cardId: 496, quantity: 1 },
         ],
       },
     });
@@ -1067,11 +1150,11 @@ function input(
   return decisionInput;
 }
 
-function corpCard(definitionId: string, type: string): VisibleCard {
+function corpCard(definition: number | string, type: string): VisibleCard {
   return {
-    instanceId: `${definitionId}-instance`,
-    definitionId,
-    title: definitionId,
+    instanceId: `${definition}-instance`,
+    definitionId: typeof definition === "number" ? definition : syntheticCardDefinitionId(definition),
+    title: String(definition),
     side: "corp",
     type,
     zone: "hq",
@@ -1080,11 +1163,11 @@ function corpCard(definitionId: string, type: string): VisibleCard {
   } as VisibleCard;
 }
 
-function runnerCard(definitionId: string, type: string): VisibleCard {
+function runnerCard(definition: number | string, type: string): VisibleCard {
   return {
-    instanceId: `${definitionId}-instance`,
-    definitionId,
-    title: definitionId,
+    instanceId: `${definition}-instance`,
+    definitionId: typeof definition === "number" ? definition : syntheticCardDefinitionId(definition),
+    title: String(definition),
     side: "runner",
     type,
     zone: "grip",

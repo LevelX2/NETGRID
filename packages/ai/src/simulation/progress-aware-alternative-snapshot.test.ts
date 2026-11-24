@@ -37,7 +37,7 @@ describe("progress-aware alternative snapshots", () => {
     });
 
     expect(snapshot.sourceKind).toBe("visible_card_or_ability");
-    expect(snapshot.sourceDefinitionId).toBe("Proteus");
+    expect(snapshot.sourceTitle).toBe("Proteus");
     expect(snapshot.semanticActionType).toBe("coverage_setup");
     expect(snapshot.expectedProgressLabel).toBe("progress_coverage_install");
     expect(snapshot.similarLaterProgress).toBe("unknown_shadow_only");

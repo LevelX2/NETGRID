@@ -349,12 +349,8 @@ export function resolveAardvarkInterceptionChoice(
   }
 
   if (actionType === "break_subroutine" && subroutineIndexRaw !== "none") {
-    const subroutineIndexes = String(
-      continuation.originalLegalAction.payload?.subroutineIndexes ??
-        subroutineIndexRaw,
-    )
-      .split(",")
-      .map((value) => Number(value));
+    const subroutineIndexes = continuation.originalLegalAction.subroutineIndexes ??
+      [Number(subroutineIndexRaw)];
     if (
       subroutineIndexes.length < 1 ||
       subroutineIndexes.some(
@@ -719,7 +715,7 @@ export function applyOncePerRunBreakTagAndAllStealthLoss(
   const suspended = host.tags.addRunnerTagsWithPrevention(
     legalAction,
     1,
-    breakerDefinition.id,
+    String(breakerDefinition.id),
   );
   if (!suspended) delete host.state.pendingAddTagContinuation;
 

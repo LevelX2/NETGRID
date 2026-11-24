@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type { CardDefinition, CardInstanceId, ServerId } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { createGame } from "../create-game";
@@ -7,13 +8,13 @@ import {
 } from "./runner-install-context-actions";
 
 function runnerCardDefinition(
-  id: string,
+  id: number | string,
   type: CardDefinition["type"],
   title: string,
   installCost: number,
 ): CardDefinition {
   return {
-    id,
+    id: typeof id === "number" ? id : syntheticCardDefinitionId(id),
     title,
     side: "runner",
     type,
@@ -50,7 +51,7 @@ describe("runner install context action builders", () => {
 
     expect(action).toMatchObject({
       actionId:
-        "runner.install_card.runner_agenda_point_hardware.runner_agenda_point_hardware",
+        "rc.runner_agenda_point_hardware.runner_agenda_point_hardware",
       side: "runner",
       type: "install_card",
       label: "Agenda Cost Hardware installieren",
@@ -98,7 +99,7 @@ describe("runner install context action builders", () => {
 
     expect(action).toMatchObject({
       actionId:
-        "runner.install_card.runner_data_fort_resource.rd.runner_data_fort_resource",
+        "rc.runner_data_fort_resource.rd.runner_data_fort_resource",
       side: "runner",
       type: "install_card",
       label: "Data Fort Resource auf R&D ausrichten",

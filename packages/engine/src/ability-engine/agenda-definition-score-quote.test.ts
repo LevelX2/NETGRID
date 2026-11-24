@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { quoteAgendaDefinitionScorePoints } from "./agenda-definition-score-quote";
-const babylon = "onr_v1_214_project-babylon";
+const babylon = 426;
 describe("public agenda definition score-point quote", () => {
   it.each([
     [3, 1],
@@ -29,7 +29,7 @@ describe("public agenda definition score-point quote", () => {
   });
   it("does not invent bonus points for an ordinary agenda", () => {
     expect(
-      quoteAgendaDefinitionScorePoints("onr_v1_220_tycho-extension", 4, 8, 5),
+      quoteAgendaDefinitionScorePoints(432, 4, 8, 5),
     ).toMatchObject({
       complete: true,
       agendaPoints: 4,
@@ -37,7 +37,7 @@ describe("public agenda definition score-point quote", () => {
       minimumAdvancementCountersForRequestedPoints: null,
     });
   });
-  it.each(["unknown-agenda", "onr_v1_133_score!", "onr_v1_225_canis-major"])(
+  it.each([0, 65535, 437])(
     "fails visibly for unavailable agenda identity %s",
     (id) => {
       expect(quoteAgendaDefinitionScorePoints(id, 3, 5, 2)).toEqual({

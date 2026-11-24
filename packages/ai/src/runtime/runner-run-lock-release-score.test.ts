@@ -21,6 +21,27 @@ describe("runnerRunLockReleaseScoreComponent", () => {
     expect(component?.reason).toContain("follow_up_server:hq");
   });
 
+  it("does not pay to unlock a follow-up that its target already prohibits", () => {
+    const current = input();
+    current.playerView.servers[0]!.statuses = [
+      {
+        id: "run-restriction",
+        kind: "run_prohibited",
+        scope: "target_server",
+        reason: "required_corp_activity_during_latest_corp_turn_missing",
+        targetServerId: "hq",
+        sourceCardInstanceId: "restriction-source",
+        sourceAbilityId: "run-restriction",
+        sourceTitle: "Run restriction",
+        sourceSide: "corp",
+      },
+    ];
+
+    expect(
+      runnerRunLockReleaseScoreComponent(current, releaseAction()),
+    ).toBeUndefined();
+  });
+
   it("does not release without a click for the follow-up run", () => {
     const current = input();
     current.playerView.own.clicks = 1;
@@ -45,7 +66,7 @@ describe("runnerRunLockReleaseScoreComponent", () => {
       withEffectiveRunQuote(
         {
           instanceId: "known-data-wall",
-          definitionId: "onr_v1_237_data-wall",
+          definitionId: 449,
           title: "Data Wall",
           type: "ice",
           known: true,
@@ -57,7 +78,7 @@ describe("runnerRunLockReleaseScoreComponent", () => {
             {
               id: "known-data-wall-end-the-run",
               type: "end_the_run",
-              sourceDefinitionId: "onr_v1_237_data-wall",
+              sourceDefinitionId: 449,
               sourceTitle: "Data Wall",
             },
           ],
@@ -78,7 +99,7 @@ describe("runnerRunLockReleaseScoreComponent", () => {
     current.playerView.own.rig = [
       {
         instanceId: "cortical-cybermodem",
-        definitionId: "onr_proteus_134_cortical-cybermodem",
+        definitionId: 192,
         known: true,
       },
     ];
@@ -98,7 +119,7 @@ describe("runnerRunLockReleaseScoreComponent", () => {
   });
 
   it("releases below matchpoint for a well-funded credible follow-up", () => {
-    const current = input();
+    const current = input(1);
     current.playerView.opponent.agendaPoints = 4;
     current.playerView.own.credits = 12;
 
@@ -151,7 +172,7 @@ describe("runnerRunLockReleaseScoreComponent", () => {
     current.playerView.opponent.agendaPoints = 5;
     current.playerView.servers = [
       {
-        id: "remote_1",
+        id: "r1",
         label: "Remote 1",
         ice: [],
         root: [
@@ -176,7 +197,7 @@ describe("runnerRunLockReleaseScoreComponent", () => {
     expect(component?.reason).toContain(
       "terminal_contest_kind:visible_two_point_remote",
     );
-    expect(component?.reason).toContain("follow_up_server:remote_1");
+    expect(component?.reason).toContain("follow_up_server:r1");
   });
 
   it("does not release at five points for an unadvanced unknown remote", () => {
@@ -184,7 +205,7 @@ describe("runnerRunLockReleaseScoreComponent", () => {
     current.playerView.opponent.agendaPoints = 5;
     current.playerView.servers = [
       {
-        id: "remote_1",
+        id: "r1",
         label: "Remote 1",
         ice: [],
         root: [
@@ -215,11 +236,14 @@ describe("runnerRunLockReleaseScoreComponent", () => {
   });
 });
 
-function input(): AiDecisionInput {
+function input(releaseCredits = 2): AiDecisionInput {
   return {
     side: "runner",
     eventTail: [],
+    legalActions: [releaseAction(releaseCredits)],
     playerView: {
+      stateVersion: 10,
+      timingPoint: "runner_action.main",
       publicEvents: [],
       agendaPointsToWin: 7,
       own: {
@@ -248,9 +272,11 @@ function input(): AiDecisionInput {
 
 function releaseAction(credits = 2): LegalAction {
   return {
-    actionId: "runner.trigger_ability",
+    actionId: "rx",
     side: "runner",
     type: "trigger_ability",
+    timingPoint: "runner_action.main",
+    expiresAtStateVersion: 10,
     costs: [{ clicks: 1, credits }],
     payload: {
       abilityId: "pay_to_remove_run_lock",

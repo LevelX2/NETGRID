@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { assessCorpScoreProtection } from "../../runtime/corp-score-protection-assessment";
 import { readExactCurrentInstalledCorpIceRezQuote } from "../../runtime/corp-exact-ice-rez-route";
@@ -17,8 +18,9 @@ export function corpBluffDefenseNeed(
 ): CorpBluffDefenseNeed | undefined {
   const server = input.playerView.servers.find((s) => s.id === serverId);
   if (
+    input.side !== "corp" ||
     !server ||
-    !serverId.startsWith("remote_") ||
+    !isRemoteServerId(serverId) ||
     !Number.isSafeInteger(reserveCredits) ||
     reserveCredits < 0
   )
@@ -72,6 +74,12 @@ export function corpBluffDefenseNeed(
       serverIce: [{ ...ice, rezzed: true, effectiveRunQuote: quote }],
       runnerRig: input.playerView.opponent.rig ?? [],
       runnerCredits: input.playerView.opponent.credits,
+      runnerRunOnlyCredits:
+        input.playerView.runnerNextRunBadPublicityCredits ?? 0,
+      ...(input.playerView.activeSide === "corp" &&
+      input.playerView.phase !== "run"
+        ? { runnerCreditPoolHorizon: "next_runner_turn" as const }
+        : {}),
       maximumRunnerAccessSuccessProbability: { numerator: 1, denominator: 2 },
     });
     const tax =

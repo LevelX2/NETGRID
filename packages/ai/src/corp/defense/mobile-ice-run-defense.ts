@@ -1,4 +1,4 @@
-import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
+import { currentRunPathContext } from "../../run-analysis/current-run-path-context";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -66,7 +66,8 @@ export function assessMobileIceRunDefense(
   };
   let q: Quote;
   try {
-    q = typeof raw === "string" ? JSON.parse(raw) : fail();
+    if (typeof raw !== "string") return fail();
+    q = JSON.parse(raw);
   } catch {
     return fail();
   }
@@ -85,6 +86,8 @@ export function assessMobileIceRunDefense(
     card?.known === true &&
     card.rezzed === true &&
     card.type === "ice" &&
+    typeof card.instanceId === "string" &&
+    typeof card.definitionId === "number" &&
     card.effectiveRunQuote?.iceInstanceId === card.instanceId &&
     card.effectiveRunQuote.iceDefinitionId === card.definitionId &&
     Array.isArray(card.effectiveRunQuote.subroutines);
@@ -163,7 +166,7 @@ export function assessMobileIceRunDefense(
     budget(),
     target.root,
     input.playerView.own.credits,
-    visibleIcePathTraceContext(input),
+    currentRunPathContext(input),
   );
   const before = quoteCorpRemotePath({
     assessment: beforeAssessment,
@@ -176,7 +179,7 @@ export function assessMobileIceRunDefense(
     budget(),
     target.root,
     payment.corpCreditsAfterDefense,
-    visibleIcePathTraceContext(input),
+    currentRunPathContext(input),
   );
   // The path assessor stops at a proven unaffordable ETR. Its assessed prefix
   // therefore need not contain inner ICE, whose complete Engine quotes were

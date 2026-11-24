@@ -1,3 +1,4 @@
+import type { RandomPurpose } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -57,7 +58,7 @@ export type CorpSpecialDamageAbilityHost = {
     ) => void;
   };
   rng: {
-    rollDie: (purpose: string) => number;
+    rollDie: (purpose: RandomPurpose) => number;
     randomCounter: () => number;
   };
   trash: {
@@ -274,13 +275,13 @@ function handleSchlaghundAction(
     throw new Error(
       "Die V1.9.21-Asset-Zufallsfaehigkeit passt nicht zur Karte.",
     );
-  const randomPurpose = `v1921.die.${definition.id}.tag_damage`;
+  const randomPurpose: RandomPurpose = [13, definition.id];
   const dieRoll = host.rng.rollDie(randomPurpose);
   const runnerTags = host.state.runner.tags;
   const tagThresholdMet = runnerTags >= dieRoll;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    randomPurpose,
+    randomPurpose: randomPurpose[0],
     v1921DieRoll: dieRoll,
     runnerTags,
     tagThresholdMet,

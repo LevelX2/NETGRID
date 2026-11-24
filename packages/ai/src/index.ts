@@ -39,6 +39,7 @@ export type { SemanticRuntimeWhyCoverageReport } from "./diagnostics/semantic-ru
 export {
   AI_DECISION_INPUT_TOP_LEVEL_FIELDS,
   buildAiDecisionInputDto,
+  AiDecisionChronicle,
 } from "./input-dto";
 export {
   buildLegalActionWitness,
@@ -76,10 +77,8 @@ export type {
   AiDecisionInputWithDeckCapabilities,
   AiDecisionSideSelection,
 } from "./runtime/ai-decision-input";
-export {
-  buildCorpIceCardFacts,
-  corpIcePlacementPostInstallRezCostFact,
-} from "./runtime/corp-ice-placement/corp-ice-placement";
+export { buildCorpIceCardFacts } from "./runtime/corp-ice-placement/corp-ice-placement";
+export { corpIcePlacementPostInstallRezCostFact } from "./runtime/corp-ice-placement/corp-ice-placement-costs";
 export type { CorpIceCardFacts } from "./runtime/corp-ice-placement/corp-ice-placement";
 export { buildCorpIceDensityProfile } from "./runtime/corp-economy/corp-ice-density";
 export type { CorpIceDensityProfile } from "./runtime/corp-economy/corp-ice-density";
@@ -657,5 +656,6 @@ export {
 export {
   AI_RUNTIME_CHECKPOINT_SCHEMA_VERSION,
   exportAiRuntimeCheckpoint,
+  restoreAiRuntimeCheckpoint,
 } from "./evaluation/decision-checkpoints/runtime-checkpoint";
 export type { AiRuntimeCheckpointV1 } from "./evaluation/decision-checkpoints/runtime-checkpoint";

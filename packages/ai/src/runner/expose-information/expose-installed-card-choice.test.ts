@@ -22,7 +22,7 @@ describe("runner installed-card expose choice", () => {
 
   it("moves to another position after the remote root was exposed exactly", () => {
     const current = input();
-    current.eventTail.push(exposeEvent("remote_1", "root", 0));
+    current.eventTail.push(exposeEvent("r1", "root", 0));
     const choice = current.playerView.pendingChoice!;
 
     expect(
@@ -34,12 +34,53 @@ describe("runner installed-card expose choice", () => {
     ).toEqual(["card_hidden_remote_ice"]);
   });
 
+  it("forgets the ICE slot replaced by a public Singapore City Grid swap", () => {
+    const current = input();
+    current.eventTail.push(exposeEvent("r1", "ice", 0), {
+      eventId: 4,
+      type: "resolve_choice",
+      stateVersionBefore: 2,
+      stateVersionAfter: 3,
+      stateHashAfter: "swap",
+      publicPayload: {
+        actor: "corp",
+        actionType: "resolve_choice",
+        hiddenZoneAction: "hq_ice_swap_swap",
+        serverId: "r1",
+        iceIndex: 0,
+      },
+    });
+    expect(runnerExposeInstalledOpportunity(current).unseenPositions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          serverId: "r1",
+          area: "ice",
+          index: 0,
+        }),
+      ]),
+    );
+  });
+
+  it("diagnoses a required expose target with no visible position binding", () => {
+    const current = input();
+    current.legalActions = [];
+    current.playerView.stateVersion = 1;
+    current.playerView.timingPoint = "runner_action.main";
+    expect(() =>
+      selectedRunnerExposeInstalledCardChoiceOptionIds(
+        current,
+        current.playerView.pendingChoice!,
+        [{ id: "card_unbound", label: "Unbound" }],
+      ),
+    ).toThrow(expect.objectContaining({ code: "step_target_mismatch" }));
+  });
+
   it("reports no unseen position after every hidden target was exposed", () => {
     const current = input();
     current.eventTail.push(
       exposeEvent("hq", "ice", 0),
-      exposeEvent("remote_1", "ice", 0),
-      exposeEvent("remote_1", "root", 0),
+      exposeEvent("r1", "ice", 0, 3),
+      exposeEvent("r1", "root", 0, 4),
     );
 
     expect(runnerExposeInstalledOpportunity(current).unseenPositions).toEqual(
@@ -50,7 +91,7 @@ describe("runner installed-card expose choice", () => {
   it("remembers the aligned outermost ICE positions exposed by one Guide event", () => {
     const current = input();
     current.eventTail.push({
-      eventId: "guide-expose",
+      eventId: 3,
       type: "play_event",
       stateVersionBefore: 1,
       stateVersionAfter: 2,
@@ -59,7 +100,7 @@ describe("runner installed-card expose choice", () => {
         actor: "runner",
         actionType: "play_event",
         publicRevealKind: "expose",
-        exposedServerIds: "hq,remote_1",
+        exposedServerIds: "hq,r1",
         exposedPositionKeys: "ice:0,ice:0",
         publicRevealDefinitionIds: "wall,code-gate",
       },
@@ -69,14 +110,14 @@ describe("runner installed-card expose choice", () => {
       runnerExposeInstalledOpportunity(current).unseenPositions.map(
         (position) => `${position.serverId}:${position.area}:${position.index}`,
       ),
-    ).toEqual(["remote_1:root:0"]);
+    ).toEqual(["r1:root:0"]);
   });
 
   it("treats a replacement card at an exposed remote-root position as unseen", () => {
     const current = input();
     current.eventTail.push(
-      exposeEvent("remote_1", "root", 0),
-      installEvent("remote_1", "root"),
+      exposeEvent("r1", "root", 0),
+      installEvent("r1", "root"),
     );
     current.playerView.servers[1]!.root = [
       {
@@ -114,7 +155,7 @@ function input(): AiDecisionInput {
           root: [],
         },
         {
-          id: "remote_1",
+          id: "r1",
           ice: [{ instanceId: "hidden_remote_ice", known: false }],
           root: [
             {
@@ -149,12 +190,13 @@ function exposeEvent(
   serverId: string,
   area: "ice" | "root",
   index: number,
+  stateVersionAfter = 2,
 ): AiDecisionInput["eventTail"][number] {
   return {
-    eventId: `expose-${serverId}-${area}-${index}`,
+    eventId: stateVersionAfter + 1,
     type: "resolve_choice",
-    stateVersionBefore: 1,
-    stateVersionAfter: 2,
+    stateVersionBefore: stateVersionAfter - 1,
+    stateVersionAfter,
     stateHashAfter: `hash-${serverId}-${area}-${index}`,
     publicPayload: {
       actor: "runner",
@@ -170,7 +212,7 @@ function legacyExposeEvent(
   serverId: string,
 ): AiDecisionInput["eventTail"][number] {
   return {
-    eventId: `legacy-expose-${serverId}`,
+    eventId: 2,
     type: "resolve_choice",
     stateVersionBefore: 0,
     stateVersionAfter: 1,
@@ -188,7 +230,7 @@ function installEvent(
   placement: "ice" | "root",
 ): AiDecisionInput["eventTail"][number] {
   return {
-    eventId: `install-${serverId}-${placement}`,
+    eventId: 4,
     type: "install_card",
     stateVersionBefore: 2,
     stateVersionAfter: 3,

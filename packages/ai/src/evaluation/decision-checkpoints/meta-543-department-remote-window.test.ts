@@ -48,7 +48,7 @@ it("executes the real defense draw before releasing its consumed receipt to Econ
       expect(plan?.selectedPlan?.moduleId).toBe("corp.economy");
     }
   }
-  expect(observed.some(p => p.defenseNeeds.some(s => s.kind === "generic" && s.drawAttemptState?.remainingAttempts === 1 && s.actionIds?.includes("corp.draw_card")))).toBe(true);
+  expect(observed.some(p => p.defenseNeeds.some(s => s.kind === "generic" && s.drawAttemptState?.remainingAttempts === 1 && s.actionIds?.includes("c8")))).toBe(true);
   expect(observed.some(p => p.defenseNeeds.some(s => s.kind === "generic" && s.drawAttemptState?.remainingAttempts === 0 && s.actionIds?.length === 0))).toBe(true);
 });
 
@@ -125,10 +125,24 @@ it.each(["g5-d333", "g18-d237", "g19-d258", "g19-d259", "g19-d269", "completed-d
         hostedCreditTakeAmount: 3,
         gainCreditsAmount: 3,
       });
-      expect(plan?.rootPlanInstanceId).toContain("economy-visible-card-payout");
+      expect(
+        plan?.portfolio.find(
+          (instance) => instance.instanceId === plan?.rootPlanInstanceId,
+        ),
+      ).toMatchObject({
+        moduleId: "corp.economy",
+        dedupeKey: expect.stringContaining("economy-visible-card-payout"),
+      });
     } else {
       expect(selected.payload?.hostedCreditAddAmount).toBe(3);
-      expect(plan?.rootPlanInstanceId).toContain("economy-hosted-bank-cycle");
+      expect(
+        plan?.portfolio.find(
+          (instance) => instance.instanceId === plan?.rootPlanInstanceId,
+        ),
+      ).toMatchObject({
+        moduleId: "corp.economy",
+        dedupeKey: expect.stringContaining("economy-hosted-bank-cycle"),
+      });
     }
     expect(plan?.route?.actionId).toBe(selected.actionId);
     expect(plan?.route?.stateVersion).toBe(f.input.playerView.stateVersion);
@@ -138,7 +152,7 @@ it.each(["g5-d333", "g18-d237", "g19-d258", "g19-d259", "g19-d269", "completed-d
 
 it.each([
   ["cp-daed3ad-latest-02-start-score-remote-d19.json", "new_remote"],
-  ["cp-daed3ad-latest-03-harden-bound-remote-d88.json", "remote_1"],
+  ["cp-daed3ad-latest-03-harden-bound-remote-d88.json", "r1"],
 ])("preserves a native bound Remote protection window: %s", (name, target) => {
   const checkpoint = JSON.parse(
     readFileSync(

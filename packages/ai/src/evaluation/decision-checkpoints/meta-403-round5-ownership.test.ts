@@ -85,7 +85,7 @@ describe("meta 403 round 5 exact owner regressions", () => {
       input.playerView.pendingChoice?.choiceId,
     );
     expect(result.selectedChoices?.selectedOptionIds).not.toContain(
-      "card_runner_onr_proteus_128_airport-locker_1",
+      "card_c15d",
     );
     expect(result.selectedChoices?.selectedOptionIds).toHaveLength(1);
     const selectedOptionIds = result.selectedChoices
@@ -103,7 +103,7 @@ describe("meta 403 round 5 exact owner regressions", () => {
     expect(selected.payload?.subroutineIndex).toBe(0);
     expect(plan?.selectedPlan?.moduleId).toBe("runner.convert_run_window");
     expect(plan?.leafExecutorInstanceId).toBe(
-      "plan:runner.convert_run_window:run%3Arun_29",
+      "p8lbz795irfbx5hejm5zh6ui1v",
     );
   });
 
@@ -122,9 +122,9 @@ describe("meta 403 round 5 exact owner regressions", () => {
         (a) => a.type === "continue_run",
       )!;
       continuation.actionId =
-        "runner.continue_run.printed_subroutines_end_the_run";
+        "r5.1";
+      continuation.encounterSubroutineIds = ["1"];
       Object.assign(continuation.payload!, {
-        encounterSubroutineIds: "printed_subroutines_end_the_run",
         unbrokenSubroutineCount: 1,
       });
       capture.input.playerView.legalActions = structuredClone(
@@ -149,7 +149,7 @@ describe("meta 403 round 5 exact owner regressions", () => {
     const continuation = capture.input.legalActions.find(
       (a) => a.type === "continue_run",
     )!;
-    delete continuation.payload!.encounterSubroutineIds;
+    delete continuation.encounterSubroutineIds;
     expect(() => choose(capture)).toThrow("missing_action_semantics");
   });
 });

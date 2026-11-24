@@ -122,8 +122,12 @@ describe("pairing 561 native Trace payment and installed-source memory", () => {
       if (step === 0) expect(hashGameState(state)).toBe(f.payment.stateHash);
       if (step === 1) expect(state.runner.credits).toBe(9);
     }
-    expect(actions[0]).toBe("runner.resolve_choice");
-    expect(actions[1]).toContain("pay_three_trash_source_gain_six");
+    expect(actions[0]).toBe("rn");
+    expect(actions[1]).toBe(
+      f.payment.input.legalActions.find(
+        (action) => action.payload?.cardImplementationAbilityId === 272,
+      )?.actionId,
+    );
     expect(actions[2]).toBe(actions[0]);
     expect(state.runner.credits).toBe(2);
     expect(state.runner.tags).toBe(0);
@@ -158,7 +162,7 @@ describe("pairing 561 native Trace payment and installed-source memory", () => {
     const input = bid.input;
     const result: Extract<PlanSchedulerResult, { lane: "engine_window" }> = {
       lane: "engine_window",
-      actionId: "runner.resolve_choice",
+      actionId: "rn",
       origin: {
         rootPlanInstanceId: "rules",
         leafPlanInstanceId: "rules.window_resolution",
@@ -198,20 +202,20 @@ describe("pairing 561 native Trace payment and installed-source memory", () => {
     const before = JSON.stringify(input);
     const belief = reconstructBeliefState(input);
     const memory = belief.knownPositionMemory!.filter(
-      (m) => m.zone === "remote_1",
+      (m) => m.zone === "r1",
     );
     expect(
       memory.some(
-        (m) => m.definitionId === "onr_v1_309_bbs-whispering-campaign",
+        (m) => m.definitionId === 521,
       ),
     ).toBe(false);
-    expect(memory.some((m) => m.definitionId === "onr_v1_244_filter")).toBe(
+    expect(memory.some((m) => m.definitionId === 456)).toBe(
       true,
     );
     const target = evaluateRunnerRunTargets({
       input,
       beliefState: belief,
-    }).find((t) => t.targetServerId === "remote_1")!;
+    }).find((t) => t.targetServerId === "r1")!;
     expect(target.accessFacts.knownTargetDefinitionIds).toEqual([]);
     expect(target.accessPayoff).toBe("score_threat");
     restoreAiRuntimeCheckpoint(
@@ -221,7 +225,7 @@ describe("pairing 561 native Trace payment and installed-source memory", () => {
     );
     const decision = chooseAiAction(input);
     // Correct facts do not remove the independent unknown-ICE hand reserve.
-    expect(decision.actionId).toBe("runner.draw_card");
+    expect(decision.actionId).toBe("r8");
     expect(
       decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
     ).toBe("runner.defense_and_recovery");

@@ -1,3 +1,6 @@
+import { instantiatePlanProposal } from "../plans/plan-instance";
+import type { PlanInstance, PlanModuleId } from "../plans/plan-kernel-types";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -24,7 +27,7 @@ import {
   runnerTargetedBypassPlanCommitment,
   type RunnerTargetedBypassChoiceContinuation,
 } from "../runner/run-window/runner-targeted-bypass-plan";
-import { bindSelectedRunnerTargetedBypassChoiceContinuation } from "../run-analysis/runner-run-preparation-choice-binding";
+import { bindSelectedRunnerTargetedPreparationChoiceContinuation } from "../run-analysis/runner-run-preparation-choice-binding";
 import { selectedChoicesForDecision } from "./selected-choices-for-decision";
 
 afterEach(() => {
@@ -39,7 +42,7 @@ describe("Runner targeted-bypass plan admission", () => {
     expect(runnerGenericDevelopmentMayOwnAction(candidate)).toBe(false);
     expect(
       runnerDefinitionRequiresTargetedBypassPlan(
-        "onr_v1_111_social-engineering",
+        323,
       ),
     ).toBe(true);
   });
@@ -194,7 +197,7 @@ describe("Runner targeted-bypass resident continuation", () => {
     expect(
       selectedRunnerTargetedBypassHideChoiceOptionId(
         hideInput,
-        resolveChoiceAction(11),
+        hideInput.legalActions[0]!,
         hideChoice,
         hideChoice.options,
       ),
@@ -202,7 +205,7 @@ describe("Runner targeted-bypass resident continuation", () => {
     expect(
       selectedChoicesForDecision(
         hideInput,
-        resolveChoiceAction(11),
+        hideInput.legalActions[0]!,
         choiceDependencies(),
       ),
     ).toEqual({
@@ -216,14 +219,14 @@ describe("Runner targeted-bypass resident continuation", () => {
       kind: "select_cards",
       options: [
         {
-          id: "ice_hq-outer",
+          id: "ice_hq.0",
           label: "HQ ICE 1",
-          value: "hq|hq-outer",
+          metadata: { targetServerId: "hq", targetIcePosition: 0 },
         },
         {
-          id: "ice_hq-wall",
+          id: "ice_hq.1",
           label: "HQ ICE 2",
-          value: "hq|hq-wall",
+          metadata: { targetServerId: "hq", targetIcePosition: 1 },
         },
       ],
     });
@@ -231,11 +234,19 @@ describe("Runner targeted-bypass resident continuation", () => {
     expect(
       selectedRunnerTargetedBypassChoiceOptionId(
         targetInput,
-        resolveChoiceAction(13),
+        targetInput.legalActions[0]!,
         targetChoice,
         targetChoice.options,
       ),
-    ).toBe("ice_hq-wall");
+    ).toBe("ice_hq.1");
+    expect(
+      selectedRunnerTargetedBypassChoiceOptionId(
+        targetInput,
+        targetInput.legalActions[0]!,
+        targetChoice,
+        [...targetChoice.options].reverse(),
+      ),
+    ).toBe("ice_hq.1");
   });
 
   it("preserves the exact targeted-bypass origin across an intervening payment-support window", () => {
@@ -255,7 +266,7 @@ describe("Runner targeted-bypass resident continuation", () => {
     expect(
       selectedRunnerTargetedBypassHideChoiceOptionId(
         hideInput,
-        resolveChoiceAction(13),
+        hideInput.legalActions[0]!,
         hideChoice,
         hideChoice.options,
       ),
@@ -275,7 +286,7 @@ describe("Runner targeted-bypass resident continuation", () => {
     expect(() =>
       selectedRunnerTargetedBypassHideChoiceOptionId(
         hideInput,
-        resolveChoiceAction(13),
+        hideInput.legalActions[0]!,
         hideChoice,
         hideChoice.options,
       ),
@@ -299,7 +310,7 @@ describe("Runner targeted-bypass resident continuation", () => {
     expect(
       selectedRunnerTargetedBypassHideChoiceOptionId(
         hideInput,
-        resolveChoiceAction(12),
+        hideInput.legalActions[0]!,
         hideChoice,
         hideChoice.options,
       ),
@@ -316,14 +327,14 @@ describe("Runner targeted-bypass resident continuation", () => {
         {
           id: "ice_other",
           label: "HQ ICE 1",
-          value: "hq|other",
+          metadata: { targetServerId: "hq", targetIcePosition: 0 },
         },
       ],
     });
     expect(() =>
       selectedRunnerTargetedBypassChoiceOptionId(
         missingOptionInput,
-        resolveChoiceAction(13),
+        missingOptionInput.legalActions[0]!,
         missingOptionInput.playerView.pendingChoice!,
         missingOptionInput.playerView.pendingChoice!.options,
       ),
@@ -344,7 +355,7 @@ describe("Runner targeted-bypass resident continuation", () => {
     expect(() =>
       selectedRunnerTargetedBypassHideChoiceOptionId(
         staleInput,
-        resolveChoiceAction(11),
+        staleInput.legalActions[0]!,
         staleInput.playerView.pendingChoice!,
         staleInput.playerView.pendingChoice!.options,
       ),
@@ -364,21 +375,21 @@ describe("Runner targeted-bypass resident continuation", () => {
       kind: "select_cards",
       options: [
         {
-          id: "ice_hq-outer",
+          id: "ice_hq.0",
           label: "HQ ICE 1",
-          value: "hq|hq-outer",
+          metadata: { targetServerId: "hq", targetIcePosition: 0 },
         },
         {
-          id: "ice_hq-wall",
+          id: "ice_hq.1",
           label: "HQ ICE 2",
-          value: "hq|hq-wall",
+          metadata: { targetServerId: "hq", targetIcePosition: 1 },
         },
       ],
     });
     expect(() =>
       selectedRunnerTargetedBypassChoiceOptionId(
         restoredTargetInput,
-        resolveChoiceAction(13),
+        restoredTargetInput.legalActions[0]!,
         restoredTargetInput.playerView.pendingChoice!,
         restoredTargetInput.playerView.pendingChoice!.options,
       ),
@@ -387,7 +398,7 @@ describe("Runner targeted-bypass resident continuation", () => {
     resetResidentPlanPortfolioMemory();
     rememberContinuation({
       ...targetedContinuation(),
-      sourceDefinitionId: "wrong-definition",
+      sourceDefinitionId: syntheticCardDefinitionId("wrong-definition"),
     } as unknown as RunnerTargetedBypassChoiceContinuation);
     const wrongDefinitionInput = choiceInput(11, {
       source:
@@ -398,7 +409,7 @@ describe("Runner targeted-bypass resident continuation", () => {
     expect(() =>
       selectedRunnerTargetedBypassHideChoiceOptionId(
         wrongDefinitionInput,
-        resolveChoiceAction(11),
+        wrongDefinitionInput.legalActions[0]!,
         wrongDefinitionInput.playerView.pendingChoice!,
         wrongDefinitionInput.playerView.pendingChoice!.options,
       ),
@@ -412,15 +423,15 @@ describe("Runner targeted-bypass resident continuation", () => {
     });
     const candidate = socialEngineeringCandidate(1);
     expect(() =>
-      bindSelectedRunnerTargetedBypassChoiceContinuation(
+      bindSelectedRunnerTargetedPreparationChoiceContinuation(
         input,
         {
           lane: "plan",
           route: {
-            planInstanceId: "plan:runner.develop_board_and_hand:social",
+            planInstanceId: "peqzdkrbqbs36rumlp8ogaju0u",
             step: {},
             head: {
-              planInstanceId: "plan:runner.develop_board_and_hand:social",
+              planInstanceId: "peqzdkrbqbs36rumlp8ogaju0u",
               stepId: "play-social",
               actionId: candidate.actionId,
               actionType: candidate.actionType,
@@ -432,10 +443,10 @@ describe("Runner targeted-bypass resident continuation", () => {
             schemaVersion: "resident-plan-portfolio-v2",
             side: "runner",
             stateVersion: 10,
-            executorInstanceId: "plan:runner.develop_board_and_hand:social",
+            executorInstanceId: "peqzdkrbqbs36rumlp8ogaju0u",
             instances: [
               {
-                instanceId: "plan:runner.develop_board_and_hand:social",
+                instanceId: "peqzdkrbqbs36rumlp8ogaju0u",
                 moduleId: "runner.develop_board_and_hand",
                 executionState: "executor",
                 moduleState: { kind: "development" },
@@ -446,7 +457,7 @@ describe("Runner targeted-bypass resident continuation", () => {
           },
           diagnostics: [],
         } as unknown as Parameters<
-          typeof bindSelectedRunnerTargetedBypassChoiceContinuation
+          typeof bindSelectedRunnerTargetedPreparationChoiceContinuation
         >[1],
         [candidate],
       ),
@@ -462,7 +473,7 @@ function socialEngineeringCandidate(
     actionType: "play_event",
     actorSide: "runner",
     semanticActionType: "play.runner_event",
-    sourceDefinitionId: "onr_v1_111_social-engineering",
+    sourceDefinitionId: 323,
     sourceCardInstanceId: "social-1",
     costProfile: { creditCost },
   } as ActionSemanticCandidate;
@@ -486,11 +497,12 @@ function planningInput(params: {
       stateVersion: 10,
       timingPoint: "runner_action.main",
       winner: null,
-      opponent: { credits: 0 },
       own: {
         credits: params.credits ?? 5,
         rig: params.rig,
       },
+      opponent: { credits: 4 },
+      traceRulesProfile: "modern_open",
       servers: [{ id: "hq", ice: params.ice, root: [] }],
     },
   } as unknown as AiDecisionInput;
@@ -499,7 +511,7 @@ function planningInput(params: {
 function blockingWall(instanceId: string): VisibleCard {
   const ice: VisibleCard = {
     instanceId,
-    definitionId: "onr_v1_232_crystal-wall",
+    definitionId: 444,
     title: "Crystal Wall",
     type: "ice",
     subtypes: ["wall"],
@@ -513,7 +525,7 @@ function blockingWall(instanceId: string): VisibleCard {
       {
         id: `${instanceId}-end-the-run`,
         type: "end_the_run",
-        sourceDefinitionId: "onr_v1_232_crystal-wall",
+        sourceDefinitionId: 444,
         sourceTitle: "Crystal Wall",
       },
     ],
@@ -523,7 +535,7 @@ function blockingWall(instanceId: string): VisibleCard {
 function pileDriver(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_v1_047_pile-driver",
+    definitionId: 259,
     title: "Pile Driver",
     type: "program",
     subtypes: ["icebreaker", "fracter", "noisy"],
@@ -539,7 +551,7 @@ function targetedContinuation(): RunnerTargetedBypassChoiceContinuation {
     sourceActionId: "runner.play.social-1",
     selectedActionId: "runner.play.social-1",
     sourceCardInstanceId: "social-1",
-    sourceDefinitionId: "onr_v1_111_social-engineering",
+    sourceDefinitionId: 323,
     plannedAtStateVersion: 10,
     selectedAtStateVersion: 10,
     ownerModuleId: "runner.pressure_central",
@@ -559,40 +571,34 @@ function rememberContinuation(
   paymentSupportPreempted = false,
 ): void {
   const input = choiceInput(portfolioStateVersion);
-  const ownerId = "plan:runner.pressure_central:central%3Ahq";
-  const economyId = "plan:runner.economy:runner-portfolio-credit-reserve";
+  const owner = currentTargetedPlanInstance(
+    "runner.pressure_central",
+    "central:hq",
+    { kind: "central_pressure", choiceContinuation: continuation },
+    portfolioStateVersion,
+  );
+  owner.executionState = paymentSupportPreempted ? "preempted" : "executor";
+  owner.portfolioRole = paymentSupportPreempted ? "background" : "foreground";
+  const economy = currentTargetedPlanInstance(
+    "runner.economy",
+    "runner-portfolio-credit-reserve",
+    { kind: "economy" },
+    portfolioStateVersion,
+  );
   rememberResidentPlanPortfolio(input, {
     schemaVersion: "resident-plan-portfolio-v2",
     side: "runner",
     stateVersion: portfolioStateVersion,
-    rootForegroundInstanceId: paymentSupportPreempted ? economyId : ownerId,
-    executorInstanceId: paymentSupportPreempted ? economyId : ownerId,
-    instances: [
-      {
-        instanceId: ownerId,
-        moduleId: "runner.pressure_central",
-        dedupeKey: "central:hq",
-        executionState: paymentSupportPreempted ? "preempted" : "executor",
-        moduleState: {
-          kind: "central_pressure",
-          choiceContinuation: continuation,
-        },
-      },
-      ...(paymentSupportPreempted
-        ? [
-            {
-              instanceId: economyId,
-              moduleId: "runner.economy",
-              dedupeKey: "runner-portfolio-credit-reserve",
-              executionState: "executor",
-              moduleState: { kind: "economy" },
-            },
-          ]
-        : []),
-    ],
+    rootForegroundInstanceId: paymentSupportPreempted
+      ? economy.instanceId
+      : owner.instanceId,
+    executorInstanceId: paymentSupportPreempted
+      ? economy.instanceId
+      : owner.instanceId,
+    instances: [owner, ...(paymentSupportPreempted ? [economy] : [])],
     completionHistory: [],
     transitions: [],
-  } as unknown as ResidentPlanPortfolio);
+  });
 }
 
 function choiceInput(
@@ -603,7 +609,8 @@ function choiceInput(
     options: Array<{
       id: string;
       label: string;
-      value: string | number;
+      value?: string | number;
+      metadata?: { targetServerId: string; targetIcePosition: number };
     }>;
   },
 ): AiDecisionInput {
@@ -615,13 +622,39 @@ function choiceInput(
     profileId: "test",
     actionNumber: stateVersion,
     eventTail: [],
-    legalActions: choice ? [resolveChoiceAction(stateVersion)] : [],
+    legalActions: choice
+      ? [
+          {
+            ...resolveChoiceAction(stateVersion),
+            source: "game_rule",
+            timingPoint: "runner_action.main",
+            expiresAtStateVersion: stateVersion,
+            choiceRequirements: [
+              {
+                choiceId: `choice-${stateVersion}`,
+                minSelections: 1,
+                maxSelections: 1,
+                optionIds: choice.options.map((option) => option.id),
+              },
+            ],
+          },
+        ]
+      : [],
     playerView: {
       stateVersion,
-      timingPoint: choice ? "choice.resolve" : "runner_action.main",
+      timingPoint: "runner_action.main",
       winner: null,
       own: { credits: 4 },
-      servers: [],
+      servers: [
+        {
+          id: "hq",
+          ice: [
+            { instanceId: "hhq.i0", known: false },
+            blockingWall("hq-wall"),
+          ],
+          root: [],
+        },
+      ],
       ...(choice
         ? {
             pendingChoice: {
@@ -653,7 +686,7 @@ function resolveChoiceAction(stateVersion: number): LegalAction {
 function paymentSupportEventTail(): AiDecisionInput["eventTail"] {
   return [
     {
-      eventId: "evt_11",
+      eventId: 12,
       type: "play_event",
       stateVersionBefore: 10,
       stateVersionAfter: 11,
@@ -662,12 +695,12 @@ function paymentSupportEventTail(): AiDecisionInput["eventTail"] {
         actor: "runner",
         actionType: "play_event",
         runnerCostPenaltySupportWindowOpened: true,
-        runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.11",
+        runnerCostPenaltySupportWindowId: 11,
         runnerCostPenaltySupportOriginalActionId: "runner.play.social-1",
       },
     },
     {
-      eventId: "evt_12",
+      eventId: 13,
       type: "activated_card_ability",
       stateVersionBefore: 11,
       stateVersionAfter: 12,
@@ -675,11 +708,11 @@ function paymentSupportEventTail(): AiDecisionInput["eventTail"] {
       publicPayload: {
         actor: "runner",
         actionType: "activated_card_ability",
-        sourceDefinitionId: "onr_proteus_133_chiba-bank-account",
+        sourceDefinitionId: 191,
       },
     },
     {
-      eventId: "evt_13",
+      eventId: 14,
       type: "play_event",
       stateVersionBefore: 12,
       stateVersionAfter: 13,
@@ -688,7 +721,7 @@ function paymentSupportEventTail(): AiDecisionInput["eventTail"] {
         actor: "runner",
         actionType: "play_event",
         sourceCardInstanceId: "social-1",
-        sourceDefinitionId: "onr_v1_111_social-engineering",
+        sourceDefinitionId: 323,
         abilityId: "secret_spend_guess_then_targeted_bypass_run",
       },
     },
@@ -699,7 +732,7 @@ function unusedPaymentSupportEventTail(): AiDecisionInput["eventTail"] {
   return [paymentSupportEventTail()[0]!, paymentSupportEventTail()[2]!].map(
     (event, index) => ({
       ...event,
-      eventId: `evt_${11 + index}`,
+      eventId: (11 + index) + 1,
       stateVersionBefore: 10 + index,
       stateVersionAfter: 11 + index,
     }),
@@ -725,5 +758,46 @@ function choiceDependencies(): Parameters<
     }),
     rolesForCardId: () => [],
     effectsForCardId: () => [],
+  };
+}
+
+function currentTargetedPlanInstance(
+  moduleId: PlanModuleId,
+  dedupeKey: string,
+  moduleState: unknown,
+  stateVersion: number,
+): PlanInstance {
+  return {
+    ...instantiatePlanProposal(
+      {
+        moduleId,
+        moduleVersion: "1",
+        dedupeKey,
+        side: "runner",
+        strategyLineIds: [],
+        executionClass: "bounded_sequence",
+        initialViability: "ready",
+        persistencePolicy: "locked_sequence",
+        retentionPolicy: {
+          blockedStateVersionTtl: 2,
+          dormantStateVersionTtl: 2,
+          completedHistoryStateVersionTtl: 4,
+          abandonWhenTargetMissing: true,
+          protectedWhileNeedOpen: true,
+          protectedWhileCommitted: true,
+        },
+        phase: "targeted_preparation",
+        milestone: "choice_bound",
+        moduleState,
+        blockers: [],
+        resumeConditions: [],
+        completionConditions: [],
+        abandonmentConditions: [],
+        evidenceRefs: [],
+      },
+      stateVersion,
+    ),
+    executionState: "executor",
+    portfolioRole: "foreground",
   };
 }

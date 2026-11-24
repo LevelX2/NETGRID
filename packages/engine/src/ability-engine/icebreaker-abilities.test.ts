@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards/engine";
+import { canonicalCapabilityId, capabilityKey, parseCanonicalCapabilityId } from "@netgrid/cards/engine";
 import type {
   CardDefinitionId,
   CardInstanceId,
@@ -18,8 +18,10 @@ import {
   type RuntimeIcebreakerAbility,
 } from "./icebreaker-abilities";
 
-const definitionId = "test_breaker" as CardDefinitionId;
+const definitionId = 32 as CardDefinitionId;
 const breakerId = "breaker_instance" as CardInstanceId;
+const PUMP_CAPABILITY_KEY = "pump_strength_five";
+const SECOND_CAPABILITY_KEY = "break_sentry_subroutine";
 
 function canonicalPump(key: string, amount: number): RuntimeIcebreakerAbility {
   return {
@@ -36,7 +38,7 @@ function actionFor(
   ability: RuntimeIcebreakerAbility,
   overrides: Partial<LegalAction> = {},
 ): LegalAction {
-  const key = ability.id.slice(ability.id.indexOf(":") + 1);
+  const key = parseCanonicalCapabilityId(ability.id).capabilityKey;
   return {
     actionId: "test-action",
     side: "runner",
@@ -80,9 +82,9 @@ describe("icebreaker ability identity binding", () => {
     [
       {
         kind: "ice_definition_any_of",
-        definitionIds: ["ice_a", "ice_b"] as CardDefinitionId[],
+        definitionIds: [3214874132, 3265206989] as CardDefinitionId[],
       },
-      { iceDefinitionIds: ["ice_a", "ice_b"] },
+      { iceDefinitionIds: [3214874132, 3265206989] },
     ],
     [
       { kind: "subroutine_tag", tag: "damage" },
@@ -138,7 +140,7 @@ describe("icebreaker ability identity binding", () => {
   it("projects the exact bound pump strength into the LegalAction payload", () => {
     expect(
       icebreakerAbilityBindingPayload(
-        canonicalPump("matador_pump", 5),
+        canonicalPump(PUMP_CAPABILITY_KEY, 5),
         breakerId,
       ),
     ).toMatchObject({
@@ -150,15 +152,15 @@ describe("icebreaker ability identity binding", () => {
   it("rejects a pump binding without a valid strength amount", () => {
     expect(() =>
       icebreakerAbilityBindingPayload(
-        { ...canonicalPump("invalid_pump", 1), amount: 0 },
+        { ...canonicalPump(PUMP_CAPABILITY_KEY, 1), amount: 0 },
         breakerId,
       ),
     ).toThrow(IcebreakerAbilityBindingError);
   });
 
   it("selects the exact canonical capability independent of same-kind ordering", () => {
-    const low = canonicalPump("pump_low", 1);
-    const high = canonicalPump("pump_high", 3);
+    const low = canonicalPump(SECOND_CAPABILITY_KEY, 1);
+    const high = canonicalPump(PUMP_CAPABILITY_KEY, 3);
     const legalAction = actionFor(high);
     expect(
       resolveIcebreakerAbilityBinding(
@@ -181,7 +183,7 @@ describe("icebreaker ability identity binding", () => {
   });
 
   it("rejects missing, wrong, hybrid and stale canonical bindings", () => {
-    const ability = canonicalPump("pump", 1);
+    const ability = canonicalPump(PUMP_CAPABILITY_KEY, 1);
     const exact = actionFor(ability);
     const { abilityRef: _missingAbilityRef, ...missingAbilityRef } = exact;
     const invalidActions: LegalAction[] = [
@@ -235,7 +237,7 @@ describe("icebreaker ability identity binding", () => {
         [ability],
         definitionId,
         breakerId,
-        actionFor(canonicalPump("stale", 2)),
+        actionFor(canonicalPump(SECOND_CAPABILITY_KEY, 2)),
         "pump_strength",
       ),
     ).toThrow();

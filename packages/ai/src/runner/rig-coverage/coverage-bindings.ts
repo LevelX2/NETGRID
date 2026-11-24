@@ -86,7 +86,7 @@ export function runnerCoverageSearchSourceChoiceBinding(
     searchState.selectedSearchStateVersion === portfolio.stateVersion &&
     input.playerView.stateVersion === portfolio.stateVersion + 1 &&
     binding !== undefined &&
-    typeof binding.targetDefinitionId === "string" &&
+    typeof binding.targetDefinitionId === "number" &&
     (zone !== "heap" ||
       input.playerView.own.heapOrArchives.some(
         (card) =>
@@ -536,7 +536,7 @@ export function bindSelectedRunnerCoverageSearchChoiceContinuation(
     selectedTarget?.known !== false &&
     selectedTarget?.type === "program" &&
     typeof selectedTarget?.instanceId === "string" &&
-    typeof selectedTarget.definitionId === "string" &&
+    typeof selectedTarget.definitionId === "number" &&
     portfolio.side === "runner" &&
     portfolio.executorInstanceId === executor.instanceId &&
     exactCoverageExecutorOwnership &&

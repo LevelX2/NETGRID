@@ -10,6 +10,13 @@ const CREDIT_COUNTER_KEYS = new Set([
 export function corpVisibleCardStoredCredits(card: VisibleCard): number {
   return Object.entries(card.counters ?? {}).reduce((total, [key, value]) => {
     if (!CREDIT_COUNTER_KEYS.has(key)) return total;
-    return total + (typeof value === "number" ? value : 0);
+    if (
+      typeof value !== "number" ||
+      !Number.isSafeInteger(value) ||
+      value < 0 ||
+      !Number.isSafeInteger(total + value)
+    )
+      throw new Error("invalid_visible_stored_credit_count");
+    return total + value;
   }, 0);
 }

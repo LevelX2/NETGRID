@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import type {
+import type { CardDefinitionId,
   AiDecisionActionAlternative,
   AiDecisionScoreComponent,
   DeckDefinition,
@@ -26,7 +26,7 @@ type StoredDeckSnapshot = {
   name: string;
   side: Side;
   identityCardId: string;
-  cards: Array<{ cardId: string; quantity: number }>;
+  cards: Array<{ cardId: CardDefinitionId; quantity: number }>;
   publicMetadata?: DeckPublicMetadata;
   deckHash?: string;
 };
@@ -232,8 +232,6 @@ function isKeyWindow(entry: ActionEntry): boolean {
   if (entry.unsafeFinalAdvance) return true;
   if (entry.protectedFinalAdvance) return true;
   if (entry.advancedAgendaStolen) return true;
-  if (entry.corpScoreTerminalWindow) return true;
-  if (entry.corpEconomyBeforeScoreDiagnosticWindow) return true;
   if (entry.corpRemoteScoringUnderbuiltWhileCentralsOverIced) return true;
   if (entry.corpExtraCentralIceChosenOverReadyRemoteBuild) return true;
   if (entry.corpExtraCentralIceChosenOverAdvanceOrScore) return true;
@@ -323,42 +321,6 @@ function relevantScoreBreakdown(
 function selectedFlags(entry: ActionEntry): Record<string, unknown> {
   const flags: Record<string, unknown> = {};
   const keys: Array<keyof ActionEntry> = [
-    "corpScoreTerminalWindow",
-    "corpScoreTerminalWindowScoreLegal",
-    "corpScoreTerminalWindowAdvanceToScoreLegal",
-    "corpScoreTerminalWindowAgendaInstallLegal",
-    "corpScoreTerminalWindowProtectedRemoteReady",
-    "corpScoreTerminalWindowRemoteContestLow",
-    "corpScoreTerminalWindowCreditsSufficient",
-    "corpScoreTerminalWindowRunnerAccessThreatHigh",
-    "corpScoreTerminalScoreTaken",
-    "corpScoreTerminalAdvanceTaken",
-    "corpScoreTerminalAgendaInstalled",
-    "corpScoreTerminalSkipped",
-    "corpScoreTerminalSkippedForProtection",
-    "corpScoreTerminalSkippedForEconomy",
-    "corpScoreTerminalSkippedForDraw",
-    "corpScoreTerminalSkippedForInstallIce",
-    "corpScoreTerminalSkippedForHqProtection",
-    "corpScoreTerminalSkippedForRndProtection",
-    "corpScoreTerminalSkippedForRemotePortfolio",
-    "corpEconomyBeforeScoreDiagnosticWindow",
-    "corpEconomyBeforeScoreWindowWithInstalledAgenda",
-    "corpEconomyBeforeScoreWindowWithAdvancedAgenda",
-    "corpEconomyBeforeScoreWindowWithScoreLegalNext",
-    "corpEconomyBeforeScoreWindowWithAdvanceToScoreLegalNext",
-    "corpEconomyBeforeScoreWindowWithReadyRemote",
-    "corpEconomyBeforeScoreWindowWithAgendaInHqAndReadyRemote",
-    "corpEconomyBeforeScoreWindowCreditsShort",
-    "corpEconomyBeforeScoreWindowCreditsAlreadyEnough",
-    "corpEconomyBeforeScoreWindowRemoteSafe",
-    "corpEconomyBeforeScoreWindowRemoteContestHigh",
-    "corpEconomyBeforeScoreTaken",
-    "corpEconomyBeforeScoreTakenAsNecessaryCredits",
-    "corpEconomyBeforeScoreTakenDespiteCreditsEnough",
-    "corpEconomyBeforeScoreTakenOverScoreLegal",
-    "corpEconomyBeforeScoreTakenOverAdvanceToScoreLegal",
-    "corpEconomyBeforeScoreTakenOverAgendaInstallReadyRemote",
     "corpRemoteScoringUnderbuiltWhileCentralsOverIced",
     "corpReadyRemoteExists",
     "corpAgendaInHqWithReadyRemote",

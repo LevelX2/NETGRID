@@ -1,3 +1,5 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
+import { mergedPublicHistory } from "../../public-event-history";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type {
@@ -30,7 +32,10 @@ import {
   clickCreditBankProfile,
 } from "../../plans/credit-bank-investment";
 import type { RunnerCreditBankSignal } from "./credit-bank-types";
-import { creditBankReplacesBasicRunFunding } from "./credit-bank-basic-run-funding";
+import {
+  creditBankReplacesBasicRunFunding,
+  runnerCreditBankRunFundingClickCapacity,
+} from "./credit-bank-basic-run-funding";
 import { creditBankFloorRecoveryWindow } from "./credit-bank-floor-recovery";
 import { creditBankFundsKnownUrgentRun } from "./credit-bank-known-run-funding";
 import { finiteBankTurnLiquiditySupport } from "./credit-bank-turn-liquidity";
@@ -198,13 +203,12 @@ export function runnerCreditBankSignals(
       )
         return [
           {
-            bankId: tool.sourceCardInstanceId ?? tool.cardId,
+            bankId: tool.sourceCardInstanceId ?? String(tool.cardId),
             phase: "hold" as const,
             actionIds: [],
             rejectedActionIds: installActionIds,
             priorityClass: "P5" as const,
             currentStoredCredits,
-            portfolioStoredCredits,
             estimatedPayout,
             value: 0,
             evidenceCodes: [
@@ -236,12 +240,11 @@ export function runnerCreditBankSignals(
       if (!plausibleFollowupWindow)
         return [
           {
-            bankId: tool.sourceCardInstanceId ?? tool.cardId,
+            bankId: tool.sourceCardInstanceId ?? String(tool.cardId),
             phase: "install" as const,
             actionIds: installActionIds,
             priorityClass: "P5" as const,
             currentStoredCredits,
-            portfolioStoredCredits,
             estimatedPayout,
             prospectivePlan,
             value: 180,
@@ -254,12 +257,11 @@ export function runnerCreditBankSignals(
         ];
       return [
         {
-          bankId: tool.sourceCardInstanceId ?? tool.cardId,
+          bankId: tool.sourceCardInstanceId ?? String(tool.cardId),
           phase: "install" as const,
           actionIds: installActionIds,
           priorityClass: "P5" as const,
           currentStoredCredits,
-          portfolioStoredCredits,
           estimatedPayout,
           prospectivePlan,
           value: 350,
@@ -447,7 +449,7 @@ export function runnerCreditBankSignals(
         matureBankDevelopmentFundingNeed;
       return [
         {
-          bankId: tool.sourceCardInstanceId ?? tool.cardId,
+          bankId: tool.sourceCardInstanceId ?? String(tool.cardId),
           phase: "cash_out" as const,
           actionIds: cashOutActionIds,
           rejectedActionIds: buildActionIds,
@@ -460,7 +462,6 @@ export function runnerCreditBankSignals(
               ? ("P2" as const)
               : ("P4" as const)),
           currentStoredCredits,
-          portfolioStoredCredits,
           estimatedPayout,
           ...(investment ? { investment } : {}),
           value: concreteFundingNeed
@@ -513,7 +514,6 @@ export function runnerCreditBankSignals(
           ],
           priorityClass: "P6",
           currentStoredCredits,
-          portfolioStoredCredits,
           estimatedPayout,
           liquidityFunding: liquiditySupport.funding,
           value: 0,
@@ -540,7 +540,7 @@ export function runnerCreditBankSignals(
     if (!shouldBuild)
       return [
         {
-          bankId: tool.sourceCardInstanceId ?? tool.cardId,
+          bankId: tool.sourceCardInstanceId ?? String(tool.cardId),
           phase: "hold" as const,
           actionIds: [],
           rejectedActionIds: [
@@ -549,7 +549,6 @@ export function runnerCreditBankSignals(
           ],
           priorityClass: "P5" as const,
           currentStoredCredits,
-          portfolioStoredCredits,
           estimatedPayout,
           ...(investment ? { investment } : {}),
           value: 0,
@@ -586,7 +585,7 @@ export function runnerCreditBankSignals(
       ];
     return [
       {
-        bankId: tool.sourceCardInstanceId ?? tool.cardId,
+        bankId: tool.sourceCardInstanceId ?? String(tool.cardId),
         phase: "build" as const,
         actionIds: automaticBuildCandidate
           ? [automaticBuildCandidate.actionId]
@@ -599,7 +598,6 @@ export function runnerCreditBankSignals(
             ? ("P4" as const)
             : ("P5" as const),
         currentStoredCredits,
-        portfolioStoredCredits,
         estimatedPayout,
         ...(investment ? { investment } : {}),
         value:
@@ -790,14 +788,6 @@ function creditBankBuiltThisTurn(
   const sourceCardInstanceId = tool.sourceCardInstanceId;
   if (!sourceCardInstanceId) return false;
 
-  const events = uniqueBy(
-    [...input.playerView.publicEvents, ...input.eventTail],
-    (event) => event.eventId,
-  ).sort(
-    (left, right) =>
-      left.stateVersionAfter - right.stateVersionAfter ||
-      left.eventId.localeCompare(right.eventId),
-  );
   const currentTurnSerial = input.playerView.turnSerial;
   if (
     currentTurnSerial === undefined ||
@@ -806,7 +796,7 @@ function creditBankBuiltThisTurn(
   ) {
     return false;
   }
-  return events.some((event) => {
+  return mergedPublicHistory(input).some((event) => {
     const resolvedEffects = Array.isArray(event.publicPayload?.resolvedEffects)
       ? event.publicPayload.resolvedEffects
       : [];
@@ -842,13 +832,7 @@ function runnerCreditBankRunFundingRoute(params: {
       priorityClass?: "P4";
     }
   | undefined {
-  const remainingFundingClicks = Math.max(
-    0,
-    params.input.playerView.own.clicks - 1,
-  );
-  if (remainingFundingClicks <= 0 || params.cashOutActionIds.length === 0) {
-    return undefined;
-  }
+  if (params.cashOutActionIds.length === 0) return undefined;
   const cashOutActionIds = new Set(params.cashOutActionIds);
   for (const evaluation of [...params.runTargets].sort((left, right) => {
     const urgencyDelta =
@@ -866,6 +850,11 @@ function runnerCreditBankRunFundingRoute(params: {
     ) {
       continue;
     }
+    const remainingFundingClicks = runnerCreditBankRunFundingClickCapacity(
+      params.input,
+      evaluation.actionId,
+    );
+    if (remainingFundingClicks === undefined) continue;
     const requiredPostRunReserve =
       params.services.requiredPostRunReserve(evaluation);
     const admission = assessRunnerRunFundingAdmission({
@@ -1088,7 +1077,7 @@ function runnerCreditBankRunFundingRoute(params: {
         ...(fundedTerminalTarget || remoteFundingRoute
           ? {
               runFunding: {
-                parentPlanInstanceId: `plan:runner.contest_remote:${encodeURIComponent(`remote:${evaluation.targetServerId}`)}`,
+                parentPlanInstanceId: planInstanceIdForProposal({ moduleId: "runner.contest_remote", dedupeKey: `remote:${evaluation.targetServerId}` }),
                 needId: `run-support:remote:${evaluation.targetServerId}`,
                 runActionId: evaluation.actionId,
                 stateVersion: params.input.playerView.stateVersion,
@@ -1136,13 +1125,4 @@ function runnerCreditBankRunFundingRoute(params: {
     }
   }
   return undefined;
-}
-
-function uniqueBy<T>(
-  values: readonly T[],
-  keyForValue: (value: T) => string,
-): T[] {
-  return [
-    ...new Map(values.map((value) => [keyForValue(value), value])).values(),
-  ];
 }

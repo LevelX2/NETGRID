@@ -1,3 +1,5 @@
+import type { CardDefinitionId } from "@netgrid/shared";
+import { visibleRunnerPathTraceContext } from "../run-analysis/trace-rules-profile-planning";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
 import type { assessKnownRezzedIcePath } from "../visible-run-analysis";
@@ -14,8 +16,8 @@ export type RunnerVisibleCardDiscardCompositionDependencies = {
   isVisibleIcebreakerProgram: (card: VisibleCard) => boolean;
   assessKnownRezzedIcePath: typeof assessKnownRezzedIcePath;
   visibleBreakerRolesForAi: (card: VisibleCard) => readonly string[];
-  rolesForCardId: (cardId: string | undefined) => readonly string[];
-  cardDefinitionTypeForAi: (cardId: string | undefined) => string | undefined;
+  rolesForCardId: (cardId: CardDefinitionId | undefined) => readonly string[];
+  cardDefinitionTypeForAi: (cardId: CardDefinitionId | undefined) => string | undefined;
   isRunnerEconomyRole: (role: string) => boolean;
 };
 
@@ -37,6 +39,8 @@ export function createRunnerVisibleCardDiscardComposition(
         runtimeInput.playerView.own.rig ?? [],
         runtimeInput.playerView.own.credits,
         server.root,
+        runtimeInput.playerView.opponent.credits,
+        visibleRunnerPathTraceContext(runtimeInput),
       ),
     visibleBreakerRoles: dependencies.visibleBreakerRolesForAi,
   });

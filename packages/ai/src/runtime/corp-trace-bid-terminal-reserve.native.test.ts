@@ -21,7 +21,7 @@ function takeCorpCard(state: GameState, definitionId: CardDefinitionId) {
 }
 
 function setup() {
-  const fangDefinitionId = "onr_v1_240_fang";
+  const fangDefinitionId = 452;
   const { corp, runner } = ORIGINALSET_DEFAULT_DECKS;
   const state = createGame({
     seed: "terminal-fang-bid",
@@ -30,7 +30,7 @@ function setup() {
       ...runner,
       cards: [
         ...runner.cards,
-        { id: "onr_proteus_129_back-door-to-netwatch", quantity: 1 },
+        { id: 187, quantity: 1 },
       ],
     },
     corpDeck: {
@@ -38,7 +38,7 @@ function setup() {
       cards: [
         ...corp.cards,
         { id: fangDefinitionId, quantity: 1 },
-        { id: "onr_v1_190_bioweapons-engineering", quantity: 1 },
+        { id: 402, quantity: 1 },
       ],
     },
   });
@@ -48,10 +48,10 @@ function setup() {
   fang.zone = { side: "corp", zone: "serverIce", serverId: "hq" };
   fang.rezzed = true;
   fang.faceup = true;
-  const tycho = takeCorpCard(state, "onr_v1_220_tycho-extension");
+  const tycho = takeCorpCard(state, 432);
   tycho.zone = { side: "corp", zone: "hq" };
   state.corp.hq.push(tycho.instanceId);
-  const stolen = takeCorpCard(state, "onr_v1_190_bioweapons-engineering");
+  const stolen = takeCorpCard(state, 402);
   stolen.zone = { side: "runner", zone: "scoreArea" };
   stolen.controller = "runner";
   stolen.faceup = true;
@@ -63,8 +63,8 @@ function setup() {
   state.corp.credits = 2;
   state.runner.clicks = 1;
   state.runner.credits = 5;
-  const runId = "terminal-fang-run";
-  const traceId = "terminal-fang-trace";
+  const runId = 1;
+  const traceId = state.stateVersion;
   state.run = {
     runId,
     attackedServerId: "hq",
@@ -77,6 +77,7 @@ function setup() {
   };
   state.trace = {
     traceId,
+    sourceRunId: runId,
     sourceCardInstanceId: fang.instanceId,
     sourceDefinitionId: fangDefinitionId,
     traceRulesProfile: "modern_open",
@@ -138,7 +139,7 @@ describe("current terminal Corp trace reserve", () => {
     expect(input.playerView.opponent.agendaPoints).toBe(3);
     expect(quote).toMatchObject({
       stateVersion: state.stateVersion,
-      actionId: "corp.resolve_choice",
+      actionId: "cn",
       choiceId: state.pendingChoice!.choiceId,
       optionId: "bid_2",
       amount: 2,
@@ -173,7 +174,7 @@ describe("current terminal Corp trace reserve", () => {
       const id = [...state.runner.grip, ...state.runner.stack].find(
         (id) =>
           state.cardInstances[id]?.definitionId ===
-          "onr_proteus_129_back-door-to-netwatch",
+          187,
       )!;
       state.runner.grip = state.runner.grip.filter((cardId) => cardId !== id);
       state.runner.stack = state.runner.stack.filter((cardId) => cardId !== id);
@@ -184,7 +185,7 @@ describe("current terminal Corp trace reserve", () => {
       card.rezzed = true;
     }
     if (scenario === "another ICE") {
-      const inner = takeCorpCard(state, "onr_v1_279_wall-of-static");
+      const inner = takeCorpCard(state, 491);
       inner.zone = { side: "corp", zone: "serverIce", serverId: "hq" };
       inner.faceup = true;
       inner.rezzed = true;

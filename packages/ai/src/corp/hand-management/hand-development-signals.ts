@@ -4,7 +4,7 @@ import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
 
 import { type CorpPlanDomain } from "../../plans/corp-tactical-plan-contracts";
@@ -12,7 +12,7 @@ import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { uniqueBy } from "../../runtime/collection";
-import { corpHostedCreditBankProfile } from "../../runtime/corp-canonical-card-facts";
+import { corpHostedCreditBankProfile } from "../../runtime/corp-canonical-credit-facts";
 import { corpCandidateProjectsCardDraw } from "../../runtime/corp-draw-action-facts";
 import { corpDrawHorizonPreservationSignals } from "./hand-draw-horizon";
 import {
@@ -42,14 +42,14 @@ export function corpEmptyRdDrawOperationDispositionEvidence(
     corpEconomyCandidateHasExecutablePayload(input, candidate) ||
     candidate.actionType !== "play_operation" ||
     !candidate.sourceDefinitionId ||
-    CARD_DEFINITIONS_BY_ID[candidate.sourceDefinitionId]?.type !== "operation"
+    planningCardFactsByDefinitionId(candidate.sourceDefinitionId)?.type !== "operation"
   ) {
     return undefined;
   }
   const action = input.legalActions.find(
     (legalAction) => legalAction.actionId === candidate.actionId,
   );
-  const drawCardsAmount = Number(action?.payload?.drawCardsAmount ?? 0);
+  const drawCardsAmount = action?.payload?.drawCardsAmount;
   const hint = AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId);
   const definitionRequiresDraw =
     hint?.effects?.some(
@@ -58,7 +58,10 @@ export function corpEmptyRdDrawOperationDispositionEvidence(
         typeof effect.amount === "number" &&
         effect.amount > 0,
     ) === true;
-  return drawCardsAmount > 0 && definitionRequiresDraw
+  return typeof drawCardsAmount === "number" &&
+    Number.isSafeInteger(drawCardsAmount) &&
+    drawCardsAmount > 0 &&
+    definitionRequiresDraw
     ? `corp_empty_rd_draw_operation_has_no_executable_payload:${candidate.sourceDefinitionId}`
     : undefined;
 }

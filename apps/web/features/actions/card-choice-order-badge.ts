@@ -1,4 +1,5 @@
-import type { PlayerView } from "@netgrid/shared";
+import { optionPresentation, type SelectionId } from "../../lib/presented-player-view";
+import type { PlayerView } from "../../lib/presented-player-view";
 
 import { newBloodReorderTargetLabel } from "../../app/action-board-ui";
 
@@ -30,7 +31,7 @@ export function cardChoiceOrderBadge(
 
 export function cardChoiceReadonlyPositionBadge(
   choice: VisibleChoice,
-  optionId: string,
+  optionId: SelectionId,
 ): { label: string; ariaLabel: string } | null {
   const cardOptions = readonlyRdCardOptions(choice);
   if (cardOptions.length <= 1) return null;
@@ -65,7 +66,7 @@ export function cardChoiceReadonlyPositionHint(
 
 export function cardChoiceHeapPositionBadge(
   choice: VisibleChoice,
-  optionId: string,
+  optionId: SelectionId,
 ): { label: string; ariaLabel: string } | null {
   const cardOptions = heapCardOptions(choice);
   const optionIndex = cardOptions.findIndex((option) => option.id === optionId);
@@ -120,7 +121,7 @@ function readonlyRdCardOptions(
   ) {
     return [];
   }
-  return choice.options.filter((option) => option.id !== "done");
+  return choice.options.filter((option) => optionPresentation(option) !== "done");
 }
 
 function heapCardOptions(choice: VisibleChoice): VisibleChoice["options"] {
@@ -130,5 +131,5 @@ function heapCardOptions(choice: VisibleChoice): VisibleChoice["options"] {
   ) {
     return [];
   }
-  return choice.options.filter((option) => option.id !== "done");
+  return choice.options.filter((option) => optionPresentation(option) !== "done");
 }

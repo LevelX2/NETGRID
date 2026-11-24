@@ -39,8 +39,16 @@ it("funds terminal HQ protection before ordinary progress on an already protecte
   expect(result.actionId).toBe(funding.actionId);
   expect(result.reasonCode).toBe("plan_first.corp.economy");
   const plan = result.decisionDebug?.planFirstDecision;
-  expect(plan?.rootPlanInstanceId).toMatch(/^plan:corp\.defend_servers:/);
-  expect(plan?.leafExecutorInstanceId).toMatch(/^plan:corp\.economy:/);
+  expect(
+    plan?.portfolio.find(
+      (instance) => instance.instanceId === plan?.rootPlanInstanceId,
+    )?.moduleId,
+  ).toBe("corp.defend_servers");
+  expect(
+    plan?.portfolio.find(
+      (instance) => instance.instanceId === plan?.leafExecutorInstanceId,
+    )?.moduleId,
+  ).toBe("corp.economy");
   expect(plan?.route).toMatchObject({
     actionId: funding.actionId,
     stateVersion: input.playerView.stateVersion,

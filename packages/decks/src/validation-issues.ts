@@ -36,7 +36,6 @@ export type DeckValidationIssueCode =
   keyof typeof DECK_VALIDATION_ISSUE_PARAMETERS;
 export type DeckValidationIssueParams<C extends DeckValidationIssueCode> = {
   [P in (typeof DECK_VALIDATION_ISSUE_PARAMETERS)[C][number]]: P extends
-    | "cardId"
     | "status"
     ? string
     : number;
@@ -93,9 +92,10 @@ export function assertDeckValidationIssues(value: {
     )
       return fail();
     for (const [name, parameter] of Object.entries(issue.params)) {
-      if (name === "cardId" || name === "status") {
+      if (name === "status") {
         if (typeof parameter !== "string") return fail();
-      } else if (typeof parameter !== "number" || !Number.isFinite(parameter))
+      } else if (typeof parameter !== "number" || !Number.isFinite(parameter) ||
+        (name === "cardId" && (!Number.isSafeInteger(parameter) || parameter <= 0)))
         return fail();
     }
   }

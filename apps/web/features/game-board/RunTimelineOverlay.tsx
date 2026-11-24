@@ -1,5 +1,6 @@
 "use client";
 
+import { type SelectionId } from "../../lib/presented-player-view";
 import {
   Check,
   CheckCircle2,
@@ -20,7 +21,8 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
-import type { LegalAction, PlayerView, Side } from "@netgrid/shared";
+import type { Side } from "@netgrid/shared";
+import type { LegalAction, PlayerView } from "../../lib/presented-player-view";
 import { useLocale, useTranslations } from "use-intl/react";
 
 import {
@@ -89,8 +91,8 @@ export function RunTimelineOverlay({
   onAction(action: LegalAction): void;
   onChoiceOption(
     action: LegalAction,
-    choiceId: string,
-    selectedOptionId: string,
+    choiceId: SelectionId,
+    selectedOptionId: SelectionId,
   ): void;
   onCorpRunAutoPassEnabled(enabled: boolean): void;
 }) {

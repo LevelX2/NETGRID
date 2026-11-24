@@ -3,6 +3,11 @@ import { describe, expect, it } from "vitest";
 import { assessCorpDrawAdmission } from "./corp-draw-admission";
 
 describe("Corp draw admission", () => {
+  it("rejects an ordinary draw that cannot fit the current clicks", () => {
+    expect(assessment({ handSize: 3, currentClicks: 0 }).disposition)
+      .toBe("blocked_unknown_projection");
+  });
+
   it("defers a same-class draw that would fill HQ until an exact conversion releases capacity", () => {
     expect(
       assessment({
@@ -274,6 +279,20 @@ describe("Corp draw admission", () => {
     ).toMatchObject({
       disposition: "blocked_deckout_horizon",
       mandatoryDrawHorizonAfterDraw: 2,
+    });
+  });
+
+  it("reserves the current mandatory base draw when it exceeds the standard floor", () => {
+    expect(
+      assessment({
+        consequenceFacts: consequenceFacts({
+          remainingDeckCardsBeforeDraw: 4,
+          mandatoryBaseDrawCount: 4,
+        }),
+      }),
+    ).toMatchObject({
+      disposition: "blocked_deckout_horizon",
+      mandatoryDrawHorizonAfterDraw: 3,
     });
   });
 

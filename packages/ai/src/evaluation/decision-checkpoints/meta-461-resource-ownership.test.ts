@@ -35,7 +35,7 @@ describe("meta461 round6 causal resource ownership", () => {
   it("requests the source breaker for a downstream no-break lock", () => {
     const input = fixture("g8-d193"),
       v = input.playerView,
-      s = v.servers.find((s) => s.id === "remote_1")!;
+      s = v.servers.find((s) => s.id === "r1")!;
     expect(
       assessKnownRezzedIcePath(
         s.ice,
@@ -53,7 +53,7 @@ describe("meta461 round6 causal resource ownership", () => {
       input.legalActions.find((a) => a.actionId === decision.actionId),
     ).toMatchObject({
       type: "install_card",
-      source: "runner_onr_classic_028_matador_1",
+      source: "c75",
     });
     expect(decision.fallbackUsed).toBe(false);
   });
@@ -64,8 +64,10 @@ describe("meta461 round6 causal resource ownership", () => {
     expect(a.type).toBe("gain_credit");
     expect(decision.fallbackUsed).toBe(false);
     expect(
-      decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-    ).toContain("corp.score_agenda");
+      decision.decisionDebug?.planFirstDecision?.portfolio.find(
+        (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+      )?.moduleId,
+    ).toBe("corp.score_agenda");
   });
   it("does not rebuild a publicly exposed non-threatening bluff after liquidation", () => {
     const input = fixture("g25-d251"),
@@ -73,7 +75,7 @@ describe("meta461 round6 causal resource ownership", () => {
       a = input.legalActions.find((a) => a.actionId === decision.actionId)!;
     expect(a).not.toMatchObject({
       type: "advance_card",
-      source: "corp_onr_v1_347_vapor-ops_1",
+      source: "c3gd",
     });
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({
@@ -86,9 +88,9 @@ describe("meta461 round6 causal resource ownership", () => {
 describe("source-lock coverage contrasts", () => {
   it("keeps an independently uncovered inner ICE as the real barrier", () => {
     const v = fixture("g8-d193").playerView,
-      s = v.servers.find((s) => s.id === "remote_1")!;
+      s = v.servers.find((s) => s.id === "r1")!;
     const rig = v.own.rig!.filter(
-      (c) => c.definitionId !== "onr_classic_030_psychic-friend",
+      (c) => c.definitionId !== 34,
     );
     expect(assessKnownRezzedIcePath(s.ice, rig, 24, s.root, 0)).toMatchObject({
       missingCoverage: ["code_gate"],
@@ -97,7 +99,7 @@ describe("source-lock coverage contrasts", () => {
   });
   it("does not invent a downstream lock without a future ICE", () => {
     const v = fixture("g8-d193").playerView,
-      s = v.servers.find((s) => s.id === "remote_1")!;
+      s = v.servers.find((s) => s.id === "r1")!;
     const result = assessKnownRezzedIcePath(
       s.ice.slice(1),
       v.own.rig!,
@@ -109,9 +111,9 @@ describe("source-lock coverage contrasts", () => {
   });
   it("opens the path with the source breaker and keeps lack of credits a funding need", () => {
     const v = fixture("g8-d193").playerView,
-      s = v.servers.find((s) => s.id === "remote_1")!,
+      s = v.servers.find((s) => s.id === "r1")!,
       matador = v.own.gripOrHq.find(
-        (c) => c.definitionId === "onr_classic_028_matador",
+        (c) => c.definitionId === 32,
       )!,
       rig = [...v.own.rig!, { ...matador, rezzed: true }];
     expect(assessKnownRezzedIcePath(s.ice, rig, 24, s.root, 0)).toMatchObject({

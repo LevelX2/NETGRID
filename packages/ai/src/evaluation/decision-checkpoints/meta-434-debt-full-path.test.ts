@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { withCurrentPrintedLockCompanion } from "./current-printed-lock.test-support";
 import { expect, it } from "vitest";
@@ -32,7 +33,7 @@ function checkpoint(name = "debt-full-path") {
 it("does not certify a debt exit from the first unaffordable ICE instead of the complete route", () => {
   const { input, runtime } = checkpoint();
   const before = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.remote_1",
+    (t) => t.actionId === "rs.r1",
   )!;
   expect(before).toMatchObject({
     pathCost: 8,
@@ -59,7 +60,7 @@ it("does not certify a debt exit from the first unaffordable ICE instead of the 
     (a) => a.actionId === result.actionId,
   )!;
   expect(selected).toBeDefined();
-  expect(selected.source).not.toContain("loan-from-chiba");
+  expect(selected.source).not.toSatisfy((reference: string | undefined) => referencesDefaultDeckCard(reference, 380));
   expect(result.fallbackUsed).toBe(false);
   expect(result.decisionDebug?.planFirstDecision?.route).toMatchObject({
     actionId: result.actionId,
@@ -70,7 +71,7 @@ it("does not certify a debt exit from the first unaffordable ICE instead of the 
 it("includes the remaining subroutines even when the unfunded path already reached the last ICE", () => {
   const { input, runtime } = checkpoint("debt-last-ice");
   const before = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.remote_2",
+    (t) => t.actionId === "rs.r2",
   )!;
   expect(before).toMatchObject({ pathCost: 26, creditsAfterRun: -2 });
   const funded = structuredClone(input);
@@ -92,6 +93,6 @@ it("includes the remaining subroutines even when the unfunded path already reach
   const result = chooseAiAction(input);
   expect(
     input.legalActions.find((a) => a.actionId === result.actionId)?.source,
-  ).not.toContain("loan-from-chiba");
+  ).not.toSatisfy((reference: string | undefined) => referencesDefaultDeckCard(reference, 380));
   expect(result.fallbackUsed).toBe(false);
 });

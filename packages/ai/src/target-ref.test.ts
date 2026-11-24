@@ -21,13 +21,13 @@ describe("TargetRef v1", () => {
   it("keeps ICE targets stable by server and position without private definition data", () => {
     const ref = buildTargetRef({
       kind: "ice",
-      serverId: "remote_1",
+      serverId: "r1",
       position: 2,
     });
 
     expect(ref).toMatchObject({
       kind: "ice",
-      identity: "ice:remote_1:2",
+      identity: "ice:r1:2",
       redactionPolicy: "public",
     });
     expect(JSON.stringify(ref)).not.toContain("cardInstances");
@@ -79,12 +79,12 @@ describe("TargetRef v1", () => {
 
   it("maps ability source identities as actor-private side-safe refs", () => {
     const ref = targetRefFromIdentity(
-      "ability:self_modifying_code:search_install",
+      "ability:363:search_install",
     );
 
     expect(ref).toMatchObject({
       kind: "abilitySource",
-      identity: "abilitySource:self_modifying_code:search_install",
+      identity: "abilitySource:363:search_install",
       redactionPolicy: "actor_private",
     });
     expect(targetRefIsCompleteOrIrrelevant(ref)).toBe(true);

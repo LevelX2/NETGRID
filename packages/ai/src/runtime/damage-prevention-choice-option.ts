@@ -32,27 +32,27 @@ export function runnerDamagePreventionChoiceResolution(
     return undefined;
   }
   const preventionOptions = selectableOptions.filter(
-    (option) => option.id !== "pass",
+    (option) => option.metadata?.optionKind === "prevent_damage",
   );
-  if (runnerHasAcuteDamagePressure(input, preventionOptions)) {
-    const optionId = preventionOptions[0]?.id;
-    return optionId ? { kind: "select", optionId } : { kind: "pass" };
+  const highestPrevention = preventionOptions.reduce<
+    PendingChoiceOption | undefined
+  >(
+    (best, option) =>
+      preventionAmount(option) > preventionAmount(best) ? option : best,
+    undefined,
+  );
+  if (
+    highestPrevention &&
+    preventionAmount(highestPrevention) >= input.playerView.own.gripOrHq.length
+  ) {
+    return { kind: "select", optionId: highestPrevention.id };
   }
-  const optionId = preventionOptions.find((option) =>
-    isRoutineDamagePreventionOption(input, option),
+  const optionId = preventionOptions.find(
+    (option) =>
+      preventionAmount(option) > 0 &&
+      isRoutineDamagePreventionOption(input, option),
   )?.id;
   return optionId ? { kind: "select", optionId } : { kind: "pass" };
-}
-
-function runnerHasAcuteDamagePressure(
-  input: AiDecisionInput,
-  preventionOptions: readonly PendingChoiceOption[],
-): boolean {
-  const maximumPrevention = Math.max(
-    0,
-    ...preventionOptions.map((option) => preventionAmount(option.id)),
-  );
-  return maximumPrevention >= input.playerView.own.gripOrHq.length;
 }
 
 function isRoutineDamagePreventionOption(
@@ -77,9 +77,13 @@ function isRoutineDamagePreventionOption(
   );
 }
 
-function preventionAmount(optionId: string): number {
-  const value = Number.parseInt(optionId.split("_").at(-1) ?? "", 10);
-  return Number.isInteger(value) && value > 0 ? value : 0;
+function preventionAmount(option: PendingChoiceOption | undefined): number {
+  const amount = option?.metadata?.amount;
+  return typeof amount === "number" &&
+    Number.isSafeInteger(amount) &&
+    amount > 0
+    ? amount
+    : 0;
 }
 
 function sanitizedChoiceSourceId(instanceId: string): string {

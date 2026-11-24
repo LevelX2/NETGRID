@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { AiDecisionInput } from "@netgrid/shared";
@@ -35,8 +36,8 @@ describe("meta489 native plan-owner regressions", () => {
 
   it("keeps the exact scoring agenda and executes its cheaper current-turn route", () => {
     const input = checkpoint("g10-d129");
-    const agenda = "corp_onr_v1_196_corporate-war_1";
-    const parent = `plan:corp.score_agenda:agenda%3A${agenda}%3Aremote_1`;
+    const agenda = "c2it";
+    const parent = planInstanceIdForProposal({ moduleId: "corp.score_agenda", dedupeKey: `agenda:${agenda}:r1` });
     expect(
       corpSameTurnScoreConversionPaths(input).find(
         (path) => path.agendaCardId === agenda,
@@ -47,7 +48,7 @@ describe("meta489 native plan-owner regressions", () => {
       sameTurnGuaranteed: true,
     });
     const selected = chooseAiAction(input);
-    expect(selected.actionId).toBe(`corp.advance_card.${agenda}.${agenda}`);
+    expect(selected.actionId).toBe(`c2.${agenda}.${agenda}`);
     expect(
       input.legalActions.find(
         (action) => action.actionId === selected.actionId,
@@ -77,11 +78,11 @@ describe("meta489 native plan-owner regressions", () => {
     );
     expect(selected.actionId).toBe(expose?.actionId);
     expect(selected.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
+      rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
       leafExecutorInstanceId:
-        "plan:runner.expose_information:ice%3Acorp_onr_proteus_017_credit-blocks_3",
+        "pbq97445607qgijs66ftfj7my5",
       executionOrigin: {
-        rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
+        rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
         stateVersion: 111,
       },
     });
@@ -89,8 +90,8 @@ describe("meta489 native plan-owner regressions", () => {
       side: "runner",
       expiresAtStateVersion: 111,
       payload: {
-        cardId: "runner_onr_v1_065_smarteye_1",
-        iceId: "corp_onr_proteus_017_credit-blocks_3",
+        cardId: "c1pl",
+        iceId: "cgv",
       },
     });
   });

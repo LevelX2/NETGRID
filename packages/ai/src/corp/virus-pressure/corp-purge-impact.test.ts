@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   applyAction,
   createGame,
@@ -127,9 +128,10 @@ it.each([0, 1, 2])(
     state.phase = "corp_action_phase";
     state.timingPoint = "corp_action.main";
     state.corp.clicks = 3;
-    const iceId = [...state.corp.hq, ...state.corp.rd].find((id) =>
-      id.includes("data-wall"),
-    )!;
+    const iceId = [...state.corp.hq, ...state.corp.rd].find(
+      (id) => state.cardInstances[id]?.definitionId === 449,
+    );
+    if (!iceId) throw new Error("Native Corp deck lacks Data Wall");
     state.corp.hq = state.corp.hq.filter((id) => id !== iceId);
     state.corp.rd = state.corp.rd.filter((id) => id !== iceId);
     const server = state.corp.servers.find(({ id }) => id === "rd")!;
@@ -197,6 +199,61 @@ it.each([0, 1, 2])(
   },
 );
 
+it("keeps the standard server virus pools separate from Proteus Purge", () => {
+  const state = createGame({
+    seed: "purge-separate-server-pools",
+    setupMode: "completed",
+  });
+  state.activeSide = "corp";
+  state.phase = "corp_action_phase";
+  state.timingPoint = "corp_action.main";
+  state.corp.clicks = 3;
+  state.poxCountersByServer = { hq: 2 };
+  state.serverAgendaCostCountersByServer = { rd: 2 };
+  state.purgeableRunnerVirusCounters = { corp: { tax: 2 } };
+  const legalActions = getLegalActions(state, "corp");
+  const input: AiDecisionInput = {
+    matchId: state.matchId,
+    side: "corp",
+    legalActions,
+    playerView: getPlayerView(state, "corp"),
+    eventTail: [],
+    seed: state.seed,
+    decisionId: "separate-purge-pools",
+    actionNumber: state.stateVersion,
+    difficulty: "normal",
+    profileId: "corp-ai-v1.4.2-normal",
+  };
+  const standard = legalActions.find((action) => action.type === "purge_virus_counters")!;
+  const proteus = legalActions.find((action) => action.type === "purge_runner_virus_counters")!;
+  const posture = { primary: "low_value", severity: "low" } as const;
+  const standardImpact = corpPurgeImpactScoreComponent(input, standard, posture);
+  expect(standardImpact?.reason).toContain("purge_visible_counter_total:4");
+  expect(standardImpact?.value).toBeGreaterThan(0);
+  const proteusImpact = corpPurgeImpactScoreComponent(input, proteus, posture);
+  expect(proteusImpact?.reason).toContain("purge_visible_counter_total:2");
+  expect(proteusImpact?.reason).toContain("purge_active_runner_counter_types:tax");
+  const apply = (action: LegalAction) => {
+    const result = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: action.actionId,
+      clientKnownStateVersion: state.stateVersion,
+    });
+    if (!result.ok) throw new Error(result.error.message);
+    return result.state;
+  };
+  expect(apply(standard)).toMatchObject({
+    poxCountersByServer: {},
+    serverAgendaCostCountersByServer: {},
+    purgeableRunnerVirusCounters: { corp: { tax: 2 } },
+  });
+  expect(apply(proteus)).toMatchObject({
+    poxCountersByServer: { hq: 2 },
+    serverAgendaCostCountersByServer: { rd: 2 },
+  });
+});
+
 it.each([
   { archives: 0, rd: 0, installed: true, active: 0 },
   { archives: 1, rd: 0, installed: true, active: 0 },
@@ -215,7 +272,7 @@ it.each([
       state.runner.rig.programs.push(source);
       state.cardInstances[source] = {
         instanceId: source,
-        definitionId: "onr_proteus_099_viral-pipeline",
+        definitionId: 157,
         owner: "runner",
         controller: "runner",
         zone: { side: "runner", zone: "rig" },
@@ -279,7 +336,7 @@ it.each([
 function inputWithVirusCounters(amount: number): AiDecisionInput {
   const bugZapper: VisibleCard = {
     instanceId: "bug-zapper",
-    definitionId: "onr_proteus_012_bug-zapper",
+    definitionId: 70,
     title: "Bug Zapper",
     type: "ice",
     known: true,
@@ -331,7 +388,7 @@ function inputWithVirusCounters(amount: number): AiDecisionInput {
 
 function purgeAction(): LegalAction {
   return {
-    actionId: "corp.purge_virus_counters",
+    actionId: "cl",
     side: "corp",
     type: "purge_virus_counters",
     source: "game_rule",
@@ -343,7 +400,7 @@ function purgeAction(): LegalAction {
 function runnerVirusPurgeAction(): LegalAction {
   return {
     ...purgeAction(),
-    actionId: "corp.purge_runner_virus_counters",
+    actionId: "ck",
     type: "purge_runner_virus_counters",
   } as LegalAction;
 }
@@ -373,7 +430,7 @@ function inputWithRunnerVirusCounters(
     counterType === "highlighter"
       ? ({
           instanceId: "highlighter",
-          definitionId: "onr_proteus_090_highlighter",
+          definitionId: 148,
           title: "Highlighter",
           type: "program",
           known: true,
@@ -383,7 +440,7 @@ function inputWithRunnerVirusCounters(
       : counterType === "garbage"
         ? ({
             instanceId: "garbage-in",
-            definitionId: "onr_proteus_089_garbage-in",
+            definitionId: 147,
             title: "Garbage In",
             type: "program",
             known: true,
@@ -392,7 +449,7 @@ function inputWithRunnerVirusCounters(
           } as VisibleCard)
         : ({
             instanceId: "generic-virus-pressure",
-            definitionId: "test_generic_virus_pressure",
+            definitionId: syntheticCardDefinitionId("test_generic_virus_pressure"),
             title: "Generic Virus Pressure",
             type: "program",
             known: true,
@@ -402,7 +459,7 @@ function inputWithRunnerVirusCounters(
   );
   input.playerView.publicEvents = [
     {
-      eventId: "rd-run",
+      eventId: 3,
       type: "action_resolved",
       stateVersionBefore: 1,
       stateVersionAfter: 2,

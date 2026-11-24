@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { describe, expect, it, vi } from "vitest";
 
@@ -9,7 +10,7 @@ describe("Corp visible tag punish opportunities", () => {
     const context = createCorpVisibleTagPunishOpportunityContext({
       corpPunishKindForAction: classify,
       corpVisibleTagPayoffCategoryForAction: () => "damage",
-      sourceDefinitionIdForAction: () => "card",
+      sourceDefinitionIdForAction: () => syntheticCardDefinitionId("card"),
     });
     const input = {
       side: "corp",

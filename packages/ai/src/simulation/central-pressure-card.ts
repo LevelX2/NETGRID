@@ -1,4 +1,4 @@
-import { createAiHintsByCard } from "../ai-hints";
+import { AI_HINTS_BY_CARD } from "../ai-hints";
 import { cardRolesForId } from "../runtime/card-role-lookup";
 import { rolesMatch } from "../role-match";
 import { isRunnerPressureRole } from "../runtime/runner-role-classification";
@@ -6,15 +6,11 @@ import type { CentralServerId } from "../runtime/server-target";
 import { sortedUnique } from "../runtime/collection";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { definitionTypeForMetrics } from "./card-metric-lookup";
-import {
-  assessKnownRezzedIcePath,
-  runnerRunPathCreditBudgetWithVisiblePools,
-} from "../visible-run-analysis";
-
-const CENTRAL_PRESSURE_AI_HINTS = createAiHintsByCard();
+import { assessKnownRezzedIcePath } from "../visible-run-analysis";
+import { quoteVisibleRunnerPathForMetrics } from "./visible-run-path-for-metrics";
 
 export function isCentralPressureCardForMetrics(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
   installedOnly: boolean,
 ): boolean {
   if (!definitionId) return false;
@@ -26,18 +22,18 @@ export function isCentralPressureCardForMetrics(
 }
 
 export function centralPressureTargetsForCard(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CentralServerId[] {
   if (!definitionId) return [];
   const roles = centralPressureRolesForCard(definitionId);
   const targets: CentralServerId[] = [];
   if (
-    definitionId === "onr_v1_139_r-and-d-interface" ||
+    definitionId === 351 ||
     rolesMatch(roles, ["pressure_rnd", "rnd_pressure"])
   )
     targets.push("rd");
   if (
-    definitionId === "onr_v1_129_hq-interface" ||
+    definitionId === 341 ||
     rolesMatch(roles, ["pressure_hq", "hq_pressure"])
   )
     targets.push("hq");
@@ -46,17 +42,17 @@ export function centralPressureTargetsForCard(
     targets.length === 0 &&
     rolesMatch(roles, ["multiaccess"]) &&
     [
-      "onr_v1_024_expert-schedule-analyzer",
-      "onr_v1_041_microtech-ai-interface",
-      "onr_v1_105_priority-wreck",
+      236,
+      253,
+      317,
     ].includes(definitionId)
   )
     targets.push("rd", "hq");
   return sortedUnique(targets) as CentralServerId[];
 }
 
-function centralPressureRolesForCard(definitionId: string): string[] {
-  return cardRolesForId(definitionId, CENTRAL_PRESSURE_AI_HINTS);
+function centralPressureRolesForCard(definitionId: number): string[] {
+  return cardRolesForId(definitionId, AI_HINTS_BY_CARD);
 }
 
 export function centralPressureTargetIsGoodForMetrics(
@@ -66,17 +62,18 @@ export function centralPressureTargetIsGoodForMetrics(
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === target,
   );
-  if (!server) return false;
-  const assessment = assessKnownRezzedIcePath(
-    server.ice,
-    input.playerView.own.rig ?? [],
-    runnerRunPathCreditBudgetWithVisiblePools(
-      input.playerView.own.credits,
-      input.playerView.own.rig ?? [],
-    ),
-    server.root,
+  if (
+    !server ||
+    (target === "hq" && input.playerView.opponent.handCount === 0) ||
+    (target === "rd" && input.playerView.opponent.deckCount === 0)
+  )
+    return false;
+  const assessment = quoteVisibleRunnerPathForMetrics(
+    input,
+    server,
+    assessKnownRezzedIcePath,
   );
-  if (assessment.blocked) return false;
+  if (!assessment.canReachAccess) return false;
   const cheap =
     (assessment.visibleBreakCost ?? 0) <= 1 || server.ice.length === 0;
   if (!cheap) return false;

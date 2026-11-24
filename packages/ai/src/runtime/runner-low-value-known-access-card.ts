@@ -1,12 +1,12 @@
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { RUNTIME_CARDS } from "../ai-hints";
 
 export function isLowValueKnownAccessCard(
-  definitionId: string,
+  definitionId: number,
   runnerCredits: number,
 ): boolean {
   const runtimeDefinition = RUNTIME_CARDS[definitionId];
-  const demoDefinition = CARD_DEFINITIONS_BY_ID[definitionId];
+  const demoDefinition = planningCardFactsByDefinitionId(definitionId);
   const type = runtimeDefinition?.type ?? demoDefinition?.type;
   if (!type) return false;
   if (type === "agenda") return false;

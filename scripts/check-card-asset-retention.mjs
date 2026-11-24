@@ -10,6 +10,7 @@ const manifestPath = path.join(skinRoot, "cards.de.json");
 const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
 const findings = [];
 const printingIds = new Set();
+const cardIds = new Set();
 
 if (manifest.sourceRegistry !== "@netgrid/catalog#createRuntimeCardsById") {
   findings.push(
@@ -18,6 +19,9 @@ if (manifest.sourceRegistry !== "@netgrid/catalog#createRuntimeCardsById") {
 }
 
 for (const card of manifest.cards ?? []) {
+  if (!Number.isSafeInteger(card.cardId) || card.cardId <= 0 || cardIds.has(card.cardId))
+    findings.push(`${card.cardId}: ungueltige oder doppelte Definitions-ID`);
+  cardIds.add(card.cardId);
   if (typeof card.printingId !== "string" || card.printingId.length === 0) {
     findings.push(`${card.cardId}: printingId fehlt`);
   } else if (printingIds.has(card.printingId)) {

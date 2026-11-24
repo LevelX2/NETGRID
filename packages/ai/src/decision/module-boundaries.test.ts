@@ -896,49 +896,11 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
-  it("keeps corp board triage and scoreline safety behind runtime owners", () => {
+  it("keeps Corp board triage behind its runtime owner", () => {
     const allowedFilesBySymbol = new Map<string, Set<string>>([
       [
         "semanticRuntimeCorpBoardTriage",
-        new Set([
-          "runtime/semantic-runtime-corp-board-triage.ts",
-          "runtime/semantic-runtime-corp-score.ts",
-        ]),
-      ],
-      [
-        "semanticRuntimeCorpActionIsScoreLine",
-        new Set([
-          "runtime/semantic-runtime-corp-board.ts",
-          "runtime/semantic-runtime-corp-board-context.ts",
-          "runtime/semantic-runtime-corp-board-score-composition.ts",
-          "runtime/semantic-runtime-corp-scoring-composition.ts",
-        ]),
-      ],
-      [
-        "semanticRuntimeCorpRemoteHasScoreLine",
-        new Set([
-          "runtime/semantic-runtime-corp-board.ts",
-          "runtime/semantic-runtime-corp-board-context.ts",
-          "runtime/semantic-runtime-corp-board-score-composition.ts",
-          "runtime/semantic-runtime-corp-scoring-composition.ts",
-        ]),
-      ],
-      [
-        "semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine",
-        new Set([
-          "runtime/semantic-runtime-corp-risk.ts",
-          "runtime/semantic-runtime-corp-risk-context.ts",
-          "runtime/semantic-runtime-corp-board-score-composition.ts",
-          "runtime/semantic-runtime-corp-scoring-composition.ts",
-        ]),
-      ],
-      [
-        "semanticRuntimeCorpScoreNowSafetyGate",
-        new Set([
-          "runtime/semantic-runtime-corp-score-safety.ts",
-          "runtime/semantic-runtime-corp-score-safety-context.ts",
-          "runtime/semantic-runtime-corp-scoring-evidence-composition.ts",
-        ]),
+        new Set(["runtime/semantic-runtime-corp-board-triage.ts"]),
       ],
     ]);
     const allowedOwnerDirectoryBySymbol = new Map<string, string>([
@@ -962,7 +924,7 @@ describe("AI module boundaries", () => {
               return [];
             }
             return [
-              `${relative} references ${symbol} outside corp board triage or scoreline safety ownership`,
+              `${relative} references ${symbol} outside Corp board triage ownership`,
             ];
           },
         );
@@ -987,7 +949,6 @@ describe("AI module boundaries", () => {
         new Set([
           "decision/target-choice-shadow.ts",
           "decision/semantic-shadow-decision.ts",
-          "diagnostics/semantic-runtime-debug.ts",
         ]),
       ],
       [
@@ -1055,76 +1016,7 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
-  it("keeps corp economy reserve and rez-floor scoring behind runtime owners", () => {
-    const allowedFilesBySymbol = new Map<string, Set<string>>([
-      [
-        "semanticRuntimeCorpRemoteRezFloorAssessment",
-        new Set([
-          "runtime/semantic-runtime-corp-rez-floor.ts",
-          "runtime/semantic-runtime-corp-rez-floor-context.ts",
-          "runtime/semantic-runtime-corp-funding-contestability-composition.ts",
-          "runtime/semantic-runtime-corp-board-score-composition.ts",
-          "runtime/semantic-runtime-corp-scoring-composition.ts",
-        ]),
-      ],
-      [
-        "semanticRuntimeCorpHasRemoteRezFloorFundingNeed",
-        new Set([
-          "runtime/semantic-runtime-corp-rez-floor.ts",
-          "runtime/semantic-runtime-corp-rez-floor-context.ts",
-          "runtime/semantic-runtime-corp-funding-contestability-composition.ts",
-          "runtime/semantic-runtime-corp-board-score-composition.ts",
-          "runtime/semantic-runtime-corp-scoring-composition.ts",
-        ]),
-      ],
-      [
-        "semanticRuntimeCorpCentralRezReserveAssessment",
-        new Set([
-          "runtime/semantic-runtime-corp-central-rez-context.ts",
-          "runtime/semantic-runtime-corp-funding-contestability-composition.ts",
-          "runtime/semantic-runtime-corp-board-score-composition.ts",
-          "runtime/semantic-runtime-corp-scoring-composition.ts",
-        ]),
-      ],
-      [
-        "semanticRuntimeCorpHasCentralRezFloorFundingNeed",
-        new Set([
-          "runtime/semantic-runtime-corp-central-rez-context.ts",
-          "runtime/semantic-runtime-corp-funding-contestability-composition.ts",
-          "runtime/semantic-runtime-corp-board-score-composition.ts",
-          "runtime/semantic-runtime-corp-scoring-composition.ts",
-        ]),
-      ],
-      [
-        "semanticRuntimeCorpPassiveScoreLinePenalty",
-        new Set([
-          "runtime/semantic-runtime-corp-passive-scoreline.ts",
-          "runtime/semantic-runtime-corp-passive-scoreline-context.ts",
-          "runtime/semantic-runtime-corp-scoring-evidence-composition.ts",
-        ]),
-      ],
-    ]);
-    const violations = collectSourceFiles(srcDir)
-      .filter((file) => !file.endsWith(".test.ts"))
-      .flatMap((file) => {
-        const content = readFileSync(file, "utf8");
-        const relative = relativeFile(file);
-        return [...allowedFilesBySymbol.entries()].flatMap(
-          ([symbol, allowedFiles]) => {
-            if (!content.includes(symbol) || allowedFiles.has(relative)) {
-              return [];
-            }
-            return [
-              `${relative} references ${symbol} outside corp economy reserve or rez-floor ownership`,
-            ];
-          },
-        );
-      });
-
-    expect(violations).toEqual([]);
-  });
-
-  it("keeps plan continuity and plan-memory exclusions behind their owners", () => {
+  it("keeps plan continuity behind its owner", () => {
     const allowedFilesBySymbol = new Map<string, Set<string>>([
       [
         "progressTacticalPlans",
@@ -1135,23 +1027,6 @@ describe("AI module boundaries", () => {
         "planCanMapToCurrentAction",
         new Set(["plans/tactical-plan-progression.ts"]),
       ],
-      [
-        "createSemanticRuntimePlanMemoryExclusionContext",
-        new Set([
-          "runtime/semantic-runtime-plan-memory-exclusion.ts",
-          "runtime/runner-economy-commitment-composition.ts",
-        ]),
-      ],
-      [
-        "semanticRuntimePlanMemoryActionExclusion",
-        new Set([
-          "runtime/semantic-runtime-plan-memory-exclusion.ts",
-          "runtime/runner-economy-commitment-composition.ts",
-          "runtime/runner-development-support-composition.ts",
-          "runtime/ai-live-runtime-composition.ts",
-          "simulation/ai-runtime-simulation-composition.ts",
-        ]),
-      ],
     ]);
     const violations = collectSourceFiles(srcDir)
       .filter((file) => !file.endsWith(".test.ts"))
@@ -1164,7 +1039,7 @@ describe("AI module boundaries", () => {
               return [];
             }
             return [
-              `${relative} references ${symbol} outside plan continuity or plan-memory ownership`,
+              `${relative} references ${symbol} outside plan continuity ownership`,
             ];
           },
         );

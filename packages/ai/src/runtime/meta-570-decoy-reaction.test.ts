@@ -48,7 +48,7 @@ it("exposes the current ICE without projecting another run, then completes the s
     if (n === 0) {
       expect(projectRunnerRunActions({ input })).toEqual([]);
       expect(
-        input.playerView.servers.find((s: any) => s.id === "remote_2").ice[
+        input.playerView.servers.find((s: any) => s.id === "r2").ice[
           input.playerView.run.position.iceIndex
         ].definitionId,
       ).toBeUndefined();

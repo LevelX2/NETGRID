@@ -13,7 +13,7 @@ export function countRunnerCoverageConversions(
     return nextEntries(sequence, index, 6).some(
       (later) =>
         later.side === "runner" &&
-        later.actionType === "start_run" &&
+        later.runnerRunStarted === true &&
         (isMeaningfulBoardProgress(later) ||
           later.runnerPhaseExitToPressure === true ||
           later.runnerRemoteRunAgainstAdvancedRemote === true ||
@@ -45,9 +45,17 @@ export function countRunnerPressureWithinOwnActions(
   }).length;
 }
 
+type BooleanSimulationMetric = {
+  [Key in keyof AiSimulationActionSequenceEntry]-?: NonNullable<
+    AiSimulationActionSequenceEntry[Key]
+  > extends boolean
+    ? Key
+    : never;
+}[keyof AiSimulationActionSequenceEntry];
+
 export function countRunnerEconomySetupMetric(
   sequence: AiSimulationActionSequenceEntry[],
-  metric: keyof AiSimulationActionSequenceEntry,
+  metric: BooleanSimulationMetric,
 ): number {
   return sequence.filter((entry) => entry[metric] === true).length;
 }
@@ -71,7 +79,7 @@ export function countRunnerSearchRecoveryNoInstallFollowup(
       if (candidate.side !== "runner") continue;
       ownActions += 1;
       if (candidate.actionType === "install_card") return false;
-      if (candidate.actionType === "start_run") return false;
+      if (candidate.runnerRunStarted === true) return false;
       if (ownActions >= 3) return true;
     }
     return ownActions > 0;

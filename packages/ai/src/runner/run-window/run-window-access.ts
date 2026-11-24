@@ -1,3 +1,4 @@
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { type AiDecisionInput } from "@netgrid/shared";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { type RunnerRunAccessCommitmentSignal } from "../../plans/runner-tactical-plan-contracts";
@@ -10,7 +11,9 @@ export function currentAccessWindowCommitment(
   parentCommitment: RunnerRunAccessCommitmentSignal | undefined,
 ): RunnerRunAccessCommitmentSignal | undefined {
   const trashAction = input.legalActions.find(
-    (action) => action.type === "trash_accessed_card",
+    (action) =>
+      action.type === "trash_accessed_card" &&
+      actionMatchesCurrentDecision(input, action),
   );
   if (!trashAction) return parentCommitment;
   const accessedDefinitionId = input.playerView.run?.accessedCard?.definitionId;
@@ -33,7 +36,7 @@ export function currentAccessWindowCommitment(
       payoff: "trash_affordable",
       intendedAction: "trash",
       knownTargetDefinitionIds: [accessedDefinitionId],
-      trashBudget: impact.trashCost,
+      trashBudget: impact.generalCreditCost,
       evidenceCode: "access_window_canonical_impact_trash",
     };
   }

@@ -1,5 +1,5 @@
 import type {
-  LegalAction,
+  MatchEventId,
   PlayerView,
   PublicGameEvent,
   Side,
@@ -10,6 +10,7 @@ import type {
   ApiLobbyPresentationDescriptor,
   ApiUserErrorPayload,
 } from "./presentation-contracts";
+import type { OfferedPlayerView } from "./match-offer-contracts";
 
 export type ApiMatchStatus =
   | "pending"
@@ -54,7 +55,7 @@ export type ApiPublicMatchListEntry = {
 
 export type ApiReplayAnalysisFrame = {
   index: number;
-  sourceEventId?: string;
+  sourceEventId?: MatchEventId;
   stateVersion: number;
   stateHash: string;
   stateHashVerified: boolean;
@@ -152,6 +153,7 @@ export type ApiGameResultSummary = {
   successfulRunCount: number;
   stolenAgendaCount: number;
   scoredAgendaCount: number;
+  playerTimeMs?: Record<Side, number>;
   startedAt: string;
   finishedAt: string;
   finalStateHash: string;
@@ -280,6 +282,7 @@ export type ApiMatchResultSnapshot = {
   successfulRunCount?: number;
   stolenAgendaCount?: number;
   scoredAgendaCount?: number;
+  playerTimeMs?: Record<Side, number>;
   finalStateHash: string;
   series?: {
     seriesId: string;
@@ -367,7 +370,7 @@ export type ApiLifecycleResultSummary = {
 export type ApiPendingUndoRequest = {
   undoRequestId: string;
   requestedBy: Side;
-  targetEventId: string;
+  targetEventId: MatchEventId;
   reason?: string;
 };
 
@@ -427,11 +430,8 @@ export type ApiSidePayload = {
   matchVersion: number;
   isPublic: boolean;
   side: Side;
-  playerView: PlayerView;
-  legalActions: LegalAction[];
-  eventTail: PublicGameEvent[];
+  playerView: OfferedPlayerView;
   opponentStatus: ApiOpponentStatus;
-  pendingChoice?: PlayerView["pendingChoice"];
   pendingUndo?: ApiPendingUndoRequest & { needsResponse: boolean };
   aiTurnPresentation?: ApiAiTurnPresentationState;
   playerClock?: ApiPlayerClockSnapshot;
@@ -466,37 +466,9 @@ export type ApiServicePayload = ApiSidePayload | ApiLobbyPayload;
 
 export type ApiServerMessage =
   | { type: "match_joined"; payload: { matchId: string; side: Side } }
-  | {
-      type: "state_update";
-      payload: {
-        matchStatus: ApiMatchStatus;
-        matchVersion: number;
-        playerView: PlayerView;
-        playerClock?: ApiPlayerClockSnapshot;
-        pendingUndo?: NonNullable<ApiSidePayload["pendingUndo"]> | null;
-      };
-    }
+  | { type: "state_update"; payload: ApiSidePayload }
   | { type: "lobby_update"; payload: ApiLobbyPayload }
-  | {
-      type: "legal_actions";
-      payload: { stateVersion?: number; legalActions: LegalAction[] };
-    }
-  | { type: "event_log_update"; payload: { events: PublicGameEvent[] } }
   | { type: "opponent_status"; payload: ApiOpponentStatus }
-  | {
-      type: "undo_request";
-      payload: NonNullable<ApiSidePayload["pendingUndo"]>;
-    }
-  | { type: "ai_turn"; payload: ApiAiTurnPresentationState | null | undefined }
-  | {
-      type: "match_finished";
-      payload: {
-        matchStatus: ApiMatchStatus;
-        winner: Winner;
-        finalStateHash: string;
-        resultSummary?: ApiGameResultSummary;
-      };
-    }
   | {
       type: "error";
       payload: ApiUserErrorPayload;
@@ -514,10 +486,6 @@ export type ApiServerMessage =
         stateHashAfter?: string;
       };
     }
-  | {
-      type: "choice_request";
-      payload: { choice: PlayerView["pendingChoice"] | null };
-    }
   | { type: "pong"; payload: { clientTime?: number; serverTime: number } };
 
 export type ApiCreateMatchResponse = {
@@ -531,8 +499,7 @@ export type ApiCreateMatchResponse = {
   joinUrl?: string;
   webSocketUrl: string;
   mode: ApiMatchMode;
-  playerView?: PlayerView;
-  legalActions: LegalAction[];
+  playerView?: OfferedPlayerView;
   matchVersion: number;
   lobby?: ApiMatchStartLobbyPayload;
   playerClock?: ApiPlayerClockSnapshot;
@@ -552,8 +519,7 @@ export type ApiJoinMatchResponse = {
   sessionToken: string;
   reconnectToken: string;
   webSocketUrl: string;
-  playerView?: PlayerView;
-  legalActions: LegalAction[];
+  playerView?: OfferedPlayerView;
   matchVersion: number;
   matchStatus?: ApiMatchStatus;
   lobby?: ApiMatchStartLobbyPayload;

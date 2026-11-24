@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_079_bodyweight-synthetic-blood"),
+    cardDefinitionId: cardDefinitionId(291),
     title: "Bodyweight™ Synthetic Blood",
     side: "runner",
     cardType: "event",

@@ -73,7 +73,11 @@ export function corpScoreFundingMilestone(
   ) {
     return undefined;
   }
-  const protectionFundingGap = knownScoreProtectionFundingGap(signal);
+  const protectionFundingGap =
+    protection?.knowledge === "known" &&
+    protection.availableCorpCredits === observedCredits
+      ? knownScoreProtectionFundingGap(signal)
+      : undefined;
   const fundingOptions = [routeFundingGap, protectionFundingGap ?? 0].filter(
     (gap) => gap > 0,
   );
@@ -100,7 +104,8 @@ export function corpScoreFundingMilestone(
     conversionTarget,
     continuationTarget,
   );
-  if (targetCredits <= 0) return undefined;
+  if (!Number.isSafeInteger(targetCredits) || targetCredits <= 0)
+    return undefined;
   const priorityClass = corpScorePriorityClass(signal);
   const basis: CorpScoreFundingMilestone["basis"] =
     targetCredits === incrementalFundingTarget &&
@@ -136,7 +141,6 @@ export function corpScoreFundingMilestone(
 export type CorpScoreFundingSpendAssessment = Readonly<{
   preservesMilestone: boolean;
   protectedCredits: number;
-  availableCreditsAfterAction: number;
   projectId?: string;
 }>;
 
@@ -188,7 +192,6 @@ export function assessCorpSpendAgainstScoreFundingMilestones(params: {
     return {
       preservesMilestone: true,
       protectedCredits: 0,
-      availableCreditsAfterAction: params.currentCredits,
     };
   }
   const protectedCredits = Math.min(
@@ -201,14 +204,11 @@ export function assessCorpSpendAgainstScoreFundingMilestones(params: {
     params.actionCreditCost >= 0
       ? params.actionCreditCost
       : undefined;
-  const availableCreditsAfterAction =
-    exactCost === undefined
-      ? Number.NEGATIVE_INFINITY
-      : params.currentCredits - exactCost;
   return {
-    preservesMilestone: availableCreditsAfterAction >= protectedCredits,
+    preservesMilestone:
+      exactCost !== undefined &&
+      params.currentCredits - exactCost >= protectedCredits,
     protectedCredits,
-    availableCreditsAfterAction,
     projectId: claim.project.projectId,
   };
 }

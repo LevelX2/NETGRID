@@ -23,7 +23,7 @@ import {
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   options: Partial<CardInstance> = {},
 ): CardInstance {
   return {
@@ -40,7 +40,7 @@ function instance(
 }
 
 function definition(
-  id: string,
+  id: number,
   options: Partial<CardDefinition> = {},
 ): CardDefinition {
   return {
@@ -54,10 +54,10 @@ function definition(
 
 function makeState(
   options: {
-    iceDefinitionId?: string;
+    iceDefinitionId?: number;
     iceRezzed?: boolean;
-    rootDefinitionId?: string;
-    runnerProgramDefinitionId?: string;
+    rootDefinitionId?: number;
+    runnerProgramDefinitionId?: number;
     phase?: NonNullable<GameState["run"]>["phase"];
     timingPoint?: GameState["timingPoint"];
     activeSide?: GameState["activeSide"];
@@ -67,10 +67,10 @@ function makeState(
   const iceId = "ice_1" as CardInstanceId;
   const rootId = "root_1" as CardInstanceId;
   const programId = "program_1" as CardInstanceId;
-  const rootDefinitionId = options.rootDefinitionId ?? "simple_upgrade";
+  const rootDefinitionId = options.rootDefinitionId ?? 606;
   const runnerProgramDefinitionId = options.runnerProgramDefinitionId;
   const cardInstances: Record<CardInstanceId, CardInstance> = {
-    [iceId]: instance(iceId, options.iceDefinitionId ?? "simple_ice", {
+    [iceId]: instance(iceId, options.iceDefinitionId ?? 2394377751, {
       rezzed: options.iceRezzed ?? true,
     }),
     [rootId]: instance(rootId, rootDefinitionId, {
@@ -124,7 +124,7 @@ function makeState(
     },
     cardInstances,
     run: {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "rd",
       phase: options.phase ?? "approach_ice",
       position:
@@ -145,22 +145,19 @@ function makeState(
 
 function definitionsFor(state: GameState): Record<string, CardDefinition> {
   const definitions: Record<string, CardDefinition> = {
-    simple_ice: definition("simple_ice"),
-    simple_sentry: definition("simple_sentry", { subtypes: ["sentry"] }),
-    simple_upgrade: definition("simple_upgrade", {
+    2394377751: definition(2394377751),
+    3585206199: definition(3585206199, { subtypes: ["sentry"] }),
+    simple_upgrade: definition(606, {
       title: "Simple Upgrade",
       type: "upgrade",
     }),
-    "onr_v1_260_pocket-virtual-reality": definition(
-      "onr_v1_260_pocket-virtual-reality",
-      { title: "Pocket Virtual Reality" },
-    ),
-    onr_v1_065_smarteye: definition("onr_v1_065_smarteye", {
+    472: definition(472, { title: "Pocket Virtual Reality" }),
+    onr_v1_065_smarteye: definition(277, {
       title: "Smarteye",
       side: "runner",
       type: "program",
     }),
-    "onr_v1_067_speed-trap": definition("onr_v1_067_speed-trap", {
+    279: definition(279, {
       title: "Speed Trap",
       side: "runner",
       type: "program",
@@ -245,12 +242,11 @@ function runnerAction(
 
 describe("encounter entry", () => {
   it("initializes encounter state for the approached ICE", () => {
-    const state = makeState({ iceDefinitionId: "simple_ice" });
+    const state = makeState({ iceDefinitionId: 2394377751 });
     state.run!.nextEncounterNoBreakSubroutines = true;
     state.run!.nextEncounterJackOutLock = true;
     state.run!.nextEncounterFatalDamage = 2;
-    state.run!.nextEncounterFatalDamageSourceDefinitionId =
-      "fatal_source" as never;
+    state.run!.nextEncounterFatalDamageSourceDefinitionId = 2126181695;
     const { host } = hostFor(state);
 
     const result = beginEncounter(host, "ice_1" as CardInstanceId);
@@ -259,7 +255,7 @@ describe("encounter entry", () => {
       handled: true,
       encounterStarted: true,
       iceId: "ice_1",
-      sourceDefinitionId: "simple_ice",
+      sourceDefinitionId: 2394377751,
     });
     expect(state.run).toMatchObject({
       phase: "encounter_ice",
@@ -271,7 +267,7 @@ describe("encounter entry", () => {
       jackOutLockedUntilEncounterEnds: true,
       fatalDamageActiveForEncounter: true,
       fatalDamageAmountForEncounter: 2,
-      fatalDamageSourceDefinitionId: "fatal_source",
+      fatalDamageSourceDefinitionId: 2126181695,
       nextEncounterFatalDamage: 0,
     });
     expect(state.timingPoint).toBe("run.encounter_ice");
@@ -279,7 +275,7 @@ describe("encounter entry", () => {
   });
 
   it("consumes Social Engineering only after entering the chosen ICE encounter", () => {
-    const state = makeState({ iceDefinitionId: "simple_ice" });
+    const state = makeState({ iceDefinitionId: 2394377751 });
     state.run!.secretSpendGuessRunAutoPassIceId = "ice_1" as CardInstanceId;
     const { host } = hostFor(state);
     const firstAction = runnerAction(state);
@@ -299,7 +295,7 @@ describe("encounter entry", () => {
     expect(firstAction.payload).toMatchObject({
       autoPassChosenIce: true,
       secretSpendGuessRunAutoPassedIce: true,
-      targetCardDefinitionId: "simple_ice",
+      targetCardDefinitionId: 2394377751,
     });
 
     state.run!.phase = "approach_ice";
@@ -320,7 +316,7 @@ describe("encounter entry", () => {
   });
 
   it("attaches a paid run-wide encounter tax and its public ICE target to the entry action", () => {
-    const state = makeState({ iceDefinitionId: "simple_ice" });
+    const state = makeState({ iceDefinitionId: 2394377751 });
     state.run!.encounterTaxForFutureIce = 2;
     state.run!.encounterTaxSourceDefinitionId = "tax_source" as never;
     const { host, calls } = hostFor(state);
@@ -331,20 +327,20 @@ describe("encounter entry", () => {
     expect(result).toMatchObject({
       handled: true,
       encounterStarted: true,
-      sourceDefinitionId: "simple_ice",
+      sourceDefinitionId: 2394377751,
     });
     expect(state.runner.credits).toBe(3);
     expect(legalAction.payload).toMatchObject({
       encounterTaxForFutureIce: 2,
       encounterTaxPaid: 2,
       encounterTaxSource: "tax_source",
-      targetIceDefinitionId: "simple_ice",
+      targetIceDefinitionId: 2394377751,
     });
     expect(calls.finish).toEqual([]);
   });
 
   it("binds pending next-sentry free breaks only to the next encountered ICE", () => {
-    const sentryState = makeState({ iceDefinitionId: "simple_sentry" });
+    const sentryState = makeState({ iceDefinitionId: 3585206199 });
     sentryState.run!.breakerState = {
       strengthModifiersByBreakerInstanceId: {},
       brokenSubroutineCountByBreakerInstanceId: {},
@@ -352,7 +348,7 @@ describe("encounter entry", () => {
         {
           sourceBreakerInstanceId: "bulldozer",
           sourceAbilityId:
-            "onr_proteus_082_bulldozer:break_wall_with_stealth_tradeoff_and_sentry_reward",
+            190,
           iceSubtype: "sentry",
           remainingUses: 1,
           mustBeNextEncounteredIce: true,
@@ -364,7 +360,7 @@ describe("encounter entry", () => {
       sentryState.run?.breakerState?.pendingFreeBreaks[0]?.targetIceId,
     ).toBe("ice_1");
 
-    const nonSentryState = makeState({ iceDefinitionId: "simple_ice" });
+    const nonSentryState = makeState({ iceDefinitionId: 2394377751 });
     nonSentryState.run!.breakerState = {
       strengthModifiersByBreakerInstanceId: {},
       brokenSubroutineCountByBreakerInstanceId: {},
@@ -372,7 +368,7 @@ describe("encounter entry", () => {
         {
           sourceBreakerInstanceId: "bulldozer",
           sourceAbilityId:
-            "onr_proteus_082_bulldozer:break_wall_with_stealth_tradeoff_and_sentry_reward",
+            190,
           iceSubtype: "sentry",
           remainingUses: 1,
           mustBeNextEncounteredIce: true,
@@ -382,7 +378,7 @@ describe("encounter entry", () => {
     beginEncounter(hostFor(nonSentryState).host, "ice_1" as CardInstanceId);
     expect(nonSentryState.run?.breakerState?.pendingFreeBreaks).toEqual([]);
 
-    const laterSentryState = makeState({ iceDefinitionId: "simple_sentry" });
+    const laterSentryState = makeState({ iceDefinitionId: 3585206199 });
     laterSentryState.run!.breakerState = {
       strengthModifiersByBreakerInstanceId: {},
       brokenSubroutineCountByBreakerInstanceId: {},
@@ -390,7 +386,7 @@ describe("encounter entry", () => {
         {
           sourceBreakerInstanceId: "bulldozer",
           sourceAbilityId:
-            "onr_proteus_082_bulldozer:break_wall_with_stealth_tradeoff_and_sentry_reward",
+            190,
           iceSubtype: "sentry",
           remainingUses: 1,
           mustBeNextEncounteredIce: true,
@@ -404,7 +400,7 @@ describe("encounter entry", () => {
 
   it("sets Pocket Virtual Reality encounter trace credits without running cleanup", () => {
     const state = makeState({
-      iceDefinitionId: "onr_v1_260_pocket-virtual-reality",
+      iceDefinitionId: 472,
     });
     const { host, calls } = hostFor(state);
     const legalAction = runnerAction(state);
@@ -414,18 +410,17 @@ describe("encounter entry", () => {
     expect(result).toMatchObject({
       handled: true,
       temporaryTraceCredits: 4,
-      sourceDefinitionId: "onr_v1_260_pocket-virtual-reality",
+      sourceDefinitionId: 472,
     });
     expect(state.run?.encounterTemporaryTraceCredits).toEqual({
       sourceIceId: "ice_1",
-      sourceDefinitionId: "onr_v1_260_pocket-virtual-reality",
+      sourceDefinitionId: 472,
       remaining: 4,
       usableFor: "this_ice_printed_trace_subroutines",
     });
     expect(legalAction.payload).toMatchObject({
       temporaryTraceCredits: 4,
-      temporaryTraceCreditsSourceDefinitionId:
-        "onr_v1_260_pocket-virtual-reality",
+      temporaryTraceCreditsSourceDefinitionId: 472,
     });
     expect(calls.finish).toEqual([]);
   });
@@ -449,7 +444,7 @@ describe("encounter entry", () => {
   it("builds and resolves Smarteye approach-expose without leaking extra state", () => {
     const state = makeState({
       iceRezzed: false,
-      runnerProgramDefinitionId: "onr_v1_065_smarteye",
+      runnerProgramDefinitionId: 277,
     });
     const { host } = hostFor(state);
 
@@ -477,8 +472,8 @@ describe("encounter entry", () => {
       hiddenZoneBarrier: true,
       hiddenZoneAction: "approach_ice_expose",
       publicRevealKind: "expose",
-      publicRevealDefinitionId: "simple_ice",
-      exposedCardDefinitionId: "simple_ice",
+      publicRevealDefinitionId: 2394377751,
+      exposedCardDefinitionId: 2394377751,
     });
     expect(JSON.stringify(actions[0]!.payload)).not.toMatch(
       /"cardInstances"|"hq"|"rd"|"grip"/,

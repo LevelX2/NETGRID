@@ -1,4 +1,8 @@
-import type { creditBankReplacesBasicRunFunding } from "./credit-bank-basic-run-funding";
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
+import {
+  runnerCreditBankRunFundingClickCapacity,
+  type creditBankReplacesBasicRunFunding,
+} from "./credit-bank-basic-run-funding";
 import { createRunnerCreditDemand } from "../../plans/credit-demand";
 import { searchFundingRoutes } from "../../plans/funding-route";
 import { runnerRunTargetIsDirectlyConvertible } from "../../runtime/runner-run-funding-admission";
@@ -9,7 +13,10 @@ export function creditBankFundsKnownUrgentRun(
   params: Parameters<typeof creditBankReplacesBasicRunFunding>[0],
 ): ReturnType<typeof creditBankReplacesBasicRunFunding> {
   const { input, target, admission } = params;
-  const remainingClicks = input.playerView.own.clicks - 1;
+  const remainingClicks = runnerCreditBankRunFundingClickCapacity(
+    input,
+    target.actionId,
+  );
   if (
     !admission.admitted ||
     !admission.urgentScoreThreat ||
@@ -17,12 +24,12 @@ export function creditBankFundsKnownUrgentRun(
     !target.routeQuote ||
     target.routeQuote.unknownIceCount !== 0 ||
     target.routeQuote.conditionalReasons.length !== 0 ||
-    remainingClicks < 1 ||
+    remainingClicks === undefined ||
     params.cashOutActionIds.length === 0
   )
     return undefined;
   const needId = `run-support:remote:${target.targetServerId}`;
-  const parentPlanInstanceId = `plan:runner.contest_remote:${encodeURIComponent(`remote:${target.targetServerId}`)}`;
+  const parentPlanInstanceId = planInstanceIdForProposal({ moduleId: "runner.contest_remote", dedupeKey: `remote:${target.targetServerId}` });
   const cashOutIds = new Set(params.cashOutActionIds);
   const demand = createRunnerCreditDemand({
     demandId: needId,
@@ -50,8 +57,8 @@ export function creditBankFundsKnownUrgentRun(
     acceptRoute: (route) => {
       if (!cashOutIds.has(route.steps[0]?.actionId ?? "")) return false;
       const actionIds = route.steps.map((step) => step.actionId);
-      if (actionIds.some((id) => id === undefined)) return false;
-      const funded = params.quoteAfterCashouts(target, actionIds as string[]);
+      if (!actionIds.every((id) => id !== undefined)) return false;
+      const funded = params.quoteAfterCashouts(target, actionIds);
       return (
         funded !== undefined &&
         funded.actionId === target.actionId &&

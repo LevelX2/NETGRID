@@ -42,6 +42,7 @@ export type CorpDrawAdmissionAssessment = {
   disposition:
     | "admitted"
     | "defer_for_capacity_release"
+    | "defer_for_current_funding"
     | "blocked_attempt_budget"
     | "blocked_unknown_projection"
     | "blocked_end_turn_overflow"
@@ -77,9 +78,11 @@ export function assessCorpDrawAdmission(params: {
     knownAgendaCount: number;
     safeDiscardCandidateCount: number;
     remainingDeckCardsBeforeDraw: number;
+    mandatoryBaseDrawCount?: number | undefined;
     terminalNeedBeforeMandatoryDraw: boolean;
   };
   allowFinalClickScoreMaterialReplacement?: boolean;
+  currentFundingHeadActionId?: string;
   punishSearch?: {
     nextMandatoryDrawCount: number | undefined;
     spareNonAgendaCount: number;
@@ -144,6 +147,7 @@ export function assessCorpDrawAdmission(params: {
   const deckoutHorizonUnsafe = corpVoluntaryDrawLeavesUnsafeMandatoryHorizon({
     remainingDeckCardsBeforeDraw,
     netDeckConsumption,
+    mandatoryBaseDrawCount: params.consequenceFacts.mandatoryBaseDrawCount,
     terminalNeedBeforeMandatoryDraw,
   });
   const punishSearch = params.punishSearch;
@@ -204,11 +208,17 @@ export function assessCorpDrawAdmission(params: {
   let disposition: CorpDrawAdmissionAssessment["disposition"];
   if (params.remainingAttempts !== 1) {
     disposition = "blocked_attempt_budget";
-  } else if (!validProjection || !consequenceFactsKnown) {
+  } else if (!validProjection || !consequenceFactsKnown || clickCost > params.currentClicks) {
     disposition = "blocked_unknown_projection";
   } else if (
+    params.purpose === "score_defense_answer_search" &&
+    params.priorityClass === "P4" &&
+    params.currentFundingHeadActionId
+  ) {
+    disposition = "defer_for_current_funding";
+  } else if (
     params.purpose === "punish_component_search" &&
-    (!punishSearch || !mandatoryCountKnown || clickCost > params.currentClicks)
+    (!punishSearch || !mandatoryCountKnown)
   ) {
     disposition = "blocked_unknown_projection";
   } else if (punishSearch && punishSearch.competingActionIds.length > 0) {
@@ -318,6 +328,11 @@ export function assessCorpDrawAdmission(params: {
       `corp_draw_final_click_score_material_replacement:${
         params.allowFinalClickScoreMaterialReplacement === true
       }`,
+      ...(params.currentFundingHeadActionId
+        ? [
+            `corp_draw_competing_current_funding:${params.currentFundingHeadActionId}`,
+          ]
+        : []),
       ...(punishSearch
         ? [
             `corp_punish_next_mandatory_draw_count:${mandatoryCount ?? "unknown"}`,
@@ -334,12 +349,14 @@ export function assessCorpDrawAdmission(params: {
 export function corpVoluntaryDrawLeavesUnsafeMandatoryHorizon(params: {
   remainingDeckCardsBeforeDraw: number;
   netDeckConsumption: number;
+  mandatoryBaseDrawCount?: number | undefined;
   terminalNeedBeforeMandatoryDraw: boolean;
 }): boolean {
   return (
     nonNegativeSafeInteger(params.remainingDeckCardsBeforeDraw) &&
     Number.isSafeInteger(params.netDeckConsumption) &&
-    params.remainingDeckCardsBeforeDraw - params.netDeckConsumption < 3 &&
+    params.remainingDeckCardsBeforeDraw - params.netDeckConsumption <
+      Math.max(3, params.mandatoryBaseDrawCount ?? 0) &&
     !params.terminalNeedBeforeMandatoryDraw
   );
 }

@@ -77,7 +77,7 @@ export type ScoredAgendaActivatedAbilityHandlerResult = {
   handled: boolean;
   stateChanged?: boolean;
   sourceCardId?: CardInstanceId;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   gainedCredits?: number;
   drawCount?: number;
   removedCounters?: number;
@@ -160,10 +160,10 @@ export function buildScoredAgendaAbilityActionsForCard(
           damageAmount,
         },
       );
-      action.abilityRef = {
-        sourceCardInstanceId: agendaId,
-        sourceAbilityId: primitive.cardImplementationAbilityId as string,
-      };
+      const sourceAbilityId = primitive.cardImplementationAbilityId;
+      if (typeof sourceAbilityId !== "number")
+        throw new Error("Missing canonical scored agenda ability identity.");
+      action.abilityRef = { sourceCardInstanceId: agendaId, sourceAbilityId };
       actions.push(action);
     }
     return { handled: true, actions };
@@ -332,7 +332,7 @@ function resolveCorporateHeadhuntersAction(
     implementation.damageAmount,
   );
   let handSizeReduction = 0;
-  if (summary.cardsTrashed > 0) {
+  if (!summary.flatline && summary.cardsTrashed > 0) {
     handSizeReduction = implementation.handSizeReduction;
     host.state.runner.maxHandSize = Math.max(
       0,

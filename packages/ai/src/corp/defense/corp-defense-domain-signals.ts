@@ -1,3 +1,6 @@
+import { isRemoteServerId } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
+import { readPostInstallEffectiveRunQuote } from "../../runtime/post-install-ice-run-quote";
 import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import type { CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
 import type { CorpDefenseSignal } from "../../plans/corp-defense-contracts";
@@ -5,6 +8,7 @@ import type {
   AiDecisionInput,
   LegalAction,
   VisibleCard,
+  VisibleCorpRezCostQuote,
   VisibleEffectiveIceRunQuote,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -26,6 +30,7 @@ import {
   readCorpPublicOffServerAccessThreat,
 } from "./corp-central-defense-facts-adapter";
 import { compareExactProbabilities } from "../../runtime/corp-score-protection-assessment";
+import { terminalOffServerTraceBudget } from "./terminal-off-server-trace";
 import {
   visibleBreakerCardCanAddressIce,
   visibleBreakerRoles,
@@ -88,8 +93,8 @@ export function corpScoredAgendaIceMarkDefenseTarget(params: {
             ice.known === true &&
             ice.type === "ice" &&
             ice.rezzed === true &&
-            typeof ice.definitionId === "string" &&
-            ice.definitionId.length > 0,
+            typeof ice.definitionId === "number" &&
+            ice.definitionId > 0,
         )
         .map((ice) => {
           const defense = visibleCorpIceDefenseProfile(ice);
@@ -175,13 +180,16 @@ export function corpIceInstallPositionEffect(
     (serverId === "new_remote"
       ? typeof action.payload.postInstallRezQuoteProjectedServerId !==
           "string" ||
-        !action.payload.postInstallRezQuoteProjectedServerId.startsWith(
-          "remote_",
-        )
+        !isRemoteServerId(action.payload.postInstallRezQuoteProjectedServerId)
       : action.payload.postInstallRezQuoteProjectedServerId !== serverId)
   )
     return "unknown";
-  const quote = readPostInstallEffectiveRunQuote(action, sourceCard);
+  const quote = currentPostInstallEffectiveRunQuote(
+    input,
+    action,
+    sourceCard,
+    serverId,
+  );
   if (!quote) return "unknown";
   const conditional = quote.conditionalEncounterEffects;
   if (conditional !== undefined && !Array.isArray(conditional))
@@ -226,7 +234,12 @@ export function corpIceInstallDefenseProfile(
       "not_excluded_by_position"
   )
     return undefined;
-  const quote = readPostInstallEffectiveRunQuote(action, source);
+  const quote = currentPostInstallEffectiveRunQuote(
+    input,
+    action,
+    source,
+    serverId,
+  );
   if (!quote) return undefined;
   const profile = visibleCorpIceDefenseProfile(source, quote.subroutines);
   return {
@@ -357,7 +370,7 @@ export function corpQualitativeIceStagingSignal(
   paymentBudget?: Readonly<{ credits: number; clicks: number }>,
 ): CorpDefenseSignal | undefined {
   const isCentral = serverId === "hq" || serverId === "rd";
-  const isExistingRemote = serverId.startsWith("remote_");
+  const isExistingRemote = isRemoteServerId(serverId);
   const isBoundNewRemote =
     serverId === "new_remote" && layeredParent?.kind === "remote";
   if (!isCentral && !isExistingRemote && !isBoundNewRemote) return undefined;
@@ -459,9 +472,7 @@ export function corpQualitativeIceStagingSignal(
   if (
     isBoundNewRemote &&
     (typeof action.payload.postInstallRezQuoteProjectedServerId !== "string" ||
-      !action.payload.postInstallRezQuoteProjectedServerId.startsWith(
-        "remote_",
-      ))
+      !isRemoteServerId(action.payload.postInstallRezQuoteProjectedServerId))
   ) {
     return undefined;
   }
@@ -616,14 +627,15 @@ export function corpOrderedRemoteInstallPathAssessment(
     opponent.credits,
     runnerRig,
   );
-  const postInstallEffectiveRunQuote = readPostInstallEffectiveRunQuote(
+  const postInstallEffectiveRunQuote = currentPostInstallEffectiveRunQuote(
+    input,
     action,
     sourceIce,
+    targetServerId,
   );
   if (!postInstallEffectiveRunQuote)
     return { knowledge: "unknown", reason: "incomplete_install_run_quote" };
-  // Structural staging compares the two paths without allocating a bid budget.
-  // Funding and the paid post-rez comparison belong to the funded route.
+  // Structural staging compares both paths before any Trace bid is funded.
   const traceContext = visibleIcePathTraceContext(input);
   const before = quoteCorpRemotePath({
     assessment: assessKnownRezzedIcePath(
@@ -690,38 +702,42 @@ function completeCurrentPostRezRunQuote(
     : undefined;
 }
 
-function readPostInstallEffectiveRunQuote(
+function currentPostInstallEffectiveRunQuote(
+  input: AiDecisionInput,
   action: LegalAction,
   sourceIce: VisibleCard,
+  targetServerId: string,
 ): VisibleEffectiveIceRunQuote | undefined {
-  const json = action.payload?.postInstallEffectiveRunQuoteJson;
   if (
-    typeof json !== "string" ||
     !sourceIce.definitionId ||
-    action.payload?.postInstallRezQuoteCardId !== sourceIce.instanceId ||
-    action.payload?.postInstallRezQuoteExpiresAtStateVersion !==
-      action.expiresAtStateVersion
-  ) {
+    !actionMatchesCurrentDecision(input, action) ||
+    action.type !== "install_card" ||
+    action.source !== sourceIce.instanceId ||
+    action.payload?.placement !== "ice" ||
+    action.payload.serverId !== targetServerId ||
+    !isInstallQuoteTarget(targetServerId)
+  )
     return undefined;
-  }
-  try {
-    const quote = JSON.parse(json) as Partial<VisibleEffectiveIceRunQuote>;
-    return quote.iceInstanceId === sourceIce.instanceId &&
-      quote.iceDefinitionId === sourceIce.definitionId &&
-      Number.isFinite(quote.effectiveStrength) &&
-      Array.isArray(quote.subroutines) &&
-      quote.subroutines.every(
-        (subroutine) =>
-          subroutine !== null &&
-          typeof subroutine === "object" &&
-          typeof subroutine.id === "string" &&
-          typeof subroutine.type === "string",
-      )
-      ? (quote as VisibleEffectiveIceRunQuote)
-      : undefined;
-  } catch {
-    return undefined;
-  }
+  const result = readPostInstallEffectiveRunQuote(
+    action,
+    sourceIce.instanceId,
+    sourceIce.definitionId,
+    targetServerId,
+    input.playerView.stateVersion,
+  );
+  return result?.status === "known" ? result.quote : undefined;
+}
+
+function isInstallQuoteTarget(
+  value: string,
+): value is VisibleCorpRezCostQuote["targetServerId"] {
+  return (
+    value === "hq" ||
+    value === "rd" ||
+    value === "archives" ||
+    value === "new_remote" ||
+    /^r[0-9]+$/.test(value)
+  );
 }
 
 export function corpSpendConsumesKnownCentralRezReserve(
@@ -734,6 +750,24 @@ export function corpSpendConsumesKnownCentralRezReserve(
     leavingHqCardId?: string;
   },
 ): boolean {
+  return (
+    centralRezReserveConsumedBySpend(
+      input,
+      centralAllocation,
+      creditsAfterInstall,
+      clicksAfterInstall,
+      claimScope,
+    ) !== undefined
+  );
+}
+
+function centralRezReserveConsumedBySpend(
+  input: AiDecisionInput,
+  centralAllocation: CorpCorePlanDomain["centralDefenseAllocation"],
+  creditsAfterInstall: number,
+  clicksAfterInstall: number,
+  claimScope?: Parameters<typeof corpSpendConsumesKnownCentralRezReserve>[4],
+): "hq" | "rd" | undefined {
   // Unknown global allocation does not erase independently known local
   // agenda pressure and current Engine rez quotes on either central.
   const threatenedServerIds = (["hq", "rd"] as const).filter((serverId) => {
@@ -787,7 +821,7 @@ export function corpSpendConsumesKnownCentralRezReserve(
       return [];
     return [{ gain, clicks: costs.clickCost }];
   });
-  return threatenedServerIds.some((serverId) => {
+  return threatenedServerIds.find((serverId) => {
     const server = input.playerView.servers.find(
       (candidate) => candidate.id === serverId,
     );
@@ -932,19 +966,20 @@ export function corpGlobalDefenseInstallRouteAssessment(
             "corp_ice_install_future_effect_has_no_following_encounter",
         };
   }
-  if (
-    (server?.ice.length ?? 0) > 0 &&
-    corpSpendConsumesKnownCentralRezReserve(
-      input,
-      centralAllocation,
-      available.credits - projectedInstallCredits,
-      available.clicks - projectedInstallClicks,
-    )
-  ) {
+  const threatenedCentralWithLostReserve =
+    (server?.ice.length ?? 0) > 0
+      ? centralRezReserveConsumedBySpend(
+          input,
+          centralAllocation,
+          available.credits - projectedInstallCredits,
+          available.clicks - projectedInstallClicks,
+        )
+      : undefined;
+  if (threatenedCentralWithLostReserve !== undefined) {
     return {
       knowledge: "known",
       disposition: "effect_missing",
-      evidenceCode: `corp_additional_ice_install_consumes_known_central_rez_reserve:${centralAllocation!.status === "known" ? centralAllocation!.selectedServerId : "unknown"}`,
+      evidenceCode: `corp_additional_ice_install_consumes_known_central_rez_reserve:${threatenedCentralWithLostReserve}`,
     };
   }
   const centralIceCounts = ["hq", "rd"].map(
@@ -1049,7 +1084,7 @@ export function corpGlobalDefenseInstallRouteAssessment(
     };
   }
   if (
-    serverId.startsWith("remote_") &&
+    isRemoteServerId(serverId) &&
     server?.root.length === 0 &&
     server.ice.length >= 2
   ) {
@@ -1102,7 +1137,7 @@ export function corpGlobalDefenseInstallRouteAssessment(
   };
   const hasResidentRemoteAgenda = input.playerView.servers.some(
     (candidateServer) =>
-      candidateServer.id.startsWith("remote_") &&
+      isRemoteServerId(candidateServer.id) &&
       candidateServer.root.some((card) => card.known && card.type === "agenda"),
   );
   const sourceHasNoVisibleBreakerAnswer =
@@ -1244,6 +1279,12 @@ export function corpGlobalDefenseInstallRouteAssessment(
       !hasResidentRemoteAgenda &&
       (establishesMissingCentralCoverage ||
         (hasSelectedCentralPressure && hasStructuredDefenseValue)));
+  const offServerTraceBudget =
+    server?.ice.length === 0 &&
+    !server.statuses?.some((status) => status.kind === "run_prohibited") &&
+    readCorpPublicOffServerAccessThreat(input, serverId)?.threat === "terminal"
+      ? terminalOffServerTraceBudget(input.playerView)
+      : undefined;
   const projection = projectCorpFundedIceInstallRoute({
     need,
     action,
@@ -1264,6 +1305,9 @@ export function corpGlobalDefenseInstallRouteAssessment(
     runnerCredits: input.playerView.opponent.credits,
     projectedInstallCredits,
     projectedInstallClicks,
+    ...(offServerTraceBudget
+      ? { terminalOffServerTraceBudget: offServerTraceBudget }
+      : {}),
     ...(preferQualitativeSourceProgress
       ? { preferPostInstallSourceProgress: true }
       : {}),
@@ -1274,6 +1318,20 @@ export function corpGlobalDefenseInstallRouteAssessment(
       evidenceCode: `corp_ice_install_assessment_unknown:${projection.unknownReason}`,
     };
   }
+  if (
+    projection.certifiedZeroBidTraceStopId &&
+    corpSpendConsumesKnownCentralRezReserve(
+      input,
+      centralAllocation,
+      projection.creditsAfterDefense,
+      projection.clicksAfterDefense,
+    )
+  )
+    return {
+      knowledge: "known",
+      disposition: "effect_missing",
+      evidenceCode: "corp_off_server_ice_install_consumes_central_rez_reserve",
+    };
   if (
     projection.preservesReserves &&
     (projection.effect === "progress" || projection.effect === "satisfied")

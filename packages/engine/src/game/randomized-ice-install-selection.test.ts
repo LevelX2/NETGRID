@@ -1,5 +1,6 @@
 import {
   ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION,
+  randomContextFingerprint,
   type EngineRandomizedIceInstallCandidate,
   type EngineRandomizedIceInstallSelectionCommand,
   type GameState,
@@ -50,9 +51,16 @@ describe("Engine-randomized ICE install near ties", () => {
       state.randomDrawRecords.length + 1,
     );
     expect(result.receipt.randomDraw.counter).toBe(state.randomCounter);
-    expect(result.receipt.randomDraw.purpose).toContain(
-      quoted.quote.candidateFingerprint,
-    );
+    expect(result.receipt.randomDraw.purpose).toEqual([
+      61,
+      state.stateVersion,
+      randomContextFingerprint([
+        quoted.quote.schemaVersion,
+        quoted.quote.timingPoint,
+        quoted.quote.planStepId,
+        quoted.quote.candidateFingerprint,
+      ]),
+    ]);
     expect(result.receipt.selectedCandidate).toEqual(
       expect.objectContaining({
         actionId: result.receipt.selectedLegalAction.actionId,

@@ -1,3 +1,4 @@
+import type { RandomPurpose } from "@netgrid/shared";
 import {
   type CardDefinitionId,
   type CardInstanceId,
@@ -696,7 +697,7 @@ export function createTurnCorpStartRuntimeResolvers(
         let tagsAdded = 0;
         const dieRolls: number[] = [];
         for (let index = 0; index < runCount; index += 1) {
-          const randomPurpose = `classic.satellite_monitors.corp_start.${state.stateVersion}.${cardId}.${index}`;
+          const randomPurpose: RandomPurpose = [26, state.stateVersion, cardId, index];
           const dieRoll = rollDeterministicDie(state, randomPurpose);
           dieRolls.push(dieRoll);
           if (dieRoll === recurringTracePool.tagOn) tagsAdded += 1;
@@ -980,7 +981,7 @@ export function createTurnCorpStartRuntimeResolvers(
       const sourceTitle = links.publicCardTitle(sourceDefinitionId);
       if (start.kind === "roll_per_counter_add_bad_publicity") {
         for (let index = 0; index < counterAmount; index += 1) {
-          const randomPurpose = `virus.${sourceDefinitionId}.corp_start.${state.stateVersion}.${index}`;
+          const randomPurpose: RandomPurpose = [24, sourceDefinitionId, state.stateVersion, index];
           const dieRoll = rollDeterministicDie(state, randomPurpose);
           const badPublicityAdded = start.successDieValues.includes(
             dieRoll as 5 | 6,
@@ -1001,7 +1002,7 @@ export function createTurnCorpStartRuntimeResolvers(
             remainingCounters: counterAmount,
             sourceDefinitionId,
             sourceTitle,
-            randomPurpose,
+            randomPurpose: randomPurpose[0],
             dieSize: start.dieSize,
             dieRoll,
             randomCounterAfter: state.randomCounter,
@@ -1066,7 +1067,7 @@ export function createTurnCorpStartRuntimeResolvers(
         "corp_start_turn_random_restricted_optional_action"
       )
         continue;
-      const randomPurpose = `action_economy.${definition.id}.corp_start.${state.stateVersion}.${sourceId}`;
+      const randomPurpose: RandomPurpose = [28, 1, definition.id, state.stateVersion, sourceId];
       const dieRoll = rollDeterministicDie(state, randomPurpose);
       const restriction = restrictedActionFamilyForRandomActionRoll(dieRoll);
       ensureActionEconomy(state).pendingOffer = {
@@ -1076,7 +1077,7 @@ export function createTurnCorpStartRuntimeResolvers(
         restriction,
         optional: true,
         dieRoll,
-        randomPurpose,
+        randomPurpose: randomPurpose[0],
         createdAtStateVersion: state.stateVersion,
       };
       effects?.push({
@@ -1089,7 +1090,7 @@ export function createTurnCorpStartRuntimeResolvers(
         sourceDefinitionId: definition.id,
         sourceTitle: definition.title,
         dieRoll,
-        randomPurpose,
+        randomPurpose: randomPurpose[0],
         restrictedActionFamily: restriction,
         randomCounterAfter: state.randomCounter,
       });

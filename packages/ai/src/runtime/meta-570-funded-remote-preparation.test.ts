@@ -77,7 +77,7 @@ const services = {
 };
 function preparation(input: AiDecisionInputWithDeckCapabilities) {
   const target = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.remote_2",
+    (t) => t.actionId === "rs.r2",
   )!;
   return runnerSameTurnBreakerPreparation(
     input,
@@ -116,7 +116,7 @@ it("installs the already funded decoder and wins the terminal remote contest in 
       heads.push(action.type);
       expect(
         decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-      ).toBe("plan:runner.contest_remote:remote%3Aremote_2");
+      ).toBe("p1p4x83h7yolw2hjtvi0ud06dm");
       expect(
         decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
       ).toBe(step === 0 ? "runner.rig_and_coverage" : "runner.contest_remote");
@@ -170,7 +170,7 @@ it.each([
     );
   if (boundary === "hand_buffer")
     input.playerView.own.gripOrHq = input.playerView.own.gripOrHq.filter((c) =>
-      c.definitionId?.includes("codecracker"),
+      c.definitionId === 226,
     );
   expect(preparation(input)).toBeUndefined();
 });
@@ -178,7 +178,7 @@ it.each([
 it("retains unknown-route risk and quotes the existing complete funding route", () => {
   const { input } = original();
   const hidden = input.playerView.servers
-    .find((s) => s.id === "remote_2")!
+    .find((s) => s.id === "r2")!
     .ice.find((c) => !c.known)!;
   expect(hidden.definitionId).toBeUndefined();
   hidden.instanceId = "another_opaque_inner_ice";

@@ -39,7 +39,7 @@ it.each(["sentry", "wall", "code_gate"] as const)(
     );
     const modes = input.legalActions.filter(
       (action) =>
-        action.payload?.cardId === "runner_onr_proteus_092_morphing-tool_2",
+        action.payload?.cardId === "cxe",
     );
     expect(modes.length).toBe(6);
     for (const action of modes) {
@@ -62,7 +62,7 @@ it("projects the chosen Gate mode when valuing its known Quandary path", () => {
   const action = input.legalActions.find(
     (a) =>
       a.type === "install_card" &&
-      a.payload?.cardId === "runner_onr_proteus_092_morphing-tool_2" &&
+      a.payload?.cardId === "cxe" &&
       a.payload?.selectedSubtype === "code_gate" &&
       !a.payload.runnerProgramTrashBeforeInstall,
   )!;
@@ -86,7 +86,7 @@ it("replans the historical Sentry installation with matching owner, mode and leg
   expect(action.payload?.selectedSubtype).toBe("sentry");
   expect(
     decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toBe("plan:runner.rig_and_coverage:coverage%3Abreaker_sentry");
+  ).toBe("pde8a64nmn1hkbrzgi9sbuf6fo");
   expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({
     actionId: action.actionId,
     stateVersion: 95,

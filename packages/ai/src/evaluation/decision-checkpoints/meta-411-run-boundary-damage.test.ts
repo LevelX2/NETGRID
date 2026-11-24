@@ -19,7 +19,7 @@ function capture() {
 describe("meta 411 future damage belongs to the creating run", () => {
   it("continues the real event-started contest after bypassing the source", () => {
     const { input, runtime } = capture();
-    expect(input.playerView.run?.runId).toBe("run_165");
+    expect(input.playerView.run?.runId).toBe(165);
     expect(runnerFutureEncounterDamageJackOutAssessment(input)).toBeUndefined();
     resetResidentPlanPortfolioMemory();
     restoreAiRuntimeCheckpoint(
@@ -28,14 +28,14 @@ describe("meta 411 future damage belongs to the creating run", () => {
       runtime,
     );
     const result = chooseAiAction(input, { runnerTurnPlannerMode: "cutover" });
-    expect(result.actionId).toBe("runner.continue_run");
+    expect(result.actionId).toBe("r5");
     expect(result.fallbackUsed).toBe(false);
     expect(input.legalActions.some((a) => a.actionId === result.actionId)).toBe(
       true,
     );
     expect(result.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_165",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      leafExecutorInstanceId: "p9nnwdbo834fc41tab1fat3xiu",
     });
   });
 
@@ -56,7 +56,7 @@ describe("meta 411 future damage belongs to the creating run", () => {
 
   it("does not let an unrelated event erase a current-run threat", () => {
     const { input } = capture();
-    input.playerView.run!.runId = "run_1";
+    input.playerView.run!.runId = 1;
     expect(runnerFutureEncounterDamageJackOutAssessment(input)).toBeDefined();
   });
 
@@ -65,19 +65,19 @@ describe("meta 411 future damage belongs to the creating run", () => {
     const original = input.eventTail.find(
       (e) =>
         e.type === "continue_run" &&
-        e.publicPayload?.sourceDefinitionId === "onr_v1_242_fatal-attractor" &&
+        e.publicPayload?.sourceDefinitionId === 454 &&
         e.publicPayload?.resolvedEffects?.some(
           (x) => x.kind === "resolve_subroutine",
         ),
     )!;
     const current = structuredClone(original);
-    current.eventId = "current-run-source";
+    current.eventId = 167;
     current.stateVersionBefore = 165;
     current.stateVersionAfter = 166;
     input.playerView.stateVersion = 166;
     input.eventTail.push(current);
     expect(runnerFutureEncounterDamageJackOutAssessment(input)).toMatchObject({
-      sourceDefinitionId: "onr_v1_242_fatal-attractor",
+      sourceDefinitionId: 454,
       projectedDamage: 3,
     });
   });

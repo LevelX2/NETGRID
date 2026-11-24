@@ -1,9 +1,11 @@
 "use client";
 
+import { type SelectionId } from "../../lib/presented-player-view";
 import { Check, Search, Shield, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import type { LegalAction, PlayerView, VisibleCard } from "@netgrid/shared";
+import type { VisibleCard } from "@netgrid/shared";
+import type { LegalAction, PlayerView } from "../../lib/presented-player-view";
 import { useLocale, useTranslations } from "use-intl/react";
 
 import { CardView } from "../cards/CardView";
@@ -59,8 +61,8 @@ export function SecurityPurgeChoicePanel({
   enrichCard(card: VisibleCard): DisplayVisibleCard;
   onChoiceOptions(
     action: LegalAction,
-    choiceId: string,
-    selectedOptionIds: string[],
+    choiceId: SelectionId,
+    selectedOptionIds: SelectionId[],
   ): void;
 }) {
   const t = useTranslations("Actions.securityPurge");
@@ -68,7 +70,7 @@ export function SecurityPurgeChoicePanel({
   const cards = useMemo(() => securityPurgeChoiceCards(choice), [choice]);
   const targetCards = cards.filter((card) => card.targetOptions.length > 0);
   const [selectedByCardId, setSelectedByCardId] = useState<
-    Record<string, string>
+    Record<string, SelectionId>
   >({});
 
   useEffect(() => {
@@ -77,7 +79,7 @@ export function SecurityPurgeChoicePanel({
 
   const selectedOptionIds = targetCards
     .map((card) => selectedByCardId[card.cardId])
-    .filter((optionId): optionId is string => Boolean(optionId));
+    .filter((optionId): optionId is SelectionId => optionId !== undefined);
   const canSubmit = selectedOptionIds.length === targetCards.length;
 
   const dialog = (

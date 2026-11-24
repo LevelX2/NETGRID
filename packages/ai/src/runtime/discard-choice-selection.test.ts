@@ -1,13 +1,16 @@
 import { describe, expect, it } from "vitest";
-import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
+import type { AiDecisionInput, CardDefinitionId, VisibleCard } from "@netgrid/shared";
 
 import { selectedDiscardChoiceOptionIds } from "./discard-choice-selection";
 
 describe("selectedDiscardChoiceOptionIds", () => {
   it("revalues the last remaining copy after selecting a duplicate", () => {
-    const duplicateOne = card("duplicate-1", "duplicate");
-    const duplicateTwo = card("duplicate-2", "duplicate");
-    const neutral = card("neutral-1", "neutral");
+    const duplicateId = syntheticCardDefinitionId("duplicate");
+    const neutralId = syntheticCardDefinitionId("neutral");
+    const duplicateOne = card("duplicate-1", duplicateId);
+    const duplicateTwo = card("duplicate-2", duplicateId);
+    const neutral = card("neutral-1", neutralId);
     const input = discardInput([duplicateOne, duplicateTwo, neutral]);
     const choice = input.playerView.pendingChoice!;
 
@@ -17,12 +20,12 @@ describe("selectedDiscardChoiceOptionIds", () => {
       choice.options,
       (currentInput, candidate) => ({
         total:
-          candidate.definitionId === "duplicate" &&
+          candidate.definitionId === duplicateId &&
           currentInput.playerView.own.gripOrHq.filter(
-            (current) => current.definitionId === "duplicate",
+            (current) => current.definitionId === duplicateId,
           ).length > 1
             ? 0
-            : candidate.definitionId === "neutral"
+            : candidate.definitionId === neutralId
               ? 50
               : 100,
       }),
@@ -32,8 +35,9 @@ describe("selectedDiscardChoiceOptionIds", () => {
   });
 
   it("discards an unbound card before a plan-bound support provider regardless of numeric keep score", () => {
-    const support = card("support-1", "support");
-    const unbound = card("unbound-1", "unbound");
+    const supportId = syntheticCardDefinitionId("support");
+    const support = card("support-1", supportId);
+    const unbound = card("unbound-1", syntheticCardDefinitionId("unbound"));
     const input = discardInput([support, unbound], 1);
     const choice = input.playerView.pendingChoice!;
 
@@ -42,7 +46,7 @@ describe("selectedDiscardChoiceOptionIds", () => {
       choice,
       choice.options,
       (_currentInput, candidate) =>
-        candidate.definitionId === "support"
+        candidate.definitionId === supportId
           ? { total: -1_000, planDisposition: "support_for_need" }
           : { total: 1_000 },
     );
@@ -51,14 +55,14 @@ describe("selectedDiscardChoiceOptionIds", () => {
   });
 });
 
-function card(instanceId: string, definitionId: string): VisibleCard {
+function card(instanceId: string, definitionId: CardDefinitionId): VisibleCard {
   return {
     instanceId,
     definitionId,
-    title: definitionId,
+    title: instanceId,
     type: "asset",
     known: true,
-  } as VisibleCard;
+  };
 }
 
 function discardInput(

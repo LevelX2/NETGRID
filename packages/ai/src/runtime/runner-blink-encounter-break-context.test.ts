@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { visibleRootIsKnownAgenda } from "./visible-root-agenda";
 import type { LegalAction, VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
@@ -72,7 +73,7 @@ describe("runner Blink encounter break context", () => {
     ];
     input.playerView.servers = [
       server(
-        "remote_1",
+        "r1",
         [encounteredIce],
         [
           {
@@ -84,15 +85,15 @@ describe("runner Blink encounter break context", () => {
       ),
     ];
     input.playerView.run = {
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
       phase: "encounter_ice",
-      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      position: { kind: "ice", serverId: "r1", iceIndex: 0 },
       encounteredIce,
       successful: false,
     };
 
     const assessment = createRunnerRandomBreakOrDamageEncounterContext({
-      sourceDefinitionIdForAction: () => "onr_v1_007_blink",
+      sourceDefinitionIdForAction: () => 219,
       randomBreakOrDamageRiskProfileForDefinitionId: () =>
         DEFAULT_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE,
       breakSubroutineIndexesForAction: () => new Set([0]),
@@ -108,7 +109,7 @@ describe("runner Blink encounter break context", () => {
       buildRandomBreakOrDamageRiskAssessment,
       isImmediateSafetyThreatSubroutine: () => true,
       isRemoteServerTarget: (serverId) =>
-        serverId?.startsWith("remote_") ?? false,
+        isRemoteServerId(serverId) ?? false,
       visibleRootIsKnownAgenda: (card) => card.known && card.type === "agenda",
     }).randomBreakOrDamageRiskAssessmentForEncounterBreak(input, action);
 
@@ -118,21 +119,26 @@ describe("runner Blink encounter break context", () => {
   });
 
   it.each([
-    { openDamage: true, excluded: true, damage: 1 },
-    { openDamage: false, excluded: false, damage: 0 },
+    { openDamage: true, laterGroup: false, excluded: true, damage: 1 },
+    { openDamage: false, laterGroup: false, excluded: false, damage: 0 },
+    { openDamage: true, laterGroup: true, excluded: true, damage: 1 },
   ])(
-    "counts other unbroken damage but not an already broken subroutine: $openDamage",
-    ({ openDamage, excluded, damage }) => {
+    "counts open damage=$openDamage with a later group=$laterGroup",
+    ({ openDamage, laterGroup, excluded, damage }) => {
       const action = blinkBreakAction();
-      const input = aiInput("runner", [
-        action,
-        encounterContinue(openDamage ? ["damage", "next-lock"] : ["next-lock"]),
-      ]);
+      const remaining = openDamage ? ["damage", "next-lock"] : ["next-lock"];
+      const continuation = encounterContinue(laterGroup ? ["next-lock"] : remaining);
+      continuation.encounterRemainingSubroutineIds = remaining;
+      continuation.payload = {
+        ...continuation.payload,
+        encounterRemainingSubroutineCount: remaining.length,
+      };
+      const input = aiInput("runner", [action, continuation]);
       input.playerView.own.gripOrHq = Array.from({ length: 3 }, (_, index) =>
         visibleCard(`grip-${index}`, "runner", "event"),
       );
       const context = createRunnerRandomBreakOrDamageEncounterContext({
-        sourceDefinitionIdForAction: () => "onr_v1_007_blink",
+        sourceDefinitionIdForAction: () => 219,
         randomBreakOrDamageRiskProfileForDefinitionId: () =>
           DEFAULT_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE,
         breakSubroutineIndexesForAction: () => new Set([1]),
@@ -176,17 +182,17 @@ function assessmentForRootCard(rootCard: VisibleCard) {
     visibleCard("grip-1", "runner", "event"),
     visibleCard("grip-2", "runner", "event"),
   ];
-  input.playerView.servers = [server("remote_1", [encounteredIce], [rootCard])];
+  input.playerView.servers = [server("r1", [encounteredIce], [rootCard])];
   input.playerView.run = {
-    attackedServerId: "remote_1",
+    attackedServerId: "r1",
     phase: "encounter_ice",
-    position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+    position: { kind: "ice", serverId: "r1", iceIndex: 0 },
     encounteredIce,
     successful: false,
   };
 
   return createRunnerRandomBreakOrDamageEncounterContext({
-    sourceDefinitionIdForAction: () => "onr_v1_007_blink",
+    sourceDefinitionIdForAction: () => 219,
     randomBreakOrDamageRiskProfileForDefinitionId: () =>
       DEFAULT_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE,
     breakSubroutineIndexesForAction: () => new Set([1]),
@@ -197,7 +203,7 @@ function assessmentForRootCard(rootCard: VisibleCard) {
     buildRandomBreakOrDamageRiskAssessment,
     isImmediateSafetyThreatSubroutine: () => false,
     isRemoteServerTarget: (serverId) =>
-      serverId?.startsWith("remote_") ?? false,
+      isRemoteServerId(serverId) ?? false,
     visibleRootIsKnownAgenda: (card) => card.known && card.type === "agenda",
   }).randomBreakOrDamageRiskAssessmentForEncounterBreak(input, action);
 }
@@ -210,11 +216,7 @@ function encounterContinue(ids: string[]): LegalAction {
     "Resolve open subroutines",
     { credits: 0 },
     {
-      payload: {
-        encounterContinue: true,
-        encounterSubroutineIds: ids.join(","),
-        unbrokenSubroutineCount: ids.length,
-      },
+      payload: {encounterContinue: true, unbrokenSubroutineCount: ids.length}, encounterSubroutineIds: ids,
     },
   );
 }
@@ -242,7 +244,7 @@ function blinkBreakAction(): LegalAction {
 it("requires a consistent known root-agenda projection for Blink risk", () => {
   const agenda = {
     instanceId: "known-agenda",
-    definitionId: "onr_v1_209_political-coup",
+    definitionId: 421,
     known: true,
     title: "Political Coup",
   };

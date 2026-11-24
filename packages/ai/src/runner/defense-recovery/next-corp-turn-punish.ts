@@ -1,6 +1,6 @@
 import {
-  cardSpecPlanningCardByDefinitionId,
-  cardSpecPlanningCards,
+  planningCardByDefinitionId,
+  planningCards,
 } from "@netgrid/cards/planning";
 import { traceRulesDefinition } from "@netgrid/engine";
 import type {
@@ -10,7 +10,7 @@ import type {
 } from "@netgrid/shared";
 import { reconstructBeliefState } from "../../belief-state";
 import { visibleRunnerTraceSupport } from "../../run-analysis/visible-run-hazards";
-import { decisionDerivedValue } from "../../runtime/decision-derived-cache";
+import { decisionDerivedValue } from "../../decision-derived-cache";
 import {
   fixedTagOperation,
   fixedTaggedDamageOperation,
@@ -35,10 +35,10 @@ type NextCorpTurnThreat = {
   additionalRunEnablesPunish: boolean;
 };
 
-const possibleTagOperations = cardSpecPlanningCards().flatMap(
-  ({ definition }) => {
-    const source = fixedTagOperation(definition.id);
-    return source ? [{ definitionId: definition.id, ...source }] : [];
+const possibleTagOperations = planningCards().flatMap(
+  ({ cardDefinitionId }) => {
+    const source = fixedTagOperation(cardDefinitionId);
+    return source ? [{ definitionId: cardDefinitionId, ...source }] : [];
   },
 );
 
@@ -130,7 +130,7 @@ function assessNextCorpTurn(
     (card) =>
       staysInstalledForNextCorpTurn(card) &&
       card.definitionId &&
-      cardSpecPlanningCardByDefinitionId(card.definitionId)?.planning.engine
+      planningCardByDefinitionId(card.definitionId)?.engine
         .runnerUtilityLongtail?.kind === "trace_attempts_auto_success_add_tag",
   );
   const priceTagSource = (source: TagSource) => {
@@ -333,8 +333,8 @@ function assessObservedPayoff({
 
 function observedOperationDefinitions(
   input: AiDecisionInput,
-): ReadonlySet<string> {
-  const ids = new Set<string>();
+): ReadonlySet<number> {
+  const ids = new Set<number>();
   for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
     if (event.stateVersionAfter > input.playerView.stateVersion) continue;
     const { actor, cardDefinitionId, sourceDefinitionId } = event.publicPayload;
@@ -342,8 +342,8 @@ function observedOperationDefinitions(
       (event.type === "play_operation" && actor === "corp") ||
       (event.type === "access_card" && actor === "runner")
     ) {
-      if (typeof cardDefinitionId === "string") ids.add(cardDefinitionId);
-      if (typeof sourceDefinitionId === "string") ids.add(sourceDefinitionId);
+      if (typeof cardDefinitionId === "number") ids.add(cardDefinitionId);
+      if (typeof sourceDefinitionId === "number") ids.add(sourceDefinitionId);
     }
   }
   return ids;
@@ -365,7 +365,7 @@ function readyMeatDamagePrevention(
       )
         return [];
       return (
-        cardSpecPlanningCardByDefinitionId(card.definitionId)?.planning.engine
+        planningCardByDefinitionId(card.definitionId)?.engine
           .damagePreventionSources ?? []
       ).flatMap((source) => {
         if (

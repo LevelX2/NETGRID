@@ -9,7 +9,7 @@ import {
   visibleCard,
 } from "../semantic-ai-runtime-cutover.test-support";
 
-const DEFINITION_ID = "onr_v1_328_information-laundering";
+const DEFINITION_ID = 540;
 const INSTANCE_ID = "counter-cashout-asset";
 
 describe("Corp counter-cashout economy ownership", () => {
@@ -153,7 +153,7 @@ function inputWithAsset(
     server("rd"),
     server("archives"),
     server(
-      "remote_1",
+      "r1",
       [],
       [
         visibleCard(INSTANCE_ID, "corp", "asset", {
@@ -182,7 +182,7 @@ function cardAction(
     { clicks, credits },
     {
       source: INSTANCE_ID,
-      payload: { cardId: INSTANCE_ID, serverId: "remote_1" },
+      payload: { cardId: INSTANCE_ID, serverId: "r1" },
     },
   );
 }

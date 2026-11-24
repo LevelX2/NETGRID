@@ -104,7 +104,7 @@ describe("historical randomized ICE selection probes", () => {
       actor: "corp",
       actions: [
         { randomizedIceInstallSelection: request },
-        { actionId: "corp.gain_credit" },
+        { actionId: "cb" },
       ],
     });
     expect(result.status).toBe("completed");
@@ -134,7 +134,7 @@ describe("historical randomized ICE selection probes", () => {
       probe([
         {
           randomizedIceInstallSelection: request,
-          actionId: "corp.gain_credit",
+          actionId: "cb",
         },
       ]),
     ).toMatchObject({
@@ -147,7 +147,7 @@ describe("historical randomized ICE selection probes", () => {
       {
         ...request,
         candidates: [
-          { ...request.candidates[0]!, actionId: "corp.gain_credit" },
+          { ...request.candidates[0]!, actionId: "cb" },
           request.candidates[1]!,
         ],
       },

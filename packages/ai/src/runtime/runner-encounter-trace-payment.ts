@@ -76,5 +76,5 @@ export function cheaperSafeCurrentTracePayment(
   // left to the existing encounter assessment, without recharging old traces.
   const remaining = currentEncounterUnbrokenSubroutineIndexes(input);
   if (remaining.size !== subroutines.length) return undefined;
-  return cost < generalPumpAndBreakCost ? cost : undefined;
+  return cost;
 }

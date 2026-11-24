@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   CURRENT_RULES_BASELINE,
   type AiDecisionInput,
@@ -36,7 +37,7 @@ import {
 
 describe("turn projection", () => {
   it("matches the native Accounts Receivable payment and payout", () => {
-    const cardId = "onr_v1_281_accounts-receivable";
+    const cardId = 493;
     const corpDeck = DEMO_DECKS.demo_corp_001;
     const setup = createGameAfterSetup({
       seed: "projection-accounts-receivable",
@@ -142,7 +143,7 @@ describe("turn projection", () => {
       input.playerView.own.credits = 1;
       const ice = input.playerView.servers[1]!.ice[0]!;
       input.playerView.run = {
-        runId: "run-current",
+        runId: 1,
         attackedServerId: "rd",
         phase: "encounter_ice",
         position: { kind: "ice", serverId: "rd", iceIndex: 0 },
@@ -198,7 +199,7 @@ describe("turn projection", () => {
     input.playerView.own.credits = 5;
     input.playerView.own.clicks = 1;
     const action: LegalAction = {
-      actionId: "runner.install_card.runner-wall-breaker",
+      actionId: "rc.runner-wall-breaker",
       type: "install_card",
       side: "runner",
       label: "Wall-Breaker installieren",
@@ -430,14 +431,14 @@ describe("turn projection", () => {
         {
           instanceId: "agenda-1",
           fromZoneId: "own_hand",
-          toZoneId: "server:remote_1:root",
+          toZoneId: "server:r1:root",
         },
       ],
       boardUpdates: [
         {
           instanceId: "agenda-1",
-          zoneId: "server:remote_1:root",
-          serverId: "remote_1",
+          zoneId: "server:r1:root",
+          serverId: "r1",
           advancementDelta: 1,
         },
       ],
@@ -450,12 +451,12 @@ describe("turn projection", () => {
 
     expect(
       projected.ownKnownZones.find(
-        (zone) => zone.zoneId === "server:remote_1:root",
+        (zone) => zone.zoneId === "server:r1:root",
       )?.instanceIds,
     ).toContain("agenda-1");
     expect(
       projected.ownKnownBoard.find((card) => card.instanceId === "agenda-1"),
-    ).toMatchObject({ serverId: "remote_1", advancement: 1 });
+    ).toMatchObject({ serverId: "r1", advancement: 1 });
     expect(projected.usageLedger).toContain("installed_this_turn:agenda-1");
 
     expect(() =>
@@ -597,7 +598,7 @@ function candidate(params: {
     },
     sourceKind: "card",
     sourceCardInstanceId: "operation-1",
-    sourceDefinitionId: "operation",
+    sourceDefinitionId: syntheticCardDefinitionId("operation"),
     abilityBindingMethod: "unresolved",
     semanticActionType: "economy.gain_credit",
     cardContextSignals: [],
@@ -713,7 +714,7 @@ function decisionInput(): AiDecisionInput {
         { id: "hq", label: "HQ", ice: [], root: [] },
         { id: "rd", label: "R&D", ice: [ice], root: [] },
         { id: "archives", label: "Archives", ice: [], root: [] },
-        { id: "remote_1", label: "Remote 1", ice: [], root: [] },
+        { id: "r1", label: "Remote 1", ice: [], root: [] },
       ],
       publicEvents: [],
       legalActions: [],
@@ -726,13 +727,13 @@ function decisionInput(): AiDecisionInput {
 
 function card(
   instanceId: string,
-  definitionId: string,
+  fixtureName: string,
   type: NonNullable<VisibleCard["type"]>,
 ): VisibleCard {
   return {
     instanceId,
-    definitionId,
-    title: definitionId,
+    definitionId: syntheticCardDefinitionId(fixtureName),
+    title: fixtureName,
     type,
     known: true,
     owner: "corp",

@@ -83,13 +83,13 @@ describe("surface policy", () => {
       sanitizePayloadForSurface(
         {
           revealedCount: 1,
-          publicRevealDefinitionIds: "ice_wall",
+          publicRevealDefinitionIds: "2521798093",
         },
         { surface: "public_event", family: "scored_agenda_sequence" },
       ),
     ).toEqual({
       revealedCount: 1,
-      publicRevealDefinitionIds: "ice_wall",
+      publicRevealDefinitionIds: "2521798093",
     });
 
     expect(() =>
@@ -117,16 +117,16 @@ describe("surface policy", () => {
     expect(
       sanitizePayloadForSurface(
         {
-          sourceDefinitionId: "onr_proteus_069_pavit-bharat",
-          targetServerId: "remote_1",
+          sourceDefinitionId: 127,
+          targetServerId: "r1",
           removedCardCount: 2,
           replacementCardCount: 2,
         },
         { surface: "public_event", family: "run_window_sequence" },
       ),
     ).toEqual({
-      sourceDefinitionId: "onr_proteus_069_pavit-bharat",
-      targetServerId: "remote_1",
+      sourceDefinitionId: 127,
+      targetServerId: "r1",
       removedCardCount: 2,
       replacementCardCount: 2,
     });

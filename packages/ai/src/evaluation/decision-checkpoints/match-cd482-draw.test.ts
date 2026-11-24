@@ -29,7 +29,7 @@ it("D26 preserves the concrete Sentry-answer draw despite its cleanup trade-off"
   expect(decision.reasonCode).toBe("plan_first.runner.rig_and_coverage");
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
     rootPlanInstanceId:
-      "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry",
+      "pde8a64nmn1hkbrzgi9sbuf6fo",
     selectedStep: { stepId: expect.stringContaining("find:breaker_sentry") },
     route: {
       actionId: action.actionId,
@@ -68,7 +68,7 @@ it("D29 does not create an unbound second draw plan after the coverage draw with
       .map((event) => event.type),
   ).toEqual(["end_turn", "play_event", "gain_credit", "gain_credit"]);
   const conditionalPointEvent = input.legalActions.find(
-    (action) => action.source === "runner_onr_v1_090_hot-tip-for-wns_1",
+    (action) => action.source === "c1v5",
   )!;
   expect(conditionalPointEvent.payload).toMatchObject({
     runnerConditionalAgendaPointQuoteSchema:

@@ -29,6 +29,9 @@ verwenden dieselben Vorgaben. Die Browserwerte werden pro Origin gespeichert.
 „Kopfzeile fixieren“ steuert die Kopfzeile. Ein sichtbarer Spielstandsstreifen
 bleibt beim Scrollen direkt darunter oder übernimmt den oberen Rand, sobald
 die unfixierte Kopfzeile wegscrollt. Das gilt für das aktive Spiel und Replays.
+Auf Mobilgeräten ist die Oberkante des gerade sichtbaren Bildausschnitts
+maßgeblich, auch beim Zoomen und Verschieben. Bei wegscrollender Kopfzeile
+bestimmt ihre gemessene Höhe, wann der Streifen die Oberkante erreicht.
 „Spielstandsstreifen → Ein“ zeigt die Ressourcenzähler dauerhaft im Streifen.
 „Auto“ blendet den Streifen im aktiven Spiel ein, sobald die Ressourcenzähler
 der Statusfelder nach oben aus dem sichtbaren Bereich scrollen. Beim

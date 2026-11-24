@@ -23,7 +23,7 @@ import { runnerRecurringEconomySignals } from "../runner/recurring-economy/recur
 import type { RunnerEconomyPosture } from "../run-analysis/runner-run-target-types";
 import { buildRunnerStrategicIntentProfile } from "../runner-strategic-intent";
 
-const CONFERENCE = "onr_v1_184_top-runners-conference";
+const CONFERENCE = 396;
 function deck(id: string): DeckDefinition {
   const current = standardDeckCatalog.decks.find(
     (d) => d.standardDeckId === id,
@@ -72,19 +72,19 @@ function fixture(payouts: number, killer = true): GameState {
   state = native(state, "corp", "mandatory_draw");
   const builder = RealEngineFixtureBuilder.forState(state)
     .withCorpHqSize(0)
-    .withCorpCardInHq("onr_v1_199_employee-empowerment")
+    .withCorpCardInHq(411)
     .withCorpCredits(15)
-    .withRezzedCorpIceOnServer("hq", "onr_v1_264_rex")
-    .withRezzedCorpIceOnServer("rd", "onr_v1_223_banpei")
+    .withRezzedCorpIceOnServer("hq", 476)
+    .withRezzedCorpIceOnServer("rd", 435)
     .withRunnerCredits(50)
     .withRunnerGripSize(0)
     .withRunnerCardInGrip(CONFERENCE)
-    .withRunnerCardInGrip("onr_v1_079_bodyweight-synthetic-blood")
-    .withRunnerCardInGrip("onr_v1_157_crash-everett-inventive-fixer")
-    .withRunnerCardInGrip("onr_v1_108_score")
-    .withRunnerProgramInstalled("onr_v1_074_worm")
-    .withRunnerProgramInstalled("onr_v1_014_codecracker");
-  if (killer) builder.withRunnerProgramInstalled("onr_v1_054_raptor");
+    .withRunnerCardInGrip(291)
+    .withRunnerCardInGrip(369)
+    .withRunnerCardInGrip(320)
+    .withRunnerProgramInstalled(286)
+    .withRunnerProgramInstalled(226);
+  if (killer) builder.withRunnerProgramInstalled(266);
   state.runner.memoryUsed = killer ? 3 : 2;
   state = native(state, "corp", "end_turn");
   state = apply(
@@ -121,7 +121,7 @@ function fixture(payouts: number, killer = true): GameState {
     getLegalActions(state, "runner").find(
       (a) =>
         a.type === "install_card" &&
-        a.source.includes("top-runners-conference"),
+        state.cardInstances[a.source]?.definitionId === CONFERENCE,
     )!,
   );
   for (let n = 0; n < payouts; n++) {
@@ -162,6 +162,43 @@ it("lets the Run parent release a native persistent lock after two actual payout
     release = releaseFor(input),
     before = JSON.stringify(input);
   expect(input.legalActions.some((a) => a.type === "start_run")).toBe(false);
+  const conference = input.playerView.own.rig?.find(
+    (card) => card.definitionId === CONFERENCE,
+  );
+  expect(conference).toBeDefined();
+  const income = input.eventTail.flatMap((event) =>
+    Array.isArray(event.publicPayload.resolvedEffects)
+      ? event.publicPayload.resolvedEffects.filter(
+          (effect) =>
+            effect.sourceDefinitionId === CONFERENCE &&
+            effect.kind === "gain_credits",
+        )
+      : [],
+  );
+  expect(income).toMatchObject([
+    { sourceCardInstanceId: conference!.instanceId, side: "runner", amount: 2 },
+    { sourceCardInstanceId: conference!.instanceId, side: "runner", amount: 2 },
+  ]);
+  expect(
+    runnerRecurringEconomySignals(
+      input,
+      [],
+      [],
+      {} as RunnerEconomyPosture,
+      [],
+      buildRunnerStrategicIntentProfile({}),
+      () => false,
+      [],
+    ),
+  ).toContainEqual(
+    expect.objectContaining({
+      commitmentId: conference!.instanceId,
+      investmentHorizon: expect.objectContaining({
+        realizedPayoutCount: 2,
+        realizedValue: 4,
+      }),
+    }),
+  );
   expect(runnerRunLockReleaseProjection(input, release)?.status).toBe("ready");
   const decision = chooseAiAction(input);
   expect(decision.actionId).toBe(release.actionId);
@@ -170,9 +207,10 @@ it("lets the Run parent release a native persistent lock after two actual payout
   expect(decision.evidence).toContain(
     "plan_step_capability:pressure_hq_access",
   );
-  expect(residentPlanPortfolioSnapshot(input)?.executorInstanceId).toContain(
-    "runner.pressure_central",
-  );
+  const portfolioBefore = residentPlanPortfolioSnapshot(input);
+  expect(portfolioBefore?.instances.find(
+    (instance) => instance.instanceId === portfolioBefore?.executorInstanceId,
+  )?.moduleId).toBe("runner.pressure_central");
   expect(JSON.stringify(input)).toBe(before);
   state = apply(state, release);
   expect(state.runner.credits).toBe(52);
@@ -187,9 +225,10 @@ it("lets the Run parent release a native persistent lock after two actual payout
   expect(action.type).toBe("start_run");
   expect(followup.reasonCode).toBe("plan_first.runner.pressure_central");
   expect(followup.fallbackUsed).toBe(false);
-  expect(residentPlanPortfolioSnapshot(after)?.executorInstanceId).toContain(
-    "runner.pressure_central",
-  );
+  const portfolioAfter = residentPlanPortfolioSnapshot(after);
+  expect(portfolioAfter?.instances.find(
+    (instance) => instance.instanceId === portfolioAfter?.executorInstanceId,
+  )?.moduleId).toBe("runner.pressure_central");
   state = apply(state, action);
   expect(state.run).toBeDefined();
   expect(
@@ -226,8 +265,8 @@ it.each(["funding", "clicks", "path"] as const)(
     if (blocker === "clicks") state.runner.clicks = 1;
     if (blocker === "path")
       RealEngineFixtureBuilder.forState(state)
-        .withRezzedCorpIceOnServer("hq", "onr_v1_223_banpei")
-        .withRezzedCorpIceOnServer("rd", "onr_v1_271_tko-2-0");
+        .withRezzedCorpIceOnServer("hq", 435)
+        .withRezzedCorpIceOnServer("rd", 483);
     const input = inputFor(state),
       release = releaseFor(input);
     expect(runnerRunLockReleaseProjection(input, release)?.status).toBe(
@@ -263,7 +302,7 @@ it.each(["missing", "stale", "unfunded"] as const)(
             value: 1800,
             fundingGap: violation === "unfunded" ? 1 : 0,
             serverId: "hq",
-            parentPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
+            parentPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
           },
         ],
       ),

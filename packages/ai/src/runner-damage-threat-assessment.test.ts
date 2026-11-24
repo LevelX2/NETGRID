@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type {
   AiDecisionInput,
@@ -21,16 +22,16 @@ import {
 describe("runnerDamageThreatAssessment", () => {
   const retiredDamageCards = () => [
     card({
-      definitionId: "onr_v1_346_vacant-soulkiller",
+      definitionId: 558,
       type: "asset",
       rezzed: true,
     }),
     card({
-      definitionId: "onr_v1_356_dedicated-response-team",
+      definitionId: 568,
       type: "upgrade",
       rezzed: true,
     }),
-    card({ definitionId: "onr_v1_228_cinderella", type: "ice", rezzed: true }),
+    card({ definitionId: 440, type: "ice", rezzed: true }),
   ];
 
   it("keeps discarded damage cards as deck knowledge without activating the virtual Archives root", () => {
@@ -57,7 +58,7 @@ describe("runnerDamageThreatAssessment", () => {
         stateVersion: 40,
         servers: [
           {
-            id: "remote_1",
+            id: "r1",
             ice: [],
             root: retiredDamageCards().filter((c) => c.type !== "ice"),
           },
@@ -77,7 +78,7 @@ describe("runnerDamageThreatAssessment", () => {
             id: "archives",
             ice: [
               card({
-                definitionId: "onr_v1_228_cinderella",
+                definitionId: 440,
                 type: "ice",
                 rezzed: true,
               }),
@@ -99,7 +100,7 @@ describe("runnerDamageThreatAssessment", () => {
         events: [
           event("seen-chance-observation", 10, {
             actionType: "access_card",
-            cardDefinitionId: "onr_v1_284_chance-observation",
+            cardDefinitionId: 496,
           }),
         ],
       }),
@@ -124,11 +125,11 @@ describe("runnerDamageThreatAssessment", () => {
         events: [
           event("seen-chance-observation", 10, {
             actionType: "access_card",
-            cardDefinitionId: "onr_v1_284_chance-observation",
+            cardDefinitionId: 496,
           }),
           event("seen-urban-renewal", 12, {
             actionType: "access_card",
-            cardDefinitionId: "onr_v1_307_urban-renewal",
+            cardDefinitionId: 519,
           }),
         ],
       }),
@@ -166,12 +167,12 @@ describe("runnerDamageThreatAssessment", () => {
           event("seen-scorched", 10, {
             actor: "runner",
             actionType: "access_card",
-            cardDefinitionId: "onr_v1_302_scorched-earth",
+            cardDefinitionId: 514,
           }),
           event("seen-urban", 12, {
             actor: "runner",
             actionType: "access_card",
-            cardDefinitionId: "onr_v1_307_urban-renewal",
+            cardDefinitionId: 519,
           }),
         ],
       });
@@ -193,12 +194,12 @@ describe("runnerDamageThreatAssessment", () => {
         event("seen-scorched", 10, {
           actor: "runner",
           actionType: "access_card",
-          cardDefinitionId: "onr_v1_302_scorched-earth",
+          cardDefinitionId: 514,
         }),
         event("seen-urban", 12, {
           actor: "runner",
           actionType: "access_card",
-          cardDefinitionId: "onr_v1_307_urban-renewal",
+          cardDefinitionId: 519,
         }),
       ],
     });
@@ -216,11 +217,11 @@ describe("runnerDamageThreatAssessment", () => {
       events: [
         event("seen-chance-observation", 10, {
           actionType: "access_card",
-          cardDefinitionId: "onr_v1_284_chance-observation",
+          cardDefinitionId: 496,
         }),
         event("seen-urban-renewal", 12, {
           actionType: "access_card",
-          cardDefinitionId: "onr_v1_307_urban-renewal",
+          cardDefinitionId: 519,
         }),
       ],
     });
@@ -265,17 +266,17 @@ describe("runnerDamageThreatAssessment", () => {
           stateVersion: 14,
           servers: [
             {
-              id: "remote_1",
+              id: "r1",
               ice: [
                 card({
-                  definitionId: "onr_v1_264_rex",
+                  definitionId: 476,
                   type: "ice",
                   rezzed: true,
                 }),
               ],
               root: [
                 card({
-                  definitionId: "onr_v1_315_corprunners-shattered-remains",
+                  definitionId: 527,
                   type: "asset",
                   rezzed: true,
                 }),
@@ -312,7 +313,7 @@ describe("runnerDamageThreatAssessment", () => {
         servers: [
           {
             id: "rd",
-            ice: [card({ definitionId: "rd-ice", type: "ice", rezzed: false })],
+            ice: [card({ definitionId: syntheticCardDefinitionId("rd-ice"), type: "ice", rezzed: false })],
             root: [],
           },
         ],
@@ -382,11 +383,11 @@ describe("runnerDamageThreatAssessment", () => {
       stateVersion: 25,
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           ice: [],
           root: [
             card({
-              definitionId: "onr_v1_346_vacant-soulkiller",
+              definitionId: 558,
               type: "asset",
               rezzed: true,
               advancementCounters: 2,
@@ -397,9 +398,9 @@ describe("runnerDamageThreatAssessment", () => {
     });
     current.playerView.timingPoint = "run.jack_out_window";
     current.playerView.run = {
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
       phase: "movement",
-      position: { kind: "server", serverId: "remote_1" },
+      position: { kind: "server", serverId: "r1" },
       successful: false,
     };
     current.legalActions = [
@@ -420,7 +421,7 @@ describe("runnerDamageThreatAssessment", () => {
     );
     expect(runnerKnownAccessDamageJackOutAssessment(current)).toEqual(
       expect.objectContaining({
-        serverId: "remote_1",
+        serverId: "r1",
         damageRisk: 2,
         evidenceCode: expect.stringContaining(
           "runner_known_access_damage_ambush_requires_jack_out",
@@ -441,16 +442,16 @@ describe("runnerDamageThreatAssessment", () => {
         event("fatal-attractor-fired", 19, {
           actor: "runner",
           actionType: "continue_run",
-          sourceDefinitionId: "onr_v1_242_fatal-attractor",
+          sourceDefinitionId: 454,
           unbrokenSubroutineCount: 1,
           resolvedEffects: [
             {
-              effectId: "fatal-attractor-subroutine",
+              effectId: 0,
               kind: "resolve_subroutine",
               visibility: "public",
               side: "runner",
               reason: "ice_subroutine",
-              sourceDefinitionId: "onr_v1_242_fatal-attractor",
+              sourceDefinitionId: 454,
               amount: 3,
             },
           ],
@@ -467,7 +468,7 @@ describe("runnerDamageThreatAssessment", () => {
 
     expect(runnerFutureEncounterDamageJackOutAssessment(current)).toMatchObject(
       {
-        sourceDefinitionId: "onr_v1_242_fatal-attractor",
+        sourceDefinitionId: 454,
         projectedDamage: 3,
         handCount: 4,
         projectedHandAfterDamage: 1,
@@ -488,7 +489,7 @@ describe("runnerDamageThreatAssessment", () => {
         event("fatal-attractor-fully-broken", 19, {
           actor: "runner",
           actionType: "continue_run",
-          sourceDefinitionId: "onr_v1_242_fatal-attractor",
+          sourceDefinitionId: 454,
           unbrokenSubroutineCount: 0,
         }),
       ],
@@ -518,7 +519,7 @@ describe("runnerDamageThreatAssessment", () => {
         event("bolter-swarm-fired", 19, {
           actor: "runner",
           actionType: "continue_run",
-          sourceDefinitionId: "onr_classic_006_bolter-swarm",
+          sourceDefinitionId: 10,
         }),
       ],
     });
@@ -553,7 +554,7 @@ describe("runnerDamageThreatAssessment", () => {
       action("jack-out", "jack_out", "game_rule"),
     ];
     const brainDrain = card({
-      definitionId: "onr_classic_007_brain-drain",
+      definitionId: 11,
       type: "ice",
       rezzed: true,
     });
@@ -562,7 +563,7 @@ describe("runnerDamageThreatAssessment", () => {
       subtypes: ["sentry", "black_ice", "ap"],
       effectiveRunQuote: {
         iceInstanceId: brainDrain.instanceId,
-        iceDefinitionId: "onr_classic_007_brain-drain",
+        iceDefinitionId: 11,
         effectiveStrength: 3,
         subroutines: [
           {
@@ -570,7 +571,7 @@ describe("runnerDamageThreatAssessment", () => {
             type: "random_damage",
             amount: 3,
             damageType: "core",
-            sourceDefinitionId: "onr_classic_007_brain-drain",
+            sourceDefinitionId: 11,
           },
         ],
       },
@@ -579,7 +580,7 @@ describe("runnerDamageThreatAssessment", () => {
     expect(
       runnerVisibleLethalIceDamageJackOutAssessment(current, [brainDrain]),
     ).toMatchObject({
-      sourceDefinitionId: "onr_classic_007_brain-drain",
+      sourceDefinitionId: 11,
       projectedDamage: 3,
       damageType: "core",
       handCount: 3,
@@ -612,7 +613,7 @@ describe("runnerDamageThreatAssessment", () => {
       action("jack-out", "jack_out", "game_rule"),
     ];
     const cumulativeDamageIce = card({
-      definitionId: "test-cumulative-damage-ice",
+      definitionId: syntheticCardDefinitionId("test-cumulative-damage-ice"),
       type: "ice",
       rezzed: true,
     });
@@ -660,7 +661,7 @@ describe("runnerDamageThreatAssessment", () => {
       stateVersion: 20,
     });
     const dataDarts = card({
-      definitionId: "onr_v1_234_data-darts",
+      definitionId: 446,
       type: "ice",
       rezzed: true,
     });
@@ -706,7 +707,7 @@ describe("runnerDamageThreatAssessment", () => {
           {
             iceInstanceId: "source",
             subroutineId: "future-net",
-            sourceDefinitionId: "onr_v1_242_fatal-attractor",
+            sourceDefinitionId: 454,
             amount: 3,
           },
         ],
@@ -722,13 +723,13 @@ describe("runnerDamageThreatAssessment", () => {
   it("accounts for the possible follow-up damage and its prevention only once with other damage", () => {
     const current = input({ handCount: 8, stateVersion: 20 });
     const followUp = card({
-      definitionId: "test-next-net-ice",
+      definitionId: syntheticCardDefinitionId("test-next-net-ice"),
       type: "ice",
       rezzed: true,
     });
     followUp.effectiveRunQuote = {
       iceInstanceId: followUp.instanceId,
-      iceDefinitionId: "test-next-net-ice",
+      iceDefinitionId: syntheticCardDefinitionId("test-next-net-ice"),
       effectiveStrength: 3,
       subroutines: [
         { id: "net", type: "do_damage", amount: 3, damageType: "net" },
@@ -739,7 +740,7 @@ describe("runnerDamageThreatAssessment", () => {
         {
           iceInstanceId: "source",
           subroutineId: "future-net",
-          sourceDefinitionId: "onr_v1_242_fatal-attractor",
+          sourceDefinitionId: 454,
           amount: 3,
         },
       ],
@@ -777,21 +778,21 @@ describe("runnerDamageThreatAssessment", () => {
       event("run-start", 18, {
         actor: "runner",
         actionType: "start_run",
-        serverId: "remote_1",
+        serverId: "r1",
       }),
       event("fatal-attractor-fired", 19, {
         actor: "runner",
         actionType: "continue_run",
-        sourceDefinitionId: "onr_v1_242_fatal-attractor",
+        sourceDefinitionId: 454,
         unbrokenSubroutineCount: 1,
         resolvedEffects: [
           {
-            effectId: "fatal-attractor-subroutine",
+            effectId: 0,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
             reason: "ice_subroutine",
-            sourceDefinitionId: "onr_v1_242_fatal-attractor",
+            sourceDefinitionId: 454,
             amount: 3,
           },
         ],
@@ -809,8 +810,8 @@ describe("runnerDamageThreatAssessment", () => {
 
     expect(runnerRecentFutureEncounterDamageSafetyAbort(blocked)).toMatchObject(
       {
-        serverId: "remote_1",
-        sourceDefinitionId: "onr_v1_242_fatal-attractor",
+        serverId: "r1",
+        sourceDefinitionId: 454,
       },
     );
 
@@ -902,7 +903,7 @@ describe("runnerDamageThreatAssessment", () => {
       ],
     });
     current.playerView.own.gripOrHq[0] = card({
-      definitionId: "onr_v1_039_krash",
+      definitionId: 251,
       type: "program",
     });
     const installKrash = action(
@@ -937,7 +938,7 @@ function input(params: {
       stateVersion: params.stateVersion,
       own: {
         gripOrHq: Array.from({ length: params.handCount }, (_, index) =>
-          card({ definitionId: `hand-${index}`, type: "event" }),
+          card({ definitionId: syntheticCardDefinitionId(`hand-${index}`), type: "event" }),
         ),
         heapOrArchives: [],
         rig: [],
@@ -947,7 +948,7 @@ function input(params: {
         maxHandSize: params.maxHandSize ?? 5,
       },
       opponent: {
-        identity: card({ definitionId: "corp-identity", type: "identity" }),
+        identity: card({ definitionId: syntheticCardDefinitionId("corp-identity"), type: "identity" }),
         handCount: params.opponentHandCount ?? 5,
       },
       servers: (params.servers ?? []).map((server) => ({
@@ -964,7 +965,7 @@ function input(params: {
 }
 
 function card(params: {
-  definitionId: string;
+  definitionId: number;
   type: NonNullable<VisibleCard["type"]>;
   rezzed?: boolean;
   advancementCounters?: number;
@@ -972,7 +973,7 @@ function card(params: {
   return {
     instanceId: `${params.definitionId}-instance`,
     definitionId: params.definitionId,
-    title: params.definitionId,
+    title: String(params.definitionId),
     owner: "corp",
     controller: "corp",
     type: params.type,
@@ -981,7 +982,7 @@ function card(params: {
     ...(params.advancementCounters !== undefined
       ? { advancementCounters: params.advancementCounters }
       : {}),
-  } as VisibleCard;
+  };
 }
 
 function action(
@@ -1004,17 +1005,17 @@ function action(
 }
 
 function event(
-  eventId: string,
+  label: string,
   stateVersionAfter: number,
-  publicPayload: Record<string, unknown>,
+  publicPayload: PublicGameEvent["publicPayload"],
 ): PublicGameEvent {
   return {
-    eventId,
-    type: String(publicPayload.actionType ?? "corp_action"),
+    eventId: stateVersionAfter + 1,
+    type: publicPayload.actionType ?? "corp_action",
     stateVersionBefore: stateVersionAfter - 1,
     stateVersionAfter,
-    stateHashAfter: `fnv1a:${eventId}`,
+    stateHashAfter: `fnv1a:${label}`,
     visibilityClass: "public",
     publicPayload: { actor: publicPayload.actor ?? "corp", ...publicPayload },
-  } as PublicGameEvent;
+  };
 }

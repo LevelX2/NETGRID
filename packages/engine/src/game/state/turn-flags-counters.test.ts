@@ -25,7 +25,7 @@ function state(): GameState {
     cardInstances: {
       [CARD_ID]: {
         instanceId: CARD_ID,
-        definitionId: "counter_definition",
+        definitionId: 4104088909,
         owner: "runner",
         controller: "runner",
         zone: { side: "runner", zone: "rig" },

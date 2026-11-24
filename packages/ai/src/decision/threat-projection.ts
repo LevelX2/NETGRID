@@ -48,11 +48,13 @@ export function buildAiThreatProjections(
     if (target.pathPassability === "blocked_missing_coverage") {
       projections.push(runTargetThreat(target, "runner_no_coverage", "high"));
     }
-    if (
-      target.pathPassability === "blocked_unbreakable" ||
-      target.pathPassability === "blocked_unpayable"
-    ) {
+    if (target.pathPassability === "blocked_unbreakable") {
       projections.push(runTargetThreat(target, "runner_no_coverage", "medium"));
+    }
+    if (target.pathPassability === "blocked_unpayable") {
+      projections.push(
+        runTargetThreat(target, "runner_economy_starvation", "medium"),
+      );
     }
     if (
       target.recommendation === "draw_for_damage_buffer" ||

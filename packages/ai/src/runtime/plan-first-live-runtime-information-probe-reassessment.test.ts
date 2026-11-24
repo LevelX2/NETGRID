@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { LegalActionPayload, VisibleCard } from "@netgrid/shared";
+import type { LegalAction, LegalActionPayload, VisibleCard } from "@netgrid/shared";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
@@ -8,6 +8,7 @@ import {
   residentPlanPortfolioSnapshot,
 } from "../plans/resident-plan-portfolio-memory";
 import {
+  completeRunnerEconomyFixturePolicy,
   aiInput,
   legalAction,
   safeRuntimeRunTarget,
@@ -87,8 +88,8 @@ describe("plan-first information-probe reassessment", () => {
           encounterContinue: true,
           encounterWillEndRun: true,
           unbrokenSubroutineCount: 1,
-          encounterSubroutineIds: "quandary-etr",
         },
+        ["quandary-etr"],
       );
       const input = aiInput("runner", [breakIce, endEncounter]);
       input.playerView.stateVersion = 2;
@@ -100,7 +101,7 @@ describe("plan-first information-probe reassessment", () => {
       );
       input.playerView.own.rig = [
         visibleCard("blink", "runner", "program", {
-          definitionId: "onr_v1_007_blink",
+          definitionId: 219,
           title: "Blink",
           subtypes: ["icebreaker"],
           strength: 5,
@@ -108,7 +109,7 @@ describe("plan-first information-probe reassessment", () => {
       ];
       const quandary = withEffectiveRunQuote(
         visibleCard("quandary", "corp", "ice", {
-          definitionId: "onr_v1_261_quandary",
+          definitionId: 473,
           title: "Quandary",
           subtypes: ["code_gate"],
           rezzed: true,
@@ -120,7 +121,7 @@ describe("plan-first information-probe reassessment", () => {
             {
               id: "quandary-etr",
               type: "end_the_run",
-              sourceDefinitionId: "onr_v1_261_quandary",
+              sourceDefinitionId: 473,
               sourceTitle: "Quandary",
             },
           ],
@@ -132,7 +133,7 @@ describe("plan-first information-probe reassessment", () => {
         server("archives"),
       ];
       input.playerView.run = {
-        runId: "probe-hq-run",
+        runId: 1,
         attackedServerId: "hq",
         phase: "encounter_ice",
         position: { kind: "ice", serverId: "hq", iceIndex: 0 },
@@ -171,10 +172,10 @@ describe("plan-first information-probe reassessment", () => {
       "start_run",
       "Run Remote 1",
       { credits: 0, clicks: 1 },
-      { payload: { serverId: "remote_1" } },
+      { payload: { serverId: "r1" } },
     );
     const target = {
-      ...safeRuntimeRunTarget(startRun.actionId, "remote_1"),
+      ...safeRuntimeRunTarget(startRun.actionId, "r1"),
       targetKind: "remote" as const,
       accessTargetKind: "remote" as const,
       knownAccessState: "unknown" as const,
@@ -205,7 +206,7 @@ describe("plan-first information-probe reassessment", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [unknownRemoteRoot]),
+      server("r1", [], [unknownRemoteRoot]),
     ];
 
     expect(context.chooseSemanticRuntimeAction(startInput, {})).toMatchObject({
@@ -234,8 +235,8 @@ describe("plan-first information-probe reassessment", () => {
         encounterContinue: true,
         encounterWillEndRun: true,
         unbrokenSubroutineCount: 1,
-        encounterSubroutineIds: "data-wall-2-etr",
       },
+      ["data-wall-2-etr"],
     );
     const encounterInput = aiInput("runner", [pump, endEncounter]);
     encounterInput.playerView.stateVersion = 2;
@@ -247,7 +248,7 @@ describe("plan-first information-probe reassessment", () => {
     encounterInput.playerView.own.clicks = 2;
     encounterInput.playerView.own.rig = [
       visibleCard("krash", "runner", "program", {
-        definitionId: "onr_v1_039_krash",
+        definitionId: 251,
         title: "Krash",
         subtypes: ["icebreaker"],
         strength: 0,
@@ -255,7 +256,7 @@ describe("plan-first information-probe reassessment", () => {
     ];
     const dataWall = withEffectiveRunQuote(
       visibleCard("data-wall-2", "corp", "ice", {
-        definitionId: "onr_v1_238_data-wall-2-0",
+        definitionId: 450,
         title: "Data Wall 2.0",
         subtypes: ["wall"],
         rezzed: true,
@@ -267,7 +268,7 @@ describe("plan-first information-probe reassessment", () => {
           {
             id: "data-wall-2-etr",
             type: "end_the_run",
-            sourceDefinitionId: "onr_v1_238_data-wall-2-0",
+            sourceDefinitionId: 450,
             sourceTitle: "Data Wall 2.0",
           },
         ],
@@ -277,13 +278,13 @@ describe("plan-first information-probe reassessment", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [dataWall], [unknownRemoteRoot]),
+      server("r1", [dataWall], [unknownRemoteRoot]),
     ];
     encounterInput.playerView.run = {
-      runId: "probe-remote-1",
-      attackedServerId: "remote_1",
+      runId: 2,
+      attackedServerId: "r1",
       phase: "encounter_ice",
-      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      position: { kind: "ice", serverId: "r1", iceIndex: 0 },
       encounteredIce: dataWall,
       successful: false,
     };
@@ -359,8 +360,8 @@ describe("plan-first information-probe reassessment", () => {
         encounterContinue: true,
         encounterWillEndRun: true,
         unbrokenSubroutineCount: 1,
-        encounterSubroutineIds: "keeper-after-data-wall-etr",
       },
+      ["keeper-after-data-wall-etr"],
     );
     const secondEncounterInput = aiInput("runner", [
       secondPump,
@@ -375,7 +376,7 @@ describe("plan-first information-probe reassessment", () => {
     secondEncounterInput.playerView.own.clicks = 2;
     secondEncounterInput.playerView.own.rig = [
       visibleCard("krash", "runner", "program", {
-        definitionId: "onr_v1_039_krash",
+        definitionId: 251,
         title: "Krash",
         subtypes: ["icebreaker"],
         strength: 1,
@@ -383,7 +384,7 @@ describe("plan-first information-probe reassessment", () => {
     ];
     const keeperAfterDataWall = withEffectiveRunQuote(
       visibleCard("keeper-after-data-wall", "corp", "ice", {
-        definitionId: "onr_v1_252_keeper",
+        definitionId: 464,
         title: "Keeper",
         subtypes: ["code_gate"],
         rezzed: true,
@@ -395,7 +396,7 @@ describe("plan-first information-probe reassessment", () => {
           {
             id: "keeper-after-data-wall-etr",
             type: "end_the_run",
-            sourceDefinitionId: "onr_v1_252_keeper",
+            sourceDefinitionId: 464,
             sourceTitle: "Keeper",
           },
         ],
@@ -405,13 +406,13 @@ describe("plan-first information-probe reassessment", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [keeperAfterDataWall, dataWall], [unknownRemoteRoot]),
+      server("r1", [keeperAfterDataWall, dataWall], [unknownRemoteRoot]),
     ];
     secondEncounterInput.playerView.run = {
-      runId: "probe-remote-1",
-      attackedServerId: "remote_1",
+      runId: 2,
+      attackedServerId: "r1",
       phase: "encounter_ice",
-      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      position: { kind: "ice", serverId: "r1", iceIndex: 0 },
       encounteredIce: keeperAfterDataWall,
       successful: false,
     };
@@ -498,8 +499,7 @@ describe("plan-first information-probe reassessment", () => {
       encounterContinue: true,
       encounterWillEndRun: true,
       unbrokenSubroutineCount: 1,
-      encounterSubroutineIds: "keeper-etr",
-    });
+    }, ["keeper-etr"]);
     const encounterInput = aiInput("runner", [pump, endEncounter]);
     encounterInput.playerView.stateVersion = 2;
     for (const action of encounterInput.legalActions) {
@@ -509,14 +509,14 @@ describe("plan-first information-probe reassessment", () => {
     encounterInput.playerView.own.credits = 3;
     encounterInput.playerView.own.rig = [
       visibleCard("krash", "runner", "program", {
-        definitionId: "onr_v1_039_krash",
+        definitionId: 251,
         subtypes: ["icebreaker"],
         strength: 0,
       }),
     ];
     const keeper = withEffectiveRunQuote(
       visibleCard("keeper", "corp", "ice", {
-        definitionId: "onr_v1_252_keeper",
+        definitionId: 464,
         title: "Keeper",
         subtypes: ["code_gate"],
         rezzed: true,
@@ -528,7 +528,7 @@ describe("plan-first information-probe reassessment", () => {
           {
             id: "keeper-etr",
             type: "end_the_run",
-            sourceDefinitionId: "onr_v1_252_keeper",
+            sourceDefinitionId: 464,
             sourceTitle: "Keeper",
           },
         ],
@@ -540,7 +540,7 @@ describe("plan-first information-probe reassessment", () => {
       server("archives"),
     ];
     encounterInput.playerView.run = {
-      runId: "probe-rd",
+      runId: 3,
       attackedServerId: "rd",
       phase: "encounter_ice",
       position: { kind: "ice", serverId: "rd", iceIndex: 0 },
@@ -578,6 +578,7 @@ function encounterAction(
   type: "pump_breaker" | "break_subroutine" | "continue_run",
   credits: number,
   payload: LegalActionPayload,
+  encounterSubroutineIds?: LegalAction["encounterSubroutineIds"],
 ) {
   const action = legalAction(
     actionId,
@@ -585,7 +586,9 @@ function encounterAction(
     type,
     actionId,
     { credits, clicks: 0 },
-    { source: type === "continue_run" ? "game_rule" : "krash", payload },
+    { source: type === "continue_run" ? "game_rule" : "krash", payload,
+      ...(encounterSubroutineIds ? { encounterSubroutineIds } : {}),
+    },
   );
   action.timingPoint = "run.encounter_ice";
   action.expiresAtStateVersion = 2;
@@ -613,5 +616,12 @@ function liveContext(overrides: Record<string, unknown> = {}) {
     practicalMicroRuntimeCandidates: () => [],
     ...overrides,
   } as unknown as SemanticRuntimeDecisionContextDependencies;
-  return createSemanticRuntimeDecisionContext(dependencies);
+  return createSemanticRuntimeDecisionContext({
+    ...dependencies,
+    buildRunnerEconomyPosture: (params) =>
+      completeRunnerEconomyFixturePolicy(
+        dependencies.buildRunnerEconomyPosture(params),
+        params.input.playerView.own.credits,
+      ),
+  });
 }

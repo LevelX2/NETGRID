@@ -3,7 +3,7 @@ import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import type { VisibleCard } from "@netgrid/shared";
 import { visibleProgramHostInstallVariants } from "./visible-program-host-install";
 
-function card(id: string, instanceId = id): VisibleCard {
+function card(id: number, instanceId = String(id)): VisibleCard {
   const definition = CARD_DEFINITIONS_BY_ID[id]!;
   return {
     ...definition,
@@ -16,8 +16,8 @@ function card(id: string, instanceId = id): VisibleCard {
 }
 describe("public program host install projection", () => {
   it("quotes Afreet's separate memory and the hosted breaker's reduced strength", () => {
-    const host = card("onr_v1_001_afreet");
-    const program = card("onr_v1_016_cyfermaster");
+    const host = card(213);
+    const program = card(228);
     const quote = visibleProgramHostInstallVariants(program, [host]);
     expect(quote).toMatchObject({
       complete: true,
@@ -32,8 +32,8 @@ describe("public program host install projection", () => {
     expect(program.hostedOn).toBeUndefined();
   });
   it("rejects full hosts, nested hosts and unknown occupancy", () => {
-    const host = card("onr_v1_001_afreet");
-    const program = card("onr_v1_016_cyfermaster");
+    const host = card(213);
+    const program = card(228);
     const occupant = {
       ...program,
       instanceId: "occupant",
@@ -57,8 +57,8 @@ describe("public program host install projection", () => {
 });
 
 it("does not mistake a public face-down resource for a possible program host", () => {
-  const host = card("onr_v1_001_afreet");
-  const program = card("onr_v1_016_cyfermaster");
+  const host = card(213);
+  const program = card(228);
   const hiddenResource: VisibleCard = {
     instanceId: "public-hidden-resource",
     known: false,
@@ -82,10 +82,9 @@ it.each(["program", "hardware", undefined] as const)(
       known: false,
       ...(type ? { type } : {}),
     };
-    expect(
-      visibleProgramHostInstallVariants(card("onr_v1_016_cyfermaster"), [
-        unknown,
-      ]),
-    ).toEqual({ complete: false, reason: "unknown_public_host" });
+    expect(visibleProgramHostInstallVariants(card(228), [unknown])).toEqual({
+      complete: false,
+      reason: "unknown_public_host",
+    });
   },
 );

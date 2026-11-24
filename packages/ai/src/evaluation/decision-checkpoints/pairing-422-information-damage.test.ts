@@ -49,7 +49,7 @@ it("still fails closed when a real encounter omits its remaining-subroutine quot
   const continuation = input.legalActions.find(
     (a) => a.type === "continue_run",
   )!;
-  delete continuation.payload!.encounterSubroutineIds;
+  delete continuation.encounterSubroutineIds;
   expect(() =>
     runnerCurrentEncounterRequiresDamagePreservingBreak(input, undefined),
   ).toThrow("missing_action_semantics");
@@ -106,11 +106,11 @@ it.each([2, 3])(
     // spendable pools and offered break actions together.
     input.playerView.own.credits = credits;
     const breaker = input.playerView.own.rig!.find(
-      (card) => card.definitionId === "onr_classic_031_rent-i-con",
+      (card) => card.definitionId === 35,
     )!;
     breaker.strength = 6;
     const pool = input.playerView.own.rig!.find(
-      (card) => card.definitionId === "onr_v1_035_invisibility",
+      (card) => card.definitionId === 247,
     )!;
     pool.counters!.bit = 0;
     pool.counterDisplays!.forEach((display) => {
@@ -127,10 +127,10 @@ it.each([2, 3])(
         abilityRef: {
           sourceCardInstanceId: breaker.instanceId,
           sourceAbilityId:
-            "onr_classic_031_rent-i-con:break_any_subroutine_and_trash_after_run",
+            48,
         },
         effectRef:
-          "effect.onr_classic_031_rent-i-con:break_any_subroutine_and_trash_after_run",
+          "effect.48",
         payload: {
           breakerId: breaker.instanceId,
           iceId: input.playerView.run!.encounteredIce!.instanceId,
@@ -138,7 +138,7 @@ it.each([2, 3])(
           cardId: breaker.instanceId,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityId:
-            "onr_classic_031_rent-i-con:break_any_subroutine_and_trash_after_run",
+            48,
           cardImplementationAbilityKey:
             "break_any_subroutine_and_trash_after_run",
         },
@@ -147,12 +147,11 @@ it.each([2, 3])(
     const continuation = input.legalActions.find(
       (a) => a.type === "continue_run",
     )!;
+    continuation.encounterSubroutineIds = ["2", "3"];
     Object.assign(continuation.payload!, {
-      encounterSubroutineIds:
-        "printed_subroutines_end_the_run,printed_subroutines_end_the_run_a",
       unbrokenSubroutineCount: 2,
     });
-    continuation.actionId = `runner.continue_run.${continuation.payload!.encounterSubroutineIds}`;
+    continuation.actionId = `r5.${continuation.encounterSubroutineIds}`;
     input.playerView.legalActions = structuredClone(input.legalActions);
     resetResidentPlanPortfolioMemory();
     restoreAiRuntimeCheckpoint(
@@ -194,14 +193,9 @@ it("keeps the remaining end-the-run barrier after damage subroutines are broken"
   const encounterQuote =
     input.playerView.run?.encounteredIce?.effectiveRunQuote;
   expect(encounterQuote).toBeDefined();
-  Object.assign(encounterQuote!, {
-    subroutines: encounterQuote!.subroutines.filter(
-      (subroutine) => subroutine.type !== "do_damage",
-    ),
-  });
+  // Resolved damage retains its positions in the full Engine quote.
+  continuation.encounterSubroutineIds = ["2", "3"];
   Object.assign(continuation.payload!, {
-    encounterSubroutineIds:
-      "printed_subroutines_end_the_run,printed_subroutines_end_the_run_a",
     unbrokenSubroutineCount: 2,
   });
   resetResidentPlanPortfolioMemory();

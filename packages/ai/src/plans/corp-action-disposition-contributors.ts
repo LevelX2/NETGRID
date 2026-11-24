@@ -1,9 +1,13 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { corpPunishPreparationConflictsScoreServer } from "../corp/punish/punish-preparation";
 import { corpReservedScoreServerIds } from "../runtime/corp-scoreline/score-hand-support";
 import { corpEconomyActionIsOwned } from "../corp/economy/economy-routes";
 import { corpHostedBankLoadRejectionEvidence } from "../corp/economy/hosted-credit-bank-facts";
 import { type CorpDefenseSignal } from "./corp-defense-contracts";
-import { type CorpScoreProjectSignal } from "./corp-score-contracts";
+import {
+  corpScoreClosesBeforeMandatoryDraw,
+  type CorpScoreProjectSignal,
+} from "./corp-score-contracts";
 import { corpPunishCampaignOwnsCandidate } from "../corp/punish/punish-plan-support";
 import { type CorpPlanDomain } from "./corp-tactical-plan-contracts";
 import type {
@@ -87,7 +91,7 @@ export type CorpActionDispositionContributorFacts = Readonly<{
     scoreProjects: readonly CorpScoreProjectSignal[],
   ) => CorpDefensiveUpgradePlacement | undefined;
   corpDefinitionSupportsPunishPlan: (
-    definitionId: string | undefined,
+    definitionId: number | undefined,
   ) => boolean;
   corpConditionalPunishTagSourceHasNoVisiblePayoff: (
     input: AiDecisionInput,
@@ -135,7 +139,7 @@ export type CorpActionDispositionContributorFacts = Readonly<{
     project: CorpScoreProjectSignal,
   ) => boolean;
   corpScoreProjectId: (
-    agendaInstanceOrDefinitionId: string,
+    agendaInstanceOrDefinitionId: number | string,
     serverId: string | undefined,
   ) => string;
   corpScoredAgendaRevealWithoutPurposeDispositionEvidence: (
@@ -313,7 +317,8 @@ function contributeCorpActionDispositionForCandidate(
     domain,
   );
   if (deckoutHorizonDisposition) {
-    add(
+    const record = deckoutHorizonDisposition.unknown ? addUnknown : add;
+    record(
       candidate.actionId,
       deckoutHorizonDisposition.ownerModuleId,
       deckoutHorizonDisposition.evidenceCode,
@@ -407,6 +412,13 @@ function contributeCorpActionDispositionForCandidate(
     );
   if (
     reservedScoreServerOverflowEvidence &&
+    !domain.economyNeeds.some(
+      (signal) =>
+        signal.kind === "develop_campaign" &&
+        signal.phase === "install" &&
+        signal.cadence.kind === "finite_pool" &&
+        signal.actionIds.includes(candidate.actionId),
+    ) &&
     !facts.corpExactExecutableNonEconomyPlanOwnsAction(domain, candidate)
   ) {
     add(
@@ -712,7 +724,7 @@ function contributeCorpActionDispositionForCandidate(
       );
       return;
     }
-    const targetRemote = globalDefenseServerId?.startsWith("remote_")
+    const targetRemote = isRemoteServerId(globalDefenseServerId)
       ? input.playerView.servers.find(
           (server) => server.id === globalDefenseServerId,
         )
@@ -1254,6 +1266,7 @@ function corpVoluntaryDrawDeckoutHorizonDisposition(
   | {
       ownerModuleId: PlanActionDisposition["ownerModuleId"];
       evidenceCode: string;
+      unknown?: true;
     }
   | undefined {
   const cardsDrawn =
@@ -1274,6 +1287,7 @@ function corpVoluntaryDrawDeckoutHorizonDisposition(
     return {
       ownerModuleId: "corp.hand_and_agenda_management",
       evidenceCode: "corp_draw_net_deck_projection_unknown",
+      unknown: true,
     };
   }
   const admittedTerminalDraw = (domain.drawArbitrations ?? []).some(
@@ -1283,10 +1297,7 @@ function corpVoluntaryDrawDeckoutHorizonDisposition(
       assessment.terminalNeedBeforeMandatoryDraw,
   );
   const exactTerminalScoreSupport = domain.scoreProjects.some((project) => {
-    if (
-      !project.feasible ||
-      (!project.sameTurnCloseout && !project.terminalScore)
-    ) {
+    if (!corpScoreClosesBeforeMandatoryDraw(project)) {
       return false;
     }
     const parentPlanInstanceId = planInstanceIdForProposal({
@@ -1303,6 +1314,8 @@ function corpVoluntaryDrawDeckoutHorizonDisposition(
   if (
     !corpVoluntaryDrawLeavesUnsafeMandatoryHorizon({
       remainingDeckCardsBeforeDraw: input.playerView.own.stackOrRdCount,
+      mandatoryBaseDrawCount:
+        input.playerView.corpMandatoryBaseDrawQuote?.baseCount,
       netDeckConsumption: netDeckConsumption!,
       terminalNeedBeforeMandatoryDraw:
         admittedTerminalDraw || exactTerminalScoreSupport,

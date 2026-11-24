@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { type AiDecisionInput } from "@netgrid/shared";
 import { type CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
 import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
@@ -56,7 +57,7 @@ export function buildCorpScoringRemoteDiscovery({
           ? { ice: [], root: [] }
           : playerView.servers.find(
               (entry) =>
-                entry.id === serverId && entry.id.startsWith("remote_"),
+                entry.id === serverId && isRemoteServerId(entry.id),
             );
       if (!server) return undefined;
 

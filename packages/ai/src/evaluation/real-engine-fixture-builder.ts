@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { CardInstanceId, GameState, ServerId } from "@netgrid/shared";
 
 export type RealEngineFixtureMutator = (
@@ -61,7 +62,7 @@ export class RealEngineFixtureBuilder {
     return this;
   }
 
-  withCorpCardInHq(definitionId: string): this {
+  withCorpCardInHq(definitionId: number): this {
     const id = this.findCard(definitionId);
     this.removeEverywhere(id);
     this.state.corp.hq.push(id);
@@ -74,7 +75,7 @@ export class RealEngineFixtureBuilder {
     return this;
   }
 
-  withRunnerCardInGrip(definitionId: string): this {
+  withRunnerCardInGrip(definitionId: number): this {
     const id = this.findCard(definitionId);
     this.removeEverywhere(id);
     this.state.runner.grip.push(id);
@@ -87,7 +88,7 @@ export class RealEngineFixtureBuilder {
     return this;
   }
 
-  withRunnerProgramInstalled(definitionId: string): this {
+  withRunnerProgramInstalled(definitionId: number): this {
     const id = this.findCard(definitionId);
     this.removeEverywhere(id);
     this.state.runner.rig.programs.push(id);
@@ -101,7 +102,7 @@ export class RealEngineFixtureBuilder {
   }
 
   withRunnerResourceInstalled(
-    definitionId: string,
+    definitionId: number,
     counters: Partial<
       Record<"bit" | "power" | "recurring_credit", number>
     > = {},
@@ -129,7 +130,7 @@ export class RealEngineFixtureBuilder {
   ): this {
     this.withCorpRootOnServer(
       serverId,
-      "simple_agenda",
+      588,
       advancementCounters,
       options,
     );
@@ -138,7 +139,7 @@ export class RealEngineFixtureBuilder {
 
   withCorpRemoteRoot(
     serverId: Exclude<ServerId, "new_remote">,
-    definitionId: string,
+    definitionId: number,
     advancementCounters = 0,
     options: { faceup?: boolean; rezzed?: boolean } = {},
   ): this {
@@ -153,7 +154,7 @@ export class RealEngineFixtureBuilder {
 
   withCorpIceOnServer(
     serverId: Exclude<ServerId, "new_remote">,
-    definitionId: string,
+    definitionId: number,
   ): this {
     this.ensureServer(serverId);
     const server = this.state.corp.servers.find(
@@ -174,7 +175,7 @@ export class RealEngineFixtureBuilder {
 
   withRezzedCorpIceOnServer(
     serverId: Exclude<ServerId, "new_remote">,
-    definitionId: string,
+    definitionId: number,
   ): this {
     this.withCorpIceOnServer(serverId, definitionId);
     const server = this.state.corp.servers.find(
@@ -193,7 +194,7 @@ export class RealEngineFixtureBuilder {
   }
 
   withCorpRezWindow(corpCredits: number): this {
-    return this.withCorpIceOnServer("hq", "simple_barrier_ice")
+    return this.withCorpIceOnServer("hq", 589)
       .withRunnerCredits(6)
       .withCorpCredits(corpCredits);
   }
@@ -202,13 +203,13 @@ export class RealEngineFixtureBuilder {
     if (this.state.corp.servers.some((server) => server.id === serverId)) {
       return this;
     }
-    if (!serverId.startsWith("remote_")) {
+    if (!isRemoteServerId(serverId)) {
       throw new Error(`Missing central server ${serverId}`);
     }
     this.state.corp.servers.push({
       id: serverId,
       kind: "remote",
-      label: `Remote ${serverId.slice("remote_".length)}`,
+      label: `Remote ${serverId.slice(1)}`,
       ice: [],
       root: [],
     });
@@ -217,7 +218,7 @@ export class RealEngineFixtureBuilder {
 
   private withCorpRootOnServer(
     serverId: Exclude<ServerId, "new_remote">,
-    definitionId: string,
+    definitionId: number,
     advancementCounters: number,
     options: { faceup?: boolean; rezzed?: boolean },
   ): CardInstanceId {
@@ -239,7 +240,7 @@ export class RealEngineFixtureBuilder {
     return id;
   }
 
-  private findCard(definitionId: string): CardInstanceId {
+  private findCard(definitionId: number): CardInstanceId {
     const entry = Object.entries(this.state.cardInstances).find(
       ([, card]) => card.definitionId === definitionId,
     );

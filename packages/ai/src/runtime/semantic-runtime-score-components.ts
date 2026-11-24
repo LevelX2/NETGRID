@@ -91,7 +91,9 @@ export function scrubEvidence(evidence: readonly string[]): string[] {
 
 export function roundSemanticRuntimeScore(value: number): number {
   assertFiniteSemanticRuntimeScore(value, "score");
-  return Math.round(value * 100) / 100;
+  return Math.abs(value) >= Number.MAX_SAFE_INTEGER
+    ? value
+    : Math.round(value * 100) / 100;
 }
 
 export function semanticRuntimeScoreFromComponents(

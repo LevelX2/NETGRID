@@ -2,7 +2,7 @@ import { candidateTargetIds } from "../../actions/action-candidate-facts";
 import { corpIceRezSupportEmptyTargetDispositionEvidence } from "./corp-defense-rez-support-facts";
 import { corpArchivesAgendaRelocationSignal } from "./archives-agenda-relocation";
 import { assessCorpTerminalAgendaDefense } from "./corp-terminal-agenda-defense";
-import type { AiDecisionInput } from "@netgrid/shared";
+import { isRemoteServerId, type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import {
   assessment,
@@ -34,9 +34,7 @@ import type {
   PlanModule,
   PlanSchedulerContext,
 } from "../../plans/plan-scheduler";
-import {
-  type CorpExactIceRezRouteProjection,
-} from "../../runtime/corp-exact-ice-rez-route";
+import { type CorpExactIceRezRouteProjection } from "../../runtime/corp-exact-ice-rez-route";
 import {
   assessBestFundedCorpScoreProtection,
   type KnownCorpFundedIceInstallRouteProjection,
@@ -123,11 +121,7 @@ export function defenseModule(): PlanModule {
           target: { kind: "capability", id: "allocate_server_defense" },
           routeExists: candidates.length > 0,
           supportable: resourceGaps.length > 0,
-          evidenceCode: defensePortfolioEvidenceCode(
-            context,
-            signals,
-            currentDomain.centralDefenseAllocation,
-          ),
+          evidenceCode: defensePortfolioEvidenceCode(context, selectedBand),
           ...(scoreProtectionRoute
             ? {
                 parentInstanceId: planInstanceIdForProposal({
@@ -170,33 +164,18 @@ export function defenseModule(): PlanModule {
       );
       const priorityClass: PriorityClass =
         selectedBand.kind === "score" ? "P5" : selectedBand.priorityClass;
-      const candidates = defensePortfolioCandidates(
-        context,
-        signals,
-        currentDomain.centralDefenseAllocation,
-      );
+      const candidates = selectedBand.candidates;
       const resourceGaps = defenseResourceGaps(selectedBand);
       return {
         ...assessment(
           instance,
           priorityClass,
           resourceGaps.length === 0 && candidates.length > 0,
-          defensePortfolioAssessmentValue(
-            context,
-            signals,
-            priorityClass,
-            currentDomain.centralDefenseAllocation,
-          ),
+          defensePortfolioAssessmentValue(context, selectedBand),
           portfolio.executorInstanceId,
           resourceGaps,
         ),
-        evidenceCodes: [
-          defensePortfolioEvidenceCode(
-            context,
-            signals,
-            currentDomain.centralDefenseAllocation,
-          ),
-        ],
+        evidenceCodes: [defensePortfolioEvidenceCode(context, selectedBand)],
       };
     },
     materialize: (instance, _assessment, context) => {
@@ -211,11 +190,7 @@ export function defenseModule(): PlanModule {
       const scoreProtectionRoute =
         selectedBand.kind === "score" ? selectedBand.route : undefined;
       const remoteProtectionRoute = selectedRemoteProtectionRoute(selectedBand);
-      const candidates = defensePortfolioCandidates(
-        context,
-        signals,
-        currentDomain.centralDefenseAllocation,
-      );
+      const candidates = selectedBand.candidates;
       const engineRandomizedIceInstallNearTie =
         engineRandomizedCentralIceInstallNearTie(
           context,
@@ -336,14 +311,8 @@ function engineRandomizedCentralIceInstallNearTie(
 
 function defensePortfolioEvidenceCode(
   context: PlanSchedulerContext,
-  signals: readonly CorpDefenseSignal[],
-  centralAllocation?: CorpCentralDefenseAllocation,
+  selectedBand: SelectedDefensePortfolioBand,
 ): string {
-  const selectedBand = selectedDefensePortfolioBand(
-    context,
-    signals,
-    centralAllocation,
-  );
   if (selectedBand.kind === "score") {
     return selectedBand.route.signal.evidenceCode;
   }
@@ -362,15 +331,6 @@ function defensePortfolioEvidenceCode(
           left.defenseId.localeCompare(right.defenseId),
       )[0]?.evidenceCode ?? "visible_server_defense_portfolio"
   );
-}
-
-function defensePriority(
-  context: PlanSchedulerContext,
-  signals: readonly CorpDefenseSignal[],
-  centralAllocation?: CorpCentralDefenseAllocation,
-): PriorityClass {
-  return selectedDefensePortfolioBand(context, signals, centralAllocation)
-    .priorityClass;
 }
 
 function defensePriorityRank(priorityClass: PriorityClass): number {
@@ -664,7 +624,8 @@ function defenseCandidates(
       }
       if (
         signal.sourceDefinitionIds.length > 0 &&
-        !signal.sourceDefinitionIds.includes(candidate.sourceDefinitionId ?? "")
+        (candidate.sourceDefinitionId === undefined ||
+          !signal.sourceDefinitionIds.includes(candidate.sourceDefinitionId))
       )
         return false;
       if (signal.phase === "install_defense_support")
@@ -1281,6 +1242,15 @@ function genericDefensePortfolioCandidates(
     ),
     centralAllocation,
   );
+  if (
+    !eligibleSignals.some((signal) => signal.iceInstallCostSupportActionId) ||
+    engineRandomizedCentralIceInstallNearTie(
+      context,
+      selected,
+      centralAllocation,
+    )
+  )
+    return selected;
   return prepareSelectedCorpIceInstallation(context, selected, eligibleSignals);
 }
 
@@ -1770,6 +1740,8 @@ function compareGenericExactInstallRoutes(
     knownExactInstallRouteCreditCost(right.projection);
   return (
     costComparison ||
+    Number(isRemoteServerId(left.signal.serverId)) -
+      Number(isRemoteServerId(right.signal.serverId)) ||
     technicalCompare(left.candidate.actionId, right.candidate.actionId)
   );
 }
@@ -2289,7 +2261,7 @@ function authoritativeDefensePlacementSource(
   }
   if (
     candidate.sourceDefinitionId !== undefined &&
-    typeof action.payload?.sourceDefinitionId === "string" &&
+    typeof action.payload?.sourceDefinitionId === "number" &&
     action.payload.sourceDefinitionId !== candidate.sourceDefinitionId
   ) {
     return undefined;
@@ -2308,15 +2280,8 @@ function defenseSignalOrderingValue(signal: CorpDefenseSignal): number {
 
 function defensePortfolioAssessmentValue(
   context: PlanSchedulerContext,
-  signals: readonly CorpDefenseSignal[],
-  _priorityClass: PriorityClass,
-  centralAllocation?: CorpCentralDefenseAllocation,
+  selectedBand: SelectedDefensePortfolioBand,
 ): number {
-  const selectedBand = selectedDefensePortfolioBand(
-    context,
-    signals,
-    centralAllocation,
-  );
   if (selectedBand.kind === "score") {
     return selectedBand.route.signal.kind === "score_protection_install" &&
       selectedBand.route.signal.effect === "satisfied"

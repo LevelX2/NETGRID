@@ -108,6 +108,28 @@ describe("Corp turn planning coverage", () => {
     ).toContain("economy.gain_credit");
   });
 
+  it("rejects duplicate Engine offer IDs and stale timing before certifying even an Engine-owned action", () => {
+    const setup = coverageSetup();
+    const action = setup.input.legalActions.find((entry) =>
+      setup.engineWindowActionIds.includes(entry.actionId))!;
+    const stale = { ...action, timingPoint: "runner_action.main" as const };
+    const report = buildCorpTurnPlanningCoverageReport({
+      ...setup,
+      input: {
+        ...setup.input,
+        playerView: {
+          ...setup.input.playerView,
+          own: { ...setup.input.playerView.own, clicks: 3 },
+        },
+        legalActions: [...setup.input.legalActions, stale],
+      },
+    });
+    expect(report.status).toBe("fail");
+    expect(report.issues.map((issue) => issue.code)).toEqual(
+      expect.arrayContaining(["duplicate_legal_action", "stale_legal_action"]),
+    );
+  });
+
   it("reports 100 percent classified current Corp LegalActions across every owner", () => {
     const setup = coverageSetup();
     const report = buildCorpTurnPlanningCoverageReport(setup);
@@ -413,10 +435,10 @@ describe("Corp turn planning coverage", () => {
 
   it("accepts a blocked score root only through an exactly bound executable support head", () => {
     const setup = coverageSetup();
-    const parentInstanceId = "plan:corp.score_agenda:agenda-1";
+    const parentInstanceId = "pec2em6rbxev7e1w1qcpuez4fk";
     const providerInstanceId =
-      "plan:corp.defend_servers:server-defense-portfolio";
-    const needId = "score-protection:agenda-1:remote_1";
+      "penw02zfrkklof54c2nuye5att";
+    const needId = "score-protection:agenda-1:r1";
     const defense = setup.heads.find(
       (head) => head.currentBinding.actionId === "action:defense",
     )!;
@@ -472,7 +494,7 @@ describe("Corp turn planning coverage", () => {
         {
           moduleId: "corp.establish_scoring_remote",
           planInstanceId:
-            "plan:corp.establish_scoring_remote:strategic-score-remote",
+            "p6vrrjl5fc78gjet2n25nst7pp",
           blocked: true,
           blockerCode: "remote_required_need_uncovered",
           requiredNeedId: "remote-hardening:strategic-score-remote:1",
@@ -501,8 +523,8 @@ describe("Corp turn planning coverage", () => {
 
   it("rejects nominal providers and parent progress claims without need reduction", () => {
     const setup = coverageSetup();
-    const parentInstanceId = "plan:corp.score_agenda:agenda-1";
-    const needId = "score-protection:agenda-1:remote_1";
+    const parentInstanceId = "pec2em6rbxev7e1w1qcpuez4fk";
+    const needId = "score-protection:agenda-1:r1";
     const report = buildCorpTurnPlanningCoverageReport({
       ...setup,
       progressRoots: [
@@ -517,7 +539,7 @@ describe("Corp turn planning coverage", () => {
             kind: "support_head",
             parentInstanceId,
             needId,
-            providerInstanceId: "plan:corp.defend_servers:missing",
+            providerInstanceId: "pbt9vwkjdrik6rff2zs3yaous4",
             actionId: "action:defense",
             needBefore: 2,
             needAfter: 2,
@@ -545,10 +567,10 @@ describe("Corp turn planning coverage", () => {
       progressRoots: [
         {
           moduleId: "corp.score_agenda",
-          planInstanceId: "plan:corp.score_agenda:agenda-1",
+          planInstanceId: "pec2em6rbxev7e1w1qcpuez4fk",
           blocked: true,
           blockerCode: "no_complete_line",
-          requiredNeedId: "score-protection:agenda-1:remote_1",
+          requiredNeedId: "score-protection:agenda-1:r1",
           campaignDisposition: "blocked_replan",
           witness: {
             kind: "replan",
@@ -719,7 +741,7 @@ function coverageSetup() {
   ];
   const input = {
     side: "corp",
-    playerView: { stateVersion: 40 },
+    playerView: { stateVersion: 40, timingPoint: "corp_action.main" },
     legalActions,
   } as Pick<AiDecisionInput, "side" | "playerView" | "legalActions">;
   return {

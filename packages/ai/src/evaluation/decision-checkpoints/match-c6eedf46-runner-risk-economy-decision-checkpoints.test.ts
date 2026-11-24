@@ -15,7 +15,7 @@ describe("match C6EEDF46 runner risk and economy checkpoints", () => {
       result.decision?.decisionDebug?.planFirstDecision?.executionOrigin
         ?.rootPlanInstanceId,
     ).toBe(
-      "plan:runner.develop_board_and_hand:card%3Arunner_onr_v1_139_r-and-d-interface_2",
+      "p5z2ln29lay17a04vka37ijdpk",
     );
   });
 
@@ -30,12 +30,12 @@ describe("match C6EEDF46 runner risk and economy checkpoints", () => {
           acceptableActions: [
             {
               type: "install_card",
-              sourceDefinitionId: "onr_v1_139_r-and-d-interface",
+              sourceDefinitionId: 351,
             },
           ],
           planExecution: {
             acceptablePlanKinds: ["runner.pressure_central"],
-            acceptableCapabilities: ["develop_onr_v1_139_r-and-d-interface"],
+            acceptableCapabilities: ["develop_351"],
             requiredAssessmentEvidence: [
               "central_pressure_preparation_actions:1",
             ],
@@ -48,7 +48,7 @@ describe("match C6EEDF46 runner risk and economy checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     const riggedInvestmentsInstanceId =
       result.input.playerView.own.gripOrHq.find(
-        (card) => card.definitionId === "onr_v1_174_rigged-investments",
+        (card) => card.definitionId === 386,
       )?.instanceId;
     expect(riggedInvestmentsInstanceId).toBeDefined();
     expect(
@@ -66,7 +66,7 @@ describe("match C6EEDF46 runner risk and economy checkpoints", () => {
     expect(
       result.decision?.decisionDebug?.planFirstDecision?.executionOrigin
         ?.rootPlanInstanceId,
-    ).toBe("plan:runner.economy:runner-portfolio-credit-reserve");
+    ).toBe("pc7ebuiw5dxhlbzbf1nhcs4p4z");
   });
 
   it("does not expose the later damage cards to the historical decision", () => {
@@ -76,9 +76,9 @@ describe("match C6EEDF46 runner risk and economy checkpoints", () => {
     );
 
     expect(serializedPublicPrefix).not.toContain(
-      "onr_v1_284_chance-observation",
+      496,
     );
-    expect(serializedPublicPrefix).not.toContain("onr_v1_307_urban-renewal");
+    expect(serializedPublicPrefix).not.toContain(519);
     expect(serializedPublicPrefix).not.toContain("Chance Observation");
     expect(serializedPublicPrefix).not.toContain("Urban Renewal");
   });

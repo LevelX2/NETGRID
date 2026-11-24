@@ -86,14 +86,14 @@ export function openReplacementWindow(
     throw new Error("Replacement-Konflikt blockiert.");
   const candidate = candidates[0];
   if (!candidate) return false;
-  const windowId = `v121_window_${event.eventId}`;
+  const windowId = state.stateVersion + 1;
   const window: ReplacementWindow = {
     windowId,
     originalEventId: event.eventId,
     eventType: event.eventType,
     candidates,
     consumedCandidateIds: [],
-    createdAtStateVersion: state.stateVersion + 1,
+    createdAtStateVersion: windowId,
     optional: candidate.optional,
   };
   state.imminentEvent = { ...event, modificationWindowId: windowId };

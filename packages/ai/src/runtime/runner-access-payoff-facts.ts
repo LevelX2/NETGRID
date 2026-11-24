@@ -5,7 +5,7 @@ import { type RunnerPlanDomain } from "../plans/runner-tactical-plan-contracts";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 
 export function runnerCentralPayoffServerForDefinition(
-  definitionId: string,
+  definitionId: number,
 ): "hq" | "rd" | "archives" | undefined {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
   const signals = new Set([

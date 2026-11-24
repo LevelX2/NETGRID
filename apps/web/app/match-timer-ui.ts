@@ -1,10 +1,5 @@
-import type {
-  ApiPlayerClockSnapshot,
-  LegalAction,
-  PlayerView,
-  Side,
-  Winner,
-} from "@netgrid/shared";
+import type { ApiPlayerClockSnapshot, Side, Winner } from "@netgrid/shared";
+import type { LegalAction, PlayerView } from "../lib/presented-player-view";
 
 export type MatchTimerSnapshotInput = {
   matchId: string;

@@ -94,7 +94,7 @@ describe("Score counter-bank funding resources", () => {
   it("releases an unsafe bank for funding", () => {
     const input = fixture(),
       a = withdrawal(input);
-    input.playerView.servers.find((s) => s.id === "remote_1")!.ice = [];
+    input.playerView.servers.find((s) => s.id === "r1")!.ice = [];
     expect(
       scoreFundingPreservesCounterBanks(input, parent(), [], [a.actionId]),
     ).toEqual([a.actionId]);
@@ -122,8 +122,8 @@ describe("Score counter-bank funding resources", () => {
         sameTurnCloseout: true,
         counterBank: {
           sourceCardInstanceId: a.source!,
-          sourceDefinitionId: "onr_v1_347_vapor-ops",
-          serverId: "remote_1",
+          sourceDefinitionId: 559,
+          serverId: "r1",
           advancementCounters: 1,
           counterTarget: 1,
           quoteStateVersion: input.playerView.stateVersion,

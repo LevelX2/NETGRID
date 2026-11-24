@@ -10,7 +10,7 @@ const pageSource = readFileSync(new URL("./page.tsx", import.meta.url), "utf8");
 describe("global sticky header", () => {
   it("pins the topbar independently of an active match", () => {
     expect(globalsCss).toMatch(
-      /\.app > \.topbar,\s*\.app > \.activeMatchChrome\s*\{[^}]*position:\s*sticky[^}]*top:\s*0/s,
+      /\.app > \.topbar,\s*\.app > \.activeMatchChrome\s*\{[^}]*position:\s*sticky[^}]*top:\s*var\(--match-viewport-top,\s*0px\)/s,
     );
     expect(globalsCss).not.toMatch(/\.app\.activeMatch\s*>\s*\.topbar/);
   });
@@ -48,10 +48,7 @@ describe("global sticky header", () => {
 
   it("lets the resource strip stick independently when the header scrolls", () => {
     expect(globalsCss).toMatch(
-      /\.app\.topbarStickyDisabled > \.activeMatchChrome\s*\{[^}]*display:\s*contents/s,
-    );
-    expect(globalsCss).toMatch(
-      /\.app\.topbarStickyDisabled > \.activeMatchChrome > \.matchResourceStrip\s*\{[^}]*position:\s*sticky[^}]*top:\s*0/s,
+      /\.app\.topbarStickyDisabled > \.activeMatchChrome\s*\{[^}]*top:\s*calc\(var\(--match-viewport-top,\s*0px\)\s*-\s*var\(--match-topbar-height\)\)/s,
     );
   });
 });

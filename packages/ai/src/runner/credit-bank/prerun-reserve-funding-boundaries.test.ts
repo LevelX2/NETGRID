@@ -114,7 +114,7 @@ it.each(
     );
     expect(
       signals.some(
-        (signal) => signal.runFunding?.needId === "run-support:remote:remote_1",
+        (signal) => signal.runFunding?.needId === "run-support:remote:r1",
       ),
     ).toBe(false);
   },

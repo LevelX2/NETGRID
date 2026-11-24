@@ -16,7 +16,7 @@ export type CorpFutureRunIceClass =
   | "future_run_ice";
 
 export type CorpIcePlacementDiagnosticsAssessment = {
-  definitionId: string;
+  definitionId: number;
   title: string;
   futureRunIceClass: CorpFutureRunIceClass;
   serverId: string;
@@ -35,19 +35,19 @@ export type CorpIcePlacementResultingPosition =
 const CORP_FUTURE_RUN_ICE_CLASS_BY_DEFINITION: Readonly<
   Record<string, CorpFutureRunIceClass>
 > = {
-  "onr_v1_222_ball-and-chain": "ball_and_chain",
-  "onr_v1_224_bolter-cluster": "bolter_or_data_darts",
-  "onr_v1_225_canis-major": "canis",
-  "onr_v1_226_canis-minor": "canis",
-  "onr_v1_234_data-darts": "bolter_or_data_darts",
-  "onr_v1_242_fatal-attractor": "future_run_ice",
+  434: "ball_and_chain",
+  436: "bolter_or_data_darts",
+  437: "canis",
+  438: "canis",
+  446: "bolter_or_data_darts",
+  454: "future_run_ice",
   onr_v1_274_tutor: "future_run_ice",
-  "onr_v1_276_viral-15": "future_run_ice",
+  488: "future_run_ice",
   onr_v1_277_virizz: "future_run_ice",
 };
 
 export function classifyCorpFutureRunIcePlacementProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
   card?: VisibleCard,
 ): CorpFutureRunIceClass | undefined {
   if (!definitionId) return undefined;
@@ -93,7 +93,7 @@ export function assessCorpIcePlacementForDiagnostics(
   if (existingIceCount === undefined) return undefined;
   return {
     definitionId,
-    title: sourceCard.title ?? definitionId,
+    title: sourceCard.title ?? String(definitionId),
     futureRunIceClass,
     serverId,
     existingIceCount,

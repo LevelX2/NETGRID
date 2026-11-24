@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { CorpEconomyNeedSignal } from "../corp/economy/economy-types";
 import type {
   CorpDefenseSignal,
@@ -73,7 +74,7 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
     {
       urgent: false,
       pressure: undefined,
-      serverId: "remote_1",
+      serverId: "r1",
       priority: "P6",
     },
   ])(
@@ -150,7 +151,7 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
       gap: 2,
       actionIds: ["gain-credits"],
       immediateDefenseConversion: true,
-      parentPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      parentPlanInstanceId: "penw02zfrkklof54c2nuye5att", parentPlanModuleId: "corp.defend_servers",
       parentNeedId: defense.defenseId,
       incrementalDefenseReserve: {
         targetCredits: 7,
@@ -216,11 +217,11 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
       "corp.defend_servers",
     ]);
     expect(line.nodes.map((node) => node.planInstanceId)).toEqual([
-      "plan:corp.economy:defense-reserve%3Ard%3Aice-1",
-      "plan:corp.defend_servers:server-defense-portfolio",
+      "pkb9qmfqz08nftxe07cix61nn",
+      "penw02zfrkklof54c2nuye5att",
     ]);
     expect(line.evidenceCodes).toContain(
-      "defense_funding_support_instance:plan:corp.economy:defense-reserve%3Ard%3Aice-1",
+      "defense_funding_support_instance:pkb9qmfqz08nftxe07cix61nn",
     );
     expect(
       line.valueClaims.filter(
@@ -260,7 +261,7 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
       gap: 2,
       actionIds: ["gain-credits"],
       immediateDefenseConversion: true,
-      parentPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      parentPlanInstanceId: "penw02zfrkklof54c2nuye5att", parentPlanModuleId: "corp.defend_servers",
       parentNeedId: defense.defenseId,
       incrementalDefenseReserve: {
         targetCredits: 7,
@@ -354,7 +355,7 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
       gap: 2,
       actionIds: ["gain-credits"],
       immediateDefenseConversion: true,
-      parentPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      parentPlanInstanceId: "penw02zfrkklof54c2nuye5att", parentPlanModuleId: "corp.defend_servers",
       parentNeedId: defense.defenseId,
       incrementalDefenseReserve: {
         targetCredits: 7,
@@ -434,7 +435,7 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
         delegatedPriorityClass: "P4",
         actionId: "install-remote",
         sourceCardInstanceId: "ice-1",
-        sourceDefinitionId: "ice-definition",
+        sourceDefinitionId: syntheticCardDefinitionId("ice-definition"),
         evidenceCode: "score_protection_staging_install:agenda-1:new_remote",
       };
       input.legalActions = [
@@ -457,7 +458,7 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
             postInstallRezQuoteComplete: true,
             postInstallRezQuoteCardId: "ice-1",
             postInstallRezQuoteTargetServerId: "new_remote",
-            postInstallRezQuoteProjectedServerId: "remote_1",
+            postInstallRezQuoteProjectedServerId: "r1",
             postInstallRezQuoteExpiresAtStateVersion: 30,
             postInstallRezQuoteFinalCredits: 1,
             postInstallRezQuoteMandatoryAgendaPointCost: requiredPoints,
@@ -484,7 +485,7 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
         disposition: "stage_for_later_rez",
         targetServerId: "new_remote",
         supportBinding: {
-          parentPlanInstanceId: "plan:corp.score_agenda:agenda-1",
+          parentPlanInstanceId: "pec2em6rbxev7e1w1qcpuez4fk",
           parentNeedId: "score-protection:agenda-1",
         },
         currentActionId: "install-remote",
@@ -529,7 +530,7 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
       delegatedPriorityClass: "P4",
       actionId: "install-rd",
       sourceCardInstanceId: "ice-1",
-      sourceDefinitionId: "ice-definition",
+      sourceDefinitionId: syntheticCardDefinitionId("ice-definition"),
       effect: "satisfied",
       runnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
       totalInstallAndRezCredits: 2,
@@ -550,7 +551,7 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
       currentActionId: "install-rd",
       disposition: "install_rez_ready",
       supportBinding: {
-        parentPlanInstanceId: "plan:corp.score_agenda:agenda-1",
+        parentPlanInstanceId: "pec2em6rbxev7e1w1qcpuez4fk",
         parentNeedId: "score-protection:agenda-1",
       },
       targetServerId: "rd",
@@ -610,7 +611,7 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
       disposition: "draw_for_ice",
       currentActionId: "draw",
       supportBinding: {
-        parentPlanInstanceId: "plan:corp.score_agenda:agenda-1",
+        parentPlanInstanceId: "pec2em6rbxev7e1w1qcpuez4fk",
         parentNeedId: "score-protection:agenda-1",
       },
       priorityClass: "P4",
@@ -681,7 +682,7 @@ function defenseSignal(params: {
     defenseId: "central-defense:rd",
     serverId: "rd",
     phase: "install_ice",
-    sourceDefinitionIds: ["ice-definition"],
+    sourceDefinitionIds: [syntheticCardDefinitionId("ice-definition")],
     actionIds: ["install-rd"],
     urgent: false,
     ...(params.centralPressure
@@ -698,7 +699,7 @@ function defenseSignal(params: {
         knowledge: "known",
         actionId: "install-rd",
         sourceCardInstanceId: "ice-1",
-        sourceDefinitionId: "ice-definition",
+        sourceDefinitionId: syntheticCardDefinitionId("ice-definition"),
         targetServerId: "rd",
         before: { knowledge: "known" },
         after: {
@@ -764,7 +765,7 @@ function installCandidate(
 ): ActionSemanticCandidate {
   return {
     ...baseCandidate(actionId, "install.card", sourceId),
-    sourceDefinitionId: "ice-definition",
+    sourceDefinitionId: syntheticCardDefinitionId("ice-definition"),
     targetContext: {
       selectedTargets: [
         {
@@ -805,7 +806,7 @@ function baseCandidate(
     stateVersion: 30,
     sourceKind: "card",
     sourceCardInstanceId: sourceId,
-    sourceDefinitionId: `${sourceId}-definition`,
+    sourceDefinitionId: syntheticCardDefinitionId(`${sourceId}-definition`),
     abilityBindingMethod: "unresolved",
     semanticActionType,
     cardContextSignals: [],
@@ -951,7 +952,7 @@ function visibleCard(
 ): VisibleCard {
   return {
     instanceId,
-    definitionId: `${instanceId}-definition`,
+    definitionId: syntheticCardDefinitionId(`${instanceId}-definition`),
     title: instanceId,
     type,
     known: true,

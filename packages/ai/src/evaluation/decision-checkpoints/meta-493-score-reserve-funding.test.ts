@@ -59,19 +59,24 @@ it("does not reserve an unaffordable central route after the native Runner prepa
   const cp = checkpoint(2);
   expect(corpFundedCentralProtectionReserve(cp.input)).toBe(0);
   expect(decide(cp).actionId).toBe(
-    "corp.advance_card.corp_onr_v1_193_corporate-coup_1.corp_onr_v1_193_corporate-coup_1",
+    "c2.c2i5.c2i5",
   );
 });
 it("funds the installed same-turn score and funded central reserve jointly under the same Score parent", () => {
   const cp = checkpoint();
   expect(cp.input.playerView.own).toMatchObject({ credits: 6, clicks: 3 });
   const r = decide(cp);
-  expect(r.actionId).toBe("corp.gain_credit");
+  expect(r.actionId).toBe("cb");
   const p = r.decisionDebug!.planFirstDecision!;
   expect(p.selectedPlan?.moduleId).toBe("corp.economy");
-  expect(p.rootPlanInstanceId).toContain(
-    "plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_1%3Aremote_1",
-  );
+  expect(
+    p?.portfolio.find(
+      (instance) => instance.instanceId === p.rootPlanInstanceId,
+    ),
+  ).toMatchObject({
+    moduleId: "corp.score_agenda",
+    dedupeKey: expect.stringContaining("agenda:c2i5:r1"),
+  });
   expect(p.selectedStep?.planInstanceId).toBe(p.leafExecutorInstanceId);
 });
 it("keeps the current advance when the entire score already leaves the funded reserve", () => {
@@ -79,7 +84,7 @@ it("keeps the current advance when the entire score already leaves the funded re
   cp.input.playerView.own.credits = 7;
   const r = decide(cp);
   expect(r.actionId).toBe(
-    "corp.advance_card.corp_onr_v1_193_corporate-coup_1.corp_onr_v1_193_corporate-coup_1",
+    "c2.c2i5.c2i5",
   );
   expect(r.decisionDebug!.planFirstDecision!.selectedPlan?.moduleId).toBe(
     "corp.score_agenda",
@@ -93,7 +98,7 @@ it("does not promise joint funding when there is no spare current click", () => 
     (p) =>
       p.moduleId === "corp.score_agenda" &&
       (p.moduleState as { signal: CorpScoreProjectSignal }).signal
-        .agendaDefinitionId === "onr_v1_193_corporate-coup",
+        .agendaDefinitionId === 405,
   )!;
   expect(
     (score.moduleState as { signal: CorpScoreProjectSignal }).signal,
@@ -107,7 +112,7 @@ it("keeps the terminal own score ahead of the joint reserve funding", () => {
   cp.input.playerView.own.agendaPoints = 5;
   const r = decide(cp);
   expect(r.actionId).toBe(
-    "corp.advance_card.corp_onr_v1_193_corporate-coup_1.corp_onr_v1_193_corporate-coup_1",
+    "c2.c2i5.c2i5",
   );
   expect(r.decisionDebug!.planFirstDecision!.priority?.effectiveClass).toBe(
     "P1",
@@ -119,21 +124,21 @@ it.each(["missing", "stale", "zero_click"] as const)(
     const cp = checkpoint();
     if (variant === "missing")
       cp.input.legalActions = cp.input.legalActions.filter(
-        (a) => a.actionId !== "corp.gain_credit",
+        (a) => a.actionId !== "cb",
       );
     else {
       const basic = cp.input.legalActions.find(
-        (a) => a.actionId === "corp.gain_credit",
+        (a) => a.actionId === "cb",
       )!;
       if (variant === "stale") basic.expiresAtStateVersion--;
       else basic.costs = [{ clicks: 0 }];
     }
     const signal: CorpScoreProjectSignal = {
-      projectId: "agenda:corp_onr_v1_193_corporate-coup_1:remote_1",
-      agendaDefinitionId: "onr_v1_193_corporate-coup",
-      agendaInstanceId: "corp_onr_v1_193_corporate-coup_1",
+      projectId: "agenda:c2i5:r1",
+      agendaDefinitionId: 405,
+      agendaInstanceId: "c2i5",
       agendaPoints: 2,
-      serverId: "remote_1",
+      serverId: "r1",
       phase: "advance_agenda",
       feasible: true,
       terminalScore: false,

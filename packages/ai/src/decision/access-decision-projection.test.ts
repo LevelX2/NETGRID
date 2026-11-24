@@ -12,8 +12,8 @@ describe("access decision projection", () => {
   it("projects agenda steal consistently", () => {
     const projection = projectAccessDecision({
       source: "pre_run",
-      serverId: "remote_1",
-      knownRootDefinitionId: "simple_agenda",
+      serverId: "r1",
+      knownRootDefinitionId: 588,
       target: "agenda",
       intendedAccessAction: "steal",
     });
@@ -31,8 +31,8 @@ describe("access decision projection", () => {
   it("projects visible agenda steal costs consistently", () => {
     const projection = projectAccessDecision({
       source: "access_window",
-      serverId: "remote_1",
-      knownRootDefinitionId: "simple_agenda",
+      serverId: "r1",
+      knownRootDefinitionId: 588,
       target: "agenda",
       intendedAccessAction: "steal",
       stealCost: 5,
@@ -54,8 +54,8 @@ describe("access decision projection", () => {
   it("projects asset trash with finite pool and trash-cost waiver", () => {
     const projection = projectAccessDecision({
       source: "access_window",
-      serverId: "remote_1",
-      knownRootDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      serverId: "r1",
+      knownRootDefinitionId: 521,
       target: "asset",
       intendedAccessAction: "trash",
       trashCost: 4,
@@ -83,7 +83,7 @@ describe("access decision projection", () => {
   it("projects free upgrade trash", () => {
     const projection = projectAccessDecision({
       source: "access_window",
-      serverId: "remote_2",
+      serverId: "r2",
       target: "upgrade",
       intendedAccessAction: "trash",
       trashCost: 3,
@@ -101,8 +101,8 @@ describe("access decision projection", () => {
   it("projects declined trash and reserve break for plan memory", () => {
     const projection = projectAccessDecision({
       source: "plan_memory",
-      serverId: "remote_1",
-      knownRootDefinitionId: "onr_v1_326_holovid-campaign",
+      serverId: "r1",
+      knownRootDefinitionId: 538,
       target: "asset",
       intendedAccessAction: "decline",
       trashCost: 7,
@@ -144,8 +144,8 @@ describe("access decision projection", () => {
     }
     const projection = projectAccessDecision({
       source: "access_window",
-      serverId: "remote_1",
-      knownRootDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      serverId: "r1",
+      knownRootDefinitionId: 521,
       target: "asset",
       intendedAccessAction: "trash",
       targetChoiceWouldSelect,
@@ -198,8 +198,8 @@ describe("access decision projection", () => {
     }
     const projection = projectAccessDecision({
       source: "access_window",
-      serverId: "remote_1",
-      knownRootDefinitionId: "onr_v1_322_euromarket-consortium",
+      serverId: "r1",
+      knownRootDefinitionId: 534,
       target: "asset",
       intendedAccessAction: "trash",
       targetChoiceWouldSelect,
@@ -209,10 +209,10 @@ describe("access decision projection", () => {
       {
         positionKey: "root:0",
         instanceId: "euromarket-1",
-        definitionId: "onr_v1_322_euromarket-consortium",
+        definitionId: 534,
         targetKind: "asset",
         commitment: {
-          serverId: "remote_1",
+          serverId: "r1",
           knownAccessState: "known_payoff",
           intendedAccessAction: "trash",
           reason: "trash_affordable",

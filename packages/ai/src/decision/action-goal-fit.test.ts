@@ -226,7 +226,7 @@ describe("ActionGoalFit", () => {
         selectedTargets: [],
         availableTargets: [
           {
-            targetId: "remote_1",
+            targetId: "r1",
             targetKind: "server",
             targetSide: "corp",
             evidence: ["test_available_target"],
@@ -256,7 +256,7 @@ describe("ActionGoalFit", () => {
         actionId: "run-remote",
         actionType: "start_run",
         requirementId: "server",
-        optionId: "remote_1",
+        optionId: "r1",
         optionKind: "target_option",
         confidence: "high",
         score: 152,
@@ -279,7 +279,7 @@ describe("ActionGoalFit", () => {
     ).toEqual(
       expect.arrayContaining([
         "target_choice_recommendation:true",
-        "target_choice_option:remote_1",
+        "target_choice_option:r1",
         "target_choice_confidence:high",
       ]),
     );

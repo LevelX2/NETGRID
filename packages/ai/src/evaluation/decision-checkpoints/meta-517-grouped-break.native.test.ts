@@ -53,9 +53,9 @@ function native() {
 afterEach(resetResidentPlanPortfolioMemory);
 
 it("matches Redecorator's one-credit group against real positive Mastermind core damage", () => {
-  const mastermind = "onr_proteus_030_mastermind";
-  const coyote = "onr_proteus_016_coyote";
-  const redecorator = "onr_proteus_093_redecorator";
+  const mastermind = 88;
+  const coyote = 74;
+  const redecorator = 151;
   let state = createGameAfterSetup({
     seed: "meta-517-redecorator-group-control",
     corpDeck: {
@@ -130,7 +130,7 @@ it("matches Redecorator's one-credit group against real positive Mastermind core
   });
   const groups = getLegalActions(state, "runner").filter(
     (a) =>
-      a.type === "break_subroutine" && a.payload?.subroutineIndexes === "0,1",
+      a.type === "break_subroutine" && a.subroutineIndexes?.join(",") === "0,1",
   );
   expect(groups).toHaveLength(1);
   expect(groups[0]!.costs.reduce((n, c) => n + (c.credits ?? 0), 0)).toBe(1);
@@ -174,7 +174,7 @@ it.each([
   (credits, access) => {
     const { input } = native();
     const rig = input.playerView.own.rig!.filter(
-      (c) => c.definitionId === "onr_proteus_079_big-frackin-gun",
+      (c) => c.definitionId === 137,
     );
     expect(
       assessKnownRezzedIcePath(currentRunRemainingIce(input), rig, credits)
@@ -200,7 +200,7 @@ it.each([
       },
     };
     const rig = input.playerView.own.rig!.filter(
-      (c) => c.definitionId === "onr_proteus_079_big-frackin-gun",
+      (c) => c.definitionId === 137,
     );
     const path = assessKnownRezzedIcePath([inner, ice], rig, credits);
     expect(path.canReachAccess).toBe(access);
@@ -220,7 +220,7 @@ it("charges the Engine per-subroutine tax for both members of a full group", () 
     },
   };
   const rig = input.playerView.own.rig!.filter(
-    (c) => c.definitionId === "onr_proteus_079_big-frackin-gun",
+    (c) => c.definitionId === 137,
   );
   expect(assessKnownRezzedIcePath([taxed], rig, 10)).toMatchObject({
     canReachAccess: true,
@@ -233,7 +233,7 @@ it("does not invent Sentry coverage or ignore a current breaking prohibition", (
   const { input } = native(),
     ice = currentRunRemainingIce(input)[0]!;
   const rig = input.playerView.own.rig!.filter(
-    (c) => c.definitionId !== "onr_proteus_079_big-frackin-gun",
+    (c) => c.definitionId !== 137,
   );
   expect(assessKnownRezzedIcePath([ice], rig, 20).canReachAccess).toBe(false);
   expect(
@@ -295,7 +295,7 @@ it("matches the real native Engine group, reaches access without damage and repl
   };
   const groups = getLegalActions(state, "runner").filter(
     (a) =>
-      a.type === "break_subroutine" && a.payload?.subroutineIndexes === "0,1",
+      a.type === "break_subroutine" && a.subroutineIndexes?.join(",") === "0,1",
   );
   expect(groups).toHaveLength(1);
   expect(

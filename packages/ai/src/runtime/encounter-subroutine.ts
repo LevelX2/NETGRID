@@ -69,7 +69,9 @@ export function isAcceptableNonlethalDamageSubroutine(
       return false;
   }
   const amount = Math.max(1, Math.floor(subroutine.amount ?? 1));
-  return amount <= (input.playerView.own.gripOrHq?.length ?? 0);
+  return (
+    amount + (requiredHandFloor ?? 0) <= input.playerView.own.gripOrHq.length
+  );
 }
 
 export function encounterContinueAcceptsOnlyNonlethalDamageThreats(
@@ -107,7 +109,6 @@ function isPermanentDamageSubroutine(
   subroutine: VisibleEncounterSubroutine,
 ): boolean {
   const type = subroutine.type.toLowerCase();
-  const id = subroutine.id.toLowerCase();
   const damageTypeValue = (subroutine as { damageType?: unknown }).damageType;
   const damageType =
     typeof damageTypeValue === "string"
@@ -116,8 +117,6 @@ function isPermanentDamageSubroutine(
   return (
     type.includes("brain_damage") ||
     type.includes("core_damage") ||
-    id.includes("brain_damage") ||
-    id.includes("core_damage") ||
     damageType === "brain" ||
     damageType === "core"
   );

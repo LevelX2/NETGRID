@@ -7,7 +7,7 @@ const centralCounterDamage = capabilityKey("central_counter_damage");
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_348_virus-test-site"),
+    cardDefinitionId: cardDefinitionId(560),
     title: "Virus Test Site",
     side: "corp",
     cardType: "asset",

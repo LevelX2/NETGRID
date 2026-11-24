@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import {
@@ -84,14 +85,14 @@ afterEach(resetResidentPlanPortfolioMemory);
 it("SP-565 admits the original free ETR when every paid continuation is inadmissible", () => {
   const r = decisionAt("g15d170");
   expect(r.decision.actionId).toBe(
-    "runner.continue_run.subroutine_end_run_unless_runner_pays_one",
+    "r5.0",
   );
   expect(r.pf.selectedPlan?.moduleId).toBe("runner.convert_run_window");
   expect(r.pf.rootPlanInstanceId).toBe(
-    "plan:runner.pressure_central:central%3Ahq",
+    "pa7nez1ioecg7mf06q1uwqq57o",
   );
   expect(r.pf.leafExecutorInstanceId).toBe(
-    "plan:runner.convert_run_window:run%3Arun_163",
+    "p9nnvzloeg2xwqxtk4u2gou84s",
   );
   const state = applySelected(r);
   expect(state.run).toBeUndefined();
@@ -104,7 +105,7 @@ it("SP-565 retains access when its paid continuation is actually funded and admi
     state.runner.credits = 100;
   });
   expect(r.decision.actionId).toBe(
-    "runner.continue_run.subroutine_end_run_unless_runner_pays_one.0.1",
+    "r5.0.0.1",
   );
   expect(r.pf.selectedPlan?.moduleId).toBe("runner.convert_run_window");
   const state = applySelected(r);
@@ -119,7 +120,7 @@ it.each(["g1d120", "g16d29"])(
       runnerDefenseHandBufferFacts(r.input, [], () => false).minimumHandBuffer,
     ).toBe(4);
     expect(r.input.playerView.own.gripOrHq).toHaveLength(4);
-    expect(r.decision.actionId).toBe("runner.gain_credit");
+    expect(r.decision.actionId).toBe("rb");
     expect(r.pf.selectedPlan?.moduleId).toBe("runner.economy");
     expect(r.pf.route?.capabilityId).toBe("gain_general_liquid_credits");
     const state = applySelected(r);
@@ -134,12 +135,12 @@ it("SP-566 allows cash conversion when it preserves the known buffer", () => {
     state.cardInstances[card]!.zone = { side: "runner", zone: "grip" };
   });
   expect(r.input.playerView.own.gripOrHq).toHaveLength(5);
-  expect(r.decision.actionId).toContain("livewires-contacts");
+  expect(r.decision.actionId).toSatisfy((reference: string | undefined) => referencesDefaultDeckCard(reference, 309));
   expect(applySelected(r).runner.grip).toHaveLength(4);
 });
 it("SP-566 preserves the buffer after the original Stakeout draw without resetting turn memory", () => {
   const first = decisionAt("g16d28");
-  expect(first.decision.actionId).toContain("stakeout");
+  expect(referencesDefaultDeckCard(first.decision.actionId, 182)).toBe(true);
   const state = applySelected(first);
   const cp = load("g16d29", "native");
   expect(hashGameState(state)).toBe(cp.stateHash);
@@ -158,7 +159,7 @@ it("SP-566 preserves the buffer after the original Stakeout draw without resetti
   });
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.timeoutUsed).not.toBe(true);
-  expect(decision.actionId).toBe("runner.gain_credit");
+  expect(decision.actionId).toBe("rb");
   expect(
     decision.decisionDebug!.planFirstDecision!.selectedPlan?.moduleId,
   ).toBe("runner.economy");
@@ -173,7 +174,7 @@ it("SP-566 preserves the buffer after the original Stakeout draw without resetti
 });
 it("SP-564 selects the native guaranteed Chance punish route above printed Trace 5", () => {
   const r = decisionAt("g12d79");
-  expect(r.decision.actionId).toContain("chance-observation_3");
+  expect(r.decision.actionId).toSatisfy((reference: string | undefined) => referencesDefaultDeckCard(reference, 496, 3));
   expect(r.pf.selectedPlan?.moduleId).toBe("corp.execute_punish_sequence");
   const state = applySelected(r);
   expect(state.pendingChoice?.kind).toBe("bid_amount");

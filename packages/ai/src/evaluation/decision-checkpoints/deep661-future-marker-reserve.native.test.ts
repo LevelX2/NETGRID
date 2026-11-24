@@ -33,7 +33,7 @@ function native(
       seed: "deep661-public-exit-companion",
     });
     state.run = {
-      runId: "companion",
+      runId: state.stateVersion + 1,
       attackedServerId: "rd",
       phase: "encounter_ice",
       position: { kind: "ice", serverId: "rd", iceIndex: 0 },
@@ -66,14 +66,14 @@ it("does not spend the bound full-run reserve on a next-encounter-only marker", 
   });
   const decision = chooseAiAction(input);
   expect(decision.actionId).toBe(
-    "runner.continue_run.printed_subroutines_next_encounter_unless_fully_break_damage_net",
+    "r5.0",
   );
   const plan = decision.decisionDebug!.planFirstDecision!;
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:runner.pressure_central:central%3Ard",
+    "pa90fufw9vc5bkshp96ztlryxl",
   );
   expect(plan.leafExecutorInstanceId).toBe(
-    "plan:runner.convert_run_window:run%3Arun_265",
+    "p8xqhbkzpiuechoo267e6gas23",
   );
   expect(plan.route).toMatchObject({
     actionId: decision.actionId,

@@ -1,3 +1,4 @@
+import { isCardDefinitionId, type CardDefinitionId } from "@netgrid/shared";
 import { createGameAfterSetup, hashState } from "@netgrid/engine";
 import type {
   CardInstanceId,
@@ -11,6 +12,11 @@ import {
   type SpectatorProjectionV1,
 } from "./spectator-projection";
 import type { EventRecord, StateSnapshot, StoredMatch } from "./multiplayer";
+import {
+  INITIAL_STATE_SNAPSHOT_ID,
+  preActionStateSnapshotId,
+  type StateSnapshotId,
+} from "./state-snapshot-id";
 
 describe("SpectatorProjectionV1 leakscan harness", () => {
   it("builds a named versioned spectator projection without player, replay, token or hidden-card payload leaks", () => {
@@ -21,7 +27,7 @@ describe("SpectatorProjectionV1 leakscan harness", () => {
     expect(projection.kind).toBe("private_spectator_live_v1");
     expect(projection.cursor).toEqual({ eventCursor: 2, stateVersion: 2 });
     expect(
-      projection.board.servers.find((server) => server.id === "remote_1")
+      projection.board.servers.find((server) => server.id === "r1")
         ?.rootSlots,
     ).toEqual([{ slot: 0, visibility: "hidden" }]);
     expect(leakFindings(projection, secrets)).toEqual([]);
@@ -39,10 +45,10 @@ describe("SpectatorProjectionV1 leakscan harness", () => {
       eventCursor: 3,
     });
 
-    expect(JSON.stringify(delayed)).not.toContain("remote_2");
+    expect(JSON.stringify(delayed)).not.toContain("r2");
     expect(JSON.stringify(delayed)).not.toContain("future_public_marker");
     expect(
-      current.board.servers.some((server) => server.id === "remote_2"),
+      current.board.servers.some((server) => server.id === "r2"),
     ).toBe(true);
     expect(
       current.events.some((event) => event.type === "future_public_marker"),
@@ -100,8 +106,8 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
   hiddenState.stateVersion = 2;
   const hiddenAgendaId = putCorpRootInRemote(
     hiddenState,
-    "remote_1",
-    "simple_agenda",
+    "r1",
+    588,
   );
   hiddenState.pendingChoice = {
     choiceId: "choice_spectator_hidden",
@@ -124,14 +130,14 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
 
   const futureState = structuredClone(hiddenState);
   futureState.stateVersion = 3;
-  putCorpRootInRemote(futureState, "remote_2", "simple_economy_asset");
+  putCorpRootInRemote(futureState, "r2", 594);
   futureState.runner.credits += 1;
 
   const eventLog: EventRecord[] = [
     eventRecord(
       matchId,
       {
-        eventId: "evt_hidden_access",
+        eventId: 2,
         type: "access_card",
         stateVersionBefore: 1,
         stateVersionAfter: 2,
@@ -141,7 +147,7 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
           actor: "runner",
           actionType: "access_card",
           title: "Simple Agenda",
-          cardDefinitionId: "simple_agenda",
+          cardDefinitionId: 588,
           privatePayload: {
             runner: { cardInstances: hiddenState.cardInstances },
           },
@@ -150,7 +156,7 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
           joinToken: "raw_join_secret",
           tokenHash:
             "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-          decklist: ["simple_agenda"],
+          decklist: [588],
           deckHash: "deck:secret-hash",
           AIInput: { side: "runner" },
           DecisionDebug: { local_analysis: true },
@@ -164,7 +170,7 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
     eventRecord(
       matchId,
       {
-        eventId: "evt_future_public_marker",
+        eventId: 3,
         type: "future_public_marker",
         stateVersionBefore: 2,
         stateVersionAfter: 3,
@@ -174,8 +180,8 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
           actor: "corp",
           actionType: "future_public_marker",
           title: "Simple Economy Asset",
-          cardDefinitionId: "simple_economy_asset",
-          serverId: "remote_2",
+          cardDefinitionId: 594,
+          serverId: "r2",
         },
       },
       false,
@@ -200,7 +206,7 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
         corpSnapshotId: "demo_corp_008_snapshot_v0_8",
         runner: {
           side: "runner",
-          identityCardId: "runner_identity",
+          identityCardId: 587,
           deckName: "Runner Private Deck",
           cardPoolSnapshotId: "private-runner-card-pool",
           formatProfileId: "snapshot",
@@ -208,7 +214,7 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
         },
         corp: {
           side: "corp",
-          identityCardId: "corp_identity",
+          identityCardId: 3,
           deckName: "Corp Private Deck",
           cardPoolSnapshotId: "private-corp-card-pool",
           formatProfileId: "snapshot",
@@ -258,14 +264,14 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
     actionReceipts: [],
     undoSnapshots: [],
     stateSnapshots: [
-      snapshot(matchId, initial, 5, "snap_initial"),
-      snapshot(matchId, hiddenState, 5, "snap_hidden_cursor"),
-      snapshot(matchId, futureState, 5, "snap_future_cursor"),
+      snapshot(matchId, initial, 5, INITIAL_STATE_SNAPSHOT_ID),
+      snapshot(matchId, hiddenState, 5, preActionStateSnapshotId(3)),
+      snapshot(matchId, futureState, 5, preActionStateSnapshotId(4)),
     ],
     pendingUndo: {
       undoRequestId: "undo_secret",
       requestedBy: "runner",
-      targetEventId: "evt_hidden_access",
+      targetEventId: 2,
       reason: "contains Simple Agenda",
     },
   };
@@ -281,7 +287,6 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
       "FullState",
       "GameState",
       "Simple Agenda",
-      "simple_agenda",
       "Runner Private Deck",
       "Corp Private Deck",
       "runner-deck-hash-secret",
@@ -306,8 +311,8 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
 
 function putCorpRootInRemote(
   state: GameState,
-  serverId: "remote_1" | "remote_2",
-  definitionId: string,
+  serverId: "r1" | "r2",
+  definitionId: CardDefinitionId,
 ): CardInstanceId {
   const cardId = findCard(state, definitionId);
   removeEverywhere(state, cardId);
@@ -334,7 +339,7 @@ function putCorpRootInRemote(
   return cardId;
 }
 
-function findCard(state: GameState, definitionId: string): CardInstanceId {
+function findCard(state: GameState, definitionId: CardDefinitionId): CardInstanceId {
   const entry = Object.entries(state.cardInstances).find(
     ([, card]) => card.definitionId === definitionId,
   );
@@ -361,7 +366,7 @@ function snapshot(
   matchId: string,
   gameState: GameState,
   matchVersion: number,
-  snapshotId: string,
+  snapshotId: StateSnapshotId,
 ): StateSnapshot {
   return {
     snapshotId,

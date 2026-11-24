@@ -1,3 +1,4 @@
+import { createRuntimeCardsById } from "@netgrid/catalog";
 import {
   PRODUCT_DEFAULT_CORP_SNAPSHOT_ID,
   PRODUCT_DEFAULT_RUNNER_SNAPSHOT_ID,
@@ -10,6 +11,8 @@ import {
   resolveParticipantDeckSetup,
   standardDeckGuideRefForSnapshot,
 } from "./deck-setup";
+
+const cardsById = createRuntimeCardsById();
 
 const previousRuntimeProfile = process.env.NETGRID_RUNTIME_PROFILE;
 
@@ -163,19 +166,19 @@ describe("AI deck readiness stages", () => {
       first.player_b.corpSnapshot,
     ]) {
       expect(
-        snapshot.cards.some((entry) => entry.cardId.startsWith("onr_proteus_")),
+        snapshot.cards.some((entry) => cardsById[entry.cardId]?.setId === "proteus"),
       ).toBe(true);
     }
   });
 
   it.each([
     ["originalset", "", false],
-    ["originalset_classic", "onr_classic_", true],
-    ["originalset_proteus", "onr_proteus_", true],
-    ["originalset_classic_proteus", "onr_proteus_", true],
+    ["originalset_classic", "classic", true],
+    ["originalset_proteus", "proteus", true],
+    ["originalset_classic_proteus", "proteus", true],
   ] as const)(
     "uses pool-aware fixed defaults for %s",
-    (cardPool, expectedPrefix, expectsExtension) => {
+    (cardPool, expectedSet, expectsExtension) => {
       const setup = resolveParticipantDeckSetup(
         {},
         {
@@ -192,13 +195,13 @@ describe("AI deck readiness stages", () => {
       expect(
         cards.some(
           (entry) =>
-            entry.cardId.startsWith("onr_classic_") ||
-            entry.cardId.startsWith("onr_proteus_"),
+            cardsById[entry.cardId]?.setId === "classic" ||
+            cardsById[entry.cardId]?.setId === "proteus",
         ),
       ).toBe(expectsExtension);
-      if (expectedPrefix)
+      if (expectedSet)
         expect(
-          cards.some((entry) => entry.cardId.startsWith(expectedPrefix)),
+          cards.some((entry) => cardsById[entry.cardId]?.setId === expectedSet),
         ).toBe(true);
     },
   );
@@ -227,8 +230,8 @@ describe("AI deck readiness stages", () => {
         (snapshot) =>
           snapshot.cards.some(
             (entry) =>
-              entry.cardId.startsWith("onr_classic_") ||
-              entry.cardId.startsWith("onr_proteus_"),
+              cardsById[entry.cardId]?.setId === "classic" ||
+              cardsById[entry.cardId]?.setId === "proteus",
           ),
       ),
     ).toBe(false);

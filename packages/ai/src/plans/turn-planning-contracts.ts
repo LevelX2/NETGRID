@@ -221,7 +221,7 @@ export type CanonicalLegalActionInvocation = {
   sourceCardInstanceId?: string;
   sourceAbilityBinding?: {
     kind: "card_spec_capability_key";
-    sourceAbilityId: string;
+    sourceAbilityId: number;
   };
   boundTargets: BoundTargetSlot[];
   boundChoices: CanonicalChoiceBinding[];
@@ -314,6 +314,7 @@ export type TurnPlanningHeadCandidate = {
   moduleId: PlanModuleId;
   rootPlanInstanceId: string;
   rootPlanModuleId?: PlanModuleId;
+  rootPlanDedupeKey?: string;
   executorPlanInstanceId?: string;
   executorParentPlanInstanceId?: string;
   executorParentNeedId?: string;
@@ -517,7 +518,6 @@ export function buildPlanningRulesContext(params: {
 }): PlanningRulesContext {
   const cardRegistryRulesContext = createCurrentCardRegistryRulesContext({
     cardPoolSnapshotId: params.cardPoolSnapshotId,
-    // CS06 replaces this empty migration boundary with the resolved format IDs.
     matchCardPoolDefinitionIds: [],
   });
   if (
@@ -1050,8 +1050,16 @@ function validatePriorityCoverage(plan: TurnPlan, issues: string[]): void {
     issues.push("duplicate_priority_obligation");
   }
   const coverage = plan.priorityCoverage;
+  const satisfied = new Set(coverage.satisfiedObligationIds);
+  const deferred = new Set(coverage.deferredObligationIds);
   for (const id of coverage.requiredObligationIds) {
     if (!obligationIds.has(id)) issues.push("unknown_required_obligation");
+    if (!satisfied.has(id) && !deferred.has(id)) {
+      issues.push("uncovered_required_obligation");
+    }
+  }
+  for (const id of satisfied) {
+    if (!obligationIds.has(id)) issues.push("unknown_satisfied_obligation");
   }
   if (coverage.violatedObligationIds.length > 0) {
     issues.push("violated_priority_obligation");
@@ -1228,6 +1236,11 @@ function canonicalLegalActionSemantics(
         effectRef: action.effectRef,
         resolvedEffects: action.resolvedEffects ?? [],
         visibility: action.visibility,
+        encounterSubroutineIds: action.encounterSubroutineIds,
+        encounterRemainingSubroutineIds: action.encounterRemainingSubroutineIds,
+        subroutineIndexes: action.subroutineIndexes,
+        payOrEndRunSubroutineIndexes: action.payOrEndRunSubroutineIndexes,
+        payOrTrashProgramSubroutineIndexes: action.payOrTrashProgramSubroutineIndexes,
         payload: omitNonSemanticIdentifiers(action.payload),
       }),
     )

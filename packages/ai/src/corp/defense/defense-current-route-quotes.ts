@@ -1,4 +1,6 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { validOptionalRezModifierDefinitionIds } from "../../card-definition-id-input";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { CorpGenericDefenseSignal } from "../../plans/corp-defense-contracts";
 import type { PlanSchedulerContext } from "../../plans/plan-scheduler";
 import {
@@ -17,7 +19,6 @@ import {
   selectedRezCostsAreUnique,
   selectedRezCostSetsEqual,
   selectedRezAgendaPointCost,
-  validDefinitionIdArray,
   validMandatoryInstalledRezCosts,
   validPostInstallProjectedServerBinding,
   validPostInstallRezQuoteModifiers,
@@ -164,7 +165,7 @@ export function exactInstallProjectionIsCurrent(
             ),
       ));
   return (
-    action?.expiresAtStateVersion === context.input.playerView.stateVersion &&
+    actionMatchesCurrentDecision(context.input, action) &&
     action.side === "corp" &&
     action.type === "install_card" &&
     action.source === projection.sourceCardInstanceId &&
@@ -243,8 +244,8 @@ function currentInstalledRezQuoteMatchesSelection(
     !validMandatoryInstalledRezCosts(quote.mandatoryAdditionalCosts) ||
     (selected.agendaPoints ?? 0) !==
       quote.mandatoryAdditionalCosts.agendaPoints ||
-    !validDefinitionIdArray(quote.reductionSourceDefinitionIds) ||
-    !validDefinitionIdArray(quote.increaseSourceDefinitionIds)
+    !validOptionalRezModifierDefinitionIds(quote.reductionSourceDefinitionIds) ||
+    !validOptionalRezModifierDefinitionIds(quote.increaseSourceDefinitionIds)
   ) {
     return false;
   }

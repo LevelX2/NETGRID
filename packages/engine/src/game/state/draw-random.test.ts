@@ -1,4 +1,8 @@
-import { type CardInstanceId, type GameState } from "@netgrid/shared";
+import {
+  RandomPurposeCode,
+  type CardInstanceId,
+  type GameState,
+} from "@netgrid/shared";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
@@ -8,6 +12,7 @@ import {
   recordStateRandomMarkers,
   rollDeterministicDie,
   shuffleStateIds,
+  withActionRandomHistory,
 } from "./draw-random";
 
 const HQ_A = "hq_a" as CardInstanceId;
@@ -37,21 +42,27 @@ describe("draw-random", () => {
     expect(source).not.toContain("hiddenZoneAction");
   });
 
-  it("records deterministic random values without changing purpose names", () => {
+  it("records deterministic random values with typed purpose codes", () => {
     const current = state();
-    const value = nextRandom(current, "test_purpose");
+    const value = nextRandom(current, [RandomPurposeCode.HqAccess]);
 
     expect(value).toBeGreaterThanOrEqual(0);
     expect(value).toBeLessThan(1);
     expect(current.randomCounter).toBe(1);
     expect(current.randomDrawRecords).toEqual([
-      { counter: 0, purpose: "test_purpose", value },
+      { counter: 0, purpose: [RandomPurposeCode.HqAccess], value },
     ]);
 
-    const die = rollDeterministicDie(current, "probe");
+    const die = rollDeterministicDie(current, [
+      RandomPurposeCode.ProgramProbe,
+      1,
+    ]);
     expect(die).toBeGreaterThanOrEqual(1);
     expect(die).toBeLessThanOrEqual(6);
-    expect(current.randomDrawRecords[1]?.purpose).toBe("v190.die.probe");
+    expect(current.randomDrawRecords[1]?.purpose).toEqual([
+      RandomPurposeCode.ProgramProbe,
+      1,
+    ]);
   });
 
   it("draws corp cards and preserves deck-empty game-over behavior", () => {
@@ -59,7 +70,7 @@ describe("draw-random", () => {
     current.cardInstances = {
       [HQ_A]: {
         instanceId: HQ_A,
-        definitionId: "corp_card",
+        definitionId: 3324707508,
         owner: "corp",
         controller: "corp",
         zone: { side: "corp", zone: "rd" },
@@ -91,21 +102,26 @@ describe("draw-random", () => {
     const current = state();
     const ids = ["a", "b", "c"] as CardInstanceId[];
 
-    const shuffled = shuffleStateIds(current, ids, "shuffle_purpose");
+    const shuffled = shuffleStateIds(current, ids, [
+      RandomPurposeCode.SetupRunnerShuffle,
+    ]);
     expect(shuffled).toHaveLength(3);
     expect([...shuffled].sort()).toEqual([...ids].sort());
     expect(ids).toEqual(["a", "b", "c"]);
     expect(current.randomCounter).toBe(2);
     expect(current.randomDrawRecords.map((record) => record.purpose)).toEqual([
-      "shuffle_purpose",
-      "shuffle_purpose",
+      [RandomPurposeCode.SetupRunnerShuffle],
+      [RandomPurposeCode.SetupRunnerShuffle],
     ]);
 
-    recordStateRandomMarkers(current, "marker_purpose", 2);
+    recordStateRandomMarkers(current, [RandomPurposeCode.SetupRunnerDraw], 2);
     expect(current.randomCounter).toBe(4);
     expect(
       current.randomDrawRecords.slice(2).map((record) => record.purpose),
-    ).toEqual(["marker_purpose", "marker_purpose"]);
+    ).toEqual([
+      [RandomPurposeCode.SetupRunnerDraw],
+      [RandomPurposeCode.SetupRunnerDraw],
+    ]);
   });
 
   it("keeps HQ random access purpose stable", () => {
@@ -113,7 +129,39 @@ describe("draw-random", () => {
     const accessed = randomHqAccess(current);
 
     expect([HQ_A, HQ_B]).toContain(accessed);
-    expect(current.randomDrawRecords[0]?.purpose).toBe("hq_random_access");
+    expect(current.randomDrawRecords[0]?.purpose).toEqual([
+      RandomPurposeCode.HqAccess,
+    ]);
+  });
+
+  it("validates the current history once for multiple draws in an action", () => {
+    const current = state();
+    const purpose = [RandomPurposeCode.HqAccess] as const;
+    nextRandom(current, purpose);
+    const first = current.randomDrawRecords[0]!;
+    let reads = 0;
+    Object.defineProperty(current.randomDrawRecords, 0, {
+      configurable: true,
+      get: () => {
+        reads++;
+        return first;
+      },
+    });
+    withActionRandomHistory(current, () => {
+      nextRandom(current, purpose);
+      nextRandom(current, purpose);
+      recordStateRandomMarkers(current, [RandomPurposeCode.SetupRunnerDraw], 2);
+    });
+    expect(reads).toBe(1);
+    expect(
+      current.randomDrawRecords.slice(1).map((record) => record.counter),
+    ).toEqual([1, 2, 3, 4]);
+
+    delete current.randomDrawRecords[0];
+    expect(() => nextRandom(current, purpose)).toThrow(
+      "nicht replay-konsistent",
+    );
+    expect(current.randomCounter).toBe(5);
   });
 
   it("rejects malformed random cursors before recording or shuffling", () => {
@@ -121,13 +169,45 @@ describe("draw-random", () => {
     malformed.randomCounter = 2;
     const before = structuredClone(malformed);
 
-    expect(() => nextRandom(malformed, "invalid_cursor")).toThrow(
+    expect(() => nextRandom(malformed, [RandomPurposeCode.HqAccess])).toThrow(
       "nicht replay-konsistent",
     );
     expect(malformed).toEqual(before);
-    expect(() => shuffleStateIds(malformed, [HQ_A], "invalid_shuffle")).toThrow(
-      "nicht replay-konsistent",
-    );
+    expect(() =>
+      shuffleStateIds(
+        malformed,
+        [HQ_A],
+        [RandomPurposeCode.SetupRunnerShuffle],
+      ),
+    ).toThrow("nicht replay-konsistent");
     expect(malformed).toEqual(before);
   });
+  it.each(["draw", "shuffle", "markers"] as const)(
+    "rejects a missing history record before %s mutates the state",
+    (operation) => {
+      const current = state();
+      nextRandom(current, [RandomPurposeCode.HqAccess]);
+      delete current.randomDrawRecords[0];
+      const before = structuredClone(current);
+      const apply = () => {
+        if (operation === "draw")
+          nextRandom(current, [RandomPurposeCode.HqAccess]);
+        else if (operation === "shuffle")
+          shuffleStateIds(
+            current,
+            [HQ_A, HQ_B],
+            [RandomPurposeCode.SetupRunnerShuffle],
+          );
+        else
+          recordStateRandomMarkers(
+            current,
+            [RandomPurposeCode.SetupRunnerDraw],
+            1,
+          );
+      };
+
+      expect(apply).toThrow("nicht replay-konsistent");
+      expect(current).toEqual(before);
+    },
+  );
 });

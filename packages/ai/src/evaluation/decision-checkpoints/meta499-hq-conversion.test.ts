@@ -36,10 +36,10 @@ describe("native meta499 HQ conversion", () => {
       cp.runtime,
     );
     const decision = chooseAiAction(input);
-    expect(decision.actionId).toBe("runner.start_run.hq");
+    expect(decision.actionId).toBe("rs.hq");
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-      "plan:runner.pressure_central:central%3Ahq",
+      "pa7nez1ioecg7mf06q1uwqq57o",
     );
     const owner = residentPlanPortfolioSnapshot(input)!.instances.find(
       (p) => p.moduleId === "runner.pressure_central" && p.target?.id === "hq",
@@ -64,18 +64,20 @@ describe("native meta499 HQ conversion", () => {
     );
     const score = chooseAiAction(before.input);
     expect(score.actionId).toBe(
-      "corp.score_agenda.corp_onr_v1_194_corporate-downsizing_1.corp_onr_v1_194_corporate-downsizing_1",
+      "cr.c2id.c2id",
     );
     expect(
-      score.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-    ).toContain("corp.score_agenda");
+      score.decisionDebug?.planFirstDecision?.portfolio.find(
+        (instance) => instance.instanceId === score.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+      )?.moduleId,
+    ).toBe("corp.score_agenda");
     const choice = chooseAiAction(after.input);
     expect(choice.fallbackUsed).toBe(false);
     expect(
       after.input.legalActions.some((a) => a.actionId === choice.actionId),
     ).toBe(true);
     expect(choice.selectedChoices?.selectedOptionIds).toEqual([
-      "card_corp_onr_v1_201_executive-extraction_1",
+      "card_c2jx",
     ]);
     expect(choice.selectedChoices?.choiceId).toBe(
       after.input.playerView.pendingChoice?.choiceId,

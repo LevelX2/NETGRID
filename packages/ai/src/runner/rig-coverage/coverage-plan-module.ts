@@ -19,6 +19,7 @@ import {
   runnerPlanDomain,
 } from "../../plans/runner-plan-module-support";
 import type { CoverageState } from "./coverage-types";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { runnerAffordableCoverageSearchActionIds } from "./coverage-search-alternatives";
 export function runnerCoveragePlanHandDisposition(
   input: AiDecisionInput,
@@ -111,19 +112,22 @@ export function runnerCoveragePlanHandDisposition(
       providerDefinitionIds.has(entry.definitionId),
   );
   if (installedProviderExists) return undefined;
-  const reachableProviderCount = [
+  const reachableProviders = [
     ...input.playerView.own.gripOrHq,
     ...(input.playerView.specialZones?.setAside ?? []),
   ].filter(
     (entry) =>
       entry.definitionId !== undefined &&
       providerDefinitionIds.has(entry.definitionId),
-  ).length;
-  return reachableProviderCount === 1 ? "support_for_need" : undefined;
+  );
+  return reachableProviders.length === 1 &&
+    reachableProviders[0]?.instanceId === card.instanceId
+    ? "support_for_need"
+    : undefined;
 }
 
 export function createRunnerCoverageModule(
-  rolesForDefinitionId: (definitionId: string) => readonly string[],
+  rolesForDefinitionId: (definitionId: number) => readonly string[],
 ): PlanModule {
   return {
     moduleId: "runner.rig_and_coverage",
@@ -330,7 +334,7 @@ export function createRunnerCoverageModule(
 function coveragePhase(
   context: PlanSchedulerContext,
   gap: RunnerCoverageGapSignal,
-  rolesForDefinitionId: (definitionId: string) => readonly string[],
+  rolesForDefinitionId: (definitionId: number) => readonly string[],
   preparations = coveragePreparationCandidates(context, gap),
   installs = coverageInstallCandidates(context, gap, rolesForDefinitionId),
 ): CoverageState["phase"] {
@@ -379,7 +383,7 @@ export function runnerCoverageAcquisitionActionIds(
 export function runnerCoverageCurrentPhase(params: {
   context: PlanSchedulerContext;
   gap: RunnerCoverageGapSignal;
-  rolesForDefinitionId: (definitionId: string) => readonly string[];
+  rolesForDefinitionId: (definitionId: number) => readonly string[];
 }): CoverageState["phase"] {
   return coveragePhase(params.context, params.gap, params.rolesForDefinitionId);
 }
@@ -387,7 +391,7 @@ export function runnerCoverageCurrentPhase(params: {
 function coverageInstallCandidates(
   context: PlanSchedulerContext,
   gap: RunnerCoverageGapSignal,
-  rolesForDefinitionId: (definitionId: string) => readonly string[],
+  rolesForDefinitionId: (definitionId: number) => readonly string[],
 ): PlanMaterialization["candidates"] {
   return context.actionCandidates.flatMap((candidate) => {
     if (candidate.semanticActionType !== "install.card") return [];
@@ -410,8 +414,7 @@ function coverageInstallCandidates(
       (entry) => entry.actionId === candidate.actionId,
     );
     const optionalProgramTrashInstall =
-      action?.payload?.runnerProgramTrashBeforeInstall === true ||
-      candidate.actionId.endsWith(".runner_program_trash_before_install");
+      action?.payload?.runnerProgramTrashBeforeInstall === true;
     const sourceCardInstanceId = runnerInstallSourceCardInstanceId(
       context,
       candidate,
@@ -431,9 +434,8 @@ function coverageInstallCandidates(
           (entry) => entry.actionId === alternative.actionId,
         );
         return (
-          alternativeAction?.payload?.runnerProgramTrashBeforeInstall !==
-            true &&
-          !alternative.actionId.endsWith(".runner_program_trash_before_install")
+          alternativeAction !== undefined &&
+          alternativeAction.payload?.runnerProgramTrashBeforeInstall !== true
         );
       })
     ) {
@@ -489,12 +491,10 @@ function coveragePreparationCandidates(
       const action = context.input.legalActions.find(
         (entry) => entry.actionId === candidate.actionId,
       );
+      if (!actionMatchesCurrentDecision(context.input, action)) return false;
       const exactMemorySupportInstall =
         memorySupportActionIds.has(candidate.actionId) &&
-        action?.side === "runner" &&
-        action.type === "install_card" &&
-        action.timingPoint === context.input.playerView.timingPoint &&
-        action.expiresAtStateVersion === context.input.playerView.stateVersion;
+        action.type === "install_card";
       return (
         exactMemorySupportInstall ||
         (gap.installCreditPreparation?.actionId === candidate.actionId &&
@@ -502,29 +502,18 @@ function coveragePreparationCandidates(
             context.input.playerView.stateVersion &&
           gap.installCreditPreparation.targetDefinitionId ===
             gap.handAnswerDefinitionId &&
-          action?.source ===
-            gap.installCreditPreparation.sourceCardInstanceId &&
-          action.side === "runner" &&
-          action.type === "install_card" &&
-          action.timingPoint === context.input.playerView.timingPoint &&
-          action.expiresAtStateVersion ===
-            context.input.playerView.stateVersion) ||
+          action.source === gap.installCreditPreparation.sourceCardInstanceId &&
+          action.type === "install_card") ||
         (gap.heapRecoveryPreparation?.actionId === candidate.actionId &&
           gap.heapRecoveryPreparation.stateVersion ===
             context.input.playerView.stateVersion &&
-          action?.type === "activated_card_ability" &&
+          action.type === "activated_card_ability" &&
           action.source === gap.heapRecoveryPreparation.sourceCardInstanceId &&
           action.payload?.cardImplementationEffectKind ===
             "move_top_trash_to_grip" &&
           action.payload.targetCardId ===
-            gap.heapRecoveryPreparation.currentTopCardInstanceId &&
-          action.expiresAtStateVersion ===
-            context.input.playerView.stateVersion) ||
-        (action?.side === "runner" &&
-          action.type === "trigger_ability" &&
-          action.timingPoint === context.input.playerView.timingPoint &&
-          action.expiresAtStateVersion ===
-            context.input.playerView.stateVersion &&
+            gap.heapRecoveryPreparation.currentTopCardInstanceId) ||
+        (action.type === "trigger_ability" &&
           action.payload?.runnerAbility === "change_icebreaker_subtype" &&
           typeof action.payload.selectedSubtype === "string")
       );
@@ -555,7 +544,7 @@ function runnerInstallSourceCardInstanceId(
 function runnerInstallSourceDefinitionId(
   context: PlanSchedulerContext,
   candidate: ActionSemanticCandidate,
-): string | undefined {
+): number | undefined {
   if (candidate.sourceDefinitionId) return candidate.sourceDefinitionId;
   const sourceCardInstanceId = runnerInstallSourceCardInstanceId(
     context,
@@ -569,7 +558,7 @@ function runnerInstallSourceDefinitionId(
 }
 
 export function runnerInstallDefinitionCoversCoverageGap(
-  definitionId: string,
+  definitionId: number,
   roles: readonly string[],
   requiredRole: RunnerCoverageGapSignal["requiredRole"],
   selectedSubtype?: unknown,

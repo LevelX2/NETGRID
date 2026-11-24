@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { runnerAffordableCoverageSearchActionIds } from "./coverage-search-alternatives";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -33,7 +34,7 @@ it("uses the already bound affordable stack search before funding an unaffordabl
     decision = chooseAiAction(input);
   const search = input.legalActions.find(
     (a: { type: string; source: string }) =>
-      a.type === "play_event" && a.source?.includes("temple-microcode"),
+      a.type === "play_event" && referencesDefaultDeckCard(a.source, 326),
   );
   expect(search.payload.cardImplementationEffectKind).toBeUndefined();
   expect(decision.actionId).toBe(search.actionId);
@@ -43,7 +44,7 @@ it("uses the already bound affordable stack search before funding an unaffordabl
   expect(p.selectedPlan!.moduleId).toBe("runner.rig_and_coverage");
   expect(p.selectedPlan!.phase).toBe("search_answer");
   expect(p.rootPlanInstanceId).toBe(
-    "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry",
+    "pde8a64nmn1hkbrzgi9sbuf6fo",
   );
   expect(p.route).toMatchObject({
     actionId: search.actionId,
@@ -58,7 +59,7 @@ it("uses the already bound affordable stack search before funding an unaffordabl
       gap: {
         directSearchChoiceBindings: Array<{
           actionId: string;
-          targetDefinitionId: string;
+          targetDefinitionId: number;
         }>;
       };
     }
@@ -66,7 +67,7 @@ it("uses the already bound affordable stack search before funding an unaffordabl
   expect(gap.directSearchChoiceBindings).toContainEqual(
     expect.objectContaining({
       actionId: search.actionId,
-      targetDefinitionId: "onr_v1_072_wild-card",
+      targetDefinitionId: 284,
     }),
   );
   expect(JSON.stringify(input)).toBe(snapshot);
@@ -107,7 +108,7 @@ it.each([
     (a: { actionId: string }) => a.actionId === decision.actionId,
   );
   const effects = AI_HINTS_BY_CARD.get(
-    "onr_v1_114_temple-microcode-outlet",
+    326,
   )!.actionCapabilitySemantics!.find(
     (s) => s.capabilityKey === action.payload.cardImplementationAbilityKey,
   )!.effects;
@@ -126,7 +127,7 @@ it.each([
     input.playerView.own.maxHandSize = input.playerView.own.gripOrHq.length;
   if (boundary === "no_stack_copy") {
     const target = input.ownDeckCapabilities.runner.breakerInventory.find(
-      (c: { cardId: string }) =>
+      (c: { cardId: number }) =>
         c.cardId === gap.directSearchChoiceBindings![0]!.targetDefinitionId,
     );
     target.quantityKnownInDeck = 0;

@@ -24,14 +24,14 @@ export type AiFacadeFoundationContextDependencies = {
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string;
+  ) => number | undefined;
 };
 
 export function createAiFacadeFoundationContext(
   dependencies: AiFacadeFoundationContextDependencies,
 ) {
   const AI_HINTS = createAiHintsByCard();
-  const hintForDefinitionId = (definitionId: string) =>
+  const hintForDefinitionId = (definitionId: number) =>
     AI_HINTS.get(definitionId);
 
   const { rolesForAction, rolesForCardId } = createRoleContext({
@@ -51,7 +51,7 @@ export function createAiFacadeFoundationContext(
     findVisibleCard: dependencies.findVisibleCard,
   });
   const {
-    strongestCorpTagSourceOpportunity,
+    corpTagSourceOpportunities,
     corpPunishKindForAction,
     isCorpTagSourceAction,
     isCorpTraceTagSourceAction,
@@ -76,12 +76,10 @@ export function createAiFacadeFoundationContext(
       corpVisibleTagPayoffCategoryForAction,
       sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
     });
-  const {
-    applyCorpTagSourceWindowDiagnostics,
-    applyActualTagCreationDiagnostics,
-  } = createCorpTagCreationDiagnosticsContext({
-    sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
-  });
+  const { applyActualTagCreationDiagnostics } =
+    createCorpTagCreationDiagnosticsContext({
+      sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
+    });
 
   return {
     hintForDefinitionId,
@@ -91,11 +89,10 @@ export function createAiFacadeFoundationContext(
     sourceDefinitionIdForSimulationAction,
     corpFutureRunIceDiagnosticsForSimulationAction,
     definitionForSimulationAction,
-    strongestCorpTagSourceOpportunity,
+    corpTagSourceOpportunities,
     corpTagPunishOntologyAssessmentForAction,
     applyCorpVisibleTagPunishUnknownSkipDiagnostics,
     corpVisibleTagPunishOpportunities,
-    applyCorpTagSourceWindowDiagnostics,
     applyActualTagCreationDiagnostics,
   };
 }

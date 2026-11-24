@@ -1,4 +1,3 @@
-import { currentDelayedSuccessChoice } from "../defense/temporary-ice-choice";
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import type { HandState } from "../hand-management/hand-management-plan-module";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
@@ -10,8 +9,9 @@ import {
   corpScoredAgendaIceMarkProfile,
 } from "../../runtime/corp-canonical-card-facts";
 import {
-  PendingChoice,
-  PendingChoiceOptions,
+  exactCurrentChoiceAction,
+  type PendingChoice,
+  type PendingChoiceOptions,
   unresolvedChoiceFailure,
 } from "../../runtime/plan-bound-choice-contract";
 export function selectedCorpScoredAgendaStartDrawChoiceOptionId(
@@ -41,20 +41,7 @@ export function selectedCorpScoredAgendaStartDrawChoiceOptionId(
   );
   const exactOptions =
     selectableOptions.length === 2 && draw !== undefined && skip !== undefined;
-  const requirement = action.choiceRequirements?.[0];
-  const exactActionBinding =
-    action.side === "corp" &&
-    action.type === "resolve_choice" &&
-    action.source === "game_rule" &&
-    action.timingPoint === input.playerView.timingPoint &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === 1 &&
-    requirement.maxSelections === 1 &&
-    requirement.optionIds.length === 2 &&
-    requirement.optionIds.includes("draw") &&
-    requirement.optionIds.includes("skip");
+  const exactActionBinding = exactCurrentChoiceAction(input, choice) === action;
   const rdCount = input.playerView.own.stackOrRdCount;
   if (
     input.playerView.timingPoint !== "corp_draw.mandatory_draw" ||
@@ -112,12 +99,13 @@ export function selectedCorpSatelliteMonitorsStartOptionId(
   const sourceStateVersion = Number(sourceMatch?.[2]);
   const sourceCard = sourceCardId
     ? input.playerView.servers
+        .filter((server) => server.id !== "archives")
         .flatMap((server) => server.root)
         .find(
           (card) =>
             card.instanceId === sourceCardId &&
             card.known &&
-            card.definitionId === "onr_classic_021_satellite-monitors" &&
+            card.definitionId === 25 &&
             card.type === "asset" &&
             card.rezzed === true,
         )
@@ -128,20 +116,7 @@ export function selectedCorpSatelliteMonitorsStartOptionId(
   const decline = selectableOptions.find(
     (option) => option.id === "decline" && option.value === "decline",
   );
-  const requirement = action.choiceRequirements?.[0];
-  const exactActionBinding =
-    action.side === "corp" &&
-    action.type === "resolve_choice" &&
-    action.source === "game_rule" &&
-    action.timingPoint === input.playerView.timingPoint &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === 1 &&
-    requirement.maxSelections === 1 &&
-    requirement.optionIds.length === 2 &&
-    requirement.optionIds.includes("use") &&
-    requirement.optionIds.includes("decline");
+  const exactActionBinding = exactCurrentChoiceAction(input, choice) === action;
   const exactWindow =
     sourceCard !== undefined &&
     sourceStateVersion === input.playerView.stateVersion &&
@@ -161,94 +136,6 @@ export function selectedCorpSatelliteMonitorsStartOptionId(
     );
   }
   return use.id;
-}
-
-export function selectedCorpDelayedSuccessOptionId(
-  input: AiDecisionInput,
-  action: LegalAction,
-  choice: PendingChoice,
-  selectableOptions: PendingChoiceOptions,
-  currentPortfolio?: ResidentPlanPortfolio,
-): string[] {
-  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
-  const current = currentDelayedSuccessChoice(input, action, choice);
-  const boundDefensePlans = (portfolio?.instances ?? []).filter((instance) => {
-    if (instance.moduleId !== "corp.defend_servers") return false;
-    const state = instance.moduleState as
-      | {
-          kind?: unknown;
-          delayedSuccessChoiceBinding?: {
-            choiceId?: unknown;
-            actionId?: unknown;
-            sourceCardInstanceId?: unknown;
-            serverId?: unknown;
-            observedAtStateVersion?: unknown;
-          };
-        }
-      | undefined;
-    const candidateBinding = state?.delayedSuccessChoiceBinding;
-    return (
-      state?.kind === "defense" &&
-      candidateBinding?.choiceId === choice.choiceId &&
-      candidateBinding.actionId === action.actionId &&
-      candidateBinding.sourceCardInstanceId === current?.sourceCardId &&
-      candidateBinding.serverId === current?.serverId &&
-      candidateBinding.observedAtStateVersion === input.playerView.stateVersion
-    );
-  });
-  const executor =
-    boundDefensePlans.length === 1 ? boundDefensePlans[0] : undefined;
-  const moduleState = executor?.moduleState as
-    | {
-        kind?: unknown;
-        delayedSuccessChoiceBinding?: {
-          choiceId?: unknown;
-          actionId?: unknown;
-          selectedOptionId?: unknown;
-          sourceCardInstanceId?: unknown;
-          serverId?: unknown;
-          observedAtStateVersion?: unknown;
-        };
-      }
-    | undefined;
-  const binding = moduleState?.delayedSuccessChoiceBinding;
-  const selectedOption = selectableOptions.find(
-    (option) =>
-      option.id === binding?.selectedOptionId &&
-      current?.options.some(
-        (available) =>
-          available.id === option.id && available.value === option.value,
-      ),
-  );
-  const exactBinding =
-    portfolio?.side === "corp" &&
-    executor !== undefined &&
-    moduleState?.kind === "defense" &&
-    binding?.choiceId === choice.choiceId &&
-    binding.actionId === action.actionId &&
-    binding.selectedOptionId === selectedOption?.id &&
-    binding.sourceCardInstanceId === current?.sourceCardId &&
-    binding.serverId === current?.serverId &&
-    binding.observedAtStateVersion === input.playerView.stateVersion &&
-    current !== undefined &&
-    selectedOption !== undefined &&
-    typeof selectedOption.value === "string" &&
-    ((selectedOption.id === "decline" && selectedOption.value === "decline") ||
-      (selectedOption.id === `ice_${selectedOption.value}` &&
-        input.playerView.own.gripOrHq.some(
-          (card) =>
-            card.instanceId === selectedOption.value &&
-            card.known &&
-            card.type === "ice",
-        )));
-  if (!exactBinding || !selectedOption) {
-    throw unresolvedChoiceFailure(
-      input,
-      action,
-      "Complete Dr. Dreff only from the exact current corp.defend_servers choice binding on the attacked fort and its legal decline or visible HQ-ICE payload.",
-    );
-  }
-  return [selectedOption.id];
 }
 
 export function selectedCorpScoreAdvancementOptionId(
@@ -569,10 +456,7 @@ export function selectedCorpScoredAgendaIceMarkOptionId(
     targetCard.rezzed === true &&
     targetCard.definitionId === binding.targetDefinitionId &&
     matchingTargetOptions.length === 1 &&
-    action.side === "corp" &&
-    action.type === "resolve_choice" &&
-    action.source === "game_rule" &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    exactCurrentChoiceAction(input, choice) === action &&
     action.choiceRequirements?.length === 1 &&
     requirement?.choiceId === choice.choiceId &&
     requirement.minSelections === 1 &&
@@ -695,10 +579,7 @@ export function selectedCorpScoredAgendaFreeRezOptionId(
     binding.selectedOptionId ===
       `rez_${binding.targetCardId}_${binding.selectedVariantId}` &&
     matchingTargetOptions.length === 1 &&
-    action.side === "corp" &&
-    action.type === "resolve_choice" &&
-    action.source === "game_rule" &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    exactCurrentChoiceAction(input, choice) === action &&
     action.choiceRequirements?.length === 1 &&
     requirement?.choiceId === choice.choiceId &&
     requirement.minSelections === 1 &&
@@ -787,10 +668,7 @@ export function residentCorpScoredAgendaHqShuffleBinding(
     choiceContinuation?.family === "corp_scored_agenda_hq_shuffle" &&
     choiceContinuation.createdAtStateVersion ===
       input.playerView.stateVersion &&
-    action.side === "corp" &&
-    action.type === "resolve_choice" &&
-    action.source === "game_rule" &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    exactCurrentChoiceAction(input, choice) === action &&
     action.choiceRequirements?.length === 1 &&
     choiceRequirement?.choiceId === choice.choiceId &&
     choiceRequirement.minSelections === choice.minSelections &&

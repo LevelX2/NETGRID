@@ -1,3 +1,4 @@
+import { type CardDefinitionId } from "@netgrid/shared";
 import { Activity, Bot, Check, Move, Play, User } from "lucide-react";
 import { useEffect, useRef } from "react";
 import type {
@@ -29,11 +30,12 @@ import type {
   CueDisplayMode,
 } from "../settings/settings-model";
 import { shouldUseFloatingCue } from "./cue-display";
+import { TurnActionBadge } from "./TurnActionBadge";
 import { WindowEventIcon } from "./WindowEventIcon";
 import { windowEventIconKindForActionCue } from "./window-event-icon-kind";
 
 type OpponentOverlayCatalogDetail = {
-  catalogCardId: string;
+  catalogCardId: CardDefinitionId;
   title: string;
   side: Side;
   type: string;
@@ -87,7 +89,7 @@ export function OpponentActionOverlay({
     cue &&
     shouldUseFloatingCue(
       cueDisplayMode,
-      manualAdvanceRequired,
+      manualAdvanceRequired && showAiAdvanceButton,
       cue.presentationKind === "trace_result",
     ),
   );
@@ -150,6 +152,37 @@ export function OpponentActionOverlay({
   const tagOutcome = cue.traceTagOutcome;
   const dismissLabel =
     showAiAdvanceButton || tagOutcome ? t("continue") : t("dismiss");
+  const { creditChanges } = cue;
+  const creditBalanceRow = creditChanges?.length ? (
+    <div className="cueCreditChanges">
+      {creditChanges.map(({ side, before, after }) => {
+        const sideLabel = t(`actor.${side}`);
+        const delta = after - before;
+        return (
+          <span
+            key={side}
+            className="cueCreditChange"
+            role="img"
+            aria-label={t("creditBalanceChange", {
+              side: sideLabel,
+              before,
+              after,
+            })}
+          >
+            <span className="creditCoin" aria-hidden="true" />
+            {creditChanges.length > 1 || side !== cue.actor ? sideLabel : null}
+            <span>{before}</span>
+            <span>→</span>
+            <b>{after}</b>
+            <small>
+              ({delta > 0 ? "+" : "−"}
+              {Math.abs(delta)})
+            </small>
+          </span>
+        );
+      })}
+    </div>
+  ) : null;
   const preventionCardNames =
     tagOutcome?.pending === false
       ? tagOutcome.preventionCardIds.flatMap((id) => {
@@ -208,7 +241,13 @@ export function OpponentActionOverlay({
       >
         <div className="floatingCueMessage">
           <span className="floatingCueActor">{cue.actorLabel}</span>
-          <strong>{renderTitle(cue)}</strong>
+          <div className="floatingCueHeadline">
+            {cue.actionUse ? (
+              <TurnActionBadge actionUse={cue.actionUse} side={cue.actor} />
+            ) : null}
+            <strong>{renderTitle(cue)}</strong>
+          </div>
+          {creditBalanceRow}
           {cue.description ? <span>{cue.description}</span> : null}
         </div>
       </aside>
@@ -303,6 +342,7 @@ export function OpponentActionOverlay({
           />
           <div className="opponentCueText">
             <strong>{renderTitle(cue)}</strong>
+            {creditBalanceRow}
             {tagOutcome?.pending ? <p>{t("traceTagPending")}</p> : null}
             {tagOutcome?.pending === false ? (
               <>

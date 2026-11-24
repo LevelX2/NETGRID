@@ -54,7 +54,7 @@ it("funds the admitted same-turn HQ run from a mature bank when basic income can
   expect(input.playerView.own).toMatchObject({ credits: 6, clicks: 2 });
   expect(action).toMatchObject({
     type: "activated_card_ability",
-    source: "runner_onr_v1_154_broker_1",
+    source: "c29d",
     payload: { cardImplementationAbilityKey: "withdraw_credits" },
   });
   expect(result.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
@@ -69,9 +69,9 @@ it("funds the admitted same-turn HQ run from a mature bank when basic income can
       estimatedPayout: 9,
       priorityClass: "P4",
       runFunding: {
-        parentPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
+        parentPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
         needId: "run-support:central:hq",
-        runActionId: "runner.start_run.hq",
+        runActionId: "rs.hq",
         stateVersion: 90,
         gap: 8,
         routeAssessment: {

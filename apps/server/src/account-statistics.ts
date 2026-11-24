@@ -1,7 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdirSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
-import { DatabaseSync } from "node:sqlite";
+import type { DatabaseSync } from "node:sqlite";
 import { getPlayerView } from "@netgrid/engine";
 import type {
   ApiAccountStatisticsExclusionReason,
@@ -22,10 +20,9 @@ import type {
 } from "@netgrid/shared";
 import type { StoredMatch } from "./multiplayer";
 import {
-  configureSqliteConnection,
+  openSqliteAccountDatabase,
   runSqliteStorageOperation,
   runSqliteTransaction,
-  SqliteMatchStorage,
 } from "./storage-sqlite";
 
 const SERIES_WIN_MATCH_POINTS = 10;
@@ -264,15 +261,7 @@ export class SqliteAccountStatisticsStorage implements AccountStatisticsStorage 
   private readonly db: DatabaseSync;
 
   constructor(options: { dbPath: string; backupDir?: string }) {
-    const dbPath = resolve(options.dbPath);
-    mkdirSync(dirname(dbPath), { recursive: true });
-    const schemaOwner = new SqliteMatchStorage({
-      dbPath,
-      backupDir: resolve(options.backupDir ?? join(dirname(dbPath), "backups")),
-    });
-    schemaOwner.close();
-    this.db = new DatabaseSync(dbPath);
-    configureSqliteConnection(this.db);
+    this.db = openSqliteAccountDatabase(options);
   }
 
   async bindParticipant(

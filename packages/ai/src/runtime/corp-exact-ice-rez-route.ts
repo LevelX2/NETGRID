@@ -1,10 +1,18 @@
-import type {
-  AiDecisionInput,
-  VisibleCard,
-  VisibleCorpRezCostQuote,
-  VisibleCorpTraceIceRezQuote,
+import { isRemoteServerId } from "@netgrid/shared";
+import {
+  isCardDefinitionId,
+  type AiDecisionInput,
+  type CardDefinitionId,
+  type VisibleCard,
+  type VisibleCorpRezCostQuote,
+  type VisibleCorpTraceIceRezQuote,
 } from "@netgrid/shared";
+import {
+  parseOptionalCardDefinitionIdCsv,
+  validOptionalRezModifierDefinitionIds,
+} from "../card-definition-id-input";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import {
   assessCorpScoreProtection,
   compareExactProbabilities,
@@ -24,7 +32,7 @@ import { visibleDeflectorSubroutineCanResolve } from "../visible-run-analysis";
 export type CorpExactIceRezRouteProjection = Readonly<{
   actionId: string;
   sourceCardInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   targetServerId: string;
   quote: Extract<VisibleCorpRezCostQuote, { complete: true }>;
   before?: KnownCorpScoreProtectionAssessment;
@@ -60,13 +68,13 @@ export type CorpExactIceRezRouteProjection = Readonly<{
     runnerNonNormalRunCreditsApplied: number;
     runnerNormalCreditsLostOnAccessPath: number;
     runnerBreakerInstanceId: string;
-    runnerBreakerDefinitionId: string;
+    runnerBreakerDefinitionId: number;
     runnerConsumedCardInstanceIds: readonly string[];
     layeredCentralPathTax?: true;
     otherRezzedIceCount?: number;
     runnerRandomConsequences?: readonly Readonly<{
       cardId: string;
-      definitionId: string;
+      definitionId: number;
       kind: "post_encounter_self_trash_check";
       numerator: number;
       denominator: number;
@@ -89,6 +97,7 @@ export function readExactCurrentInstalledCorpIceRezQuote(params: {
 }): CorpExactInstalledIceRezQuoteRead | undefined {
   const { input, sourceCard, targetServerId } = params;
   if (
+    input.side !== "corp" ||
     sourceCard.known !== true ||
     sourceCard.type !== "ice" ||
     !sourceCard.definitionId ||
@@ -116,8 +125,8 @@ export function readExactCurrentInstalledCorpIceRezQuote(params: {
     !nonNegativeSafeInteger(quote.baseCredits) ||
     !nonNegativeSafeInteger(quote.finalCredits) ||
     !nonNegativeSafeInteger(quote.mandatoryAdditionalCosts?.agendaPoints) ||
-    !validDefinitionIdList(quote.reductionSourceDefinitionIds) ||
-    !validDefinitionIdList(quote.increaseSourceDefinitionIds) ||
+    !validOptionalRezModifierDefinitionIds(quote.reductionSourceDefinitionIds) ||
+    !validOptionalRezModifierDefinitionIds(quote.increaseSourceDefinitionIds) ||
     !definitionIdListsDisjoint(
       quote.reductionSourceDefinitionIds,
       quote.increaseSourceDefinitionIds,
@@ -248,39 +257,17 @@ export function projectExactCorpIceRezRoute(params: {
     )
       ? requestedBluff
       : undefined;
-  let continuationRezCredits = 0;
+  const bypassContinuation = currentInnerBypassContinuation({
+    input,
+    server,
+    outerIceInstanceId: sourceCard.instanceId,
+    outerRezCredits: totalRezCredits,
+  });
+  const continuationRezCredits = bypassContinuation?.rezCredits ?? 0;
   const serverIce = server.ice.map((originalIce) => {
-    const continuation = originalIce.effectivePostRezRunQuote;
-    const binding =
-      continuation?.complete === true
-        ? continuation.bypassContinuation
-        : undefined;
-    const cost = originalIce.effectiveRezCostQuote;
     const ice =
-      firstEncounterBypassed &&
-      continuation?.complete === true &&
-      binding !== undefined &&
-      binding.runId === input.playerView.run?.runId &&
-      binding.outerIceId === sourceCard.instanceId &&
-      continuation.cardId === originalIce.instanceId &&
-      continuation.iceDefinitionId === originalIce.definitionId &&
-      continuation.targetServerId === targetServerId &&
-      continuation.projectedServerId === targetServerId &&
-      continuation.expiresAtStateVersion === input.playerView.stateVersion &&
-      cost?.complete === true &&
-      cost.context === "installed" &&
-      cost.cardId === originalIce.instanceId &&
-      cost.targetServerId === targetServerId &&
-      cost.expiresAtStateVersion === input.playerView.stateVersion &&
-      cost.finalCredits === binding.rezCredits &&
-      cost.finalCredits + totalRezCredits <= input.playerView.own.credits &&
-      cost.mandatoryAdditionalCosts.agendaPoints === 0
-        ? ((continuationRezCredits += cost.finalCredits),
-          {
-            ...originalIce,
-            rezzed: true,
-            effectiveRunQuote: continuation.effectiveRunQuote,
-          })
+      originalIce.instanceId === bypassContinuation?.ice.instanceId
+        ? bypassContinuation.ice
         : originalIce;
     return {
       instanceId: ice.instanceId,
@@ -491,6 +478,60 @@ export function projectExactCorpIceRezRoute(params: {
   };
 }
 
+/** The Engine quotes just the inner layer immediately behind the bypassed outer ICE. */
+function currentInnerBypassContinuation(params: {
+  input: AiDecisionInput;
+  server: AiDecisionInput["playerView"]["servers"][number];
+  outerIceInstanceId: string;
+  outerRezCredits: number;
+}): { ice: VisibleCard; rezCredits: number } | undefined {
+  const { input, server, outerIceInstanceId, outerRezCredits } = params;
+  const { run, stateVersion } = input.playerView;
+  const innerIce = server.ice[0];
+  if (
+    !run?.bypassFirstIceRemaining ||
+    !run.runId ||
+    run.phase !== "approach_ice" ||
+    run.attackedServerId !== server.id ||
+    run.position?.kind !== "ice" ||
+    run.position.serverId !== server.id ||
+    run.position.iceIndex !== 1 ||
+    server.ice[1]?.instanceId !== outerIceInstanceId ||
+    !innerIce ||
+    innerIce.rezzed !== false
+  ) return undefined;
+
+  const continuation = innerIce.effectivePostRezRunQuote;
+  const binding = continuation?.complete === true
+    ? continuation.bypassContinuation
+    : undefined;
+  const cost = readExactCurrentInstalledCorpIceRezQuote({
+    input,
+    sourceCard: innerIce,
+    targetServerId: server.id,
+  })?.quote;
+  if (
+    continuation?.complete !== true ||
+    continuation.context !== "installed_post_rez" ||
+    continuation.cardId !== innerIce.instanceId ||
+    continuation.iceDefinitionId !== innerIce.definitionId ||
+    continuation.targetServerId !== server.id ||
+    continuation.projectedServerId !== server.id ||
+    continuation.expiresAtStateVersion !== stateVersion ||
+    binding?.runId !== run.runId ||
+    binding.outerIceId !== outerIceInstanceId ||
+    cost?.costKind !== "fixed" ||
+    cost.finalCredits !== binding.rezCredits ||
+    cost.finalCredits + outerRezCredits > input.playerView.own.credits ||
+    cost.mandatoryAdditionalCosts.agendaPoints !== 0
+  ) return undefined;
+
+  return {
+    ice: { ...innerIce, rezzed: true, effectiveRunQuote: continuation.effectiveRunQuote },
+    rezCredits: cost.finalCredits,
+  };
+}
+
 /** Compare the remaining actual encounters on each branch. Declining an
  * unrezzed outer layer preserves the first-encounter bypass for inner ICE. */
 function currentRunEncounterPath<
@@ -592,7 +633,7 @@ function readKnownCurrentRunAccessPathTax(params: {
     (candidate) => candidate.id === targetServerId,
   );
   if (
-    !targetServerId.startsWith("remote_") ||
+    !isRemoteServerId(targetServerId) ||
     run?.attackedServerId !== targetServerId ||
     run.phase !== "approach_ice" ||
     run.position?.kind !== "ice" ||
@@ -656,7 +697,7 @@ function quoteQualitativeEncounterActivationCredits(params: {
             subroutine.type !== "deflect_run" ||
             visibleDeflectorSubroutineCanResolve(subroutine, {
               visibleRemoteServerCount: input.playerView.servers.filter(
-                (candidate) => candidate.id.startsWith("remote_"),
+                (candidate) => isRemoteServerId(candidate.id),
               ).length,
               visibleCorpCredits:
                 input.playerView.own.credits - totalRezCredits,
@@ -980,7 +1021,7 @@ function readExactCurrentRunResourceExchange(params: {
       consumed.cardId !== quote.runnerBreak.breakerCardId ||
       consumed.definitionId !== quote.runnerBreak.breakerDefinitionId ||
       !nonBlankString(consumed.cardId) ||
-      !nonBlankString(consumed.definitionId)
+      !isCardDefinitionId(consumed.definitionId)
     ) {
       return undefined;
     }
@@ -1045,7 +1086,7 @@ function currentRunMarginalDefenseThreat(
     (candidate) => candidate.id === accessServerId,
   );
   if (!server) return undefined;
-  if (accessServerId?.startsWith("remote_")) {
+  if (isRemoteServerId(accessServerId)) {
     return server.root.some((card) => card.known && card.type === "agenda")
       ? "visible_agenda_remote"
       : undefined;
@@ -1069,6 +1110,7 @@ export function readExactInstalledCorpIceRezQuote(params: {
     sourceCard.type !== "ice" ||
     !sourceCard.definitionId ||
     sourceCard.rezzed !== false ||
+    candidate.actorSide !== "corp" ||
     candidate.semanticActionType !== "corp_window.rez" ||
     candidate.sourceCardInstanceId !== sourceCard.instanceId ||
     candidate.sourceDefinitionId !== sourceCard.definitionId
@@ -1081,14 +1123,14 @@ export function readExactInstalledCorpIceRezQuote(params: {
     targetServerId,
   });
   if (!quoteRead) return undefined;
-  const action = input.legalActions.find(
+  const actions = input.legalActions.filter(
     (candidateAction) => candidateAction.actionId === candidate.actionId,
   );
+  const [action] = actions;
   if (
-    !action ||
-    action.side !== "corp" ||
+    actions.length !== 1 ||
+    !actionMatchesCurrentDecision(input, action) ||
     action.type !== "rez_ice" ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
     action.source !== sourceCard.instanceId ||
     action.payload?.cardId !== sourceCard.instanceId ||
     (action.payload.serverId !== undefined &&
@@ -1262,7 +1304,7 @@ function discountedRezActionQuote(
     ordinaryQuote.costKind !== "fixed" ||
     !payload ||
     !nonBlankString(payload.discountedRezSourceCardId) ||
-    !nonBlankString(payload.discountedRezSourceDefinitionId) ||
+    !isCardDefinitionId(payload.discountedRezSourceDefinitionId) ||
     payload.temporaryDerezAfterRun !== true ||
     payload.serverId !== ordinaryQuote.targetServerId ||
     !nonNegativeSafeInteger(payload.discountedRezCostBase) ||
@@ -1286,7 +1328,7 @@ function discountedRezActionQuote(
   ) {
     return undefined;
   }
-  const reductionSourceDefinitionIds = commaSeparatedDefinitionIds(
+  const reductionSourceDefinitionIds = parseOptionalCardDefinitionIdCsv(
     payload.rezCostReductionSourceDefinitionIds,
   );
   if (
@@ -1303,7 +1345,7 @@ function discountedRezActionQuote(
   const increaseSourceDefinitionIds = ordinaryQuote.increaseSourceDefinitionIds;
   if (surchargeAmount > 0) {
     if (
-      !nonBlankString(payload.corpRezCostSurchargeSourceDefinitionId) ||
+      !isCardDefinitionId(payload.corpRezCostSurchargeSourceDefinitionId) ||
       !increaseSourceDefinitionIds?.includes(
         payload.corpRezCostSurchargeSourceDefinitionId,
       )
@@ -1315,7 +1357,7 @@ function discountedRezActionQuote(
   }
   const sortedReductionSourceDefinitionIds = [
     ...reductionSourceDefinitionIds,
-  ].sort();
+  ].sort((left, right) => left - right);
   if (
     !definitionIdListsDisjoint(
       sortedReductionSourceDefinitionIds,
@@ -1331,13 +1373,7 @@ function discountedRezActionQuote(
   };
 }
 
-function commaSeparatedDefinitionIds(value: unknown): string[] | undefined {
-  if (typeof value !== "string" || value.length === 0) return undefined;
-  const values = value.split(",");
-  return values.every(nonBlankString) && new Set(values).size === values.length
-    ? values
-    : undefined;
-}
+
 
 function nonBlankString(value: unknown): value is string {
   return typeof value === "string" && value.length > 0;
@@ -1514,22 +1550,9 @@ function nonNegativeSafeInteger(value: unknown): value is number {
   return Number.isSafeInteger(value) && (value as number) >= 0;
 }
 
-function validDefinitionIdList(values: readonly string[] | undefined): boolean {
-  return (
-    values === undefined ||
-    (Array.isArray(values) &&
-      values.every(
-        (value, index) =>
-          typeof value === "string" &&
-          value.length > 0 &&
-          (index === 0 || values[index - 1]! < value),
-      ))
-  );
-}
-
 function definitionIdListsDisjoint(
-  reductionIds: readonly string[] | undefined,
-  increaseIds: readonly string[] | undefined,
+  reductionIds: readonly CardDefinitionId[] | undefined,
+  increaseIds: readonly CardDefinitionId[] | undefined,
 ): boolean {
   if (!reductionIds || !increaseIds) return true;
   const reductions = new Set(reductionIds);
@@ -1537,8 +1560,8 @@ function definitionIdListsDisjoint(
 }
 
 function definitionIdListsEqual(
-  left: readonly string[] | undefined,
-  right: readonly string[] | undefined,
+  left: readonly CardDefinitionId[] | undefined,
+  right: readonly CardDefinitionId[] | undefined,
 ): boolean {
   return (
     (left === undefined && right === undefined) ||

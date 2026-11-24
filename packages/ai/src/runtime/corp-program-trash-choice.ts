@@ -4,6 +4,7 @@ import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
 import { residentPlanPortfolioSnapshot } from "../plans/resident-plan-portfolio-memory";
 import { corpProgramTrashChoiceContext } from "../corp/defense/program-trash-targets";
 import {
+  exactCurrentChoiceAction,
   unresolvedChoiceFailure,
   type PendingChoice,
   type PendingChoiceOptions,
@@ -27,14 +28,15 @@ export function selectedCorpProgramTrashChoiceOptionIds(
   const state = executor?.moduleState as
     | { kind?: string; signals?: CorpGenericDefenseSignal[] }
     | undefined;
-  const signal = state?.signals?.find(
-    (s) =>
-      s.phase === "resolve_program_trash" &&
-      s.actionIds?.length === 1 &&
-      s.actionIds[0] === action.actionId,
-  );
+  const signals =
+    state?.signals?.filter(
+      (s) =>
+        s.phase === "resolve_program_trash" &&
+        s.actionIds?.length === 1 &&
+        s.actionIds[0] === action.actionId,
+    ) ?? [];
+  const [signal] = signals;
   const resolution = signal?.choiceResolution;
-  const requirement = action.choiceRequirements?.[0];
   const context = corpProgramTrashChoiceContext(input, choice);
   const sameOrigin =
     resolution?.kind === "program_trash" &&
@@ -46,14 +48,14 @@ export function selectedCorpProgramTrashChoiceOptionIds(
         resolution.origin.traceId === context.origin.traceId);
   if (
     input.side !== "corp" ||
+    portfolio?.side !== "corp" ||
+    signals.length !== 1 ||
     state?.kind !== "defense" ||
     choice.side !== "corp" ||
     choice.kind !== "select_cards" ||
     choice.visibility !== "public" ||
     choice.minSelections !== 1 ||
     choice.maxSelections !== 1 ||
-    action.source !== "game_rule" ||
-    action.timingPoint !== input.playerView.timingPoint ||
     resolution?.kind !== "program_trash" ||
     resolution.sourceStateVersion !== input.playerView.stateVersion ||
     choice.stateVersion !== input.playerView.stateVersion ||
@@ -61,19 +63,18 @@ export function selectedCorpProgramTrashChoiceOptionIds(
     resolution.choiceSource !== choice.source ||
     !sameOrigin ||
     resolution.sourceIceInstanceId !== context?.sourceIceId ||
-    action.side !== "corp" ||
-    action.type !== "resolve_choice" ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
-    action.choiceRequirements?.length !== 1 ||
-    requirement?.choiceId !== choice.choiceId ||
-    requirement.minSelections !== 1 ||
-    requirement.maxSelections !== 1 ||
-    requirement.optionIds.length !== options.length ||
-    !options.every((o) => requirement.optionIds.includes(o.id)) ||
+    exactCurrentChoiceAction(input, choice) !== action ||
     !options.some(
       (o) =>
         o.id === resolution.selectedOptionId &&
-        o.value === resolution.targetCardInstanceId,
+        o.value === resolution.targetCardInstanceId &&
+        o.selectable !== false,
+    ) ||
+    !choice.options.some(
+      (option) =>
+        option.id === resolution.selectedOptionId &&
+        option.value === resolution.targetCardInstanceId &&
+        option.selectable !== false,
     )
   ) {
     throw unresolvedChoiceFailure(

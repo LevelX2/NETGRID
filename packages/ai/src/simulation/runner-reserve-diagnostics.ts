@@ -1,3 +1,4 @@
+import { averageNumber } from "./simulation-metric-aggregation";
 import {
   type AiDecisionInput,
   type GameState,
@@ -62,6 +63,7 @@ export function createRunnerReserveDiagnosticsForSimulationAction(
     action: LegalAction,
     targetServerId: string | undefined,
     stateAfterAction: GameState,
+    runStarted: boolean,
   ): Partial<AiSimulationSummary["actionSequence"][number]> {
     if (input.side !== "runner" || action.side !== "runner") return {};
     const creditsBefore = input.playerView.own.credits;
@@ -74,12 +76,17 @@ export function createRunnerReserveDiagnosticsForSimulationAction(
     const economyGain = economyAction && creditDelta > 0 ? creditDelta : 0;
     const economySpend =
       economyAction && creditDelta < 0 ? Math.abs(creditDelta) : 0;
-    const runDiagnostics = dependencies.runnerKnownPathDiagnosticsForAction(
-      input,
-      action,
-      targetServerId,
-      reserveTarget,
-    );
+    // Nonbasic run starts use their exact action route in setup diagnostics.
+    // The basic-run quote cannot measure a modified event or ability run.
+    const runDiagnostics: RunnerActionDiagnostics =
+      runStarted && action.type !== "start_run"
+        ? {}
+        : dependencies.runnerKnownPathDiagnosticsForAction(
+            input,
+            action,
+            targetServerId,
+            reserveTarget,
+          );
     const remoteThreatTargeting =
       dependencies.runnerRemoteThreatTargetingDiagnosticsForAction(
         input,
@@ -113,14 +120,17 @@ export function createRunnerReserveDiagnosticsForSimulationAction(
     const contestBlockedByCredits =
       dependencies.runnerContestBlockedByCredits(input, reserveTarget) ||
       runDiagnostics.runStartedAgainstKnownUnaffordablePath === true;
-    const reserveAfterAccess = [
-      "access_card",
-      "steal_agenda",
-      "trash_accessed_card",
-      "decline_trash",
-    ].includes(action.type)
-      ? creditsAfter - reserveTarget
-      : undefined;
+    const runId = input.playerView.run?.runId;
+    const reserveAfterAccess =
+      runId &&
+      [
+        "access_card",
+        "steal_agenda",
+        "trash_accessed_card",
+        "decline_trash",
+      ].includes(action.type)
+        ? creditsAfter - reserveTarget
+        : undefined;
     const accessTarget =
       targetServerId ?? input.playerView.run?.attackedServerId;
 
@@ -148,8 +158,14 @@ export function createRunnerReserveDiagnosticsForSimulationAction(
       ...(expensiveInstallBelowReserve
         ? { runnerExpensiveInstallBelowReserve: true }
         : {}),
-      ...(reserveAfterAccess !== undefined
-        ? { runnerReserveAfterSuccessfulRun: reserveAfterAccess }
+      ...(reserveAfterAccess !== undefined && runId !== undefined
+        ? {
+            runnerReserveRunId: runId,
+            ...(accessTarget
+              ? { runnerReserveAccessTarget: accessTarget }
+              : {}),
+            runnerReserveAfterSuccessfulRun: reserveAfterAccess,
+          }
         : {}),
       ...(reserveAfterAccess !== undefined && isRemoteServerTarget(accessTarget)
         ? { runnerReserveAfterRemoteAccess: reserveAfterAccess }
@@ -163,5 +179,37 @@ export function createRunnerReserveDiagnosticsForSimulationAction(
       ...runDiagnostics,
       ...remoteThreatTargeting,
     };
+  };
+}
+
+/** One final observed access reserve per run, with game-local run ids. */
+export function summarizeRunnerReserveAfterRuns(
+  summaries: readonly AiSimulationSummary[],
+) {
+  const finalSamples = summaries.flatMap((summary) => {
+    const samplesByRun = new Map<
+      number,
+      AiSimulationSummary["actionSequence"][number]
+    >();
+    for (const entry of summary.actionSequence) {
+      if (entry.side === "runner" && entry.runnerReserveRunId)
+        samplesByRun.set(entry.runnerReserveRunId, entry);
+    }
+    return [...samplesByRun.values()];
+  });
+  return {
+    runnerReserveAfterSuccessfulRun: averageNumber(
+      finalSamples.flatMap(
+        (entry) => entry.runnerReserveAfterSuccessfulRun ?? [],
+      ),
+    ),
+    runnerReserveAfterRemoteAccess: averageNumber(
+      finalSamples.flatMap(
+        (entry) => entry.runnerReserveAfterRemoteAccess ?? [],
+      ),
+    ),
+    runnerReserveAfterCentralRun: averageNumber(
+      finalSamples.flatMap((entry) => entry.runnerReserveAfterCentralRun ?? []),
+    ),
   };
 }

@@ -3,7 +3,7 @@ import type {
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import { getStructuredBreakerProfileForCard } from "../breaker-ontology-consumer";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import {
@@ -38,7 +38,7 @@ export type RunnerProgramInstallTrashContextDependencies = {
     cards: VisibleCard[],
   ) => ReadonlyMap<string, number>;
   visibleBreakerRoles: (card: VisibleCard) => readonly string[];
-  rolesForCardId: (definitionId: string | undefined) => readonly string[];
+  rolesForCardId: (definitionId: number | undefined) => readonly string[];
   isRunnerPressureRole: (role: string) => boolean;
   isRunnerEconomyRole: (role: string) => boolean;
   visibleCounterValue: (card: VisibleCard | undefined) => number;
@@ -308,7 +308,7 @@ export function createRunnerProgramInstallTrashContext(
       const incomingReplacesMember =
         incoming?.known === true &&
         incoming.type === "program" &&
-        typeof incoming.definitionId === "string" &&
+        typeof incoming.definitionId === "number" &&
         ((incoming.definitionId === entry.definitionId &&
           incoming.selectedSubtype === entry.selectedSubtype) ||
           incomingBreakerPreservesMemberCoverage(input, incoming, entry)) &&
@@ -410,8 +410,8 @@ export function createRunnerProgramInstallTrashContext(
     )
       return false;
     return [member, incoming].every((card) => {
-      const engine = cardSpecPlanningCardByDefinitionId(card.definitionId!)
-        ?.planning.engine;
+      const engine = planningCardByDefinitionId(card.definitionId!)
+        ?.engine;
       return (
         engine !== undefined &&
         (engine.icebreakerAbilities?.length ?? 0) > 0 &&

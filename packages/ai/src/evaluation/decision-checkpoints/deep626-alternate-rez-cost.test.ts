@@ -60,7 +60,7 @@ describe("native exact alternate-subtype rez costs", () => {
     expect(action.payload?.variableRezKind).toBe("alternate_subtype");
     const plan = decision.decisionDebug?.planFirstDecision;
     expect(plan?.rootPlanInstanceId).toBe(
-      "plan:corp.defend_servers:server-defense-portfolio",
+      "penw02zfrkklof54c2nuye5att",
     );
     expect(plan?.leafExecutorInstanceId).toBe(plan?.rootPlanInstanceId);
     expect(plan?.route?.actionId).toBe(action.actionId);

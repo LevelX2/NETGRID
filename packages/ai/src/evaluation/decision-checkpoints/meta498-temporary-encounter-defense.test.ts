@@ -154,8 +154,8 @@ function decide(native: ReturnType<typeof fixture>) {
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.selectedChoices?.choiceId).toBe(choiceBefore!.choiceId);
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
-    leafExecutorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+    rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
+    leafExecutorInstanceId: "penw02zfrkklof54c2nuye5att",
   });
   expect(input.playerView.pendingChoice).toEqual(choiceBefore);
   return decision.selectedChoices!.selectedOptionIds as string[];

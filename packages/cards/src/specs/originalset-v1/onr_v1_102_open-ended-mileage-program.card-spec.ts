@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_102_open-ended-mileage-program"),
+    cardDefinitionId: cardDefinitionId(314),
     title: "Open-Ended® Mileage Program",
     side: "runner",
     cardType: "event",

@@ -49,6 +49,7 @@ export function corpDefenseReserveNeeds(
           kind: "parent_funding" as const,
           needId: `defense-restricted-funding:${need.defenseId}`,
           parentNeedId: need.defenseId,
+          parentPlanModuleId: "corp.defend_servers" as const,
           parentPlanInstanceId: planInstanceIdForProposal({
             moduleId: "corp.defend_servers",
             dedupeKey: "server-defense-portfolio",
@@ -174,6 +175,7 @@ export function corpDefenseReserveNeeds(
           ? { restrictedCreditPreparations }
           : {}),
         immediateDefenseConversion: true,
+        parentPlanModuleId: "corp.defend_servers" as const,
         parentPlanInstanceId: planInstanceIdForProposal({
           moduleId: "corp.defend_servers",
           dedupeKey: "server-defense-portfolio",

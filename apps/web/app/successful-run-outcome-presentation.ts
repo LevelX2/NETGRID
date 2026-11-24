@@ -1,11 +1,16 @@
-import type { PublicGameEvent } from "@netgrid/shared";
+import { cardDefinitionIdValue } from "./card-definition-id";
+import type {
+  CardDefinitionId,
+  MatchEventId,
+  PublicGameEvent,
+} from "@netgrid/shared";
 
 export const WEATHER_TO_FINANCE_PIPE_DEFINITION_ID =
-  "onr_v1_118_weather-to-finance-pipe";
+  330;
 
 export type SuccessfulRunOutcomePresentation = {
-  eventId: string;
-  sourceDefinitionId: string;
+  eventId: MatchEventId;
+  sourceDefinitionId: CardDefinitionId;
   sourceTitle: string;
   headline: string;
   resultText: string;
@@ -17,7 +22,7 @@ export function successfulRunOutcomePresentationFromEvent(
   event: PublicGameEvent,
 ): SuccessfulRunOutcomePresentation | null {
   const payload = event.publicPayload;
-  const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
+  const sourceDefinitionId = cardDefinitionIdValue(payload.sourceDefinitionId);
   if (
     sourceDefinitionId !== WEATHER_TO_FINANCE_PIPE_DEFINITION_ID ||
     payload.accessReplacement !== "corp_lose_credits" ||
@@ -44,7 +49,7 @@ export function successfulRunOutcomePresentationFromEvent(
 
 export function latestSuccessfulRunOutcomePresentation(
   events: readonly PublicGameEvent[],
-  dismissedEventId: string | null,
+  dismissedEventId: MatchEventId | null,
 ): SuccessfulRunOutcomePresentation | null {
   for (let index = events.length - 1; index >= 0; index -= 1) {
     const event = events[index];

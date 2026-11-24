@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { visibleRunnerDrawTaxSourceCount } from "./ai-feature-server";
@@ -5,13 +6,13 @@ import { visibleRunnerDrawTaxSourceCount } from "./ai-feature-server";
 describe("visibleRunnerDrawTaxSourceCount", () => {
   it("ignores a discarded rezzed tax while retaining a separate installed tax", () => {
     const input = inputWithRemoteRoot([
-      rootCard("onr_v1_313_city-surveillance", { rezzed: true }),
+      rootCard(525, { rezzed: true }),
     ]);
     input.playerView.servers.push({
       id: "archives",
       label: "Archives",
       ice: [],
-      root: [rootCard("onr_v1_313_city-surveillance", { rezzed: true })],
+      root: [rootCard(525, { rezzed: true })],
     });
     expect(visibleRunnerDrawTaxSourceCount(input)).toBe(1);
     input.playerView.servers[0]!.root = [];
@@ -21,7 +22,7 @@ describe("visibleRunnerDrawTaxSourceCount", () => {
     expect(
       visibleRunnerDrawTaxSourceCount(
         inputWithRemoteRoot([
-          rootCard("onr_v1_313_city-surveillance", { rezzed: true }),
+          rootCard(525, { rezzed: true }),
         ]),
       ),
     ).toBe(1);
@@ -31,13 +32,13 @@ describe("visibleRunnerDrawTaxSourceCount", () => {
     expect(
       visibleRunnerDrawTaxSourceCount(
         inputWithRemoteRoot([
-          rootCard("onr_v1_313_city-surveillance", {
+          rootCard(525, {
             known: false,
             rezzed: true,
           }),
-          rootCard("onr_v1_313_city-surveillance", { rezzed: false }),
-          rootCard("onr_v1_333_omniscience-foundation", { rezzed: true }),
-          rootCard("custom-blank-asset", { rezzed: true }),
+          rootCard(525, { rezzed: false }),
+          rootCard(545, { rezzed: true }),
+          rootCard(syntheticCardDefinitionId("custom-blank-asset"), { rezzed: true }),
         ]),
       ),
     ).toBe(0);
@@ -54,7 +55,7 @@ function inputWithRemoteRoot(root: VisibleCard[]): AiDecisionInput {
       activeSide: "runner",
       phase: "runner_action_phase",
       own: {
-        identity: rootCard("runner-identity"),
+        identity: rootCard(syntheticCardDefinitionId("runner-identity")),
         credits: 5,
         clicks: 4,
         agendaPoints: 0,
@@ -67,7 +68,7 @@ function inputWithRemoteRoot(root: VisibleCard[]): AiDecisionInput {
         tags: 0,
       },
       opponent: {
-        identity: rootCard("corp-identity"),
+        identity: rootCard(syntheticCardDefinitionId("corp-identity")),
         credits: 5,
         clicks: 3,
         agendaPoints: 0,
@@ -80,7 +81,7 @@ function inputWithRemoteRoot(root: VisibleCard[]): AiDecisionInput {
       },
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           label: "Remote 1",
           ice: [],
           root,
@@ -102,13 +103,13 @@ function inputWithRemoteRoot(root: VisibleCard[]): AiDecisionInput {
 }
 
 function rootCard(
-  definitionId: string,
+  definitionId: number,
   overrides: Partial<VisibleCard> = {},
 ): VisibleCard {
   return {
     instanceId: `${definitionId}-instance`,
     definitionId,
-    title: definitionId,
+    title: String(definitionId),
     type: "asset",
     known: true,
     owner: "corp",

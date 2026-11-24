@@ -30,6 +30,7 @@ type RunnerEndgameCloseoutCandidate = {
   blockedByBreakerCoverage: boolean;
   blockedByPostRunReserve: boolean;
   attempted: boolean;
+  viable: boolean;
 };
 
 type StrategicPlanRepeatContext = {
@@ -40,6 +41,7 @@ type StrategicPlanRepeatContext = {
 export type RunnerEndgameCloseoutEntry = {
   side?: string;
   actionType?: string;
+  runnerRunStarted?: true;
   targetServerId?: string;
   targetCardType?: string;
   hqKnownAgendaCount?: number;
@@ -110,21 +112,12 @@ export function summarizeRunnerEndgameCloseoutWindow(
     existing.blockedByBreakerCoverage ||= candidate.blockedByBreakerCoverage;
     existing.blockedByPostRunReserve ||= candidate.blockedByPostRunReserve;
     existing.attempted ||= candidate.attempted;
+    existing.viable ||= candidate.viable;
   }
 
   const deduped = [...byKey.values()];
-  const trueCandidates = deduped.filter(
-    (candidate) =>
-      !candidate.blockedByCredits &&
-      !candidate.blockedByBreakerCoverage &&
-      !candidate.blockedByPostRunReserve,
-  );
-  const blockedCandidates = deduped.filter(
-    (candidate) =>
-      candidate.blockedByCredits ||
-      candidate.blockedByBreakerCoverage ||
-      candidate.blockedByPostRunReserve,
-  );
+  const trueCandidates = deduped.filter((candidate) => candidate.viable);
+  const blockedCandidates = deduped.filter((candidate) => !candidate.viable);
 
   return {
     raw: candidates.length,
@@ -203,12 +196,20 @@ function runnerEndgameCloseoutCandidateForEntry(
 
   const target = runnerCloseoutTargetForEntry(entry, reasons);
   const key = `${target}:${[...reasons].sort().join("+")}`;
+  const blockedByCredits = runnerCloseoutBlockedByCredits(entry);
+  const blockedByBreakerCoverage =
+    runnerCloseoutBlockedByBreakerCoverage(entry);
+  const blockedByPostRunReserve = runnerCloseoutBlockedByPostRunReserve(entry);
   return {
     key,
     reasons,
-    blockedByCredits: runnerCloseoutBlockedByCredits(entry),
-    blockedByBreakerCoverage: runnerCloseoutBlockedByBreakerCoverage(entry),
-    blockedByPostRunReserve: runnerCloseoutBlockedByPostRunReserve(entry),
+    blockedByCredits,
+    blockedByBreakerCoverage,
+    blockedByPostRunReserve,
+    viable:
+      !blockedByCredits &&
+      !blockedByBreakerCoverage &&
+      !blockedByPostRunReserve,
     attempted: runnerCloseoutAttemptedByEntry(entry),
   };
 }
@@ -263,10 +264,9 @@ function runnerCloseoutAttemptedByEntry(
   entry: RunnerEndgameCloseoutEntry,
 ): boolean {
   return (
-    entry.actionType === "start_run" ||
+    entry.runnerRunStarted === true ||
+    entry.actionType === "steal_agenda" ||
     entry.actionType === "trash_accessed_card" ||
-    entry.runnerCentralCloseoutRunTaken === true ||
-    entry.runnerRemoteRunAgainstAdvancedRemote === true ||
     entry.runnerRelevantRemoteTrashTaken === true
   );
 }
@@ -290,14 +290,7 @@ export function isRunnerEndgameMeaningfulRunOpportunity(
 export function isRunnerEndgameMeaningfulRunTaken(
   entry: RunnerEndgameCloseoutEntry,
 ): boolean {
-  if (entry.side !== "runner") return false;
-  if (entry.actionType === "steal_agenda") return true;
-  if (
-    entry.actionType === "trash_accessed_card" ||
-    entry.runnerRelevantRemoteTrashTaken === true
-  )
-    return true;
-  if (entry.actionType !== "start_run") return false;
+  if (entry.side !== "runner" || entry.runnerRunStarted !== true) return false;
   return (
     entry.runnerRemoteRunAgainstAdvancedRemote === true ||
     entry.runnerCentralCloseoutRunTaken === true ||
@@ -334,7 +327,7 @@ export function isEndgameKnownInfoTaken(
     entry.side === "runner" &&
     (entry.actionType === "steal_agenda" ||
       entry.actionType === "trash_accessed_card" ||
-      (entry.actionType === "start_run" &&
+      (entry.runnerRunStarted === true &&
         (entry.hqRunBoostedBecauseKnownAgenda === true ||
           entry.hqRunBoostedByRndToHqAgenda === true ||
           entry.remoteRunBoostedByKnownRemoteAgenda === true ||
@@ -378,7 +371,7 @@ export function isEndgameScoreOrStealPressureAction(
     entry.actionType === "steal_agenda" ||
     entry.actionType === "trash_accessed_card" ||
     isCorpRemoteAdvancementProgressForEndgame(entry) ||
-    (entry.side === "runner" && entry.actionType === "start_run")
+    (entry.side === "runner" && entry.runnerRunStarted === true)
   );
 }
 
@@ -476,6 +469,10 @@ export function countSameStrategicPlanRepeatsWithoutProgress<
     if (!entry.side) continue;
     const context = contextForEntry(entry);
     const planKind = context.planKind;
+    if (context.meaningfulBoardProgress) {
+      progressSinceLastPlanBySide.runner = true;
+      progressSinceLastPlanBySide.corp = true;
+    }
     if (!planKind) continue;
     if (
       lastPlanBySide[entry.side] === planKind &&
@@ -485,10 +482,6 @@ export function countSameStrategicPlanRepeatsWithoutProgress<
     }
     lastPlanBySide[entry.side] = planKind;
     progressSinceLastPlanBySide[entry.side] = context.meaningfulBoardProgress;
-    if (context.meaningfulBoardProgress) {
-      progressSinceLastPlanBySide.runner = true;
-      progressSinceLastPlanBySide.corp = true;
-    }
   }
   return repeats;
 }

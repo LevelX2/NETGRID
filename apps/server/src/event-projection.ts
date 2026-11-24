@@ -1,12 +1,12 @@
 import { redactPublicEventForSide } from "@netgrid/engine";
-import type { GameEvent, PublicGameEvent, Side } from "@netgrid/shared";
+import type { GameEvent, MatchEventId, PublicGameEvent, Side } from "@netgrid/shared";
 
 export type EngineEvent = GameEvent;
 
 export type ReplayPerspective = Side | "local_analysis";
 
 export type ServerEventRecord = {
-  eventId: string;
+  eventId: MatchEventId;
   matchId: string;
   stateVersionBefore: number;
   stateVersionAfter: number;

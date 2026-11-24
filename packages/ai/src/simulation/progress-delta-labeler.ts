@@ -25,16 +25,12 @@ export type ProgressDeltaAction = {
   runnerCoverageImproved?: boolean;
   runnerRemoteTrashTaken?: boolean;
   advancedAgendaStolen?: boolean;
-  corpScoreTerminalScoreTaken?: boolean;
-  corpScoreTerminalAdvanceTaken?: boolean;
+  finalAdvance?: boolean;
   protectBeforeAdvance?: boolean;
-  corpScoreTerminalWindowScoreLegal?: boolean;
-  corpScoreTerminalWindowAdvanceToScoreLegal?: boolean;
-  corpScoreTerminalWindowAgendaInstallLegal?: boolean;
+  scoreActionsAvailable?: number;
   corpCreditsBelowCheapestRelevantRez?: boolean;
   corpCreditsBelowEstimatedCentralRezNeed?: boolean;
   corpCannotRezAnyNewlyInstalledIce?: boolean;
-  corpEconomyBeforeScorePlausibleRezOrAdvanceReserve?: boolean;
   runnerEconomyTakenToReachRunReserve?: boolean;
   runnerReservePreservingEconomy?: boolean;
   runnerBelowReserveBefore?: boolean;
@@ -94,7 +90,11 @@ export function labelProgressDeltaAction(
     return resultFor(action, offset, direct, true, rationaleForDirect(direct));
   }
 
-  if (isEconomyAction(action) && hasFutureProgress(window, offset, 20)) {
+  if (
+    action.side &&
+    isEconomyAction(action) &&
+    hasFutureProgress(window, offset, 20, action.side)
+  ) {
     return resultFor(
       action,
       offset,
@@ -141,14 +141,7 @@ function directProgressLabel(
   if (action.actionType === "steal_agenda" || action.advancedAgendaStolen) {
     return "progress_steal";
   }
-  if (
-    action.actionType === "score_agenda" ||
-    action.corpScoreTerminalScoreTaken ||
-    action.corpScoreTerminalAdvanceTaken ||
-    (action.actionType === "advance_card" &&
-      (action.corpScoreTerminalWindowScoreLegal ||
-        action.corpScoreTerminalWindowAdvanceToScoreLegal))
-  ) {
+  if (action.actionType === "score_agenda" || action.finalAdvance) {
     return "progress_score";
   }
   if (actionTextHasFlatlineSignal(text)) return "progress_flatline";
@@ -160,8 +153,10 @@ function directProgressLabel(
 }
 
 function isCoverageInstall(action: ProgressDeltaAction): boolean {
-  if (action.runnerCoverageImproved) return true;
   if (action.side !== "runner") return false;
+  if (action.runnerCoverageImproved !== undefined) {
+    return action.runnerCoverageImproved;
+  }
   if (
     !["install_card", "play_event", "activated_card_ability"].includes(
       action.actionType,
@@ -206,6 +201,7 @@ function hasFutureProgress(
   window: readonly ProgressDeltaAction[],
   offset: number,
   lookahead: number,
+  side: string,
 ): boolean {
   for (
     let index = offset + 1;
@@ -213,7 +209,7 @@ function hasFutureProgress(
     index += 1
   ) {
     const action = window[index];
-    if (!action) continue;
+    if (action?.side !== side) continue;
     const label = directProgressLabel(action);
     if (label && isDirectProgressLabel(label)) return true;
   }
@@ -237,10 +233,7 @@ function isPlausibleNoProgress(action: ProgressDeltaAction): boolean {
     action.corpCreditsBelowCheapestRelevantRez ||
     action.corpCreditsBelowEstimatedCentralRezNeed ||
     action.corpCannotRezAnyNewlyInstalledIce ||
-    action.corpEconomyBeforeScorePlausibleRezOrAdvanceReserve ||
-    action.corpScoreTerminalWindowScoreLegal ||
-    action.corpScoreTerminalWindowAdvanceToScoreLegal ||
-    action.corpScoreTerminalWindowAgendaInstallLegal
+    (action.scoreActionsAvailable ?? 0) > 0
   ) {
     return true;
   }

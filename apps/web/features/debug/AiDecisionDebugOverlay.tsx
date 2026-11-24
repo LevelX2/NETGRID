@@ -1,3 +1,5 @@
+import { isRemoteServerId } from "@netgrid/shared";
+import { isCardDefinitionId } from "@netgrid/shared";
 import {
   AlertTriangle,
   Brain,
@@ -42,7 +44,7 @@ import {
   aiTraceScoreRows,
   aiTraceTitle,
   safeStringList,
-  type MaintenanceAiTraceDetail,
+  type AiDecisionDebugTrace,
   type MaintenanceAiTraceActionRow,
 } from "../../app/maintenance";
 import { copyTextToClipboard } from "../../lib/clipboard";
@@ -80,8 +82,8 @@ export function FloatingAiDecisionDebugOverlay({
   position: RunOverlayPositionPreference;
   status: AiDecisionDebugOverlayStatus;
   error: string;
-  trace: MaintenanceAiTraceDetail | null;
-  turnPlanTrace: MaintenanceAiTraceDetail | null;
+  trace: AiDecisionDebugTrace | null;
+  turnPlanTrace: AiDecisionDebugTrace | null;
   traceCount: number;
   onPosition(position: RunOverlayPositionPreference): void;
   onClose(): void;
@@ -288,8 +290,8 @@ function AiDecisionDebugOverlayBody({
 }: {
   status: AiDecisionDebugOverlayStatus;
   error: string;
-  trace: MaintenanceAiTraceDetail | null;
-  turnPlanTrace: MaintenanceAiTraceDetail | null;
+  trace: AiDecisionDebugTrace | null;
+  turnPlanTrace: AiDecisionDebugTrace | null;
 }) {
   if (status === "error") {
     if (turnPlanTrace) {
@@ -331,7 +333,7 @@ function AiDecisionDebugOverlayBody({
 }
 
 function aiDecisionTraceSelectedActionLabel(
-  trace: MaintenanceAiTraceDetail,
+  trace: AiDecisionDebugTrace,
 ): string {
   const action =
     trace.detail.selectedActionType ?? trace.selectedActionType ?? "KI-Aktion";
@@ -346,7 +348,7 @@ function aiDecisionTraceSelectedActionLabel(
 }
 
 function aiDecisionDebugWindowHeaderStatusLabel(
-  trace: MaintenanceAiTraceDetail,
+  trace: AiDecisionDebugTrace,
   mode: "trace" | "preview",
 ): string {
   const planFirstDecision = parseAiPlanFirstDecisionDebug(
@@ -373,8 +375,8 @@ function AiDecisionDebugTraceView({
   turnPlanTrace,
   mode = "trace",
 }: {
-  trace: MaintenanceAiTraceDetail;
-  turnPlanTrace: MaintenanceAiTraceDetail | null;
+  trace: AiDecisionDebugTrace;
+  turnPlanTrace: AiDecisionDebugTrace | null;
   mode?: "trace" | "preview";
 }) {
   const decision = parseAiPlanFirstDecisionDebug(
@@ -423,8 +425,8 @@ function AiDecisionDebugPlanFirstTraceView({
   mode,
   decision,
 }: {
-  trace: MaintenanceAiTraceDetail;
-  turnPlanTrace: MaintenanceAiTraceDetail | null;
+  trace: AiDecisionDebugTrace;
+  turnPlanTrace: AiDecisionDebugTrace | null;
   mode: "trace" | "preview";
   decision: AiPlanFirstDecisionDebug;
 }) {
@@ -1100,7 +1102,7 @@ function AiDecisionDebugPlanFirstTraceView({
 function AiDecisionDebugTurnPlanSnapshotView({
   trace,
 }: {
-  trace: MaintenanceAiTraceDetail;
+  trace: AiDecisionDebugTrace;
 }) {
   const decision = parseAiPlanFirstDecisionDebug(
     trace.detail.planFirstDecision,
@@ -1530,7 +1532,7 @@ function AiDecisionDebugLegacyTraceView({
   trace,
   mode = "trace",
 }: {
-  trace: MaintenanceAiTraceDetail;
+  trace: AiDecisionDebugTrace;
   mode?: "trace" | "preview";
 }) {
   const detail = trace.detail;
@@ -1691,7 +1693,7 @@ function AiDecisionDebugLegacyTraceView({
 }
 
 export function serializeAiDecisionDebugVisibleJsonExport(
-  trace: MaintenanceAiTraceDetail,
+  trace: AiDecisionDebugTrace,
   mode: "trace" | "preview",
   exportedAt: string,
 ): string {
@@ -1753,7 +1755,7 @@ const AI_DECISION_DEBUG_OVERLAY_META_LABELS = new Set([
 ]);
 
 function aiDecisionDebugOverlayMetaRows(
-  trace: MaintenanceAiTraceDetail,
+  trace: AiDecisionDebugTrace,
   mode: "trace" | "preview",
 ): Array<[string, string]> {
   const hiddenPreviewLabels = new Set(["Entscheidung", "Ausgeführt"]);
@@ -2524,8 +2526,8 @@ function aiDecisionDebugPrivateHandExportFromPreview(
       const title =
         typeof card.title === "string"
           ? card.title
-          : typeof card.definitionId === "string"
-            ? card.definitionId
+          : isCardDefinitionId(card.definitionId)
+            ? String(card.definitionId)
             : `Karte ${index + 1}`;
       const type = typeof card.type === "string" ? card.type : "unknown";
       const cost =
@@ -3267,7 +3269,7 @@ function aiDecisionDebugPlanServerTargetLabel(
   if (id === "hq") return "HQ";
   if (id === "rd") return "R&D";
   if (id === "archives") return "Archive";
-  if (id.startsWith("remote_")) return `Remote ${id.slice("remote_".length)}`;
+  if (isRemoteServerId(id)) return `Remote ${id.slice(1)}`;
   return id;
 }
 
@@ -3910,8 +3912,8 @@ function aiDecisionDebugServerLabel(value: string): string {
   if (value === "hq") return "HQ";
   if (value === "rd") return "R&D";
   if (value === "archives") return "Archive";
-  if (value.startsWith("remote_"))
-    return `Remote ${value.slice("remote_".length)}`;
+  if (isRemoteServerId(value))
+    return `Remote ${value.slice(1)}`;
   return value;
 }
 
@@ -3921,8 +3923,8 @@ function aiDecisionDebugCardLabel(
   if (!entry) return "";
   return typeof entry.title === "string"
     ? entry.title
-    : typeof entry.definitionId === "string"
-      ? entry.definitionId
+    : isCardDefinitionId(entry.definitionId)
+      ? String(entry.definitionId)
       : "";
 }
 
@@ -3982,7 +3984,7 @@ function aiDecisionDebugNormalizePositionCardList(
         const zone = typeof entry.zone === "string" ? entry.zone : "";
         const positionKey =
           typeof entry.positionKey === "string" ? entry.positionKey : "";
-        return zone.startsWith("remote_") && positionKey !== "installed";
+        return isRemoteServerId(zone) && positionKey !== "installed";
       })
       .map(
         (entry) => `${String(entry.zone)}:${aiDecisionDebugCardLabel(entry)}`,
@@ -3995,7 +3997,7 @@ function aiDecisionDebugNormalizePositionCardList(
       typeof entry.positionKey === "string" ? entry.positionKey : "";
     const label = aiDecisionDebugCardLabel(entry);
     if (
-      zone.startsWith("remote_") &&
+      isRemoteServerId(zone) &&
       positionKey === "installed" &&
       preciseRemoteCards.has(`${zone}:${label}`)
     ) {

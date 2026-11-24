@@ -5,7 +5,7 @@ import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
 } from "../../plans/resident-plan-portfolio-memory";
-import { corpConditionalScoreCreditProfile } from "../../runtime/corp-canonical-card-facts";
+import { corpConditionalScoreCreditProfile } from "../../runtime/corp-canonical-credit-facts";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
   restoreAiRuntimeCheckpoint,
@@ -35,12 +35,12 @@ it("funds a reachable conditional score threshold before a nonterminal free scor
   const score = input.legalActions.find((a) => a.type === "score_agenda")!;
   expect(score.costs).toEqual([]);
   expect(
-    input.legalActions.find((a) => a.actionId === "corp.gain_credit"),
+    input.legalActions.find((a) => a.actionId === "cb"),
   ).toMatchObject({
     costs: [{ clicks: 1 }],
     payload: { gainCreditsAmount: 1 },
   });
-  expect(corpConditionalScoreCreditProfile("onr_v1_196_corporate-war")).toEqual(
+  expect(corpConditionalScoreCreditProfile(408)).toEqual(
     { threshold: 12, gainAmount: 12 },
   );
   resetResidentPlanPortfolioMemory();
@@ -50,7 +50,7 @@ it("funds a reachable conditional score threshold before a nonterminal free scor
     runtime,
   );
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("corp.gain_credit");
+  expect(decision.actionId).toBe("cb");
   expect(decision.fallbackUsed).toBe(false);
   const portfolio = residentPlanPortfolioSnapshot(input)!;
   const root = portfolio.instances.find(
@@ -115,7 +115,7 @@ it("binds a two-credit gap only when both basic credits fit in the current turn"
     runtime,
   );
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("corp.gain_credit");
+  expect(decision.actionId).toBe("cb");
   const portfolio = residentPlanPortfolioSnapshot(input)!;
   expect(
     portfolio.instances.find(
@@ -137,7 +137,7 @@ it("keeps actual terminal R&D defense ahead of the native nonwinning score payof
   );
   const decision = chooseAiAction(input);
   expect(decision.actionId).toBe(
-    "corp.install_card.corp_onr_v1_222_ball-and-chain_1.rd.corp_onr_v1_222_ball-and-chain_1.1",
+    "cc.c2ol.rd.c2ol.1",
   );
   expect(
     decision.decisionDebug?.planFirstDecision?.priority?.effectiveClass,

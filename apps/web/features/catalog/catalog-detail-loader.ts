@@ -1,13 +1,14 @@
+import { type CardDefinitionId } from "@netgrid/shared";
 import type { CatalogCardDetail } from "./catalog-types";
 
 type CatalogDetailFetcher = (
-  cardId: string,
+  cardId: CardDefinitionId,
 ) => Promise<CatalogCardDetail | null>;
 type CatalogDetailConsumer = (detail: CatalogCardDetail) => void;
-type CatalogDetailPresenceCheck = (cardId: string) => boolean;
+type CatalogDetailPresenceCheck = (cardId: CardDefinitionId) => boolean;
 
 export class CatalogDetailRequestCoordinator {
-  private readonly pendingByCardId = new Map<string, Promise<void>>();
+  private readonly pendingByCardId = new Map<CardDefinitionId, Promise<void>>();
   private readonly queue: Array<() => void> = [];
   private activeRequests = 0;
 
@@ -35,7 +36,7 @@ export class CatalogDetailRequestCoordinator {
   }
 
   async ensure(
-    cardIds: readonly string[],
+    cardIds: readonly CardDefinitionId[],
     isLoaded: CatalogDetailPresenceCheck,
     fetchDetail: CatalogDetailFetcher,
     consumeDetail: CatalogDetailConsumer,

@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_v1_166_karl-de-veres-corporate-stooge",
+      378,
     ),
     title: "Karl de Veres, Corporate Stooge",
     side: "runner",

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { describe, expect, it } from "vitest";
 import {
@@ -63,6 +64,21 @@ describe("plan route binding", () => {
     );
   });
 
+  it("enforces one current offer for the plan's side", () => {
+    const entry = routeCandidate(candidate("credit"), 4);
+    const otherSide = routeCandidate(
+      { ...candidate("credit"), actorSide: "corp" },
+      4,
+    );
+    for (const candidates of [[otherSide], [entry, entry]]) {
+      expect(() =>
+        bindBestCurrentPlanRoute({ ...baseParams(), candidates }),
+      ).toThrow(
+        expect.objectContaining({ code: "stale_or_future_action_reference" }),
+      );
+    }
+  });
+
   it("does not treat any install as exact breaker coverage", () => {
     const breakerStep: PlanRouteStep = {
       stepId: "install_missing_sentry_breaker",
@@ -78,7 +94,7 @@ describe("plan route binding", () => {
       "install-psychic-friend",
       "install_card",
       "install.card",
-      "onr_classic_030_psychic-friend",
+      34,
     );
 
     expect(
@@ -122,7 +138,7 @@ describe("plan route binding", () => {
               "install-psychic-friend",
               "install_card",
               "install.card",
-              "onr_classic_030_psychic-friend",
+              34,
             ),
             5,
             ["breaker_code_gate"],
@@ -175,7 +191,7 @@ describe("plan route binding", () => {
       targetContext: {
         selectedTargets: [
           {
-            targetId: "remote_1",
+            targetId: "r1",
             targetKind: "server" as const,
             targetSide: "corp" as const,
             visibilityScope: "public" as const,
@@ -202,7 +218,7 @@ describe("plan route binding", () => {
             capabilityId: "install_ice",
             semanticActionTypes: ["install.card"],
           },
-          target: { kind: "server", id: "remote_1" },
+          target: { kind: "server", id: "r1" },
           purpose: "Install the exact ICE on the exact selected server.",
         },
         candidates: [routeCandidate(install, 20)],
@@ -233,7 +249,7 @@ describe("plan route binding", () => {
           capability: {
             capabilityId: "rez_response",
             semanticActionTypes: ["corp_window.rez"],
-            requiredSourceDefinitionIds: ["corp-ice-definition"],
+            requiredSourceDefinitionIds: [syntheticCardDefinitionId("corp-ice-definition")],
           },
           target: { kind: "ice", id: "outer-ice" },
           purpose: "Rez the exact ICE owned by this defense response.",
@@ -399,8 +415,11 @@ function candidate(
   actionId: string,
   actionType = "gain_credit",
   semanticActionType = "economy.gain_credit",
-  sourceDefinitionId?: string,
+  sourceDefinition?: number | string,
 ): ActionSemanticCandidate {
+  const sourceDefinitionId = typeof sourceDefinition === "string"
+    ? syntheticCardDefinitionId(sourceDefinition)
+    : sourceDefinition;
   return {
     actionId,
     actionType,

@@ -251,7 +251,7 @@ export type TurnRuntimePort = {
     | undefined;
   randomRunnerGripCardId: (
     state: GameState,
-    purpose: string,
+    purpose: readonly [54],
   ) => CardInstanceId | undefined;
   virusCounterCreditsAtRunnerStart: (state: GameState) => {
     amount: number;
@@ -261,7 +261,7 @@ export type TurnRuntimePort = {
   randomCorpHqCardsWithoutReplacement: (
     state: GameState,
     count: number,
-    purpose: string,
+    purpose: readonly [55, stateVersion: number],
   ) => CardInstanceId[];
   startRunnerPrivateLookAtSpecificCorpCards: (
     state: GameState,

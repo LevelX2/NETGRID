@@ -1,11 +1,13 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import { runnerRecurringEconomyRunDeferral } from "./recurring-economy-run-deferral";
 import type { RunnerRecurringEconomySignal } from "./recurring-economy-types";
 
 describe("recurring income owner run deferral", () => {
   it("defers a run for an active waiting investment with value at risk", () => {
-    expect(runnerRecurringEconomyRunDeferral([signal()])).toBe(
-      "runner_recurring_economy_defers_run_until_payout:income-source",
+    const investment = signal();
+    expect(runnerRecurringEconomyRunDeferral([investment])).toBe(
+      "runner_recurring_economy_defers_run_until_payout:" + investment.definitionId,
     );
   });
 
@@ -38,7 +40,7 @@ describe("recurring income owner run deferral", () => {
 function signal(): RunnerRecurringEconomySignal {
   return {
     commitmentId: "income-1",
-    definitionId: "income-source",
+    definitionId: syntheticCardDefinitionId("income-source"),
     commitmentActive: true,
     phase: "hold",
     actionIds: [],

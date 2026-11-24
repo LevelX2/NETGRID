@@ -18,8 +18,8 @@ import { buildAiDecisionInput } from "./ai-decision-input";
 import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
 
-const BOOT = "onr_proteus_058_executive-boot-camp";
-const COLONEL = "onr_proteus_015_colonel-failure";
+const BOOT = 116;
+const COLONEL = 73;
 const decks = Object.fromEntries(
   (["corp", "runner"] as const).map((side) => {
     const id =
@@ -66,7 +66,7 @@ function fixture(corpCredits = 15) {
   RealEngineFixtureBuilder.forState(state)
     .withCorpRemoteRoot("hq", BOOT, 0, { faceup: true, rezzed: true })
     .withCorpIceOnServer("hq", COLONEL)
-    .withRunnerProgramInstalled("onr_v1_039_krash")
+    .withRunnerProgramInstalled(251)
     .withCorpCredits(corpCredits)
     .withRunnerCredits(13)
     .withCorpHqSize(5);
@@ -97,9 +97,7 @@ function assessment(current: ReturnType<typeof input>) {
   const action = current.legalActions.find(
     (a) =>
       a.type === "activated_card_ability" &&
-      a.abilityRef?.sourceAbilityId.endsWith(
-        ":during_run_discard_for_two_run_credits",
-      ),
+      a.payload?.cardImplementationAbilityKey === "during_run_discard_for_two_run_credits",
   )!;
   const candidate = buildActionSemanticCandidates(current).find(
     (c) => c.actionId === action.actionId,

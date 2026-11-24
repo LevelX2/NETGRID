@@ -7,7 +7,7 @@ describe("projectKnownCorpCardAccessEffect", () => {
     expect(
       projectKnownCorpCardAccessEffect({
         input: input("runner", { corpCredits: 4, runnerHandCount: 3 }),
-        sourceDefinitionId: "onr_v1_345_trap",
+        sourceDefinitionId: 557,
         sourceCard: card("trap", "asset"),
       }),
     ).toMatchObject({
@@ -24,11 +24,30 @@ describe("projectKnownCorpCardAccessEffect", () => {
     });
   });
 
+  it("does not count unused damage prevention as cards in the hand buffer", () => {
+    const current = input("runner", { corpCredits: 4, runnerHandCount: 0 });
+    current.playerView.own.freeNetOrCoreDamagePreventionRemaining = 5;
+
+    expect(
+      projectKnownCorpCardAccessEffect({
+        input: current,
+        sourceDefinitionId: 557,
+        sourceCard: card("trap", "asset"),
+      }),
+    ).toMatchObject({
+      status: "complete",
+      damage: {
+        runnerSurvivable: true,
+        runnerHandBufferPreserved: false,
+      },
+    });
+  });
+
   it("fails the optional effect closed as inapplicable when Corp cannot pay", () => {
     expect(
       projectKnownCorpCardAccessEffect({
         input: input("runner", { corpCredits: 3, runnerHandCount: 5 }),
-        sourceDefinitionId: "onr_v1_345_trap",
+        sourceDefinitionId: 557,
         sourceCard: card("trap", "asset"),
       }),
     ).toMatchObject({
@@ -45,7 +64,7 @@ describe("projectKnownCorpCardAccessEffect", () => {
     expect(
       projectKnownCorpCardAccessEffect({
         input: input("corp", { runnerRig: [] }),
-        sourceDefinitionId: "onr_v1_323_experimental-ai",
+        sourceDefinitionId: 535,
         sourceCard: source,
       }),
     ).toMatchObject({
@@ -63,7 +82,7 @@ describe("projectKnownCorpCardAccessEffect", () => {
         input: input("corp", {
           runnerRig: [card("hardware", "hardware"), card("program", "program")],
         }),
-        sourceDefinitionId: "onr_v1_315_corprunners-shattered-remains",
+        sourceDefinitionId: 527,
         sourceCard: source,
       }),
     ).toMatchObject({

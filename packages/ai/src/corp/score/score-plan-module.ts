@@ -1,5 +1,6 @@
 import { candidateTargetIds } from "../../actions/action-candidate-facts";
-import type { AiDecisionInput } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
+import { isCardDefinitionId, type AiDecisionInput } from "@netgrid/shared";
 import {
   assessment,
   domain,
@@ -297,14 +298,15 @@ export function corpScorePlanTarget(signal: CorpScoreProjectSignal) {
     signal.phase === "install_agenda_from_counter_bank"
     ? {
         kind: "card" as const,
-        id: signal.agendaDefinitionId ?? signal.projectId,
+        id: String(signal.agendaDefinitionId ?? signal.projectId),
       }
     : {
         kind: "card" as const,
-        id:
+        id: String(
           signal.agendaInstanceId ??
           signal.agendaDefinitionId ??
           signal.projectId,
+        ),
       };
 }
 
@@ -353,6 +355,8 @@ function scoreCandidates(
         return (
           signal.agendaDefinitionId !== undefined &&
           candidate.sourceDefinitionId === signal.agendaDefinitionId &&
+          (signal.agendaInstanceId === undefined ||
+            candidate.sourceCardInstanceId === signal.agendaInstanceId) &&
           (!signal.serverId ||
             candidateTargetIds(candidate).includes(signal.serverId))
         );
@@ -372,8 +376,10 @@ function scoreCandidates(
       const agendaId = signal.agendaInstanceId ?? signal.agendaDefinitionId;
       if (!agendaId) return false;
       return (
-        candidate.sourceCardInstanceId === agendaId ||
-        candidateTargetIds(candidate).includes(agendaId)
+        typeof agendaId === "number"
+          ? candidate.sourceDefinitionId === agendaId
+          : candidate.sourceCardInstanceId === agendaId ||
+            candidateTargetIds(candidate).includes(agendaId)
       );
     })
     .map((candidate) => ({
@@ -404,10 +410,10 @@ function scoreCandidateStepValue(
     (server) => server.id === action?.payload?.selectedServerId,
   );
   if (
-    action?.type !== "score_agenda" ||
+    !actionMatchesCurrentDecision(input, action) ||
+    action.type !== "score_agenda" ||
     action.side !== "corp" ||
     action.source !== candidate.sourceCardInstanceId ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
     !selectedServer ||
     effects.some(
       (effect) =>
@@ -462,7 +468,7 @@ function scoreResourceGaps(
       signal.phase === "select_agenda" ||
       signal.setupNeed.needId !== expectedNeedId ||
       !signal.setupNeed.actionId.trim() ||
-      !signal.setupNeed.sourceDefinitionId.trim()
+      !isCardDefinitionId(signal.setupNeed.sourceDefinitionId)
     ) {
       throw new PlanResolutionFailure("invalid_support_graph", {
         side: context.input.side,
@@ -568,6 +574,7 @@ function scoreResourceGaps(
   if (
     !protectionNeed ||
     protectionNeed.parentProjectId !== signal.projectId ||
+    protectionNeed.needId !== protectionProvider.parentNeedId ||
     protectionNeed.targetServerId !== protectionProvider.serverId ||
     protectionNeed.observedAtStateVersion !==
       context.input.playerView.stateVersion

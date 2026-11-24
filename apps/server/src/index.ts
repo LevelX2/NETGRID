@@ -8,6 +8,8 @@ import {
 } from "@netgrid/engine";
 import type { EngineResult, GameState, PlayerAction } from "@netgrid/shared";
 import { pathToFileURL } from "node:url";
+import { isMainThread, workerData } from "node:worker_threads";
+import { AI_DECISION_WORKER_ROLE, runAiDecisionWorker } from "./ai-decision-worker";
 import { resolveDeckSetup } from "./deck-setup";
 import { startNetgridServer } from "./http-server";
 
@@ -93,7 +95,9 @@ function views(state: GameState): LocalDemoMatch {
   };
 }
 
-if (
+if (!isMainThread && workerData === AI_DECISION_WORKER_ROLE) {
+  runAiDecisionWorker();
+} else if (
   process.argv[1] &&
   import.meta.url === pathToFileURL(process.argv[1]).href
 ) {

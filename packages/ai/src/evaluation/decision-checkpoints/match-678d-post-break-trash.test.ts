@@ -40,19 +40,24 @@ describe("match 678d D50 central opening", () => {
 
     const decision = chooseAiAction(input);
     expect(decision.actionId).toBe(
-      "runner.install_card.runner_onr_v1_068_startup-immolator_1.runner_onr_v1_068_startup-immolator_1",
+      "rc.c1q9.c1q9",
     );
     const plan = decision.decisionDebug?.planFirstDecision;
     expect(plan?.route).toMatchObject({
-      planInstanceId: expect.stringMatching(
-        /^plan:runner\.pressure_central:central%3A(hq|rd)$/,
+      planInstanceId: expect.toBeOneOf(
+        plan?.portfolio
+          .filter((instance) =>
+            instance.moduleId === "runner.pressure_central" &&
+            /^(central:hq|central:rd)$/.test(instance.dedupeKey),
+          )
+          .map((instance) => instance.instanceId) ?? [],
       ),
-      capabilityId: "develop_onr_v1_068_startup-immolator",
+      capabilityId: "develop_280",
     });
     expect(plan?.portfolio).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          instanceId: "plan:runner.pressure_central:central%3Ard",
+          instanceId: "pa90fufw9vc5bkshp96ztlryxl",
           viability: "ready",
           phase: "develop_payoff",
         }),

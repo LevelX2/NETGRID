@@ -1,6 +1,8 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import {
+  createRunnerInstallClassificationContext,
   hasRunnerInstallableBreakerActionForSimulation,
   isRunnerLowValueDuplicateInstallForSimulation,
   isRunnerRigInstallActionForSimulation,
@@ -21,6 +23,30 @@ describe("runnerDrawKindForSimulationAction", () => {
 });
 
 describe("runner install classification", () => {
+  it("keeps bare runs out of hand pressure and empty remotes out of runnable pressure", () => {
+    const context = createRunnerInstallClassificationContext({
+      rolesForAction: (_input, action) =>
+        action.type === "play_event" ? ["run_pressure"] : [],
+      rolesForCardId: () => [],
+      sourceDefinitionIdForAction: () => undefined,
+      isSearchChoice: () => false,
+    });
+    const forTarget = (serverId: string) =>
+      ({
+        side: "runner",
+        playerView: {
+          own: { credits: 5 },
+          servers: [{ id: serverId, ice: [], root: [] }],
+        },
+        legalActions: [{ ...action("start_run"), payload: { serverId } }],
+      }) as unknown as AiDecisionInput;
+    expect(context.hasRunnerPlayablePressureCard(forTarget("hq"))).toBe(false);
+    expect(context.hasRunnerRunnablePressureAction(forTarget("hq"))).toBe(true);
+    expect(context.hasRunnerRunnablePressureAction(forTarget("r1"))).toBe(
+      false,
+    );
+  });
+
   it("matches rig-install breaker roles by bounded prefixes", () => {
     expect(rigInstallForRoles(["breaker_fracter"])).toBe(true);
     expect(rigInstallForRoles(["breakerish_fracter"])).toBe(false);
@@ -78,7 +104,7 @@ function lowValueDuplicateForRoles(roles: string[]): boolean {
     {} as AiDecisionInput,
     action("install_card"),
     {
-      sourceDefinitionIdForAction: () => "local-card",
+      sourceDefinitionIdForAction: () => syntheticCardDefinitionId("local-card"),
       rolesForCardId: () => roles,
     },
   );

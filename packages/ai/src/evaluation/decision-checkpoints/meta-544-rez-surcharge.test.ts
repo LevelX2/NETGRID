@@ -33,7 +33,7 @@ for (const [game, index] of [[2, 259], [13, 198]] as const) {
     expect(event.effectTargets).toContain("matching_printed_rez_cost_surcharge");
     expect(runnerCardRunHasVisibleDifferentialPayoff(input, event, "hq")).toBe(false);
   });
-  it("keeps cheaper HQ run under Central owner in native G" + game + "/D" + index, () => {
+  it("prefers the cheaper HQ route within Central pressure in native G" + game + "/D" + index, () => {
     const { input, runtime } = fixture(game, index), view = structuredClone(input.playerView), legals = structuredClone(input.legalActions);
     resetResidentPlanPortfolioMemory();
     restoreAiRuntimeCheckpoint(input, input.ownDeckSnapshot!.deckSnapshotId, runtime);
@@ -42,11 +42,23 @@ for (const [game, index] of [[2, 259], [13, 198]] as const) {
     expect(input.legalActions).toEqual(legals);
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.timeoutUsed).toBe(false);
-    expect(decision.actionId).toBe("runner.start_run.hq");
+    const plan = decision.decisionDebug?.planFirstDecision;
+    if (game === 2) {
+      // The terminal remote now has priority over the otherwise ready HQ route.
+      expect(plan?.selectedPlan).toMatchObject({
+        moduleId: "runner.rig_and_coverage",
+        evidenceCodes: expect.arrayContaining(["terminal_remote_coverage:r1"]),
+      });
+      expect(decision.decisionDebug?.actionAlternatives).toContainEqual(expect.objectContaining({
+        actionId: "rs.hq",
+        whyNot: expect.arrayContaining(["candidate_plan:pa7nez1ioecg7mf06q1uwqq57o:ready"]),
+      }));
+    } else {
+      expect(decision.actionId).toBe("rs.hq");
+      expect(plan?.selectedPlan?.moduleId).toBe("runner.pressure_central");
+    }
     const action = input.legalActions.find(a => a.actionId === decision.actionId)!;
     expect(action.expiresAtStateVersion).toBe(view.stateVersion);
-    const plan = decision.decisionDebug?.planFirstDecision;
-    expect(plan?.selectedPlan?.moduleId).toBe("runner.pressure_central");
     expect(plan?.route?.actionId).toBe(action.actionId);
     expect(plan?.route?.stateVersion).toBe(view.stateVersion);
     expect(plan?.route?.planInstanceId).toBe(plan?.leafExecutorInstanceId);
@@ -56,8 +68,8 @@ for (const [game, index] of [[2, 259], [13, 198]] as const) {
 it("retains potential surcharge support on the native unrezzed Remote path", () => {
   const { input, validation } = fixture(18, 258);
   expect(Object.values(validation).every(Boolean)).toBe(true);
-  expect(input.playerView.servers.find(s => s.id === "remote_1")!.ice.some(i => i.rezzed === false)).toBe(true);
-  const event = candidates(input).find(c => c.runProjectionSummary?.serverId === "remote_1" && c.effectTargets?.includes("matching_printed_rez_cost_surcharge"))!;
+  expect(input.playerView.servers.find(s => s.id === "r1")!.ice.some(i => i.rezzed === false)).toBe(true);
+  const event = candidates(input).find(c => c.runProjectionSummary?.serverId === "r1" && c.effectTargets?.includes("matching_printed_rez_cost_surcharge"))!;
   expect(event).toBeDefined();
-  expect(runnerCardRunHasVisibleDifferentialPayoff(input, event, "remote_1")).toBe(true);
+  expect(runnerCardRunHasVisibleDifferentialPayoff(input, event, "r1")).toBe(true);
 });

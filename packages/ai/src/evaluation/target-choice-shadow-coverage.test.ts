@@ -15,7 +15,7 @@ describe("TargetChoiceShadow candidate coverage", () => {
             id: "server",
             kind: "server",
             visibility: "known_to_actor",
-            allowedServers: ["hq", "remote_1"],
+            allowedServers: ["hq", "r1"],
           },
         ],
       }),
@@ -25,7 +25,7 @@ describe("TargetChoiceShadow candidate coverage", () => {
           opportunity: "remote_contest_window",
           priority: "high",
           side: "runner",
-          targetId: "remote_1",
+          targetId: "r1",
           evidence: ["test:remote"],
         },
       ],
@@ -98,6 +98,16 @@ describe("TargetChoiceShadow candidate coverage", () => {
     expect(report.scenariosWithoutReports).toEqual(["missing_case"]);
     expect(report.scenariosWithBlockedRequirements).toEqual(["blocked_case"]);
     expect(containsForbiddenSemanticMarker(report)).toBe(false);
+  });
+
+  it("leaves a total expectation open when some scenarios have no count", () => {
+    const report = buildTargetChoiceShadowCandidateCoverageReport([
+      { scenarioId: "known", reports: [], expectedCandidateCount: 2 },
+      { scenarioId: "unknown", reports: [] },
+    ]);
+
+    expect(report.scenarioCount).toBe(2);
+    expect(report.expectedCandidateCount).toBeUndefined();
   });
 
   it("reports target-choice coverage over real Engine target candidates", () => {

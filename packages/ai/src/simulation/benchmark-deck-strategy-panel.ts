@@ -15,8 +15,13 @@ export const CORP_STRATEGY_PANEL_TARGETS = [
 export function missingCorpStrategyPanelSlots(
   slots: readonly AiBenchmarkDeckSlotDefinition[],
 ): AiBenchmarkDeckSlotDefinition[] {
+  const runnableArchetypes = new Set(
+    slots
+      .filter((slot) => slot.status === "runnable")
+      .map((slot) => slot.corpArchetype),
+  );
   return CORP_STRATEGY_PANEL_TARGETS.filter(
-    (target) => !slots.some((slot) => slot.corpArchetype === target),
+    (target) => !runnableArchetypes.has(target),
   ).map((target) => ({
     slotId: `strategy_panel_gap_${target}`,
     label: `Strategy Panel Gap: ${target}`,

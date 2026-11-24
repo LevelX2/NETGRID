@@ -56,7 +56,7 @@ function currentOperationCompanion(input: AiDecisionInputWithDeckCapabilities) {
     (action) =>
       action.type === "play_operation" && action.payload?.xValue !== undefined,
   )
-    ? corpFreeRezBoardCompanion(copy, "onr_proteus_049_emergency-rig").input
+    ? corpFreeRezBoardCompanion(copy, 107).input
     : copy;
 }
 
@@ -123,7 +123,7 @@ describe("match 41df Corp scoring", () => {
 
   it("funds the known stopping ICE instead of a second non-stopping layer at D13", () => {
     const { decision } = decide(13);
-    expect(decision.actionId).toBe("corp.gain_credit");
+    expect(decision.actionId).toBe("cb");
     expect(decision.reasonCode).toBe("plan_first.corp.economy");
   });
 
@@ -172,7 +172,7 @@ describe("match 41df Corp scoring", () => {
     expect(
       selected.type === "install_card" &&
         selected.payload?.placement === "root" &&
-        selected.payload?.serverId === "remote_2" &&
+        selected.payload?.serverId === "r2" &&
         input.playerView.own.gripOrHq.some(
           (card) =>
             card.instanceId === selected.source && card.type === "agenda",
@@ -233,15 +233,15 @@ describe("match 41df Corp scoring", () => {
         expect(projects.every((project) => !project.feasible)).toBe(true);
         // A concrete installed central reserve now precedes unsafe emergency
         // installs. The route comparison remains independently observable.
-        expect(selected.actionId).toBe("corp.gain_credit");
+        expect(selected.actionId).toBe("cb");
         expect(decision.evidence).toEqual(
           expect.arrayContaining([
-            "plan_priority_delegated_from:plan:corp.defend_servers:server-defense-portfolio",
-            "plan_assessment_evidence:corp_terminal_central_rez_reserve_required:hq:corp_onr_proteus_015_colonel-failure_1:gap_4",
+            "plan_priority_delegated_from:penw02zfrkklof54c2nuye5att",
+            "plan_assessment_evidence:corp_terminal_central_rez_reserve_required:hq:cgd:gap_4",
           ]),
         );
         const remote = projects.find(
-          (project) => project.serverId === "remote_2",
+          (project) => project.serverId === "r2",
         );
         expect(remote).toBeDefined();
         expect(
@@ -263,7 +263,7 @@ describe("match 41df Corp scoring", () => {
         knowledge: "known",
         runnerCreditsRemaining: remaining,
       });
-      expect(selected.payload?.serverId).toBe("remote_2");
+      expect(selected.payload?.serverId).toBe("r2");
     },
   );
 });

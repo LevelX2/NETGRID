@@ -56,7 +56,7 @@ describe("Manhunt vs. Coup exact selfplay decision checkpoints", () => {
   it("does not expose Corporate War and may instead stage its bound defense", () => {
     const checkpoint = fixture(deckoutCloseoutJson);
     checkpoint.expectation = {
-      acceptableActions: [{ actionId: "corp.gain_credit" }],
+      acceptableActions: [{ actionId: "cb" }],
       forbiddenActions: [
         { type: "install_card", sourceDefinitionId: CORPORATE_WAR },
       ],
@@ -71,7 +71,7 @@ describe("Manhunt vs. Coup exact selfplay decision checkpoints", () => {
     expect(
       result.decision?.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
     ).toBe(
-      "plan:corp.score_agenda:agenda%3Acorp_onr_v1_196_corporate-war_2%3Aremote_1",
+      "pcp5j0i0bjrmyiqa675g0xvi8i",
     );
   });
 
@@ -79,7 +79,7 @@ describe("Manhunt vs. Coup exact selfplay decision checkpoints", () => {
     const relaxedClock = mutateFixture(deckoutCloseoutJson, (checkpoint) => {
       moveArchivesCardsToRd(checkpoint, 6);
       checkpoint.expectation = {
-        acceptableActions: [{ actionId: "corp.gain_credit" }],
+        acceptableActions: [{ actionId: "cb" }],
         forbiddenActions: [
           { type: "install_card", sourceDefinitionId: CORPORATE_WAR },
         ],
@@ -87,7 +87,7 @@ describe("Manhunt vs. Coup exact selfplay decision checkpoints", () => {
           acceptablePlanKinds: ["corp.economy"],
           acceptableCapabilities: ["develop_or_convert_corp_economy"],
           requiredAssessmentEvidence: [
-            "corp_score_protection_required:remote_1",
+            "corp_score_protection_required:r1",
           ],
         },
       };
@@ -99,7 +99,7 @@ describe("Manhunt vs. Coup exact selfplay decision checkpoints", () => {
   });
 });
 
-const CORPORATE_WAR = "onr_v1_196_corporate-war";
+const CORPORATE_WAR = 408;
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
   return bindHistoricalRunEventCadence(
@@ -121,7 +121,7 @@ function mutateFixture(
 
 function moveCorpCardToArchives(
   checkpoint: AiDecisionCheckpointV1,
-  definitionId: string,
+  definitionId: number,
 ): void {
   const state = checkpoint.engine.testOnlyGameState;
   const instanceId = [...state.corp.hq, ...state.corp.rd].find(

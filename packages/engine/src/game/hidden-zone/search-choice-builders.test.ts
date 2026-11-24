@@ -18,7 +18,7 @@ import {
 } from "./search-choice-builders";
 
 const sourceCardId = "source_card" as CardInstanceId;
-const sourceDefinitionId = "source_definition" as CardDefinitionId;
+const sourceDefinitionId = 462381168 as CardDefinitionId;
 
 describe("hidden-zone search choice builders", () => {
   it("builds search-to-grip choices and payloads without changing marker fields", () => {
@@ -53,7 +53,7 @@ describe("hidden-zone search choice builders", () => {
       choiceId: "p3_37_search_stack_to_grip_13",
       side: "runner",
       source:
-        "p3_37.search_stack_to_grip:source_card:source_definition:program:reveal:shuffle:13",
+        "p3_37.search_stack_to_grip:source_card:462381168:program:reveal:shuffle:13",
       sourceCardInstanceId: sourceCardId,
       sourceCardDefinitionId: sourceDefinitionId,
       prompt: "Stack durchsuchen",
@@ -98,8 +98,7 @@ describe("hidden-zone search choice builders", () => {
     });
     expect(trashChoice).toMatchObject({
       choiceId: "p3_37_search_trash_to_grip_13",
-      source:
-        "p3_37.search_trash_to_grip:source_card:source_definition:any_card:13",
+      source: "p3_37.search_trash_to_grip:source_card:462381168:any_card:13",
       sourceCardInstanceId: sourceCardId,
       sourceCardDefinitionId: sourceDefinitionId,
       prompt: "Heap durchsuchen",
@@ -161,7 +160,7 @@ describe("hidden-zone search choice builders", () => {
       sourceCardInstanceId: sourceCardId,
       sourceCardDefinitionId: sourceDefinitionId,
       source:
-        "p3_37.look_top_stack_take_matching:source_card:source_definition:5:program,event:1:reveal:shuffle:3",
+        "p3_37.look_top_stack_take_matching:source_card:462381168:5:program,event:1:reveal:shuffle:3",
       minSelections: 0,
       maxSelections: 1,
       stackSearchResolution: {
@@ -197,7 +196,7 @@ describe("hidden-zone search choice builders", () => {
     expect(install).toMatchObject({
       choiceId: "p3_38_search_stack_install_3",
       source:
-        "p3_38.search_stack_install:source_card:source_definition:program:free:shuffle:3",
+        "p3_38.search_stack_install:source_card:462381168:program:free:shuffle:3",
       sourceCardInstanceId: sourceCardId,
       sourceCardDefinitionId: sourceDefinitionId,
       prompt: "Stack durchsuchen und Programm installieren",
@@ -291,7 +290,7 @@ describe("hidden-zone search choice builders", () => {
     expect(sneakSource).toMatchObject({
       choiceId: "v1911_temporary_program_install_source_8",
       source:
-        "p3_38.stack_or_trash_program_install_source:source_card:source_definition:8",
+        "p3_38.stack_or_trash_program_install_source:source_card:462381168:8",
       sourceCardInstanceId: sourceCardId,
       sourceCardDefinitionId: sourceDefinitionId,
       prompt: "Sneak-Preview-Quelle wählen",

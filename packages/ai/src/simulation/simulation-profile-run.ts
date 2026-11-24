@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { canonicalSerialize } from "@netgrid/cards";
+import { canonicalSerialize } from "@netgrid/cards/planning";
 
 import type { AiSimulationConfig } from "./ai-simulation-config";
 import type { AiSimulationSummary } from "./ai-simulation-summary";

@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -9,6 +10,7 @@ import {
 } from "../../plans/runner-funding-contracts";
 import type { EconomyState } from "../economy/economy-types";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { RunnerCreditBankSignal } from "./credit-bank-types";
 
 /** A prefilled, otherwise inert source may fund the existing P6 need.
@@ -17,7 +19,7 @@ export function finiteBankTurnLiquiditySupport(params: {
   input: AiDecisionInput;
   candidates: readonly ActionSemanticCandidate[];
   needs: readonly RunnerFundingNeedSignal[];
-  definitionId: string;
+  definitionId: number;
   bankId: string;
   cashOutActionIds: readonly string[];
   estimatedPayout: number;
@@ -117,7 +119,7 @@ export function finiteBankTurnLiquiditySupport(params: {
         (a) =>
           a.actionId === c.actionId &&
           a.source === params.bankId &&
-          a.expiresAtStateVersion === input.playerView.stateVersion,
+          actionMatchesCurrentDecision(input, a),
       )
     );
   });
@@ -125,7 +127,7 @@ export function finiteBankTurnLiquiditySupport(params: {
     ? {
         actionId: payout.actionId,
         funding: {
-          parentPlanInstanceId: `plan:runner.economy:${encodeURIComponent(need.needId)}`,
+          parentPlanInstanceId: planInstanceIdForProposal({ moduleId: "runner.economy", dedupeKey: need.needId }),
           needId: need.needId,
           stateVersion: input.playerView.stateVersion,
           need,

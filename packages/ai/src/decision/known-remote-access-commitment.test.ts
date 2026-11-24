@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 
 import type { AiDecisionInput, PlayerView, VisibleCard } from "@netgrid/shared";
@@ -5,7 +6,6 @@ import {
   knownRemoteAgendaAccessCommitment,
   knownRemoteRootHasHighImpactRole,
   projectKnownRemoteTrashCommitment,
-  trashSupportEffectTargetHasFreeTrash,
 } from "./known-remote-access-commitment";
 
 describe("known remote access commitment", () => {
@@ -25,11 +25,11 @@ describe("known remote access commitment", () => {
 
   it("models agenda access as a steal commitment", () => {
     expect(
-      knownRemoteAgendaAccessCommitment("remote_1", [
+      knownRemoteAgendaAccessCommitment("r1", [
         "known_remote_agenda_root:root:0",
       ]),
     ).toMatchObject({
-      serverId: "remote_1",
+      serverId: "r1",
       knownAccessState: "known_payoff",
       intendedAccessAction: "steal",
       reason: "agenda_payoff",
@@ -45,13 +45,13 @@ describe("known remote access commitment", () => {
     const projection = projectKnownRemoteTrashCommitment(
       aiInput({ credits: 4 }),
       {
-        serverId: "remote_1",
-        definitionId: "onr_v1_326_holovid-campaign",
+        serverId: "r1",
+        definitionId: 538,
         rootType: "asset",
         trashCost: 4,
         creditsAfterPath: 4,
         visibleCard: visibleCard("holovid", {
-          definitionId: "onr_v1_326_holovid-campaign",
+          definitionId: 538,
           title: "Holovid Campaign",
           type: "asset",
           counters: { bit: 5 },
@@ -86,13 +86,13 @@ describe("known remote access commitment", () => {
     const projection = projectKnownRemoteTrashCommitment(
       aiInput({ credits: 2 }),
       {
-        serverId: "remote_1",
-        definitionId: "onr_v1_326_holovid-campaign",
+        serverId: "r1",
+        definitionId: 538,
         rootType: "asset",
         trashCost: 4,
         creditsAfterPath: 2,
         visibleCard: visibleCard("holovid", {
-          definitionId: "onr_v1_326_holovid-campaign",
+          definitionId: 538,
           title: "Holovid Campaign",
           type: "asset",
           counters: { bit: 5 },
@@ -120,13 +120,13 @@ describe("known remote access commitment", () => {
     const projection = projectKnownRemoteTrashCommitment(
       aiInput({ credits: 8 }),
       {
-        serverId: "remote_1",
-        definitionId: "onr_v1_366_red-herrings",
+        serverId: "r1",
+        definitionId: 578,
         rootType: "upgrade",
         trashCost: 1,
         creditsAfterPath: 8,
         visibleCard: visibleCard("neutral-asset", {
-          definitionId: "onr_v1_366_red-herrings",
+          definitionId: 578,
           title: "Red Herrings",
           type: "upgrade",
         }),
@@ -151,58 +151,53 @@ describe("known remote access commitment", () => {
     );
   });
 
-  it("uses bounded free-trash support from installed runner cards", () => {
+  it.each([
+    { amount: 1, expectedGeneralCost: 3 },
+    { amount: 0, expectedGeneralCost: 4 },
+  ])("prices a remote trash with only $amount remaining restricted credits", ({ amount, expectedGeneralCost }) => {
     const projection = projectKnownRemoteTrashCommitment(
       aiInput({
-        credits: 8,
+        credits: 4,
         rig: [
-          visibleCard("kilroy", {
-            definitionId: "onr_v1_096_kilroy-was-here",
-            title: "Kilroy Was Here",
-            type: "event",
+          visibleCard("poltergeist", {
+            definitionId: 260,
+            type: "program",
+            counterDisplays: [
+              {
+                id: "restricted_pool",
+                amount,
+                displayKind: "restricted_pool",
+                label: "Trash-Credits",
+                ariaLabel: "Trash-Credits",
+                counterType: "bit",
+                usageHint: "spendable",
+                creditPool: {
+                  kind: "restricted_credit",
+                  capacity: 2,
+                  uses: ["trash_nodes"],
+                },
+              },
+            ],
           }),
         ],
       }),
       {
-        serverId: "remote_1",
-        definitionId: "onr_v1_366_red-herrings",
-        rootType: "upgrade",
-        trashCost: 1,
-        creditsAfterPath: 8,
-        visibleCard: visibleCard("neutral-asset", {
-          definitionId: "onr_v1_366_red-herrings",
-          title: "Red Herrings",
-          type: "upgrade",
-        }),
+        serverId: "r1",
+        definitionId: 538,
+        rootType: "asset",
+        trashCost: 4,
+        creditsAfterPath: 4,
       },
     );
-
-    expect(projection).toMatchObject({
-      generalTrashCost: 0,
-      creditsAfterTrash: 8,
-      evidence: expect.arrayContaining([
-        "known_remote_root_free_trash_support:true",
-        "known_remote_root_trash_support_source:onr_v1_096_kilroy-was-here",
-      ]),
-    });
-  });
-
-  it("matches free-trash effect targets by bounded marker segments", () => {
-    expect(trashSupportEffectTargetHasFreeTrash("free_trash")).toBe(true);
-    expect(trashSupportEffectTargetHasFreeTrash("access.free_trash")).toBe(
-      true,
-    );
-    expect(trashSupportEffectTargetHasFreeTrash("not_free_trash_noise")).toBe(
-      false,
-    );
+    expect(projection.generalTrashCost).toBe(expectedGeneralCost);
   });
 
   it("uses supplied runner economy posture as access reserve basis", () => {
     const projection = projectKnownRemoteTrashCommitment(
       aiInput({ credits: 8 }),
       {
-        serverId: "remote_1",
-        definitionId: "onr_v1_322_euromarket-consortium",
+        serverId: "r1",
+        definitionId: 534,
         rootType: "asset",
         trashCost: 4,
         creditsAfterPath: 8,
@@ -213,7 +208,7 @@ describe("known remote access commitment", () => {
           },
         },
         visibleCard: visibleCard("euromarket", {
-          definitionId: "onr_v1_322_euromarket-consortium",
+          definitionId: 534,
           title: "Euromarket Consortium",
           type: "asset",
         }),
@@ -240,13 +235,13 @@ describe("known remote access commitment", () => {
     const projection = projectKnownRemoteTrashCommitment(
       aiInput({ credits: 10 }),
       {
-        serverId: "remote_1",
-        definitionId: "onr_v1_326_holovid-campaign",
+        serverId: "r1",
+        definitionId: 538,
         rootType: "asset",
         trashCost: 4,
         creditsAfterPath: 10,
         visibleCard: visibleCard("holovid", {
-          definitionId: "onr_v1_326_holovid-campaign",
+          definitionId: 538,
           title: "Holovid Campaign",
           type: "asset",
           counters: { bit: 0 },
@@ -274,13 +269,13 @@ describe("known remote access commitment", () => {
     const projection = projectKnownRemoteTrashCommitment(
       aiInput({ credits: 4 }),
       {
-        serverId: "remote_1",
-        definitionId: "onr_v1_347_vapor-ops",
+        serverId: "r1",
+        definitionId: 559,
         rootType: "asset",
         trashCost: 1,
         creditsAfterPath: 4,
         visibleCard: visibleCard("counter-transfer-engine", {
-          definitionId: "onr_v1_347_vapor-ops",
+          definitionId: 559,
           title: "Vapor Ops",
           type: "asset",
           advancementCounters: 2,
@@ -317,7 +312,7 @@ function aiInput(params: {
     timingPoint: "runner_action.main",
     own: {
       identity: visibleCard("runner-identity", {
-        definitionId: "runner-identity",
+        definitionId: syntheticCardDefinitionId("runner-identity"),
         title: "Runner Identity",
         type: "identity",
       }),
@@ -334,7 +329,7 @@ function aiInput(params: {
     },
     opponent: {
       identity: visibleCard("corp-identity", {
-        definitionId: "corp-identity",
+        definitionId: syntheticCardDefinitionId("corp-identity"),
         title: "Corp Identity",
         type: "identity",
       }),
@@ -350,7 +345,7 @@ function aiInput(params: {
     },
     servers: [
       {
-        id: "remote_1",
+        id: "r1",
         label: "Remote 1",
         ice: [],
         root: [],

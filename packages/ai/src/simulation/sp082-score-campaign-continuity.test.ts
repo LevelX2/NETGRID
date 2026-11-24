@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import {
   applyAction,
   getLegalActions,
@@ -13,11 +14,6 @@ import { chooseAiAction } from "../index";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInput } from "../runtime/ai-decision-input";
 
-const SCORE_ROOT =
-  "plan:corp.score_agenda:agenda%3Acorp_onr_proteus_005_marked-accounts_1%3Aremote_1";
-const SCORE_SUPPORT =
-  "plan:corp.economy:score-support%3Aagenda%3Acorp_onr_proteus_005_marked-accounts_1%3Aremote_1";
-
 describe("SP-082 score campaign multi-step regression", () => {
   it.each([0, 1])(
     "preserves funding across the opponent turn from %i credits and releases the closed need",
@@ -26,6 +22,16 @@ describe("SP-082 score campaign multi-step regression", () => {
         sp082KnownProtectionFundingCompanion(),
       );
       let state = structuredClone(fixture.engine.testOnlyGameState);
+      const fort = state.corp.servers.find((server) => server.id === "r1");
+      const agenda = state.corp.hq.find(
+        (id) => state.cardInstances[id]?.definitionId === 63,
+      );
+      if (!fort || !agenda) {
+        throw new Error("Missing the fixture's agenda or target remote.");
+      }
+      const projectKey = `agenda:${agenda}:${fort.id}`;
+      const scoreRoot = planInstanceIdForProposal({ moduleId: "corp.score_agenda", dedupeKey: projectKey });
+      const scoreSupport = planInstanceIdForProposal({ moduleId: "corp.economy", dedupeKey: `score-support:${projectKey}` });
       // Reproduce the funding boundary itself. An independently chosen Runner
       // policy must not decide whether this regression reaches a turn boundary.
       state.corp.credits = initialCredits;
@@ -71,7 +77,7 @@ describe("SP-082 score campaign multi-step regression", () => {
           actionId = decision.actionId!;
           expect(decision.fallbackUsed).toBe(false);
           if (
-            decision.evidence?.includes(`plan_first_executor:${SCORE_SUPPORT}`)
+            decision.evidence?.includes(`plan_first_executor:${scoreSupport}`)
           ) {
             expect(state.corp.credits).toBeLessThan(fundingTarget);
             expect(
@@ -79,8 +85,8 @@ describe("SP-082 score campaign multi-step regression", () => {
             ).toBe("gain_credit");
             expect(decision.evidence).toEqual(
               expect.arrayContaining([
-                `plan_first_root:${SCORE_ROOT}`,
-                `plan_first_executor:${SCORE_SUPPORT}`,
+                `plan_first_root:${scoreRoot}`,
+                `plan_first_executor:${scoreSupport}`,
               ]),
             );
             expect(state.turnSerial).toBeDefined();
@@ -92,7 +98,7 @@ describe("SP-082 score campaign multi-step regression", () => {
             state.timingPoint === "corp_action.main"
           ) {
             expect(decision.evidence).not.toContain(
-              `plan_priority_delegated_from:${SCORE_ROOT}`,
+              `plan_priority_delegated_from:${scoreRoot}`,
             );
             released = true;
           }

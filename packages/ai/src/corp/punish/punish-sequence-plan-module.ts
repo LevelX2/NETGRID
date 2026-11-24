@@ -14,37 +14,37 @@ export function punishSequenceModule(): PlanModule {
     moduleId: "corp.execute_punish_sequence",
     side: "corp",
     discover: (context) =>
-      domain(context)
-        .punishCampaigns.filter(
-          (signal) =>
-            signal.routeContract?.quoteStatus === "complete" &&
-            signal.routeContract.horizon === "execute" &&
-            signal.routeContract.currentHeadActionId !== undefined,
+      domain(context).punishCampaigns.flatMap((signal) => {
+        const route = signal.routeContract;
+        if (
+          route?.quoteStatus !== "complete" ||
+          route.horizon !== "execute" ||
+          route.currentHeadActionId === undefined
         )
-        .map((signal) => {
-          const executionProposal = proposal(
-            "corp.execute_punish_sequence",
-            `${signal.campaignId}:${signal.routeContract!.routeId}`,
-            { kind: "punish_sequence", signal } satisfies PunishState,
-            "P5",
-            punishCandidates(context, signal),
-            signal.evidenceCodes ?? signal.evidenceCode,
-            { kind: "player", id: "runner" },
-            "locked_sequence",
-            planInstanceIdForProposal({
-              moduleId: "corp.punish_campaign",
-              dedupeKey: signal.campaignId,
-            }),
-            signal.routeContract!.executionNeedId,
-          );
-          executionProposal.retentionPolicy = {
-            ...executionProposal.retentionPolicy,
-            abandonWhenTargetMissing: true,
-            protectedWhileNeedOpen: false,
-            protectedWhileCommitted: false,
-          };
-          return executionProposal;
-        }),
+          return [];
+        const executionProposal = proposal(
+          "corp.execute_punish_sequence",
+          `${signal.campaignId}:${route.routeId}`,
+          { kind: "punish_sequence", signal } satisfies PunishState,
+          "P5",
+          punishCandidates(context, signal),
+          signal.evidenceCodes ?? signal.evidenceCode,
+          { kind: "player", id: "runner" },
+          "locked_sequence",
+          planInstanceIdForProposal({
+            moduleId: "corp.punish_campaign",
+            dedupeKey: signal.campaignId,
+          }),
+          route.executionNeedId,
+        );
+        executionProposal.retentionPolicy = {
+          ...executionProposal.retentionPolicy,
+          abandonWhenTargetMissing: true,
+          protectedWhileNeedOpen: false,
+          protectedWhileCommitted: false,
+        };
+        return [executionProposal];
+      }),
     assess: (instance, context, portfolio) => {
       const current = state<PunishState>(instance);
       return assessment(

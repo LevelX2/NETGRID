@@ -1,39 +1,22 @@
 import { describe, expect, it } from "vitest";
+import { selectedPlayfulAiChoiceOptionId } from "./playful-ai-choice-option";
 
-import { playfulAiGainValue } from "./choice-option";
+describe("selectedPlayfulAiChoiceOptionId", () => {
+  it("ranks the explicit gain with opaque option IDs", () => {
+    expect(
+      selectedPlayfulAiChoiceOptionId([
+        { id: "17", label: "Aufteilung A", value: 3 },
+        { id: "18", label: "Aufteilung B", value: 2 },
+      ]),
+    ).toBe("17");
+  });
 
-describe("playfulAiGainValue", () => {
-  it("uses structured option values and ignores label-only credit amounts", () => {
+  it("rejects an offer with a missing gain despite a descriptive ID", () => {
     expect(
-      playfulAiGainValue({
-        id: "take_credits",
-        value: 3,
-        label: "3 Credits nehmen",
-      }),
-    ).toBe(3);
-    expect(
-      playfulAiGainValue({
-        id: "take_credits",
-        label: "9 Credits nehmen",
-      }),
-    ).toBe(0);
-    expect(
-      playfulAiGainValue({
-        id: "gain_2_set_aside_1",
-        label: "label without amount",
-      }),
-    ).toBe(2);
-    expect(
-      playfulAiGainValue({
-        id: "gain_2_set_aside_1_noise",
-        label: "label without amount",
-      }),
-    ).toBe(0);
-    expect(
-      playfulAiGainValue({
-        id: "prefix_gain_2_set_aside_1",
-        label: "label without amount",
-      }),
-    ).toBe(0);
+      selectedPlayfulAiChoiceOptionId([
+        { id: "gain_2_set_aside_1", label: "2 Credits nehmen" },
+        { id: "gain_1_set_aside_2", label: "1 Credit nehmen", value: 1 },
+      ]),
+    ).toBeUndefined();
   });
 });

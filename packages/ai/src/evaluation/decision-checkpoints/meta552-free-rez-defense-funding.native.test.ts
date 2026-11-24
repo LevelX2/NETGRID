@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   applyAction,
@@ -29,6 +30,7 @@ import {
   restoreAiRuntimeCheckpoint,
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
+import { applyPostSetupDeckOrder, type PostSetupDeckOrder } from "./post-setup-deck-order.test-support";
 
 function fixture() {
   return JSON.parse(
@@ -42,6 +44,8 @@ function fixture() {
   ) as {
     matchId: string;
     seed: string;
+    initialStateHash: string;
+    setupArrangement: PostSetupDeckOrder;
     runnerDeckSnapshot: DeckSnapshot;
     native: {
       input: AiDecisionInputWithDeckCapabilities & {
@@ -54,6 +58,7 @@ function fixture() {
     prefixActions: Array<{
       side: "runner" | "corp";
       actionId: string;
+      stateHashAfter: string;
       selectedChoices?: PlayerAction["selectedChoices"];
     }>;
     originalContinuation: Array<{
@@ -84,7 +89,7 @@ function advance(
   if (!r.ok) throw Error(JSON.stringify(r.error));
   return r.state;
 }
-function originalState() {
+function scenarioState() {
   const f = fixture(),
     corp = f.native.input.ownDeckSnapshot!,
     runner = f.runnerDeckSnapshot!;
@@ -120,12 +125,17 @@ function originalState() {
     runnerDeckMetadata: runner.publicMetadata,
     corpDeckMetadata: corp.publicMetadata,
   });
-  for (const a of f.prefixActions) state = advance(state, a);
+  expect(hashState(state)).toBe(f.initialStateHash);
+  for (const [index, action] of f.prefixActions.entries()) {
+    state = advance(state, action);
+    if (index === 1) applyPostSetupDeckOrder(state, f.setupArrangement);
+    expect(hashState(state)).toBe(action.stateHashAfter);
+  }
   expect(hashState(state)).toBe(f.native.stateHash);
   return { f, state };
 }
 function offers() {
-  const { f, state } = originalState();
+  const { f, state } = scenarioState();
   const input = buildAiDecisionInput(state, "corp", {
     ownDeckSnapshot: f.native.input.ownDeckSnapshot!,
     difficulty: "hard",
@@ -192,8 +202,8 @@ describe("native free rez before Defense funding", () => {
       ),
     ).toThrow("missing_plan_module_coverage");
   });
-  it("reconstructs the original Engine state and strictly improves the one-click funding prefix", () => {
-    const { f, state } = originalState();
+  it("replays the authored Engine scene and strictly improves the one-click funding prefix", () => {
+    const { f, state } = scenarioState();
     expect(Object.keys(f.native.validation)).toHaveLength(9);
     expect(Object.values(f.native.validation).every(Boolean)).toBe(true);
     const rez = getLegalActions(state, "corp").find(
@@ -201,7 +211,7 @@ describe("native free rez before Defense funding", () => {
     )!;
     const basic = advance(structuredClone(state), {
       side: "corp",
-      actionId: "corp.gain_credit",
+      actionId: "cb",
     });
     let improved = advance(structuredClone(state), {
       side: "corp",
@@ -212,7 +222,8 @@ describe("native free rez before Defense funding", () => {
     const payout = getLegalActions(improved, "corp").find(
       (a) =>
         a.type === "activated_card_ability" &&
-        a.actionId.includes("take_hosted_credits"),
+        a.source === rez.source &&
+        a.abilityRef?.sourceAbilityId === canonicalCapabilityId(521, capabilityKey("abilities_activated_corp_main_take_hosted_credits")),
     )!;
     improved = advance(improved, { side: "corp", actionId: payout.actionId });
     expect([basic.corp.credits, basic.corp.clicks]).toEqual([6, 1]);
@@ -225,7 +236,7 @@ describe("native free rez before Defense funding", () => {
     expect(hashState(replay.state)).toBe(hashState(improved));
   });
   it("keeps free setup and real payout under Defense, then revalidates the funded prefix before Score protection", () => {
-    const { f, state } = originalState();
+    const { f, state } = scenarioState();
     let current = structuredClone(state);
     const actions: string[] = [];
     for (let index = 0; index < 3; index++) {
@@ -252,13 +263,13 @@ describe("native free rez before Defense funding", () => {
       expect(p?.route?.planInstanceId).toBe(p?.leafExecutorInstanceId);
       if (index < 2) {
         expect(p?.rootPlanInstanceId).toBe(
-          "plan:corp.defend_servers:server-defense-portfolio",
+          "penw02zfrkklof54c2nuye5att",
         );
         expect(p?.selectedPlan?.moduleId).toBe("corp.economy");
       } else {
         expect(current.corp.credits).toBe(7);
         expect(p?.rootPlanInstanceId).toBe(
-          "plan:corp.score_agenda:agenda%3Acorp_onr_v1_220_tycho-extension_1%3Aremote_1",
+          "p90hpy8yxs8swev9syuvfoksvw",
         );
         expect(p?.selectedPlan?.moduleId).toBe("corp.defend_servers");
       }
@@ -291,7 +302,7 @@ describe("native free rez before Defense funding", () => {
     ).toEqual(expected);
     expect(expected).toMatchObject({
       stateVersion: 25,
-      parentPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      parentPlanInstanceId: "penw02zfrkklof54c2nuye5att",
       parentNeedId: signal.parentNeedId,
       poolCreditsOnRez: 16,
       payoutCredits: 2,
@@ -319,7 +330,7 @@ describe("native free rez before Defense funding", () => {
     if (kind === "no_click") input.playerView.own.clicks = 0;
     if (kind === "funded") signal.gap = 0;
     if (kind === "other_parent")
-      signal.parentPlanInstanceId = "plan:corp.score_agenda:other";
+      signal.parentPlanInstanceId = "p5ooqqp5ofx0yrvg8322ut5eo2";
     expect(
       corpFreeRezPayoutPreparation(
         input,

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
@@ -35,7 +36,7 @@ describe("applyTargetContextProjection", () => {
           delayedInstallAbility: "set_aside_from_grip",
           cardId: "shell-traders-1",
           targetCardId: "dwarf-1",
-          targetCardDefinitionId: "dwarf-definition",
+          targetCardDefinitionId: syntheticCardDefinitionId("dwarf-definition"),
         },
       },
       undefined,
@@ -48,7 +49,7 @@ describe("applyTargetContextProjection", () => {
           targetId: "dwarf-1",
           targetKind: "card",
           targetSide: "runner",
-          targetDefinitionId: "dwarf-definition",
+          targetDefinitionId: syntheticCardDefinitionId("dwarf-definition"),
         }),
       ]),
     );
@@ -62,7 +63,7 @@ describe("applyTargetContextProjection", () => {
     (zoneScope, hostCardId) => {
       const hostedInstallAction = {
         ...action("install_card"),
-        actionId: `runner.install_card.program.${hostCardId}`,
+        actionId: `rc.program.${hostCardId}`,
         side: "runner",
         payload: {
           cardId: "program-to-install",
@@ -88,7 +89,7 @@ describe("applyTargetContextProjection", () => {
       );
 
       expect(hostedInstallAction.actionId).toBe(
-        `runner.install_card.program.${hostCardId}`,
+        `rc.program.${hostCardId}`,
       );
       expect(projected.targetContext?.availableTargets).toEqual([
         expect.objectContaining({
@@ -123,12 +124,12 @@ function action(type: string): LegalAction {
     source: "agenda",
     timingPoint: "corp_action.main",
     costs: [],
-    payload: { serverId: "remote_1" },
+    payload: { serverId: "r1" },
     targetRequirements: [
       {
         id: "server",
         kind: "server",
-        allowedServers: ["remote_1"],
+        allowedServers: ["r1"],
       },
     ],
     visibility: "public",

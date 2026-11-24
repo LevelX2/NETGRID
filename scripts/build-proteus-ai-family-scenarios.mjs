@@ -110,7 +110,7 @@ const scenarios = Object.entries(specs)
         (card) => card.primaryFamily === family && card.pilotDeckIds.length > 0,
       )
       .map((card) => card.cardId)
-      .sort(),
+      .sort((a, b) => a - b),
     positiveDecisionAssertions: spec.modelAssertions,
     negativeDecisionAssertions: [
       "never_submit_non_legal_action",

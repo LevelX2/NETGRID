@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import { buildPlanningStateIdentity } from "../../plans/turn-planning-contracts";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../../actions/action-card-semantic-profiles";
 import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-source-definitions";
@@ -28,8 +29,8 @@ const recorded = JSON.parse(
   input: AiDecisionInputWithDeckCapabilities;
   runtime: AiRuntimeCheckpointV1;
 };
-const genetics = "corp_onr_v1_202_genetics-visionary-acquisition_2";
-const actionId = "corp.install_card." + genetics + ".remote_1." + genetics;
+const genetics = "c2k6";
+const actionId = "cc." + genetics + ".r1." + genetics;
 beforeEach(resetResidentPlanPortfolioMemory);
 
 function native() {
@@ -96,15 +97,19 @@ describe("pairing 553 terminal score objective", () => {
     if (!snapshotId) throw new Error("Missing native deck snapshot");
     // This is an initial-planning probe, deliberately without the persisted
     // portfolio that already contains the old decision at this StateVersion.
+    cp.input.planningStateIdentity = buildPlanningStateIdentity(cp.input);
     const before = JSON.stringify(cp.input);
     const result = chooseAiAction(cp.input);
     expect(JSON.stringify(cp.input)).toBe(before);
     expect(result.fallbackUsed).toBe(false);
     expect(result.actionId).toBe(actionId);
     const pf = result.decisionDebug?.planFirstDecision;
-    expect(pf?.rootPlanInstanceId).toContain(
-      encodeURIComponent("agenda:" + genetics + ":remote_1"),
-    );
+    expect(pf?.portfolio.find(
+      (instance) => instance.instanceId === pf.rootPlanInstanceId,
+    )).toMatchObject({
+      moduleId: "corp.score_agenda",
+      dedupeKey: `agenda:${genetics}:r1`,
+    });
     expect(pf?.leafExecutorInstanceId).toBe(pf?.rootPlanInstanceId);
     expect(pf?.route).toMatchObject({
       actionId,
@@ -118,7 +123,8 @@ describe("pairing 553 terminal score objective", () => {
     restoreAiRuntimeCheckpoint(cp.input, snapshotId, cp.runtime);
     const result = chooseAiAction(cp.input);
     expect(result.fallbackUsed).toBe(false);
-    expect(result.actionId).toContain("corporate-coup");
+    const action = cp.input.legalActions.find((a) => a.actionId === result.actionId)!;
+    expect(visibleSourceDefinitionsByInstanceId(cp.input.playerView)[action.source]).toBe(405);
     expect(
       cp.input.legalActions.some((a) => a.actionId === result.actionId),
     ).toBe(true);

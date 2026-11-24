@@ -48,7 +48,7 @@
   },
   "cards": [
     {
-      "cardId": "onr_proteus_001_ai-board-member",
+      "cardId": 59,
       "side": "corp",
       "cardType": "agenda",
       "primaryFamily": "temporary_action",
@@ -69,7 +69,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_002_charity-takeover",
+      "cardId": 60,
       "side": "corp",
       "cardType": "agenda",
       "primaryFamily": "bad_publicity",
@@ -93,7 +93,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_003_corporate-headhunters",
+      "cardId": 61,
       "side": "corp",
       "cardType": "agenda",
       "primaryFamily": "baseline",
@@ -114,7 +114,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_004_fetal-ai",
+      "cardId": 62,
       "side": "corp",
       "cardType": "agenda",
       "primaryFamily": "access_ambush",
@@ -135,7 +135,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_005_marked-accounts",
+      "cardId": 63,
       "side": "corp",
       "cardType": "agenda",
       "primaryFamily": "access_ambush",
@@ -156,7 +156,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_006_please-dont-choke-anyone",
+      "cardId": 64,
       "side": "corp",
       "cardType": "agenda",
       "primaryFamily": "temporary_action",
@@ -177,7 +177,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_007_project-venice",
+      "cardId": 65,
       "side": "corp",
       "cardType": "agenda",
       "primaryFamily": "temporary_action",
@@ -198,7 +198,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_008_project-zurich",
+      "cardId": 66,
       "side": "corp",
       "cardType": "agenda",
       "primaryFamily": "baseline",
@@ -219,7 +219,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_009_viral-breeding-ground",
+      "cardId": 67,
       "side": "corp",
       "cardType": "agenda",
       "primaryFamily": "access_ambush",
@@ -240,7 +240,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_010_world-domination",
+      "cardId": 68,
       "side": "corp",
       "cardType": "agenda",
       "primaryFamily": "baseline",
@@ -261,7 +261,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_011_brain-wash",
+      "cardId": 69,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
@@ -282,7 +282,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_012_bug-zapper",
+      "cardId": 70,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
@@ -303,7 +303,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_013_caryatid",
+      "cardId": 71,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "target_choice",
@@ -327,7 +327,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_014_chihuahua",
+      "cardId": 72,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
@@ -351,7 +351,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_015_colonel-failure",
+      "cardId": 73,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
@@ -372,7 +372,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_016_coyote",
+      "cardId": 74,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
@@ -393,7 +393,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_017_credit-blocks",
+      "cardId": 75,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "target_choice",
@@ -417,7 +417,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_018_datacomb",
+      "cardId": 76,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
@@ -441,7 +441,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_019_death-yo-yo",
+      "cardId": 77,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
@@ -461,7 +461,7 @@
       "removalConditions": ["baseline_decision_smoke_green"]
     },
     {
-      "cardId": "onr_proteus_020_digiconda",
+      "cardId": 78,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "target_choice",
@@ -482,7 +482,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_021_dog-pile",
+      "cardId": 79,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "temporary_action",
@@ -503,7 +503,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_022_food-fight",
+      "cardId": 80,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "x_cost",
@@ -524,7 +524,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_023_galatea",
+      "cardId": 81,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "target_choice",
@@ -548,7 +548,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_024_gatekeeper",
+      "cardId": 82,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "x_cost",
@@ -569,7 +569,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_025_homing-missile",
+      "cardId": 83,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "target_choice",
@@ -590,7 +590,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_026_hunting-pack",
+      "cardId": 84,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
@@ -611,7 +611,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_027_iceberg",
+      "cardId": 85,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "x_cost",
@@ -632,7 +632,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_028_lesser-arcana",
+      "cardId": 86,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "target_choice",
@@ -656,7 +656,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_029_marionette",
+      "cardId": 87,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
@@ -680,7 +680,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_030_mastermind",
+      "cardId": 88,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
@@ -701,7 +701,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_031_minotaur",
+      "cardId": 89,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
@@ -722,7 +722,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_032_misleading-access-menus",
+      "cardId": 90,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
@@ -743,7 +743,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_033_mobile-barricade",
+      "cardId": 91,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "target_choice",
@@ -767,7 +767,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_034_riddler",
+      "cardId": 92,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "x_cost",
@@ -788,7 +788,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_035_roadblock",
+      "cardId": 93,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "random_outcome",
@@ -812,7 +812,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_036_sandstorm",
+      "cardId": 94,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "target_choice",
@@ -833,7 +833,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_037_scaffolding",
+      "cardId": 95,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
@@ -857,7 +857,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_038_snowbank",
+      "cardId": 96,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
@@ -877,7 +877,7 @@
       "removalConditions": ["baseline_decision_smoke_green"]
     },
     {
-      "cardId": "onr_proteus_039_sphinx-2006",
+      "cardId": 97,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "target_choice",
@@ -901,7 +901,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_040_sumo-2008",
+      "cardId": 98,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "target_choice",
@@ -925,7 +925,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_041_toughoniumtm-wall",
+      "cardId": 99,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
@@ -949,7 +949,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_042_tumblers",
+      "cardId": 100,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
@@ -973,7 +973,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_043_twisty-passages",
+      "cardId": 101,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
@@ -996,7 +996,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_044_walking-wall",
+      "cardId": 102,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "target_choice",
@@ -1020,7 +1020,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_045_washed-up-solo-construct",
+      "cardId": 103,
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "complex_multi_ability",
@@ -1044,7 +1044,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_046_corporate-guard-r-temps",
+      "cardId": 104,
       "side": "corp",
       "cardType": "operation",
       "primaryFamily": "x_cost",
@@ -1071,7 +1071,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_047_credit-consolidation",
+      "cardId": 105,
       "side": "corp",
       "cardType": "operation",
       "primaryFamily": "baseline",
@@ -1095,7 +1095,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_048_data-sifters",
+      "cardId": 106,
       "side": "corp",
       "cardType": "operation",
       "primaryFamily": "baseline",
@@ -1116,7 +1116,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_049_emergency-rig",
+      "cardId": 107,
       "side": "corp",
       "cardType": "operation",
       "primaryFamily": "target_choice",
@@ -1137,7 +1137,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_050_manhunt",
+      "cardId": 108,
       "side": "corp",
       "cardType": "operation",
       "primaryFamily": "baseline",
@@ -1158,7 +1158,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_051_rent-to-own-contract",
+      "cardId": 109,
       "side": "corp",
       "cardType": "operation",
       "primaryFamily": "target_choice",
@@ -1179,7 +1179,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_052_schlaghund-pointers",
+      "cardId": 110,
       "side": "corp",
       "cardType": "operation",
       "primaryFamily": "baseline",
@@ -1200,7 +1200,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_053_underworld-mole",
+      "cardId": 111,
       "side": "corp",
       "cardType": "operation",
       "primaryFamily": "target_choice",
@@ -1221,7 +1221,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_054_bel-digmo-antibody",
+      "cardId": 112,
       "side": "corp",
       "cardType": "asset",
       "primaryFamily": "access_ambush",
@@ -1245,7 +1245,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_055_cybertech-think-tank",
+      "cardId": 113,
       "side": "corp",
       "cardType": "asset",
       "primaryFamily": "baseline",
@@ -1266,7 +1266,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_056_department-of-misinformation",
+      "cardId": 114,
       "side": "corp",
       "cardType": "asset",
       "primaryFamily": "baseline",
@@ -1290,7 +1290,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_057_doppelganger-antibody",
+      "cardId": 115,
       "side": "corp",
       "cardType": "asset",
       "primaryFamily": "access_ambush",
@@ -1311,7 +1311,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_058_executive-boot-camp",
+      "cardId": 116,
       "side": "corp",
       "cardType": "asset",
       "primaryFamily": "random_outcome",
@@ -1335,7 +1335,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_059_government-contract",
+      "cardId": 117,
       "side": "corp",
       "cardType": "asset",
       "primaryFamily": "temporary_action",
@@ -1356,7 +1356,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_060_herman-revista",
+      "cardId": 118,
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "target_choice",
@@ -1377,7 +1377,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_061_ldl-traffic-analyzers",
+      "cardId": 119,
       "side": "corp",
       "cardType": "asset",
       "primaryFamily": "temporary_action",
@@ -1398,7 +1398,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_062_lesley-major",
+      "cardId": 120,
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "access_ambush",
@@ -1419,7 +1419,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_063_lisa-blight",
+      "cardId": 121,
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "random_outcome",
@@ -1439,7 +1439,7 @@
       "removalConditions": ["random_outcome_decision_smoke_green"]
     },
     {
-      "cardId": "onr_proteus_064_marcel-desoleil",
+      "cardId": 122,
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "target_choice",
@@ -1459,7 +1459,7 @@
       "removalConditions": ["target_choice_decision_smoke_green"]
     },
     {
-      "cardId": "onr_proteus_065_networked-center",
+      "cardId": 123,
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "complex_multi_ability",
@@ -1480,7 +1480,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_066_obfuscated-fortress",
+      "cardId": 124,
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "baseline",
@@ -1500,7 +1500,7 @@
       "removalConditions": ["baseline_decision_smoke_green"]
     },
     {
-      "cardId": "onr_proteus_067_panic-button",
+      "cardId": 125,
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "baseline",
@@ -1524,7 +1524,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_068_pattel-antibody",
+      "cardId": 126,
       "side": "corp",
       "cardType": "asset",
       "primaryFamily": "access_ambush",
@@ -1545,7 +1545,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_069_pavit-bharat",
+      "cardId": 127,
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "target_choice",
@@ -1565,7 +1565,7 @@
       "removalConditions": ["target_choice_decision_smoke_green"]
     },
     {
-      "cardId": "onr_proteus_070_rasmin-bridger",
+      "cardId": 128,
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "baseline",
@@ -1586,7 +1586,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_071_raymond-ellison",
+      "cardId": 129,
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "temporary_action",
@@ -1606,7 +1606,7 @@
       "removalConditions": ["temporary_action_decision_smoke_green"]
     },
     {
-      "cardId": "onr_proteus_072_research-bunker",
+      "cardId": 130,
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "complex_multi_ability",
@@ -1627,7 +1627,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_073_simon-francisco",
+      "cardId": 131,
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "access_ambush",
@@ -1647,7 +1647,7 @@
       "removalConditions": ["access_ambush_decision_smoke_green"]
     },
     {
-      "cardId": "onr_proteus_074_siren",
+      "cardId": 132,
       "side": "corp",
       "cardType": "asset",
       "primaryFamily": "run_modification",
@@ -1667,7 +1667,7 @@
       "removalConditions": ["run_modification_decision_smoke_green"]
     },
     {
-      "cardId": "onr_proteus_075_stereogram-antibody",
+      "cardId": 133,
       "side": "corp",
       "cardType": "asset",
       "primaryFamily": "access_ambush",
@@ -1691,7 +1691,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_076_syd-meyer-superstores",
+      "cardId": 134,
       "side": "corp",
       "cardType": "asset",
       "primaryFamily": "target_choice",
@@ -1714,7 +1714,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_077_weapons-depot",
+      "cardId": 135,
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "complex_multi_ability",
@@ -1735,7 +1735,7 @@
       "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
-      "cardId": "onr_proteus_078_armageddon",
+      "cardId": 136,
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "virus_counter",
@@ -1759,7 +1759,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_079_big-frackin-gun",
+      "cardId": 137,
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "target_choice",
@@ -1786,7 +1786,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_080_black-widow",
+      "cardId": 138,
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "target_choice",
@@ -1810,7 +1810,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_081_boring-bit",
+      "cardId": 139,
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "baseline",
@@ -1834,7 +1834,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_082_bulldozer",
+      "cardId": 140,
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "baseline",
@@ -1858,7 +1858,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_083_corrosion",
+      "cardId": 141,
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "baseline",
@@ -1885,7 +1885,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_084_crumble",
+      "cardId": 142,
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "virus_counter",
@@ -1912,7 +1912,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_085_disintegrator",
+      "cardId": 143,
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "baseline",
@@ -1939,7 +1939,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_086_enterprise-inc-shields",
+      "cardId": 144,
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "baseline",
@@ -1963,7 +1963,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_087_forwards-legacy",
+      "cardId": 145,
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "baseline",
@@ -1986,7 +1986,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_088_fubar",
+      "cardId": 146,
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "target_choice",
@@ -2010,7 +2010,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_089_garbage-in",
+      "cardId": 147,
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "virus_counter",
@@ -2037,7 +2037,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_090_highlighter",
+      "cardId": 148,
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "virus_counter",
@@ -2064,7 +2064,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_091_lockjaw",
+      "cardId": 149,
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "temporary_action",
@@ -2088,7 +2088,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_092_morphing-tool",
+      "cardId": 150,
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "target_choice",
@@ -2112,7 +2112,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_093_redecorator",
+      "cardId": 151,
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "target_choice",
@@ -2135,7 +2135,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_094_scaldan",
+      "cardId": 152,
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "virus_counter",
@@ -2159,7 +2159,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_095_skeleton-passkeys",
+      "cardId": 153,
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "baseline",
@@ -2186,7 +2186,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_096_skullcap",
+      "cardId": 154,
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "baseline",
@@ -2209,7 +2209,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_097_taxman",
+      "cardId": 155,
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "virus_counter",
@@ -2236,7 +2236,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_098_vienna-22",
+      "cardId": 156,
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "virus_counter",
@@ -2263,7 +2263,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_099_viral-pipeline",
+      "cardId": 157,
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "temporary_action",
@@ -2290,7 +2290,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_100_wrecking-ball",
+      "cardId": 158,
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "target_choice",
@@ -2314,7 +2314,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_101_all-hands",
+      "cardId": 159,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "run_modification",
@@ -2337,7 +2337,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_102_blackmail",
+      "cardId": 160,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "run_modification",
@@ -2360,7 +2360,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_103_cruising-for-netwatch",
+      "cardId": 161,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "complex_multi_ability",
@@ -2384,7 +2384,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_104_decoy-signal",
+      "cardId": 162,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "run_modification",
@@ -2407,7 +2407,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_105_demolition-run",
+      "cardId": 163,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "run_modification",
@@ -2431,7 +2431,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_106_disgruntled-ice-technician",
+      "cardId": 164,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "run_modification",
@@ -2455,7 +2455,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_107_drone-for-a-day",
+      "cardId": 165,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "baseline",
@@ -2478,7 +2478,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_108_faked-hit",
+      "cardId": 166,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "bad_publicity",
@@ -2502,7 +2502,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_109_frame-up",
+      "cardId": 167,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "bad_publicity",
@@ -2526,7 +2526,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_110_hijack",
+      "cardId": 168,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "target_choice",
@@ -2550,7 +2550,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_111_ice-and-data-special-report",
+      "cardId": 169,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "target_choice",
@@ -2573,7 +2573,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_112_identity-donor",
+      "cardId": 170,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "bad_publicity",
@@ -2596,7 +2596,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_113_live-news-feed",
+      "cardId": 171,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "bad_publicity",
@@ -2620,7 +2620,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_114_on-the-fast-track",
+      "cardId": 172,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "baseline",
@@ -2644,7 +2644,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_115_personal-touch-the",
+      "cardId": 173,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "target_choice",
@@ -2667,7 +2667,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_116_pirate-broadcast",
+      "cardId": 174,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "temporary_action",
@@ -2691,7 +2691,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_117_poisoned-water-supply",
+      "cardId": 175,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "bad_publicity",
@@ -2707,7 +2707,7 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_bad_publicity"
         ],
         "targetProfileCount": 0,
-        "effectCount": 1
+        "effectCount": 2
       },
       "removalConditions": [
         "strategy_coverage_or_explicit_non_strategy_decision",
@@ -2715,7 +2715,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_118_prearranged-drop",
+      "cardId": 176,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "access_ambush",
@@ -2738,7 +2738,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_119_promises-promises",
+      "cardId": 177,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "access_ambush",
@@ -2762,7 +2762,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_120_reconnaissance",
+      "cardId": 178,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "run_modification",
@@ -2786,7 +2786,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_121_remote-detonator",
+      "cardId": 179,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "run_modification",
@@ -2810,7 +2810,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_122_rush-hour",
+      "cardId": 180,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "run_modification",
@@ -2834,7 +2834,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_123_senatorial-field-trip",
+      "cardId": 181,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "bad_publicity",
@@ -2858,7 +2858,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_124_stakeout",
+      "cardId": 182,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "complex_multi_ability",
@@ -2881,7 +2881,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_125_subliminal-corruption",
+      "cardId": 183,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "bad_publicity",
@@ -2905,7 +2905,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_126_test-spin",
+      "cardId": 184,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "temporary_action",
@@ -2921,7 +2921,7 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_temporary_action"
         ],
         "targetProfileCount": 1,
-        "effectCount": 0
+        "effectCount": 1
       },
       "removalConditions": [
         "strategy_coverage_or_explicit_non_strategy_decision",
@@ -2929,7 +2929,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_127_weefle-initiation",
+      "cardId": 185,
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "run_modification",
@@ -2952,7 +2952,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_128_airport-locker",
+      "cardId": 186,
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
@@ -2975,7 +2975,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_129_back-door-to-netwatch",
+      "cardId": 187,
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
@@ -2999,7 +2999,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_130_back-door-to-rivals",
+      "cardId": 188,
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "run_modification",
@@ -3022,7 +3022,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_131_bargain-with-viacox",
+      "cardId": 189,
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "random_outcome",
@@ -3045,7 +3045,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_132_bolt-hole",
+      "cardId": 190,
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
@@ -3068,7 +3068,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_133_chiba-bank-account",
+      "cardId": 191,
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
@@ -3092,7 +3092,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_134_cortical-cybermodem",
+      "cardId": 192,
       "side": "runner",
       "cardType": "hardware",
       "primaryFamily": "temporary_action",
@@ -3116,7 +3116,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_135_cortical-stimulators",
+      "cardId": 193,
       "side": "runner",
       "cardType": "hardware",
       "primaryFamily": "baseline",
@@ -3140,7 +3140,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_136_credit-subversion",
+      "cardId": 194,
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
@@ -3163,7 +3163,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_137_death-from-above",
+      "cardId": 195,
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
@@ -3186,7 +3186,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_138_deck-the",
+      "cardId": 196,
       "side": "runner",
       "cardType": "hardware",
       "primaryFamily": "complex_multi_ability",
@@ -3209,7 +3209,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_139_eurocorpse-tm-spin-chip",
+      "cardId": 197,
       "side": "runner",
       "cardType": "hardware",
       "primaryFamily": "temporary_action",
@@ -3232,7 +3232,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_140_expendable-family-member",
+      "cardId": 198,
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
@@ -3255,7 +3255,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_141_get-ready-to-rumble",
+      "cardId": 199,
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
@@ -3278,7 +3278,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_142_hq-mole",
+      "cardId": 200,
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "access_ambush",
@@ -3302,7 +3302,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_143_liberated-savings-account",
+      "cardId": 201,
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
@@ -3326,7 +3326,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_144_lucidrinetm-drip-feed",
+      "cardId": 202,
       "side": "runner",
       "cardType": "hardware",
       "primaryFamily": "temporary_action",
@@ -3349,7 +3349,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_145_mercenary-subcontract",
+      "cardId": 203,
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
@@ -3372,7 +3372,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_146_precision-bribery",
+      "cardId": 204,
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
@@ -3396,7 +3396,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_147_r-and-d-mole",
+      "cardId": 205,
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "access_ambush",
@@ -3420,7 +3420,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_148_runner-sensei",
+      "cardId": 206,
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "run_modification",
@@ -3443,7 +3443,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_149_simulacrum",
+      "cardId": 207,
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
@@ -3466,7 +3466,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_150_streetware-distributor",
+      "cardId": 208,
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "temporary_action",
@@ -3493,7 +3493,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_151_sunburst-cranial-interface",
+      "cardId": 209,
       "side": "runner",
       "cardType": "hardware",
       "primaryFamily": "temporary_action",
@@ -3517,7 +3517,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_152_swiss-bank-account",
+      "cardId": 210,
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
@@ -3541,7 +3541,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_153_time-to-collect",
+      "cardId": 211,
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
@@ -3564,7 +3564,7 @@
       ]
     },
     {
-      "cardId": "onr_proteus_154_wired-switchboard",
+      "cardId": 212,
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",

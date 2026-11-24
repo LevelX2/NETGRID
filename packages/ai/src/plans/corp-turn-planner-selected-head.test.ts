@@ -20,18 +20,18 @@ import { planningHeadMatchesCommittedPhaseRoot } from "./corp-turn-planner-cutov
 
 describe("Corp TurnPlanner selected-head binding", () => {
   it("uses a blocked score route's explicit replan witness before its stale self head", () => {
-    const projectId = "agenda:project-babylon:remote_4";
+    const projectId = "agenda:project-babylon:r4";
     const planInstanceId =
-      "plan:corp.score_agenda:agenda%3Aproject-babylon%3Aremote_4";
-    const actionId = "corp.install_card.project-babylon.remote_4";
-    const needId = "score-protection:project-babylon:remote_4";
+      "pc7wfim8zpglz9gsyoxji7hmn1";
+    const actionId = "cc.project-babylon.r4";
+    const needId = "score-protection:project-babylon:r4";
     const roots = corpPlanProgressRoots({
       domain: {
         scoreProjects: [
           {
             projectId,
             feasible: false,
-            evidenceCode: "corp_score_protection_funding_gap:remote_4:1",
+            evidenceCode: "corp_score_protection_funding_gap:r4:1",
             protectionNeed: { needId },
           },
         ],
@@ -90,8 +90,8 @@ describe("Corp TurnPlanner selected-head binding", () => {
     (feasible) => {
       const projectId = "agenda:priority-requisition:new_remote";
       const planInstanceId =
-        "plan:corp.score_agenda:agenda%3Apriority-requisition%3Anew_remote";
-      const actionId = "corp.install_card.priority-requisition.new_remote";
+        "p4agjryeicpfg6glkecanrbmcs";
+      const actionId = "cc.priority-requisition.new_remote";
       const needId = "score-protection:priority-requisition:new_remote";
       const roots = corpPlanProgressRoots({
         domain: {
@@ -149,7 +149,7 @@ describe("Corp TurnPlanner selected-head binding", () => {
 
   it("keeps an urgent same-turn score head inside its exact agenda root", () => {
     const scoreRoot =
-      "plan:corp.score_agenda:agenda%3Ahostile-takeover%3Aremote_1";
+      "pchlqdcyntxk1pahj3fn7cxz3n";
     const scoreHead = {
       rootPlanInstanceId: scoreRoot,
       rootPlanModuleId: "corp.score_agenda" as const,
@@ -185,7 +185,7 @@ describe("Corp TurnPlanner selected-head binding", () => {
         ...scoreHead,
         moduleId: "corp.economy",
         executorPlanInstanceId:
-          "plan:corp.economy:score-support%3Aagenda%3Atycho%3Aremote_1",
+          "pdcotdsq4fiusvarcf6xpuq08z",
       },
     });
 
@@ -211,15 +211,15 @@ describe("Corp TurnPlanner selected-head binding", () => {
   });
 
   it("returns from an exact defense support leaf to its score root", () => {
-    const scoreRoot = "plan:corp.score_agenda:agenda%3Aagenda-1%3Aremote_2";
+    const scoreRoot = "pbdqaaet57fc1fsqhucpd7r0x4";
     const supportHead = {
       rootPlanInstanceId: scoreRoot,
       rootPlanModuleId: "corp.score_agenda" as const,
       moduleId: "corp.defend_servers" as const,
       executorPlanInstanceId:
-        "plan:corp.defend_servers:score-protection%3Aagenda-1%3Aremote_2",
+        "pb4asuxdk3s7jp403ftjy1f34a",
       executorParentPlanInstanceId: scoreRoot,
-      executorParentNeedId: "score-protection:agenda-1:remote_2",
+      executorParentNeedId: "score-protection:agenda-1:r2",
       priorityClass: "P4" as const,
       nextMilestoneId: "score_server_protected",
     };
@@ -247,7 +247,7 @@ describe("Corp TurnPlanner selected-head binding", () => {
     const shared = {
       routeActionId: "play-accounts",
       routeModuleId: "corp.economy" as const,
-      routePlanInstanceId: "plan:corp.economy:defense-reserve%3Ard%3Aice-1",
+      routePlanInstanceId: "pkb9qmfqz08nftxe07cix61nn",
       routeDedupeKey: "defense-reserve:rd:ice-1",
       lineActionId: "play-accounts",
       lineOwnerModuleId: "corp.economy" as const,
@@ -257,7 +257,7 @@ describe("Corp TurnPlanner selected-head binding", () => {
       specializedPlanningLineMatchesRoute({
         ...shared,
         linePlanInstanceId:
-          "plan:corp.economy:defense-reserve%3Aremote_1%3Aice-1",
+          "paz0at5vyrfvy2ol0k6r0275p4",
       }),
     ).toBe(false);
     expect(
@@ -271,7 +271,7 @@ describe("Corp TurnPlanner selected-head binding", () => {
   it("keeps the defense module's selected current head bound through commitment and lease", () => {
     const checkpoint = structuredClone(
       fundedRdLayerJson,
-    ) as AiDecisionCheckpointV1;
+    ) as unknown as AiDecisionCheckpointV1;
     checkpoint.source.kind = "synthetic_companion";
     checkpoint.engine.testOnlyGameState.corp.credits = 20;
     checkpoint.engine.stateHash = hashGameState(
@@ -281,7 +281,7 @@ describe("Corp TurnPlanner selected-head binding", () => {
       acceptableActions: [
         {
           actionId:
-            "corp.install_card.corp_onr_proteus_013_caryatid_1.rd.corp_onr_proteus_013_caryatid_1.4",
+            "cc.cfx.rd.cfx.4",
         },
       ],
       planExecution: {
@@ -296,17 +296,17 @@ describe("Corp TurnPlanner selected-head binding", () => {
 
     expect(result.ok, result.message).toBe(true);
     expect(result.decision?.actionId).toBe(
-      "corp.install_card.corp_onr_proteus_013_caryatid_1.rd.corp_onr_proteus_013_caryatid_1.4",
+      "cc.cfx.rd.cfx.4",
     );
     expect(planning).toMatchObject({
       mode: "cutover",
       shadowComparison: {
         liveActionId:
-          "corp.install_card.corp_onr_proteus_013_caryatid_1.rd.corp_onr_proteus_013_caryatid_1.4",
+          "cc.cfx.rd.cfx.4",
         shadowActionId:
-          "corp.install_card.corp_onr_proteus_013_caryatid_1.rd.corp_onr_proteus_013_caryatid_1.4",
+          "cc.cfx.rd.cfx.4",
         shadowRootPlanInstanceId:
-          "plan:corp.defend_servers:server-defense-portfolio",
+          "penw02zfrkklof54c2nuye5att",
         agreement: true,
       },
       commitment: {
@@ -314,19 +314,19 @@ describe("Corp TurnPlanner selected-head binding", () => {
         rematerialization: {
           status: "executable",
           actionId:
-            "corp.install_card.corp_onr_proteus_013_caryatid_1.rd.corp_onr_proteus_013_caryatid_1.4",
+            "cc.cfx.rd.cfx.4",
         },
       },
     });
     expect(portfolio).toMatchObject({
-      executorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      executorInstanceId: "penw02zfrkklof54c2nuye5att",
       turnPlanCommitment: {
         status: "active",
       },
       turnPlanExecutionLease: {
         currentBinding: {
           actionId:
-            "corp.install_card.corp_onr_proteus_013_caryatid_1.rd.corp_onr_proteus_013_caryatid_1.4",
+            "cc.cfx.rd.cfx.4",
         },
       },
     });
@@ -347,18 +347,18 @@ describe("Corp TurnPlanner selected-head binding", () => {
 
 describe("Corp defense provider authority", () => {
   const binding = {
-    parentPlanInstanceId: "plan:corp.score_agenda:agenda%3Aone%3Aremote_1",
-    parentNeedId: "score-protection:one:remote_1",
+    parentPlanInstanceId: "pdncsswqpavgvqw6oq05011eh1",
+    parentNeedId: "score-protection:one:r1",
   };
   const route = {
     instance: {
       parentInstanceId: binding.parentPlanInstanceId,
       parentNeedId: binding.parentNeedId,
     },
-    step: { target: { kind: "server", id: "remote_1" } },
+    step: { target: { kind: "server", id: "r1" } },
   } as never;
   it("keeps exact parent, need and server support and rejects unrelated projected siblings", () => {
-    const line = { targetServerId: "remote_1", supportBinding: binding };
+    const line = { targetServerId: "r1", supportBinding: binding };
     expect(corpDefensePlanningLineMatchesRoute(line, route)).toBe(true);
     expect(
       corpDefensePlanningLineMatchesRoute(
@@ -401,7 +401,7 @@ describe("Corp defense provider authority", () => {
     ).toBe(true);
     expect(
       corpDefensePlanningLineMatchesRoute(
-        { targetServerId: "remote_1", supportBinding: binding },
+        { targetServerId: "r1", supportBinding: binding },
         general,
       ),
     ).toBe(false);

@@ -28,10 +28,10 @@ import { assessRunnerHandRotation } from "../../runtime/runner-hand-rotation-ass
 import { buildRunnerEconomyPosture } from "../../runner-economy-posture";
 import type { RunnerStrategicIntentProfile } from "../../runner-strategic-intent";
 
-const crash = "onr_v1_157_crash-everett-inventive-fixer",
-  saloon = "onr_v1_179_silicon-saloon-franchise",
-  junkyard = "onr_v1_165_junkyard-bbs",
-  jack = "onr_v1_095_jack-n-joe";
+const crash = 369,
+  saloon = 391,
+  junkyard = 377,
+  jack = 307;
 const deck = {
   ...ORIGINALSET_DEFAULT_DECKS.runner,
   cards: [
@@ -53,9 +53,9 @@ function fixture(stackCount = 1, withCrash = true, activeDeck = deck) {
         ...ORIGINALSET_DEFAULT_DECKS.corp,
         cards: [
           ...ORIGINALSET_DEFAULT_DECKS.corp.cards.filter(
-            (c) => c.id !== "onr_v1_313_city-surveillance",
+            (c) => c.id !== 525,
           ),
-          { id: "onr_v1_313_city-surveillance", quantity: 1 },
+          { id: 525, quantity: 1 },
         ],
       },
     }),
@@ -180,7 +180,7 @@ it("subtracts both mandatory disposition and the event source from a bounded bur
 });
 
 function soleAnswerDraw(withCrash: boolean) {
-  const codecracker = "onr_v1_014_codecracker";
+  const codecracker = 226;
   const activeDeck = {
     ...deck,
     cards: [
@@ -264,7 +264,7 @@ it.each([true, false])(
 
 it("counts actual replaced draws for visible taxes while keeping an unrezzed source private", () => {
   let state = fixture(2);
-  const city = putCorpRootInRemote(state, "onr_v1_313_city-surveillance");
+  const city = putCorpRootInRemote(state, 525);
   expect(saloonAction(state).payload?.visibleDrawTaxSourceCount).toBe(0);
   state.cardInstances[city]!.rezzed = true;
   state.cardInstances[city]!.faceup = true;
@@ -313,9 +313,9 @@ it("uses the existing Defense owner and real heap recovery when the last draw ca
     pf = d.decisionDebug!.planFirstDecision!;
   expect(d.fallbackUsed).toBe(false);
   expect(d.timeoutUsed).not.toBe(true);
-  expect(d.actionId).toContain("junkyard-bbs");
   expect(pf.selectedPlan?.moduleId).toBe("runner.defense_and_recovery");
   const action = input.legalActions.find((a) => a.actionId === d.actionId)!;
   expect(action.expiresAtStateVersion).toBe(state.stateVersion);
+  expect(state.cardInstances[action.source!]?.definitionId).toBe(junkyard);
   expect(act(state, action).runner.grip.length).toBe(2);
 });

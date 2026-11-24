@@ -6,7 +6,7 @@ import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decis
 // Resources, legal invocations and hidden cards stay historical. The printed
 // effect comes from the current Engine producer, not a hand-written quote.
 // This is deliberately test-only and does not repair persisted checkpoints.
-const sourceId = "onr_v1_268_shock-r";
+const sourceId = 480;
 function currentPrintedEffect() {
   const state = createGame({
     seed: "current-printed-next-encounter-lock",

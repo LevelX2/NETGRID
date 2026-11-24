@@ -11,7 +11,7 @@ type HintEffect = {
 };
 
 type HintCard = {
-  cardId: string;
+  cardId: number;
   roles: string[];
   planRoles: string[];
   requiredMechanics?: string[];
@@ -32,7 +32,7 @@ describe.each(hintSources)("match 424A card semantics in %s", (source) => {
   const hints = readHints(source);
 
   it("keeps Force Shield as prevention setup rather than economy recovery", () => {
-    const hint = card(hints, "onr_v1_028_force-shield");
+    const hint = card(hints, 240);
 
     expect(hint.roles).toEqual(
       expect.arrayContaining(["program", "damage_prevention"]),
@@ -51,7 +51,7 @@ describe.each(hintSources)("match 424A card semantics in %s", (source) => {
   });
 
   it("records Core Command's successful-HQ-run prerequisite precisely", () => {
-    const hint = card(hints, "onr_v1_080_core-command-jettison-ice");
+    const hint = card(hints, 292);
 
     expect(hint.conditions).toEqual(
       expect.arrayContaining([
@@ -66,7 +66,7 @@ describe.each(hintSources)("match 424A card semantics in %s", (source) => {
   });
 
   it("models Broker as a click-driven credit bank, not trash recursion", () => {
-    const hint = card(hints, "onr_v1_154_broker");
+    const hint = card(hints, 366);
 
     expect(hint.roles).toEqual(expect.arrayContaining(["economy", "resource"]));
     expect(hint.planRoles).toEqual(
@@ -102,7 +102,7 @@ describe.each(hintSources)("match 424A card semantics in %s", (source) => {
   });
 
   it("keeps Inside Job's first-ICE bypass semantics", () => {
-    const hint = card(hints, "onr_v1_094_inside-job");
+    const hint = card(hints, 306);
 
     expect(hint.effects).toEqual(
       expect.arrayContaining([
@@ -119,8 +119,8 @@ describe.each(hintSources)("match 424A card semantics in %s", (source) => {
   });
 
   it("keeps SeeYa and Forged Activation Orders on legal visible targets", () => {
-    const seeYa = card(hints, "onr_v1_058_seeya");
-    const forged = card(hints, "onr_v1_086_forged-activation-orders");
+    const seeYa = card(hints, 270);
+    const forged = card(hints, 298);
 
     expect(seeYa.effects).toEqual(
       expect.arrayContaining([
@@ -150,8 +150,8 @@ describe.each(hintSources)("match 424A card semantics in %s", (source) => {
   });
 
   it("keeps WuTech as memory support and Junkyard as recovery utility", () => {
-    const wuTech = card(hints, "onr_v1_145_wutech-mem-chip");
-    const junkyard = card(hints, "onr_v1_165_junkyard-bbs");
+    const wuTech = card(hints, 357);
+    const junkyard = card(hints, 377);
 
     expect(wuTech.effects).toEqual(
       expect.arrayContaining([
@@ -187,7 +187,7 @@ function readHints(_source: string): HintCard[] {
   return [...createAiHintsByCard().values()] as HintCard[];
 }
 
-function card(hints: HintCard[], cardId: string): HintCard {
+function card(hints: HintCard[], cardId: number): HintCard {
   const found = hints.find((hint) => hint.cardId === cardId);
   if (!found) throw new Error(`Missing AI hint ${cardId}`);
   return found;

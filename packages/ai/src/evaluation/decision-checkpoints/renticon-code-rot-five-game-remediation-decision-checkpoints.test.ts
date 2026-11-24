@@ -56,11 +56,11 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
       "funds visible liquidity instead of adding an unproven fourth matchpoint defense layer"
     ) {
       expectBoundTurnPlan(result, {
-        actionId: "corp.gain_credit",
+        actionId: "cb",
         planKind: "corp.economy",
         capability: "develop_or_convert_corp_economy",
         executorInstanceId:
-          "plan:corp.economy:economy-visible-liquidity-development%3A8",
+          "p4gj7mjn9buqqlpbcttnuemgfj",
       });
     }
   });
@@ -84,7 +84,7 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
           acceptableActions: [
             {
               type: "install_card",
-              sourceDefinitionId: "onr_v1_221_asp",
+              sourceDefinitionId: 433,
               targetServerId: "rd",
             },
           ],
@@ -99,7 +99,7 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
         actionId: result.selectedAction!.actionId,
         planKind: "corp.defend_servers",
         capability: "allocate_server_defense",
-        executorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+        executorInstanceId: "penw02zfrkklof54c2nuye5att",
       });
     },
   );
@@ -148,7 +148,7 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
       const hq = state.corp.servers.find((server) => server.id === "hq")!;
       hq.ice = hq.ice.filter((cardId) => cardId !== innerIceId);
       state.corp.servers.push({
-        id: "remote_1",
+        id: "r1",
         kind: "remote",
         label: "Remote 1",
         ice: [innerIceId],
@@ -156,22 +156,22 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
       });
       state.cardInstances[innerIceId] = {
         ...state.cardInstances[innerIceId]!,
-        zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+        zone: { side: "corp", zone: "serverIce", serverId: "r1" },
       };
       state.corp.credits = 12;
       candidate.expectation = {
         acceptableActions: [
           {
             type: "install_card",
-            sourceDefinitionId: "onr_v1_193_corporate-coup",
-            targetServerId: "remote_1",
+            sourceDefinitionId: 405,
+            targetServerId: "r1",
           },
         ],
         planExecution: {
           acceptablePlanKinds: ["corp.score_agenda"],
           acceptableCapabilities: ["install_score_agenda"],
           requiredAssessmentEvidence: [
-            "corp_engine_certified_mature_remote_score_install:remote_1",
+            "corp_engine_certified_mature_remote_score_install:r1",
           ],
         },
       };
@@ -187,17 +187,17 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
         acceptableActions: [
           {
             type: "play_operation",
-            sourceDefinitionId: "onr_v1_290_efficiency-experts",
+            sourceDefinitionId: 502,
           },
         ],
         planExecution: {
           acceptablePlanIds: [
-            "plan:corp.economy:economy-immediate-operation%3Acorp_onr_v1_290_efficiency-experts_3",
+            "pdc5ziw907bu45fhsncnzfkqwe",
           ],
           acceptablePlanKinds: ["corp.economy"],
           acceptableCapabilities: ["develop_or_convert_corp_economy"],
           requiredAssessmentEvidence: [
-            "corp_engine_certified_immediate_operation_conversion:onr_v1_290_efficiency-experts",
+            "corp_engine_certified_immediate_operation_conversion:502",
           ],
         },
       };
@@ -206,8 +206,8 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
     const result = expectCheckpointToPass(checkpoint);
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
-        "plan_first_root:plan:corp.economy:economy-immediate-operation%3Acorp_onr_v1_290_efficiency-experts_3",
-        "plan_first_executor:plan:corp.economy:economy-immediate-operation%3Acorp_onr_v1_290_efficiency-experts_3",
+        "plan_first_root:pdc5ziw907bu45fhsncnzfkqwe",
+        "plan_first_executor:pdc5ziw907bu45fhsncnzfkqwe",
       ]),
     );
   });
@@ -231,8 +231,8 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
         forbiddenActions: [
           {
             type: "install_card",
-            sourceDefinitionId: "onr_v1_251_jack-attack",
-            targetServerId: "remote_1",
+            sourceDefinitionId: 463,
+            targetServerId: "r1",
           },
         ],
         planExecution: {
@@ -247,12 +247,12 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
 
     const result = expectCheckpointToPass(checkpoint);
     expectBoundTurnPlan(result, {
-      actionId: "corp.gain_credit",
+      actionId: "cb",
       planKind: "corp.economy",
       capability: "develop_or_convert_corp_economy",
       assessmentEvidence: "corp_engine_certified_basic_liquidity_development",
       executorInstanceId:
-        "plan:corp.economy:economy-visible-liquidity-development%3A8",
+        "p4gj7mjn9buqqlpbcttnuemgfj",
     });
   });
 });

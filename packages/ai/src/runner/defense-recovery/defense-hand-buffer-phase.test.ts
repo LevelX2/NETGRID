@@ -17,14 +17,14 @@ import type { RunnerPlanDomain } from "../../plans/runner-tactical-plan-contract
 
 function fixture(tags = 1) {
   const draw = legalAction(
-    "runner.draw_card",
+    "r8",
     "runner",
     "draw_card",
     "Draw a card",
     { credits: 0, clicks: 1 },
   );
   const clear = legalAction(
-    "runner.remove_tag",
+    "rm",
     "runner",
     "remove_tag",
     "Remove a tag",
@@ -82,6 +82,33 @@ function fixture(tags = 1) {
 }
 
 describe("Defense hand-buffer phase ownership", () => {
+  it("revalidates the reaction-reserve need when materializing its route", () => {
+    const f = fixture(0);
+    f.defense.handBufferActionIds = [];
+    f.defense.reactionReserveNeed = {
+      needId: "runner-defense-reaction-reserve",
+      parentPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
+      targetCredits: 8,
+      currentCreditsAtRevalidation: 6,
+      gap: 2,
+      actionIds: [f.draw.actionId],
+      revalidation: { stateVersion: f.input.playerView.stateVersion, status: "defense_parent_open" },
+      evidenceCode: "test_reserve",
+    };
+    const module = createRunnerDefenseModule();
+    const context = {
+      input: f.input,
+      actionCandidates: f.candidates,
+      turnKey: "runner:0",
+      domain: f.domain,
+    };
+    const proposal = module.discover(context)[0]!;
+    expect(proposal.phase).toBe("build_reaction_reserve");
+    const instance = { ...proposal, instanceId: "defense-current-phase" } as never;
+    expect(module.materialize(instance, {} as never, context).candidates).toHaveLength(1);
+    f.input.playerView.stateVersion += 1;
+    expect(module.materialize(instance, {} as never, context).candidates).toEqual([]);
+  });
   it.each(["trace_tag_counter", "baskerville", "cerberus", "mastiff", "doppelganger"])(
     "defers the legal %s removal only while its survival buffer is current",
     (counterType) => {
@@ -166,7 +193,7 @@ describe("Defense hand-buffer phase ownership", () => {
     (tags) => {
       const f = fixture(tags);
       const meatUpgrade = legalAction(
-        "runner.play_event.meat-upgrade",
+        "rh.meat-upgrade",
         "runner",
         "play_event",
         "Meat Upgrade",
@@ -181,7 +208,7 @@ describe("Defense hand-buffer phase ownership", () => {
             drawCardsAmount: 3,
             cardImplementationCapabilityBindingKind: "card_spec_capability_key",
             cardImplementationAbilityId:
-              "onr_classic_040_meat-upgrade:on_play_remove_tags_and_draw",
+              58,
             cardImplementationAbilityKey: "on_play_remove_tags_and_draw",
           },
         },
@@ -193,7 +220,7 @@ describe("Defense hand-buffer phase ownership", () => {
         "meat-upgrade",
         "runner",
         "event",
-        { definitionId: "onr_classic_040_meat-upgrade" },
+        { definitionId: 44 },
       );
       f.defense.handBufferActionIds = [f.draw.actionId, meatUpgrade.actionId];
       const candidates = buildActionSemanticCandidates({
@@ -201,7 +228,7 @@ describe("Defense hand-buffer phase ownership", () => {
         observerSide: "runner",
         stateVersion: f.input.playerView.stateVersion,
         visibleSourceDefinitionsByInstanceId: {
-          "meat-upgrade": "onr_classic_040_meat-upgrade",
+          "meat-upgrade": 44,
         },
         cardSemanticProfilesByDefinitionId:
           buildActionCardSemanticProfilesByDefinitionId(),
@@ -357,7 +384,7 @@ function creditDrawBufferFixture(tags = 0) {
         cardImplementationAbilityKey:
           "abilities_activated_runner_main_gain_credits",
         cardImplementationAbilityId:
-          "onr_v1_179_silicon-saloon-franchise:abilities_activated_runner_main_gain_credits",
+          466,
       },
     },
   );
@@ -365,7 +392,7 @@ function creditDrawBufferFixture(tags = 0) {
   f.input.legalActions.push(action);
   f.input.playerView.own.rig = [
     visibleCard(source, "runner", "resource", {
-      definitionId: "onr_v1_179_silicon-saloon-franchise",
+      definitionId: 391,
     }),
   ];
   const candidates = buildActionSemanticCandidates({
@@ -373,7 +400,7 @@ function creditDrawBufferFixture(tags = 0) {
     observerSide: "runner",
     stateVersion: f.input.playerView.stateVersion,
     visibleSourceDefinitionsByInstanceId: {
-      [source]: "onr_v1_179_silicon-saloon-franchise",
+      [source]: 391,
     },
     cardSemanticProfilesByDefinitionId:
       buildActionCardSemanticProfilesByDefinitionId(),

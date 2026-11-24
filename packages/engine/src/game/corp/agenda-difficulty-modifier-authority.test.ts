@@ -15,12 +15,12 @@ import {
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 import { visibleCorpScoreContinuationQuote } from "../view/visible-corp-score-continuation-quote";
 
-const tycho = "onr_v1_220_tycho-extension";
-const corporateWar = "onr_v1_196_corporate-war";
-const directors = "onr_v1_189_artificial-security-directors";
-const washington = "onr_v1_374_washington-d-c-city-grid";
+const tycho = 432;
+const corporateWar = 408;
+const directors = 401;
+const washington = 586;
 
-function prepare(region?: string, agenda = tycho, directorsCount = 1) {
+function prepare(region?: number, agenda = tycho, directorsCount = 1) {
   const state = apply(
     createGameAfterSetup({
       seed: "agenda-difficulty-modifier-authority",
@@ -53,7 +53,7 @@ function prepare(region?: string, agenda = tycho, directorsCount = 1) {
 describe("agenda difficulty follows declared modifiers", () => {
   it.each([
     [undefined, 4, 1],
-    ["onr_v1_368_roving-submarine", 4, 1],
+    [580, 4, 1],
     [washington, 3, 0],
   ] as const)(
     "projects and quotes %s without an unrelated or duplicate discount",
@@ -61,11 +61,11 @@ describe("agenda difficulty follows declared modifiers", () => {
       const { state, agendaId } = prepare(region);
       const before = hashState(state);
       const card = getPlayerView(state, "corp")
-        .servers.find((s) => s.id === "remote_1")!
+        .servers.find((s) => s.id === "r1")!
         .root.find((c) => c.instanceId === agendaId);
       expect(card?.advancementRequirement).toBe(requirement);
       expect(
-        visibleCorpScoreContinuationQuote(state, agendaId, "remote_1"),
+        visibleCorpScoreContinuationQuote(state, agendaId, "r1"),
       ).toMatchObject({
         complete: true,
         remainingAdvancementCounters: remaining,
@@ -76,7 +76,7 @@ describe("agenda difficulty follows declared modifiers", () => {
       expect(hashState(state)).toBe(before);
       expect(
         getPlayerView(state, "runner")
-          .servers.find((s) => s.id === "remote_1")!
+          .servers.find((s) => s.id === "r1")!
           .root.find((c) => !c.known),
       ).not.toHaveProperty("advancementRequirement");
     },
@@ -86,7 +86,7 @@ describe("agenda difficulty follows declared modifiers", () => {
     const { state, agendaId } = prepare(washington, corporateWar, 3);
     const agenda = state.cardInstances[agendaId]!;
     const remoteRoot = (side: "corp" | "runner") =>
-      getPlayerView(state, side).servers.find((s) => s.id === "remote_1")!.root;
+      getPlayerView(state, side).servers.find((s) => s.id === "r1")!.root;
     const visibleAgenda = (side: "corp" | "runner") =>
       remoteRoot(side).find((card) => card.instanceId === agendaId);
 
@@ -104,12 +104,12 @@ describe("agenda difficulty follows declared modifiers", () => {
       agendaDifficultyModifier: -2,
     });
 
-    state.serverAgendaCostCountersByServer = { remote_1: 4 };
+    state.serverAgendaCostCountersByServer = { r1: 4 };
     expect(visibleAgenda("corp")?.advancementRequirement).toBe(3);
     expect(visibleAgenda("corp")).not.toHaveProperty(
       "agendaDifficultyModifier",
     );
-    state.serverAgendaCostCountersByServer = { remote_1: 6 };
+    state.serverAgendaCostCountersByServer = { r1: 6 };
     expect(visibleAgenda("corp")).toMatchObject({
       advancementRequirement: 4,
       agendaDifficultyModifier: 1,
@@ -137,7 +137,7 @@ describe("agenda difficulty follows declared modifiers", () => {
     )!;
     expect(score).toBeDefined();
     const regionId = state.corp.servers
-      .find((s) => s.id === "remote_1")!
+      .find((s) => s.id === "r1")!
       .root.find((id) => id !== agendaId)!;
     state.cardInstances[regionId]!.rezzed = false;
     state.cardInstances[regionId]!.faceup = false;
@@ -154,7 +154,7 @@ describe("agenda difficulty follows declared modifiers", () => {
   });
 
   it("requires and scores all four Tycho counters beside a run-lock region", () => {
-    const { state, agendaId } = prepare("onr_v1_368_roving-submarine");
+    const { state, agendaId } = prepare(580);
     state.cardInstances[agendaId]!.advancementCounters = 4;
     const score = getLegalActions(state, "corp").find(
       (a) => a.type === "score_agenda",

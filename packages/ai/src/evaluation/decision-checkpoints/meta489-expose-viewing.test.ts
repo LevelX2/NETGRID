@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
@@ -19,25 +20,26 @@ import {
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { RealEngineFixtureBuilder } from "../real-engine-fixture-builder";
 import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
+import { applyPostSetupDeckOrder } from "./post-setup-deck-order.test-support";
 
 const read = (name: string) =>
   JSON.parse(
     readFileSync(new URL(`./fixtures/${name}.json`, import.meta.url), "utf8"),
   );
-const root = "plan:runner.pressure_central:central%3Ahq";
-const SMARTEYE = "onr_v1_065_smarteye";
-const BLOCKS = "onr_proteus_017_credit-blocks";
+const root = "pa7nez1ioecg7mf06q1uwqq57o";
+const SMARTEYE = 277;
+const BLOCKS = 75;
 const runnerDeck: DeckDefinition = {
   ...DEMO_DECKS.demo_runner_001,
   id: "current-smarteye-viewing-runner",
   cards: [
     ...DEMO_DECKS.demo_runner_001.cards,
     ...[
-      "onr_v1_030_grubb",
-      "onr_v1_054_raptor",
-      "onr_v1_014_codecracker",
+      242,
+      266,
+      226,
       SMARTEYE,
-      "onr_v1_129_hq-interface",
+      341,
     ].map((id) => ({ id, quantity: 1 })),
   ],
 };
@@ -46,7 +48,7 @@ const corpDeck: DeckDefinition = {
   id: "current-smarteye-viewing-corp",
   cards: [
     ...DEMO_DECKS.demo_corp_001.cards,
-    ...[BLOCKS, "onr_v1_278_wall-of-ice", "onr_v1_290_efficiency-experts"].map(
+    ...[BLOCKS, 490, 502].map(
       (id) => ({ id, quantity: 1 }),
     ),
   ],
@@ -71,21 +73,31 @@ function checkpoint() {
     runnerDeck,
     corpDeck,
   });
-  state = apply(state, "corp", "corp.mandatory_draw");
+  const runnerGrip = ["c23t", "c3o9", "c1pl", "c3pf", "c3oa"];
+  const gripIds = new Set(runnerGrip);
+  applyPostSetupDeckOrder(state, {
+    runnerGrip,
+    runnerStack: [...state.runner.grip, ...state.runner.stack].filter(
+      (id) => !gripIds.has(id),
+    ),
+    corpHq: state.corp.hq,
+    corpRd: state.corp.rd,
+  });
+  state = apply(state, "corp", "ce");
   RealEngineFixtureBuilder.forState(state).withCorpHqSize(0);
-  state = apply(state, "corp", "corp.end_turn");
+  state = apply(state, "corp", "c9");
   RealEngineFixtureBuilder.forState(state)
     .withRunnerCredits(20)
     .withRunnerGripSize(5)
-    .withRunnerProgramInstalled("onr_v1_030_grubb")
-    .withRunnerProgramInstalled("onr_v1_054_raptor")
-    .withRunnerProgramInstalled("onr_v1_014_codecracker")
+    .withRunnerProgramInstalled(242)
+    .withRunnerProgramInstalled(266)
+    .withRunnerProgramInstalled(226)
     .withRunnerProgramInstalled(SMARTEYE)
-    .withRunnerCardInGrip("onr_v1_129_hq-interface")
-    .withCorpCardInHq("simple_agenda")
-    .withCorpCardInHq("onr_v1_290_efficiency-experts")
+    .withRunnerCardInGrip(341)
+    .withCorpCardInHq(588)
+    .withCorpCardInHq(502)
     .withCorpIceOnServer("hq", BLOCKS)
-    .withRezzedCorpIceOnServer("rd", "onr_v1_278_wall-of-ice")
+    .withRezzedCorpIceOnServer("rd", 490)
     .withCorpCredits(6);
   state.runner.memoryUsed = 4;
   const interfaceAction = getLegalActions(state, "runner").find(
@@ -93,7 +105,7 @@ function checkpoint() {
       a.type === "install_card" &&
       typeof a.payload?.cardId === "string" &&
       state.cardInstances[a.payload.cardId]?.definitionId ===
-        "onr_v1_129_hq-interface",
+        341,
   )!;
   state = apply(state, "runner", interfaceAction.actionId);
   const build = (s: GameState) =>
@@ -109,7 +121,7 @@ function checkpoint() {
       },
     });
   const start = chooseAiAction(build(state));
-  expect(start.actionId).toBe("runner.start_run.hq");
+  expect(start.actionId).toBe("rs.hq");
   expect(start.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(root);
   state = apply(state, "runner", start.actionId!);
   const expose = chooseAiAction(build(state));
@@ -124,7 +136,7 @@ function checkpoint() {
   expect(
     runtime.residentPlanPortfolio?.runnerExposeInformationMemory,
   ).toHaveLength(1);
-  const leaf = `plan:runner.convert_run_window:run%3A${input.playerView.run!.runId}`;
+  const leaf = planInstanceIdForProposal({ moduleId: "runner.convert_run_window", dedupeKey: `run:${input.playerView.run!.runId}` });
   resetResidentPlanPortfolioMemory();
   return {
     input,
@@ -209,7 +221,7 @@ describe("native expose-viewing continuation (SP-472)", () => {
           selectedAtStateVersion: remembered.selectedAtStateVersion - 1,
         },
       ];
-    if (boundary === "run") input.playerView.run!.runId = "different_run";
+    if (boundary === "run") input.playerView.run!.runId = input.playerView.stateVersion + 1;
     if (boundary === "root") p.rootForegroundInstanceId = "different_root";
     if (boundary === "event") input.eventTail = input.eventTail!.slice(0, -1);
     if (boundary === "parent") {

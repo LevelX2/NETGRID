@@ -1,8 +1,6 @@
 import type { AiSimulationSummary } from "./ai-simulation-summary";
-import {
-  isCorpRemoteAdvancementProgress,
-  progressionEntriesWithRunTargets,
-} from "./progression-action-sequence";
+import { progressionEntriesWithRunTargets } from "./progression-action-sequence";
+import { averageNumber } from "./simulation-metric-aggregation";
 import { roundNumber as round } from "../runtime/number-rounding";
 
 export function averageFirstProgressionTurn(
@@ -25,72 +23,44 @@ export function averageFirstProgressionTurn(
 export function averageTurnsFromFirstAdvanceToScore(
   summaries: AiSimulationSummary[],
 ): number {
-  const deltas = summaries
-    .map((summary) => {
-      const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
-      const firstAdvance = sequence.find(
-        (entry) =>
-          isCorpRemoteAdvancementProgress(entry) &&
-          (entry.advancementTargetTypes?.includes("agenda") ||
-            entry.targetCardType === "agenda"),
-      );
-      if (!firstAdvance?.turnNumber) return undefined;
-      const firstScore = sequence.find(
-        (entry) =>
-          entry.side === "corp" &&
-          entry.actionType === "score_agenda" &&
-          (entry.turnNumber ?? 0) >= firstAdvance.turnNumber!,
-      );
-      if (!firstScore?.turnNumber) return undefined;
-      return Math.max(0, firstScore.turnNumber - firstAdvance.turnNumber);
-    })
-    .filter((value): value is number => typeof value === "number");
-  if (deltas.length === 0) return 0;
-  return round(deltas.reduce((sum, delta) => sum + delta, 0) / deltas.length);
+  const observedTurns = summaries.flatMap(({ agendaProgressionOutcomes }) => {
+    const turnGap = agendaProgressionOutcomes?.firstAdvanceToScoreTurns;
+    return turnGap === undefined ? [] : [turnGap];
+  });
+  return averageNumber(observedTurns);
 }
 
 export function countFinalAdvancesResolvedBySameTurnCorpScore(
   summaries: AiSimulationSummary[],
 ): number {
-  return summaries.reduce((count, summary) => {
-    const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
-    return (
-      count +
-      sequence.filter((entry, index) => {
-        if (entry.side !== "corp" || entry.finalAdvance !== true) return false;
-        return sequence
-          .slice(index + 1)
-          .some(
-            (later) =>
-              later.side === "corp" &&
-              later.actionType === "score_agenda" &&
-              later.turnNumber === entry.turnNumber,
-          );
-      }).length
-    );
-  }, 0);
+  return summaries.reduce(
+    (sum, { agendaProgressionOutcomes }) =>
+      sum + (agendaProgressionOutcomes?.finalAdvancesScoredSameTurn ?? 0),
+    0,
+  );
 }
 
 export function countFinalAdvancesStolenBeforeCorpScore(
   summaries: AiSimulationSummary[],
 ): number {
-  return summaries.reduce((count, summary) => {
-    const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
-    return (
-      count +
-      sequence.filter((entry, index) => {
-        if (entry.side !== "corp" || entry.finalAdvance !== true) return false;
-        const later = sequence
-          .slice(index + 1)
-          .find(
-            (candidate) =>
-              candidate.actionType === "score_agenda" ||
-              candidate.actionType === "steal_agenda",
-          );
-        return later?.actionType === "steal_agenda";
-      }).length
-    );
-  }, 0);
+  return summaries.reduce(
+    (sum, { agendaProgressionOutcomes }) =>
+      sum + (agendaProgressionOutcomes?.finalAdvancesStolen ?? 0),
+    0,
+  );
+}
+
+export function averageTurnsFromFinalAdvanceToScoreOrSteal(
+  summaries: AiSimulationSummary[],
+): number {
+  let count = 0;
+  let turnTotal = 0;
+  for (const { agendaProgressionOutcomes } of summaries) {
+    if (!agendaProgressionOutcomes) continue;
+    count += agendaProgressionOutcomes.resolvedFinalAdvances;
+    turnTotal += agendaProgressionOutcomes.finalAdvanceResolutionTurnTotal;
+  }
+  return count === 0 ? 0 : round(turnTotal / count);
 }
 
 export function countRunnerDrawThenDiscardSameTurn(

@@ -1,16 +1,14 @@
 import type { PreparedAiDecisionDebug } from "../lib/client-api";
 
 import { parseAiPlanFirstDecisionDebug } from "./ai-plan-first-decision-ui";
-import type { MaintenanceAiTraceDetail } from "./maintenance";
+import type { AiDecisionDebugTrace } from "./maintenance";
 
 /** Converts the server-bound next AI decision into the inspector's trace view. */
 export function preparedAiDecisionDebugTrace(
   prepared: PreparedAiDecisionDebug,
-): MaintenanceAiTraceDetail {
+): AiDecisionDebugTrace {
   return {
-    traceId: `prepared_ai_decision_${prepared.matchId}_${prepared.stateVersion}`,
     matchId: prepared.matchId,
-    eventId: "prepared",
     stateVersion: prepared.stateVersion,
     matchVersion: prepared.matchVersion,
     side: prepared.side,
@@ -35,7 +33,7 @@ export function preparedAiDecisionDebugTrace(
 /** Returns only complete turn-planning snapshots suitable for turn retention. */
 export function preparedAiDecisionDebugTurnPlanTrace(
   prepared: PreparedAiDecisionDebug,
-): MaintenanceAiTraceDetail | null {
+): AiDecisionDebugTrace | null {
   const trace = preparedAiDecisionDebugTrace(prepared);
   const decision = parseAiPlanFirstDecisionDebug(
     trace.detail.planFirstDecision,
@@ -48,9 +46,9 @@ export function preparedAiDecisionDebugTurnPlanTrace(
  * when another match or another AI turn begins.
  */
 export function retainPreparedAiDecisionDebugTurnPlanTrace(
-  current: MaintenanceAiTraceDetail | null,
+  current: AiDecisionDebugTrace | null,
   prepared: PreparedAiDecisionDebug,
-): MaintenanceAiTraceDetail | null {
+): AiDecisionDebugTrace | null {
   const next = preparedAiDecisionDebugTurnPlanTrace(prepared);
   if (!next) return current;
   const currentTurnKey = current

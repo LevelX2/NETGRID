@@ -18,9 +18,9 @@ it.each([
     checkpoint: purgeCheckpoint as unknown,
     stateVersion: 232,
     actionId:
-      "corp.advance_card.corp_onr_v1_209_political-coup_1.corp_onr_v1_209_political-coup_1",
-    leaf: "plan:corp.score_agenda:agenda%3Acorp_onr_v1_209_political-coup_1%3Aremote_1",
-    root: "plan:corp.score_agenda:agenda%3Acorp_onr_v1_209_political-coup_1%3Aremote_1",
+      "c2.c2lp.c2lp",
+    leaf: "pa1o3tqquxh3idj1dz05ipqkos",
+    root: "pa1o3tqquxh3idj1dz05ipqkos",
     semanticActionType: "score.advance_card",
     step: "advance_agenda",
     capability: "advance_score_agenda",
@@ -30,9 +30,9 @@ it.each([
     checkpoint: creditCheckpoint as unknown,
     stateVersion: 152,
     actionId:
-      "corp.play_operation.corp_onr_v1_281_accounts-receivable_2.corp_onr_v1_281_accounts-receivable_2.onr_v1_281_accounts-receivable:abilities_on_play_gain_credits",
-    leaf: "plan:corp.economy:score-support%3Aagenda%3Acorp_onr_v1_202_genetics-visionary-acquisition_2%3Aremote_1",
-    root: "plan:corp.score_agenda:agenda%3Acorp_onr_v1_202_genetics-visionary-acquisition_2%3Aremote_1",
+      "ci.c31q.c31q.607",
+    leaf: "pby4jc1qx064ugd33m8am6umi4",
+    root: "p8lb6gg4bostn5z3b64t0g63d3",
     semanticActionType: "economy.gain_credit",
     step: "fund",
     capability: "develop_or_convert_corp_economy",
@@ -106,7 +106,7 @@ it.each([
       expect(fundingTarget(root)).toBe(12);
       expect(
         fundingTarget(
-          "plan:corp.score_agenda:agenda%3Acorp_onr_v1_209_political-coup_1%3Aremote_1",
+          "pa1o3tqquxh3idj1dz05ipqkos",
         ),
       ).toBe(13);
     }

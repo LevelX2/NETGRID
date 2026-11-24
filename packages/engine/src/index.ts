@@ -4,10 +4,13 @@
  * This facade intentionally contains no gameplay or runtime implementation.
  * Runtime internals live below game/ and engine-runtime-internal.
  */
+export { BAD_PUBLICITY_LOSS_THRESHOLD } from "./game/win-conditions";
+export { buildMatchPlayerOffer } from "./game/player-offer";
 export { quoteCorpRestrictedCreditRoute } from "./game/view/corp-restricted-credit-route-quote";
 export { projectVisibleIceAfterPassiveRunnerInstall } from "./ability-engine/ice-strength-modifiers";
 export { quoteAgendaDefinitionSelfStealCreditCost } from "./ability-engine/steal-cost-modifiers";
 export { quoteAgendaPurgeArchivesProtection } from "./game/corp/scored-agenda/agenda-purge-archives-protection-quote";
+export { toPublicEventForSide } from "./game/view/public-event-view";
 
 export {
   getLegalActions,
@@ -19,6 +22,7 @@ export {
   createGame,
   createGameAfterSetup,
   applyAction,
+  applyMatchActionOffer,
   applyRandomizedIceInstallSelection,
   candidateFingerprint,
   quoteRandomizedIceInstallSelection,

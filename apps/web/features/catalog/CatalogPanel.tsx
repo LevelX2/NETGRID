@@ -1,5 +1,6 @@
 "use client";
 
+import { type CardDefinitionId } from "@netgrid/shared";
 import {
   ChevronDown,
   ChevronUp,
@@ -51,7 +52,7 @@ type CatalogAiHints = {
 };
 
 type CatalogCardSummary = {
-  catalogCardId: string;
+  catalogCardId: CardDefinitionId;
   title: string;
   side: Side;
   type: string;
@@ -74,7 +75,7 @@ type CatalogCardDetail = CatalogCardSummary & {
   collectorNumber: string;
   text: string;
   numeric: Record<string, number | null>;
-  engineCardId: string | null;
+  engineCardId: CardDefinitionId | null;
   aiHints?: CatalogAiHints | null;
   aiInspector?: CatalogAiInspector | null;
 };
@@ -146,7 +147,7 @@ export function CatalogPanel({
   side: Side | "all";
   setAddons: CatalogProductSetSelection;
   setCounts: Record<CatalogProductSetKey, number>;
-  selectedId: string | null;
+  selectedId: CardDefinitionId | null;
   filtersOpen: boolean;
   rarityCounts: Record<CatalogRarityFilterKey, number>;
   rarityFilter: CatalogRarityFilterKey;
@@ -155,7 +156,7 @@ export function CatalogPanel({
   onSearch(value: string): void;
   onSide(value: Side | "all"): void;
   onSetAddon(addon: "original" | "classic" | "proteus", enabled: boolean): void;
-  onSelect(value: string): void;
+  onSelect(value: CardDefinitionId): void;
   onFiltersOpen(value: boolean): void;
   onRarity(value: CatalogRarityFilterKey): void;
   onTypeFilter(key: CatalogTypeFilterKey, selected: boolean): void;

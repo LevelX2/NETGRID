@@ -20,7 +20,7 @@ import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import { createSemanticRuntimeDecisionContext } from "./semantic-runtime-decision-context";
 import type { SemanticRuntimeDecisionContextDependencies } from "./semantic-runtime-decision-context";
 
-const AMBUSH_ROOT_ID = "plan:corp.ambush_and_bluff:ambush%3Avacant-soulkiller";
+const AMBUSH_ROOT_ID = "pepll3z56vr7jpwjh7qempjvwz";
 const AMBUSH_FUNDING_NEED_ID = "ambush-funding:vacant-soulkiller";
 const AMBUSH_SETUP_NEED_ID = "ambush-setup:vacant-soulkiller:new_remote";
 
@@ -235,14 +235,14 @@ describe("red contract: persistent Corp Ambush root and exact support children",
 
 function vacantSoulkiller(): VisibleCard {
   return visibleCard("vacant-soulkiller", "corp", "asset", {
-    definitionId: "onr_v1_346_vacant-soulkiller",
+    definitionId: 558,
     title: "Vacant Soulkiller",
   });
 }
 
 function scoreAgenda(advancementCounters: number): VisibleCard {
   return visibleCard("agenda-1", "corp", "agenda", {
-    definitionId: "onr_v1_189_artificial-security-directors",
+    definitionId: 401,
     title: "Artificial Security Directors",
     advancementCounters,
     advancementRequirement: 3,
@@ -306,10 +306,10 @@ function scoringServers(agenda: VisibleCard) {
     server("rd"),
     server("archives"),
     server(
-      "remote_1",
+      "r1",
       [
         visibleCard("remote-ice", "corp", "ice", {
-          definitionId: "onr_v1_237_data-wall",
+          definitionId: 449,
           title: "Data Wall",
           rezzed: true,
         }),

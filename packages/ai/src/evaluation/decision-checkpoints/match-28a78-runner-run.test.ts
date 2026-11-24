@@ -32,7 +32,7 @@ function capture(index: number): Capture {
   ) as Capture;
   if (index === 85 || index === 90) {
     bindExplicitZeroPublicStealQuotes(captured.input, [
-      "onr_v1_309_bbs-whispering-campaign",
+      521,
     ]);
   }
   return captured;
@@ -73,8 +73,8 @@ describe("match 28a78 run costs and admission", () => {
     expect(action.type).toBe("break_subroutine");
     expect(action.payload?.subroutineIndex).toBe(1);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_159",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      leafExecutorInstanceId: "p9nu0ixuj7baoh70y20mjtnp1l",
     });
   });
   it.each([85, 90])(
@@ -82,23 +82,23 @@ describe("match 28a78 run costs and admission", () => {
     (index) => {
       const { input, decision } = replay(capture(index));
       const target = evaluateRunnerRunTargets({ input }).find(
-        (t) => t.targetServerId === "remote_1",
+        (t) => t.targetServerId === "r1",
       )!;
       expect(target.prerunReserveQuote).toMatchObject({
         status: "blocked",
         creditGap: 11,
       });
-      expect(decision.actionId).not.toBe("runner.start_run.remote_1");
+      expect(decision.actionId).not.toBe("rs.r1");
       const plan = decision.decisionDebug?.planFirstDecision;
       expect(plan?.route?.actionId).toBe(decision.actionId);
       if (index === 85) {
         expect(plan?.selectedPlan).toMatchObject({
           moduleId: "runner.develop_board_and_hand",
           instanceId:
-            "plan:runner.develop_board_and_hand:card%3Arunner_onr_v1_101_mit-west-tier_1",
+            "p3qysouaafvglehouuttnj25h1",
         });
         expect(plan?.executionOrigin?.rootPlanInstanceId).toBe(
-          "plan:runner.develop_board_and_hand:card%3Arunner_onr_v1_101_mit-west-tier_1",
+          "p3qysouaafvglehouuttnj25h1",
         );
       } else {
         expect(plan?.selectedPlan?.moduleId).toBe(
@@ -113,10 +113,10 @@ describe("match 28a78 run costs and admission", () => {
     const { input, decision } = replay(funded);
     expect(
       evaluateRunnerRunTargets({ input }).find(
-        (t) => t.targetServerId === "remote_1",
+        (t) => t.targetServerId === "r1",
       )?.prerunReserveQuote,
     ).toMatchObject({ creditGap: 0 });
-    expect(decision.actionId).toBe("runner.start_run.remote_1");
+    expect(decision.actionId).toBe("rs.r1");
     expect(
       decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
     ).toBe("runner.contest_remote");
@@ -126,7 +126,7 @@ describe("match 28a78 run costs and admission", () => {
     const action = value.input.legalActions.find(
       (a) => a.type === "continue_run",
     )!;
-    delete action.payload!.encounterSubroutineIds;
+    delete action.encounterSubroutineIds;
     expect(() => replay(value)).toThrow("missing_action_semantics");
   });
   it("does not buy an unaffordable ETR after the first break", () => {
@@ -153,7 +153,7 @@ describe("match 28a78 run costs and admission", () => {
     const action = value.input.legalActions.find(
       (a) => a.type === "continue_run",
     )!;
-    action.payload!.encounterSubroutineIds = "";
+    action.encounterSubroutineIds = [];
     action.payload!.unbrokenSubroutineCount = 0;
     action.payload!.encounterWillEndRun = false;
     const root = activeRunRootPlan(

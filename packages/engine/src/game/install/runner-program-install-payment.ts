@@ -22,7 +22,7 @@ export type RunnerInstallCreditSpendResult = {
   hostedCreditsSpent: number;
   recurringCreditsSpent: number;
   temporaryCreditsSpent: number;
-  sourceDefinitionIds: string[];
+  sourceDefinitionIds: number[];
   runnerCreditsAfter: number;
 };
 
@@ -197,7 +197,7 @@ function actionWithRunnerInstallPayment(
   const label = `${action.label} (${paymentLabel(state, sourcePayments)})`;
   return {
     ...action,
-    actionId: makeActionId(action.type, action.side, payload, action.source),
+    actionId: makeActionId(action.type, action.side, payload, action.source, action),
     label,
     payload,
   };

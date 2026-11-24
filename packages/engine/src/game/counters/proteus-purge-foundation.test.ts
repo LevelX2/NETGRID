@@ -1,3 +1,4 @@
+import { RandomPurposeCode } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
@@ -43,7 +44,7 @@ function proteusPurgeFixture(): GameState {
   state.timingPoint = "run.jack_out_window";
   state.corp.clicks = 0;
   state.runnerVirusPurgeWindow = {
-    windowId: "run_1.special_effect.1",
+    windowId: "1.special_effect.1",
     timingFamily: "run_special_effect",
   };
   state.purgeableRunnerVirusCounters = {
@@ -85,7 +86,7 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
         purgeModel: "future_action_debt",
         actionDebtAdded: 3,
         actionCapacityMinimumAvailableActions: 0,
-        timingWindowId: "run_1.special_effect.1",
+        timingWindowId: "1.special_effect.1",
       },
     });
     expect(legalActions.map((action) => action.type)).not.toContain(
@@ -148,7 +149,7 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
       purgedRunnerVirusCounters: 4,
       actionDebtAdded: 3,
       corpActionDebtTotalAfter: 3,
-      timingWindowId: "run_1.special_effect.1",
+      timingWindowId: "1.special_effect.1",
       timingFamily: "run_special_effect",
     });
     expect(
@@ -329,7 +330,7 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
           kind: "lose_credits",
           side: "corp",
           amount: 2,
-          sourceDefinitionId: "onr_proteus_097_taxman",
+          sourceDefinitionId: 155,
         }),
         expect.objectContaining({
           kind: "counter_change",
@@ -355,7 +356,7 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
       state.runner.rig.programs.push(sourceCardId);
       state.cardInstances[sourceCardId] = {
         instanceId: sourceCardId,
-        definitionId: "onr_proteus_099_viral-pipeline" as CardDefinitionId,
+        definitionId: 157 as CardDefinitionId,
         owner: "runner",
         controller: "runner",
         zone: { side: "runner", zone: "rig" },
@@ -441,7 +442,7 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
             kind: "counter_change",
             counterType: "pipe",
             amount: 1,
-            sourceDefinitionId: "onr_proteus_099_viral-pipeline",
+            sourceDefinitionId: 157,
           }),
         ]),
       );
@@ -485,7 +486,7 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
         expect.objectContaining({
           counterType: "scaldan",
           dieSize: 6,
-          sourceDefinitionId: "onr_proteus_094_scaldan",
+          sourceDefinitionId: 152,
         }),
       ]),
     );
@@ -533,10 +534,10 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
       initial.randomDrawRecords.length,
     );
     const rolls = randomRecords
-      .filter((record) =>
-        String(record.purpose).includes(
-          "virus.onr_proteus_078_armageddon.install",
-        ),
+      .filter(
+        (record) =>
+          record.purpose[0] === RandomPurposeCode.VirusInstallDie &&
+          record.purpose[1] === 136,
       )
       .map((record) => Math.floor(record.value * 6) + 1);
     const hitCount = rolls.filter((roll) => roll === 6).length;

@@ -12,11 +12,26 @@ const scenarios = buildRealEngineDecisionCorpusScenarios();
 describe("default live Engine authority", () => {
   it("binds all 53 current Engine decisions to their actual owner, route and commitment", () => {
     expect(scenarios).toHaveLength(53);
-    const failures = scenarios.flatMap(({ scenarioId, input }) =>
-      bindingViolations(input, choose(input)).map(
-        (code) => `${scenarioId}:${code}`,
-      ),
-    );
+    const failures = scenarios.flatMap((scenario) => {
+      const { scenarioId, input, engineOptions } = scenario;
+      const decision = choose(input, engineOptions);
+      const selectedByEngine = scenario.applyEngineSelection(decision);
+      const violations = bindingViolations(
+        input,
+        decision,
+        selectedByEngine?.ok === true,
+      );
+      if (
+        selectedByEngine &&
+        (!selectedByEngine.ok ||
+          !input.legalActions.some(
+            (action) => action.actionId === selectedByEngine.receipt.selectedLegalAction.actionId,
+          ))
+      ) {
+        violations.push("current_engine_selection");
+      }
+      return violations.map((code) => `${scenarioId}:${code}`);
+    });
     expect(failures).toEqual([]);
   }, 60_000);
 
@@ -92,20 +107,25 @@ function choose(
 function bindingViolations(
   input: AiDecisionInput,
   decision: AiDecision,
+  engineSelectionConfirmed = false,
 ): string[] {
   const failures: string[] = [];
   const check = (valid: unknown, code: string): void => {
     if (!valid) failures.push(code);
   };
-  const action = input.legalActions.find(
-    (candidate) => candidate.actionId === decision.actionId,
-  );
   const trace = decision.decisionDebug?.planFirstDecision;
+  const boundActionId = engineSelectionConfirmed
+    ? trace?.route?.actionId
+    : decision.actionId;
+  const action = input.legalActions.find(
+    (candidate) => candidate.actionId === boundActionId,
+  );
   if (!action || !trace) return ["missing_current_action_or_trace"];
   const version = input.playerView.stateVersion;
   check(
-    (decision.selectionKind ?? "direct") === "direct" && !decision.fallbackUsed,
-    "direct_selection",
+    ((decision.selectionKind ?? "direct") === "direct" || engineSelectionConfirmed) &&
+      !decision.fallbackUsed,
+    "validated_selection",
   );
   check(
     action.side === input.side && action.expiresAtStateVersion === version,

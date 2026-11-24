@@ -2,6 +2,7 @@ import type {
   CardDefinitionId,
   CardInstanceId,
   DamageType,
+  DamageRandomSource,
   GameState,
   ImminentEvent,
   LegalAction,
@@ -10,6 +11,7 @@ import type {
   Side,
   TimingPointId,
 } from "@netgrid/shared";
+import { isDamageRandomSource, RandomPurposeCode } from "@netgrid/shared";
 import { selectedChoiceIds } from "../choices/choice-validation";
 import { maxHandSize } from "../../ability-engine/effective-values";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
@@ -44,37 +46,30 @@ export function doDamage(
     damageId: string;
     damageType: DamageType;
     amount: number;
-    source: string;
+    source: string | CardDefinitionId;
+    randomSource: DamageRandomSource;
     runnerActionOrdinal?: number;
   },
 ): DamageSummary {
+  if (!isDamageRandomSource(request.randomSource))
+    throw new Error("runtime_damage_random_source_missing");
   // Dieser Finalresolver zieht sofort Zufall. Fenster müssen vor dem Aufruf
   // vollständig abgearbeitet sein, damit Replay und RandomCounter stabil bleiben.
   assertPositiveIntegerAmount(request.amount);
   const runnerGripBefore = state.runner.grip.length;
-  if (request.amount > runnerGripBefore) {
-    state.winner = "corp";
-    state.gameEndReason = "flatline";
-    state.phase = "game_over";
-    state.timingPoint = "game.checkpoint";
-    state.activeSide = "corp";
-    delete state.run;
-    return {
-      damageType: request.damageType,
-      amount: request.amount,
-      cardsTrashed: 0,
-      flatline: true,
-      runnerGripBefore,
-        runnerGripAfter: state.runner.grip.length,
-    };
-  }
-
+  const cardsToTrash = Math.min(request.amount, runnerGripBefore);
   const available = state.runner.grip.slice();
   const selected: CardInstanceId[] = [];
-  for (let index = 0; index < request.amount; index += 1) {
+  for (let index = 0; index < cardsToTrash; index += 1) {
     const value = nextRandom(
       state,
-      `damage:${request.damageId}:${request.damageType}:${request.source}:${request.amount}:selection:${index}`,
+      [
+        RandomPurposeCode.DamageSelection,
+        request.damageType === "net" ? 0 : request.damageType === "meat" ? 1 : 2,
+        request.randomSource,
+        request.amount,
+        index,
+      ],
     );
     const selectedIndex = Math.floor(value * available.length);
     const cardId = mustArrayValue(
@@ -97,23 +92,30 @@ export function doDamage(
     };
   }
 
-  if (request.damageType === "core") state.runner.coreDamage += request.amount;
-  recordRunnerDamageDuringCurrentAction(state, request.runnerActionOrdinal);
-
-  const summary = {
+  const summary: DamageSummary = {
     damageType: request.damageType,
     amount: request.amount,
     cardsTrashed: selected.length,
-    flatline: false,
+    flatline: request.amount > runnerGripBefore,
     runnerGripBefore,
     runnerGripAfter: state.runner.grip.length,
-    ...(request.damageType === "core"
-      ? {
-          coreDamageAfter: state.runner.coreDamage,
-          runnerMaxHandSizeAfter: maxHandSize(state, "runner"),
-        }
-      : {}),
   };
+  if (summary.flatline) {
+    state.winner = "corp";
+    state.gameEndReason = "flatline";
+    state.phase = "game_over";
+    state.timingPoint = "game.checkpoint";
+    state.activeSide = "corp";
+    delete state.run;
+    return summary;
+  }
+
+  if (request.damageType === "core") {
+    state.runner.coreDamage += request.amount;
+    summary.coreDamageAfter = state.runner.coreDamage;
+    summary.runnerMaxHandSizeAfter = maxHandSize(state, "runner");
+  }
+  recordRunnerDamageDuringCurrentAction(state, request.runnerActionOrdinal);
   if (request.damageType === "meat" && selected.length > 0 && !state.winner)
     requireDamageCoreHost().reactions?.openPostMeatDamageReactionWindow(
       state,
@@ -124,7 +126,7 @@ export function doDamage(
 
 export function damageResolutionId(
   state: Pick<GameState, "stateVersion">,
-  source: string,
+  source: string | CardDefinitionId,
   variant?: string,
 ): string {
   return `damage.${state.stateVersion}.${source}${variant ? `.${variant}` : ""}`;
@@ -161,7 +163,7 @@ export function pdcaEventWithReturnContext(
 ): ImminentEvent {
   return {
     ...event,
-    modificationWindowId: `proteus_pdca_${event.eventId}`,
+    modificationWindowId: state.stateVersion + 1,
     payload: {
       ...event.payload,
       pdcaReturnPhase: state.phase,
@@ -347,8 +349,11 @@ export function createDamageImminentEvent(
     damageType: DamageType;
     amount: number;
     source: string;
+    randomSource: DamageRandomSource;
   },
 ): ImminentEvent {
+  if (!isDamageRandomSource(request.randomSource))
+    throw new Error("runtime_damage_random_source_missing");
   const damageAmountModifier =
     request.damageType === "meat" ? corpScoredMeatDamageBonus(state) : 0;
   const amount = request.amount + damageAmountModifier;
@@ -369,6 +374,7 @@ export function createDamageImminentEvent(
           }
         : {}),
       source: request.source,
+      randomSource: request.randomSource,
       ...((state.run?.runnerActionOrdinal ??
         state.runnerTurnFlags?.currentRunnerActionOrdinal) !== undefined
         ? {
@@ -436,7 +442,8 @@ export function addTagPublicContextFromPayload(
     "accessedFromZone",
   ] as const) {
     const value = payload[key];
-    if (typeof value === "string") context[key] = value;
+    if (typeof value === "string" || typeof value === "number")
+      context[key] = value;
   }
   return context;
 }
@@ -476,6 +483,9 @@ export function resolveDamageImminentEvent(
     throw new Error("Nur Damage-ImminentEvents sind in V1.2.0 auflösbar.");
   const amount = numberPayload(event, "amount");
   const damageType = damageTypePayload(event);
+  const randomSource = event.payload.randomSource;
+  if (!isDamageRandomSource(randomSource))
+    throw new Error("runtime_damage_random_source_missing");
   if (amount <= 0)
     return { damageType, amount: 0, cardsTrashed: 0, flatline: false };
   return doDamage(state, {
@@ -483,6 +493,7 @@ export function resolveDamageImminentEvent(
     damageType,
     amount,
     source: stringPayload(event, "source"),
+    randomSource,
     ...(numberPayload(event, "runnerActionOrdinal") > 0
       ? {
           runnerActionOrdinal: numberPayload(event, "runnerActionOrdinal"),

@@ -44,14 +44,21 @@ export function selectedProgramSacrificeCandidates(
       canFreeRequiredMemory: true,
     };
   }
-  const selectedCandidates: ProgramSacrificeCandidate[] = [];
-  let memoryFreed = 0;
-  for (const candidate of candidates) {
-    if (!candidate.acceptable) continue;
-    selectedCandidates.push(candidate);
-    memoryFreed += candidate.memoryCost;
-    if (memoryFreed >= requiredMemoryToFree) break;
-  }
+  const acceptable = candidates.filter(
+    (candidate) => candidate.acceptable && candidate.memoryCost > 0,
+  );
+  const possibleMemory = acceptable.reduce(
+    (sum, candidate) => sum + candidate.memoryCost,
+    0,
+  );
+  const selectedCandidates =
+    possibleMemory >= requiredMemoryToFree
+      ? selectMinimalSacrificeSet(acceptable, requiredMemoryToFree)
+      : acceptable;
+  const memoryFreed = selectedCandidates.reduce(
+    (sum, candidate) => sum + candidate.memoryCost,
+    0,
+  );
   return {
     selectedCandidates,
     memoryFreed,
@@ -72,17 +79,25 @@ export function selectedMinimalProgramSacrificeCandidates(
   requiredMemoryToFree: number,
 ): ProgramSacrificeCandidate[] {
   if (requiredMemoryToFree <= 0) return [];
-  const eligible = [...candidates]
-    .filter(
+  return selectMinimalSacrificeSet(
+    candidates.filter(
       (candidate) =>
         candidate.memoryCost > 0 && candidate.option?.id !== undefined,
-    )
-    .sort((left, right) =>
-      sacrificeCandidateLabel(left).localeCompare(
-        sacrificeCandidateLabel(right),
-        "de",
-      ),
-    );
+    ),
+    requiredMemoryToFree,
+  );
+}
+
+function selectMinimalSacrificeSet(
+  candidates: readonly ProgramSacrificeCandidate[],
+  requiredMemoryToFree: number,
+): ProgramSacrificeCandidate[] {
+  const eligible = [...candidates].sort((left, right) =>
+    sacrificeCandidateLabel(left).localeCompare(
+      sacrificeCandidateLabel(right),
+      "de",
+    ),
+  );
   const selections = new Map<string, ProgramSacrificeSelection>();
   selections.set("0:0", {
     candidates: [],
@@ -94,11 +109,14 @@ export function selectedMinimalProgramSacrificeCandidates(
 
   for (const candidate of eligible) {
     for (const selection of [...selections.values()]) {
+      if (selection.memoryFreed >= requiredMemoryToFree) continue;
       const memoryFreed = selection.memoryFreed + candidate.memoryCost;
       const minimumMemoryCost =
         selection.candidates.length === 0
           ? candidate.memoryCost
           : Math.min(selection.minimumMemoryCost, candidate.memoryCost);
+      // A sufficient subset with a removable program cannot become minimal.
+      if (memoryFreed - minimumMemoryCost >= requiredMemoryToFree) continue;
       const next: ProgramSacrificeSelection = {
         candidates: [...selection.candidates, candidate],
         memoryFreed,
@@ -234,8 +252,9 @@ export function sacrificeCandidateLabel(
   return (
     candidate.option?.label ??
     candidate.card?.title ??
-    candidate.card?.definitionId ??
-    ""
+    (candidate.card?.definitionId !== undefined
+      ? String(candidate.card.definitionId)
+      : "")
   );
 }
 
@@ -309,7 +328,7 @@ export function runnerProgramInstallTrashAssessmentFromCards(params: {
 
 export type ProgramSacrificeCandidateDependencies = {
   visibleMemoryCost: (card: VisibleCard | undefined) => number;
-  rolesForCardId: (definitionId: string | undefined) => readonly string[];
+  rolesForCardId: (definitionId: number | undefined) => readonly string[];
   visibleBreakerRoles: (card: VisibleCard) => readonly string[];
   isRunnerPressureRole: (role: string) => boolean;
   isRunnerEconomyRole: (role: string) => boolean;

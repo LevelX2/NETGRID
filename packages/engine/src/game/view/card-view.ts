@@ -1,4 +1,10 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
+import {
+  hiddenRunnerResourceSlotId,
+  hiddenVisibleCardId,
+} from "./hidden-card-slot";
+export { hiddenRunnerResourceSlotId } from "./hidden-card-slot";
 // ARCH-6 read-only View-Helfer.
 // Keine State-Mutation, keine LegalAction-Erzeugung, kein Import aus index.ts,
 // keine PublicPayload-Vertragsaenderung.
@@ -993,6 +999,28 @@ export function poxCounterDisplaysForServer(
   ];
 }
 
+export function agendaCostCounterDisplaysForServer(
+  state: GameState,
+  serverId: Exclude<ServerId, "new_remote">,
+): VisibleCard["counterDisplays"] {
+  const amount = Math.max(
+    0,
+    Math.floor(state.serverAgendaCostCountersByServer?.[serverId] ?? 0),
+  );
+  if (amount <= 0) return undefined;
+  return [
+    {
+      id: "agenda_cost_virus",
+      amount,
+      displayKind: "virus",
+      label: "Agenda-Kosten-Counter",
+      ariaLabel: `${amount} Agenda-Kosten-Counter auf diesem Server`,
+      counterType: "virus",
+      usageHint: "status_marker",
+    },
+  ];
+}
+
 export function spyCounterDisplaysForServer(
   state: GameState,
   serverId: Exclude<ServerId, "new_remote">,
@@ -1125,7 +1153,7 @@ export function visibleRunnerRigCardForViewer(
     return visibleKnownCardWithReferenceViewer(state, id, viewer);
   const instance = mustInstance(state.cardInstances, id);
   return {
-    instanceId: hiddenRunnerResourceSlotId(id),
+    instanceId: hiddenRunnerResourceSlotId(state, id),
     known: false,
     concealed: true,
     hiddenRunnerResource: true,
@@ -1209,13 +1237,6 @@ export function isConcealedRunnerResource(
   return definition.type === "resource" && cardHasSubtype(definition, "hidden");
 }
 
-export function hiddenRunnerResourceSlotId(id: CardInstanceId): CardInstanceId {
-  return `hidden_runner_resource_${hiddenVisibleCardId(id).replace(
-    /^hidden_/,
-    "",
-  )}`;
-}
-
 export function resolveHiddenRunnerResourceSlot(
   state: GameState,
   slotId: string,
@@ -1223,7 +1244,7 @@ export function resolveHiddenRunnerResourceSlot(
   return state.runner.rig.resources.find(
     (id) =>
       isConcealedRunnerResource(state, id) &&
-      hiddenRunnerResourceSlotId(id) === slotId,
+      hiddenRunnerResourceSlotId(state, id) === slotId,
   );
 }
 
@@ -1297,7 +1318,7 @@ export function visibleCorpCard(
     (state.corp.archives.includes(id) && instance.faceup);
   if (!visible) {
     return {
-      instanceId: hiddenVisibleCardId(id),
+      instanceId: hiddenVisibleCardId(state, id),
       known: false,
       rezzed: false,
       advancementCounters: area === "root" ? instance.advancementCounters : 0,
@@ -1308,13 +1329,18 @@ export function visibleCorpCard(
   }
   const visibleCard = visibleOwnCard(state, id);
   const definition = definitionFor(state, id);
+  const publiclyExposedInRoot =
+    area === "root" &&
+    isRemoteServerId(serverId) &&
+    !instance.rezzed &&
+    (instance.faceup || exposedBySpyCounter);
   const printedRequirement = definition.advancementRequirement;
   const effectiveRequirement = visibleCard.advancementRequirement;
   const agendaDifficultyModifier =
     area === "root" &&
     instance.zone.side === "corp" &&
     instance.zone.zone === "serverRoot" &&
-    serverId?.startsWith("remote_") &&
+    isRemoteServerId(serverId) &&
     definition.type === "agenda" &&
     printedRequirement !== undefined &&
     effectiveRequirement !== undefined
@@ -1322,6 +1348,7 @@ export function visibleCorpCard(
       : 0;
   return {
     ...visibleCard,
+    ...(publiclyExposedInRoot ? { publiclyExposedInRoot } : {}),
     ...(agendaDifficultyModifier !== 0 ? { agendaDifficultyModifier } : {}),
     ...visibleAgendaStealCostQuote(state, id, definition, instance, viewer),
   };
@@ -1388,7 +1415,7 @@ function visibleSpecialZoneCard(
   if (instance.zone.side !== "special") return visibleOwnCard(state, id);
   if (canSeeSpecialZoneCard(instance, viewer)) return visibleOwnCard(state, id);
   return {
-    instanceId: hiddenVisibleCardId(id),
+    instanceId: hiddenVisibleCardId(state, id),
     known: false,
   };
 }
@@ -1442,15 +1469,6 @@ function cardCounter(
   counterType: CounterType,
 ): number {
   return mustInstance(state.cardInstances, cardId).counters?.[counterType] ?? 0;
-}
-
-function hiddenVisibleCardId(id: CardInstanceId): CardInstanceId {
-  let hash = 0x811c9dc5;
-  for (let index = 0; index < id.length; index += 1) {
-    hash ^= id.charCodeAt(index);
-    hash = Math.imul(hash, 0x01000193);
-  }
-  return `hidden_${(hash >>> 0).toString(16).padStart(8, "0")}`;
 }
 
 export function serverDifficultyIncreaseFromRunCounters(

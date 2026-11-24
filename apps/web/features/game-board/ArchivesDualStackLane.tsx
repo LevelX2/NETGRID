@@ -1,7 +1,8 @@
 import { Eye, Image } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
-import type { LegalAction, Side, VisibleCard } from "@netgrid/shared";
+import type { Side, VisibleCard } from "@netgrid/shared";
+import type { LegalAction } from "../../lib/presented-player-view";
 import { useTranslations } from "use-intl/react";
 
 import {

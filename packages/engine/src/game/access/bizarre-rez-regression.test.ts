@@ -33,7 +33,7 @@ describe("Bizarre Encryption Scheme activation (SP-745)", () => {
       const fixture = originalAccess();
       expect(hashGameState(fixture.state)).toBe(fixture.provenance.hash);
       const source = Object.values(fixture.state.cardInstances).find(
-        (card) => card.definitionId === "onr_v1_351_bizarre-encryption-scheme",
+        (card) => card.definitionId === 563,
       )!;
       expect(source.rezzed).toBe(false);
       source.rezzed = rezzed;

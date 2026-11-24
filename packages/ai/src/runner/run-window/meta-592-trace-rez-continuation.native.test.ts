@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -51,13 +52,13 @@ it("keeps the original run executor through untargeted Corp rez passes, Hunter t
       executorInstanceId: origin.executorInstanceId,
       originalActionId:
         d === 149
-          ? "runner.continue_run.printed_subroutines_trace"
-          : "runner.resolve_choice",
+          ? "r5.0"
+          : "rn",
       selectedAtStateVersion: d === 149 ? 148 : 150,
     });
     if (d === 149)
       expect(result.actionId).toBe(
-        "runner.continue_run.printed_subroutines_trace",
+        "r5.0",
       );
     if (d === 151)
       expect(result.selectedChoices?.selectedOptionIds).toEqual(["bid_5"]);
@@ -65,8 +66,8 @@ it("keeps the original run executor through untargeted Corp rez passes, Hunter t
       expect(
         input.legalActions.find((a: any) => a.actionId === result.actionId)
           ?.payload.costPenaltySupportOriginalActionId,
-      ).toBe("runner.resolve_choice");
-      expect(result.actionId).toContain("swiss-bank-account");
+      ).toBe("rn");
+      expect(referencesDefaultDeckCard(result.actionId, 210)).toBe(true);
     }
   }
 });
@@ -101,7 +102,7 @@ it.each([
       lane: "engine_window",
       actionId: input.legalActions[0].actionId,
       origin: {
-        rootPlanInstanceId: "run:run_142",
+        rootPlanInstanceId: "run:142",
         leafPlanInstanceId: "rules.window_resolution",
         side: "runner",
         windowKind: "mandatory_choice",

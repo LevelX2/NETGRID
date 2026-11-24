@@ -1,4 +1,7 @@
-import { CARD_VIRUS_COUNTER_TYPES } from "@netgrid/shared";
+import {
+  CARD_VIRUS_COUNTER_TYPES,
+  PURGEABLE_RUNNER_VIRUS_COUNTER_TYPES,
+} from "@netgrid/shared";
 import type {
   AiDecisionInput,
   AiDecisionScoreComponent,
@@ -12,7 +15,6 @@ import {
 } from "@netgrid/engine";
 import type { CorpBoardTriage } from "../../runtime/semantic-runtime-corp-board-triage";
 import { semanticRuntimeCorpCentralPressureAssessment } from "../../runtime/semantic-runtime-corp-central-pressure";
-import { currentCorpMandatoryDrawCardsPerWindow } from "../../runtime/corp-scoreline-feasibility";
 
 type VisibleVirusCounterCard = {
   card: VisibleCard;
@@ -20,8 +22,10 @@ type VisibleVirusCounterCard = {
   amount: number;
 };
 
-type VisibleRunnerVirusCounter = VisibleVirusCounterCard & {
-  counterType: string | undefined;
+type VisibleRunnerVirusCounter = {
+  amount: number;
+  serverId: string | undefined;
+  counterType: (typeof PURGEABLE_RUNNER_VIRUS_COUNTER_TYPES)[number];
 };
 
 export function corpPurgeImpactScoreComponent(
@@ -48,20 +52,30 @@ export function assessCorpPurgeImpact(
       ? visibleVirusCounterCards(input)
       : [];
   const runnerVirusCounters = visibleRunnerVirusCounters(input, action);
-  const allAffected = [...affected, ...runnerVirusCounters];
-  const totalCounters = allAffected.reduce(
+  const standardServerCounters =
+    action.type === "purge_virus_counters"
+      ? visibleStandardServerVirusCounters(input)
+      : [];
+  const standardCounterTotal = [...affected, ...standardServerCounters].reduce(
     (sum, entry) => sum + entry.amount,
     0,
   );
+  const totalCounters =
+    standardCounterTotal +
+    runnerVirusCounters.reduce((sum, entry) => sum + entry.amount, 0);
   const activeRunnerVirusCounters = runnerVirusCounters.flatMap((entry) => {
     const amount = activeRunnerVirusCounterAmount(input, entry);
     return amount > 0 ? [{ ...entry, amount }] : [];
   });
-  const materiallyAffected = [...affected, ...activeRunnerVirusCounters];
+  const materiallyAffected = [
+    ...affected,
+    ...standardServerCounters,
+    ...activeRunnerVirusCounters,
+  ];
   const activeCounterTotal =
-    affected.reduce((sum, entry) => sum + entry.amount, 0) +
+    standardCounterTotal +
     activeRunnerVirusCounters.reduce((sum, entry) => sum + entry.amount, 0);
-  const criticalIce = materiallyAffected.filter(
+  const criticalIce = affected.filter(
     ({ card }) =>
       card.type === "ice" &&
       ((card.definitionId ? endTheRunSubroutineCount(card.definitionId) : 0) >
@@ -106,15 +120,16 @@ export function assessCorpPurgeImpact(
     0,
   );
   const remainingDeckCards = input.playerView.own.stackOrRdCount;
+  const drawQuote = input.playerView.corpMandatoryBaseDrawQuote;
+  const drawsPerWindow =
+    drawQuote &&
+    (action.type === "purge_runner_virus_counters"
+      ? drawQuote.baseCount - drawQuote.virusDrawCount
+      : drawQuote.baseCount);
+  if (recurringActionLoss > 0 && drawsPerWindow === undefined) return undefined;
   const recoveryTurns =
-    typeof remainingDeckCards === "number"
-      ? Math.min(
-          4,
-          Math.floor(
-            Math.max(0, remainingDeckCards) /
-              currentCorpMandatoryDrawCardsPerWindow(input.playerView),
-          ),
-        )
+    remainingDeckCards !== undefined && drawsPerWindow !== undefined
+      ? Math.min(4, Math.floor(remainingDeckCards / drawsPerWindow))
       : 0;
   const preventedActionLoss = recoveryTurns * Math.min(3, recurringActionLoss);
 
@@ -162,7 +177,7 @@ export function assessCorpPurgeImpact(
       `purge_inactive_counter_total:${Math.max(0, totalCounters - activeCounterTotal)}`,
       `purge_active_runner_counter_types:${
         activeRunnerVirusCounters
-          .map((entry) => entry.counterType ?? "unknown")
+          .map((entry) => entry.counterType)
           .join(",") || "none"
       }`,
       `purge_affected_card_count:${affected.length}`,
@@ -232,18 +247,28 @@ function visibleRunnerVirusCounters(
   return displays.flatMap(({ counterDisplays, serverId }) =>
     (counterDisplays ?? []).flatMap((display) => {
       if (display.displayKind !== "virus") return [];
-      const amount = Math.max(0, Math.floor(display.amount ?? 0));
-      return amount > 0
-        ? [
-            {
-              card: input.playerView.own.identity,
-              serverId,
-              amount,
-              counterType: display.counterType,
-            },
-          ]
+      const counterType = PURGEABLE_RUNNER_VIRUS_COUNTER_TYPES.find(
+        (type) => type === display.counterType,
+      );
+      return counterType &&
+        Number.isSafeInteger(display.amount) &&
+        display.amount > 0
+        ? [{ serverId, amount: display.amount, counterType }]
         : [];
     }),
+  );
+}
+
+function visibleStandardServerVirusCounters(input: AiDecisionInput) {
+  return input.playerView.servers.flatMap(({ id, counterDisplays }) =>
+    (counterDisplays ?? []).flatMap((display) =>
+      display.displayKind === "virus" &&
+      display.counterType === "virus" &&
+      Number.isSafeInteger(display.amount) &&
+      display.amount > 0
+        ? [{ serverId: id, amount: display.amount }]
+        : [],
+    ),
   );
 }
 

@@ -1,3 +1,4 @@
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import { visibleRunnerRunOnlyCredits } from "../run-analysis/visible-run-credit-budget";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
@@ -30,7 +31,9 @@ export function runnerRunExitAction(action: LegalAction): boolean {
 /** Current Engine offers, not a second action chooser or a reconstructed rule. */
 export function runnerFortPassTollWindow(input: AiDecisionInput) {
   const actions = input.legalActions.filter(
-    (a) => a.payload?.fortRunWindowAbility === FORT_PASS_TOLL,
+    (a) =>
+      a.payload?.fortRunWindowAbility === FORT_PASS_TOLL &&
+      a.payload.runnerCostPenaltySupportContinuation !== true,
   );
   if (actions.length === 0) return undefined;
   const run = input.playerView.run;
@@ -63,8 +66,7 @@ export function runnerFortPassTollWindow(input: AiDecisionInput) {
     pay.length + end.length !== actions.length ||
     actions.some(
       (a) =>
-        a.side !== "runner" ||
-        a.expiresAtStateVersion !== input.playerView.stateVersion ||
+        !actionMatchesCurrentDecision(input, a) ||
         a.payload?.serverId !== server.id ||
         a.payload?.paymentAmount !== amount ||
         a.costs.reduce((sum, c) => sum + (c.credits ?? 0), 0) !==

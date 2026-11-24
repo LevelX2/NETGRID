@@ -105,7 +105,7 @@ function buildRunnerActionsForCostPenaltySupportWindow(
   if (state.run?.pendingEncounterEntryIceId) {
     const window = state.runnerCostPenaltySupportWindow;
     if (
-      window?.originalActionId !== "runner.continue_run" ||
+      window?.originalActionId !== "r5" ||
       window.kind !== "cost"
     )
       throw new Error(

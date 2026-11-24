@@ -7,7 +7,7 @@ const distributeAdvancementCounters = capabilityKey(
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_300_project-consultants"),
+    cardDefinitionId: cardDefinitionId(512),
     title: "Project Consultants",
     side: "corp",
     cardType: "operation",

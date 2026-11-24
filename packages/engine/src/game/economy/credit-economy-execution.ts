@@ -1,3 +1,4 @@
+import type { RandomPurpose } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardInstance,
@@ -49,7 +50,7 @@ export type CreditEconomyExecutionHost = {
       state: GameState,
       cardId: string | undefined,
     ) => string | undefined;
-    hasCardImplementationForDefinition: (definitionId: string) => boolean;
+    hasCardImplementationForDefinition: (definitionId: number) => boolean;
     hasCorpUtilityKind: (
       state: GameState,
       cardId: CardInstanceId,
@@ -164,7 +165,7 @@ export type CreditEconomyExecutionHost = {
     };
   };
   random: {
-    nextRandom: (state: GameState, purpose: string) => number;
+    nextRandom: (state: GameState, purpose: RandomPurpose) => number;
   };
 };
 
@@ -338,12 +339,12 @@ export function handleCreditEconomyExecution(
       throw new Error(
         "Die V1.9.21-Programm-Zufallsfaehigkeit passt nicht zur Karte.",
       );
-    const randomPurpose = `v1921.die.${definition.id}.program_probe`;
+    const randomPurpose: RandomPurpose = [12, definition.id];
     const dieRoll =
       Math.floor(host.random.nextRandom(state, randomPurpose) * 6) + 1;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      randomPurpose,
+      randomPurpose: randomPurpose[0],
       v1921DieRoll: dieRoll,
       randomCounterAfter: state.randomCounter,
     };

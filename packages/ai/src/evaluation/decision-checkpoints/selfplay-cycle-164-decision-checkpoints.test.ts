@@ -18,25 +18,21 @@ type ReconstructedDecisionCapture = {
 
 describe("selfplay cycle 164 decision checkpoints", () => {
   it("keeps visible random core damage mitigation above an information-probe spend limit", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       brainDrainInformationBudgetJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
     expect(deckSnapshotId).toBeDefined();
-    // This older capture predates the remaining-subroutine-ID DTO field.
-    // Its sole quoted subroutine and unbroken count bind the current contract
-    // exactly; the historical fixture itself remains unmodified.
     expect(
       capture.input.playerView.run?.encounteredIce?.effectiveRunQuote?.subroutines.map(
         (s) => s.id,
       ),
-    ).toEqual(["subroutine_random_brain_damage"]);
+    ).toEqual(["0"]);
     const continuation = capture.input.legalActions.find(
       (a) => a.type === "continue_run",
     )!;
     expect(continuation.payload?.unbrokenSubroutineCount).toBe(1);
-    continuation.payload!.encounterSubroutineIds =
-      "subroutine_random_brain_damage";
+    expect(continuation.encounterSubroutineIds).toEqual(["0"]);
     resetResidentPlanPortfolioMemory();
     restoreAiRuntimeCheckpoint(capture.input, deckSnapshotId!, capture.runtime);
 
@@ -44,14 +40,14 @@ describe("selfplay cycle 164 decision checkpoints", () => {
 
     expect(decision).toMatchObject({
       actionId:
-        "runner.pump_breaker.runner_onr_v1_054_raptor_1.runner_onr_v1_054_raptor_1.runner_onr_v1_054_raptor_1.corp_onr_classic_007_brain-drain_1.onr_v1_054_raptor:icebreaker_abilities_increase_strength",
+        "rj.c1n5.c1n5.c1n5.c2l.348",
       reasonCode: "plan_first.runner.convert_run_window",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+          rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
           leafExecutorInstanceId:
-            "plan:runner.convert_run_window:run%3Arun_196",
+            "p9nlmml78ptx7h1ghtu23kmpnw",
           route: {
             actionType: "pump_breaker",
             capabilityId: "convert_active_run_window",
@@ -61,7 +57,7 @@ describe("selfplay cycle 164 decision checkpoints", () => {
     });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_assessment_evidence:runner_visible_encounter_requires_mitigation:onr_classic_007_brain-drain",
+        "plan_assessment_evidence:runner_visible_encounter_requires_mitigation:11",
       ]),
     );
   });

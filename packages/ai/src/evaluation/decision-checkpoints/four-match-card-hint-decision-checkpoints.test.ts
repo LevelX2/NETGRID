@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { describe, expect, it } from "vitest";
 
 import disgruntledArchivesJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-four-match-01-disgruntled-archives.json";
@@ -22,7 +23,7 @@ describe("four-match card-hint decision checkpoints", () => {
     if (!selectedAction) throw new Error("Expected selected reserve action");
     const decision = result.decision;
     if (!decision) throw new Error("Expected plan-owned reserve decision");
-    const defensePlanInstanceId = "plan:runner.defense_and_recovery:runner";
+    const defensePlanInstanceId = "p1gzjb6yfcv4zbzow512kexs33";
     expect(decision).toMatchObject({
       actionId: selectedAction.actionId,
       reasonCode: "plan_first.runner.defense_and_recovery",
@@ -65,7 +66,7 @@ describe("four-match card-hint decision checkpoints", () => {
     );
     const insideJobAction = result.input.legalActions.find(
       (action) =>
-        action.actionId.includes("inside-job") &&
+        referencesDefaultDeckCard(action.actionId, 306) &&
         action.actionId.includes(".rd."),
     );
     if (!insideJobAction)
@@ -93,7 +94,7 @@ describe("four-match card-hint decision checkpoints", () => {
     );
     const directHqEvaluation = evaluateRunnerRunTargets({
       input: result.input,
-    }).find((entry) => entry.actionId === "runner.start_run.hq");
+    }).find((entry) => entry.actionId === "rs.hq");
     expect(directHqEvaluation).toMatchObject({
       targetServerId: "hq",
       accessServerId: "hq",
@@ -105,9 +106,25 @@ describe("four-match card-hint decision checkpoints", () => {
         fundingGap: 0,
         unknownIceCount: 0,
       },
-      unavoidableVisibleIceHazardCount: 1,
+      unavoidableVisibleIceHazardCount: 0,
+      visibleIceRunHazards: expect.arrayContaining([
+        expect.objectContaining({
+          kind: "trace_tag",
+          minimumAvoidanceCost: 0,
+          unavoidable: false,
+        }),
+      ]),
     });
-    expect(directHqEvaluation?.score).toBeLessThan(0);
+
+    const unprotected = structuredClone(result.input);
+    unprotected.playerView.own.rig = unprotected.playerView.own.rig!.filter(
+      (card) => card.definitionId !== 373,
+    );
+    const unprotectedHq = evaluateRunnerRunTargets({ input: unprotected }).find(
+      (entry) => entry.actionId === "rs.hq",
+    );
+    expect(unprotectedHq?.unavoidableVisibleIceHazardCount).toBe(1);
+    expect(unprotectedHq?.score).toBeLessThan(0);
   });
 });
 

@@ -14,19 +14,19 @@ import {
   toRunnerTurnFromCorpMain,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 
-const PROTECTED_RESOURCES = "onr_classic_053_protected-resources";
-const PHONE_FREAK = "onr_classic_054_phone-freak";
+const PROTECTED_RESOURCES = 57;
+const PHONE_FREAK = 58;
 
 const CORP_DECK: DeckDefinition = {
   id: "classic_silent_impact_corp",
   name: "Classic Silent Impact Corp",
   side: "corp",
-  identity: "corp_identity_001",
+  identity: 3,
   cards: [
     { id: PROTECTED_RESOURCES, quantity: 1 },
-    { id: "simple_agenda", quantity: 8 },
-    { id: "simple_barrier_ice", quantity: 4 },
-    { id: "simple_economy_operation", quantity: 12 },
+    { id: 588, quantity: 8 },
+    { id: 589, quantity: 4 },
+    { id: 596, quantity: 12 },
   ],
 };
 
@@ -34,13 +34,13 @@ const RUNNER_DECK: DeckDefinition = {
   id: "classic_silent_impact_runner",
   name: "Classic Silent Impact Runner",
   side: "runner",
-  identity: "runner_identity_001",
+  identity: 587,
   cards: [
     { id: PHONE_FREAK, quantity: 1 },
-    { id: "simple_setup_hardware", quantity: 3 },
-    { id: "simple_fracter", quantity: 3 },
-    { id: "simple_economy_event", quantity: 12 },
-    { id: "simple_run_event", quantity: 8 },
+    { id: 602, quantity: 3 },
+    { id: 597, quantity: 3 },
+    { id: 595, quantity: 12 },
+    { id: 600, quantity: 8 },
   ],
 };
 
@@ -82,7 +82,7 @@ describe("Classic Silent Impact v2.2b", () => {
     const sourceId = addRezzedCorpRootForTest(
       state,
       PROTECTED_RESOURCES,
-      "remote_1",
+      "r1",
       "protected",
     );
 

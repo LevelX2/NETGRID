@@ -1,4 +1,5 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { readKnownCorpCentralAgendaThreat } from "../corp/defense/corp-central-defense-facts-adapter";
 
@@ -21,6 +22,8 @@ export function corpPassTaxRezAssessment(
   );
   const run = input.playerView.run;
   if (
+    input.side !== "corp" ||
+    !run ||
     q.actionId !== candidate.actionId ||
     q.sourceCardInstanceId !== source.instanceId ||
     q.targetServerId !== serverId ||
@@ -28,7 +31,7 @@ export function corpPassTaxRezAssessment(
     q.runId !== run?.runId ||
     run.attackedServerId !== serverId ||
     run.position?.kind !== "ice" ||
-    !action ||
+    !actionMatchesCurrentDecision(input, action) ||
     action.type !== "rez_card" ||
     action.source !== source.instanceId ||
     action.expiresAtStateVersion !== q.stateVersion ||

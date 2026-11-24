@@ -4,8 +4,9 @@ import {
   type ServerId,
   type VisibleCard,
 } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
+import { requireVisibleAgendaPoints } from "../../runtime/visible-agenda-facts";
 import { isFiniteNonNegativeInteger } from "../../runtime/exact-action-cost-facts";
 import { assessCorpScoreProtection } from "../../runtime/corp-score-protection-assessment";
 import { allocateCorpCentralDefenseFromAiFacts } from "./corp-central-defense-facts-adapter";
@@ -23,6 +24,23 @@ export function corpScoredAgendaFreeRezDefenseTarget(
       rezCredits: number;
     }>
   | undefined {
+  const sourceAgenda = input.playerView.servers
+    .flatMap((server) => server.root)
+    .find(
+      (card) =>
+        card.instanceId === sourceAgendaId &&
+        card.known &&
+        card.type === "agenda",
+    );
+  if (!sourceAgenda) missingDefenseNeed(input, "the exact scored agenda");
+  const agendaPointsAfterScore =
+    input.playerView.own.agendaPoints +
+    requireVisibleAgendaPoints(input, sourceAgenda);
+  if (!Number.isSafeInteger(agendaPointsAfterScore))
+    missingDefenseNeed(
+      input,
+      "safely representable Corp agenda points after scoring",
+    );
   const targets = input.playerView.servers
     .flatMap((server) =>
       server.ice.map((card) => ({ card, serverId: server.id })),
@@ -32,8 +50,8 @@ export function corpScoredAgendaFreeRezDefenseTarget(
         card.known === true &&
         card.type === "ice" &&
         card.rezzed === false &&
-        typeof card.definitionId === "string" &&
-        card.definitionId.length > 0 &&
+        typeof card.definitionId === "number" &&
+        card.definitionId > 0 &&
         card.effectiveRezCostQuote?.context === "installed" &&
         card.effectiveRezCostQuote.cardId === card.instanceId &&
         card.effectiveRezCostQuote.targetServerId === serverId &&
@@ -41,7 +59,12 @@ export function corpScoredAgendaFreeRezDefenseTarget(
         card.effectiveRezCostQuote.expiresAtStateVersion ===
           input.playerView.stateVersion &&
         card.effectiveRezCostQuote.complete === true &&
-        isFiniteNonNegativeInteger(card.effectiveRezCostQuote.finalCredits),
+        isFiniteNonNegativeInteger(card.effectiveRezCostQuote.finalCredits) &&
+        isFiniteNonNegativeInteger(
+          card.effectiveRezCostQuote.mandatoryAdditionalCosts.agendaPoints,
+        ) &&
+        card.effectiveRezCostQuote.mandatoryAdditionalCosts.agendaPoints <=
+          agendaPointsAfterScore,
     )
     .map(({ card, serverId }) => {
       const quote = card.effectiveRezCostQuote;
@@ -155,7 +178,7 @@ function corpScoredAgendaIceSubtypeIsBreakable(
   subtypes: readonly string[],
 ): boolean {
   if (!ice.definitionId) return false;
-  const definition = CARD_DEFINITIONS_BY_ID[ice.definitionId];
+  const definition = planningCardFactsByDefinitionId(ice.definitionId);
   const subroutines = (definition?.subroutines ?? []).map((subroutine) => ({
     id: subroutine.id,
     type: subroutine.type,

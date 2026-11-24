@@ -1,3 +1,4 @@
+import { type CardDefinitionId } from "@netgrid/shared";
 import {
   deckFormatProfiles08Data as profilesData,
   deckFormatProfiles130Data as profilesData130,
@@ -185,29 +186,31 @@ function availableCardsById(): DeckValidationContext["cardsById"] {
 }
 
 function deckCardsAvailable(deck: {
-  identityCardId?: string;
-  identity?: string;
-  cards: Array<{ cardId?: string; id?: string }>;
+  identityCardId?: CardDefinitionId;
+  identity?: CardDefinitionId;
+  cards: Array<{ cardId?: CardDefinitionId; id?: CardDefinitionId }>;
 }): boolean {
   if (testCardsEnabledFromEnvironment(process.env)) return true;
   const cardsById = createRuntimeCardsById();
   const ids = [
     deck.identityCardId ?? deck.identity,
     ...deck.cards.map((entry) => entry.cardId ?? entry.id),
-  ].filter((id): id is string => typeof id === "string");
+  ].filter((id): id is CardDefinitionId => typeof id === "number");
   return ids.every((id) => cardsById[id]?.setId !== TEST_CARD_SET_ID);
 }
 
 function rulesBaselineForDeck(deck: EditableDeck): string {
+  const cardsById = createRuntimeCardsById();
   if (
     deck.cards.some(
       (entry) =>
-        entry.cardId.startsWith("onr_v1_") || entry.cardId.startsWith("v094_"),
+        cardsById[entry.cardId]?.setId === "originalset-v1" ||
+        cardsById[entry.cardId]?.printingId.startsWith("v094_"),
     )
   )
     return "rules-baseline-mvp-0.94";
   if (
-    deck.cards.some((entry) => entry.cardId.startsWith("v08_")) ||
+    deck.cards.some((entry) => cardsById[entry.cardId]?.printingId.startsWith("v08_")) ||
     deck.cardPoolSnapshotId === "card-snapshot-0.8"
   )
     return "rules-baseline-mvp-0.8";

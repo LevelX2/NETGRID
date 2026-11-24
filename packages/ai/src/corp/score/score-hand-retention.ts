@@ -1,15 +1,17 @@
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import {
+  planningCardByDefinitionId,
+  planningCardFactsByDefinitionId,
+} from "@netgrid/cards/planning";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 import { corpFixedOperationPlayCredits } from "../../runtime/corp-canonical-card-facts";
 
 /** The cleanup comparison can price plain action bursts as a group. More
  * complex conversion effects keep their existing per-card disposition. */
-export function fixedCorpScoreActionBurst(definitionId: string) {
+export function fixedCorpScoreActionBurst(definitionId: number) {
   const credits = corpFixedOperationPlayCredits(definitionId);
   if (credits === undefined) return undefined;
   const abilities =
-    cardSpecPlanningCardByDefinitionId(definitionId)?.planning.engine.abilities;
+    planningCardByDefinitionId(definitionId)?.engine.abilities;
   if (abilities?.length !== 1) return undefined;
   const [ability] = abilities;
   if (
@@ -60,17 +62,17 @@ export function prepareCorpScoreHandRetention(input: AiDecisionInput) {
     let value = 0;
     function considerAgenda(card: VisibleCard, installClicks: number) {
       const definition = card.definitionId
-        ? CARD_DEFINITIONS_BY_ID[card.definitionId]
+        ? planningCardFactsByDefinitionId(card.definitionId)
         : undefined;
       if (
         !card.known ||
         definition?.type !== "agenda" ||
-        definition.advancementRequirement === undefined
+        card.advancementRequirement === undefined
       )
         return;
       const advances = Math.max(
         0,
-        definition.advancementRequirement - (card.advancementCounters ?? 0),
+        card.advancementRequirement - (card.advancementCounters ?? 0),
       );
       const clicks = advances + installClicks;
       const points = card.agendaPoints ?? definition.agendaPoints;

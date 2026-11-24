@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
@@ -6,22 +7,50 @@ import { latestTraceContext } from "./trace-context";
 describe("latestTraceContext", () => {
   it("reads the public trace limit without inventing a starting value", () => {
     const input = traceInput();
+    input.playerView.stateVersion = 2;
     input.eventTail = [
       {
-        eventId: "trace-started",
+        eventId: 3,
         type: "play_operation",
         stateVersionBefore: 1,
         stateVersionAfter: 2,
         stateHashAfter: "hash",
-        publicPayload: { traceLimit: 5 },
+        publicPayload: {
+          traceLimit: 5,
+          effectiveTraceLimit: 3,
+          traceRulesProfile: "classic_blind",
+        },
       },
     ];
 
     expect(latestTraceContext(input)).toMatchObject({
       traceLimit: 5,
+      effectiveTraceLimit: 3,
+      traceRulesProfile: "classic_blind",
       runnerLink: 0,
     });
     expect(latestTraceContext(input).traceValue).toBeUndefined();
+  });
+
+  it("uses the Runner's own payment capacity in its view", () => {
+    const input = traceInput();
+    input.side = "runner";
+    input.playerView.side = "runner";
+    input.playerView.own.credits = 2;
+    input.playerView.trace = {
+      traceId: 1,
+      sourceDefinitionId: 461,
+      profile: "modern_open",
+      phase: "runner_bid",
+      printedTrace: 5,
+      effectiveTraceLimit: 5,
+      bidsRevealed: true,
+      corpBidCommitted: true,
+      runnerBidCommitted: false,
+      visibleOpponentBidCapacity: 9,
+    };
+
+    expect(latestTraceContext(input).runnerMaximumPreRevealStrength).toBe(2);
   });
 
   it("includes visible static Runner link before the Runner bid", () => {
@@ -30,7 +59,7 @@ describe("latestTraceContext", () => {
     input.playerView.opponent.rig = [
       {
         instanceId: "link-card",
-        definitionId: "visible-link-card",
+        definitionId: syntheticCardDefinitionId("visible-link-card"),
         known: true,
         baseLink: 2,
       },
@@ -41,9 +70,10 @@ describe("latestTraceContext", () => {
 
   it("merges the public Corp bid when the visible trace omits resolved strength", () => {
     const input = traceInput();
+    input.playerView.stateVersion = 4;
     input.playerView.trace = {
-      traceId: "hunter-trace",
-      sourceDefinitionId: "onr_v1_249_hunter",
+      traceId: 2,
+      sourceDefinitionId: 461,
       profile: "modern_open",
       phase: "runner_bid",
       printedTrace: 5,
@@ -55,16 +85,30 @@ describe("latestTraceContext", () => {
     };
     input.eventTail = [
       {
-        eventId: "corp-bid",
+        eventId: 4,
         type: "resolve_choice",
         stateVersionBefore: 2,
         stateVersionAfter: 3,
         stateHashAfter: "hash",
         publicPayload: {
-          sourceDefinitionId: "onr_v1_249_hunter",
+          sourceDefinitionId: 461,
+          traceId: 2,
           traceValue: 2,
           corpBid: 2,
           runnerLink: 0,
+        },
+      },
+      {
+        eventId: 5,
+        type: "resolve_choice",
+        stateVersionBefore: 3,
+        stateVersionAfter: 4,
+        stateHashAfter: "hash-other",
+        publicPayload: {
+          traceId: 3,
+          sourceDefinitionId: 461,
+          traceValue: 5,
+          corpBid: 5,
         },
       },
     ];

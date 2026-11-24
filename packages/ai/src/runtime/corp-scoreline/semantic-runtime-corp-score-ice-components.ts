@@ -1,4 +1,4 @@
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import type {
   AiDecisionInput,
   AiDecisionScoreComponent,
@@ -8,7 +8,6 @@ import type {
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate";
 import { corpPurgeImpactScoreComponent } from "../../corp/virus-pressure/corp-purge-impact";
 import { corpCurrentRunAccessServerId } from "../../corp/defense/corp-central-defense-facts-adapter";
-import { semanticRuntimeCorpEffectiveDefenseContext } from "../semantic-runtime-corp-effective-defense";
 import { visibleCardDefinition } from "../card-definition-lookup";
 import { createAiHintsByCard } from "../../ai-hints";
 import { rolesMatch } from "../../role-match";
@@ -17,77 +16,7 @@ import {
   traceActionLeavesImmediatePunishWindow,
   traceTagExpectedSuccessEstimate,
 } from "../trace-tag-success-estimate";
-import { type SemanticRuntimeCorpScoreDependencies } from "./semantic-runtime-corp-score-contracts";
-import {
-  corpBurstEconomyOperationForAction,
-  positiveOrZeroNumber,
-  semanticRuntimeCorpActionCreditCost,
-  visibleActionSourceId,
-} from "./semantic-runtime-corp-score-action-economy";
-import {
-  corpServerIceLocation,
-  minimumInnerUnrezzedIceRezCost,
-} from "./semantic-runtime-corp-score-install-sequencing";
-
 const AI_HINTS_BY_CARD = createAiHintsByCard();
-
-export function corpInstallServerId(action: LegalAction): string | undefined {
-  const serverId =
-    action.payload?.serverId ??
-    action.payload?.targetServerId ??
-    action.payload?.attackedServerId;
-  return typeof serverId === "string" ? serverId : undefined;
-}
-
-export function corpDownstreamRezReserveAssessment<TConsumer extends string>(
-  input: AiDecisionInput,
-  action: LegalAction,
-  actionSemanticCandidate: ActionSemanticCandidate | undefined,
-  dependencies: Pick<
-    SemanticRuntimeCorpScoreDependencies<TConsumer>,
-    "actionCreditCost"
-  >,
-  effectiveDefense: ReturnType<
-    typeof semanticRuntimeCorpEffectiveDefenseContext
-  >,
-): AiDecisionScoreComponent | undefined {
-  if (!effectiveDefense?.isRezzableNow) return undefined;
-  if (
-    !effectiveDefense.visibleBreakerCoverage &&
-    !effectiveDefense.zeroEffectRisk
-  ) {
-    return undefined;
-  }
-  const sourceId = visibleActionSourceId(action);
-  if (!sourceId) return undefined;
-  const location = corpServerIceLocation(input, sourceId);
-  if (!location || location.iceIndex <= 0) return undefined;
-  const innerRezFloor = minimumInnerUnrezzedIceRezCost(location);
-  if (innerRezFloor === undefined) return undefined;
-  const rezCost = semanticRuntimeCorpActionCreditCost(
-    dependencies,
-    action,
-    actionSemanticCandidate,
-  );
-  const postRezCredits = input.playerView.own.credits - rezCost;
-  if (postRezCredits >= innerRezFloor) return undefined;
-  const isCentral = location.server.id === "hq" || location.server.id === "rd";
-  const value = isCentral ? -1800 : -1300;
-  return {
-    key: "corp_downstream_rez_floor_preservation",
-    label: "Innere ICE-Reserve",
-    value,
-    reason: [
-      "downstream_rez_floor:blocked_after_current_rez",
-      `server:${location.server.id}`,
-      `post_rez_credits:${postRezCredits}`,
-      `inner_rez_floor:${innerRezFloor}`,
-      `visible_breaker_coverage:${effectiveDefense.visibleBreakerCoverage}`,
-      `zero_effect_risk:${effectiveDefense.zeroEffectRisk}`,
-      `downstream_reserve_value:${value}`,
-    ].join("|"),
-  };
-}
 
 export function corpRootRezTimingComponent(
   input: AiDecisionInput,
@@ -104,9 +33,9 @@ export function corpRootRezTimingComponent(
   const hint = AI_HINTS_BY_CARD.get(sourceCard.definitionId);
   const effects = hint?.effects ?? [];
   const installedAccessEffects =
-    cardSpecPlanningCardByDefinitionId(
+    planningCardByDefinitionId(
       sourceCard.definitionId,
-    )?.planning.engine.accessEffects?.filter(
+    )?.engine.accessEffects?.filter(
       (effect) =>
         effect.kind === "on_access" &&
         effect.sourceZones.includes("installed") &&
@@ -153,15 +82,16 @@ export function corpRootRezTimingComponent(
       ].join("|"),
     };
   }
-  const taxesAgendaAtAccess =
+  const protectsAtAccess =
     hint?.remoteRole?.kind === "agenda_steal_tax" ||
     effects.some(
       (effect) =>
-        effect.kind === "run_tax" &&
         effect.timing === "on_access" &&
-        effect.target === "agenda_steal_cost",
+        ((effect.kind === "run_tax" && effect.target === "agenda_steal_cost") ||
+          (effect.kind === "remote_protection" &&
+            effect.target === "access.corp_central_access_reduction")),
     );
-  const relevantServerId = taxesAgendaAtAccess
+  const relevantServerId = protectsAtAccess
     ? corpCurrentRunAccessServerId(input)
     : run?.attackedServerId;
   if (!run || relevantServerId !== location.id) {

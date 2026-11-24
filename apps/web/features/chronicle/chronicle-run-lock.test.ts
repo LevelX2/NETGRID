@@ -18,7 +18,7 @@ import {
 } from "../../app/chronicle";
 
 const messages = { de, en, fr };
-const definitionId = "onr_v1_247_haunting-inquisition";
+const definitionId = 459;
 
 function hauntingEncounterEvent(): PublicGameEvent {
   let state = toRunnerTurn(
@@ -129,7 +129,7 @@ describe("run-lock subroutine chronicle", () => {
         side: "runner",
         visibility: "private_to_side",
         sourceTitle: "Private source",
-        sourceDefinitionId: "private_source",
+        sourceDefinitionId: 9125,
       },
     ];
     const result = items(event, "en");

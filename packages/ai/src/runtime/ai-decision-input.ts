@@ -18,10 +18,8 @@ import {
   type DeckCapabilityProfile,
 } from "../deck-capabilities";
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
-import {
-  type AiDeckStrategyProfile,
-  type DeckDoctrineV2Diagnostic,
-} from "../deck-doctrine-strategy";
+import type { AiDeckStrategyProfile } from "../deck-doctrine-strategy";
+import type { DeckDoctrineV2Diagnostic } from "../deck-doctrine-diagnostic";
 import { buildDeckDoctrineRuntimeContext } from "../deck-doctrine-runtime-context";
 import {
   assertValidAiDeckSnapshotForRuntime,
@@ -40,7 +38,7 @@ import {
   type StrategicIntentState,
 } from "../strategic-intent-state";
 import { getStrategicIntentMemorySnapshot } from "../strategic-intent-memory";
-import { buildAiDecisionInputDto } from "../input-dto";
+import { buildAiDecisionInputDto, type AiDecisionChronicle } from "../input-dto";
 import {
   strategicIntentRevalidationFromCurrentPublicEvents,
   strategicIntentRevalidationPublicEventFacts,
@@ -53,7 +51,10 @@ import {
   type PlanningStateIdentity,
   type ObservedTurnPlanAction,
 } from "../plans/turn-planning-contracts";
-import { observeTurnPlanAction } from "./turn-plan-observation";
+import {
+  observeRandomizedRunnerRunStart,
+  observeTurnPlanAction,
+} from "./turn-plan-observation";
 import {
   buildRemoteDoctrineProfile,
   type RemoteDoctrineProfile,
@@ -86,6 +87,7 @@ export type AiDecisionInputWithDeckCapabilities = AiDecisionInput & {
   planningRulesContext?: PlanningRulesContext;
   planningStateIdentity?: PlanningStateIdentity;
   observedTurnPlanAction?: ObservedTurnPlanAction;
+  observedRandomizedRunnerRunStart?: ObservedTurnPlanAction;
   ownDeckSnapshot?: AiDeckStrategyDeckSnapshot;
   ownDeckCapabilities?: DeckCapabilityProfile;
   ownDeckStrategyProfile?: AiDeckStrategyProfile;
@@ -126,6 +128,7 @@ export function buildAiDecisionInput(
     actionNumber?: number;
     profileId?: string;
     eventTail?: PublicGameEvent[];
+    chronicle?: AiDecisionChronicle;
     ownDeckSnapshot: AiDeckStrategyDeckSnapshot;
     expectedDeckSnapshot?: Omit<AiDeckSnapshotRuntimeExpectation, "side">;
   },
@@ -138,8 +141,14 @@ export function buildAiDecisionInput(
       ...expectedDeckSnapshot,
     },
   );
-  const playerView = getPlayerView(state, side);
-  const legalActions = getLegalActions(state, side);
+  const playerView = getPlayerView(
+    state,
+    side,
+    options.chronicle ? { publicEventLimit: 0 } : {},
+  );
+  if (options.chronicle)
+    playerView.publicEvents = options.chronicle.project(state, side);
+  const legalActions = playerView.legalActions;
   if (side === "corp" && playerView.pendingChoice) {
     const choice = playerView.pendingChoice;
     const resolution = legalActions.find(
@@ -263,6 +272,10 @@ export function buildAiDecisionInput(
     stateVersion: state.stateVersion,
     event: state.eventLog.at(-1),
   });
+  const observedRandomizedRunnerRunStart = observeRandomizedRunnerRunStart(
+    state,
+    side,
+  );
   const enriched: AiDecisionInputWithDeckCapabilities = {
     ...input,
     planningRulesContext: buildPlanningRulesContext({
@@ -278,6 +291,9 @@ export function buildAiDecisionInput(
     }),
     planningStateIdentity: buildPlanningStateIdentity(input),
     ...(observedTurnPlanAction ? { observedTurnPlanAction } : {}),
+    ...(observedRandomizedRunnerRunStart
+      ? { observedRandomizedRunnerRunStart }
+      : {}),
     ownDeckSnapshot,
     ownDeckCapabilities,
     ownDeckStrategyProfile,

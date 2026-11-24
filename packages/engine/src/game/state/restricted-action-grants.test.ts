@@ -26,7 +26,7 @@ describe("restricted-action-grants", () => {
       {
         side: "runner",
         sourceCardInstanceId: "valu_pak" as CardInstanceId,
-        sourceDefinitionId: "onr_v1_117_valu-pak-software-bundle",
+        sourceDefinitionId: 329,
         actionType: "install_card",
         remainingActions: 5,
         costProfile: "temporary_credit_bundle",
@@ -79,7 +79,7 @@ describe("restricted-action-grants", () => {
         [RESTRICTED_ACTION_GRANT_KEYS.valuPakProgramInstall]: {
           side: "runner",
           sourceCardInstanceId: "valu_pak" as CardInstanceId,
-          sourceDefinitionId: "onr_v1_117_valu-pak-software-bundle",
+          sourceDefinitionId: 329,
           actionType: "install_card",
           remainingActions: invalidAmount,
           costProfile: "temporary_credit_bundle",
@@ -114,7 +114,7 @@ describe("restricted-action-grants", () => {
         {
           side: "runner",
           sourceCardInstanceId: "valu_pak" as CardInstanceId,
-          sourceDefinitionId: "onr_v1_117_valu-pak-software-bundle",
+          sourceDefinitionId: 329,
           actionType: "install_card",
           remainingActions: 1,
           costProfile: "temporary_credit_bundle",

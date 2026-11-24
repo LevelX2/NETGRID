@@ -99,7 +99,7 @@ describe("pairing557 staged harmless encounter resolution", () => {
     );
     expect(completeEncounterBreakerPayment(f.native.input, a)).toBeUndefined();
   });
-  it.each(["certificate", "full-break", "paid-continue", "ends-run"])(
+  it.each(["certificate", "full-break", "paid-continue", "ends-run", "stale-certificate"])(
     "preserves other obligations: %s",
     (kind) => {
       const f = original(),
@@ -113,6 +113,10 @@ describe("pairing557 staged harmless encounter resolution", () => {
       if (kind === "certificate")
         for (const b of i.legalActions)
           delete b.payload?.breakSubroutinePurpose;
+      if (kind === "stale-certificate")
+        for (const b of i.legalActions)
+          if (b.payload?.breakSubroutinePurpose === "zero_damage_no_secondary_effect")
+            b.expiresAtStateVersion -= 1;
       if (kind === "full-break") co.payload.encounterFullBreakDamage = 1;
       if (kind === "paid-continue") co.costs = [{ credits: 1 }];
       if (kind === "ends-run") co.payload.encounterWillEndRun = true;

@@ -85,7 +85,7 @@ describe("card-implementation-ability-limits", () => {
   it("uses run and trace lifecycle state for matching limit scopes", () => {
     const current = state();
     current.run = {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "hq",
       phase: "access",
       position: { kind: "server", serverId: "hq" },
@@ -109,9 +109,9 @@ describe("card-implementation-ability-limits", () => {
     expect(current.run?.successfulRunAbilityUsedSourceIds).toEqual([SOURCE_A]);
 
     current.trace = {
-      traceId: "trace_1",
+      traceId: 1,
       sourceCardInstanceId: "trace_source" as CardInstanceId,
-      sourceDefinitionId: "trace_definition",
+      sourceDefinitionId: 2594286542,
       traceLimit: 2,
       status: "post_bid_link",
       successEffect: { type: "none" },
@@ -143,9 +143,9 @@ describe("card-implementation-ability-limits", () => {
   it("blocks any second base-link source in the same trace attempt", () => {
     const current = state();
     current.trace = {
-      traceId: "trace_1",
+      traceId: 1,
       sourceCardInstanceId: "trace_source" as CardInstanceId,
-      sourceDefinitionId: "trace_definition",
+      sourceDefinitionId: 2594286542,
       traceLimit: 2,
       status: "base_link",
       successEffect: { type: "none" },

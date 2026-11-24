@@ -1,7 +1,7 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import { breakerCardBlocksAccessReachability } from "../../breaker-ontology-consumer";
-import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
+import { visibleRunnerPathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
@@ -19,7 +19,7 @@ function profile(
   card: VisibleCard,
 ): { capacityMu: number; creditCapacity: number } | undefined {
   const engine = card.definitionId
-    ? cardSpecPlanningCardByDefinitionId(card.definitionId)?.planning.engine
+    ? planningCardByDefinitionId(card.definitionId)?.engine
     : undefined;
   const host = engine?.hostedProgramCapacity;
   const pool = engine?.restrictedHostedCreditSource;
@@ -204,7 +204,7 @@ export function assessHostedBreakerDevelopment(
           s.ice.every((c) => c.known && c.rezzed),
       )
       .flatMap((server) => {
-        const traceContext = visibleIcePathTraceContext(input);
+        const traceContext = visibleRunnerPathTraceContext(input);
         const cost = (cards: readonly VisibleCard[]) => {
           const path = assessKnownRezzedIcePath(
             server.ice,

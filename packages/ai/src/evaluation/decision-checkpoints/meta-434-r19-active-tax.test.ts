@@ -65,8 +65,10 @@ it.each([false, true])(
     ).toBe("continue_run");
     expect(result.fallbackUsed).toBe(false);
     expect(
-      result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-    ).toContain("plan:runner.convert_run_window:");
+      result.decisionDebug?.planFirstDecision?.portfolio.find(
+        (instance) => instance.instanceId === result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+      )?.moduleId,
+    ).toBe("runner.convert_run_window");
     expect(result.decisionDebug?.planFirstDecision?.route).toMatchObject({
       actionId: result.actionId,
       stateVersion: input.playerView.stateVersion,

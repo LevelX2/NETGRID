@@ -14,34 +14,28 @@ export function runMatchProgressionBenchmarkSlot(
     slotConfig: AiDoctrineQualityBenchmarkConfig,
   ) => NonNullable<AiBenchmarkDeckSlotResult["benchmark"]>,
 ): AiBenchmarkDeckSlotResult {
-  const runnerDeckRef = deckReferenceLabel(slot.runner);
-  const corpDeckRef = deckReferenceLabel(slot.corp);
+  const slotMetadata = {
+    slotId: slot.slotId,
+    label: slot.label,
+    slotType: slot.slotType,
+    tuningUse: slot.tuningUse,
+    runnerArchetype: slot.runnerArchetype,
+    corpArchetype: slot.corpArchetype,
+    runnerDeckRef: deckReferenceLabel(slot.runner),
+    corpDeckRef: deckReferenceLabel(slot.corp),
+  };
   if (slot.status !== "runnable") {
     return {
-      slotId: slot.slotId,
-      label: slot.label,
-      slotType: slot.slotType,
+      ...slotMetadata,
       status: slot.status,
-      tuningUse: slot.tuningUse,
-      runnerArchetype: slot.runnerArchetype,
-      corpArchetype: slot.corpArchetype,
-      runnerDeckRef,
-      corpDeckRef,
-      reason: slot.pendingReason ?? "Slot ist nicht lauffaehig konfiguriert.",
+      reason: slot.pendingReason ?? "Slot ist nicht lauffähig konfiguriert.",
     };
   }
   const resolved = resolveBenchmarkDeckSlot(slot);
   if (!resolved.ok) {
     return {
-      slotId: slot.slotId,
-      label: slot.label,
-      slotType: slot.slotType,
+      ...slotMetadata,
       status: "disabled",
-      tuningUse: slot.tuningUse,
-      runnerArchetype: slot.runnerArchetype,
-      corpArchetype: slot.corpArchetype,
-      runnerDeckRef,
-      corpDeckRef,
       reason: resolved.reason,
     };
   }
@@ -53,28 +47,14 @@ export function runMatchProgressionBenchmarkSlot(
   const supportErrors = validateSimulationDeckSupport(slotConfig);
   if (supportErrors.length > 0) {
     return {
-      slotId: slot.slotId,
-      label: slot.label,
-      slotType: slot.slotType,
+      ...slotMetadata,
       status: "disabled",
-      tuningUse: slot.tuningUse,
-      runnerArchetype: slot.runnerArchetype,
-      corpArchetype: slot.corpArchetype,
-      runnerDeckRef,
-      corpDeckRef,
       reason: supportErrors.join(" | "),
     };
   }
   return {
-    slotId: slot.slotId,
-    label: slot.label,
-    slotType: slot.slotType,
+    ...slotMetadata,
     status: "runnable",
-    tuningUse: slot.tuningUse,
-    runnerArchetype: slot.runnerArchetype,
-    corpArchetype: slot.corpArchetype,
-    runnerDeckRef,
-    corpDeckRef,
     benchmark: runMatchProgressionBenchmark(slotConfig),
   };
 }

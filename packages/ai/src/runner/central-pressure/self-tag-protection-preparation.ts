@@ -1,5 +1,5 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { RunnerPressureSignal } from "../../plans/runner-tactical-plan-contracts";
 import { planInstanceIdForProposal } from "../../plans/plan-instance";
@@ -16,7 +16,7 @@ import type {
 function finiteOneTagCosts(card: VisibleCard): number[] {
   if (!card.known || !card.definitionId) return [];
   return (
-    cardSpecPlanningCardByDefinitionId(card.definitionId)?.planning.engine
+    planningCardByDefinitionId(card.definitionId)?.engine
       .tagPreventionSources ?? []
   ).flatMap((source) => {
     if (source.kind !== "avoid_tag" || source.amount !== 1) return [];
@@ -214,7 +214,7 @@ export function bindRunnerCentralSelfTagProtection(params: {
   if (!need) return { centralPressure, defense };
   return {
     centralPressure: centralPressure.map((parent) =>
-      parent.serverId === need.serverId
+      planInstanceIdForProposal({ moduleId: "runner.pressure_central", dedupeKey: parent.pressureId }) === need.parentPlanInstanceId
         ? {
             ...parent,
             reachable: false,

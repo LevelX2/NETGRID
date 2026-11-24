@@ -3,15 +3,15 @@ import { describe, expect, it } from "vitest";
 import { createGame } from "../create-game";
 import { visibleCorpIceRezResourceExchangeQuote } from "./visible-rez-resource-exchange-quote";
 
-const FILTER = "onr_v1_244_filter";
-const RENT_I_CON = "onr_classic_031_rent-i-con";
-const BARTMOSS = "onr_v1_005_bartmoss-memorial-icebreaker";
-const VEWY_VEWY_QUIET = "onr_v1_071_vewy-vewy-quiet";
-const CHIBA_BANK_ACCOUNT = "onr_proteus_133_chiba-bank-account";
-const GLACIER = "onr_classic_011_glacier";
-const JACKHAMMER = "onr_v1_036_jackhammer";
-const CRYSTAL_WALL = "onr_v1_232_crystal-wall";
-const PILE_DRIVER = "onr_v1_047_pile-driver";
+const FILTER = 456;
+const RENT_I_CON = 35;
+const BARTMOSS = 217;
+const VEWY_VEWY_QUIET = 283;
+const CHIBA_BANK_ACCOUNT = 191;
+const GLACIER = 15;
+const JACKHAMMER = 248;
+const CRYSTAL_WALL = 444;
+const PILE_DRIVER = 259;
 const FILTER_ID = "resource_exchange_filter" as CardInstanceId;
 const RENT_I_CON_ID = "resource_exchange_rent_i_con" as CardInstanceId;
 const VEWY_VEWY_QUIET_ID =
@@ -24,8 +24,8 @@ describe("visible Corp ICE rez resource exchange quote", () => {
     "quotes %i active outside gates through the projected rezzed source",
     (outsideCount) => {
       const { state, visibleIce } = resourceExchangeState();
-      state.cardInstances[FILTER_ID]!.definitionId = "onr_proteus_031_minotaur";
-      state.cardInstances[RENT_I_CON_ID]!.definitionId = "onr_v1_039_krash";
+      state.cardInstances[FILTER_ID]!.definitionId = 89;
+      state.cardInstances[RENT_I_CON_ID]!.definitionId = 251;
       state.runner.credits = 6;
       const server = state.corp.servers.find((s) => s.id === "rd")!;
       for (let i = 0; i < outsideCount; i++) {
@@ -42,7 +42,7 @@ describe("visible Corp ICE rez resource exchange quote", () => {
       const before = structuredClone(state);
       const quote = visibleCorpIceRezResourceExchangeQuote(state, FILTER_ID, {
         ...visibleIce,
-        definitionId: "onr_proteus_031_minotaur",
+        definitionId: 89,
         subtypes: ["sentry"],
         strength: 4,
       });
@@ -64,11 +64,11 @@ describe("visible Corp ICE rez resource exchange quote", () => {
 
   it("does not count unrezzed outside gates or active outside sentries", () => {
     const { state, visibleIce } = resourceExchangeState();
-    state.cardInstances[FILTER_ID]!.definitionId = "onr_proteus_031_minotaur";
+    state.cardInstances[FILTER_ID]!.definitionId = 89;
     const server = state.corp.servers.find((s) => s.id === "rd")!;
     for (const [i, definitionId, rezzed] of [
       [0, FILTER, false],
-      [1, "onr_proteus_011_brain-wash", true],
+      [1, 69, true],
     ] as const) {
       const id = `nonqualifying-outside-${i}` as CardInstanceId;
       server.ice.push(id);
@@ -83,7 +83,7 @@ describe("visible Corp ICE rez resource exchange quote", () => {
     expect(
       visibleCorpIceRezResourceExchangeQuote(state, FILTER_ID, {
         ...visibleIce,
-        definitionId: "onr_proteus_031_minotaur",
+        definitionId: 89,
         subtypes: ["sentry"],
         strength: 4,
       }),
@@ -122,7 +122,7 @@ describe("visible Corp ICE rez resource exchange quote", () => {
     const { state, visibleIce } = resourceExchangeState();
     state.runner.credits = 11;
     state.run!.runnerRunTemporaryCredits = {
-      sourceDefinitionId: "onr_v1_098_lucidrine-booster-drug",
+      sourceDefinitionId: 310,
       remaining: 2,
       returnUnusedAtRunEnd: true,
     };
@@ -428,7 +428,7 @@ function resourceExchangeState(): {
     strengthModifier: 0,
   };
   state.run = {
-    runId: "resource_exchange_run",
+    runId: 317781,
     attackedServerId: "rd",
     phase: "approach_ice",
     position: { kind: "ice", serverId: "rd", iceIndex: 0 },

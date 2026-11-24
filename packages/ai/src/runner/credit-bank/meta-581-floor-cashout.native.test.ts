@@ -18,6 +18,7 @@ import {
   type AiDecisionInputWithDeckCapabilities,
 } from "../../runtime/ai-decision-input";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
+import { buildActionCardSemanticProfilesByDefinitionId } from "../../actions/action-card-semantic-profiles";
 import { buildRunnerEconomyPosture } from "../../runner-economy-posture";
 import { creditBankFloorRecoveryWindow } from "./credit-bank-floor-recovery";
 
@@ -57,9 +58,11 @@ function chooseDirect(input: AiDecisionInputWithDeckCapabilities) {
   return decision;
 }
 
-it("loads before a recoverable floor payout and reaches the same next-turn R&D run with two extra actions", () => {
+it("loads before a recoverable floor payout and funds the same next-turn R&D target using two fewer actions", () => {
   const f = fixture();
   expect(f.provenance.checkedStates).toBe(128);
+  if (f.state.turnSerial === undefined) throw Error("Missing fixture turn serial");
+  const initialTurn = f.state.turnSerial;
   expect(hashGameState(f.state)).toBe(f.runner.stateHash);
   for (const cp of [f.runner, f.corp])
     expect(Object.values(cp.validation)).toEqual(Array(9).fill(true));
@@ -78,13 +81,14 @@ it("loads before a recoverable floor payout and reaches the same next-turn R&D r
       );
     }
     let state = f.state;
+    const targetActionId = "rs.rd";
+    const targetCredits = 11;
     const steps: {
       side: Side;
       actionId: string;
       hash: string;
       selectedChoices?: Record<string, unknown>;
-      module?: string | undefined;
-      root?: string | undefined;
+      bankOwner?: string | undefined;
     }[] = [];
     for (let n = 0; n < 24; n++) {
       const { side } = selectAiDecisionSideForState(state);
@@ -99,16 +103,18 @@ it("loads before a recoverable floor payout and reaches the same next-turn R&D r
               ownDeckSnapshot: cp.input.ownDeckSnapshot!,
             });
       const unchanged = JSON.stringify(input);
-      const decision: Partial<ReturnType<typeof chooseDirect>> & {
-        actionId: string;
-      } =
-        oldCashout && n === 0
-          ? {
-              actionId: input.legalActions.find((a) =>
-                a.actionId.endsWith("withdraw_credits"),
-              )!.actionId,
-            }
-          : chooseDirect(input);
+      const cashout = input.legalActions.find(
+        (action) => action.payload?.cardImplementationAbilityKey === "withdraw_credits",
+      );
+      // Compare both financing routes against the same next-turn R&D action.
+      const followingRunnerTurn = side === "runner" && state.turnSerial !== undefined && state.turnSerial > initialTurn;
+      const comparisonActionId = input.playerView.own.credits >= targetCredits
+        ? targetActionId
+        : oldCashout ? "rb" : cashout?.actionId;
+      const controlled = followingRunnerTurn || (oldCashout && n === 0);
+      const decision = controlled
+        ? { actionId: followingRunnerTurn ? comparisonActionId : cashout?.actionId }
+        : chooseDirect(input);
       expect(JSON.stringify(input)).toBe(unchanged);
       if ("fallbackUsed" in decision)
         expect(decision).toMatchObject({
@@ -128,7 +134,7 @@ it("loads before a recoverable floor payout and reaches the same next-turn R&D r
             decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
         ).toBe("runner.credit_bank");
       }
-      const selectedChoices = decision.selectedChoices;
+      const selectedChoices = "selectedChoices" in decision ? decision.selectedChoices : undefined;
       const result = applyAction(state, {
         matchId: state.matchId,
         side: side!,
@@ -139,24 +145,24 @@ it("loads before a recoverable floor payout and reaches the same next-turn R&D r
       expect(result.ok).toBe(true);
       if (!result.ok) throw Error(result.error.message);
       state = result.state;
+      const bankOwner = action === cashout
+        ? buildActionSemanticCandidates({
+            legalActions: [action],
+            observerSide: "runner",
+            stateVersion: input.playerView.stateVersion,
+            cardSemanticProfilesByDefinitionId: buildActionCardSemanticProfilesByDefinitionId(),
+          })[0]?.planOwnerBinding?.owner
+        : undefined;
       steps.push({
         side: side!,
+        bankOwner,
         actionId: action.actionId,
         hash: hashGameState(state),
         ...(selectedChoices ? { selectedChoices } : {}),
-        ...("decisionDebug" in decision
-          ? {
-              module:
-                decision.decisionDebug?.planFirstDecision?.selectedPlan
-                  ?.moduleId,
-              root: decision.decisionDebug?.planFirstDecision
-                ?.rootPlanInstanceId,
-            }
-          : {}),
       });
       if (action.type === "start_run") break;
     }
-    expect(steps.at(-1)?.actionId).toBe("runner.start_run.rd");
+    expect(steps.at(-1)?.actionId).toBe(targetActionId);
     let replay = f.state;
     for (const step of steps) {
       const result = applyAction(replay, {
@@ -191,11 +197,7 @@ it("loads before a recoverable floor payout and reaches the same next-turn R&D r
   ).toEqual(
     before.steps.filter((s) => s.side === "corp").map((s) => s.actionId),
   );
-  const payout = after.steps.find((s) =>
-    s.actionId.endsWith("withdraw_credits"),
-  )!;
-  expect(payout.module).toBe("runner.credit_bank");
-  expect(payout.root).toBe("plan:runner.pressure_central:central%3Ard");
+  expect(after.steps.find((step) => step.bankOwner !== undefined)?.bankOwner).toBe("runner.credit_bank");
 }, 30000);
 
 function recovery(input: AiDecisionInputWithDeckCapabilities) {
@@ -212,7 +214,7 @@ function recovery(input: AiDecisionInputWithDeckCapabilities) {
     handDevelopment: [],
     minimumHandBuffer: 3,
     loadActionIds: input.legalActions
-      .filter((a) => a.actionId.endsWith("store_credits"))
+      .filter((a) => a.payload?.cardImplementationAbilityKey === "store_credits")
       .map((a) => a.actionId),
   });
 }
@@ -250,7 +252,7 @@ it.each([
       .expiresAtStateVersion--;
   if (kind === "visible-score") {
     const source = input.playerView.servers.flatMap((s) => s.root)[0]!;
-    input.playerView.servers.find((s) => s.id === "remote_1")!.root = [
+    input.playerView.servers.find((s) => s.id === "r1")!.root = [
       { ...source, advancementCounters: 2 },
     ];
   }

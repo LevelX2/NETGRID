@@ -1,3 +1,5 @@
+import { isRemoteServerId } from "@netgrid/shared";
+import { isCardDefinitionId } from "@netgrid/shared";
 export type AiDecisionDebugRow = [string, string];
 
 export type AiDecisionDebugDeckStrategySummary = {
@@ -232,8 +234,8 @@ function aiDecisionDebugServerLabel(value: string): string {
   if (value === "hq") return "HQ";
   if (value === "rd") return "R&D";
   if (value === "archives") return "Archive";
-  if (value.startsWith("remote_"))
-    return `Remote ${value.slice("remote_".length)}`;
+  if (isRemoteServerId(value))
+    return `Remote ${value.slice(1)}`;
   return value;
 }
 
@@ -480,8 +482,8 @@ function aiDecisionDebugCardLabel(
   if (!entry) return "";
   return typeof entry.title === "string"
     ? entry.title
-    : typeof entry.definitionId === "string"
-      ? entry.definitionId
+    : isCardDefinitionId(entry.definitionId)
+      ? String(entry.definitionId)
       : "";
 }
 

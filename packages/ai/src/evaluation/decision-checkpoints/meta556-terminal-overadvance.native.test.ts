@@ -25,7 +25,7 @@ const recorded = JSON.parse(
   runtime: AiRuntimeCheckpointV1;
   validation: Record<string, boolean>;
 };
-const agendaId = "corp_onr_v1_214_project-babylon_2";
+const agendaId = "c2mu";
 beforeEach(resetResidentPlanPortfolioMemory);
 function native() {
   const cp = structuredClone(recorded);
@@ -96,16 +96,16 @@ describe("pairing 556 terminal overadvance", () => {
   it("copies bonus facts only for an identified visible card", () => {
     const { input } = native();
     const own = buildAiDecisionInputDto(input).playerView.servers.find(
-      (s) => s.id === "remote_1",
+      (s) => s.id === "r1",
     )!.root[0]!;
     expect(own).toMatchObject({
       overadvanceThreshold: 2,
       overadvanceReward: "agenda_points",
     });
-    input.playerView.servers.find((s) => s.id === "remote_1")!.root[0]!.known =
+    input.playerView.servers.find((s) => s.id === "r1")!.root[0]!.known =
       false;
     const unknown = buildAiDecisionInputDto(input).playerView.servers.find(
-      (s) => s.id === "remote_1",
+      (s) => s.id === "r1",
     )!.root[0]!;
     expect(unknown).not.toHaveProperty("overadvanceThreshold");
     expect(unknown).not.toHaveProperty("overadvanceReward");
@@ -138,9 +138,12 @@ describe("pairing 556 terminal overadvance", () => {
         missingActionCount: 0,
         conflictingActionCount: 0,
       });
-      expect(pf?.rootPlanInstanceId).toContain(
-        encodeURIComponent("agenda:" + agendaId + ":remote_1"),
-      );
+      expect(pf?.portfolio.find(
+        (instance) => instance.instanceId === pf.rootPlanInstanceId,
+      )).toMatchObject({
+        moduleId: "corp.score_agenda",
+        dedupeKey: `agenda:${agendaId}:r1`,
+      });
       expect(pf?.rootPlanInstanceId).toBe(pf?.leafExecutorInstanceId);
       expect(pf?.route).toMatchObject({
         actionId: result.actionId,

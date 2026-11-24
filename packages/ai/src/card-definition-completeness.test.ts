@@ -3,7 +3,7 @@ import type {
   CatalogCardType,
   CatalogNumericFields,
 } from "@netgrid/catalog";
-import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
 import { AI_HINTS_BY_CARD, RUNTIME_CARDS } from "./ai-hints";
@@ -18,7 +18,7 @@ describe("AI card definition completeness", () => {
           runtimeCard.statuses.playable,
       )
       .flatMap(([definitionId, runtimeCard]) => {
-        const authoritative = CARD_DEFINITIONS_BY_ID[definitionId];
+        const authoritative = planningCardFactsByDefinitionId(Number(definitionId));
         return authoritative?.type &&
           runtimeCard.type &&
           authoritative.type === physicalRuntimeType(runtimeCard.type)
@@ -38,7 +38,7 @@ describe("AI card definition completeness", () => {
 
   it("requires every active AI hint to bind the same authoritative type", () => {
     const invalid = [...AI_HINTS_BY_CARD].flatMap(([definitionId, hint]) => {
-      const authoritative = CARD_DEFINITIONS_BY_ID[definitionId];
+      const authoritative = planningCardFactsByDefinitionId(definitionId);
       return authoritative?.type &&
         hint.cardType &&
         authoritative.type === hint.cardType
@@ -65,7 +65,7 @@ describe("AI card definition completeness", () => {
 
   it("keeps authoritative Shared numeric and strength models aligned with Catalog", () => {
     const invalid = playableRuntimeCards().flatMap<object>((runtimeCard) => {
-      const authoritative = CARD_DEFINITIONS_BY_ID[runtimeCard.catalogCardId];
+      const authoritative = planningCardFactsByDefinitionId(runtimeCard.catalogCardId);
       if (!authoritative) {
         return [
           {

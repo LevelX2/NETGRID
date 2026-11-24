@@ -1,14 +1,15 @@
-import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
+import { visibleRunnerPathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { RunnerPressureSignal } from "../../plans/runner-tactical-plan-contracts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 
 type Source = {
   sourceCardInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   installed: boolean;
 };
 type Target = { targetIceInstanceId: string; trashCredits: number };
@@ -50,8 +51,7 @@ function currentQuote(
     q.schemaVersion !== "runner-post-break-trash-quote-v1" ||
     q.stateVersion !== input.playerView.stateVersion ||
     q.actionId !== action.actionId ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
-    action.timingPoint !== input.playerView.timingPoint ||
+    !actionMatchesCurrentDecision(input, action) ||
     q.serverId !== action.payload?.serverId ||
     !Array.isArray(q.sources) ||
     !Array.isArray(q.targets) ||
@@ -59,7 +59,7 @@ function currentQuote(
       (s: unknown): s is Source =>
         isRecord(s) &&
         typeof s.sourceCardInstanceId === "string" &&
-        typeof s.sourceDefinitionId === "string" &&
+        typeof s.sourceDefinitionId === "number" &&
         typeof s.installed === "boolean",
     ) ||
     !q.targets.every(
@@ -138,7 +138,9 @@ export function runnerPostBreakTrashPreparationSignals(
     )?.moduleState as
       | { kind: "central_pressure"; signal: RunnerPressureSignal }
       | undefined;
-    const commitment = priorState?.signal.postBreakTrashCommitment;
+    const commitment = priorState?.kind === "central_pressure"
+      ? priorState.signal.postBreakTrashCommitment
+      : undefined;
     if (
       commitment &&
       commitment.serverId === server.id &&
@@ -162,7 +164,7 @@ export function runnerPostBreakTrashPreparationSignals(
         view.own.credits - startCredits - target.trashCredits,
         server.root,
         view.opponent.credits,
-        visibleIcePathTraceContext(input),
+        visibleRunnerPathTraceContext(input),
       );
       if (
         path.canReachAccess &&
@@ -206,8 +208,9 @@ export function runnerPostBreakTrashPreparationSignals(
           : input.legalActions.find(
               (a) =>
                 a.type === "install_card" &&
+                actionMatchesCurrentDecision(input, a) &&
                 a.source === card.instanceId &&
-                !a.actionId.includes("trash_before") &&
+                a.payload?.runnerProgramTrashBeforeInstall !== true &&
                 !a.choiceRequirements?.length &&
                 candidates.some((c) => c.actionId === a.actionId),
             );
@@ -231,7 +234,7 @@ export function runnerPostBreakTrashPreparationSignals(
             target.trashCredits,
           server.root,
           view.opponent.credits,
-          visibleIcePathTraceContext(input),
+          visibleRunnerPathTraceContext(input),
         );
         if (
           !path.canReachAccess ||

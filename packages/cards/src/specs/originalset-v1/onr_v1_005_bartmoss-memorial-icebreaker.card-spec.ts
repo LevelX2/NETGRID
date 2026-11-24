@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_v1_005_bartmoss-memorial-icebreaker",
+      217,
     ),
     title: "Bartmoss Memorial Icebreaker",
     side: "runner",

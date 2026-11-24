@@ -193,7 +193,9 @@ function scoreComponentContribution(
 
 function scoreMap(trace: SemanticDecisionTrace): Record<string, number> {
   return Object.fromEntries(
-    trace.rankedActions.map((action) => [action.actionId, action.score]),
+    [...trace.rankedActions]
+      .sort((left, right) => left.actionId.localeCompare(right.actionId))
+      .map((action) => [action.actionId, action.score]),
   );
 }
 

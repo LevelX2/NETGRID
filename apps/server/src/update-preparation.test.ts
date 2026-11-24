@@ -106,9 +106,12 @@ describe("server-owned update preparation", () => {
       }
       const entered = deferred<void>();
       const continueLoad = deferred<void>();
-      const originalLoad = storage.load.bind(storage);
-      vi.spyOn(storage, "load").mockImplementationOnce(async (...args) => {
-        const record = await originalLoad(...args);
+      const loadMethod = kind === "reconnect" || kind === "bootstrap"
+        ? "loadForConnection"
+        : "load";
+      const originalLoad = storage[loadMethod].bind(storage);
+      vi.spyOn(storage, loadMethod).mockImplementationOnce(async (matchId: string) => {
+        const record = await originalLoad(matchId);
         entered.resolve();
         await continueLoad.promise;
         return record;
@@ -242,6 +245,7 @@ describe("server-owned update preparation", () => {
     const { service, storage, control, url } = await start();
     await control("POST");
     const load = vi.spyOn(storage, "load");
+    const loadForConnection = vi.spyOn(storage, "loadForConnection");
     const operations = [
       () => service.createMatch({ hostSide: "runner" }),
       () => service.joinMatch("missing", {}),
@@ -273,6 +277,7 @@ describe("server-owned update preparation", () => {
     for (const operation of operations)
       await expect(operation()).rejects.toThrow("update_preparing");
     expect(load).not.toHaveBeenCalled();
+    expect(loadForConnection).not.toHaveBeenCalled();
     const create = await fetch(`${url}/api/matches`, {
       method: "POST",
       headers: { "content-type": "application/json" },

@@ -10,7 +10,7 @@ describe("windowEventIconKindForActionCue", () => {
     ["hq", "HQ", "run-hq"],
     ["rd", "R&D", "run-rd"],
     ["archives", "Archive", "run-archives"],
-    ["remote_2", "Remote 2", "run-remote"],
+    ["r2", "Remote 2", "run-remote"],
   ])("marks a run on %s with its target", (serverId, serverLabel, expected) => {
     expect(
       windowEventIconKindForActionCue({

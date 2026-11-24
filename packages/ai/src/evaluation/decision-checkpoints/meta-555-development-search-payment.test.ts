@@ -1,3 +1,4 @@
+import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-source-definitions";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
@@ -57,11 +58,12 @@ function begin() {
 afterEach(resetResidentPlanPortfolioMemory);
 it("preserves the native selected program target through Chiba support and resumes the same development executor", () => {
   const { cp, pending } = begin();
-  const target = "onr_v1_035_invisibility";
+  const target = 247;
   const support = checkpoint(156).input;
   const before = JSON.stringify([support.playerView, support.legalActions]);
   const paid = chooseAiAction(support);
-  expect(paid.actionId).toContain("chiba-bank-account");
+  const paidAction = support.legalActions.find((a) => a.actionId === paid.actionId)!;
+  expect(visibleSourceDefinitionsByInstanceId(support.playerView)[paidAction.source]).toBe(191);
   expect(paid.fallbackUsed).toBe(false);
   expect(JSON.stringify([support.playerView, support.legalActions])).toBe(
     before,
@@ -117,7 +119,7 @@ it.each(["target", "source", "version", "missing-selection", "root"])(
     )!;
     const commitment = (owner.moduleState as DevelopmentState).signal
       .programSearchCommitment!;
-    if (kind === "target") commitment.targetDefinitionId = "onr_v1_011_cloak";
+    if (kind === "target") commitment.targetDefinitionId = 223;
     else if (kind === "source")
       commitment.sourceCardInstanceId = "different-source";
     else if (kind === "version") commitment.plannedAtStateVersion += 1;

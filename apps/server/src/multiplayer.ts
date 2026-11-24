@@ -1,9 +1,19 @@
+import {
+  isCardDefinitionId,
+  isMatchEventId,
+  type CardDefinitionId,
+  type MatchEventId,
+  type RandomPurpose,
+} from "@netgrid/shared";
 import { createHash, randomBytes } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import { setTimeout as yieldToEventLoop } from "node:timers/promises";
 import { UpdateAdmission } from "./update-admission";
+import type { AiDecisionWorkerPool } from "./ai-decision-worker-pool";
+import type { LiveAiQuotes } from "./ai-decision-worker";
 import { probeHistoricalEngineState } from "./maintenance-engine-probe";
 import {
+  AiDecisionChronicle,
   assertValidAiDeckSnapshotForRuntime,
   beliefStateInvariantSignature,
   buildAiDecisionInput,
@@ -16,6 +26,7 @@ import {
   residentPlanPortfolioSnapshot,
   reconstructBeliefState,
   releaseAiMatchRuntime,
+  restoreAiRuntimeCheckpoint,
   restoreResidentPlanPortfolioMemorySnapshot,
   selectAiDecisionSideForState,
   withDecisionLocalCorpPunishRouteQuotes,
@@ -35,6 +46,7 @@ import {
 import { buildEngineDeck, type DeckSnapshot } from "@netgrid/decks";
 import {
   applyAction,
+  applyMatchActionOffer,
   applyRandomizedIceInstallSelection,
   applyRandomizedTurnPlanSelection,
   applyRandomizedTraceBidSelection,
@@ -54,6 +66,7 @@ import {
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
   CURRENT_RULES_BASELINE,
+  isRemoteServerId,
   sanitizeAiDecisionDebug,
   type ApiAiPacingMode,
   type ApiAiTurnPresentationState,
@@ -78,7 +91,6 @@ import {
   type ApiSeriesResultSummary,
   type ApiSeriesMode,
   type ApiSeriesStatus,
-  type ApiServicePayload,
   type ApiSidePayload,
   type ApiPlayerClockConfig,
   type ApiPlayerClockSnapshot,
@@ -90,6 +102,7 @@ import {
   type AiDifficulty,
   type AiDecisionDebug,
   type AiDecisionInput,
+  type ApplyActionOptions,
   type CorpPunishRouteQuoteSet,
   type DeckPublicMetadata,
   type EngineError,
@@ -100,6 +113,7 @@ import {
   type GameEvent,
   type GameState,
   type LegalAction,
+  type MatchActionSubmission,
   type PlayerAction,
   type PlayerController,
   type PlayerView,
@@ -142,6 +156,7 @@ import {
   type SpectatorProjectionV1,
 } from "./spectator-projection";
 import { chronicleTurnNumberForEvent } from "./chronicle-turn-context";
+import { publicEventHistorySummary, type PublicEventHistorySummary, type StoredPublicEventHistory } from "./public-event-history";
 import type {
   BackupManifest,
   StorageHealth,
@@ -165,6 +180,12 @@ import type {
   StorageMaintenanceSnapshotCompactionResult,
   StorageMaintenanceSummary,
 } from "./storage-sqlite";
+import {
+  aiAttemptStateSnapshotId,
+  INITIAL_STATE_SNAPSHOT_ID,
+  preActionStateSnapshotId,
+  type StateSnapshotId,
+} from "./state-snapshot-id";
 
 export type MatchStatus = ApiMatchStatus;
 export type HostSideSelection = Side | "random";
@@ -352,7 +373,7 @@ export type TokenRecord = {
 };
 
 export type StateSnapshot = {
-  snapshotId: string;
+  snapshotId: StateSnapshotId;
   matchId: string;
   stateVersion: number;
   matchVersion: number;
@@ -362,7 +383,10 @@ export type StateSnapshot = {
   hiddenInfoBarrier: boolean;
 };
 
-export type EventRecord = ServerEventRecord;
+export type EventRecord = ServerEventRecord & {
+  /** Server-private continuation and context persisted alongside this event. */
+  history?: StoredPublicEventHistory;
+};
 
 export type ActionReceipt = {
   idempotencyKey: string;
@@ -378,8 +402,8 @@ export type ActionReceipt = {
 export type UndoSnapshot = {
   undoRequestId: string;
   matchId: string;
-  targetEventId: string;
-  snapshotId: string;
+  targetEventId: MatchEventId;
+  snapshotId: StateSnapshotId | null;
   requestedBy: Side;
   status: UndoStatus;
   hiddenInfoSafe: boolean;
@@ -392,8 +416,11 @@ export type ActionPersistenceBaseline = {
   expectedStateVersion: number;
   publicEventCount: number;
   engineEventCount: number;
+  engineEventGeneration: number;
   actionReceiptCount: number;
   aiDecisionTraceCount: number;
+  loadedPublicEventCount: number;
+  loadedEngineEventCount: number;
   loadedActionReceiptCount: number;
   loadedAiDecisionTraceCount: number;
 };
@@ -401,6 +428,11 @@ export type ActionPersistenceBaseline = {
 export type ActionPersistenceLoadInput = {
   side: Side;
   idempotencyKey?: string;
+};
+
+export type ConnectionPersistenceInput = {
+  sessionId: string;
+  kind: "heartbeat" | "time_expired" | "countdown_cancelled";
 };
 
 export type StoredMatch = {
@@ -431,12 +463,13 @@ export type StoredMatch = {
   };
   pendingUndo?: PendingUndoRequest;
   actionPersistenceBaseline?: ActionPersistenceBaseline;
+  /** Prefix preceding the SQL-bounded public tail; never part of player payloads. */
+  publicHistoryPrefix?: PublicEventHistorySummary;
 };
 
 export type AiDecisionTraceRecord = {
-  traceId: string;
   matchId: string;
-  eventId: string;
+  eventId: MatchEventId;
   stateVersion: number;
   matchVersion: number;
   side: Side;
@@ -466,7 +499,7 @@ export type AiDecisionHistoricalLegalAction = {
   source: {
     kind: "card" | "basic_action" | "game_rule";
     sourceCardInstanceId?: string;
-    sourceDefinitionId?: string;
+    sourceDefinitionId?: CardDefinitionId;
   };
   timingPoint: LegalAction["timingPoint"];
   costs: LegalAction["costs"];
@@ -501,8 +534,8 @@ export type AiDecisionHistoricalAudit = {
     matchVersion: number;
     rulesBaseline: RulesBaseline;
     outcome?: "applied" | "failed_before_apply" | "rejected";
-    decisionEventId?: string;
-    eventAnchorId?: string;
+    decisionEventId?: MatchEventId;
+    eventAnchorId?: MatchEventId;
     selectedActionId?: string;
     validation: {
       actor: Side;
@@ -523,7 +556,7 @@ export type AiDecisionHistoricalAudit = {
   };
   analysisSnapshot: {
     schemaVersion: "netgrid-actor-analysis-snapshot-v1";
-    snapshotId: string;
+    snapshotId: StateSnapshotId;
     stateHash: string;
     stateVersion: number;
     matchVersion: number;
@@ -695,6 +728,11 @@ export type MultiplayerStorage = {
     input: ActionPersistenceLoadInput,
   ): Promise<StoredMatch | undefined>;
   saveActionDelta?(record: StoredMatch): Promise<void>;
+  loadForConnection?(matchId: string): Promise<StoredMatch | undefined>;
+  saveConnection?(
+    record: StoredMatch,
+    input: ConnectionPersistenceInput,
+  ): Promise<void>;
   list?(): Promise<StoredMatch[]>;
   listStartupReconciliationMetadata?(
     matchIds: readonly string[],
@@ -724,7 +762,8 @@ export type MultiplayerStorage = {
     filters?: { afterDecisionIndex?: number },
   ): Promise<StorageMaintenanceAiDecisionTraceIndexEntry[]>;
   maintenanceAiDecisionTraceDetail?(
-    traceId: string,
+    matchId: string,
+    decisionIndex: number,
   ): Promise<StorageMaintenanceAiDecisionTraceDetail | undefined>;
   maintenanceMatchAnalysis?(
     matchId: string,
@@ -776,10 +815,12 @@ export type StartupReconciliationInput = {
   terminalResultMatchIds: readonly string[];
 };
 
-export type SidePayload = ApiSidePayload;
+export type SidePayload = Omit<ApiSidePayload, "playerView"> & {
+  playerView: PlayerView;
+};
 export type AiTurnPresentationState = ApiAiTurnPresentationState;
 export type LobbyPayload = ApiLobbyPayload;
-export type ServicePayload = ApiServicePayload;
+export type ServicePayload = SidePayload | LobbyPayload;
 
 export type { ReplayPerspective } from "./event-projection";
 
@@ -824,7 +865,7 @@ export type ReplayStateHashCheck = {
 };
 
 export type ReplayTimelineStep = {
-  eventId: string;
+  eventId: MatchEventId;
   index: number;
   side?: Side;
   actionType: string;
@@ -844,14 +885,15 @@ export type ReplayTimelineStep = {
 };
 
 export type ReplayRandomDrawEntry = {
+  domain: "engine" | "ai_turn_plan_selection";
   counter: number;
-  purpose: string;
+  purpose: RandomPurpose[0];
   valueHash: string;
 };
 
 export type ReplayExploitSuggestion = {
   candidateId: string;
-  eventId: string;
+  eventId: MatchEventId;
   reason: string;
   status: "review_suggestion";
 };
@@ -911,10 +953,8 @@ export type CreateMatchResult = {
   mode: MatchMode;
   baseline: RulesBaseline;
   playerView: PlayerView;
-  legalActions: LegalAction[];
   matchVersion: number;
   lobby?: MatchStartLobbyPayload;
-  pendingChoice?: PlayerView["pendingChoice"];
   playerClock?: ApiPlayerClockSnapshot;
   aiTurnPresentation?: AiTurnPresentationState;
   winner?: Side | "draw";
@@ -930,11 +970,9 @@ export type JoinMatchResult = {
   side: Side;
   webSocketUrl: string;
   playerView: PlayerView;
-  legalActions: LegalAction[];
   matchVersion: number;
   matchStatus?: MatchStatus;
   lobby?: MatchStartLobbyPayload;
-  pendingChoice?: PlayerView["pendingChoice"];
   pendingUndo?: PendingUndoRequest & { needsResponse: boolean };
   aiTurnPresentation?: AiTurnPresentationState;
   playerClock?: ApiPlayerClockSnapshot;
@@ -944,7 +982,7 @@ export type JoinMatchResult = {
 };
 
 export type ReconnectResult = JoinMatchResult & {
-  eventTail: PublicGameEvent[];
+  eventTail?: PublicGameEvent[];
 };
 
 export type MaintenanceRecoveryAccessResult = {
@@ -1033,6 +1071,7 @@ export type AiDecisionPreview = {
   side: Side;
   generatedAt: string;
   actionId: string;
+  actionOfferId: number;
   actionType: LegalAction["type"];
   actionLabel: string;
   reasonCode: string;
@@ -1177,6 +1216,8 @@ export class MultiplayerService {
    */
   private readonly preparedAiDecisions = new Map<string, PreparedAiDecision>();
   private readonly aiRuntimeMatchIds = new Set<string>();
+  private readonly aiChronicle = new AiDecisionChronicle();
+  private readonly aiDecisionWorkers: AiDecisionWorkerPool | undefined;
 
   constructor(
     private readonly storage: MultiplayerStorage,
@@ -1188,6 +1229,7 @@ export class MultiplayerService {
       allowTestCards?: boolean;
       now?: () => string;
       chooseAiAction?: AiDecisionChooser;
+      aiDecisionWorkers?: AiDecisionWorkerPool;
       buildAiDecisionInput?: AiDecisionInputBuilder;
       applyAction?: EngineActionApplier;
       applyRandomizedIceInstallSelection?: EngineRandomizedIceInstallSelectionApplier;
@@ -1213,6 +1255,7 @@ export class MultiplayerService {
     this.allowTestCards = options.allowTestCards;
     this.now = options.now ?? (() => new Date().toISOString());
     this.chooseAiAction = options.chooseAiAction ?? chooseAiAction;
+    this.aiDecisionWorkers = options.aiDecisionWorkers;
     this.buildAiDecisionInput =
       options.buildAiDecisionInput ?? buildAiDecisionInput;
     this.applyEngineAction = options.applyAction ?? applyAction;
@@ -1265,10 +1308,14 @@ export class MultiplayerService {
     };
   }
 
-  private async persist(record: StoredMatch): Promise<void> {
+  private async persist(
+    record: StoredMatch,
+    options: { rewound?: boolean } = {},
+  ): Promise<void> {
     ensureMatchResultSnapshot(record);
     await this.storage.save(record);
-    this.releaseTerminalAiRuntime(record);
+    if (options.rewound) this.releaseAiRuntimeFor(record.match.matchId);
+    else this.releaseTerminalAiRuntime(record);
     for (const observer of this.persistenceObservers) await observer(record);
   }
 
@@ -1283,6 +1330,20 @@ export class MultiplayerService {
     for (const observer of this.persistenceObservers) await observer(record);
   }
 
+  private async persistConnection(
+    record: StoredMatch,
+    input: ConnectionPersistenceInput,
+  ): Promise<void> {
+    if (!this.storage.loadForConnection || !this.storage.saveConnection) {
+      await this.persist(record);
+      return;
+    }
+    ensureMatchResultSnapshot(record);
+    await this.storage.saveConnection(record, input);
+    this.releaseTerminalAiRuntime(record);
+    for (const observer of this.persistenceObservers) await observer(record);
+  }
+
   private releaseTerminalAiRuntime(record: StoredMatch): void {
     if (isTerminalStatus(record.match.status))
       this.releaseAiRuntimeFor(record.match.matchId);
@@ -1290,16 +1351,43 @@ export class MultiplayerService {
 
   private releaseAiRuntimeFor(matchId: string): void {
     releaseAiMatchRuntime(matchId);
+    this.aiChronicle.release(matchId);
     this.preparedAiDecisions.delete(matchId);
     this.aiRuntimeMatchIds.delete(matchId);
   }
 
-  private chooseMatchAiAction(
+  private async chooseMatchAiAction(
     record: StoredMatch,
-    ...args: Parameters<AiDecisionChooser>
-  ): ReturnType<AiDecisionChooser> {
+    input: AiDecisionInputWithDeckCapabilities,
+    state: GameState,
+    persistTacticalPlanMemory = true,
+  ): Promise<AiDecision> {
     this.aiRuntimeMatchIds.add(record.match.matchId);
-    return this.chooseAiAction(...args);
+    const quotes: LiveAiQuotes = {
+      quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
+      quoteRandomizedIceInstallSelection: (request) =>
+        quoteRandomizedIceInstallSelection(state, request),
+      quoteRandomizedTurnPlanSelection: (request) =>
+        quoteRandomizedTurnPlanSelection(state, request),
+      quoteRandomizedTraceBidSelection: (request) =>
+        quoteRandomizedTraceBidSelection(state, request),
+    };
+    if (!this.aiDecisionWorkers)
+      return this.chooseAiAction(input, { ...quotes, persistTacticalPlanMemory });
+
+    const deckSnapshotId = requiredCheckpointDeckSnapshotId(input);
+    const result = await this.aiDecisionWorkers.choose(
+      input,
+      exportAiRuntimeCheckpoint(input, deckSnapshotId),
+      quotes,
+      persistTacticalPlanMemory,
+    );
+    // The per-match lock is held while the worker decides. The Engine
+    // applies the result to the admitted state when a move is submitted.
+    restoreAiRuntimeCheckpoint(input, deckSnapshotId, result.runtime, {
+      preserveLiveCommitment: true,
+    });
+    return result.decision;
   }
 
   /**
@@ -1618,7 +1706,6 @@ export class MultiplayerService {
         mode,
         baseline: record.match.baseline,
         playerView: undefined as unknown as PlayerView,
-        legalActions: [],
         matchVersion: record.match.matchVersion,
         ...(lobbyPayload.playerClock
           ? { playerClock: lobbyPayload.playerClock }
@@ -1789,7 +1876,7 @@ export class MultiplayerService {
       actionReceipts: [],
       undoSnapshots: [],
       stateSnapshots: [
-        this.snapshotFor(matchId, gameState, 1, "snap_initial", false),
+        this.snapshotFor(matchId, gameState, 1, INITIAL_STATE_SNAPSHOT_ID, false),
       ],
     };
 
@@ -1813,11 +1900,7 @@ export class MultiplayerService {
       mode,
       baseline,
       playerView: payload.playerView,
-      legalActions: payload.legalActions,
       matchVersion: record.match.matchVersion,
-      ...(payload.pendingChoice
-        ? { pendingChoice: payload.pendingChoice }
-        : {}),
       ...(payload.playerClock ? { playerClock: payload.playerClock } : {}),
       ...(payload.aiTurnPresentation
         ? { aiTurnPresentation: payload.aiTurnPresentation }
@@ -1868,7 +1951,7 @@ export class MultiplayerService {
         };
       }
 
-      this.finalizeSeriesGame(record);
+      this.finalizeGameResult(record);
       if (
         series.status === "finished" ||
         series.results.length >= series.gamesPlanned
@@ -1933,7 +2016,7 @@ export class MultiplayerService {
       const participantDecks = participantDeckInputsForRecord(record);
       const next = await this.createMatch({
         hostSide: nextHostSide,
-        participantIdentities: record.match.participantIdentities,
+        ...(record.match.participantIdentities ? { participantIdentities: record.match.participantIdentities } : {}),
         displayName: input.displayName ?? session.displayName,
         seed: `${record.gameState.seed}:series-game-${nextGameNumber}`,
         mode: nextMode,
@@ -2101,13 +2184,9 @@ export class MultiplayerService {
       playerView: isSidePayload(payload)
         ? payload.playerView
         : (undefined as unknown as PlayerView),
-      legalActions: isSidePayload(payload) ? payload.legalActions : [],
       matchVersion: record.match.matchVersion,
       ...(!isSidePayload(payload) && payload.startLobby
         ? { lobby: payload.startLobby }
-        : {}),
-      ...(isSidePayload(payload) && payload.pendingChoice
-        ? { pendingChoice: payload.pendingChoice }
         : {}),
       ...(payload.playerClock ? { playerClock: payload.playerClock } : {}),
       ...(isSidePayload(payload) && payload.aiTurnPresentation
@@ -2334,7 +2413,6 @@ export class MultiplayerService {
         side: tokenRecord.allowedSide,
         webSocketUrl: this.webSocketUrl(),
         playerView: undefined as unknown as PlayerView,
-        legalActions: [],
         matchVersion: record.match.matchVersion,
         matchStatus: record.match.status,
         ...(lobbyPayload.playerClock
@@ -2353,11 +2431,7 @@ export class MultiplayerService {
       side: tokenRecord.allowedSide,
       webSocketUrl: this.webSocketUrl(),
       playerView: payload.playerView,
-      legalActions: payload.legalActions,
       matchVersion: record.match.matchVersion,
-      ...(payload.pendingChoice
-        ? { pendingChoice: payload.pendingChoice }
-        : {}),
       ...(payload.playerClock ? { playerClock: payload.playerClock } : {}),
       ...(payload.aiTurnPresentation
         ? { aiTurnPresentation: payload.aiTurnPresentation }
@@ -2381,7 +2455,9 @@ export class MultiplayerService {
     },
   ): Promise<ReconnectResult | { error: SafeErrorPayload }> {
     return this.updateAdmission.run(() =>
-      this.reconnectAdmittedMatch(matchId, input),
+      this.withMatchLock(matchId, () =>
+        this.reconnectAdmittedMatch(matchId, input),
+      ),
     );
   }
 
@@ -2389,7 +2465,7 @@ export class MultiplayerService {
     matchId: string,
     input: Parameters<MultiplayerService["reconnectMatch"]>[1],
   ): Promise<ReconnectResult | { error: SafeErrorPayload }> {
-    const record = await this.mustLoad(matchId);
+    const record = await this.loadConnection(matchId);
     if (!record)
       return {
         error: safeError(
@@ -2419,17 +2495,13 @@ export class MultiplayerService {
       };
 
     const now = this.now();
-    record.sessions = record.sessions.map((candidate) =>
-      candidate.sessionId === session.sessionId
-        ? {
-            ...candidate,
-            lastSeenAt: now,
-          }
-        : candidate,
-    );
-    this.syncPlayerClock(record, now);
+    session.lastSeenAt = now;
+    const timeExpired = this.syncPlayerClock(record, now);
     record.match.updatedAt = now;
-    await this.persist(record);
+    await this.persistConnection(record, {
+      sessionId: session.sessionId,
+      kind: timeExpired ? "time_expired" : "heartbeat",
+    });
 
     const payload = this.shouldUseLobbyPayload(record)
       ? this.lobbyPayloadFor(record, input.side)
@@ -2444,15 +2516,11 @@ export class MultiplayerService {
       playerView: isSidePayload(payload)
         ? payload.playerView
         : (undefined as unknown as PlayerView),
-      legalActions: isSidePayload(payload) ? payload.legalActions : [],
       matchVersion: record.match.matchVersion,
-      eventTail: payload.eventTail,
+      ...(!isSidePayload(payload) ? { eventTail: payload.eventTail } : {}),
       matchStatus: payload.matchStatus,
       ...(!isSidePayload(payload) && payload.startLobby
         ? { lobby: payload.startLobby }
-        : {}),
-      ...(isSidePayload(payload) && payload.pendingChoice
-        ? { pendingChoice: payload.pendingChoice }
         : {}),
       ...(payload.playerClock ? { playerClock: payload.playerClock } : {}),
       ...(isSidePayload(payload) && payload.pendingUndo
@@ -2560,15 +2628,11 @@ export class MultiplayerService {
       playerView: isSidePayload(payload)
         ? payload.playerView
         : (undefined as unknown as PlayerView),
-      legalActions: isSidePayload(payload) ? payload.legalActions : [],
       matchVersion: record.match.matchVersion,
-      eventTail: payload.eventTail,
+      ...(!isSidePayload(payload) ? { eventTail: payload.eventTail } : {}),
       matchStatus: payload.matchStatus,
       ...(!isSidePayload(payload) && payload.startLobby
         ? { lobby: payload.startLobby }
-        : {}),
-      ...(isSidePayload(payload) && payload.pendingChoice
-        ? { pendingChoice: payload.pendingChoice }
         : {}),
       ...(isSidePayload(payload) && payload.pendingUndo
         ? { pendingUndo: payload.pendingUndo }
@@ -2660,13 +2724,8 @@ export class MultiplayerService {
       side,
       webSocketUrl: this.webSocketUrl(),
       playerView: payload.playerView,
-      legalActions: payload.legalActions,
       matchVersion: record.match.matchVersion,
-      eventTail: payload.eventTail,
       matchStatus: payload.matchStatus,
-      ...(payload.pendingChoice
-        ? { pendingChoice: payload.pendingChoice }
-        : {}),
       ...(payload.pendingUndo ? { pendingUndo: payload.pendingUndo } : {}),
       ...(payload.playerClock ? { playerClock: payload.playerClock } : {}),
       ...(payload.aiTurnPresentation
@@ -2700,7 +2759,7 @@ export class MultiplayerService {
     options?: { allowLobby?: boolean },
   ): Promise<ServicePayload | { error: SafeErrorPayload }> {
     return this.withMatchLock(matchId, async () => {
-      const record = await this.mustLoad(matchId);
+      const record = await this.loadConnection(matchId);
       if (!record)
         return {
           error: safeError(
@@ -2713,10 +2772,15 @@ export class MultiplayerService {
         return {
           error: safeError("unauthorized", "Die Session ist nicht gültig."),
         };
-      session.lastSeenAt = this.now();
-      this.syncPlayerClock(record);
-      if (this.storage instanceof InMemoryMatchStorage)
-        await this.persist(record);
+      const now = this.now();
+      session.lastSeenAt = now;
+      const timeExpired = this.syncPlayerClock(record, now);
+      if (timeExpired || this.storage instanceof InMemoryMatchStorage) {
+        await this.persistConnection(record, {
+          sessionId: session.sessionId,
+          kind: timeExpired ? "time_expired" : "heartbeat",
+        });
+      }
       if (this.shouldUseLobbyPayload(record)) {
         const lobby = this.lobbyPayloadFor(record, side);
         return options?.allowLobby
@@ -2739,7 +2803,7 @@ export class MultiplayerService {
     connected: boolean,
   ): Promise<ServicePayload | { error: SafeErrorPayload }> {
     return this.withMatchLock(matchId, async () => {
-      const record = await this.mustLoad(matchId);
+      const record = await this.loadConnection(matchId);
       if (!record)
         return {
           error: safeError(
@@ -2754,22 +2818,28 @@ export class MultiplayerService {
         };
       session.connected = connected;
       session.lastSeenAt = this.now();
-      this.syncPlayerClock(record);
-      let persistentLifecycleChange = false;
-      if (
+      const timeExpired = this.syncPlayerClock(record, session.lastSeenAt);
+      const countdownCancelled =
         !connected &&
         record.match.status === "countdown" &&
-        record.startLobby
-      ) {
+        record.startLobby !== undefined;
+      if (countdownCancelled) {
         this.cancelCountdownFor(record, side);
-        persistentLifecycleChange = true;
       }
       const persistTransientConnectionState =
         this.storage instanceof InMemoryMatchStorage;
-      if (persistentLifecycleChange || persistTransientConnectionState) {
-        record.match.matchVersion += 1;
+      if (timeExpired || countdownCancelled || persistTransientConnectionState) {
+        const kind = timeExpired
+          ? "time_expired"
+          : countdownCancelled
+            ? "countdown_cancelled"
+            : "heartbeat";
+        if (!timeExpired) record.match.matchVersion += 1;
         record.match.updatedAt = this.now();
-        await this.persist(record);
+        await this.persistConnection(record, {
+          sessionId: session.sessionId,
+          kind,
+        });
       }
       if (this.shouldUseLobbyPayload(record))
         return this.lobbyPayloadFor(record, side);
@@ -3059,7 +3129,7 @@ export class MultiplayerService {
         finalEngineStateHash,
       };
       delete record.pendingUndo;
-      this.finalizeSeriesGame(record);
+      this.finalizeGameResult(record);
       await this.persist(record);
       return this.lifecycleResultFor(record, input.side);
     });
@@ -3278,16 +3348,41 @@ export class MultiplayerService {
     });
   }
 
-  async submitAction(input: {
+  submitActionOffer(
+    input: MatchActionSubmission & { sessionToken: string },
+  ): Promise<SubmitActionResult> {
+    return this.applySubmittedAction(input, (state, options) =>
+      applyMatchActionOffer(state, input, options),
+    );
+  }
+
+  submitAction(input: {
     matchId: string;
     side: Side;
     sessionToken: string;
     actionId: string;
     clientKnownStateVersion: number;
+    clientKnownMatchVersion: number;
     idempotencyKey: string;
     selectedTargets?: Record<string, string>;
     selectedChoices?: Record<string, unknown>;
   }): Promise<SubmitActionResult> {
+    const {
+      sessionToken: _sessionToken,
+      clientKnownMatchVersion: _version,
+      ...action
+    } = input;
+    return this.applySubmittedAction(input, (state, options) =>
+      applyAction(state, action, options),
+    );
+  }
+
+  private applySubmittedAction(
+    input: Omit<MatchActionSubmission, "actionId" | "selectedChoices" | "selectedTargets"> & {
+      sessionToken: string;
+    },
+    apply: (state: GameState, options: ApplyActionOptions) => EngineResult,
+  ): Promise<SubmitActionResult> {
     return this.withMatchLock(input.matchId, async () => {
       const record = await this.mustLoadForAction(input.matchId, {
         side: input.side,
@@ -3391,7 +3486,10 @@ export class MultiplayerService {
         };
       }
 
-      if (input.clientKnownStateVersion !== record.gameState.stateVersion) {
+      if (
+        input.clientKnownStateVersion !== record.gameState.stateVersion ||
+        input.clientKnownMatchVersion !== record.match.matchVersion
+      ) {
         const receipt = this.receiptFor(
           record,
           input.side,
@@ -3414,27 +3512,7 @@ export class MultiplayerService {
         };
       }
 
-      const action: PlayerAction = {
-        matchId: input.matchId,
-        side: input.side,
-        actionId: input.actionId,
-        clientKnownStateVersion: input.clientKnownStateVersion,
-        idempotencyKey: input.idempotencyKey,
-        ...(input.selectedTargets
-          ? { selectedTargets: input.selectedTargets }
-          : {}),
-        ...(input.selectedChoices
-          ? { selectedChoices: input.selectedChoices }
-          : {}),
-      };
-      const snapshot = this.snapshotFor(
-        input.matchId,
-        record.gameState,
-        record.match.matchVersion,
-        `snap_before_${record.gameState.stateVersion + 1}`,
-        false,
-      );
-      const result = applyAction(record.gameState, action, {
+      const result = apply(record.gameState, {
         publicEventsMode: "latest",
       });
       if (!result.ok) {
@@ -3461,8 +3539,15 @@ export class MultiplayerService {
       }
 
       const barrier = isHiddenInfoBarrier(result.event);
-      const undoSnapshot = { ...snapshot, hiddenInfoBarrier: barrier };
-      record.stateSnapshots.push(undoSnapshot);
+      record.stateSnapshots.push(
+        this.snapshotFor(
+          input.matchId,
+          record.gameState,
+          record.match.matchVersion,
+          preActionStateSnapshotId(result.state.stateVersion),
+          barrier,
+        ),
+      );
       record.gameState = result.state;
       record.eventLog.push(toEventRecord(input.matchId, result.event, barrier));
       const receipt = {
@@ -3607,7 +3692,7 @@ export class MultiplayerService {
         (input.mode === "until_human" && record.match.mode !== "ai_vs_ai") ||
         (input.mode === "batch" && record.match.mode === "ai_vs_ai")
           ? await this.runAiUntilNextHuman(record)
-          : this.runAiStep(record);
+          : await this.runAiStep(record);
       this.syncPlayerClock(record);
 
       if (!aiStepResult.ok && aiStepResult.code === "ai_decision_failed") {
@@ -3843,6 +3928,7 @@ export class MultiplayerService {
               record,
               activeAiSide,
             ),
+            chronicle: this.aiChronicle,
           });
           this.restoreResidentPlanPortfolioFor(record, aiInput);
         } catch (error) {
@@ -3858,16 +3944,7 @@ export class MultiplayerService {
             };
           throw error;
         }
-        decision = this.chooseMatchAiAction(record, aiInput, {
-          quoteCorpPunishRoute: (request) =>
-            quoteCorpPunishRoute(record.gameState!, request),
-          quoteRandomizedIceInstallSelection: (request) =>
-            quoteRandomizedIceInstallSelection(record.gameState!, request),
-          quoteRandomizedTurnPlanSelection: (request) =>
-            quoteRandomizedTurnPlanSelection(record.gameState!, request),
-          quoteRandomizedTraceBidSelection: (request) =>
-            quoteRandomizedTraceBidSelection(record.gameState!, request),
-        });
+        decision = await this.chooseMatchAiAction(record, aiInput, record.gameState);
         this.preparedAiDecisions.set(record.match.matchId, {
           stateVersion: record.gameState.stateVersion,
           side: activeAiSide,
@@ -4101,7 +4178,7 @@ export class MultiplayerService {
         record.match.aiControllers?.[opposite(input.targetSide)]?.difficulty ??
         "normal";
       const advisorProfileId = `${input.targetSide}-human-advisor-v0.9-${advisorDifficulty}`;
-      let aiInput: AiDecisionInput;
+      let aiInput: AiDecisionInputWithDeckCapabilities;
       try {
         const ownDeckSnapshot = assertRecordAiDeckSnapshotForRuntime(
           record,
@@ -4117,6 +4194,7 @@ export class MultiplayerService {
             record,
             input.targetSide,
           ),
+          chronicle: this.aiChronicle,
         });
       } catch (error) {
         if (isAiDeckSnapshotRuntimeError(error)) {
@@ -4132,17 +4210,9 @@ export class MultiplayerService {
         }
         throw error;
       }
-      const decision = this.chooseMatchAiAction(record, aiInput, {
-        persistTacticalPlanMemory: false,
-        quoteCorpPunishRoute: (request) =>
-          quoteCorpPunishRoute(record.gameState, request),
-        quoteRandomizedIceInstallSelection: (request) =>
-          quoteRandomizedIceInstallSelection(record.gameState, request),
-        quoteRandomizedTurnPlanSelection: (request) =>
-          quoteRandomizedTurnPlanSelection(record.gameState, request),
-        quoteRandomizedTraceBidSelection: (request) =>
-          quoteRandomizedTraceBidSelection(record.gameState, request),
-      });
+      const decision = await this.chooseMatchAiAction(
+        record, aiInput, record.gameState, false,
+      );
       if (
         decision.selectionKind === "engine_randomized_ice_install_selection" ||
         decision.selectionKind === "engine_randomized_turn_plan_selection" ||
@@ -4187,6 +4257,9 @@ export class MultiplayerService {
         side: input.targetSide,
         generatedAt: this.now(),
         actionId: legalAction.actionId,
+        actionOfferId: getLegalActions(record.gameState, input.targetSide).findIndex(
+          (candidate) => candidate.actionId === legalAction.actionId,
+        ) + 1,
         actionType: legalAction.type,
         actionLabel: legalAction.label,
         reasonCode: decision.reasonCode,
@@ -4215,7 +4288,8 @@ export class MultiplayerService {
     matchId: string;
     side: Side;
     sessionToken: string;
-    targetEventId: string;
+    targetEventId: MatchEventId;
+    clientKnownMatchVersion: number;
     reason?: string;
   }): Promise<UndoResult> {
     return this.withMatchLock(input.matchId, async () => {
@@ -4242,9 +4316,20 @@ export class MultiplayerService {
             "Undo ist aktuell nicht möglich.",
           ),
         };
-      const targetIndex = record.eventLog.findIndex(
-        (event) => event.eventId === input.targetEventId,
-      );
+      if (input.clientKnownMatchVersion !== record.match.matchVersion)
+        return {
+          ok: false,
+          error: safeError(
+            "stale_state",
+            "Der Spielzustand ist veraltet.",
+            record.gameState,
+            input.side,
+          ),
+          payload: this.payloadFor(record, input.side),
+        };
+      const targetIndex = isMatchEventId(input.targetEventId)
+        ? record.eventLog.findIndex((event) => event.eventId === input.targetEventId)
+        : -1;
       if (targetIndex < 0)
         return {
           ok: false,
@@ -4262,7 +4347,7 @@ export class MultiplayerService {
           undoRequestId: randomId("undo"),
           matchId: input.matchId,
           targetEventId: input.targetEventId,
-          snapshotId: "blocked",
+          snapshotId: null,
           requestedBy: input.side,
           status: "blocked",
           hiddenInfoSafe: false,
@@ -4278,11 +4363,13 @@ export class MultiplayerService {
           payload: this.payloadFor(record, input.side),
         };
       }
-      const snapshot = record.stateSnapshots.find(
-        (candidate) =>
-          candidate.snapshotId ===
-          `snap_before_${record.eventLog[targetIndex]?.stateVersionAfter}`,
-      );
+      const transition = record.eventLog[targetIndex]!.stateVersionAfter;
+      const snapshot = transition > 0
+        ? record.stateSnapshots.find(
+            (candidate) =>
+              candidate.snapshotId === preActionStateSnapshotId(transition),
+          )
+        : undefined;
       if (!snapshot)
         return {
           ok: false,
@@ -4325,7 +4412,7 @@ export class MultiplayerService {
           };
         record.match.matchVersion += 1;
         record.match.updatedAt = this.now();
-        await this.persist(record);
+        await this.persist(record, { rewound: true });
         return {
           ok: true,
           requesterPayload: this.payloadFor(record, input.side),
@@ -4377,7 +4464,9 @@ export class MultiplayerService {
         finalStateHash: "",
         errors: ["Match is not active."],
       };
-    const initial = record.stateSnapshots[0]?.gameState;
+    const initial = record.stateSnapshots.find(
+      (snapshot) => snapshot.snapshotId === INITIAL_STATE_SNAPSHOT_ID,
+    )?.gameState;
     if (!initial)
       return {
         ok: false,
@@ -4862,9 +4951,10 @@ export class MultiplayerService {
   }
 
   async storageMaintenanceAiDecisionTraceDetail(
-    traceId: string,
+    matchId: string,
+    decisionIndex: number,
   ): Promise<StorageMaintenanceAiDecisionTraceDetail | undefined> {
-    return this.storage.maintenanceAiDecisionTraceDetail?.(traceId);
+    return this.storage.maintenanceAiDecisionTraceDetail?.(matchId, decisionIndex);
   }
 
   async storageMaintenanceMatchAnalysis(
@@ -5290,9 +5380,14 @@ export class MultiplayerService {
   }
 
   closeStorage(): void {
+    this.aiDecisionWorkers?.close();
     for (const matchId of this.aiRuntimeMatchIds)
       this.releaseAiRuntimeFor(matchId);
     this.storage.close?.();
+  }
+
+  async warmUpAiWorker(): Promise<void> {
+    await this.aiDecisionWorkers?.warmUp();
   }
 
   private async resolveUndo(
@@ -5380,8 +5475,7 @@ export class MultiplayerService {
       }
       record.match.matchVersion += 1;
       record.match.updatedAt = this.now();
-      await this.persist(record);
-      if (status === "accepted") this.releaseAiRuntimeFor(record.match.matchId);
+      await this.persist(record, { rewound: status === "accepted" });
       return {
         ok: true,
         requesterPayload: this.payloadFor(record, pending.requestedBy),
@@ -5424,7 +5518,9 @@ export class MultiplayerService {
       (receipt) => receipt.stateVersionAfter <= snapshot.stateVersion,
     );
     record.stateSnapshots = record.stateSnapshots.filter(
-      (candidate) => candidate.stateVersion <= snapshot.stateVersion,
+      (candidate) =>
+        candidate.stateVersion <= snapshot.stateVersion &&
+        candidate.snapshotId !== snapshot.snapshotId,
     );
     return true;
   }
@@ -5655,7 +5751,11 @@ export class MultiplayerService {
     record.stateSnapshots = [];
   }
 
-  private syncPlayerClock(record: StoredMatch, nowIso = this.now()): boolean {
+  private syncPlayerClock(
+    record: StoredMatch,
+    nowIso = this.now(),
+    decision?: { side: Side; legalActions: readonly LegalAction[] },
+  ): boolean {
     const clock = record.match.playerClock;
     if (
       !clock ||
@@ -5667,12 +5767,12 @@ export class MultiplayerService {
       return false;
     const nowMs = Date.parse(nowIso);
     if (!Number.isFinite(nowMs)) return false;
-    const owner = this.playerClockDecisionOwner(record);
+    const owner = decision?.side ?? this.playerClockDecisionOwner(record);
     if (!owner) {
       delete clock.activity;
       return false;
     }
-    const key = this.playerClockActivityKey(record, owner);
+    const key = this.playerClockActivityKey(record, owner, decision?.legalActions);
     if (
       !clock.activity ||
       clock.activity.key !== key ||
@@ -5686,25 +5786,7 @@ export class MultiplayerService {
       };
       return false;
     }
-    const elapsedMs = Math.max(0, nowMs - clock.activity.startedAtMs);
-    if (clock.mode === "none") {
-      const consumedDeltaMs = Math.max(0, elapsedMs - clock.activity.chargedMs);
-      if (consumedDeltaMs <= 0) return false;
-      clock.consumedMs[owner] += consumedDeltaMs;
-      clock.activity.chargedMs += consumedDeltaMs;
-      return false;
-    }
-    const chargeableMs = Math.max(
-      0,
-      elapsedMs - clock.gracePeriodMs - clock.activity.chargedMs,
-    );
-    if (chargeableMs <= 0) return false;
-    clock.remainingMs[owner] = Math.max(
-      0,
-      clock.remainingMs[owner] - chargeableMs,
-    );
-    clock.activity.chargedMs += chargeableMs;
-    if (clock.remainingMs[owner] <= 0) {
+    if (settlePlayerClockActivity(clock, clock.activity, nowMs)) {
       this.terminalizeTimeExpired(record, owner, nowIso);
       return true;
     }
@@ -5727,10 +5809,14 @@ export class MultiplayerService {
     return undefined;
   }
 
-  private playerClockActivityKey(record: StoredMatch, owner: Side): string {
+  private playerClockActivityKey(
+    record: StoredMatch,
+    owner: Side,
+    legalActions?: readonly LegalAction[],
+  ): string {
     const state = record.gameState;
     const actions = state
-      ? getLegalActions(state, owner)
+      ? (legalActions ?? getLegalActions(state, owner))
           .map((action) => action.actionId)
           .sort()
           .join(",")
@@ -5774,14 +5860,15 @@ export class MultiplayerService {
     delete record.pendingUndo;
     record.eventLog.push(
       timeExpiredEventRecord(
-        record,
+        record.match.matchId,
+        record.gameState.stateVersion,
         expiredSide,
         winnerSide,
         nowIso,
         finalEngineStateHash,
       ),
     );
-    this.finalizeSeriesGame(record);
+    this.finalizeGameResult(record);
     this.revokeAllTokens(record, nowIso);
   }
 
@@ -5850,7 +5937,7 @@ export class MultiplayerService {
       schemaVersion: "player-clock-v1",
       mode: "player_clock",
       remainingMs: effectiveRemaining,
-      consumedMs: { ...clock.consumedMs },
+      consumedMs: timeSpentFromBudget(clock.startingTimeMs, effectiveRemaining),
       startingTimeMs: clock.startingTimeMs,
       gracePeriodMs: clock.gracePeriodMs,
       ...(decisionOwnerSide ? { decisionOwnerSide } : {}),
@@ -6113,7 +6200,7 @@ export class MultiplayerService {
         record.match.matchId,
         gameState,
         record.match.matchVersion,
-        "snap_initial",
+        INITIAL_STATE_SNAPSHOT_ID,
         false,
       ),
     ];
@@ -6124,10 +6211,19 @@ export class MultiplayerService {
     if (!record.gameState?.winner) return;
     record.match.status = "finished";
     record.match.winner = record.gameState.winner;
-    this.finalizeSeriesGame(record);
+    this.finalizeGameResult(record);
   }
 
-  private finalizeSeriesGame(record: StoredMatch): void {
+  private finalizeGameResult(record: StoredMatch): void {
+    const clock = record.match.playerClock;
+    if (clock?.activity) {
+      settlePlayerClockActivity(
+        clock,
+        clock.activity,
+        Date.parse(record.match.updatedAt),
+      );
+      delete clock.activity;
+    }
     const series = record.match.series;
     const state = record.gameState;
     const winner = record.lifecycleResult?.winnerSide ?? state?.winner;
@@ -6137,9 +6233,9 @@ export class MultiplayerService {
     if (
       !series.results.some((result) => result.matchId === record.match.matchId)
     ) {
-      const runnerAgendaPoints = getPlayerView(state, "runner").own
+      const runnerAgendaPoints = getPlayerView(state, "runner", { publicEventLimit: 0 }).own
         .agendaPoints;
-      const corpAgendaPoints = getPlayerView(state, "corp").own.agendaPoints;
+      const corpAgendaPoints = getPlayerView(state, "corp", { publicEventLimit: 0 }).own.agendaPoints;
       const lifecycleReason = record.lifecycleResult?.reason;
       const reason: GameResultReason =
         lifecycleReason === "forfeit" || lifecycleReason === "time_expired"
@@ -6179,7 +6275,7 @@ export class MultiplayerService {
       this.aiControllableSide(record);
       count += 1
     ) {
-      if (!this.runAiStep(record).ok) return;
+      if (!(await this.runAiStep(record)).ok) return;
       await yieldToEventLoop(AI_EVENT_LOOP_YIELD_MS);
     }
     if (record.match.aiPacingMode === "fast")
@@ -6200,7 +6296,7 @@ export class MultiplayerService {
       this.aiControllableSide(record);
       count += 1
     ) {
-      const stepResult = this.runAiStep(record);
+      const stepResult = await this.runAiStep(record);
       if (!stepResult.ok) return stepResult;
       lastResult = stepResult;
       state = record.gameState;
@@ -6210,7 +6306,7 @@ export class MultiplayerService {
     return lastResult;
   }
 
-  private runAiStep(record: StoredMatch): AiStepResult {
+  private async runAiStep(record: StoredMatch): Promise<AiStepResult> {
     const state = record.gameState;
     if (
       !state ||
@@ -6225,6 +6321,10 @@ export class MultiplayerService {
       return { ok: false, code: "ai_no_action" };
     const legalActions = getLegalActions(state, side);
     if (legalActions.length === 0) return { ok: false, code: "ai_no_action" };
+    const clockDecision = { side, legalActions };
+    // A timeout is itself the terminal transition for this step.
+    if (this.syncPlayerClock(record, this.now(), clockDecision))
+      return { ok: true };
     const prepared = this.preparedAiDecisions.get(record.match.matchId);
     let decision: AiDecision;
     let decisionInput: AiDecisionInputWithDeckCapabilities;
@@ -6245,6 +6345,7 @@ export class MultiplayerService {
           record,
           side,
         );
+        this.aiRuntimeMatchIds.add(record.match.matchId);
         input = this.buildAiDecisionInput(state, side, {
           difficulty: controller?.difficulty ?? "normal",
           profileId:
@@ -6254,6 +6355,7 @@ export class MultiplayerService {
           actionNumber: state.stateVersion,
           ownDeckSnapshot,
           expectedDeckSnapshot: aiDeckSnapshotExpectationFor(record, side),
+          chronicle: this.aiChronicle,
         });
         this.restoreResidentPlanPortfolioFor(record, input);
         decisionInput = input;
@@ -6276,16 +6378,7 @@ export class MultiplayerService {
         };
       }
       try {
-        decision = this.chooseMatchAiAction(record, input, {
-          quoteCorpPunishRoute: (request) =>
-            quoteCorpPunishRoute(state, request),
-          quoteRandomizedIceInstallSelection: (request) =>
-            quoteRandomizedIceInstallSelection(state, request),
-          quoteRandomizedTurnPlanSelection: (request) =>
-            quoteRandomizedTurnPlanSelection(state, request),
-          quoteRandomizedTraceBidSelection: (request) =>
-            quoteRandomizedTraceBidSelection(state, request),
-        });
+        decision = await this.chooseMatchAiAction(record, input, state);
       } catch (error) {
         const diagnosticCode = this.captureAiDecisionFailureAttempt(
           record,
@@ -6305,6 +6398,8 @@ export class MultiplayerService {
       this.captureResidentPlanPortfolioFor(record, input);
       decisionInput = input;
     }
+    if (this.syncPlayerClock(record, this.now(), clockDecision))
+      return { ok: true };
     const directLegalAction =
       decision.selectionKind === "engine_randomized_ice_install_selection" ||
       decision.selectionKind === "engine_randomized_turn_plan_selection" ||
@@ -6322,7 +6417,7 @@ export class MultiplayerService {
       record.match.matchId,
       state,
       record.match.matchVersion,
-      `snap_before_${state.stateVersion + 1}`,
+      preActionStateSnapshotId(state.stateVersion + 1),
       false,
     );
     const rejectedActionResult = (
@@ -6497,7 +6592,7 @@ export class MultiplayerService {
       record.match.matchId,
       state,
       record.match.matchVersion,
-      `snap_ai_attempt_${decisionIndex}`,
+      aiAttemptStateSnapshotId(decisionIndex),
       false,
     );
     const beliefState = beliefCaptureFor(record, state, side);
@@ -6505,9 +6600,9 @@ export class MultiplayerService {
       chronicleTurnNumberForEvent(
         record.eventLog.map((entry) => entry.publicPayload),
         anchorEvent.eventId,
+        record.publicHistoryPrefix?.chronicle,
       ) ?? 1;
     const trace: AiDecisionTraceRecord = {
-      traceId: diagnosticCode,
       matchId: record.match.matchId,
       eventId: anchorEvent.eventId,
       stateVersion: state.stateVersion,
@@ -6644,6 +6739,12 @@ export class MultiplayerService {
       if (!record || record.actionPersistenceBaseline) return record;
     }
     return this.storage.load(matchId, { includeStateSnapshots: false });
+  }
+
+  private async loadConnection(matchId: string): Promise<StoredMatch | undefined> {
+    return this.storage.loadForConnection && this.storage.saveConnection
+      ? this.storage.loadForConnection(matchId)
+      : this.storage.load(matchId);
   }
 
   private authenticate(
@@ -6784,7 +6885,7 @@ export class MultiplayerService {
     matchId: string,
     gameState: GameState,
     matchVersion: number,
-    snapshotId: string,
+    snapshotId: StateSnapshotId,
     hiddenInfoBarrier: boolean,
   ): StateSnapshot {
     return {
@@ -7005,6 +7106,37 @@ function normalizeAiDecisionTraceMode(value: unknown): AiDecisionTraceMode {
   return value === "summary" || value === "detailed" ? value : "off";
 }
 
+function timeSpentFromBudget(
+  startingTimeMs: number,
+  remainingMs: Record<Side, number>,
+): Record<Side, number> {
+  return {
+    runner: startingTimeMs - remainingMs.runner,
+    corp: startingTimeMs - remainingMs.corp,
+  };
+}
+
+function settlePlayerClockActivity(
+  clock: PlayerClockState,
+  activity: PlayerClockActivityState,
+  nowMs: number,
+): boolean {
+  const graceMs = clock.mode === "player_clock" ? clock.gracePeriodMs : 0;
+  const deltaMs = Math.max(
+    0,
+    nowMs - activity.startedAtMs - graceMs - activity.chargedMs,
+  );
+  if (deltaMs === 0) return false;
+  activity.chargedMs += deltaMs;
+  const side = activity.decisionOwnerSide;
+  if (clock.mode === "none") {
+    clock.consumedMs[side] += deltaMs;
+    return false;
+  }
+  clock.remainingMs[side] = Math.max(0, clock.remainingMs[side] - deltaMs);
+  return clock.remainingMs[side] === 0;
+}
+
 function initialPlayerClockState(
   config: ApiPlayerClockConfig,
 ): PlayerClockState {
@@ -7027,15 +7159,15 @@ function initialPlayerClockState(
 }
 
 function timeExpiredEventRecord(
-  record: StoredMatch,
+  matchId: string,
+  stateVersion: number,
   expiredSide: Side,
   winnerSide: Side,
   occurredAt: string,
   finalStateHash: string,
 ): EventRecord {
-  const stateVersion = record.gameState?.stateVersion ?? 0;
   const event: PublicGameEvent = {
-    eventId: `time_expired_${record.match.matchVersion}`,
+    eventId: stateVersion + 2,
     type: "time_expired",
     stateVersionBefore: stateVersion,
     stateVersionAfter: stateVersion,
@@ -7052,7 +7184,7 @@ function timeExpiredEventRecord(
   };
   return {
     eventId: event.eventId,
-    matchId: record.match.matchId,
+    matchId,
     stateVersionBefore: stateVersion,
     stateVersionAfter: stateVersion,
     stateHashAfter: finalStateHash,
@@ -7216,7 +7348,9 @@ function replayStateHashChecks(record: StoredMatch): {
     ReplayStateHashCheck & { randomDrawCounters: number[] }
   > = {};
   const errors: string[] = [];
-  const initial = record.stateSnapshots[0]?.gameState;
+  const initial = record.stateSnapshots.find(
+    (snapshot) => snapshot.snapshotId === INITIAL_STATE_SNAPSHOT_ID,
+  )?.gameState;
   if (!initial) {
     errors.push("initial_snapshot_missing");
     return { byEventId, errors };
@@ -7326,7 +7460,7 @@ function replayAnalysisFrames(record: StoredMatch): ApiReplayAnalysisFrame[] {
 
 function replayAnalysisFrameFor(
   state: GameState,
-  input: { index: number; sourceEventId?: string; stateHashVerified: boolean },
+  input: { index: number; sourceEventId?: MatchEventId; stateHashVerified: boolean },
 ): ApiReplayAnalysisFrame {
   return {
     index: input.index,
@@ -7345,7 +7479,7 @@ function replayAnalysisFrameFor(
 }
 
 function replayPlayerViewFor(state: GameState, side: Side): PlayerView {
-  const { pendingChoice: _pendingChoice, ...view } = getPlayerView(state, side);
+  const { pendingChoice: _pendingChoice, ...view } = getPlayerView(state, side, { publicEventLimit: 0 });
   return {
     ...view,
     publicEvents: [],
@@ -7659,9 +7793,8 @@ function aiDecisionTraceFor(
     projectEngineEventToPublicEvent(event),
   ];
   const turn =
-    chronicleTurnNumberForEvent(chronologicalEvents, event.eventId) ?? 1;
+    chronicleTurnNumberForEvent(chronologicalEvents, event.eventId, record.publicHistoryPrefix?.chronicle) ?? 1;
   return {
-    traceId: `ai_trace_${record.match.matchId}_${decisionIndex}`,
     matchId: record.match.matchId,
     eventId: event.eventId,
     stateVersion: event.stateVersionBefore,
@@ -7919,7 +8052,7 @@ function historicalAuditFor(
   beliefState: AiDecisionBeliefCapture,
   decisionInput: AiDecisionInputWithDeckCapabilities,
 ): AiDecisionHistoricalAudit {
-  const actorView = getPlayerView(state, side);
+  const actorView = getPlayerView(state, side, { publicEventLimit: 0 });
   const choiceQuote =
     decisionInput.playerView.pendingChoice?.agendaPurgeArchivesProtectionQuote;
   if (choiceQuote) {
@@ -8051,14 +8184,14 @@ function historicalAuditFor(
 function historicalFailureAuditFor(
   state: GameState,
   snapshot: StateSnapshot,
-  eventAnchorId: string,
+  eventAnchorId: MatchEventId,
   side: Side,
   legalActions: readonly LegalAction[],
   beliefState: AiDecisionBeliefCapture,
   decisionInput: AiDecisionInputWithDeckCapabilities | undefined,
   selectedAction?: LegalAction,
 ): AiDecisionHistoricalAudit {
-  const actorView = getPlayerView(state, side);
+  const actorView = getPlayerView(state, side, { publicEventLimit: 0 });
   const {
     legalActions: _legalActions,
     publicEvents: _publicEvents,
@@ -8447,7 +8580,7 @@ function beliefCaptureFor(
     runtimeVersion: belief.version,
     invariantSignature: beliefStateInvariantSignature(belief),
     stateVersion: state.stateVersion,
-    lastEventIndex: Math.max(-1, record.eventLog.length - 1),
+    lastEventIndex: Math.max(-1, (record.publicHistoryPrefix?.eventCount ?? 0) + record.eventLog.length - 1),
     ...(runnerModel
       ? {
           hqHandMemory: structuredClone(runnerModel.hqHandMemory),
@@ -8960,24 +9093,18 @@ function minimalAiPreviewDetail(
 function replayRandomDrawEntries(record: StoredMatch): ReplayRandomDrawEntry[] {
   return [
     ...record.gameState.randomDrawRecords.map((entry) => ({
+      domain: "engine" as const,
       counter: entry.counter,
-      purpose: publicReplayRandomPurpose(entry.purpose),
+      purpose: entry.purpose[0],
       valueHash: `fnv1a:${fnv1a(String(entry.value))}`,
     })),
     ...(record.gameState.aiTurnPlanRandomDrawRecords ?? []).map((entry) => ({
+      domain: entry.domain,
       counter: entry.counter,
-      purpose: "ai_turn_plan_selection",
+      purpose: entry.purpose[0],
       valueHash: `fnv1a:${fnv1a(String(entry.value))}`,
     })),
   ];
-}
-
-function publicReplayRandomPurpose(purpose: string): string {
-  return purpose.includes("engine.randomized_ice_install_selection")
-    ? "engine_randomized_ice_install_selection"
-    : purpose.includes("engine.randomized_trace_bid_selection")
-      ? "engine_randomized_trace_bid_selection"
-      : purpose;
 }
 
 function replayExploitSuggestions(
@@ -9194,13 +9321,9 @@ function matchResultSnapshotFor(
   const winner =
     record.lifecycleResult?.winnerSide ?? record.match.winner ?? state?.winner;
   if (!state || !winner) return undefined;
-  const runnerAgendaPoints = getPlayerView(state, "runner").own.agendaPoints;
-  const corpAgendaPoints = getPlayerView(state, "corp").own.agendaPoints;
-  const actionEvents = record.eventLog.filter(
-    (event) => event.publicPayload.type !== "game_created",
-  );
-  const countType = (type: string) =>
-    actionEvents.filter((event) => event.publicPayload.type === type).length;
+  const runnerAgendaPoints = getPlayerView(state, "runner", { publicEventLimit: 0 }).own.agendaPoints;
+  const corpAgendaPoints = getPlayerView(state, "corp", { publicEventLimit: 0 }).own.agendaPoints;
+  const history = publicEventHistorySummary(record);
   const finalStateHash =
     record.lifecycleResult?.finalEngineStateHash ?? hashState(state);
   const runnerMatchPoints = singleGameMatchPointsFor(
@@ -9214,6 +9337,11 @@ function matchResultSnapshotFor(
     corpAgendaPoints,
   );
   const lifecycleReason = record.lifecycleResult?.reason;
+  const clock = record.match.playerClock;
+  const playerTimeMs =
+    clock?.mode === "player_clock"
+      ? timeSpentFromBudget(clock.startingTimeMs, clock.remainingMs)
+      : clock?.consumedMs;
   const reason: ApiGameResultReason =
     lifecycleReason === "forfeit" || lifecycleReason === "time_expired"
       ? lifecycleReason
@@ -9256,12 +9384,13 @@ function matchResultSnapshotFor(
         ? { deckName: record.match.deckSetup.corp.deckName }
         : {}),
     },
-    actionCount: actionEvents.length,
+    actionCount: history.actionCount,
     runCount: runCountForResult(state),
     agendaPointsToWin: record.match.settings.agendaPointsToWin,
-    successfulRunCount: successfulRunCountForResult(actionEvents),
-    stolenAgendaCount: stolenAgendaCountForResult(actionEvents),
-    scoredAgendaCount: countType("score_agenda"),
+    successfulRunCount: history.successfulRunCount,
+    stolenAgendaCount: history.stolenAgendaCount,
+    scoredAgendaCount: history.scoredAgendaCount,
+    ...(playerTimeMs ? { playerTimeMs: { ...playerTimeMs } } : {}),
     finalStateHash,
     ...(record.match.series
       ? {
@@ -9341,6 +9470,7 @@ function resultSummaryFor(
     successfulRunCount: snapshot.successfulRunCount ?? 0,
     stolenAgendaCount: snapshot.stolenAgendaCount ?? 0,
     scoredAgendaCount: snapshot.scoredAgendaCount ?? 0,
+    ...(snapshot.playerTimeMs ? { playerTimeMs: snapshot.playerTimeMs } : {}),
     startedAt: snapshot.startedAt,
     finishedAt: snapshot.finishedAt,
     finalStateHash: snapshot.finalStateHash || finalStateHash,
@@ -9769,7 +9899,7 @@ function safeError(
     code,
     message,
     ...(state ? { currentStateVersion: state.stateVersion } : {}),
-    ...(state && side ? { playerView: getPlayerView(state, side) } : {}),
+    ...(state && side ? { playerView: getPlayerView(state, side, { publicEventLimit: 0 }) } : {}),
   };
 }
 
@@ -10024,7 +10154,7 @@ function renderGamebook(record: StoredMatch, locale: GamebookLocale): string {
     "",
   );
   const initial = record.stateSnapshots.find(
-    (snapshot) => snapshot.snapshotId === "snap_initial",
+    (snapshot) => snapshot.snapshotId === INITIAL_STATE_SNAPSHOT_ID,
   )?.gameState;
   if (initial) {
     lines.push(`## ${messages.setupHeading}`, "");
@@ -10115,7 +10245,7 @@ function cardNames(state: GameState, ids: readonly string[]): string[] {
   return ids.map((id) => {
     const definitionId = state.cardInstances[id]?.definitionId;
     return definitionId
-      ? (CARD_DEFINITIONS_BY_ID[definitionId]?.title ?? definitionId)
+      ? (CARD_DEFINITIONS_BY_ID[definitionId]?.title ?? String(definitionId))
       : id;
   });
 }
@@ -10124,10 +10254,12 @@ function gamebookStateBefore(
   record: StoredMatch,
   event: GameEvent,
 ): GameState | undefined {
+  const snapshotId = event.stateVersionAfter === 0
+    ? INITIAL_STATE_SNAPSHOT_ID
+    : preActionStateSnapshotId(event.stateVersionAfter);
   return (
     record.stateSnapshots.find(
-      (snapshot) =>
-        snapshot.snapshotId === `snap_before_${event.stateVersionAfter}`,
+      (snapshot) => snapshot.snapshotId === snapshotId,
     )?.gameState ??
     record.stateSnapshots.find(
       (snapshot) => snapshot.stateVersion === event.stateVersionBefore,
@@ -10142,7 +10274,7 @@ function gamebookStateAfter(
   return (
     record.stateSnapshots.find(
       (snapshot) =>
-        snapshot.snapshotId === `snap_before_${event.stateVersionAfter + 1}`,
+        snapshot.snapshotId === preActionStateSnapshotId(event.stateVersionAfter + 1),
     )?.gameState ??
     (record.gameState.stateVersion === event.stateVersionAfter
       ? record.gameState
@@ -10245,8 +10377,8 @@ function cardTitleForEvent(
 ): string | undefined {
   const direct = stringValue(event.publicPayload.title);
   if (direct) return direct;
-  const definitionId = stringValue(event.publicPayload.cardDefinitionId);
-  if (definitionId) return CARD_DEFINITIONS_BY_ID[definitionId]?.title;
+  const definitionId = event.publicPayload.cardDefinitionId;
+  if (isCardDefinitionId(definitionId)) return CARD_DEFINITIONS_BY_ID[definitionId]?.title;
   const side = sideValue(event.publicPayload.actor);
   const privatePayload = side ? event.privatePayload?.[side] : undefined;
   const source =
@@ -10281,7 +10413,7 @@ function serverForEvent(
   if (serverId === "rd") return "R&D";
   if (serverId === "hq") return "HQ";
   if (serverId === "archives") return "Archives";
-  return serverId.replace("_", " ").replace(/^remote /, "Remote ");
+  return isRemoteServerId(serverId) ? `Remote ${serverId.slice(1)}` : serverId;
 }
 
 function installedPosition(

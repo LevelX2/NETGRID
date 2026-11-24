@@ -1,7 +1,10 @@
 import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import { visibleRunnerRunCreditPool } from "../../runtime/visible-run-credit-facts";
 import type { AiDecisionInput } from "@netgrid/shared";
-import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
+import {
+  assessKnownRezzedIcePath,
+  runnerRunPathCreditBudgetWithVisiblePools,
+} from "../../visible-run-analysis";
 import { semanticRuntimeCorpObservedRemoteReachability } from "../../runtime/semantic-runtime-corp-remote-reachability";
 import { visibleRunnerExposureCreditValue } from "../../runtime/visible-runner-action-economy";
 
@@ -16,6 +19,7 @@ export function corpRemoteContestabilityAssessment(
       assessedKnownIceCount: number;
       canReachAccess: boolean;
       creditsAfterPath: number;
+      expectedTagsFromVisibleIce: number;
       visibleBreakCost?: number;
       noAccessReason?: string;
       evidence: string[];
@@ -39,10 +43,15 @@ export function corpRemoteContestabilityAssessment(
   );
   const visibleRunnerExposureContestCredits =
     visibleRunnerContestCredits + additionalExposureCredits;
+  const exposureBudget = runnerRunPathCreditBudgetWithVisiblePools(
+    playerView.opponent.credits + additionalExposureCredits,
+    runnerRig,
+    { creditPoolHorizon: "next_runner_turn" },
+  );
   const assessment = assessKnownRezzedIcePath(
     server.ice,
     runnerRig,
-    visibleRunnerExposureContestCredits,
+    exposureBudget,
     server.root,
     input.playerView.own.credits,
     visibleIcePathTraceContext(input),
@@ -56,7 +65,7 @@ export function corpRemoteContestabilityAssessment(
   const missingCoverageAffordable =
     assessment.knownPathBlockedByMissingCoverage === true &&
     (assessment.visibleBreakCost ?? 0) > 0 &&
-    visibleRunnerExposureContestCredits >= (assessment.visibleBreakCost ?? 0);
+    exposureBudget.credits >= (assessment.visibleBreakCost ?? 0);
   const contestable =
     observedReachability.applies ||
     missingCoverageAffordable ||
@@ -68,6 +77,7 @@ export function corpRemoteContestabilityAssessment(
     assessedKnownIceCount: assessment.assessedKnownIceCount,
     canReachAccess: assessment.canReachAccess,
     creditsAfterPath: assessment.creditsAfterPath,
+    expectedTagsFromVisibleIce: assessment.expectedTagsFromVisibleIce ?? 0,
     ...(assessment.visibleBreakCost !== undefined
       ? { visibleBreakCost: assessment.visibleBreakCost }
       : {}),

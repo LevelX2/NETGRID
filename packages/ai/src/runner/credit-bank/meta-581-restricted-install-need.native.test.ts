@@ -63,6 +63,8 @@ it("does not treat an unavailable restricted-install bit as acute income and pre
   expect(hashGameState(f.state)).toBe(f.runner.stateHash);
   for (const cp of [f.runner, f.corp])
     expect(Object.values(cp.validation)).toEqual(Array(9).fill(true));
+  // Both test branches start from the captured board with a seed that gives Blink a successful roll.
+  const initial = { ...f.state, seed: "restricted-install-native-blink-a" };
   function play(oldCashout: boolean) {
     resetResidentPlanPortfolioMemory();
     for (const cp of [f.runner, f.corp]) {
@@ -77,7 +79,7 @@ it("does not treat an unavailable restricted-install bit as acute income and pre
         cp.runtime.residentPlanPortfolio!,
       );
     }
-    let state = f.state;
+    let state = initial;
     const steps: {
       side: Side;
       actionId: string;
@@ -85,6 +87,7 @@ it("does not treat an unavailable restricted-install bit as acute income and pre
       selectedChoices?: Record<string, unknown>;
       module?: string | undefined;
       root?: string | undefined;
+      sourceDefinitionId?: number | undefined;
     }[] = [];
     let runStarted = false;
     for (let n = 0; n < 96; n++) {
@@ -107,7 +110,7 @@ it("does not treat an unavailable restricted-install bit as acute income and pre
         oldCashout && n === 0
           ? {
               actionId: input.legalActions.find((a) =>
-                a.actionId.endsWith("withdraw_credits"),
+                a.payload?.cardImplementationAbilityKey === "withdraw_credits",
               )!.actionId,
             }
           : chooseDirect(input);
@@ -144,6 +147,7 @@ it("does not treat an unavailable restricted-install bit as acute income and pre
       steps.push({
         side: side!,
         actionId: action.actionId,
+        sourceDefinitionId: state.cardInstances[action.source]?.definitionId,
         hash: hashGameState(state),
         ...(selectedChoices ? { selectedChoices } : {}),
         ...("decisionDebug" in decision
@@ -158,8 +162,8 @@ it("does not treat an unavailable restricted-install bit as acute income and pre
       });
       if (action.type === "start_run") runStarted = true;
     }
-    expect(steps.at(-1)?.actionId).toContain("runner.steal_agenda.");
-    let replay = f.state;
+    expect(steps.at(-1)?.actionId).toContain("rt.");
+    let replay = initial;
     for (const step of steps) {
       const result = applyAction(replay, {
         matchId: replay.matchId,
@@ -188,7 +192,7 @@ it("does not treat an unavailable restricted-install bit as acute income and pre
   expect(before.view.own.agendaPoints).toBe(2);
   const stored = (view: typeof after.view) =>
     view.own
-      .rig!.filter((c) => c.definitionId === "onr_v1_154_broker")
+      .rig!.filter((c) => c.definitionId === 366)
       .reduce((n, c) => n + (c.counters?.bit ?? 0), 0);
   expect(stored(after.view)).toBe(6);
   expect(stored(before.view)).toBe(0);
@@ -205,13 +209,11 @@ it("does not treat an unavailable restricted-install bit as acute income and pre
   expect(after.state.randomCounter).toBe(before.state.randomCounter + 1);
   expect(after.state.randomDrawRecords.at(-1)).toMatchObject({
     counter: before.state.randomCounter,
-    purpose: expect.stringContaining(
-      "icebreaker.random_break_or_damage.onr_v1_007_blink",
-    ),
+    purpose: [20, 219, 75, "cgn", "c1cr", 0],
   });
   expect(after.steps.some((step) =>
-    step.actionId.startsWith("runner.break_subroutine.") &&
-    step.actionId.includes("onr_v1_007_blink"),
+    step.actionId.startsWith("r3.") &&
+    step.sourceDefinitionId === 219,
   )).toBe(true);
   expect(
     after.steps.filter((s) => s.side === "corp").map((s) => s.actionId),
@@ -219,7 +221,7 @@ it("does not treat an unavailable restricted-install bit as acute income and pre
     before.steps.filter((s) => s.side === "corp").map((s) => s.actionId),
   );
   expect(
-    after.steps.find((s) => s.actionId === "runner.start_run.remote_1")?.module,
+    after.steps.find((s) => s.actionId === "rs.r1")?.module,
   ).toBe("runner.contest_remote");
 }, 30000);
 
@@ -232,7 +234,7 @@ it("reports no acute economy need for a pure unavailable program-install bundle"
     strategicIntent: input.ownRunnerStrategicIntent!,
   });
   const bundle = evaluations.find(
-    (e) => e.definitionId === "onr_v1_117_valu-pak-software-bundle",
+    (e) => e.definitionId === 329,
   );
   expect(bundle).toMatchObject({
     availability: "timing_blocked",

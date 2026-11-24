@@ -64,7 +64,7 @@ export function openEventModificationWindow(
     throw new Error("Event-Modification-Konflikt blockiert.");
   const candidate = sorted[0];
   if (!candidate) return false;
-  const windowId = `v120_window_${event.eventId}`;
+  const windowId = state.stateVersion + 1;
   const window: EventModificationWindow = {
     windowId,
     eventId: event.eventId,
@@ -72,7 +72,7 @@ export function openEventModificationWindow(
     kind: candidate.kind,
     side: candidate.controller,
     candidates: sorted,
-    createdAtStateVersion: state.stateVersion + 1,
+    createdAtStateVersion: windowId,
     optional: candidate.optional,
   };
   state.imminentEvent = { ...event, modificationWindowId: windowId };
@@ -348,7 +348,6 @@ export function resolveEventModificationChoice(
         continueEventModificationWindow(
           state,
           event,
-          window,
           remainingCandidates,
           legalAction,
           {
@@ -376,7 +375,6 @@ export function resolveEventModificationChoice(
         continueEventModificationWindow(
           state,
           event,
-          window,
           remainingCandidates,
           legalAction,
           {
@@ -437,7 +435,6 @@ export function resolveEventModificationChoice(
       continueEventModificationWindow(
         state,
         event,
-        window,
         remainingCandidates,
         legalAction,
         {
@@ -552,7 +549,6 @@ export function resolveEventModificationChoice(
       continueEventModificationWindow(
         state,
         finalEvent,
-        window,
         remainingEventModificationCandidatesAfterStage(
           state,
           window,
@@ -762,7 +758,6 @@ export function resolveEventModificationChoice(
         continueEventModificationWindow(
           state,
           remainingEvent,
-          window,
           remainingCandidates,
           legalAction,
           {
@@ -935,7 +930,6 @@ export function resolveEventModificationChoice(
     continueEventModificationWindow(
       state,
       finalEvent,
-      window,
       collectFreshDamagePreventionCandidates(state, finalEvent),
       legalAction,
       legalAction.payload,
@@ -1051,7 +1045,6 @@ export function clampEventModificationCandidatesToEventAmount(
 export function continueEventModificationWindow(
   state: GameState,
   event: ImminentEvent,
-  previousWindow: EventModificationWindow,
   candidates: EventModificationCandidate[],
   legalAction: LegalAction,
   payload: LegalAction["payload"],
@@ -1068,7 +1061,7 @@ export function continueEventModificationWindow(
     throw new Error("Event-Modification-Konflikt blockiert.");
   const candidate = sorted[0];
   if (!candidate) return false;
-  const windowId = `${previousWindow.windowId}_next_${candidate.priority}_${candidate.controller}`;
+  const windowId = state.stateVersion + 1;
   const window: EventModificationWindow = {
     windowId,
     eventId: event.eventId,
@@ -1076,7 +1069,7 @@ export function continueEventModificationWindow(
     kind: candidate.kind,
     side: candidate.controller,
     candidates: sorted,
-    createdAtStateVersion: state.stateVersion + 1,
+    createdAtStateVersion: windowId,
     optional: candidate.optional,
   };
   state.imminentEvent = { ...event, modificationWindowId: windowId };

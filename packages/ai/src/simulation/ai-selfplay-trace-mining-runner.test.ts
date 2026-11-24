@@ -108,6 +108,7 @@ describe("createAiSelfplayTraceMiningRunner", () => {
 
     expect(result.findings).toEqual(repeated);
     expect(result.aggregate.findingsByDetector.hidden_info_marker).toBe(1);
+    expect(result.aggregate.allRedactionSafe).toBe(false);
   });
 });
 

@@ -20,7 +20,7 @@ import {
   toRunnerTurn,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 
-const PSYCHIC_FRIEND = "onr_classic_030_psychic-friend";
+const PSYCHIC_FRIEND = 34;
 
 function psychicFriendGame(): GameState {
   const state = toRunnerTurn(
@@ -40,8 +40,8 @@ function psychicFriendGame(): GameState {
         id: "classic_psychic_friend_turn_corp",
         name: "Classic Psychic Friend Turn Corp",
         cards: [
-          { id: "simple_code_gate_ice", quantity: 1 },
-          { id: "onr_v1_244_filter", quantity: 1 },
+          { id: 590, quantity: 1 },
+          { id: 456, quantity: 1 },
           ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
         ],
       },
@@ -56,8 +56,8 @@ function psychicFriendGame(): GameState {
   state.corp.clicks = 10;
   state.corp.maxHandSize = 100;
   installRunnerProgramForTest(state, PSYCHIC_FRIEND);
-  putCorpIceOnServer(state, "archives", "simple_code_gate_ice");
-  putCorpIceOnServer(state, "rd", "onr_v1_244_filter");
+  putCorpIceOnServer(state, "archives", 590);
+  putCorpIceOnServer(state, "rd", 456);
   return state;
 }
 
@@ -134,7 +134,7 @@ describe("Classic Psychic Friend current-turn pump", () => {
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
 
-    state = encounterIce(state, "archives", "simple_code_gate_ice");
+    state = encounterIce(state, "archives", 590);
     const pump = mustAction(
       state,
       "runner",

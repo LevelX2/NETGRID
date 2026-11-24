@@ -1,12 +1,7 @@
 "use client";
 
-import type {
-  ApiReplayAnalysisFrame,
-  LegalAction,
-  PublicGameEvent,
-  Side,
-  VisibleCard,
-} from "@netgrid/shared";
+import type { ApiReplayAnalysisFrame, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
+import type { LegalAction } from "../../lib/presented-player-view";
 import { Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslations } from "use-intl/react";

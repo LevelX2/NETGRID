@@ -5,6 +5,7 @@ import { selectedDiscardChoiceOptionIds } from "../../runtime/discard-choice-sel
 import {
   PendingChoice,
   PendingChoiceOptions,
+  exactCurrentChoiceAction,
   unresolvedChoiceFailure,
 } from "../../runtime/plan-bound-choice-contract";
 import type {
@@ -43,12 +44,13 @@ export function selectedRunnerHiddenDrawReplacementOptionId(
       );
       return (
         choices.length === 2 &&
+        new Set(choices.map((option) => option.value)).size === 2 &&
         choices.every(
           (option) =>
             option.card?.instanceId === cardId &&
             option.card.known !== false &&
-            typeof option.card.definitionId === "string" &&
-            option.card.definitionId.length > 0,
+            typeof option.card.definitionId === "number" &&
+            option.card.definitionId > 0,
         )
       );
     });
@@ -74,15 +76,10 @@ export function selectedRunnerHiddenDrawReplacementOptionId(
     portfolio.executorInstanceId === origin.executorInstanceId &&
     root !== undefined &&
     executor !== undefined &&
-    action.side === "runner" &&
-    action.type === "resolve_choice" &&
-    action.source === "game_rule" &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === 1 &&
-    requirement.maxSelections === 1 &&
-    requirement.optionIds.length === selectableOptions.length &&
+    exactCurrentChoiceAction(input, choice) === action &&
+    choice.minSelections === 1 &&
+    choice.maxSelections === 1 &&
+    requirement?.optionIds.length === selectableOptions.length &&
     selectableOptions.every((option) =>
       requirement.optionIds.includes(option.id),
     ) &&
@@ -174,15 +171,9 @@ export function selectedRunnerPostBreakStealthLossOptionIds(
     portfolio.executorInstanceId === origin.executorInstanceId &&
     root !== undefined &&
     executor !== undefined &&
-    action.side === "runner" &&
-    action.type === "resolve_choice" &&
-    action.source === "game_rule" &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === choice.minSelections &&
-    requirement.maxSelections === choice.maxSelections &&
-    requirement.optionIds.length === selectableOptions.length &&
+    exactCurrentChoiceAction(input, choice) === action &&
+    expectedSelections <= selectableOptions.length &&
+    requirement?.optionIds.length === selectableOptions.length &&
     selectableOptions.every((option) =>
       requirement.optionIds.includes(option.id),
     );
@@ -210,8 +201,19 @@ export function selectedRunnerAccessProgramInstallMemoryOptionIds(
   const sourceParts = choice.source.split(":");
   const targetCardId = sourceParts[2];
   const automaticFreedMemory = Number(sourceParts[3]);
-  const originalChoiceId = decodeURIComponent(sourceParts[4] ?? "");
-  const originalChoiceSource = decodeURIComponent(sourceParts[5] ?? "");
+  let originalChoiceId: string;
+  let originalChoiceSource: string;
+  try {
+    originalChoiceId = decodeURIComponent(sourceParts[4] ?? "");
+    originalChoiceSource = decodeURIComponent(sourceParts[5] ?? "");
+  } catch (error) {
+    if (!(error instanceof URIError)) throw error;
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "The accessed-agenda memory continuation requires the exact encoded Engine choice identity and source.",
+    );
+  }
   const originalSourceMatch =
     /^access\.agenda_install_as_runner_program:([^:]+):([0-9]+)$/.exec(
       originalChoiceSource,
@@ -249,7 +251,7 @@ export function selectedRunnerAccessProgramInstallMemoryOptionIds(
     targetCardId !== undefined &&
     Number.isInteger(automaticFreedMemory) &&
     automaticFreedMemory >= 0 &&
-    originalChoiceId.startsWith(`runner.steal_agenda.${targetCardId}.`) &&
+    originalChoiceId.startsWith(`rt.${targetCardId}.`) &&
     originalSourceMatch?.[1] === targetCardId &&
     Number(originalSourceMatch[2]) > 0 &&
     choice.side === "runner" &&
@@ -478,15 +480,13 @@ export function selectedRunnerTraceBaseLinkOptionId(
   const selectedOption = selectableOptions.find(
     (option) => option.id === binding?.selectedOptionId,
   );
-  const traceId = choice.source.slice("trace_base_link:".length);
+  const trace = input.playerView.trace;
   const selectedSourceId =
     selectedOption?.id === "pass"
       ? undefined
       : typeof selectedOption?.value === "string"
         ? selectedOption.value
         : undefined;
-  const [requirement] = action.choiceRequirements ?? [];
-  const optionIds = selectableOptions.map((option) => option.id);
   const exactBinding =
     portfolio?.side === "runner" &&
     executor !== undefined &&
@@ -498,8 +498,8 @@ export function selectedRunnerTraceBaseLinkOptionId(
     binding.selectedOptionId === selectedOption?.id &&
     binding.sourceCardInstanceId === selectedSourceId &&
     binding.observedAtStateVersion === input.playerView.stateVersion &&
-    input.playerView.trace?.traceId === traceId &&
-    input.playerView.trace.phase === "base_link" &&
+    trace?.phase === "base_link" &&
+    choice.source === `trace_base_link:${trace.traceId}` &&
     choice.side === "runner" &&
     choice.stateVersion === input.playerView.stateVersion &&
     choice.minSelections === 1 &&
@@ -510,17 +510,7 @@ export function selectedRunnerTraceBaseLinkOptionId(
         (input.playerView.own.rig ?? []).some(
           (card) => card.known && card.instanceId === selectedSourceId,
         ))) &&
-    action.side === "runner" &&
-    action.type === "resolve_choice" &&
-    action.source === "game_rule" &&
-    action.timingPoint === input.playerView.timingPoint &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === 1 &&
-    requirement.maxSelections === 1 &&
-    requirement.optionIds.length === optionIds.length &&
-    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
+    exactCurrentChoiceAction(input, choice) === action;
   if (!exactBinding || !selectedOption) {
     throw unresolvedChoiceFailure(
       input,
@@ -563,7 +553,7 @@ export function selectedRunnerTraceSuccessCancelOptionId(
   const selectedOption = selectableOptions.find(
     (option) => option.id === binding?.selectedOptionId,
   );
-  const traceId = choice.source.slice("trace_success_cancel:".length);
+  const trace = input.playerView.trace;
   const selectedSourceId =
     selectedOption?.id === "pass"
       ? undefined
@@ -578,8 +568,6 @@ export function selectedRunnerTraceSuccessCancelOptionId(
             entry.sourceCardInstanceId === selectedSourceId &&
             entry.activationCost <= input.playerView.own.credits,
         );
-  const [requirement] = action.choiceRequirements ?? [];
-  const optionIds = selectableOptions.map((option) => option.id);
   const exactBinding =
     portfolio?.side === "runner" &&
     executor !== undefined &&
@@ -591,8 +579,8 @@ export function selectedRunnerTraceSuccessCancelOptionId(
     binding.selectedOptionId === selectedOption?.id &&
     binding.sourceCardInstanceId === selectedSourceId &&
     binding.observedAtStateVersion === input.playerView.stateVersion &&
-    input.playerView.trace?.traceId === traceId &&
-    input.playerView.trace.phase === "trace_success_cancel" &&
+    trace?.phase === "trace_success_cancel" &&
+    choice.source === `trace_success_cancel:${trace.traceId}` &&
     choice.side === "runner" &&
     choice.visibility === "hidden_info_barrier" &&
     choice.stateVersion === input.playerView.stateVersion &&
@@ -605,17 +593,7 @@ export function selectedRunnerTraceSuccessCancelOptionId(
         (input.playerView.own.rig ?? []).some(
           (card) => card.known && card.instanceId === selectedSourceId,
         ))) &&
-    action.side === "runner" &&
-    action.type === "resolve_choice" &&
-    action.source === "game_rule" &&
-    action.timingPoint === input.playerView.timingPoint &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === 1 &&
-    requirement.maxSelections === 1 &&
-    requirement.optionIds.length === optionIds.length &&
-    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
+    exactCurrentChoiceAction(input, choice) === action;
   if (!exactBinding || !selectedOption) {
     throw unresolvedChoiceFailure(
       input,

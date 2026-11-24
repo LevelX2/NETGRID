@@ -21,7 +21,7 @@ import { bindSyntheticAgendaStealQuotes } from "../../agenda-steal-quotes.test-s
 function currentContestInput(input: AiDecisionInputWithDeckCapabilities) {
   // Explicit current companion: no public steal surcharge and no known agenda.
   // The unmodified capture remains a missing-quote negative below.
-  bindSyntheticAgendaStealQuotes(input, "remote_1", 0, {});
+  bindSyntheticAgendaStealQuotes(input, "r1", 0, {});
   return input;
 }
 
@@ -52,7 +52,7 @@ function replay(json: unknown) {
 it("prepares the exposed heap top for an affordable same-turn buried coverage answer", () => {
   const { capture, decision, portfolio, action } = replay(heapJson);
   expect(action?.payload?.targetCardId).toBe(
-    "runner_onr_classic_042_panzer-run_1",
+    "ca9",
   );
   expect(action?.payload?.cardImplementationEffectKind).toBe(
     "move_top_trash_to_grip",
@@ -63,14 +63,14 @@ it("prepares the exposed heap top for an affordable same-turn buried coverage an
   )!;
   expect(executor.moduleId).toBe("runner.rig_and_coverage");
   expect(executor.parentInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Aremote_1",
+    "p1p4xezjcxov79rno40lq3f7rv",
   );
   expect(capture.input.playerView.own.clicks).toBe(4);
 });
 
 it("builds the quoted missing hand buffer instead of credits that cannot close it", () => {
   const { decision, portfolio } = replay(handJson);
-  expect(decision.actionId).toBe("runner.draw_card");
+  expect(decision.actionId).toBe("r8");
   expect(decision.fallbackUsed).toBe(false);
   expect(
     portfolio.instances.find(
@@ -83,7 +83,7 @@ it("temporarily exceeds the cleanup limit to finish a funded contest buffer", ()
   const { capture, decision, portfolio } = replay(temporaryHandJson);
   expect(capture.input.playerView.own.maxHandSize).toBe(2);
   expect(capture.input.playerView.own.gripOrHq).toHaveLength(3);
-  expect(decision.actionId).toBe("runner.draw_card");
+  expect(decision.actionId).toBe("r8");
   expect(
     portfolio.instances.find(
       (p) => p.instanceId === portfolio.executorInstanceId,
@@ -105,7 +105,7 @@ it.each([
   ) as unknown as AiDecisionInputWithDeckCapabilities;
   currentContestInput(input);
   const evaluation = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.targetServerId === "remote_1",
+    (t) => t.targetServerId === "r1",
   )!;
   const recovery = input.legalActions.find(
     (a) => a.payload?.cardImplementationEffectKind === "move_top_trash_to_grip",
@@ -117,7 +117,7 @@ it.each([
   if (variant === "stale_target") recovery.payload!.targetCardId = "old_top";
   if (variant === "stale_action") recovery.expiresAtStateVersion--;
   if (variant === "unknown_ice")
-    input.playerView.servers.find((s) => s.id === "remote_1")!.ice[0]!.known =
+    input.playerView.servers.find((s) => s.id === "r1")!.ice[0]!.known =
       false;
   const candidates = buildActionSemanticCandidates({
     legalActions: input.legalActions,
@@ -134,8 +134,8 @@ it.each([
   else
     expect(quote).toMatchObject({
       actionId: recovery.actionId,
-      currentTopCardInstanceId: "runner_onr_classic_042_panzer-run_1",
-      targetCardInstanceId: "runner_onr_classic_031_rent-i-con_1",
+      currentTopCardInstanceId: "ca9",
+      targetCardInstanceId: "c7t",
       recoveryCount: 2,
       requiredClicks: 4,
       upfrontCredits: 5,
@@ -158,7 +158,7 @@ it.each([
     ) as unknown as AiDecisionInputWithDeckCapabilities;
     currentContestInput(input);
     const evaluation = evaluateRunnerRunTargets({ input }).find(
-      (t) => t.targetServerId === "remote_1",
+      (t) => t.targetServerId === "r1",
     )!;
     evaluation.prerunReserveQuote = {
       ...evaluation.prerunReserveQuote!,
@@ -193,7 +193,7 @@ it.each([heapJson, handJson, temporaryHandJson])(
       capture.input,
     ) as unknown as AiDecisionInputWithDeckCapabilities;
     const target = evaluateRunnerRunTargets({ input }).find(
-      (t) => t.targetServerId === "remote_1",
+      (t) => t.targetServerId === "r1",
     )!;
     expect(target.accessPayoffContestable).toBe(false);
     expect(target.evidence).toContain(

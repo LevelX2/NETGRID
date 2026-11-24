@@ -1,5 +1,11 @@
+import { parseOptionalCardDefinitionIdCsv, validOptionalRezModifierDefinitionIds } from "../card-definition-id-input";
+import { readPostInstallEffectiveRunQuote } from "./post-install-ice-run-quote";
+import {
+  traceComparisonIsSuccessful,
+  traceCorpBaseStrength,
+} from "@netgrid/engine";
 import type { PublicHeapBreakerPreparation } from "./corp-public-heap-breaker-preparation";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   type LegalAction,
   type ServerId,
@@ -8,10 +14,11 @@ import {
   type VisibleEffectiveIceRunQuote,
   type VisibleVariableCorpRezCostParameter,
 } from "@netgrid/shared";
-import { corpIcePlacementActionCostAgreementFact } from "./corp-ice-placement/corp-ice-placement";
+import { corpIcePlacementActionCostAgreementFact } from "./corp-ice-placement/corp-ice-placement-costs";
 import {
   assessCorpScoreProtection,
   compareExactProbabilities,
+  corpVisibleSingleSubroutineIsUnbreakable,
   type CorpScoreProtectionIceInput,
   type ExactProbability,
   type KnownCorpScoreProtectionAssessment,
@@ -92,7 +99,7 @@ export type CorpFundedScoreProtectionIceInput = CorpScoreProtectionIceInput &
 
 export type CorpSelectedRezCost = Readonly<{
   iceInstanceId: string;
-  iceDefinitionId: string;
+  iceDefinitionId: number;
   credits: number;
   agendaPoints?: number;
   source: "engine_rez_cost_quote";
@@ -230,7 +237,7 @@ export function corpFundedScoreProtectionCertifiesBinding(params: {
 type CorpFundedIceInstallRouteBase = Readonly<{
   actionId: string;
   sourceCardInstanceId?: string;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   targetServerId?: string;
   before: CorpFundedScoreProtectionAssessment;
   effect: "unknown" | "no_progress" | "progress" | "satisfied";
@@ -242,8 +249,9 @@ export type KnownCorpFundedIceInstallRouteProjection =
     Readonly<{
       knowledge: "known";
       effect: "no_progress" | "progress" | "satisfied";
+      certifiedZeroBidTraceStopId?: string;
       sourceCardInstanceId: string;
-      sourceDefinitionId: string;
+      sourceDefinitionId: number;
       targetServerId: string;
       after: KnownCorpFundedScoreProtectionAssessment;
       installCredits: number;
@@ -313,6 +321,10 @@ export type CorpFundedIceInstallRouteInput = Readonly<{
   runnerRunOnlyCredits?: number;
   projectedInstallCredits: number;
   projectedInstallClicks: number;
+  terminalOffServerTraceBudget?: Readonly<{
+    runnerCredits: number;
+    runnerMaximumTraceStrength: number;
+  }>;
   preferPostInstallSourceProgress?: boolean;
 }>;
 
@@ -333,7 +345,7 @@ const MAX_EXACT_REZ_CANDIDATES = 12;
 type CompleteRezQuoteRead =
   | Readonly<{
       status: "known";
-      definitionId: string;
+      definitionId: number;
       options: readonly CertifiedFundedRezOption[];
     }>
   | Readonly<{
@@ -367,16 +379,6 @@ type PostInstallRezQuoteRead =
         | "post_install_rez_quote_unknown"
         | "post_install_rez_quote_drift"
         | "unsupported_mandatory_rez_cost";
-    }>;
-
-type PostInstallEffectiveRunQuoteRead =
-  | Readonly<{
-      status: "known";
-      quote: VisibleEffectiveIceRunQuote;
-    }>
-  | Readonly<{
-      status: "unknown";
-      reason: "post_install_effective_run_quote_drift";
     }>;
 
 export function assessBestFundedCorpScoreProtection(
@@ -698,6 +700,44 @@ export function assessBestFundedCorpScoreProtection(
   };
 }
 
+/** Keep the exact Engine quote and admit only its specific, proven trace stop. */
+function certifyPostInstallTraceStop(
+  input: CorpFundedIceInstallRouteInput,
+  source: CorpFundedScoreProtectionIceInput,
+  creditsAfterInstall: number,
+): CorpFundedScoreProtectionIceInput | undefined {
+  const budget = input.terminalOffServerTraceBudget;
+  const trace = source.effectiveRunQuote?.subroutines[0];
+  if (
+    !budget ||
+    input.currentServer?.ice.length !== 0 ||
+    source.effectiveRezCostQuote?.complete !== true ||
+    source.effectiveRezCostQuote.costKind !== "fixed" ||
+    source.effectiveRezCostQuote.finalCredits > creditsAfterInstall ||
+    trace?.type !== "initiate_trace" ||
+    (trace.traceSuccessEffect?.type !== "end_run_and_run_lock" &&
+      trace.traceSuccessEffect?.type !==
+        "end_run_trash_hardware_and_unpreventable_meat_damage") ||
+    !nonNegativeSafeInteger(trace.traceLimit) ||
+    !traceComparisonIsSuccessful(
+      "modern_open",
+      traceCorpBaseStrength({
+        traceRulesProfile: "modern_open",
+        traceLimit: trace.traceLimit!,
+      }),
+      budget.runnerMaximumTraceStrength,
+    ) ||
+    !corpVisibleSingleSubroutineIsUnbreakable({
+      ice: source,
+      runnerRig: input.runnerRig,
+      runnerCredits: budget.runnerCredits,
+    })
+  )
+    return undefined;
+
+  return { ...source, certifiedZeroBidTraceStopId: trace.id };
+}
+
 export function projectCorpFundedIceInstallRoute(
   input: CorpFundedIceInstallRouteInput,
 ): CorpFundedIceInstallRouteProjection {
@@ -775,7 +815,7 @@ export function projectCorpFundedIceInstallRoute(
   }
   const sourceCard = sourceMatches[0]!;
   const sourceDefinition = sourceCard.definitionId
-    ? CARD_DEFINITIONS_BY_ID[sourceCard.definitionId]
+    ? planningCardFactsByDefinitionId(sourceCard.definitionId)
     : undefined;
   if (
     !sourceCard.definitionId ||
@@ -1022,11 +1062,16 @@ export function projectCorpFundedIceInstallRoute(
         : {}),
     effectiveRezCostQuote: projectedRezQuote.quote,
   };
+  const certifiedTraceIce = certifyPostInstallTraceStop(
+    input,
+    projectedSource,
+    creditsAfterInstall,
+  );
   const after = assessBestFundedCorpScoreProtection({
     ...(input.currentServer?.root
       ? { serverRoot: input.currentServer.root }
       : {}),
-    serverIce: [...currentIce, projectedSource],
+    serverIce: [...currentIce, certifiedTraceIce ?? projectedSource],
     postInstallQuoteCardId: sourceCard.instanceId,
     ...(input.preferPostInstallSourceProgress === true
       ? { preferPostInstallSourceProgress: true }
@@ -1123,6 +1168,15 @@ export function projectCorpFundedIceInstallRoute(
     installClicks: clickCost.amount,
     installCostSource: "legal_action_agreed_projection",
     selectedRezCosts: after.selectedRezCosts,
+    ...(certifiedTraceIce?.certifiedZeroBidTraceStopId &&
+    after.selectedRezCosts.some(
+      (cost) => cost.iceInstanceId === sourceCard.instanceId,
+    )
+      ? {
+          certifiedZeroBidTraceStopId:
+            certifiedTraceIce.certifiedZeroBidTraceStopId,
+        }
+      : {}),
     creditsAfterDefense: after.creditsAfterDefense,
     clicksAfterDefense: after.clicksAfterDefense,
     preservesScoreCreditReserve: after.preservesScoreCreditReserve,
@@ -1169,8 +1223,8 @@ function readCompleteFundedRezQuote(
     !nonNegativeSafeInteger(quote.baseCredits) ||
     !nonNegativeSafeInteger(quote.finalCredits) ||
     !validMandatoryRezCosts(quote.mandatoryAdditionalCosts) ||
-    !validDefinitionIdList(quote.reductionSourceDefinitionIds) ||
-    !validDefinitionIdList(quote.increaseSourceDefinitionIds)
+    !validOptionalRezModifierDefinitionIds(quote.reductionSourceDefinitionIds) ||
+    !validOptionalRezModifierDefinitionIds(quote.increaseSourceDefinitionIds)
   ) {
     return { status: "unknown", reason: "rez_cost_quote_drift" };
   }
@@ -1205,7 +1259,7 @@ function fundedRezOptionsForQuote(
     ];
   }
   const definition = ice.definitionId
-    ? CARD_DEFINITIONS_BY_ID[ice.definitionId]
+    ? planningCardFactsByDefinitionId(ice.definitionId)
     : undefined;
   const parameter = quote.variableParameter;
   if (
@@ -1390,10 +1444,10 @@ function readPostInstallRezQuote(
   const mandatoryAgendaPointCost =
     payload.postInstallRezQuoteMandatoryAgendaPointCost;
   const mandatoryKind = payload.postInstallRezQuoteMandatoryAdditionalCostKind;
-  const reductionSourceDefinitionIds = commaSeparatedIds(
+  const reductionSourceDefinitionIds = parseOptionalCardDefinitionIdCsv(
     payload.postInstallRezQuoteReductionSourceDefinitionIds,
   );
-  const increaseSourceDefinitionIds = commaSeparatedIds(
+  const increaseSourceDefinitionIds = parseOptionalCardDefinitionIdCsv(
     payload.postInstallRezQuoteIncreaseSourceDefinitionIds,
   );
   const variableParameter =
@@ -1448,57 +1502,6 @@ function readPostInstallRezQuote(
         : {}),
     },
   };
-}
-
-function readPostInstallEffectiveRunQuote(
-  action: LegalAction,
-  sourceCardInstanceId: string,
-  sourceDefinitionId: string,
-  targetServerId: VisibleCorpRezCostQuote["targetServerId"],
-  observedAtStateVersion: number,
-): PostInstallEffectiveRunQuoteRead | undefined {
-  const payload = action.payload ?? {};
-  const json = payload.postInstallEffectiveRunQuoteJson;
-  if (typeof json !== "string") {
-    return undefined;
-  }
-  if (
-    payload.postInstallRezQuoteCardId !== sourceCardInstanceId ||
-    payload.postInstallRezQuoteTargetServerId !== targetServerId ||
-    payload.postInstallRezQuoteExpiresAtStateVersion !== observedAtStateVersion
-  ) {
-    return {
-      status: "unknown",
-      reason: "post_install_effective_run_quote_drift",
-    };
-  }
-  try {
-    const quote = JSON.parse(json) as Partial<VisibleEffectiveIceRunQuote>;
-    if (
-      quote.iceInstanceId !== sourceCardInstanceId ||
-      quote.iceDefinitionId !== sourceDefinitionId ||
-      !Number.isFinite(quote.effectiveStrength) ||
-      !Array.isArray(quote.subroutines) ||
-      !quote.subroutines.every(
-        (subroutine) =>
-          subroutine !== null &&
-          typeof subroutine === "object" &&
-          typeof subroutine.id === "string" &&
-          typeof subroutine.type === "string",
-      )
-    ) {
-      return {
-        status: "unknown",
-        reason: "post_install_effective_run_quote_drift",
-      };
-    }
-    return { status: "known", quote: quote as VisibleEffectiveIceRunQuote };
-  } catch {
-    return {
-      status: "unknown",
-      reason: "post_install_effective_run_quote_drift",
-    };
-  }
 }
 
 function postInstallVariableRezParameter(
@@ -1648,7 +1651,7 @@ function validTargetProjectedServerBinding(
   if (targetServerId === "new_remote") {
     return (
       typeof projectedServerId === "string" &&
-      /^remote_[1-9]\d*$/.test(projectedServerId)
+      /^r[1-9]\d*$/.test(projectedServerId)
     );
   }
   return projectedServerId === targetServerId;
@@ -1665,21 +1668,6 @@ function validMandatoryRezCosts(
     costs !== null &&
     nonNegativeSafeInteger(costs.agendaPoints)
   );
-}
-
-function validDefinitionIdList(ids: readonly string[] | undefined): boolean {
-  return (
-    ids === undefined ||
-    (Array.isArray(ids) &&
-      ids.every((id) => typeof id === "string" && id.length > 0))
-  );
-}
-
-function commaSeparatedIds(value: unknown): string[] | undefined {
-  if (value === undefined) return [];
-  if (typeof value !== "string" || value.length === 0) return undefined;
-  const ids = value.split(",");
-  return validDefinitionIdList(ids) ? ids : undefined;
 }
 
 function canonicalCommaSeparatedSubtypes(value: unknown): string[] | undefined {

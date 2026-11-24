@@ -147,14 +147,14 @@ describe("trace payment pools", () => {
     const trace = corpBidTrace({
       traceLimit: 5,
       fortTraceBitPoolSourceCardInstanceId: fortPoolId,
-      fortTraceBitPoolServerId: "remote_1",
+      fortTraceBitPoolServerId: "r1",
     });
     const state = stateForTrace(trace, { corpCredits: 2 });
     const deps = corpDeps({
       fortTraceBitPoolTotal: () => fortBits,
       spendFortTraceBitPool: (_state, sourceCardId, serverId, amount) => {
         expect(sourceCardId).toBe(fortPoolId);
-        expect(serverId).toBe("remote_1");
+        expect(serverId).toBe("r1");
         fortBits -= amount;
         return amount;
       },
@@ -201,7 +201,7 @@ describe("trace payment pools", () => {
       corpCreditBid: 2,
       fortTraceBitPoolSpent: 2,
       fortTraceBitPoolRemaining: 0,
-      fortTraceBitPoolServerId: "remote_1",
+      fortTraceBitPoolServerId: "r1",
       recurringTraceCreditPoolSpent: 1,
       hackerTrackerCountersSpent: 1,
       traceLimitAndValueBoost: 1,
@@ -215,7 +215,7 @@ describe("trace payment pools", () => {
   it("rejects stale Corp trace pool quotes when source availability changes", () => {
     const trace = corpBidTrace({
       fortTraceBitPoolSourceCardInstanceId: "fort_pool_1" as CardInstanceId,
-      fortTraceBitPoolServerId: "remote_1",
+      fortTraceBitPoolServerId: "r1",
     });
     const state = stateForTrace(trace, { corpCredits: 1 });
     let fortBits = 2;
@@ -274,7 +274,7 @@ describe("trace payment pools", () => {
         {
           kind: "corp_trace_bit_pool",
           sourceCardInstanceId: sourceId,
-          sourceDefinitionId: "trace_pool" as CardDefinitionId,
+          sourceDefinitionId: 2011192609 as CardDefinitionId,
           available,
         },
       ],
@@ -315,7 +315,7 @@ describe("trace payment pools", () => {
         {
           kind: "corp_trace_bit_pool",
           sourceCardInstanceId: krumzId,
-          sourceDefinitionId: "onr_v1_330_krumz",
+          sourceDefinitionId: 542,
           available: available.get(krumzId) ?? 0,
         },
       ],
@@ -323,7 +323,7 @@ describe("trace payment pools", () => {
         {
           kind: "corp_trace_counter_pool",
           sourceCardInstanceId: trackerId,
-          sourceDefinitionId: "onr_v1_325_hacker-tracker-central",
+          sourceDefinitionId: 537,
           available: available.get(trackerId) ?? 0,
         },
       ],
@@ -375,7 +375,7 @@ describe("trace payment pools", () => {
       const trace = corpBidTrace({
         corpTemporaryTraceCredits: {
           sourceCardInstanceId: "temporary_trace_source" as CardInstanceId,
-          sourceDefinitionId: "temporary_trace_source" as CardDefinitionId,
+          sourceDefinitionId: 437695242 as CardDefinitionId,
           remaining: invalidAmount,
           includedInCorpCreditPool: true,
           usableFor: "unrestricted_during_current_trace",
@@ -406,7 +406,7 @@ describe("trace payment pools", () => {
           {
             kind: "corp_trace_bit_pool",
             sourceCardInstanceId,
-            sourceDefinitionId: "specialized_pool" as CardDefinitionId,
+            sourceDefinitionId: 583524301 as CardDefinitionId,
             available: invalidAmount,
           },
         ],
@@ -424,7 +424,7 @@ describe("trace payment pools", () => {
     const invalid = 1.5;
     const trace = corpBidTrace({
       fortTraceBitPoolSourceCardInstanceId: "fort_pool" as CardInstanceId,
-      fortTraceBitPoolServerId: "remote_1",
+      fortTraceBitPoolServerId: "r1",
     });
     const state = stateForTrace(trace, { corpCredits: 1, runnerCredits: 1 });
 
@@ -458,8 +458,8 @@ describe("trace payment pools", () => {
   it("quotes and spends Runner trace-link pools without a Hells Run payment kind", () => {
     const pkId = "pk_1" as CardInstanceId;
     const hellsId = "hells_1" as CardInstanceId;
-    const pkDefinitionId = "pk_6089a" as CardDefinitionId;
-    const hellsDefinitionId = "hells_run" as CardDefinitionId;
+    const pkDefinitionId = 2851424055 as CardDefinitionId;
+    const hellsDefinitionId = 55983445 as CardDefinitionId;
     const trace = runnerBidTrace();
     const state = stateForTrace(trace, { runnerCredits: 2 });
     const hostedCredits = new Map<CardInstanceId, number>([
@@ -516,7 +516,7 @@ describe("trace payment pools", () => {
       traceLinkCreditsSpent: 2,
       bonusTraceLinkCreditsSpent: 1,
       runnerCreditsSpent: 2,
-      traceLinkCreditSourceDefinitionIds: "hells_run,pk_6089a",
+      traceLinkCreditSourceDefinitionIds: "55983445,2851424055",
     });
     expect(hostedCredits.get(pkId)).toBe(0);
     expect(hostedCredits.get(hellsId)).toBe(0);
@@ -587,9 +587,9 @@ function stateForTrace(
 
 function corpBidTrace(extras: Partial<TraceState> = {}): TraceState {
   return {
-    traceId: "trace_1",
+    traceId: 1,
     sourceCardInstanceId: "source_1" as CardInstanceId,
-    sourceDefinitionId: "trace_source" as CardDefinitionId,
+    sourceDefinitionId: 2680416230 as CardDefinitionId,
     traceLimit: 2,
     status: "corp_bid",
     successEffect: { type: "add_tag", amount: 1 },

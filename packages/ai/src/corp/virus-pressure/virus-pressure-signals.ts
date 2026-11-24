@@ -1,3 +1,4 @@
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { CorpVirusPressureSignal } from "./virus-pressure-types";
 import { assessCorpPurgeImpact } from "./corp-purge-impact";
@@ -6,12 +7,10 @@ export function buildCorpVirusPressureSignals(
   input: AiDecisionInput,
 ): CorpVirusPressureSignal[] {
   if (input.side !== "corp") return [];
-  const { stateVersion, timingPoint } = input.playerView;
+  const { stateVersion } = input.playerView;
   return input.legalActions.flatMap((action): CorpVirusPressureSignal[] => {
     if (
-      action.side !== "corp" ||
-      action.expiresAtStateVersion !== stateVersion ||
-      action.timingPoint !== timingPoint ||
+      !actionMatchesCurrentDecision(input, action) ||
       (action.type !== "purge_virus_counters" &&
         action.type !== "purge_runner_virus_counters")
     )

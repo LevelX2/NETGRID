@@ -1,13 +1,13 @@
 import { type LegalAction } from "@netgrid/shared";
 
 export function parseSubroutineIndexes(value: unknown): Set<number> {
-  if (typeof value !== "string") return new Set();
+  if (value === undefined) return new Set();
+  if (!Array.isArray(value))
+    throw new Error("Invalid Engine subroutine indexes.");
   const indexes = new Set<number>();
-  for (const rawIndex of value.split(",")) {
-    if (!rawIndex) continue;
-    const index = Number(rawIndex);
-    if (!Number.isFinite(index) || !Number.isInteger(index) || index < 0)
-      continue;
+  for (const index of value) {
+    if (!Number.isSafeInteger(index) || index < 0 || indexes.has(index))
+      throw new Error("Invalid Engine subroutine indexes.");
     indexes.add(index);
   }
   return indexes;
@@ -16,9 +16,13 @@ export function parseSubroutineIndexes(value: unknown): Set<number> {
 export function breakSubroutineIndexesForAction(
   action: LegalAction,
 ): Set<number> {
-  const indexes = parseSubroutineIndexes(action.payload?.subroutineIndexes);
-  const singleIndex = Number(action.payload?.subroutineIndex);
-  if (Number.isInteger(singleIndex) && singleIndex >= 0)
+  const indexes = parseSubroutineIndexes(action.subroutineIndexes);
+  const singleIndex = action.payload?.subroutineIndex;
+  if (
+    typeof singleIndex === "number" &&
+    Number.isSafeInteger(singleIndex) &&
+    singleIndex >= 0
+  )
     indexes.add(singleIndex);
   return indexes;
 }

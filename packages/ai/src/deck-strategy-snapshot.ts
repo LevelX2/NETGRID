@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import type { DeckPublicMetadata, Side } from "@netgrid/shared";
 
 export type AiDeckStrategyDeckSnapshot = {
@@ -8,5 +9,5 @@ export type AiDeckStrategyDeckSnapshot = {
   formatProfileId?: string;
   deckHash?: string;
   publicMetadata?: DeckPublicMetadata;
-  cards: Array<{ cardId: string; quantity: number }>;
+  cards: Array<{ cardId: CardDefinitionId; quantity: number }>;
 };

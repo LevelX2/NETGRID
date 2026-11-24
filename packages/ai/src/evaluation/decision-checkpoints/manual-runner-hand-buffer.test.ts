@@ -27,7 +27,7 @@ it("preserves a fourth hand card before the Corp response at D37", () => {
     capture.input.legalActions.some((a) => a.actionId === decision.actionId),
   ).toBe(true);
   expect(decision.fallbackUsed).toBe(false);
-  expect(decision.actionId).toBe("runner.draw_card");
+  expect(decision.actionId).toBe("r8");
   expect(
     decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
   ).toBe("runner.defense_and_recovery");

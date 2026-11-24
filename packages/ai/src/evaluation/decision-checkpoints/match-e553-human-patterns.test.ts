@@ -58,7 +58,7 @@ describe("e553 human-pattern historical evidence", () => {
     expect(rd.prerunReserveQuote!.evidence).toContain(
       "prerun_reserve_program_install_investment_credits:5",
     );
-    expect(decision.actionId).toBe("runner.gain_credit");
+    expect(decision.actionId).toBe("rb");
     expect(
       decision.decisionDebug?.planFirstDecision?.selectedPlan,
     ).toMatchObject({
@@ -82,8 +82,8 @@ describe("e553 human-pattern historical evidence", () => {
   });
   it("keeps the early blocked remote and its exact coverage child resident", () => {
     const { decision } = replay(earlyRemoteJson);
-    const parent = "plan:runner.contest_remote:remote%3Aremote_1";
-    const need = "coverage:breaker_sentry:run:runner.start_run.remote_1";
+    const parent = "p1p4xezjcxov79rno40lq3f7rv";
+    const need = "coverage:breaker_sentry:run:rs.r1";
     expect(decision.decisionDebug?.planFirstDecision?.portfolio).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ instanceId: parent, openNeedIds: [need] }),
@@ -107,16 +107,16 @@ describe("e553 human-pattern historical evidence", () => {
       input.playerView.own.rig?.find(
         (card) => card.instanceId === action.source,
       )?.definitionId,
-    ).toBe("onr_v1_177_the-short-circuit");
+    ).toBe(389);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       selectedPlan: {
         moduleId: "runner.rig_and_coverage",
         phase: "search_answer",
-        parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+        parentInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
         target: { id: "breaker_sentry" },
       },
       executionOrigin: {
-        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+        rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
         stateVersion: input.playerView.stateVersion,
       },
       priority: { effectiveClass: "P4" },
@@ -128,7 +128,7 @@ describe("e553 human-pattern historical evidence", () => {
     (variant) => {
       const changed = structuredClone(earlyRemoteJson);
       const server = changed.input.playerView.servers.find(
-        (entry) => entry.id === "remote_1",
+        (entry) => entry.id === "r1",
       )!;
       if (variant === "empty") server.root = [];
       else server.ice = [{ instanceId: "hidden-remote-ice", known: false }];
@@ -138,22 +138,22 @@ describe("e553 human-pattern historical evidence", () => {
           (entry) =>
             entry.moduleId === "runner.rig_and_coverage" &&
             entry.parentInstanceId ===
-              "plan:runner.contest_remote:remote%3Aremote_1",
+              "p1p4xezjcxov79rno40lq3f7rv",
         ),
       ).toBe(false);
     },
   );
   it("keeps liquidity instead of paying for an incomplete matchpoint answer at D147", () => {
     const { input, decision } = replay(lateShellJson);
-    expect(decision.actionId).toBe("runner.draw_card");
+    expect(decision.actionId).toBe("r8");
     expect(
       decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
     ).toBe("runner.defense_and_recovery");
     const paid = input.legalActions.filter(
       (action) =>
         action.payload?.delayedInstallAbility === "remove_shell_counter" &&
-        ["onr_v1_016_cyfermaster", "onr_v1_023_evil-twin"].includes(
-          String(action.payload.targetCardDefinitionId),
+        [228, 235].includes(
+          action.payload.targetCardDefinitionId as number,
         ),
     );
     expect(paid).toHaveLength(2);
@@ -174,13 +174,13 @@ describe("e553 human-pattern historical evidence", () => {
     const { input } = structuredClone(lateShellJson) as Capture;
     // Projection counterfactual: identical visible Engine quotes, more liquid credits.
     input.playerView.own.credits = 100;
-    const source = "runner_onr_v1_176_the-shell-traders_1";
-    const target = "runner_onr_v1_016_cyfermaster_1";
+    const source = "c2e9";
+    const target = "c1ep";
     const assessment = assessShellTradersAccess(
       input,
       source,
       target,
-      "remote_1",
+      "r1",
     );
     expect(assessment).toMatchObject({
       status: "funded",
@@ -188,7 +188,7 @@ describe("e553 human-pattern historical evidence", () => {
       requiredClicks: 1,
     });
     expect(assessment.completionCardIds).toEqual(
-      expect.arrayContaining([target, "runner_onr_v1_023_evil-twin_1"]),
+      expect.arrayContaining([target, "c1g9"]),
     );
     expect(assessment.knownPathCost).toBeGreaterThan(0);
     const fundedDecision = replay({ ...lateShellJson, input }).decision;
@@ -202,16 +202,16 @@ describe("e553 human-pattern historical evidence", () => {
     });
     input.playerView.own.credits = assessment.requiredCredits!;
     expect(
-      assessShellTradersAccess(input, source, target, "remote_1").status,
+      assessShellTradersAccess(input, source, target, "r1").status,
     ).toBe("funded");
     input.playerView.own.credits -= 1;
     expect(
-      assessShellTradersAccess(input, source, target, "remote_1").status,
+      assessShellTradersAccess(input, source, target, "r1").status,
     ).toBe("blocked");
     input.playerView.own.credits = 100;
     input.playerView.own.clicks = 0;
     expect(
-      assessShellTradersAccess(input, source, target, "remote_1").reason,
+      assessShellTradersAccess(input, source, target, "r1").reason,
     ).toBe("run_click_unavailable");
   });
 
@@ -219,14 +219,14 @@ describe("e553 human-pattern historical evidence", () => {
     const { input } = structuredClone(lateShellJson) as Capture;
     input.playerView.own.credits = 100;
     input.playerView.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     )!.ice[0] = { instanceId: "hidden", known: false };
     expect(
       assessShellTradersAccess(
         input,
-        "runner_onr_v1_176_the-shell-traders_1",
-        "runner_onr_v1_016_cyfermaster_1",
-        "remote_1",
+        "c2e9",
+        "c1ep",
+        "r1",
       ).status,
     ).toBe("unknown");
   });
@@ -235,14 +235,14 @@ describe("e553 human-pattern historical evidence", () => {
     const { input } = structuredClone(lateShellJson);
     input.playerView.own.credits = 100;
     input.playerView.own.memoryLimit = 3;
-    const source = "runner_onr_v1_176_the-shell-traders_1";
-    const target = "runner_onr_v1_016_cyfermaster_1";
+    const source = "c2e9";
+    const target = "c1ep";
     expect(
-      assessShellTradersAccess(input, source, target, "remote_1").status,
+      assessShellTradersAccess(input, source, target, "r1").status,
     ).toBe("blocked");
     expect(
-      assessShellTradersAccess(input, source, target, "remote_1", [
-        "runner_onr_v1_036_jackhammer_1",
+      assessShellTradersAccess(input, source, target, "r1", [
+        "c1j5",
       ]).status,
     ).toBe("funded");
     const action = input.legalActions.find(
@@ -252,8 +252,8 @@ describe("e553 human-pattern historical evidence", () => {
     )!;
     action.expiresAtStateVersion -= 1;
     expect(
-      assessShellTradersAccess(input, source, target, "remote_1", [
-        "runner_onr_v1_036_jackhammer_1",
+      assessShellTradersAccess(input, source, target, "r1", [
+        "c1j5",
       ]).status,
     ).toBe("unknown");
   });

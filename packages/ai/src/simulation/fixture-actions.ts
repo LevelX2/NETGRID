@@ -12,9 +12,13 @@ export function applyFixtureAction(
   predicate: (action: LegalAction) => boolean,
   label: string,
 ): FixtureActionResult {
-  const legalAction = getLegalActions(state, side).find(predicate);
-  if (!legalAction) {
-    return { ok: false, message: `missing_legal_action:${label}` };
+  const matches = getLegalActions(state, side).filter(predicate);
+  const [legalAction] = matches;
+  if (!legalAction || matches.length !== 1) {
+    return {
+      ok: false,
+      message: `${legalAction ? "ambiguous" : "missing"}_legal_action:${label}`,
+    };
   }
   const result = applyAction(state, {
     matchId: state.matchId,
@@ -40,6 +44,11 @@ export function applyFixtureChoiceFirstOption(
   const pendingChoice = state.pendingChoice;
   if (!pendingChoice || pendingChoice.side !== side)
     return { ok: false, message: `missing_pending_choice:${label}` };
+  if (pendingChoice.minSelections > 1 || pendingChoice.maxSelections < 1)
+    return {
+      ok: false,
+      message: `fixture_choice_needs_other_selection_count:${label}`,
+    };
   const optionId = selectableChoiceOptions(pendingChoice.options)[0]?.id;
   if (optionId === undefined || optionId === null)
     return { ok: false, message: `missing_choice_option:${label}` };

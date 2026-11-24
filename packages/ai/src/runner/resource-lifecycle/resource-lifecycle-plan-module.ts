@@ -104,6 +104,8 @@ function resourceLifecycleCandidates(
     .filter(
       (candidate) =>
         actionIds.has(candidate.actionId) &&
+        candidate.actorSide === "runner" &&
+        candidate.stateVersion === context.input.playerView.stateVersion &&
         candidate.sourceKind === "card" &&
         candidate.sourceDefinitionId === signal.definitionId &&
         candidate.sourceCardInstanceId === signal.sourceCardInstanceId &&

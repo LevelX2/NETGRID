@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { ORIGINALSET_DEFAULT_DECKS, type AiDecisionInput, type GameState, type LegalAction } from "@netgrid/shared";
 import { applyAction, createGameAfterSetup, getLegalActions, hashGameState, replayEvents } from "@netgrid/engine";
 import { describe, expect, it } from "vitest";
@@ -23,7 +24,7 @@ type ReconstructedDecisionCapture = {
 
 describe("selfplay cycle 245 decision checkpoints", () => {
   it("contests the remote without inventing confirmed damage from discarded Setup", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       taxedMultiDrawJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
@@ -41,19 +42,19 @@ describe("selfplay cycle 245 decision checkpoints", () => {
     );
 
     expect(decision).toMatchObject({
-      actionId: "runner.start_run.remote_2",
+      actionId: "rs.r2",
       reasonCode: "plan_first.runner.contest_remote",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:runner.contest_remote:remote%3Aremote_2",
+            "p1p4x83h7yolw2hjtvi0ud06dm",
           leafExecutorInstanceId:
-            "plan:runner.contest_remote:remote%3Aremote_2",
+            "p1p4x83h7yolw2hjtvi0ud06dm",
           dispositions: expect.arrayContaining([
             expect.objectContaining({
               actionId:
-                "runner.play_event.runner_onr_v1_097_livewires-contacts_3.runner_onr_v1_097_livewires-contacts_3.onr_v1_097_livewires-contacts:abilities_on_play_gain_credits",
+                "rh.c1wr.c1wr.393",
               disposition: "explicitly_nonproductive",
               ownerModuleId: "runner.economy",
               evidenceCode:
@@ -66,7 +67,7 @@ describe("selfplay cycle 245 decision checkpoints", () => {
   });
 
   it("keeps an over-capacity taxed draw under exactly one disposition owner", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       taxedMultiDrawJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
@@ -91,12 +92,12 @@ describe("selfplay cycle 245 decision checkpoints", () => {
       decision.decisionDebug?.planFirstDecision?.dispositions ?? [];
 
     expect(decision).toMatchObject({
-      actionId: "runner.start_run.remote_2",
+      actionId: "rs.r2",
       reasonCode: "plan_first.runner.contest_remote",
       fallbackUsed: false,
     });
     expect(
-      dispositions.filter((entry) => entry.actionId === "runner.draw_card"),
+      dispositions.filter((entry) => entry.actionId === "r8"),
     ).toEqual([
       expect.objectContaining({
         disposition: "explicitly_nonproductive",
@@ -105,12 +106,12 @@ describe("selfplay cycle 245 decision checkpoints", () => {
       }),
     ]);
     expect(
-      dispositions.filter((entry) => entry.actionId.includes("jack-n-joe")),
+      dispositions.filter((entry) => referencesDefaultDeckCard(entry.actionId, 307)),
     ).toEqual([
       expect.objectContaining({
         disposition: "explicitly_nonproductive",
         ownerModuleId: "runner.develop_board_and_hand",
-        evidenceCode: "runner_hand_development_rejected:no_current_need:runner_onr_v1_095_jack-n-joe_3",
+        evidenceCode: "runner_hand_development_rejected:no_current_need:c1wb",
       }),
     ]);
   });
@@ -124,21 +125,21 @@ describe("selfplay cycle 245 decision checkpoints", () => {
     const decision = chooseAiAction(input);
     expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
     const dispositions = decision.decisionDebug?.planFirstDecision?.dispositions ?? [];
-    expect(dispositions.filter((d) => d.actionId.includes("jack-n-joe"))).toEqual([
+    expect(dispositions.filter((d) => referencesDefaultDeckCard(d.actionId, 307))).toEqual([
       expect.objectContaining({
         disposition: "explicitly_nonproductive", ownerModuleId: "runner.defense_and_recovery",
         evidenceCode: "runner_confirmed_damage_draw_tax_tag_unsafe",
       }),
     ]);
-    expect(dispositions.filter((d) => d.actionId === "runner.draw_card")).toHaveLength(1);
+    expect(dispositions.filter((d) => d.actionId === "r8")).toHaveLength(1);
     if (overflow === 0) verifyActualDrawTax(state, jackId);
   });
 });
 
 function activeDrawTaxFixture(overflow: number) {
-  const jack = "onr_v1_095_jack-n-joe";
-  const city = "onr_v1_313_city-surveillance";
-  const setup = "onr_v1_340_setup";
+  const jack = 307;
+  const city = 525;
+  const setup = 552;
   const runnerDeck = { ...ORIGINALSET_DEFAULT_DECKS.runner, cards: [
     ...ORIGINALSET_DEFAULT_DECKS.runner.cards.filter((c) => c.id !== jack),
     { id: jack, quantity: 1 },
@@ -166,8 +167,8 @@ function activeDrawTaxFixture(overflow: number) {
   // Each asset needs its own legal one-slot root. Generate the whole view and
   // LegalActions from this Engine state instead of editing a captured DTO.
   removeEverywhere(state, setupId);
-  state.corp.servers.push({ id: "remote_2", kind: "remote", label: "Remote 2", ice: [], root: [setupId] });
-  state.cardInstances[setupId]!.zone = { side: "corp", zone: "serverRoot", serverId: "remote_2" };
+  state.corp.servers.push({ id: "r2", kind: "remote", label: "Remote 2", ice: [], root: [setupId] });
+  state.cardInstances[setupId]!.zone = { side: "corp", zone: "serverRoot", serverId: "r2" };
   for (const id of [cityId, setupId]) Object.assign(state.cardInstances[id]!, { rezzed: true, faceup: true });
   Object.assign(state.runner, { credits: 0, clicks: 3, coreDamage: 2 });
   const input = buildAiDecisionInput(state, "runner", { difficulty: "hard", ownDeckSnapshot: {

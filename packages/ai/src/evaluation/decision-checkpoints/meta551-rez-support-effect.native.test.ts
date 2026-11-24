@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -71,50 +72,61 @@ function decide(key: string) {
 }
 describe("native action ICE rez-support current effect", () => {
   beforeEach(resetResidentPlanPortfolioMemory);
-  it.each([
-    "emptyInstallment",
-    "emptyTemporary",
-    "emptyOverflowInstallment",
-    "emptyOverflowTemporary",
-  ])("does not buy the complete empty target in %s", (key) => {
-    const { input, action, result, observedActionId } = decide(key);
-    const target = input.playerView.servers
-      .flatMap((s) => s.ice)
-      .find((i) => i.definitionId === "onr_proteus_031_minotaur")!;
-    expect(target.effectivePostRezRunQuote).toMatchObject({
-      complete: true,
-      effectiveRunQuote: { subroutines: [] },
-    });
-    expect(
-      action.type === "play_operation" &&
-        action.payload?.targetCardId === target.instanceId,
-    ).toBe(false);
-    expect(
-      result.decisionDebug?.planFirstDecision?.dispositions.some(
-        (d) =>
-          d.actionId === observedActionId &&
-          d.ownerModuleId === "corp.defend_servers" &&
-          d.evidenceCode.startsWith("corp_rez_support_empty_current_effect:"),
-      ),
-    ).toBe(true);
-  });
+  it.each(["emptyInstallment", "emptyTemporary"])(
+    "does not buy the complete empty target in %s",
+    (key) => {
+      const { input, action, result, observedActionId } = decide(key);
+      const target = input.playerView.servers
+        .flatMap((s) => s.ice)
+        .find((i) => i.definitionId === 89)!;
+      expect(target.effectivePostRezRunQuote).toMatchObject({
+        complete: true,
+        effectiveRunQuote: { subroutines: [] },
+      });
+      expect(
+        action.type === "play_operation" &&
+          action.payload?.targetCardId === target.instanceId,
+      ).toBe(false);
+      expect(
+        result.decisionDebug?.planFirstDecision?.dispositions.some(
+          (d) =>
+            d.actionId === observedActionId &&
+            d.ownerModuleId === "corp.defend_servers" &&
+            d.evidenceCode.startsWith("corp_rez_support_empty_current_effect:"),
+        ),
+      ).toBe(true);
+    },
+  );
   it.each(["stopper"])(
     "retains the original exact operation and owner in %s",
     (key) => {
       const { action, observedActionId, result } = decide(key);
       expect(action.actionId).toBe(observedActionId);
       expect(
-        result.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-      ).toMatch(/^plan:corp.defend_servers:/);
+        result.decisionDebug?.planFirstDecision?.portfolio.find(
+          (instance) => instance.instanceId === result.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+        )?.moduleId,
+      ).toBe("corp.defend_servers");
     },
   );
-  it.each(["income", "variable", "emptyOuter"])(
+  it.each([
+    "income",
+    "variable",
+    "emptyOuter",
+    "emptyOverflowInstallment",
+    "emptyOverflowTemporary",
+  ])(
     "requires current operation payout quotes instead of adapting the old %s fixture",
     (key) => {
       // Current native income positives live in meta584-rez-purpose.native.test.ts.
       // This captured older input predates operationFreeRezRunQuoteJson.
       const { input } = capture(key);
-      expect(() => chooseAiAction(input)).toThrowError(expect.objectContaining({ code: "missing_action_semantics", context: expect.objectContaining({ owner: "action_semantics" }) }));
+      expect(() => chooseAiAction(input)).toThrowError(
+        expect.objectContaining({
+          code: "missing_action_semantics",
+          context: expect.objectContaining({ owner: "action_semantics" }),
+        }),
+      );
     },
   );
 });
@@ -127,12 +139,12 @@ describe("rez-support empty-effect proof boundary", () => {
       const { input } = capture(key);
       const targetId =
         key === "paid"
-          ? "onr_proteus_034_riddler"
+          ? 92
           : key === "activeDynamic"
-            ? "onr_proteus_031_minotaur"
+            ? 89
             : key === "income"
-              ? "onr_proteus_014_chihuahua"
-              : "onr_proteus_023_galatea";
+              ? 72
+              : 81;
       const server = input.playerView.servers.find((s) =>
         s.ice.some((i) => i.definitionId === targetId),
       )!;
@@ -152,7 +164,7 @@ describe("rez-support empty-effect proof boundary", () => {
   ])("does not infer emptiness from %s binding", (key) => {
     const { input } = capture("emptyInstallment"),
       server = input.playerView.servers.find((s) =>
-        s.ice.some((i) => i.definitionId === "onr_proteus_031_minotaur"),
+        s.ice.some((i) => i.definitionId === 89),
       )!,
       ice = server.ice[0]!;
     expect(
@@ -162,7 +174,7 @@ describe("rez-support empty-effect proof boundary", () => {
     if (key === "missing") delete ice.effectivePostRezRunQuote;
     if (key === "stale") post.expiresAtStateVersion--;
     if (key === "source") post.cardId = "other";
-    if (key === "definition") post.iceDefinitionId = "other";
+    if (key === "definition") post.iceDefinitionId = syntheticCardDefinitionId("other");
     if (key === "server") post.targetServerId = "rd";
     if (key === "inner_source" && post.complete)
       post.effectiveRunQuote.iceInstanceId = "other";

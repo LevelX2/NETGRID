@@ -1,11 +1,13 @@
-import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
+import { currentRunPathContext } from "../../run-analysis/current-run-path-context";
+import { actionCreditCost } from "../../runtime/action-cost";
+import { isFiniteNonNegativeInteger } from "../../runtime/exact-action-cost-facts";
 import type {
   AiDecisionInput,
   CorpTemporaryIceStrengthPulseQuote,
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import {
   assessKnownRezzedIcePath,
@@ -26,7 +28,7 @@ export function assessCorpTemporaryIceStrengthPulse(
     .find((c) => c.instanceId === action.source);
   const planning =
     source?.definitionId &&
-    cardSpecPlanningCardByDefinitionId(source.definitionId)?.planning;
+    planningCardByDefinitionId(source.definitionId);
   const pulse =
     planning &&
     (planning.engine.abilities ?? []).some(
@@ -55,14 +57,13 @@ export function assessCorpTemporaryIceStrengthPulse(
   };
   let q: CorpTemporaryIceStrengthPulseQuote;
   const raw = action.payload?.corpTemporaryIceStrengthPulseQuoteJson;
+  if (typeof raw !== "string") return fail();
   try {
-    q = typeof raw === "string" ? JSON.parse(raw) : fail();
+    q = JSON.parse(raw);
   } catch {
     return fail();
   }
-  const nonnegative = (n: unknown): n is number =>
-    typeof n === "number" && Number.isSafeInteger(n) && n >= 0;
-  const actionCredits = action.costs.reduce((n, c) => n + (c.credits ?? 0), 0);
+  const actionCredits = actionCreditCost(action);
   if (
     !q ||
     q.schemaVersion !== 1 ||
@@ -77,8 +78,8 @@ export function assessCorpTemporaryIceStrengthPulse(
     q.sourceTrashed !== true ||
     q.expires !== "turn_end" ||
     q.kind !== (action.type === "rez_card" ? "prepare_rez" : "activate") ||
-    !nonnegative(q.pulseCredits) ||
-    !nonnegative(q.sourceRezCredits) ||
+    !isFiniteNonNegativeInteger(q.pulseCredits) ||
+    !isFiniteNonNegativeInteger(q.sourceRezCredits) ||
     (action.type === "rez_card"
       ? q.sourceRezCredits !== actionCredits
       : q.sourceRezCredits !== 0 ||
@@ -117,7 +118,7 @@ export function assessCorpTemporaryIceStrengthPulse(
     ice.definitionId === currentIce?.definitionId &&
     ice.effectiveRunQuote?.iceInstanceId === ice.instanceId &&
     ice.effectiveRunQuote.iceDefinitionId === ice.definitionId &&
-    nonnegative(ice.effectiveRunQuote.effectiveStrength) &&
+    isFiniteNonNegativeInteger(ice.effectiveRunQuote.effectiveStrength) &&
     Array.isArray(ice.effectiveRunQuote.subroutines);
   if (
     q.complete !== true ||
@@ -126,8 +127,8 @@ export function assessCorpTemporaryIceStrengthPulse(
     !target ||
     run.attackedServerId !== target.id ||
     currentIce?.instanceId !== q.targetIceInstanceId ||
-    !nonnegative(q.iceRezCredits) ||
-    !nonnegative(q.corpCreditsAfterDefense) ||
+    !isFiniteNonNegativeInteger(q.iceRezCredits) ||
+    !isFiniteNonNegativeInteger(q.corpCreditsAfterDefense) ||
     q.corpCreditsAfterDefense !==
       input.playerView.own.credits -
         q.sourceRezCredits -
@@ -148,20 +149,27 @@ export function assessCorpTemporaryIceStrengthPulse(
               c.known &&
               c.type === "agenda" &&
               c.definitionId &&
-              !cardSpecPlanningCardByDefinitionId(c.definitionId)?.planning
-                .engine.agendaAccessReplacement,
+              !planningCardByDefinitionId(c.definitionId)?.engine.agendaAccessReplacement,
           )
           .reduce((n, c) => n + (c.agendaPoints ?? 0), 0) +
           input.playerView.opponent.agendaPoints >=
         input.playerView.agendaPointsToWin;
   if (!terminal) return reject("has_no_known_current_terminal_agenda");
   const rig = input.playerView.opponent.rig ?? [];
-  const budget = () =>
-    runnerRunPathCreditBudgetWithVisiblePools(
-      input.playerView.opponent.credits + (run.badPublicityCredits ?? 0),
-      rig,
-      { liquidCredits: input.playerView.opponent.credits },
-    );
+  const budget = runnerRunPathCreditBudgetWithVisiblePools(
+    input.playerView.opponent.credits + (run.badPublicityCredits ?? 0),
+    rig,
+    {
+      liquidCredits: input.playerView.opponent.credits,
+      excludeStealthCredits:
+        target.statuses?.some(
+          (status) =>
+            status.kind === "run_payment_restriction" &&
+            status.restriction === "runner_stealth_bit_payment_sources",
+        ) === true,
+    },
+  );
+  const pathContext = currentRunPathContext(input);
   const discarded = new Set(
     input.playerView.own.heapOrArchives.map((c) => c.instanceId),
   );
@@ -172,21 +180,21 @@ export function assessCorpTemporaryIceStrengthPulse(
     assessment: assessKnownRezzedIcePath(
       [q.beforeIce],
       rig,
-      budget(),
+      budget,
       root,
       input.playerView.own.credits - q.sourceRezCredits - q.iceRezCredits,
-      visibleIcePathTraceContext(input),
+      pathContext,
     ),
     expectedKnownIceCount: 1,
-    runnerCreditBudgetBefore: budget(),
+    runnerCreditBudgetBefore: budget,
   });
   const after = assessKnownRezzedIcePath(
     [q.afterIce],
     rig,
-    budget(),
+    budget,
     root,
     q.corpCreditsAfterDefense,
-    visibleIcePathTraceContext(input),
+    pathContext,
   );
   if (
     before.accessStatus !== "reachable" ||

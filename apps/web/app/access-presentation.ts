@@ -1,9 +1,11 @@
-import type { PublicGameEvent, Side } from "@netgrid/shared";
+import type { AccessPresentationId } from "./access-reveal-ui";
+import type { MatchEventId, PublicGameEvent, Side } from "@netgrid/shared";
+import { cardDefinitionIdValue } from "./card-definition-id";
 
 export type AccessPresentationOutcomeKind = "trashed" | "stolen" | "declined";
 
 export type AccessPresentationOutcome = {
-  eventId: string;
+  eventId: MatchEventId;
   kind: AccessPresentationOutcomeKind;
   status: string;
 };
@@ -153,7 +155,7 @@ export function accessPresentationOutcomeAfter(
 
 export function latestStolenAgendaEvent(
   events: PublicGameEvent[],
-  dismissedEventIds: readonly string[],
+  dismissedEventIds: readonly AccessPresentationId[],
 ): PublicGameEvent | null {
   for (let index = events.length - 1; index >= 0; index -= 1) {
     const event = events[index];
@@ -175,7 +177,7 @@ function publicAccessEventForOutcome(
     (event) => event.eventId === outcomeEvent.eventId,
   );
   if (outcomeIndex < 0) return null;
-  const outcomeCardId = stringValue(
+  const outcomeCardId = cardDefinitionIdValue(
     outcomeEvent.publicPayload.cardDefinitionId,
   );
   for (let index = outcomeIndex - 1; index >= 0; index -= 1) {
@@ -183,7 +185,7 @@ function publicAccessEventForOutcome(
     if (!event) continue;
     if (event.publicPayload.actionType !== "access_card") continue;
     if (!isPublicCardAccessEvent(event)) return null;
-    const accessCardId = stringValue(event.publicPayload.cardDefinitionId);
+    const accessCardId = cardDefinitionIdValue(event.publicPayload.cardDefinitionId);
     if (outcomeCardId && outcomeCardId !== accessCardId) return null;
     return event;
   }
@@ -228,7 +230,7 @@ function accessOutcome(
 function isPublicCardAccessEvent(event: PublicGameEvent): boolean {
   return (
     event.publicPayload.actionType === "access_card" &&
-    Boolean(stringValue(event.publicPayload.cardDefinitionId)) &&
+    Boolean(cardDefinitionIdValue(event.publicPayload.cardDefinitionId)) &&
     Boolean(stringValue(event.publicPayload.title))
   );
 }

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { CardDefinitionId } from "@netgrid/shared";
 import generatedArtifact from "../../../data/ai/card-spec-ai-hints-generated.json";
 
 type ActiveHint = (typeof generatedArtifact.cards)[number]["hint"];
@@ -8,34 +9,34 @@ const hintsByCard = new Map(
 );
 
 const DIRECT_PLACEMENT_CARDS = [
-  "onr_v1_292_management-shake-up",
-  "onr_v1_300_project-consultants",
-  "onr_v1_304_systematic-layoffs",
-  "onr_v1_305_team-restructuring",
-  "onr_v1_312_chicago-branch",
+  504,
+  512,
+  516,
+  517,
+  524,
 ] as const;
 
 const TRANSFER_CARDS = [
-  "onr_v1_291_falsified-transactions-expert",
-  "onr_v1_347_vapor-ops",
+  503,
+  559,
 ] as const;
 
 const IMMEDIATE_ACTION_CAPACITY_CARDS = [
-  ["onr_v1_297_overtime-incentives", "action.corp_extra_action_burst"],
-  ["onr_v1_334_pacifica-regional-ai", "action.corp_counter_to_action"],
-  ["onr_v1_192_corporate-boon", "action.corp_extra_action"],
+  [509, "action.corp_extra_action_burst"],
+  [546, "action.corp_counter_to_action"],
+  [404, "action.corp_extra_action"],
 ] as const;
 
 const FUTURE_ACTION_CAPACITY_CARDS = [
-  ["onr_v1_218_subsidiary-branch", "action.corp_recurring_extra_action"],
-  ["onr_v1_331_nevinyrral", "action.corp_repeatable_extra_action"],
-  ["onr_v1_335_remote-facility", "action.corp_repeatable_extra_action"],
+  [430, "action.corp_recurring_extra_action"],
+  [543, "action.corp_repeatable_extra_action"],
+  [547, "action.corp_repeatable_extra_action"],
 ] as const;
 
 const OVERADVANCE_TARGETS = [
-  "onr_v1_214_project-babylon",
-  "onr_proteus_007_project-venice",
-  "onr_proteus_008_project-zurich",
+  426,
+  65,
+  66,
 ] as const;
 
 describe("Corp score-conversion hint audit", () => {
@@ -64,7 +65,7 @@ describe("Corp score-conversion hint audit", () => {
     (cardId) => {
       const hint = requiredHint(cardId);
       expect(hint.actionCapacityProfiles?.length).toBeGreaterThan(0);
-      if (cardId === "onr_v1_297_overtime-incentives") {
+      if (cardId === 509) {
         expect(hint.planRoles).not.toContain("recover_economy");
         expect(strategyIds(hint)).toContain("corp.fast_advance");
       }
@@ -95,7 +96,7 @@ describe("Corp score-conversion hint audit", () => {
   );
 
   it("keeps Vapor Ops both economy- and agenda-support visible", () => {
-    const hint = requiredHint("onr_v1_347_vapor-ops");
+    const hint = requiredHint(559);
     expect(hint.planRoles).toEqual(
       expect.arrayContaining([
         "remote_asset_economy",
@@ -106,7 +107,7 @@ describe("Corp score-conversion hint audit", () => {
   });
 
   it("binds Team Restructuring to distributed advancement evidence", () => {
-    const hint = requiredHint("onr_v1_305_team-restructuring");
+    const hint = requiredHint(517);
     expect(hint.strategySupportPairs).toContainEqual(
       expect.objectContaining({
         strategyId: "corp.fast_advance",
@@ -120,7 +121,7 @@ describe("Corp score-conversion hint audit", () => {
   });
 
   it("classifies Chicago Branch as score acceleration, never asset economy", () => {
-    const hint = requiredHint("onr_v1_312_chicago-branch");
+    const hint = requiredHint(524);
     expect(hint.remoteRole?.kind).toBe("score_acceleration");
     expect(hint.remoteRole?.kind).not.toBe("asset_economy");
     expect(hint.strategySupportPairs).toContainEqual(
@@ -132,7 +133,7 @@ describe("Corp score-conversion hint audit", () => {
   });
 });
 
-function requiredHint(cardId: string): ActiveHint {
+function requiredHint(cardId: CardDefinitionId): ActiveHint {
   const hint = hintsByCard.get(cardId);
   expect(hint, `missing active AI hint for ${cardId}`).toBeDefined();
   return hint!;

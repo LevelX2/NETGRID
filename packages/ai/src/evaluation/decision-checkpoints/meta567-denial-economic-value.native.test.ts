@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -30,8 +31,8 @@ function fixture(game: number, decision: number) {
 }
 afterEach(resetResidentPlanPortfolioMemory);
 it.each([
-  [2, 419, "priority-wreck", 22],
-  [35, 300, "edited-shipping", 14],
+  [2, 419, 317, 22],
+  [35, 300, 296, 14],
 ] as const)(
   "does not give G%i D%i a profitable access value for a losing economic route",
   (game, decision, definition, pathCost) => {
@@ -48,7 +49,7 @@ it.each([
         input,
         deckCapabilities: input.ownDeckCapabilities!,
       }),
-      route = targets.find((t) => t.actionId.includes(definition))!;
+      route = targets.find((t) => referencesDefaultDeckCard(t.actionId, definition))!;
     expect(route.pathCost).toBe(pathCost);
     expect(route.unknownUnrezzedIceCount).toBe(0);
     expect(route.score).toBeLessThanOrEqual(0);
@@ -77,7 +78,7 @@ it("preserves the genuinely useful zero-path-cost denial at G11 D311 under the s
     route = evaluateRunnerRunTargets({
       input,
       deckCapabilities: input.ownDeckCapabilities!,
-    }).find((t) => t.actionId.includes("priority-wreck"))!;
+    }).find((t) => referencesDefaultDeckCard(t.actionId, 317))!;
   expect(route.pathCost).toBe(0);
   expect(route.score).toBeGreaterThan(0);
   const result = chooseAiAction(input);

@@ -47,16 +47,15 @@ export function corpMatureRemoteAffordableDefenseLayerCertification(
   const availableAgendaPoints = input.playerView.own.agendaPoints;
   for (let left = 0; left < layers.length; left += 1) {
     for (let right = left + 1; right < layers.length; right += 1) {
-      const layerCredits = layers[left]!.credits + layers[right]!.credits;
       if (
-        layerCredits <= availableCredits &&
+        layers[left]!.credits + layers[right]!.credits <= availableCredits &&
         layers[left]!.agendaPoints + layers[right]!.agendaPoints <=
           availableAgendaPoints &&
         corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
           input,
           server,
           [layers[left]!.iceInstanceId, layers[right]!.iceInstanceId],
-          availableCredits - layerCredits,
+          availableCredits - layers[left]!.credits - layers[right]!.credits,
         )
       ) {
         return {
@@ -67,7 +66,7 @@ export function corpMatureRemoteAffordableDefenseLayerCertification(
             layers[left]!.iceInstanceId,
             layers[right]!.iceInstanceId,
           ],
-          requiredCredits: layerCredits,
+          requiredCredits: layers[left]!.credits + layers[right]!.credits,
           requiredAgendaPoints:
             layers[left]!.agendaPoints + layers[right]!.agendaPoints,
         };
@@ -260,7 +259,8 @@ export function corpArchivesHasCertifiedPaidAccess(
   ) {
     return false;
   }
-  const remainingCorpCredits = view.own.credits - layer.credits;
+  const visibleCorpCredits = view.own.credits - layer.credits;
+  const runOnlyCredits = view.runnerNextRunBadPublicityCredits ?? 0;
   const assessment = assessEngineCertifiedPostRezIcePath(
     [ice],
     server.id,
@@ -268,18 +268,19 @@ export function corpArchivesHasCertifiedPaidAccess(
     new Set([ice.instanceId]),
     runnerRig,
     runnerRunPathCreditBudgetWithVisiblePools(
-      view.opponent.credits,
+      view.opponent.credits + runOnlyCredits,
       runnerRig,
       {
+        liquidCredits: view.opponent.credits,
         creditPoolHorizon: "next_runner_turn",
       },
     ),
     [],
-    remainingCorpCredits,
+    visibleCorpCredits,
     {
       ...visibleIcePathTraceContext(input),
       targetServerId: server.id,
-      visibleCorpCredits: remainingCorpCredits,
+      visibleCorpCredits,
       visibleRemoteServerCount: view.servers.filter(
         (candidate) => !["hq", "rd", "archives"].includes(candidate.id),
       ).length,

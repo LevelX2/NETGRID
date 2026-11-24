@@ -8,7 +8,7 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 describe("selfplay cycle 013 remediation decision checkpoints", () => {
   it("keeps the exact same-turn matchpoint score ahead of a speculative central-defense draw", () => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(scoreBeforeDefenseDrawJson) as AiDecisionCheckpointV1,
+      structuredClone(scoreBeforeDefenseDrawJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
@@ -18,7 +18,7 @@ describe("selfplay cycle 013 remediation decision checkpoints", () => {
 
   it("keeps the admitted last-draw matchpoint score project through its advance phase", () => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(lastDrawScoreContinuationJson) as AiDecisionCheckpointV1,
+      structuredClone(lastDrawScoreContinuationJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);

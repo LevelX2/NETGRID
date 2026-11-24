@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_classic_004_theorem-proof"),
+    cardDefinitionId: cardDefinitionId(8),
     title: "Theorem Proof",
     side: "corp",
     cardType: "agenda",

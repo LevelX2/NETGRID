@@ -12,6 +12,7 @@ import {
   spendBreakerCreditsAndApplySideEffects,
   spendTraceEligibleCredits,
 } from "./visible-run-credit-budget";
+import { quoteInstalledFixedTagAvoidance } from "./installed-tag-avoidance-quote";
 import { isVisibleDirectDamageSubroutine } from "./visible-subroutine-semantics";
 import type {
   BreakAssessment,
@@ -125,12 +126,18 @@ export function visibleIceRunHazardsForQuote(params: {
   ice: IceCardLike;
   iceIndex: number;
   rigCards: VisibleCard[];
+  /** Full installed rig, including cards that cannot break this encounter. */
+  tagPrevention?: {
+    rigCards: readonly VisibleCard[];
+    consumedSourceIds: ReadonlySet<string>;
+  };
   /** Complete current payment ledger; restricted breaker pools never fund traces. */
   creditBudget: RunnerRunPathCreditBudgetInput;
   visibleCorpBidCapacity: number;
   breakerStrengths: Map<string, number>;
   additionalBreakCostPerSubroutine: number;
   runnerTraceSupportQuote?: VisibleRunnerTraceSupportQuote;
+  runnerTraceCreditLimit?: number;
   traceRulesProfile?: TraceRulesProfile;
   runTraceLinkBonus?: number;
   excludeStealthTraceCredits?: boolean;
@@ -148,6 +155,9 @@ export function visibleIceRunHazardsForQuote(params: {
     params.excludeStealthTraceCredits,
   );
   const consumedTraceSupportSourceIds = new Set<string>();
+  const consumedTagPreventionSourceIds = new Set(
+    params.tagPrevention?.consumedSourceIds,
+  );
   quote.subroutines.forEach((subroutine) => {
     if (subroutine.type !== "initiate_trace") return;
     const traceSupport = visibleRunnerTraceSupport(
@@ -155,7 +165,10 @@ export function visibleIceRunHazardsForQuote(params: {
         params.runnerTraceSupportQuote,
         consumedTraceSupportSourceIds,
       ),
-      remainingCreditBudget.traceEligibleCredits,
+      Math.min(
+        remainingCreditBudget.traceEligibleCredits,
+        params.runnerTraceCreditLimit ?? Infinity,
+      ),
       params.runTraceLinkBonus,
       {
         traceCreditPool: remainingTraceCreditPool,
@@ -191,7 +204,7 @@ export function visibleIceRunHazardsForQuote(params: {
           );
     const traceSuccessCancel = cheapestTraceSuccessCancel(
       traceSupport,
-      remainingCreditBudget.traceEligibleCredits,
+      traceSupport.availableCredits,
     );
     const traceAvoidanceCandidate =
       visibleCorpMaxTraceAvoidance?.cheapestAffordableSafe?.creditCost;
@@ -212,15 +225,30 @@ export function visibleIceRunHazardsForQuote(params: {
         .affordable
         ? breakAssessment.cost
         : undefined;
+    const tagAvoidance =
+      successEffect?.type === "add_tag" && params.tagPrevention
+        ? quoteInstalledFixedTagAvoidance(
+            params.tagPrevention.rigCards,
+            successEffect.amount,
+            remainingCreditBudget.traceEligibleCredits,
+            consumedTagPreventionSourceIds,
+          )
+        : undefined;
     const avoidanceCandidates = [
       traceAvoidanceCandidate,
       traceSuccessCancelCandidate,
       breakAvoidanceCandidate,
     ].filter((cost): cost is number => cost !== undefined);
-    const minimumAvoidanceCost =
-      avoidanceCandidates.length > 0
-        ? Math.min(...avoidanceCandidates)
+    const minimumTraceOrBreakCost = Math.min(...avoidanceCandidates);
+    const selectedTagAvoidance =
+      tagAvoidance && tagAvoidance.cost < minimumTraceOrBreakCost
+        ? tagAvoidance
         : undefined;
+    const minimumAvoidanceCost =
+      selectedTagAvoidance?.cost ??
+      (minimumTraceOrBreakCost < Infinity
+        ? minimumTraceOrBreakCost
+        : undefined);
     const usesBreakAvoidance =
       breakAvoidanceCandidate !== undefined &&
       minimumAvoidanceCost === breakAvoidanceCandidate &&
@@ -395,6 +423,11 @@ export function visibleIceRunHazardsForQuote(params: {
         ...(breakAssessment
           ? [`visible_trace_break_cost:${breakAssessment.cost}`]
           : []),
+        ...(selectedTagAvoidance
+          ? [
+              `visible_installed_tag_avoidance_cost:${selectedTagAvoidance.cost}`,
+            ]
+          : []),
         `visible_ice_hazard_unavoidable:${unavoidable}`,
       ],
     };
@@ -423,21 +456,30 @@ export function visibleIceRunHazardsForQuote(params: {
             }
           : {}),
       ...(!unavoidable && minimumAvoidanceCost !== undefined
-        ? usesBreakAvoidance && breakAssessment
+        ? selectedTagAvoidance
           ? {
               avoidancePayment: {
-                kind: "breaker" as const,
-                assessment: breakAssessment,
+                kind: "tag_prevention" as const,
+                ...selectedTagAvoidance,
               },
             }
-          : {
-              avoidancePayment: {
-                kind: "general" as const,
-                cost: minimumAvoidanceCost,
-              },
-            }
+          : usesBreakAvoidance && breakAssessment
+            ? {
+                avoidancePayment: {
+                  kind: "breaker" as const,
+                  assessment: breakAssessment,
+                },
+              }
+            : {
+                avoidancePayment: {
+                  kind: "general" as const,
+                  cost: minimumAvoidanceCost,
+                },
+              }
         : {}),
     });
+    for (const sourceId of selectedTagAvoidance?.trashedSourceIds ?? [])
+      consumedTagPreventionSourceIds.add(sourceId);
     if (!unavoidable && minimumAvoidanceCost !== undefined) {
       if (usesBreakAvoidance && breakAssessment) {
         spendBreakerCreditsAndApplySideEffects(
@@ -646,7 +688,7 @@ type VisibleRunnerTraceSupportOption = {
   activationCost: number;
   rewardCreditsOnAvoidTrace?: number;
   safeForAccess: boolean;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   sourceTitle?: string;
   sideEffect?: VisibleTraceSupportSideEffect;
   classicLinkModifier?: VisibleClassicLinkModifier;
@@ -654,7 +696,7 @@ type VisibleRunnerTraceSupportOption = {
 
 type VisibleRunnerTracePostBidLinkOption = {
   sourceCardInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   sourceTitle: string;
   linkDelta: number;
   activationCost: number;
@@ -667,7 +709,7 @@ type VisibleRunnerTracePostBidLinkOption = {
 
 type VisibleRunnerTraceSuccessCancelOption = {
   sourceCardInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   sourceTitle: string;
   activationCost: number;
   tapSource: boolean;
@@ -967,6 +1009,7 @@ export function visibleTracePostBidSelections(
     rewardCreditsOnAvoidTrace: number;
     safeForAccess: boolean;
     consumedSourceIds: string[];
+    oncePerTraceSourceIds: string[];
   }> = [
     {
       linkDelta: 0,
@@ -974,9 +1017,18 @@ export function visibleTracePostBidSelections(
       rewardCreditsOnAvoidTrace: 0,
       safeForAccess: true,
       consumedSourceIds: [],
+      oncePerTraceSourceIds: [],
     },
   ];
-  for (const option of options) {
+  if (!Number.isSafeInteger(activationBudget) || activationBudget < 0)
+    throw new Error("invalid_trace_activation_budget");
+  const consumesSource = (option: VisibleRunnerTracePostBidLinkOption) =>
+    option.tapSource || option.trashSource;
+  // Reusable payments can happen before the tap or trash of their source.
+  for (const option of [...options].sort(
+    (left, right) =>
+      Number(consumesSource(left)) - Number(consumesSource(right)),
+  )) {
     if (
       option.useLimit.kind === "repeatable_while_legal" &&
       option.activationCost === 0
@@ -985,15 +1037,22 @@ export function visibleTracePostBidSelections(
         `Unbegrenzte kostenlose Post-Bid-Link-Nutzung: ${option.sourceDefinitionId}`,
       );
     const nextSelections = [...selections];
+    const oneUse =
+      option.useLimit.kind === "once_per_trace" || consumesSource(option);
     for (const selection of selections) {
+      if (
+        selection.consumedSourceIds.includes(option.sourceCardInstanceId) ||
+        (oneUse &&
+          selection.oncePerTraceSourceIds.includes(option.sourceCardInstanceId))
+      )
+        continue;
       const remainingBudget = Math.max(
         0,
         activationBudget - selection.activationCost,
       );
-      const maxUses =
-        option.useLimit.kind === "once_per_trace"
-          ? 1
-          : Math.floor(remainingBudget / option.activationCost);
+      const maxUses = oneUse
+        ? 1
+        : Math.floor(remainingBudget / option.activationCost);
       for (let uses = 1; uses <= maxUses; uses += 1) {
         const activationCost =
           selection.activationCost + option.activationCost * uses;
@@ -1009,12 +1068,17 @@ export function visibleTracePostBidSelections(
             option.tapSource || option.trashSource
               ? [...selection.consumedSourceIds, option.sourceCardInstanceId]
               : selection.consumedSourceIds,
+          oncePerTraceSourceIds: oneUse
+            ? [...selection.oncePerTraceSourceIds, option.sourceCardInstanceId]
+            : selection.oncePerTraceSourceIds,
         });
       }
     }
     selections = nextSelections;
   }
-  return selections;
+  return selections.map(
+    ({ oncePerTraceSourceIds: _used, ...selection }) => selection,
+  );
 }
 
 function traceSupportQuoteWithoutConsumedSources(
@@ -1167,7 +1231,6 @@ export function unbrokenEffectIsUnavoidableTraceRunLock(
     sourceSubroutine,
     traceRulesProfile,
   );
-  if (traceBaseStrength === undefined) return true;
   const support = visibleRunnerTraceSupport(
     options.runnerTraceSupportQuote,
     remainingCredits,
@@ -1179,6 +1242,9 @@ export function unbrokenEffectIsUnavoidableTraceRunLock(
         : {}),
     },
   );
+  if (cheapestTraceSuccessCancel(support, support.availableCredits))
+    return false;
+  if (traceBaseStrength === undefined) return true;
   const corpStrength =
     traceBaseStrength + Math.max(0, options.visibleCorpBidCapacity ?? 0);
   return (

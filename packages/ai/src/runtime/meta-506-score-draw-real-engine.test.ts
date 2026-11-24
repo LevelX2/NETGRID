@@ -26,10 +26,10 @@ const cp = JSON.parse(
     "utf8",
   ),
 );
-const lab = "onr_classic_003_unlisted-research-lab";
-const supers = "onr_classic_002_superserum";
-const data = "onr_classic_001_data-fort-remapping";
-const theorem = "onr_classic_004_theorem-proof";
+const lab = 7;
+const supers = 6;
+const data = 5;
+const theorem = 8;
 afterEach(resetResidentPlanPortfolioMemory);
 function apply(state: GameState, actionId: string) {
   const result = applyAction(state, {
@@ -43,7 +43,7 @@ function apply(state: GameState, actionId: string) {
 }
 function ready(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   serverId: Exclude<ServerId, "new_remote">,
 ) {
   const id = [...state.corp.rd, ...state.corp.hq].find(
@@ -69,7 +69,7 @@ function ready(
   )!;
 }
 function fixture(
-  scored: readonly string[],
+  scored: readonly number[],
   remaining: number,
   withSibling = false,
 ) {
@@ -102,11 +102,11 @@ function fixture(
   for (const [i, id] of scored.entries())
     state = apply(
       state,
-      ready(state, id, `remote_${i + 1}` as Exclude<ServerId, "new_remote">)
+      ready(state, id, `r${i + 1}` as Exclude<ServerId, "new_remote">)
         .actionId,
     );
-  const score = ready(state, lab, "remote_10");
-  const sibling = withSibling ? ready(state, theorem, "remote_11") : undefined;
+  const score = ready(state, lab, "r10");
+  const sibling = withSibling ? ready(state, theorem, "r11") : undefined;
   // Move excess unseen own cards to Archives to control the real remaining draw horizon.
   const removed = state.corp.rd.splice(remaining);
   state.corp.archives.push(...removed);

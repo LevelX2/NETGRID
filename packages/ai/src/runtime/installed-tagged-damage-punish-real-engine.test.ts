@@ -1,3 +1,4 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import { readFileSync } from "node:fs";
 import {
   applyAction,
@@ -19,8 +20,8 @@ import { chooseCorpAction } from "../index";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInput } from "./ai-decision-input";
 
-const SQUAD = "onr_v1_342_solo-squad";
-const CAPABILITY = `${SQUAD}:abilities_activated_corp_main_damage`;
+const SQUAD = 554;
+const CAPABILITY = canonicalCapabilityId(SQUAD, capabilityKey("abilities_activated_corp_main_damage"));
 const entry = catalog.decks.find(
   (d) => d.standardDeckId === "standard_corp_neon_guillotine",
 )!;
@@ -180,10 +181,16 @@ it("requotes each normal activation and closes the three-click damage line", () 
     });
     expect(decision.fallbackUsed).toBe(false);
     const pf = decision.decisionDebug!.planFirstDecision!;
-    expect(pf.rootPlanInstanceId).toContain("corp.punish_campaign");
-    expect(pf.executionOrigin?.leafPlanInstanceId).toContain(
-      "corp.execute_punish_sequence",
-    );
+    expect(
+      pf.portfolio.find(
+        (instance) => instance.instanceId === pf.rootPlanInstanceId,
+      )?.moduleId,
+    ).toBe("corp.punish_campaign");
+    expect(
+      pf?.portfolio.find(
+        (instance) => instance.instanceId === pf.executionOrigin?.leafPlanInstanceId,
+      )?.moduleId,
+    ).toBe("corp.execute_punish_sequence");
     expect(pf.selectedStep?.stepId).toBeTruthy();
     expect(pf.route).toMatchObject({
       actionId: action.actionId,

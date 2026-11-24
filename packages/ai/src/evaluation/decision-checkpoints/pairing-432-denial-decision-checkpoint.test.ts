@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { expect, it } from "vitest";
 import captureJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-pairing-432-priority-wreck-d306.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -10,7 +11,7 @@ import {
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 
 it("keeps the central executor and actual access instead of consuming a zero-yield denial run", () => {
-  const capture = structuredClone(captureJson) as {
+  const capture = structuredClone<unknown>(captureJson) as {
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
   };
@@ -22,28 +23,28 @@ it("keeps the central executor and actual access instead of consuming a zero-yie
   );
   const decision = chooseAiAction(capture.input);
   expect(decision).toMatchObject({
-    actionId: "runner.start_run.hq",
+    actionId: "rs.hq",
     fallbackUsed: false,
   });
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-    leafExecutorInstanceId: "plan:runner.pressure_central:central%3Ahq",
+    rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+    leafExecutorInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
   });
 });
 
 it.each([0, 1, 8])(
   "quotes only the actual denial payoff at %i visible Corp credits",
   (credits) => {
-    const input = structuredClone(
+    const input = structuredClone<unknown>(
       captureJson.input,
     ) as AiDecisionInputWithDeckCapabilities;
     input.playerView.opponent.credits = credits;
     const evaluations = evaluateRunnerRunTargets({ input });
     const denial = evaluations.find((x) =>
-      x.actionId.includes("priority-wreck"),
+      referencesDefaultDeckCard(x.actionId, 317),
     )!;
     const basic = evaluations.find(
-      (x) => x.actionId === "runner.start_run.hq",
+      (x) => x.actionId === "rs.hq",
     )!;
     expect(denial.runActionProjection.accessReplacement).toBe(
       "runner_spend_corp_lose_credits",

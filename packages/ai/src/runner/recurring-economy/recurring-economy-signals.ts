@@ -1,4 +1,6 @@
+import { uniqueBy } from "../../runtime/collection";
 import type { AiDecisionInput } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import type { RunnerHandDevelopmentEvaluation } from "../hand-development/hand-development-evaluation";
@@ -41,14 +43,12 @@ export function runnerRecurringEconomySignals(
       (a) => a.actionId === route.actionId,
     );
     if (
-      !action ||
-      action.side !== "runner" ||
       input.side !== "runner" ||
+      !actionMatchesCurrentDecision(input, action) ||
       action.type !== "trigger_ability" ||
       (action.payload?.abilityId !== "pay_to_remove_run_lock" &&
         action.payload?.v1920RunnerRunLockAbility !==
           "pay_to_remove_run_lock") ||
-      action.expiresAtStateVersion !== input.playerView.stateVersion ||
       !route.serverId ||
       !route.parentPlanInstanceId ||
       !Number.isFinite(route.value) ||
@@ -81,7 +81,11 @@ export function runnerRecurringEconomySignals(
         input,
         definitionId,
       );
-      const realization = recurringEconomyRealization(input, definitionId);
+      const realization = recurringEconomyRealization(
+        input,
+        card.instanceId,
+        definitionId,
+      );
       const runDecision = runnerRecurringEconomyRunDecision(
         input,
         runTargets,
@@ -180,8 +184,7 @@ export function runnerRecurringEconomySignals(
         {
           commitmentId:
             candidate.sourceCardInstanceId ??
-            candidate.sourceCardId ??
-            candidate.sourceDefinitionId,
+            String(candidate.sourceCardId ?? candidate.sourceDefinitionId),
           definitionId: candidate.sourceDefinitionId,
           commitmentActive: false,
           phase: setupWindow ? ("install" as const) : ("hold" as const),
@@ -297,8 +300,7 @@ export function runnerRecurringEconomySignals(
         {
           commitmentId:
             candidate.sourceCardInstanceId ??
-            candidate.sourceCardId ??
-            candidate.sourceDefinitionId,
+            String(candidate.sourceCardId ?? candidate.sourceDefinitionId),
           definitionId: candidate.sourceDefinitionId,
           commitmentActive: false,
           phase: installReady ? ("install" as const) : ("hold" as const),
@@ -351,7 +353,7 @@ function runnerInstalledCompatibleRestrictedCreditBreakerCount(
   );
   const supportsKiller = uses.includes("using_killer_during_run");
   return (input.playerView.own.rig ?? []).filter((card) => {
-    const roles = rolesForDeckDoctrineCard(card.definitionId ?? "");
+    const roles = rolesForDeckDoctrineCard(card.definitionId);
     const subtypes = new Set(
       (card.subtypes ?? []).map((subtype) =>
         subtype.trim().toLocaleLowerCase("en-US"),
@@ -403,24 +405,15 @@ function runnerRecurringEconomyRunDecision(
   });
 }
 
-function recurringEconomyCommitmentValue(definitionId: string): number {
-  const profile = runnerNoRunRecurringEconomyProfile(definitionId);
-  if (!profile)
-    throw new Error(
-      `runner_no_run_recurring_economy_profile_missing:${definitionId}`,
-    );
-  return profile.turnStartCredits;
-}
-
 function hasNoRunRecurringEconomyCommitment(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): boolean {
   return runnerNoRunRecurringEconomyProfile(definitionId) !== undefined;
 }
 
 function runnerRecurringEconomyInstalledInCurrentTurn(
   input: AiDecisionInput,
-  definitionId: string,
+  definitionId: number,
 ): boolean {
   const turnSerial = input.playerView.turnSerial;
   if (turnSerial === undefined) return false;
@@ -439,7 +432,8 @@ function runnerRecurringEconomyInstalledInCurrentTurn(
 
 function recurringEconomyRealization(
   input: AiDecisionInput,
-  definitionId: string,
+  cardInstanceId: string,
+  definitionId: number,
 ): { payoutCount: number; value: number } {
   const events = uniqueBy(
     [...input.playerView.publicEvents, ...input.eventTail],
@@ -451,12 +445,16 @@ function recurringEconomyRealization(
     const effects = event.publicPayload?.resolvedEffects;
     if (!Array.isArray(effects)) continue;
     for (const effect of effects) {
+      if (typeof effect !== "object" || effect === null) continue;
       const resolved = effect as Record<string, unknown>;
       if (
+        resolved.sourceCardInstanceId === cardInstanceId &&
         resolved.sourceDefinitionId === definitionId &&
         resolved.kind === "gain_credits" &&
+        resolved.side === "runner" &&
         resolved.reason === "start_of_turn" &&
         typeof resolved.amount === "number" &&
+        Number.isSafeInteger(resolved.amount) &&
         resolved.amount > 0
       ) {
         payoutCount += 1;
@@ -464,14 +462,5 @@ function recurringEconomyRealization(
       }
     }
   }
-  return { payoutCount, value: Math.max(0, Math.floor(value)) };
-}
-
-function uniqueBy<T>(
-  values: readonly T[],
-  keyForValue: (value: T) => string,
-): T[] {
-  return [
-    ...new Map(values.map((value) => [keyForValue(value), value])).values(),
-  ];
+  return { payoutCount, value };
 }

@@ -3,7 +3,7 @@ import type { RunnerCreditReservePhase } from "../../run-analysis/runner-run-tar
 export const RUNNER_BREAKER_UPGRADE_ECONOMIC_QUOTE_SCHEMA_VERSION =
   "runner-breaker-upgrade-economic-quote-v2" as const;
 
-const ACTION_OPPORTUNITY_COST_PER_CLICK = 1;
+export const RUNNER_BREAKER_UPGRADE_CLICK_VALUE = 1;
 const CONSUMED_SEARCH_CARD_OPPORTUNITY_COST = 1;
 const REQUIRED_NET_SAFETY_MARGIN = 2;
 
@@ -110,7 +110,7 @@ export function quoteRunnerBreakerUpgradeEconomics(
     (params.installActionClicks +
       params.searchActionClicks +
       memorySupportActionClicks) *
-    ACTION_OPPORTUNITY_COST_PER_CLICK;
+    RUNNER_BREAKER_UPGRADE_CLICK_VALUE;
   const searchCardOpportunityCost = params.consumesSearchCard
     ? CONSUMED_SEARCH_CARD_OPPORTUNITY_COST
     : 0;
@@ -122,7 +122,20 @@ export function quoteRunnerBreakerUpgradeEconomics(
   const projectedMemoryAvailable =
     params.memoryAvailable + memorySupportAdditionalMu;
   const rejectionReasons: RunnerBreakerUpgradeEconomicRejection[] = [];
-  if (!validInputs) rejectionReasons.push("invalid_quote_input");
+  if (
+    !validInputs ||
+    ![
+      grossRunSavings,
+      upfrontCreditCost,
+      actionOpportunityCost,
+      totalInvestment,
+      netValueBeforeSafetyMargin,
+      projectedLiquidCreditsAfterUpgradeAndRun,
+      projectedMemoryAvailable,
+    ].every(Number.isSafeInteger)
+  ) {
+    rejectionReasons.push("invalid_quote_input");
+  }
   if (params.phase !== "midgame") rejectionReasons.push("not_midgame");
   if (params.scoreThreat) rejectionReasons.push("urgent_score_threat");
   if (params.plannedRunHorizon < 2)

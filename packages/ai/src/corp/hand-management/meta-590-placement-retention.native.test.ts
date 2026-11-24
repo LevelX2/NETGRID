@@ -41,22 +41,20 @@ it.each([
     );
     const d = chooseAiAction(input),
       root =
-        "plan:corp.hand_and_agenda_management:discard-window%3Adiscard_corp_255%3A255";
+        "p5rzamnhgf4a1pqijqcprw0f6y";
     expect(d).toMatchObject({
-      actionId: "corp.resolve_choice",
+      actionId: "cn",
       fallbackUsed: false,
       timeoutUsed: false,
     });
+    expect(d.selectedChoices?.selectedOptionIds).toHaveLength(2);
     expect(d.selectedChoices?.selectedOptionIds).toEqual(
-      keep
-        ? [
-            "card_corp_onr_proteus_021_dog-pile_1",
-            "card_corp_onr_proteus_007_project-venice_1",
-          ]
-        : [
-            "card_corp_onr_v1_304_systematic-layoffs_1",
-            "card_corp_onr_proteus_021_dog-pile_1",
-          ],
+      expect.arrayContaining([
+        "card_chp",
+        keep
+          ? "card_cel"
+          : "card_c36t",
+      ]),
     );
     expect(d.decisionDebug!.planFirstDecision!).toMatchObject({
       rootPlanInstanceId: root,
@@ -65,7 +63,7 @@ it.each([
         moduleId: "corp.hand_and_agenda_management",
         phase: "discard_window",
       },
-      route: { actionId: "corp.resolve_choice", stateVersion: 255 },
+      route: { actionId: "cn", stateVersion: 255 },
     });
     expect(JSON.stringify(input.playerView) === beforeView).toBe(true);
     expect(JSON.stringify(input.legalActions) === beforeLegal).toBe(true);
@@ -84,27 +82,27 @@ it.each([
 it("does not treat distinct-target counters or generated actions as unrestricted counters", () => {
   expect(
     corpGuaranteedOnPlayAdvancementCountersPerTarget(
-      "onr_v1_304_systematic-layoffs",
+      516,
     ),
   ).toBe(2);
   expect(
     corpGuaranteedOnPlayAdvancementCountersPerTarget(
-      "onr_v1_292_management-shake-up",
+      504,
     ),
   ).toBe(3);
   expect(
     corpGuaranteedOnPlayAdvancementCountersPerTarget(
-      "onr_v1_305_team-restructuring",
+      517,
     ),
   ).toBe(1);
   expect(
     corpGuaranteedOnPlayAdvancementCountersPerTarget(
-      "onr_v1_297_overtime-incentives",
+      509,
     ),
   ).toBe(0);
   expect(
     corpGuaranteedOnPlayAdvancementCountersPerTarget(
-      "onr_v1_312_chicago-branch",
+      524,
     ),
   ).toBe(0);
 });

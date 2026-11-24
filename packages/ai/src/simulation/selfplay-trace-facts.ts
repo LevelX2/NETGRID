@@ -217,16 +217,16 @@ export function retainActionAlternativesForFindingWindows(
   }> = [],
 ): void {
   const keep = new Set<string>();
-  const requestedBySeed = new Map(
-    opportunitySnapshotRequests.map((request) => [
-      request.seed,
-      new Set(
-        request.actionIndices.filter(
-          (index) => Number.isInteger(index) && index >= 0,
-        ),
-      ),
-    ]),
-  );
+  const requestedBySeed = new Map<string, Set<number>>();
+  for (const { seed, actionIndices } of opportunitySnapshotRequests) {
+    const requested = requestedBySeed.get(seed) ?? new Set<number>();
+    for (const actionIndex of actionIndices) {
+      if (Number.isSafeInteger(actionIndex) && actionIndex >= 0) {
+        requested.add(actionIndex);
+      }
+    }
+    requestedBySeed.set(seed, requested);
+  }
   for (const finding of findings) {
     if (
       Array.isArray(finding.detectorIds) &&
@@ -237,7 +237,13 @@ export function retainActionAlternativesForFindingWindows(
       continue;
     }
     const summary = summaries[finding.summaryIndex];
-    if (!summary) continue;
+    if (
+      !summary ||
+      !Number.isSafeInteger(finding.actionIndex) ||
+      finding.actionIndex < 0 ||
+      finding.actionIndex >= summary.actionSequence.length
+    )
+      continue;
     const from = Math.max(0, finding.actionIndex - 5);
     const to = Math.min(
       summary.actionSequence.length - 1,

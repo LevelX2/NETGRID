@@ -1,4 +1,5 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { PlanSchedulerResult } from "../../plans/plan-scheduler";
 import type { RunnerRunWindowSignal } from "../../plans/runner-tactical-plan-contracts";
 import { runnerUnfundedExposedIceRezCredits } from "../run-window/run-window-expose-viewing";
@@ -14,10 +15,11 @@ export function bindSelectedRunnerExposeInformationMemory(
   const selectedAction = input.legalActions.find(
     (action) => action.actionId === result.route.head.actionId,
   );
-  const targetIceInstanceId = selectedAction?.payload?.iceId;
-  const sourceCardInstanceId = selectedAction?.payload?.cardId;
+  if (!actionMatchesCurrentDecision(input, selectedAction)) return;
+  const targetIceInstanceId = selectedAction.payload?.iceId;
+  const sourceCardInstanceId = selectedAction.payload?.cardId;
   const serverId = input.playerView.run?.attackedServerId;
-  if (executor?.moduleId === "runner.convert_run_window" && selectedAction) {
+  if (executor?.moduleId === "runner.convert_run_window") {
     const state = executor.moduleState as
       | { kind: "run_window"; signal: RunnerRunWindowSignal }
       | undefined;
@@ -52,12 +54,11 @@ export function bindSelectedRunnerExposeInformationMemory(
   }
   if (
     executor?.moduleId !== "runner.expose_information" ||
-    selectedAction?.type !== "trigger_ability" ||
+    selectedAction.type !== "trigger_ability" ||
     selectedAction.payload?.approachIceExposeDecision !== "expose" ||
     typeof targetIceInstanceId !== "string" ||
     typeof sourceCardInstanceId !== "string" ||
-    typeof serverId !== "string" ||
-    selectedAction.expiresAtStateVersion !== input.playerView.stateVersion
+    typeof serverId !== "string"
   ) {
     return;
   }

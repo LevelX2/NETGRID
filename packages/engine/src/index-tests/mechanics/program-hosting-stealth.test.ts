@@ -188,17 +188,17 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     expect(MECHANIC_SMOKE_CARD_IDS.programSubtypeHosting).toHaveLength(16);
     for (const definitionId of MECHANIC_SMOKE_CARD_IDS.programSubtypeHosting) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
       expect(
         cardImplementationForDefinitionId(definitionId),
-        definitionId,
+        String(definitionId),
       ).toBeDefined();
-      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+      expect(definition?.rulesText, String(definitionId)).not.toContain("WIP");
     }
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus,
+      CARD_DEFINITIONS_BY_ID[488]?.implementationStatus,
     ).toBe("playable_mvp");
   });
 
@@ -208,23 +208,23 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     );
     state.runner.credits = 12;
     state.corp.credits = 8;
-    moveRunnerCardToGrip(state, "onr_v1_003_baedekers-net-map");
-    moveRunnerCardToGrip(state, "onr_v1_148_access-through-alpha");
+    moveRunnerCardToGrip(state, 215);
+    moveRunnerCardToGrip(state, 360);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_003_baedekers-net-map",
+        sourceDefinition(state, action) === 215,
     );
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_148_access-through-alpha",
+        sourceDefinition(state, action) === 360,
     );
-    putCorpIceOnServer(state, "rd", "onr_v1_246_fragmentation-storm");
+    putCorpIceOnServer(state, "rd", 458);
 
     state = apply(
       state,
@@ -237,7 +237,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "onr_v1_246_fragmentation-storm",
+        sourceDefinition(state, action) === 458,
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
 
@@ -267,7 +267,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       "runner",
       traceChoiceOptionIdForDefinition(
         state,
-        "onr_v1_148_access-through-alpha",
+        360,
         "trace_base_link_",
       ),
     );
@@ -288,44 +288,44 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       MECHANIC_SMOKE_GAMES.programSubtypeHosting("v1916-stealth-recurring"),
     );
     state.runner.credits = 30;
-    moveRunnerCardToGrip(state, "onr_v1_035_invisibility");
-    moveRunnerCardToGrip(state, "onr_v1_140_raven-microcyb-eagle");
-    moveRunnerCardToGrip(state, "onr_v1_141_raven-microcyb-owl");
+    moveRunnerCardToGrip(state, 247);
+    moveRunnerCardToGrip(state, 352);
+    moveRunnerCardToGrip(state, 353);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_035_invisibility",
+        sourceDefinition(state, action) === 247,
     );
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_140_raven-microcyb-eagle",
+        sourceDefinition(state, action) === 352,
     );
     const eagleId = state.runner.rig.hardware.find(
       (id) =>
         state.cardInstances[id]?.definitionId ===
-        "onr_v1_140_raven-microcyb-eagle",
+        352,
     );
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_141_raven-microcyb-owl",
+        sourceDefinition(state, action) === 353,
     );
 
     const invisibilityId = state.runner.rig.programs.find(
       (id) =>
-        state.cardInstances[id]?.definitionId === "onr_v1_035_invisibility",
+        state.cardInstances[id]?.definitionId === 247,
     );
     const owlId = state.runner.rig.hardware.find(
       (id) =>
         state.cardInstances[id]?.definitionId ===
-        "onr_v1_141_raven-microcyb-owl",
+        353,
     );
     expect(invisibilityId).toBeDefined();
     expect(eagleId).toBeDefined();
@@ -366,17 +366,17 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     );
     state.runner.credits = 12;
     state.corp.credits = 8;
-    moveRunnerCardToGrip(state, "onr_v1_033_imp");
-    moveRunnerCardToGrip(state, "onr_v1_004_bakdoor");
+    moveRunnerCardToGrip(state, 245);
+    moveRunnerCardToGrip(state, 216);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_033_imp",
+        sourceDefinition(state, action) === 245,
     );
     const impId = state.runner.rig.programs.find(
-      (id) => state.cardInstances[id]?.definitionId === "onr_v1_033_imp",
+      (id) => state.cardInstances[id]?.definitionId === 245,
     );
     expect(impId).toBeDefined();
     if (!impId) throw new Error("Missing installed Imp host");
@@ -386,7 +386,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_004_bakdoor" &&
+        sourceDefinition(state, action) === 216 &&
         action.payload?.hostOnCardId === impId,
     );
     const bakdoorId = String(hostedInstall.payload?.cardId ?? "");
@@ -416,7 +416,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     rdServer.ice.push(dArcKnightId);
     state.cardInstances[dArcKnightId] = {
       instanceId: dArcKnightId,
-      definitionId: "onr_v1_233_d-arc-knight",
+      definitionId: 445,
       owner: "corp",
       controller: "corp",
       zone: { side: "corp", zone: "serverIce", serverId: "rd" },
@@ -438,7 +438,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "onr_v1_233_d-arc-knight",
+        sourceDefinition(state, action) === 445,
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = applyChoice(state, "corp", `card_${bakdoorId}`);
@@ -465,20 +465,20 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     );
     state.runner.credits = 10;
     state.corp.credits = 8;
-    moveRunnerCardToGrip(state, "onr_v1_047_pile-driver");
+    moveRunnerCardToGrip(state, 259);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_047_pile-driver",
+        sourceDefinition(state, action) === 259,
     );
     const pileDriverId = state.runner.rig.programs.find(
       (id) =>
-        state.cardInstances[id]?.definitionId === "onr_v1_047_pile-driver",
+        state.cardInstances[id]?.definitionId === 259,
     );
     expect(pileDriverId).toBeDefined();
-    putCorpIceOnServer(state, "rd", "onr_v1_246_fragmentation-storm");
+    putCorpIceOnServer(state, "rd", 458);
     const initial = structuredClone(state);
 
     state = apply(
@@ -492,7 +492,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "onr_v1_246_fragmentation-storm",
+        sourceDefinition(state, action) === 458,
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     const maximumCorpBidOption = state.pendingChoice?.options
@@ -514,7 +514,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       tagsAdded: 0,
       runnerRunEnded: true,
       runnerRunLockCreditCost: 1,
-      trashedCardDefinitionId: "onr_v1_047_pile-driver",
+      trashedCardDefinitionId: 259,
       trashedCardType: "program",
       trashedCount: 1,
     });
@@ -543,7 +543,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(failed, action) === "onr_v1_246_fragmentation-storm",
+        sourceDefinition(failed, action) === 458,
     );
     failed = apply(
       failed,

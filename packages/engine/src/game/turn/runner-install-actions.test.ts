@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type { CardDefinition, CardInstanceId } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { createGame } from "../create-game";
@@ -8,13 +9,13 @@ import {
 } from "./runner-install-actions";
 
 function runnerCardDefinition(
-  id: string,
+  id: number | string,
   type: CardDefinition["type"],
   title: string,
   installCost: number,
 ): CardDefinition {
   return {
-    id,
+    id: typeof id === "number" ? id : syntheticCardDefinitionId(id),
     title,
     side: "runner",
     type,
@@ -41,7 +42,7 @@ describe("runner install main actions", () => {
         runnerCardDefinition(cardId, "program", "Test Program", 2),
       ),
     ).toMatchObject({
-      actionId: "runner.install_card.runner_program_test.runner_program_test",
+      actionId: "rc.runner_program_test.runner_program_test",
       side: "runner",
       type: "install_card",
       label: "Test Program installieren",
@@ -62,12 +63,7 @@ describe("runner install main actions", () => {
       buildRunnerResourceInstallAction(
         game,
         "loan-instance" as never,
-        runnerCardDefinition(
-          "onr_v1_168_loan-from-chiba",
-          "resource",
-          "Credit Exchange",
-          0,
-        ),
+        runnerCardDefinition(380, "resource", "Credit Exchange", 0),
       ).payload,
     ).toMatchObject({
       cardId: "loan-instance",
@@ -89,7 +85,7 @@ describe("runner install main actions", () => {
         runnerCardDefinition(cardId, "hardware", "Test Hardware", 3),
       ),
     ).toMatchObject({
-      actionId: "runner.install_card.runner_hardware_test.runner_hardware_test",
+      actionId: "rc.runner_hardware_test.runner_hardware_test",
       side: "runner",
       type: "install_card",
       label: "Test Hardware installieren",
@@ -115,7 +111,7 @@ describe("runner install main actions", () => {
         runnerCardDefinition(cardId, "resource", "Test Resource", 1),
       ),
     ).toMatchObject({
-      actionId: "runner.install_card.runner_resource_test.runner_resource_test",
+      actionId: "rc.runner_resource_test.runner_resource_test",
       side: "runner",
       type: "install_card",
       label: "Test Resource installieren",

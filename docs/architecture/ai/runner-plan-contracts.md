@@ -64,6 +64,20 @@ fail-closed; Labels und Kartennamen ersetzen sie nicht. Paarung 644 D53 prüft
 den Engine-Aktionspräfix, DTO, die Umleitung HQ → R&D und den unveränderten
 Central-Owner für einen bezahlbaren bekannten Agenda-Zugriff.
 
+Beim Vergleich gewöhnlicher Zugriffe auf dieselbe unbekannte Zentralzone
+zählt das tatsächliche Zugriffsziel auch bei unterschiedlichen Eintrittsservern.
+Ein vollständig bezahlter Pfad ohne offene ICE-Wirkung kann eine gleichwertige
+Route ablösen, wenn er mehr liquide Credits schützt oder bei bedingtem Zugriff
+mindestens so viel Geld wie die Alternative nach ihrer Vorabreserve übrig
+lässt. Nur für diesen Vergleich darf der sichere Pfad die allgemeine
+Entwicklungsreserve einsetzen. Mindest-, Notfall- und gebundene Contest-Reserven
+bleiben erhalten. Ein bloß möglicher Gratis-Trash rechtfertigt die schlechtere
+Route bei Unterschreiten dieser Reserven nicht. Konkrete Zusatzwirkungen und
+Mehrfachzugriffe bleiben eigenständige Angebote. Die gewöhnliche Zulassung
+für Handpuffer, Deckung und Zugriffskadenz gilt auch für den bevorzugten Pfad.
+Match 5a983612 D60 und D77 prüfen Direktzugriff und Bypass über die gespeicherten
+Engine-Quotes.
+
 Die Installation eines Zugriffspayoffs erhält am letzten verfügbaren Klick
 denselben bereits erreichten Handboden wie die allgemeine Handentwicklung.
 Der Zentralparent und die allgemeine Handentwicklung konsumieren dafür dieselbe
@@ -153,6 +167,14 @@ Run-Zahlungen verbrauchen zuerst das beschränkte Geld. Trace-Zahlungen
 belasten das allgemeine Teilkonto unmittelbar. Mehrere Trace-Subroutinen und
 aufeinanderfolgende ICE konsumieren denselben Ledger. Dedizierte, von der
 Engine projizierte Trace-Pools bleiben zusätzlich verwendbar.
+
+Enthält der Trace-Erfolg ausschließlich eine feste Anzahl Tags, kann die
+Pfadquote zusätzlich sichtbare, bereits installierte Tag-Vermeidung ansetzen.
+Allgemeine Credits finanzieren wiederholbare Zahlungen. Eine reine
+Tag-Vermeidungsquelle mit Trash-Kosten ist über alle Subroutinen und ICE
+hinweg nur einmal verfügbar. Die Quote bewertet die verbleibenden Tags und
+lässt unabhängige Folgen der Subroutine bestehen. Das spätere
+Prevention-Fenster wird aus den dann legalen Engine-Aktionen aufgelöst.
 
 Bezahlte Vorbereitung vor dem Run, etwa ein Subtypwechsel, benötigt bereits
 verfügbares allgemeines Geld. Ihre Zahlung vermindert das Gesamtbudget und
@@ -273,6 +295,13 @@ Quote eröffnet keine LegalAction: Der vorhandene Run-Window-Owner führt nur
 die aktuell legal gebundene Fortsetzung aus. Native Engine-Prüfungen sichern
 den gemeinsamen Preis, echte Zugriffskonversion und deterministisches Replay.
 
+Beim verdeckten Creditvergleich beendet die Engine den Run, wenn der
+Runner mehr als die Corp bietet. Das legale Nullgebot erhält den Zugang
+kostenlos. Pfadquote und Choice-Ausführung verwenden dieselbe Regel.
+Bei Break-Kosten werden anschließende Stealth-Verluste in der angebotenen
+Reihenfolge ins Ledger gebucht. Die Quote und ihre Anwendung verwenden
+dieselbe Reihenfolge und veröffentlichen eine vollständige Buchung.
+
 Die gewöhnliche Run-Startquote finanziert positiven bekannten Hirnschaden-
 Schutz gemeinsam mit allen unabhängigen ETR-Breaks. Die aktuelle
 Encounter-Abwehr priorisiert diesen Schutz bereits; eine vorgeschaltete
@@ -283,6 +312,11 @@ Exakt null Schaden verursacht keine zusätzlichen Schutzkosten. Der bestehende,
 Nicht-Flatline-Schadenszulassung, ohne unabhängige ETR-Sperren zu beseitigen.
 Die nativen Checkpoints aus Paarung 515 sichern gewöhnliche Finanzierung,
 finanzierten Gegenfall, Nullschaden und tatsächliche AI→Engine-Fortsetzung ab.
+Auch wenn ein kostenloser Archives-Zugriff den Finanzierungsbedarf eines
+anderen Zentralruns zurückstellt, prüft der Zentraldruck-Owner für jede
+gewöhnliche Runaktion weiter den liquiden Mindestbestand nach Pfadkosten.
+Die bestehenden Ausnahmen für exakt gebundene dringliche Zugriffe und
+Vorbereitungen folgen weiterhin ihren eigenen Quotes.
 
 Der aktuelle Payoff wird pro Runaktion am tatsächlichen `accessServerId`
 bewertet. Ein Zugang über Archives mit anschließendem HQ-Zugriff übernimmt
@@ -598,6 +632,55 @@ Nullnutzen, unvermeidbare Gefahr, fehlende Zugriffskonversion und veraltete
 Actions begründen keine solche Alternative. Ein unbekanntes Root wird dadurch
 nicht als bekannte Agenda behandelt.
 
+Im letzten Klick vergleicht der Zentraldruck aktuelle Basis- und Kartenruns
+mit normalem Zugriff auf HQ oder R&D, wenn eine öffentlich begründete
+terminale Bedrohung im Remote ansteht. Eine bekannte Remote-Agenda muss
+genügend Punkte für den Corp-Sieg liefern. Ein finanzierter Remote mit
+relevantem Zugriff oder belegter Vorbereitung behält seinen Contest-Anspruch.
+Ein aus dem öffentlichen Verlauf abgeleiteter Remote ohne Agenda-Chance
+blockiert die Zentralroute nicht. Bei unbekanntem ICE bleibt eine bedingte
+Route mit vollständig finanzierter Vorabreserve und ohne weitere offene
+ICE-Wirkungen vergleichbar. Mindestreserve, Handpuffer und sichtbare
+Steal-Kosten bleiben bindend. D112 aus Match ce27c6b1 und die Gegenproben
+prüfen den HQ-Basisrun, Mehrfachzugriff und die Remote-Alternativen.
+
+Ein aktuell legaler Run auf das ungeschützte Archiv besitzt einen
+P1-Sieganspruch, wenn der Bestand vollständig sichtbar ist, der Zugriff
+keine offenen Effekte enthält und die aktuelle Engine-Quote einer sichtbaren
+Siegagenda ihren Steal finanziert. Der Zentraldruck bindet den Anspruch an
+die konkrete Archiv-Action. Normale und spekulative Zugriffe behalten ihre
+jeweiligen Prioritätsklassen.
+
+Ein HQ-Zugriff ohne Diebstahl oder Trash verbraucht die gewöhnliche
+Zugriffskadenz. Bei einem legalen Basisrun mit garantiertem, finanziertem
+Normalzugriff prüft der Zentraldruck den nächsten HQ-Zugriff erneut, wenn
+weiterhin unbekannte Karten oder ein konkreter bezahlbarer Zugriffsertrag
+vorliegen. Das HQ-Gedächtnis liefert den aktuellen Grenznutzen. Der
+TurnPlanner vergleicht die Route mit den anderen Klickoptionen. Bestehende
+Reserve-, Handpuffer- und Sicherheitsprüfungen gelten auch für diese
+Route. Nach dem tatsächlichen Zugriff wird neu geplant. Das native
+Fixture aus `match_910071d4b10c4a02`, Entscheidung 19, belegt den Folge-Run
+unter derselben Zentraldruckinstanz.
+
+Die Aktionsdiagnostik jeder Zentralroute führt den ausgewerteten Belief-Stand.
+Ein öffentlich beobachteter Corp-Draw invalidiert die bekannte R&D-Spitze
+und verändert die Zugriffsbewertung. Die D112-Gegenprobe hält die LegalActions
+fest und prüft den Wechsel des tatsächlichen Zugriffsziels von R&D zu HQ.
+
+Der Pilot `runnerCentralAccessVariation` materialisiert im letzten Klick bei
+maximal zwei fehlenden Runner-Siegpunkten jeweils eine vollständige freie
+Basisrun-Linie auf ungeschütztes HQ und R&D mit unbekanntem Zugriffsertrag.
+Beide Linien haben P4, keine offene Pflicht, keinen bekannten Pfadrisiko-
+oder Ressourcenunterschied und höchstens 20 Punkte Abstand im TurnPlanner.
+Bei Gleichstand erhalten sie Gewicht eins. Innerhalb des Bandes erhält die
+höher bewertete Linie Gewicht zwei. Eine laufende Bindung, eine belegte
+Siegroute und ein relevanter Ressourcen- oder Sicherheitsunterschied
+begrenzen die Variation. Die Engine wendet genau eine Variante über
+`ai_turn_plan_selection` an. Der validierte Spielbeleg stellt vor dem ersten
+Run-Fenster die konkret gezogene Planinstanz und ihren Step wieder her.
+Die Runtime-Option ermöglicht einen Vergleich bei identischen Decks und
+Seeds. Der Pilot deckt vorerst das Auswahl- und Zugriffsfenster ab.
+
 Die Informationsroute bewertet ein öffentlich beobachtetes kostenloses
 Run-Ende im laufenden Zug: Folgt auf den Basisrun ausschließlich kostenloses
 ICE-Rezzen und ein von der Engine bestätigtes End-the-Run-Fenster ohne
@@ -678,6 +761,11 @@ Bypassvorbereitung sowie ihre exakten Choices teilen
 Diese Dienste wählen keinen Executor. Die gemeinsame Herkunft eines laufenden
 Runs ist in `plans/runner-run-origin-contract.ts` typisiert. Kein Central-Modul
 importiert die Live-Runtime oder eine Planregistry zurück.
+
+Der Run-Window-Owner bindet Zahlungsangebote und die Fortsetzung einer
+unterbrochenen Aktion an die Seite, StateVersion und den Timingpunkt der
+aktuellen Engine-Entscheidung. Bei einem bestehenden Zahlungsfenster
+müssen auch die ursprüngliche Aktions-ID und die Fenster-ID übereinstimmen.
 
 ## 3. `runner.contest_remote`
 
@@ -793,6 +881,11 @@ diese Vorbereitung nicht. Der konkrete Informationsschritt bleibt bei
 `runner.contest_remote`; weitere Sabotage- und Bypassrouten behalten ihre
 eigenen Nachweise.
 
+Das Aufdeckgedächtnis verliert die Positionsbindung beim bestätigten
+ICE-Tausch. Eine ICE-Verschiebung kann mehrere Indizes verändern und
+invalidiert die ICE-Positionen der betroffenen Forts. Zur Auswahl muss
+die aktuelle Option an eine sichtbare Position gebunden sein.
+
 Quelle, Action, side-sichere Root-Instanz, Position und StateVersion werden
 vor der Aufdeckung gebunden. Die anschließende Engine-Choice übernimmt nur
 das eine passende aktuelle Optionsfeld; sie wählt weder ein anderes Fort
@@ -857,14 +950,18 @@ bleiben und dadurch den gesamten TurnPlanner trotz ausführbarer Erholung
 abbrechen. Der native Präfix von Paarung 578 G27 sowie die wieder
 aufgefüllte Hand prüfen Sperre, vollständige Coverage und regulären Tagabbau.
 
-Ein Erstbegegnungs-Bypass um unbekanntes, rezzbares ICE erhält den Wert
-eines frischen Zugriffs, wenn er den Pfad zur unbekannten Remote-Root
-vollständig finanziert und die Mindestreserve erhält. Bei einem garantierten
-Pfad ohne offene ICE-Wirkungen darf er die allgemeine Entwicklungsreserve
-nutzen. Eine akute Scorebedrohung behält ihre Reserve. Die Root bleibt
-unbekannt und der Verbrauch der Eventkarte fließt in die Bewertung ein.
-Match 734d6341 D34 belegt den bezahlbaren Bypass und den Gegenfall mit
-weiterem unbekanntem ICE.
+Ein Erstbegegnungs-Bypass um gerezztes oder unbekanntes, rezzbares ICE
+erhält den Wert eines frischen Zugriffs, wenn die Route zur unbekannten
+Remote-Root garantiert und vollständig bezahlt ist. Ohne offene ICE-Wirkungen
+darf sie die allgemeine Entwicklungsreserve bis zur Mindestreserve einsetzen.
+Beim letzten Klick darf ein Bypass um bereits gerezztes ICE auch die
+allgemeine Mindestreserve nutzen. Die Kosten des Run-Events, sichtbare
+Steal-Kosten, die Notfallreserve und die Sicherheitsprüfung des Runpfads
+bleiben bindend. Eine akute Scorebedrohung behält ihren eigenen Reservevertrag.
+Die Root bleibt unbekannt und der Verbrauch der Eventkarte fließt in die
+Bewertung ein. Match 7097801c D33 belegt den Bypass mit drei Credits und
+einem Klick. Match 734d6341 D34 und die Gegenfälle mit unbekanntem Rest-ICE
+oder offenen Steal-Kosten sichern die Grenzen.
 
 Coverage-Unterstützung gehört zur exakt bewerteten Run-Action. Eine auf demselben
 Server bereits ausführbare Bypass-Variante übernimmt nicht den Breakerbedarf
@@ -882,6 +979,12 @@ Coverage-Reconciliation erhält unabhängig weiterhin sinnvolle Breakersuchen;
 vor dem Routenwechsel bleibt eine tatsächlich benötigte Child-Bindung erhalten.
 Die gespeicherten Entscheidungen D159/D160 aus Paarung 425 prüfen beide Seiten
 dieses Übergangs mit den historischen LegalActions und Runtime-Checkpoints.
+
+Öffnet eine gezielte ICE-Vorbereitung ein Zahlungsfenster, behält der
+ursprüngliche Zentral- oder Remoteplan sein gewähltes ICE, auch wenn der
+Einkommensplan eine Bank aktiviert. Bei der Fortsetzung prüft der Owner
+Quellkarte, Aktion und Fenster-ID. Die anschließende Zielauswahl bindet an
+die StateVersion der fortgesetzten Aktion und übernimmt das zuvor gewählte ICE.
 Paarung 557/R1/G18/D320 ergänzt den Zentralfall mit verdrängter Run-Finanzierung: Der aktuelle HQ-Vorbereitungsschritt behält keinen Need des noch nicht neu quotierten Folgeruns. Der Funding-Owner und seine fail-closed Parentprüfung bleiben unverändert.
 
 Die Runpfad-Projektion trennt einen nicht tödlichen Handpufferverstoß von
@@ -1156,6 +1259,18 @@ garantierte Trace-/Breakreserve ist keine Betriebskostenersparnis einer
 neuen Installation. Zulassung verlangt niedrigere vollständige
 Installations- plus Pfadkosten als die so gequotete bestehende Abdeckung.
 Gleiche Kosten erzeugen keinen Effizienzbedarf, auch bei kostenloser Kopie.
+Das gilt auch für einen technisch finanzierten Zentralpfad, den seine
+allgemeine Nach-Run-Reserve zurückstellt. Hier bindet Coverage nur eine
+bereits legale Handinstallation, die den Pfad inklusive Installationskosten
+verbilligt und freien Speicher nutzt. Maßgeblich ist der bereits erreichte
+gemeinsame Defense-Handpuffer. Ein erforderlicher, aktuell belegter Ziehschritt
+muss neben dem Installations- und einem Run-Klick Platz finden. Installations-
+und Ziehklick gehen mit dem bestehenden Klickwert in den Vergleich ein.
+Öffentlich belegter Zentraldruck in mindestens zwei eigenen Zügen begründet
+einen auf zwei Zugriffe begrenzten Nutzungshorizont, solange der Corp mehr
+als zwei Siegpunkte fehlen. Ein späterer Run wird anhand seiner eigenen
+Quote neu zugelassen. D97 aus Match ce27c6b1 prüft Installation, Handaufbau
+und die erneute HQ-Pfadquote.
 
 Eine unbezahlbare vollständige Schadensvermeidung kann den vorhandenen
 Coverage-Owner ebenfalls mit einer günstigeren Handinstallation beauftragen.
@@ -2666,7 +2781,12 @@ Ziel über dem Limit, muss nach der Installation genug Grip übrig bleiben
 oder ein gebundener Draw bis zum Ziel reichen. Die Prüfung berücksichtigt
 Installationskosten, Grip-Verbrauch, verbleibende Klicks und sichtbare Draw
 Taxes. Nach der Installation bindet Defense den benötigten Draw am neuen
-Zustand. Eine sofort mögliche vollständige Tag-Entfernung
+Zustand. Kann der Runner mit dem letzten Klick durch die Basisaktion alle
+Tags entfernen und liegt seine Hand bereits innerhalb des Limits, stellt
+Defense eine Installation mit ausschließlich passivem Handlimitgewinn
+zurück. Das höhere Limit füllt die Hand vor dem Corp-Zug erst mit einem
+weiteren Draw. P862 G7/D20 prüft die Wahl bei drei Handkarten und einem Tag.
+Eine sofort mögliche vollständige Tag-Entfernung
 hat Vorrang, wenn sie den bekannten Gegenschlag abwendet. Eine freiwillige
 Informationsroute kann entfallen, wenn genau dieser Run den bekannten, mit
 der Hand nicht abfangbaren Gegenschlag auslöst. Unmittelbare Siegoptionen
@@ -3817,7 +3937,10 @@ nach dieser Gebühr. Seine vorhandenen Sicherheitsabbrüche gelten auch für
 die angebotene Fort-Exit-Action. Bad-Publicity-/temporäre Run-Credits und
 gebundene Zahlungshilfen bleiben von zweckgebundenen Breaker-Pools getrennt;
 eine quotierte Zahlungshilfe muss weiterhin im echten Engine-Fenster ausgeführt
-werden. Die Engine revalidiert beim Anwenden das tatsächliche passierte ICE.
+werden. Öffnet die gewählte Mautzahlung ein Bankfenster, übernimmt der
+Zahlungspfad die an diese Aktion gebundene Fortsetzung. Die auf der
+Fortsetzung mitgeführten Mautdaten eröffnen keine weitere Wahl zwischen
+Zahlen und Run-Ende. Die Engine revalidiert beim Anwenden das passierte ICE.
 Es entstehen weder ein zweiter Chooser noch ein allgemeiner Zahlungsbonus.
 
 Bei einem bedingten Encounter-ETR darf der freie Run-Abbruch nur gegenüber
@@ -3918,6 +4041,12 @@ Ereignistypen, Lücken oder ein abweichendes Quell-ICE invalidieren die
 Fortsetzung weiterhin fail-closed.
 
 ## 9. `runner.expose_information`
+
+Bei *Ice and Data Special Report* kann die Runner-KI das Event ausspielen und
+anschließend an der optionalen Serverwahl mit `window_origin_missing` stoppen.
+Der Informationsplan bindet die Folgeauswahl
+`expose_installed_cards_fort_select` dann nicht an einen konkreten Server.
+Die Reproduktion gegen Chrome Rush Bureau bot `fort_none` und `fort_r1` an.
 
 Mehrfach-Aufdeckungen liefern aus der Engine gleich lange, gleich geordnete
 `publicRevealDefinitionIds`, `exposedServerIds` und `exposedPositionKeys`.
@@ -4628,10 +4757,9 @@ Die gebundene generische Ausführung bleibt zuständig. CardSpec-Installchoices
 mit `requires_engine_quote` behalten ihre bisherige Projektionsgrenze; daraus
 folgt keine neue Choice-Unterstützung durch das Verschieben der Dateien.
 
-Der vorhandene `runtime/runner-bank-investment-context.ts` gehört zur separat
-verdrahteten Economy-Commitment-/Score-Oberfläche und ist nicht der Produzent
-der hier beschriebenen Plan-first-Bankphasen. Seine Composition-Pass-throughs
-werden durch diesen Schnitt weder zur Autorität erhoben noch bereinigt.
+Die Bankphasen und ihre Finanzierungssignale liegen im Credit-Bank-Owner.
+Die Simulation übernimmt dieselben Plan-first-Entscheidungen für ihre
+Auswertung.
 
 ### Bewertung und Anwendung auf weitere Owner
 

@@ -13,7 +13,7 @@ vi.mock("../../card-implementations/registry", async (importOriginal) => {
   return {
     ...actual,
     CARD_IMPLEMENTATIONS_BY_DEFINITION_ID: mutableImplementations,
-    cardImplementationForDefinitionId: (definitionId: string) =>
+    cardImplementationForDefinitionId: (definitionId: number) =>
       mutableImplementations[definitionId],
   };
 });
@@ -109,7 +109,7 @@ describe("public next-turn basic run preparation", () => {
     const id = "public-extra-run-source" as CardInstanceId;
     state.cardInstances[id] = {
       instanceId: id,
-      definitionId: "onr_v1_123_bodyweight-data-creche",
+      definitionId: 335,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "rig" },
@@ -133,7 +133,7 @@ describe("public next-turn basic run preparation", () => {
       kind: "multi_server_success_sequence",
       sequence: "run_each_data_fort",
       sourceCardId: "public-sequence-source",
-      sourceDefinitionId: "onr_proteus_116_pirate-broadcast",
+      sourceDefinitionId: 174,
       sourceTitle: "Pirate Broadcast",
       pendingServerIds: ["hq", "rd", "archives"],
       successfulServerIds: [],
@@ -164,10 +164,30 @@ describe("public next-turn basic run preparation", () => {
 });
 
 describe("PlayerView projection", () => {
+  it("quotes current required Corp draws from the state without modifying either side", () => {
+    const state = createGameAfterSetup({
+      seed: "corp-mandatory-base-draw-view",
+    });
+    expect(getPlayerView(state, "corp").corpMandatoryBaseDrawQuote).toEqual({
+      baseCount: 1,
+      virusDrawCount: 0,
+    });
+    state.purgeableRunnerVirusCounters = { corp: { skivviss: 2 } };
+    const before = hashState(state);
+    expect(getPlayerView(state, "corp").corpMandatoryBaseDrawQuote).toEqual({
+      baseCount: 3,
+      virusDrawCount: 2,
+    });
+    expect(getPlayerView(state, "runner")).not.toHaveProperty(
+      "corpMandatoryBaseDrawQuote",
+    );
+    expect(hashState(state)).toBe(before);
+  });
+
   it("projects the public resolved encounter tax for both sides without exposing hands", () => {
     const state = createGameAfterSetup({ seed: "resolved-encounter-tax-view" });
     state.run = {
-      runId: "run_tax_view",
+      runId: 942408,
       attackedServerId: "hq",
       phase: "movement",
       position: { kind: "ice", serverId: "hq", iceIndex: 0 },
@@ -175,7 +195,7 @@ describe("PlayerView projection", () => {
       resolvedSubroutineIndexes: [],
       successful: false,
       encounterTaxForFutureIce: 4,
-      encounterTaxSourceDefinitionId: "onr_v1_222_ball-and-chain",
+      encounterTaxSourceDefinitionId: 434,
     };
     const before = hashState(state);
     for (const side of ["runner", "corp"] as const) {
@@ -195,7 +215,7 @@ describe("PlayerView projection", () => {
     const id = "visible-krash" as CardInstanceId;
     state.cardInstances[id] = {
       instanceId: id,
-      definitionId: "onr_v1_039_krash",
+      definitionId: 251,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "rig" },
@@ -213,7 +233,7 @@ describe("PlayerView projection", () => {
     state.temporaryBreakerStrengthModifiersUntilEndOfTurn = [
       {
         sourceCardInstanceId: id,
-        sourceDefinitionId: "onr_v1_039_krash",
+        sourceDefinitionId: 251,
         targetBreakerId: id,
         amount: 3,
         turnSerial: state.turnSerial,
@@ -244,7 +264,7 @@ describe("PlayerView projection", () => {
     const hiddenSupportId = "hidden_chiba" as CardInstanceId;
     state.cardInstances[phoneFreakId] = {
       instanceId: phoneFreakId,
-      definitionId: "onr_classic_054_phone-freak",
+      definitionId: 58,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "rig" },
@@ -256,7 +276,7 @@ describe("PlayerView projection", () => {
     };
     state.cardInstances[hiddenSupportId] = {
       instanceId: hiddenSupportId,
-      definitionId: "onr_proteus_133_chiba-bank-account",
+      definitionId: 191,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "rig" },
@@ -267,7 +287,7 @@ describe("PlayerView projection", () => {
     };
     state.runner.rig.resources.push(phoneFreakId, hiddenSupportId);
     state.trace = {
-      traceId: "trace_visible_capacity",
+      traceId: 1,
       sourceCardInstanceId: state.corp.identity,
       sourceDefinitionId:
         state.cardInstances[state.corp.identity]!.definitionId,
@@ -299,7 +319,7 @@ describe("PlayerView projection", () => {
       traceRulesProfile: "classic_blind",
     });
     state.trace = {
-      traceId: "trace_hidden_view",
+      traceId: 1,
       sourceCardInstanceId: state.corp.identity,
       sourceDefinitionId:
         state.cardInstances[state.corp.identity]!.definitionId,
@@ -360,7 +380,7 @@ describe("PlayerView projection", () => {
     });
     state.runner.credits = 8;
     state.trace = {
-      traceId: "trace_hidden_runner_payment",
+      traceId: 1,
       sourceCardInstanceId: state.corp.identity,
       sourceDefinitionId:
         state.cardInstances[state.corp.identity]!.definitionId,
@@ -410,7 +430,7 @@ describe("PlayerView projection", () => {
     const sourceId = "free-prevention-source" as CardInstanceId;
     state.cardInstances[sourceId] = {
       ...state.cardInstances[state.runner.identity]!,
-      definitionId: "onr_classic_047_little-black-box",
+      definitionId: 51,
       owner: "runner",
       controller: "runner",
     };
@@ -446,7 +466,7 @@ describe("PlayerView projection", () => {
         corpDeckId: "demo_corp_001",
       }),
     );
-    const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    const iceId = putCorpIceOnServer(state, "rd", 589);
     state.cardInstances[iceId]!.faceup = true;
     state.cardInstances[iceId]!.rezzed = true;
 
@@ -456,12 +476,12 @@ describe("PlayerView projection", () => {
 
     expect(ice?.effectiveRunQuote).toMatchObject({
       iceInstanceId: iceId,
-      iceDefinitionId: "simple_barrier_ice",
+      iceDefinitionId: 589,
       effectiveStrength: expect.any(Number),
       subroutines: expect.any(Array),
     });
     expect(ice?.effectiveRunQuote?.subroutines[0]).toMatchObject({
-      sourceDefinitionId: "simple_barrier_ice",
+      sourceDefinitionId: 589,
       sourceTitle: "Simple Barrier ICE",
     });
     expect(
@@ -482,9 +502,8 @@ describe("PlayerView projection", () => {
         corpDeckId: "demo_corp_001",
       }),
     );
-    const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
-    state.cardInstances[iceId]!.definitionId =
-      "onr_proteus_015_colonel-failure";
+    const iceId = putCorpIceOnServer(state, "rd", 589);
+    state.cardInstances[iceId]!.definitionId = 73;
     removeEverywhere(state, iceId);
     state.cardInstances[iceId]!.zone = {
       side: "special",
@@ -496,7 +515,7 @@ describe("PlayerView projection", () => {
     state.specialZones ??= { setAside: [], removedFromGame: [] };
     state.specialZones.setAside.push(iceId);
     state.run = {
-      runId: "run_set_aside_quote",
+      runId: 777965,
       attackedServerId: "hq",
       phase: "encounter_ice",
       position: { kind: "ice", serverId: "hq", iceIndex: 0 },
@@ -509,22 +528,22 @@ describe("PlayerView projection", () => {
 
     expect(getPlayerView(state, "corp").run?.encounteredIce).toMatchObject({
       instanceId: iceId,
-      definitionId: "onr_proteus_015_colonel-failure",
+      definitionId: 73,
       rezzed: false,
       effectiveRunQuote: {
         iceInstanceId: iceId,
-        iceDefinitionId: "onr_proteus_015_colonel-failure",
+        iceDefinitionId: 73,
         subroutines: [
           expect.objectContaining({
-            id: "subroutine_trash_program_a",
+            id: "0",
             type: "trash_installed_program",
           }),
           expect.objectContaining({
-            id: "subroutine_trash_program_b",
+            id: "1",
             type: "trash_installed_program",
           }),
           expect.objectContaining({
-            id: "subroutine_trash_program_c",
+            id: "2",
             type: "trash_installed_program",
           }),
           expect.objectContaining({ type: "end_the_run" }),
@@ -542,8 +561,8 @@ describe("PlayerView projection", () => {
         corpDeckId: "demo_corp_001",
       }),
     );
-    const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
-    state.cardInstances[iceId]!.definitionId = "onr_classic_007_brain-drain";
+    const iceId = putCorpIceOnServer(state, "rd", 589);
+    state.cardInstances[iceId]!.definitionId = 11;
     state.cardInstances[iceId]!.faceup = true;
     state.cardInstances[iceId]!.rezzed = true;
 
@@ -568,7 +587,7 @@ describe("PlayerView projection", () => {
         corpDeckId: "demo_corp_001",
       }),
     );
-    const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    const iceId = putCorpIceOnServer(state, "rd", 589);
 
     const corpIce = getPlayerView(state, "corp")
       .servers.find((server) => server.id === "rd")
@@ -581,14 +600,14 @@ describe("PlayerView projection", () => {
     expect(corpIce?.effectivePostRezRunQuote).toMatchObject({
       context: "installed_post_rez",
       cardId: iceId,
-      iceDefinitionId: "simple_barrier_ice",
+      iceDefinitionId: 589,
       targetServerId: "rd",
       projectedServerId: "rd",
       expiresAtStateVersion: state.stateVersion,
       complete: true,
       effectiveRunQuote: {
         iceInstanceId: iceId,
-        iceDefinitionId: "simple_barrier_ice",
+        iceDefinitionId: 589,
         subroutines: expect.arrayContaining([
           expect.objectContaining({ type: "end_the_run" }),
         ]),
@@ -606,7 +625,7 @@ describe("PlayerView projection", () => {
     const iceId = "alternate-subtype-credit-blocks" as CardInstanceId;
     state.cardInstances[iceId] = {
       instanceId: iceId,
-      definitionId: "onr_proteus_017_credit-blocks",
+      definitionId: 75,
       owner: "corp",
       controller: "corp",
       zone: { side: "corp", zone: "serverIce", serverId: "rd" },
@@ -616,10 +635,7 @@ describe("PlayerView projection", () => {
       strengthModifier: 0,
     };
     state.corp.servers.find((server) => server.id === "rd")!.ice.push(iceId);
-    for (const [index, definitionId] of [
-      "onr_v1_040_loony-goon",
-      "onr_v1_014_codecracker",
-    ].entries()) {
+    for (const [index, definitionId] of [252, 226].entries()) {
       const cardId = `alternate-subtype-breaker-${index}` as CardInstanceId;
       state.cardInstances[cardId] = {
         instanceId: cardId,
@@ -676,7 +692,7 @@ describe("PlayerView projection", () => {
       quote: {
         complete: true,
         runnerBreak: {
-          breakerDefinitionId: "onr_v1_040_loony-goon",
+          breakerDefinitionId: 252,
         },
       },
     });
@@ -696,13 +712,13 @@ describe("PlayerView projection", () => {
       }),
     );
     state.corp.credits = 20;
-    const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    const iceId = putCorpIceOnServer(state, "rd", 589);
     const antiquatedId = "post-rez-antiquated" as CardInstanceId;
     const tesseractId = "post-rez-tesseract" as CardInstanceId;
     const identity = state.cardInstances[state.corp.identity]!;
     state.cardInstances[antiquatedId] = {
       ...identity,
-      definitionId: "onr_v1_350_antiquated-interface-routines",
+      definitionId: 562,
       owner: "corp",
       controller: "corp",
       faceup: true,
@@ -711,7 +727,7 @@ describe("PlayerView projection", () => {
     };
     state.cardInstances[tesseractId] = {
       ...identity,
-      definitionId: "onr_v1_370_tesseract-fort-construction",
+      definitionId: 582,
       owner: "corp",
       controller: "corp",
       faceup: true,
@@ -732,7 +748,7 @@ describe("PlayerView projection", () => {
       effectiveRunQuote: {
         subroutines: expect.arrayContaining([
           expect.objectContaining({
-            sourceDefinitionId: "onr_v1_370_tesseract-fort-construction",
+            sourceDefinitionId: 582,
             type: "end_the_run_unless_runner_pays",
           }),
         ]),
@@ -766,7 +782,7 @@ describe("PlayerView projection", () => {
     state.cardInstances[iceId] = {
       ...state.cardInstances[state.corp.identity]!,
       instanceId: iceId,
-      definitionId: "onr_proteus_038_snowbank",
+      definitionId: 96,
       owner: "corp",
       controller: "corp",
       faceup: false,
@@ -778,7 +794,7 @@ describe("PlayerView projection", () => {
     state.cardInstances[firmId] = {
       ...state.cardInstances[state.corp.identity]!,
       instanceId: firmId,
-      definitionId: "onr_v1_329_investment-firm",
+      definitionId: 541,
       owner: "corp",
       controller: "corp",
       faceup: true,
@@ -805,7 +821,7 @@ describe("PlayerView projection", () => {
     state.cardInstances[iceId] = {
       ...state.cardInstances[state.corp.identity]!,
       instanceId: iceId,
-      definitionId: "onr_proteus_038_snowbank",
+      definitionId: 96,
       owner: "corp",
       controller: "corp",
       faceup: false,
@@ -834,11 +850,11 @@ describe("PlayerView projection", () => {
     expect(state.actionEconomy.corpCreditForfeitDebt?.remaining).toBe(2);
   });
   it.each([
-    ["onr_proteus_014_chihuahua", 2],
-    ["onr_proteus_016_coyote", 3],
-    ["onr_proteus_032_misleading-access-menus", 3],
-    ["onr_proteus_038_snowbank", 3],
-    ["onr_proteus_045_washed-up-solo-construct", 3],
+    [72, 2],
+    [74, 3],
+    [90, 3],
+    [96, 3],
+    [103, 3],
   ])(
     "projects %s public credit lifecycle without changing the current state",
     (definitionId, gain) => {
@@ -850,7 +866,7 @@ describe("PlayerView projection", () => {
       state.cardInstances[iceId] = {
         ...state.cardInstances[state.corp.identity]!,
         instanceId: iceId,
-        definitionId: definitionId as string,
+        definitionId,
         owner: "corp",
         controller: "corp",
         faceup: false,
@@ -931,7 +947,7 @@ describe("PlayerView projection", () => {
     const variableIceId = "variable-post-rez-ice" as CardInstanceId;
     state.cardInstances[variableIceId] = {
       ...state.cardInstances[state.corp.identity]!,
-      definitionId: "onr_proteus_025_homing-missile",
+      definitionId: 83,
       owner: "corp",
       controller: "corp",
       faceup: false,
@@ -941,7 +957,7 @@ describe("PlayerView projection", () => {
     state.corp.servers
       .find((server) => server.id === "hq")!
       .ice.push(variableIceId);
-    const fixedIceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    const fixedIceId = putCorpIceOnServer(state, "rd", 589);
 
     expect(
       getPlayerView(state, "corp")
@@ -972,7 +988,7 @@ describe("PlayerView projection", () => {
       expiresAtStateVersion: state.stateVersion,
       effectiveRunQuote: {
         iceInstanceId: fixedIceId,
-        iceDefinitionId: "simple_barrier_ice",
+        iceDefinitionId: 589,
       },
     });
   });
@@ -989,35 +1005,35 @@ describe("PlayerView projection", () => {
     const onceSourceId = "trace-once-source" as CardInstanceId;
     state.cardInstances[postBidSourceId] = {
       ...source,
-      definitionId: "onr_proteus_154_wired-switchboard",
+      definitionId: 212,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "rig" },
     };
     state.cardInstances[cancelSourceId] = {
       ...source,
-      definitionId: "onr_proteus_129_back-door-to-netwatch",
+      definitionId: 187,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "rig" },
     };
     state.cardInstances[repeatableSourceId] = {
       ...source,
-      definitionId: "onr_v1_003_baedekers-net-map",
+      definitionId: 215,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "rig" },
     };
     state.cardInstances[rewardSourceId] = {
       ...source,
-      definitionId: "onr_proteus_148_runner-sensei",
+      definitionId: 206,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "rig" },
     };
     state.cardInstances[onceSourceId] = {
       ...source,
-      definitionId: "onr_v1_063_signpost",
+      definitionId: 275,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "rig" },
@@ -1059,7 +1075,7 @@ describe("PlayerView projection", () => {
     );
     expect(traceSupport?.baseLinkOptions).toContainEqual(
       expect.objectContaining({
-        sourceDefinitionId: "onr_proteus_148_runner-sensei",
+        sourceDefinitionId: 206,
         rewardCreditsOnAvoidTrace: 1,
       }),
     );
@@ -1078,7 +1094,7 @@ describe("PlayerView projection", () => {
     );
 
     state.trace = {
-      traceId: "visible-used-trace-source",
+      traceId: 1,
       sourceCardInstanceId: state.corp.identity,
       sourceDefinitionId:
         state.cardInstances[state.corp.identity]!.definitionId,
@@ -1102,7 +1118,7 @@ describe("PlayerView projection", () => {
     const sourceId = "hells-run-trace-credit" as CardInstanceId;
     state.cardInstances[sourceId] = {
       ...state.cardInstances[state.runner.identity]!,
-      definitionId: "onr_v1_164_hells-run",
+      definitionId: 376,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "rig" },
@@ -1115,7 +1131,7 @@ describe("PlayerView projection", () => {
         ?.traceCreditSources,
     ).toContainEqual({
       sourceCardInstanceId: sourceId,
-      sourceDefinitionId: "onr_v1_164_hells-run",
+      sourceDefinitionId: 376,
       amount: 1,
       isStealth: false,
     });
@@ -1128,7 +1144,7 @@ describe("PlayerView projection", () => {
     const sourceId = "crash-space-trace-quote" as CardInstanceId;
     state.cardInstances[sourceId] = {
       ...state.cardInstances[state.runner.identity]!,
-      definitionId: "onr_classic_044_crash-space",
+      definitionId: 48,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "rig" },
@@ -1153,14 +1169,14 @@ describe("PlayerView projection", () => {
     const sourceId = "invalid-trace-window-source" as CardInstanceId;
     state.cardInstances[sourceId] = {
       ...state.cardInstances[state.runner.identity]!,
-      definitionId: "onr_classic_044_crash-space",
+      definitionId: 48,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "rig" },
     };
     state.runner.rig.resources.push(sourceId);
 
-    const definitionId = "onr_classic_044_crash-space";
+    const definitionId = 48;
     const originalImplementation =
       TEST_CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[definitionId];
     if (!originalImplementation)
@@ -1203,7 +1219,7 @@ describe("PlayerView projection", () => {
     if (!rd) throw new Error("Missing R&D server");
     state.cardInstances[sourceId] = {
       ...source,
-      definitionId: "onr_v1_363_olivia-salazar",
+      definitionId: 575,
       owner: "corp",
       controller: "corp",
       zone: { side: "corp", zone: "serverRoot", serverId: "rd" },
@@ -1287,7 +1303,7 @@ describe("PlayerView projection", () => {
     const state = originalsetReorderCounterRunlockGame(
       "vapor-counter-bank-projection",
     );
-    const vaporId = moveCorpCardToHq(state, "onr_v1_347_vapor-ops");
+    const vaporId = moveCorpCardToHq(state, 559);
 
     const hqVapor = getPlayerView(state, "corp").own.gripOrHq.find(
       (card) => card.instanceId === vaporId,
@@ -1315,14 +1331,14 @@ describe("PlayerView projection", () => {
       },
     });
 
-    putCorpRootInRemote(state, "onr_v1_347_vapor-ops");
+    putCorpRootInRemote(state, 559);
     state.cardInstances[vaporId]!.advancementCounters = 3;
     const rootVapor = getPlayerView(state, "corp")
-      .servers.find((server) => server.id === "remote_1")
+      .servers.find((server) => server.id === "r1")
       ?.root.find((card) => card.instanceId === vaporId);
     expect(rootVapor?.counterBankPreparationQuote).toMatchObject({
       sourceCardId: vaporId,
-      location: { kind: "installed_root", serverId: "remote_1" },
+      location: { kind: "installed_root", serverId: "r1" },
       advancementCounters: 3,
     });
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
@@ -1338,7 +1354,7 @@ describe("PlayerView projection", () => {
         corpDeckId: "demo_corp_001",
       }),
     );
-    const agendaId = putCorpRootInRemote(state, "simple_agenda");
+    const agendaId = putCorpRootInRemote(state, 588);
     state.cardInstances[agendaId]!.advancementCounters = 2;
 
     const corpAgenda = getPlayerView(state, "corp")
@@ -1349,7 +1365,7 @@ describe("PlayerView projection", () => {
     expect(corpAgenda?.scoreContinuationQuote).toEqual({
       context: "installed_agenda",
       agendaCardId: agendaId,
-      serverId: "remote_1",
+      serverId: "r1",
       expiresAtStateVersion: state.stateVersion,
       complete: true,
       remainingAdvancementCounters: 1,
@@ -1374,7 +1390,7 @@ describe("PlayerView projection", () => {
         corpDeckId: "demo_corp_001",
       }),
     );
-    const programId = moveRunnerCardToGrip(state, "simple_decoder");
+    const programId = moveRunnerCardToGrip(state, 591);
     removeEverywhere(state, programId);
     state.runner.rig.programs.push(programId);
     state.cardInstances[programId]!.zone = {
@@ -1384,7 +1400,7 @@ describe("PlayerView projection", () => {
     state.temporaryProgramInstallReturns = [
       {
         cardId: programId,
-        sourceCardDefinitionId: "onr_v1_110_sneak-preview",
+        sourceCardDefinitionId: 322,
       },
     ];
 
@@ -1447,7 +1463,7 @@ describe("PlayerView projection", () => {
         corpDeckId: "demo_corp_001",
       }),
     );
-    const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    const iceId = putCorpIceOnServer(state, "rd", 589);
     state.cardInstances[iceId]!.rezzed = true;
     state.runnerTurnFlags = {
       ...(state.runnerTurnFlags ?? {
@@ -1488,12 +1504,12 @@ describe("PlayerView projection", () => {
         corpDeckId: "demo_corp_001",
       }),
     );
-    moveRunnerCardToGrip(state, "simple_run_event");
-    moveCorpCardToHq(state, "simple_agenda");
-    moveCorpCardToArchives(state, "simple_economy_operation");
-    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
-    putCorpRootInRemote(state, "simple_economy_asset");
-    const advancedAgendaId = putCorpRootInRemote(state, "simple_agenda");
+    moveRunnerCardToGrip(state, 600);
+    moveCorpCardToHq(state, 588);
+    moveCorpCardToArchives(state, 596);
+    putCorpIceOnServer(state, "rd", 589);
+    putCorpRootInRemote(state, 594);
+    const advancedAgendaId = putCorpRootInRemote(state, 588);
     if (!state.cardInstances[advancedAgendaId])
       throw new Error("Missing advanced hidden agenda fixture");
     state.cardInstances[advancedAgendaId].advancementCounters = 5;
@@ -1503,7 +1519,7 @@ describe("PlayerView projection", () => {
     const corpView = getPlayerView(state, "corp");
     const serialized = JSON.stringify(runnerView);
     const knownRunnerCard = runnerView.own.gripOrHq.find(
-      (card) => card.definitionId === "simple_run_event",
+      (card) => card.definitionId === 600,
     );
 
     expect(knownRunnerCard?.rulesText).toBe(
@@ -1582,25 +1598,25 @@ describe("PlayerView projection", () => {
       runnerDeck: ONR_V1_9_19_AGENDA_OVERADVANCE_RUNNER_DECK,
       corpDeck: ONR_V1_9_19_AGENDA_OVERADVANCE_CORP_DECK,
     });
-    const rovingId = putCorpRootInRemote(state, "onr_v1_368_roving-submarine");
+    const rovingId = putCorpRootInRemote(state, 580);
     const roving = state.cardInstances[rovingId]!;
     roving.rezzed = true;
     roving.faceup = true;
     roving.counters = {};
 
     const lockedRunnerServer = getPlayerView(state, "runner").servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     const lockedCorpServer = getPlayerView(state, "corp").servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     expect(lockedRunnerServer?.statuses).toEqual([
       {
-        id: `server_status:remote_1:run_prohibited:${rovingId}:fort_activity_gate`,
+        id: `server_status:r1:run_prohibited:${rovingId}:fort_activity_gate`,
         kind: "run_prohibited",
         scope: "target_server",
         reason: "required_corp_activity_during_latest_corp_turn_missing",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         sourceCardInstanceId: rovingId,
         sourceAbilityId: "fort_activity_gate",
         sourceTitle: "Roving Submarine",
@@ -1612,10 +1628,10 @@ describe("PlayerView projection", () => {
     state.corpTurnFlags = {
       scoredBlackOpsAgendaThisTurn: false,
       scoredBlackOpsAgendaLastTurn: false,
-      fortActivityServerIdsSinceCorpTurnStart: ["remote_1"],
+      fortActivityServerIdsSinceCorpTurnStart: ["r1"],
     };
     const allowedRunnerServer = getPlayerView(state, "runner").servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     expect(allowedRunnerServer?.statuses).toBeUndefined();
 
@@ -1623,13 +1639,13 @@ describe("PlayerView projection", () => {
     roving.faceup = false;
     roving.counters = {};
     const hiddenRunnerCard = getPlayerView(state, "runner")
-      .servers.find((server) => server.id === "remote_1")
+      .servers.find((server) => server.id === "r1")
       ?.root.at(0);
     expect(hiddenRunnerCard).toMatchObject({ known: false, rezzed: false });
     expect(hiddenRunnerCard).not.toHaveProperty("title");
     expect(
       getPlayerView(state, "runner").servers.find(
-        (server) => server.id === "remote_1",
+        (server) => server.id === "r1",
       )?.statuses,
     ).toBeUndefined();
   });
@@ -1638,15 +1654,12 @@ describe("PlayerView projection", () => {
     const state = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-stealth-block"),
     );
-    const surveillanceId = putCorpRootInRemote(
-      state,
-      "onr_v1_373_twenty-four-hour-surveillance",
-    );
+    const surveillanceId = putCorpRootInRemote(state, 585);
     state.cardInstances[surveillanceId]!.rezzed = true;
     state.cardInstances[surveillanceId]!.faceup = true;
 
     const server = getPlayerView(state, "runner").servers.find(
-      (candidate) => candidate.id === "remote_1",
+      (candidate) => candidate.id === "r1",
     );
 
     expect(server?.statuses).toContainEqual(
@@ -1659,9 +1672,9 @@ describe("PlayerView projection", () => {
   });
 
   it.each([
-    ["onr_v1_214_project-babylon", 2, "agenda_points"],
-    ["onr_proteus_007_project-venice", 3, "start_of_corp_turn_actions"],
-    ["onr_proteus_008_project-zurich", 2, "start_of_corp_turn_credits"],
+    [426, 2, "agenda_points"],
+    [65, 3, "start_of_corp_turn_actions"],
+    [66, 2, "start_of_corp_turn_credits"],
   ] as const)(
     "projects the authoritative overadvance contract for %s",
     (definitionId, threshold, reward) => {
@@ -1674,6 +1687,33 @@ describe("PlayerView projection", () => {
     },
   );
 
+  it("identifies public exposure of an unrezzed remote root in both player views", () => {
+    const state = createGameAfterSetup({
+      seed: "public-remote-root-exposure",
+      runnerDeck: DEMO_DECKS.demo_runner_004,
+      corpDeck: DEMO_DECKS.demo_corp_004,
+    });
+    const id = putCorpRootInRemote(state, 606);
+    const instance = state.cardInstances[id]!;
+    const rootCard = (side: "corp" | "runner") =>
+      getPlayerView(state, side).servers.find((server) => server.id === "r1")!
+        .root[0]!;
+    const exposure = () =>
+      (["corp", "runner"] as const).map((side) => rootCard(side).publiclyExposedInRoot);
+    expect(rootCard("corp").known).toBe(true);
+    expect(rootCard("runner").known).toBe(false);
+    expect(exposure()).toEqual([undefined, undefined]);
+
+    instance.faceup = true;
+    expect(exposure()).toEqual([true, true]);
+    instance.faceup = false;
+    state.spyCountersByServer = { r1: 1 };
+    expect(exposure()).toEqual([true, true]);
+    state.spyCountersByServer = {};
+    expect(exposure()).toEqual([undefined, undefined]);
+    expect(rootCard("runner").known).toBe(false);
+  });
+
   it("keeps mixed remote root order accessible without leaking hidden root types before access", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
@@ -1683,13 +1723,13 @@ describe("PlayerView projection", () => {
       }),
     );
     state.runner.credits = 20;
-    const firstUpgradeId = moveCorpCardToHq(state, "simple_upgrade");
-    const secondUpgradeId = moveCorpCardCopyToHq(state, "simple_upgrade");
-    const rezzedNodeId = moveCorpCardToHq(state, "simple_economy_asset");
-    let remote = state.corp.servers.find((server) => server.id === "remote_1");
+    const firstUpgradeId = moveCorpCardToHq(state, 606);
+    const secondUpgradeId = moveCorpCardCopyToHq(state, 606);
+    const rezzedNodeId = moveCorpCardToHq(state, 594);
+    let remote = state.corp.servers.find((server) => server.id === "r1");
     if (!remote) {
       remote = {
-        id: "remote_1",
+        id: "r1",
         kind: "remote",
         label: "Remote 1",
         ice: [],
@@ -1703,7 +1743,7 @@ describe("PlayerView projection", () => {
       remoteServer.root.push(cardId);
       state.cardInstances[cardId] = {
         ...state.cardInstances[cardId]!,
-        zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+        zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
         faceup: rezzed,
         rezzed,
       };
@@ -1715,7 +1755,7 @@ describe("PlayerView projection", () => {
     const replayStart = state.eventLog.length;
 
     const runnerRemoteBefore = getPlayerView(state, "runner").servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     expect(runnerRemoteBefore?.root).toHaveLength(3);
     expect(runnerRemoteBefore?.root[0]).toMatchObject({
@@ -1726,7 +1766,7 @@ describe("PlayerView projection", () => {
     expect(runnerRemoteBefore?.root[0]).not.toHaveProperty("type");
     expect(runnerRemoteBefore?.root[1]).toMatchObject({
       known: true,
-      definitionId: "simple_economy_asset",
+      definitionId: 594,
       type: "asset",
       rezzed: true,
     });
@@ -1738,13 +1778,13 @@ describe("PlayerView projection", () => {
     expect(runnerRemoteBefore?.root[2]).not.toHaveProperty("type");
     expect(
       JSON.stringify(getPlayerView(state, "runner").publicEvents),
-    ).not.toContain("simple_upgrade");
+    ).not.toContain(606);
 
     state = apply(
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     expect(getPlayerView(state, "runner").run?.runId).toBe(state.run?.runId);
     expect(getPlayerView(state, "corp").run?.runId).toBe(state.run?.runId);
@@ -1755,17 +1795,17 @@ describe("PlayerView projection", () => {
     ).toEqual([firstUpgradeId, rezzedNodeId, secondUpgradeId]);
     expect(
       JSON.stringify(getPlayerView(state, "runner").publicEvents),
-    ).not.toContain("simple_upgrade");
+    ).not.toContain(606);
 
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(
       getPlayerView(state, "runner").servers.find(
-        (server) => server.id === "remote_1",
+        (server) => server.id === "r1",
       )?.root[0],
     ).toMatchObject({
       instanceId: firstUpgradeId,
       known: true,
-      definitionId: "simple_upgrade",
+      definitionId: 606,
       rezzed: false,
     });
     expect(state.cardInstances[firstUpgradeId]?.faceup).toBe(false);
@@ -1773,13 +1813,16 @@ describe("PlayerView projection", () => {
     const runnerRemoteBetweenAccesses = getPlayerView(
       state,
       "runner",
-    ).servers.find((server) => server.id === "remote_1");
+    ).servers.find((server) => server.id === "r1");
     expect(runnerRemoteBetweenAccesses?.root[0]).toMatchObject({
       instanceId: firstUpgradeId,
       known: true,
-      definitionId: "simple_upgrade",
+      definitionId: 606,
       rezzed: false,
     });
+    expect(runnerRemoteBetweenAccesses?.root[0]).not.toHaveProperty(
+      "publiclyExposedInRoot",
+    );
     expect(runnerRemoteBetweenAccesses?.root[2]).toMatchObject({
       known: false,
       rezzed: false,
@@ -1804,7 +1847,7 @@ describe("PlayerView projection", () => {
 
     expect(state.run).toBeUndefined();
     const runnerRemoteAfter = getPlayerView(state, "runner").servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     expect(runnerRemoteAfter?.root[0]).toMatchObject({
       known: false,
@@ -1821,7 +1864,7 @@ describe("PlayerView projection", () => {
       .filter((event) => event.publicPayload.actionType === "access_card");
     expect(
       accessEvents.map((event) => event.publicPayload.cardDefinitionId),
-    ).toEqual(["simple_upgrade", "simple_economy_asset", "simple_upgrade"]);
+    ).toEqual([606, 594, 606]);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(replay.actualFinalStateHash).toBe(hashState(state));

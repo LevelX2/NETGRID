@@ -98,7 +98,7 @@ describe("activated CardImplementation action execution dispatch", () => {
     const gameState = state();
     const payload = {
       sourceCardId: "source_1",
-      sourceDefinitionId: "source_definition",
+      sourceDefinitionId: 462381168,
       abilityIndex: 0,
     };
     const legalAction = action("activated_card_ability", payload);

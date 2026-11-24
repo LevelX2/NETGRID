@@ -1,3 +1,4 @@
+import { corpMandatoryBaseDrawQuote } from "../corp/score-mandatory-draw-horizon";
 // ARCH-5R extracts only the read-only PlayerView projection.
 // This module creates no LegalActions, executes no actions, and mutates no
 // GameState. The host passes LegalActions in from the game legal-actions facade.
@@ -19,6 +20,7 @@ import { corpGeneralCreditAvailability } from "../payment/corp-general-credit-av
 import {
   agendaPoints,
   counterDisplaysField,
+  agendaCostCounterDisplaysForServer,
   poxCounterDisplaysForServer,
   purgeableRunnerVirusCounterDisplaysForServer,
   spyCounterDisplaysForServer,
@@ -72,7 +74,11 @@ export function buildPlayerViewProjection(
   state: GameState,
   side: Side,
   legalActions: LegalAction[],
+  options: { publicEventLimit?: number } = {},
 ): PlayerView {
+  const limit = options.publicEventLimit;
+  if (limit !== undefined && (!Number.isSafeInteger(limit) || limit < 0))
+    throw new Error("PlayerView public event limit must be a nonnegative integer.");
   const runnerSide = side === "runner";
   const corpCentralAccessQuotes =
     side === "corp" ? quoteCorpCentralAccesses(state) : undefined;
@@ -244,6 +250,7 @@ export function buildPlayerViewProjection(
       ...(statuses.length > 0 ? { statuses } : {}),
       ...counterDisplaysField([
         ...(poxCounterDisplaysForServer(state, server.id) ?? []),
+        ...(agendaCostCounterDisplaysForServer(state, server.id) ?? []),
         ...(purgeableRunnerVirusCounterDisplaysForServer(state, server.id) ??
           []),
         ...(spyCounterDisplaysForServer(state, server.id) ?? []),
@@ -351,7 +358,12 @@ export function buildPlayerViewProjection(
           : {}),
         ...(state.run.secretSpendGuessRunAutoPassIceId
           ? {
-              pendingAutoPassIceId: state.run.secretSpendGuessRunAutoPassIceId,
+              pendingAutoPassIceId: visibleCorpCard(
+                state,
+                state.run.secretSpendGuessRunAutoPassIceId,
+                side,
+                "ice",
+              ).instanceId,
             }
           : {}),
         ...(state.run.bypassFirstIceRemaining !== undefined
@@ -440,10 +452,12 @@ export function buildPlayerViewProjection(
   const visibleTrace = trace
     ? {
         traceId: trace.traceId,
+        ...(trace.sourceRunId !== undefined ? { sourceRunId: trace.sourceRunId } : {}),
         sourceCardInstanceId: trace.sourceCardInstanceId,
         ...(trace.subroutineIndex !== undefined &&
-        run?.encounteredIce?.instanceId === trace.sourceCardInstanceId &&
-        run.encounteredIce.known
+        ((run?.encounteredIce?.instanceId === trace.sourceCardInstanceId && run.encounteredIce.known) ||
+          (side === "corp" && trace.status === "trace_success_program_trash" &&
+            state.corp.servers.some((server) => server.ice.includes(trace.sourceCardInstanceId))))
           ? { sourceSubroutineIndex: trace.subroutineIndex }
           : {}),
         ...(traceBidEffect ? { bidEffect: traceBidEffect } : {}),
@@ -676,6 +690,9 @@ export function buildPlayerViewProjection(
           memoryLimit: runnerMemoryLimit(state),
         },
     servers: visibleServers,
+    ...(side === "corp"
+      ? { corpMandatoryBaseDrawQuote: corpMandatoryBaseDrawQuote(state) }
+      : {}),
     ...(corpCentralAccessQuotes
       ? { corpCentralAccessQuotes: [...corpCentralAccessQuotes] }
       : {}),
@@ -698,7 +715,7 @@ export function buildPlayerViewProjection(
           },
         }
       : {}),
-    publicEvents: state.eventLog.map((event) =>
+    publicEvents: (limit === undefined ? state.eventLog : limit === 0 ? [] : state.eventLog.slice(-limit)).map((event) =>
       toPublicEventForSide(event, side),
     ),
     legalActions,

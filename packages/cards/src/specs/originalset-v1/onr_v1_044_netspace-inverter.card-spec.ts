@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_044_netspace-inverter"),
+    cardDefinitionId: cardDefinitionId(256),
     title: "Netspace Inverter",
     side: "runner",
     cardType: "program",

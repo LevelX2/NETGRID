@@ -22,12 +22,12 @@ describe("publicContextForAction", () => {
       type: "resolve_subroutine",
       payload: {
         traceStarted: true,
-        traceId: "trace_start_hidden",
+        traceId: 1,
         traceLimit: 3,
         effectiveTraceLimit: 3,
         corpBidMax: 5,
         temporaryTraceCreditsAvailable: 2,
-        temporaryTraceCreditsSourceDefinitionId: "hidden_pool",
+        temporaryTraceCreditsSourceDefinitionId: 1980406800,
       },
     } as unknown as LegalAction;
 
@@ -60,7 +60,7 @@ describe("publicContextForAction", () => {
       side: "corp",
       type: "resolve_choice",
       payload: {
-        traceId: "trace_hidden",
+        traceId: 1,
         traceStep: "corp_bid",
         traceLimit: 3,
         corpBid: 2,
@@ -69,7 +69,7 @@ describe("publicContextForAction", () => {
         recurringTraceCreditPoolSpent: 1,
         traceLimitAndValueBoost: 1,
         effectiveTraceLimit: 4,
-        temporaryTraceCreditsSourceDefinitionId: "secret_trace_pool",
+        temporaryTraceCreditsSourceDefinitionId: 2919910038,
       },
     } as unknown as LegalAction;
 
@@ -79,7 +79,7 @@ describe("publicContextForAction", () => {
       traceRulesProfile: "classic_blind",
       traceBidsRevealed: false,
       traceBidCommittedSide: "corp",
-      traceId: "trace_hidden",
+      traceId: 1,
       traceLimit: 3,
     });
     expect(context).not.toHaveProperty("corpBid");
@@ -108,7 +108,7 @@ describe("publicContextForAction", () => {
       side: "runner",
       type: "resolve_choice",
       payload: {
-        traceId: "trace_revealed",
+        traceId: 1,
         traceStep: "runner_bid",
         corpBid: 2,
         traceValue: 2,
@@ -146,7 +146,7 @@ describe("publicContextForAction", () => {
       side: "runner",
       type: "resolve_choice",
       payload: {
-        traceId: "trace_runner_hidden",
+        traceId: 1,
         traceStep: "runner_bid",
         runnerBid: 1,
       },
@@ -268,7 +268,7 @@ describe("publicContextForAction", () => {
       source: "hidden_ice",
       payload: {
         cardId: "hidden_ice",
-        serverId: "remote_1",
+        serverId: "r1",
         placement: "ice",
       },
     } as unknown as LegalAction;
@@ -350,7 +350,7 @@ describe("publicContextForAction", () => {
 
   it("binds hidden installs and later rez events to opaque stable positions", () => {
     const beforeInstall = {
-      corp: { servers: [{ id: "remote_1", ice: [], root: [] }] },
+      corp: { servers: [{ id: "r1", ice: [], root: [] }] },
       cardInstances: {
         hidden_ice_a: { zone: { side: "corp", zone: "hand" } },
         hidden_ice_b: { zone: { side: "corp", zone: "hand" } },
@@ -360,7 +360,7 @@ describe("publicContextForAction", () => {
       corp: {
         servers: [
           {
-            id: "remote_1",
+            id: "r1",
             ice: ["hidden_ice_a", "hidden_ice_b"],
             root: [],
           },
@@ -368,10 +368,10 @@ describe("publicContextForAction", () => {
       },
       cardInstances: {
         hidden_ice_a: {
-          zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+          zone: { side: "corp", zone: "serverIce", serverId: "r1" },
         },
         hidden_ice_b: {
-          zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+          zone: { side: "corp", zone: "serverIce", serverId: "r1" },
         },
       },
     } as unknown as GameState;
@@ -425,7 +425,7 @@ describe("publicContextForAction", () => {
     );
 
     expect(installed).toMatchObject({
-      serverId: "remote_1",
+      serverId: "r1",
       installPlacement: "ice",
       installedPositionKey: expect.stringMatching(/^installed-position-v1:/),
     });
@@ -519,7 +519,7 @@ describe("publicContextForAction", () => {
       corp: {
         servers: [
           {
-            id: "remote_1",
+            id: "r1",
             kind: "remote",
             label: "Remote 1",
             ice: ["outer_rezzed_ice"],
@@ -535,9 +535,9 @@ describe("publicContextForAction", () => {
       payload: {
         choiceVisibility: "public",
         classicDeflector: true,
-        sourceDefinitionId: "onr_classic_010_entrapment",
+        sourceDefinitionId: 14,
         deflectedRun: true,
-        redirectedServerId: "remote_1",
+        redirectedServerId: "r1",
         redirectedToIceId: "outer_rezzed_ice",
         redirectedToRezzedIce: true,
         lastPassedIceId: "hidden_inner_ice",
@@ -561,9 +561,9 @@ describe("publicContextForAction", () => {
 
     expect(context).toMatchObject({
       classicDeflector: true,
-      sourceDefinitionId: "onr_classic_010_entrapment",
+      sourceDefinitionId: 14,
       deflectedRun: true,
-      selectedServerId: "remote_1",
+      selectedServerId: "r1",
       selectedServerLabel: "Remote 1",
       redirectedToRezzedIce: true,
       paidCredits: 2,
@@ -586,9 +586,9 @@ describe("publicContextForAction", () => {
         hiddenZoneBarrier: true,
         hiddenZoneAction: "expose_installed_card_review",
         publicRevealKind: "expose",
-        publicRevealDefinitionId: "simple_upgrade",
-        sourceDefinitionId: "onr_v1_058_seeya",
-        exposedServerId: "remote_2",
+        publicRevealDefinitionId: 606,
+        sourceDefinitionId: 270,
+        exposedServerId: "r2",
         exposedServerLabel: "Remote 2",
         exposedArea: "root",
         exposedIndex: 1,
@@ -615,9 +615,9 @@ describe("publicContextForAction", () => {
       hiddenZoneBarrier: true,
       hiddenZoneAction: "expose_installed_card_review",
       publicRevealKind: "expose",
-      publicRevealDefinitionId: "simple_upgrade",
-      sourceDefinitionId: "onr_v1_058_seeya",
-      exposedServerId: "remote_2",
+      publicRevealDefinitionId: 606,
+      sourceDefinitionId: 270,
+      exposedServerId: "r2",
       exposedServerLabel: "Remote 2",
       exposedArea: "root",
       exposedIndex: 1,

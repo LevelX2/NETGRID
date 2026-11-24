@@ -1,3 +1,5 @@
+import type { RandomPurpose } from "@netgrid/shared";
+import { parseRunIdToken, type RunId } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -69,7 +71,7 @@ export type RunAccessTransitionHost = {
   rng: {
     shuffleStateIds: (
       ids: CardInstanceId[],
-      purpose: string,
+      purpose: RandomPurpose,
     ) => CardInstanceId[];
   };
   access: {
@@ -365,7 +367,7 @@ export function enterAccessFromSuccessfulRun(
 
 export function sourcePayloadForSuccessfulRunReplacement(
   run: ActiveRun,
-): Record<string, string> {
+): Record<string, string | number> {
   return {
     ...(run.successfulRunSourceCardId
       ? { cardId: run.successfulRunSourceCardId }
@@ -725,7 +727,9 @@ function applySuccessfulRunAccessReplacement(
       host.tags.addRunnerTagsWithPrevention(
         legalAction,
         runnerTagGain,
-        run.successfulRunSourceDefinitionId ?? "successful_run_replacement",
+        run.successfulRunSourceDefinitionId !== undefined
+          ? String(run.successfulRunSourceDefinitionId)
+          : "successful_run_replacement",
       )
     ) {
       legalAction.payload = {
@@ -978,7 +982,7 @@ function finishGypsyRdReveal(
   }
   const shuffledRd = host.rng.shuffleStateIds(
     [...remainingRd, ...revealedNonAgendaIds],
-    `successful_run.reveal_rd_until_agenda.${run.runId}`,
+    [35, run.runId],
   );
   host.state.corp.rd = shuffledRd;
   for (const cardId of shuffledRd) {
@@ -1001,7 +1005,7 @@ function finishGypsyRdReveal(
       ? { storedAgendaDefinitionId: host.cards.definitionFor(agendaId).id }
       : {}),
     revealedAgendaDefinitionIds: agendaId
-      ? host.cards.definitionFor(agendaId).id
+      ? String(host.cards.definitionFor(agendaId).id)
       : "",
     publicRevealDefinitionIds: revealedDefinitions
       .map((definition) => definition.id)
@@ -1074,7 +1078,7 @@ function gypsyRdRevealChoice(
 }
 
 function gypsyRdRevealChoiceSource(
-  runId: string,
+  runId: RunId,
   revealedIds: CardInstanceId[],
   stateVersion: number,
 ): string {
@@ -1082,11 +1086,12 @@ function gypsyRdRevealChoiceSource(
 }
 
 function parseGypsyRdRevealChoiceSource(source: string): {
-  runId: string;
+  runId: RunId;
   revealedIds: CardInstanceId[];
 } {
-  const [prefix, runId = "", revealedIdCsv = ""] = source.split(":");
-  if (prefix !== GYPSY_RD_REVEAL_CHOICE_SOURCE || !runId)
+  const [prefix, runIdToken, revealedIdCsv = ""] = source.split(":");
+  const runId = parseRunIdToken(runIdToken);
+  if (prefix !== GYPSY_RD_REVEAL_CHOICE_SOURCE || runId === undefined)
     throw new Error("Die Gypsy-R&D-Reveal-Choice ist ungueltig.");
   const revealedIds = revealedIdCsv
     .split(",")
@@ -1326,7 +1331,7 @@ function applyArchivesFaceupToRdReplacement(
   );
   const shuffled = host.rng.shuffleStateIds(
     faceupIds,
-    `p3_33.archives_faceup_to_rd_replacement.${run.runId}`,
+    [36, run.runId],
   );
   const moveCount = Math.min(
     Math.max(0, Math.floor(run.successfulRunArchivesMoveCount ?? 2)),

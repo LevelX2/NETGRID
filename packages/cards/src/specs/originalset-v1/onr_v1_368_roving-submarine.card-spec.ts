@@ -5,7 +5,7 @@ const fortActivityGate = capabilityKey("fort_activity_gate");
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_368_roving-submarine"),
+    cardDefinitionId: cardDefinitionId(580),
     title: "Roving Submarine",
     side: "corp",
     cardType: "upgrade",

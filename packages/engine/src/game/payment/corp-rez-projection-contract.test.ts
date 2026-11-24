@@ -20,17 +20,17 @@ import {
   projectInstalledCorpIceRezCost,
 } from "./corp-rez-cost";
 
-const WALL = "onr_v1_279_wall-of-static";
-const GLACIER = "onr_classic_011_glacier";
-const JERUSALEM_CITY_GRID = "onr_v1_360_jerusalem-city-grid";
-const DIGICONDA = "onr_proteus_020_digiconda";
-const HOMING_MISSILE = "onr_proteus_025_homing-missile";
-const SANDSTORM = "onr_proteus_036_sandstorm";
-const CREDIT_BLOCKS = "onr_proteus_017_credit-blocks";
+const WALL = 491;
+const GLACIER = 15;
+const JERUSALEM_CITY_GRID = 572;
+const DIGICONDA = 78;
+const HOMING_MISSILE = 83;
+const SANDSTORM = 94;
+const CREDIT_BLOCKS = 75;
 
 function instance(
   instanceId: CardInstanceId,
-  definitionId: string,
+  definitionId: number,
   zone: CardInstance["zone"],
   options: Partial<CardInstance> = {},
 ): CardInstance {
@@ -67,7 +67,7 @@ function stateWithHandIce(
 
 function installRezzedRoot(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   serverId: "hq" | "rd",
 ): CardInstanceId {
   const cardId = `root_${definitionId}_${serverId}` as CardInstanceId;
@@ -154,7 +154,7 @@ describe("Corp ICE rez projection contract", () => {
   it("projects new_remote through the exact next concrete remote position", () => {
     const { state, cardId } = stateWithHandIce();
     state.corp.servers.push({
-      id: "remote_4",
+      id: "r4",
       kind: "remote",
       label: "Remote 4",
       ice: [],
@@ -166,12 +166,12 @@ describe("Corp ICE rez projection contract", () => {
       cardId,
       serverId: "new_remote",
       postInstallRezQuoteTargetServerId: "new_remote",
-      postInstallRezQuoteProjectedServerId: "remote_5",
+      postInstallRezQuoteProjectedServerId: "r5",
       postInstallRezQuoteExpiresAtStateVersion: 17,
       postInstallRezQuoteComplete: true,
       postInstallRezQuoteFinalCredits: 3,
     });
-    expect(createRemote(state).id).toBe("remote_5");
+    expect(createRemote(state).id).toBe("r5");
   });
 
   it("exposes mandatory agenda-point rez cost without folding it into credits", () => {
@@ -245,7 +245,7 @@ describe("Corp ICE rez projection contract", () => {
       context: "post_install",
       cardId,
       targetServerId: "new_remote",
-      projectedServerId: "remote_1",
+      projectedServerId: "r1",
       expiresAtStateVersion: 17,
       complete: true,
       costKind: "variable",
@@ -361,7 +361,7 @@ describe("Corp ICE rez projection contract", () => {
     });
   });
 
-  it.each([CREDIT_BLOCKS, "onr_proteus_040_sumo-2008"])(
+  it.each([CREDIT_BLOCKS, 98])(
     "projects the no-surcharge base subtype before installing %s without mutation",
     (definitionId) => {
       const { state, cardId } = stateWithHandIce(definitionId);
@@ -504,7 +504,7 @@ describe("Corp ICE rez projection contract", () => {
   it("shares one fail-closed canonical next-remote rule with createRemote", () => {
     const { state, cardId } = stateWithHandIce();
     state.corp.servers.push({
-      id: "remote_01" as "remote_1",
+      id: "r01" as "r1",
       kind: "remote",
       label: "Invalid Remote",
       ice: [],

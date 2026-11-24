@@ -11,7 +11,7 @@ import {
   type AiDeckStrategyProfile,
   type DeckStrategyEvidence,
 } from "../packages/ai/src/deck-doctrine-strategy";
-import type { Side } from "@netgrid/shared";
+import type { CardDefinitionId, Side } from "@netgrid/shared";
 
 const REPO_ROOT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -55,7 +55,7 @@ type DeckSnapshotFixture = {
   side: Side;
   formatProfileId?: string;
   publicMetadata?: AiDeckStrategyDeckSnapshot["publicMetadata"];
-  cards: Array<{ cardId: string; quantity: number }>;
+  cards: Array<{ cardId: CardDefinitionId; quantity: number }>;
 };
 
 type Ai006Report = {
@@ -228,7 +228,7 @@ function validateLegacyRolesDoNotAnchor(): void {
   const profile = buildDeckStrategyProfile({
     deckSnapshotId: "ai006-check-legacy-only-runner",
     side: "runner",
-    cards: [{ cardId: "onr_proteus_078_armageddon", quantity: 3 }],
+    cards: [{ cardId: 136, quantity: 3 }],
   });
   assert(
     profile.legacySignalCounts["planRole:pressure_rnd"] === 3,

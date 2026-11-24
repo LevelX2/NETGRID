@@ -6,6 +6,17 @@ import type {
   VisibleEffectiveIceRunQuote,
 } from "@netgrid/shared";
 
+export function forcedIceRezChoiceIceId(
+  source: string,
+  stateVersion: number,
+): string | undefined {
+  const match =
+    /^card_implementation\.corp_choice_rez_or_trash_ice_decision:([^:]+):([0-9]+)$/.exec(
+      source,
+    );
+  return match?.[2] === String(stateVersion) ? match[1] : undefined;
+}
+
 export function sanitizeForcedIceRezChoiceQuote(
   value: unknown,
   binding: {
@@ -27,12 +38,10 @@ export function sanitizeForcedIceRezChoiceQuote(
   if (
     q.schemaVersion !== 1 ||
     choice.side !== "corp" ||
-    !/^card_implementation\.corp_choice_rez_or_trash_ice_decision:[^:]+:[0-9]+$/.test(
-      choice.source,
-    ) ||
     q.choiceId !== choice.choiceId ||
     q.choiceSource !== choice.source ||
     q.optionId !== option.id ||
+    option.selectable === false ||
     option.value !== option.id ||
     !/^rez_ice(?:_[1-9][0-9]*)?$/.test(option.id) ||
     q.stateVersion !== binding.stateVersion ||
@@ -43,7 +52,8 @@ export function sanitizeForcedIceRezChoiceQuote(
     ice.rezzed !== false ||
     q.iceInstanceId !== ice.instanceId ||
     q.iceDefinitionId !== ice.definitionId ||
-    !choice.source.includes(`:${ice.instanceId}:${q.stateVersion}`) ||
+    forcedIceRezChoiceIceId(choice.source, q.stateVersion) !== ice.instanceId ||
+    serverId === undefined ||
     q.serverId !== serverId ||
     typeof q.rezActionId !== "string" ||
     q.rezActionId.length === 0 ||

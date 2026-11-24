@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
 import type { CorpDefenseSignal } from "../../plans/corp-defense-contracts";
 import type { AiDecisionInput } from "@netgrid/shared";
@@ -26,7 +27,7 @@ export function checkpointDefenseCandidate(
     },
     stateVersion: 60,
     sourceKind: "card",
-    sourceDefinitionId: `generic-defense-${sourceCardInstanceId}`,
+    sourceDefinitionId: syntheticCardDefinitionId(`generic-defense-${sourceCardInstanceId}`),
     sourceCardInstanceId,
     abilityBindingMethod: "unresolved",
     semanticActionType: "install.card",
@@ -108,7 +109,7 @@ export function checkpointRemoteSupportSignal(params: {
   return {
     kind: "generic",
     defenseId: `checkpoint-remote-support:${params.candidate.actionId}`,
-    serverId: "remote_1",
+    serverId: "r1",
     phase: "install_defense_support",
     sourceDefinitionIds: [params.candidate.sourceDefinitionId!],
     parentKind: "remote",
@@ -123,7 +124,7 @@ export function checkpointRemoteSupportSignal(params: {
       rezFundingGap: 0,
       projection: checkpointInstallProjection({
         candidate: params.candidate,
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         effect: "progress",
         accessProbability: params.accessProbability ?? {
           numerator: 1,
@@ -147,10 +148,10 @@ export function checkpointRemoteProject(
     purposes: ["scoreline"],
     target: {
       status: "bound",
-      serverId: "remote_1",
+      serverId: "r1",
       targetBindingRevision: 4,
     },
-    serverId: "remote_1",
+    serverId: "r1",
     protectionTarget: "taxing",
     buildTiming: "prebuild",
     targetRecoveryTurns: 2,
@@ -163,7 +164,7 @@ export function checkpointRemoteProject(
     need: {
       needId: parentNeedId,
       parentProjectId: "strategic-score-remote",
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       observedAtStateVersion: 60,
       capability: "improve_remote_protection_path",
       minimum: 1,
@@ -176,7 +177,7 @@ export function checkpointRemoteProject(
     },
     feasible: true,
     value: 20,
-    evidenceCode: "remote_protection_below_target:remote_1",
+    evidenceCode: "remote_protection_below_target:r1",
   };
 }
 
@@ -251,7 +252,7 @@ export function checkpointDefenseContext(params: {
       playerView: {
         stateVersion: 60,
         timingPoint: "corp_action.main",
-        servers: ["hq", "rd", "archives", "remote_1"].map((serverId) => ({
+        servers: ["hq", "rd", "archives", "r1"].map((serverId) => ({
           id: serverId,
           label: serverId,
           ice: [],

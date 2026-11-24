@@ -34,7 +34,14 @@ export function evaluateDecisionSnapshot(params: {
   const failedForbiddenMistakes = observedMistakes.filter((mistake) =>
     forbidden.has(mistake.mistakeClass),
   );
+  const identityMatched =
+    params.snapshot.side === params.frame.side &&
+    params.trace.frameSummary.side === params.frame.side &&
+    params.trace.frameSummary.stateVersion === params.frame.stateVersion &&
+    params.trace.frameSummary.legalActionCount ===
+      params.frame.legalActionIds.length;
   const passed =
+    identityMatched &&
     failedForbiddenMistakes.length === 0 &&
     legalActionInvariantHolds(params.frame, params.trace) &&
     preferredGoalFamilyMatched;
@@ -47,6 +54,7 @@ export function evaluateDecisionSnapshot(params: {
       `forbidden_mistakes:${[...forbidden].join(",")}`,
       `observed_mistakes:${observedMistakes.map((mistake) => mistake.mistakeClass).join(",")}`,
       `preferred_goal_family_matched:${preferredGoalFamilyMatched}`,
+      `snapshot_trace_identity_matched:${identityMatched}`,
     ],
   };
 }

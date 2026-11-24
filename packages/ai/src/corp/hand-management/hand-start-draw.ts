@@ -1,6 +1,10 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
-import { unresolvedChoiceFailure } from "../../runtime/plan-bound-choice-contract";
+import {
+  exactCurrentChoiceAction,
+  unresolvedChoiceFailure,
+} from "../../runtime/plan-bound-choice-contract";
+import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { corpStartDrawAgendaSearchServerId } from "../score/score-start-draw-need";
 import type { CorpHandManagementSignal } from "./hand-management-types";
 
@@ -14,16 +18,29 @@ export function corpOptionalStartDrawSignal(
     !choice?.source.startsWith("scored_agenda.start_draw_choice:")
   )
     return undefined;
-  const action = input.legalActions.find(
-    (a) =>
-      a.type === "resolve_choice" &&
-      a.choiceRequirements?.[0]?.choiceId === choice.choiceId,
-  );
-  if (!action) return undefined;
+  const action = exactCurrentChoiceAction(input, choice);
+  if (!action) {
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((candidate) => candidate.type),
+      owner: "window_resolution",
+      removalCondition:
+        "Publish the exact current Engine action for the optional Corp start draw.",
+    });
+  }
   const quote = choice.corpStartDrawQuote;
   const own = input.playerView.own;
   if (
     !quote ||
+    choice.minSelections !== 1 ||
+    choice.maxSelections !== 1 ||
+    !["draw", "skip"].every((id) =>
+      choice.options.some(
+        (option) => option.id === id && option.selectable !== false,
+      ),
+    ) ||
     quote.observedAtStateVersion !== input.playerView.stateVersion ||
     choice.source !==
       `scored_agenda.start_draw_choice:${quote.sourceCardInstanceId}:${quote.observedAtStateVersion}` ||

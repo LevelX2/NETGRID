@@ -43,17 +43,17 @@ const RAW_GAIN_CREDIT_COMPARISON =
   /action\.type\s*[!=]==?\s*["']gain_credit["']|["']gain_credit["']\s*[!=]==?\s*action\.type/g;
 
 const TARGET_CARD_IDS = [
-  "onr_v1_193_corporate-coup",
-  "onr_v1_309_bbs-whispering-campaign",
-  "onr_v1_154_broker",
+  405,
+  521,
+  366,
 ];
 
 const SCORED_AGENDA_ACTION_CONTRACTS = new Map([
-  ["onr_v1_193_corporate-coup", 3],
-  ["onr_v1_195_corporate-retreat", 2],
-  ["onr_v1_206_marine-arcology", 3],
-  ["onr_v1_209_political-coup", 3],
-  ["onr_v1_210_political-overthrow", 3],
+  [405, 3],
+  [407, 2],
+  [418, 3],
+  [421, 3],
+  [422, 3],
 ]);
 
 export function buildAiEconomyContractAudit() {
@@ -278,7 +278,7 @@ function economyContractViolations(hintCards) {
   requireFixedPool(
     cardsById,
     violations,
-    "onr_v1_193_corporate-coup",
+    405,
     15,
     "corp",
     "when_scored",
@@ -286,7 +286,7 @@ function economyContractViolations(hintCards) {
   requireFixedPool(
     cardsById,
     violations,
-    "onr_v1_209_political-coup",
+    421,
     12,
     "corp",
     "when_scored",
@@ -294,13 +294,13 @@ function economyContractViolations(hintCards) {
   requireFixedPool(
     cardsById,
     violations,
-    "onr_v1_309_bbs-whispering-campaign",
+    521,
     16,
     "corp",
     "on_rez",
   );
 
-  const bbs = cardsById.get("onr_v1_309_bbs-whispering-campaign");
+  const bbs = cardsById.get(521);
   if (bbs) {
     const bbsPayouts = arrayValue(bbs.effects).filter(
       (effect) =>
@@ -329,7 +329,7 @@ function economyContractViolations(hintCards) {
     }
   }
 
-  const broker = cardsById.get("onr_v1_154_broker");
+  const broker = cardsById.get(366);
   if (!broker) {
     violations.push("onr_v1_154_broker: missing hint");
   } else {

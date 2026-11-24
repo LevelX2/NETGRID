@@ -972,7 +972,10 @@ export function configureFlowRuntimeBootstrap({
             publicLabel: "Start-of-run Redirect",
             value: cardId,
             serverId: targetServerId,
-            metadata: { cardTitle: definitionFor(state, cardId).title },
+            metadata: {
+              cardTitle: definitionFor(state, cardId).title,
+              creditCost: startRunRedirectCostCredits(state, cardId),
+            },
           };
         }),
         ...reorderSourceIds.map((cardId) => ({
@@ -1201,7 +1204,7 @@ export function configureFlowRuntimeBootstrap({
       };
       runtimePorts.shuffleRunnerStack(
         state,
-        `run_end.test_spin.return_to_stack.${run.runId}.${pending.cardId}`,
+        [37, run.runId, pending.cardId],
       );
       if (legalAction) {
         legalAction.payload = {
@@ -1230,6 +1233,7 @@ export function configureFlowRuntimeBootstrap({
         damageType: "meat",
         amount: unpaid,
         source: `run_end:${pending.sourceDefinitionId}`,
+        randomSource: ["c", pending.sourceDefinitionId],
       });
     }
     if (legalAction) {

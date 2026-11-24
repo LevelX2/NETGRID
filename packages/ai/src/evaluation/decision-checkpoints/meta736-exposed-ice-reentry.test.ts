@@ -11,8 +11,8 @@ import { runnerImmediateExposedIceSafetyExit } from "../../runner/run-window/run
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 
-const hqRun = "runner.start_run.hq";
-const rdRun = "runner.start_run.rd";
+const hqRun = "rs.hq";
+const rdRun = "rs.rd";
 
 function nativeReentryFixture(name: string) {
   return JSON.parse(
@@ -103,7 +103,7 @@ describe("SP-523: an immediate repeat after a lethal exposed ICE exit", () => {
       ...fixture.input,
       ...buildAiDecisionInputDto(fixture.input),
     };
-    const target = "corp_onr_v1_278_wall-of-ice_2";
+    const target = "c312";
     const remembered = portfolio.runnerExposeInformationMemory?.find(
       (record) => record.targetIceInstanceId === target,
     );

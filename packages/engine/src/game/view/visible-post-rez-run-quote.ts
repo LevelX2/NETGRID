@@ -472,7 +472,7 @@ export function visibleCorpIcePostInstallRunQuote(
       ? {
           id: projectedServerId,
           kind: "remote" as const,
-          label: `Remote ${projectedServerId.slice("remote_".length)}`,
+          label: `Remote ${projectedServerId.slice(1)}`,
           ice: [] as CardInstanceId[],
           root: [] as CardInstanceId[],
         }

@@ -55,10 +55,7 @@ export function accessDecisionInvariantViolations(
   ) {
     violations.push("trash_cost_waiver_requires_trash_intent");
   }
-  if (
-    input.intendedAccessAction === "decline" &&
-    input.targetChoiceWouldSelect?.selectedChoicesCreated === true
-  ) {
+  if (input.targetChoiceWouldSelect?.selectedChoicesCreated === true) {
     violations.push("dry_run_must_not_create_selected_choices");
   }
   if (input.targetChoiceWouldSelect?.selectedTargetsCreated === true) {

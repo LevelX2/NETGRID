@@ -23,7 +23,7 @@ describe("corp main action generation", () => {
       state.corp.credits = cost + 2;
       state.corpTemporaryInstallRezCredits = {
         sourceCardInstanceId: "contract",
-        sourceDefinitionId: "onr_proteus_059_government-contract",
+        sourceDefinitionId: 117,
         remaining: 3,
         usableFor: "corp_install_or_rez",
         returnUnusedAtTurnEnd: true,
@@ -51,14 +51,14 @@ describe("corp main action generation", () => {
       state.runner.rig.resources = ["resource-instance"];
       state.corpTemporaryInstallRezCredits = {
         sourceCardInstanceId: "contract-instance",
-        sourceDefinitionId: "onr_proteus_059_government-contract",
+        sourceDefinitionId: 117,
         remaining: 3,
         usableFor: "corp_install_or_rez",
         returnUnusedAtTurnEnd: true,
       };
       const host = testCorpMainHost(state);
       host.cards.definitionFor = () =>
-        CARD_DEFINITIONS_BY_ID["onr_v1_151_aujourdoui"]!;
+        CARD_DEFINITIONS_BY_ID[363]!;
       expect(
         buildCorpMainActions(host).some(
           (action) => action.type === "trash_resource",
@@ -74,7 +74,7 @@ describe("corp main action generation", () => {
     const actions = buildCorpMainActions(testCorpMainHost(state));
 
     expect(actions.map((candidate) => candidate.actionId)).toEqual([
-      "corp.end_turn",
+      "c9",
     ]);
     expect(JSON.stringify(state)).toBe(before);
   });
@@ -88,8 +88,8 @@ describe("corp main action generation", () => {
     const actions = buildCorpMainActions(testCorpMainHost(state));
 
     expect(actions.map((candidate) => candidate.actionId)).toEqual([
-      "corp.gain_credit",
-      "corp.end_turn",
+      "cb",
+      "c9",
     ]);
     expect(actions.map((candidate) => candidate.type)).toEqual([
       "gain_credit",
@@ -108,7 +108,7 @@ describe("corp main action generation", () => {
     );
 
     expect(actions.map((candidate) => candidate.actionId)).toEqual([
-      "corp.forgo_action",
+      "ca",
     ]);
     expect(actions[0]?.payload).toMatchObject({
       actionDebtPaid: 1,
@@ -147,7 +147,7 @@ describe("corp main action generation", () => {
   it("binds a generic Corp operation to its exact CardSpec on-play capability", () => {
     const state = minimalCorpMainState("cs12-corp-operation-capability");
     const cardId = "chance-observation-instance";
-    const definition = CARD_DEFINITIONS_BY_ID["onr_v1_284_chance-observation"]!;
+    const definition = CARD_DEFINITIONS_BY_ID[496]!;
     state.corp.hq = [cardId as never];
     state.corp.credits = 5;
     state.cardInstances[cardId] = {
@@ -173,14 +173,14 @@ describe("corp main action generation", () => {
       abilityRef: {
         sourceCardInstanceId: cardId,
         sourceAbilityId:
-          "onr_v1_284_chance-observation:abilities_on_play_trace",
+          610,
       },
       payload: {
         cardId,
         cardImplementationCapabilityBindingKind: "card_spec_capability_key",
         cardImplementationAbilityKey: "abilities_on_play_trace",
         cardImplementationAbilityId:
-          "onr_v1_284_chance-observation:abilities_on_play_trace",
+          610,
       },
     });
   });
@@ -188,13 +188,13 @@ describe("corp main action generation", () => {
   it("attaches the exact composite zone projection to Rescheduler", () => {
     const state = minimalCorpMainState("corp-main-rescheduler-projection");
     const cardId = "rescheduler-instance";
-    const definition = CARD_DEFINITIONS_BY_ID["onr_v1_336_rescheduler"]!;
+    const definition = CARD_DEFINITIONS_BY_ID[548]!;
     state.cardInstances[cardId] = {
       id: cardId,
       definitionId: definition.id,
       owner: "corp",
       controller: "corp",
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
       installed: true,
       rezzed: true,
       advancementCounters: 0,
@@ -234,7 +234,7 @@ describe("corp main action generation", () => {
     );
     const cardId = "corporate-shuffle-instance";
     const definition =
-      CARD_DEFINITIONS_BY_ID["onr_classic_017_corporate-shuffle"]!;
+      CARD_DEFINITIONS_BY_ID[21]!;
     state.corp.clicks = 2;
     state.corp.hq = [cardId];
     state.corp.rd = ["rd-1", "rd-2", "rd-3", "rd-4", "rd-5"];

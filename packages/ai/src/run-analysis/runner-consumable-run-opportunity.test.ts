@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -7,7 +8,7 @@ import {
 import type { RunActionProjection } from "./runner-run-target-types";
 import { quoteRunnerConsumableRunOpportunity } from "./runner-consumable-run-opportunity";
 
-const SOURCE_DEFINITION_ID = "test-consumable-bypass-route";
+const SOURCE_DEFINITION_ID = syntheticCardDefinitionId("test-consumable-bypass-route");
 
 describe("quoteRunnerConsumableRunOpportunity", () => {
   it("moderately preserves a lone bypass card on a blind single-access run", () => {

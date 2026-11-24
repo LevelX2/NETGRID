@@ -22,7 +22,7 @@ import {
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   options: Partial<CardInstance> = {},
 ): CardInstance {
   return {
@@ -40,7 +40,7 @@ function instance(
 }
 
 function definition(
-  id: string,
+  id: number,
   options: Partial<CardDefinition> = {},
 ): CardDefinition {
   return {
@@ -104,28 +104,28 @@ function makeState(
       ],
     },
     cardInstances: {
-      [iceInner]: instance(iceInner, "simple_ice", {
+      [iceInner]: instance(iceInner, 2394377751, {
         zone: { side: "corp", zone: "serverIce", serverId: "rd" },
         faceup: false,
         rezzed: false,
       }),
-      [iceOuter]: instance(iceOuter, "onr_proteus_033_mobile-barricade", {
+      [iceOuter]: instance(iceOuter, 91, {
         zone: { side: "corp", zone: "serverIce", serverId: "rd" },
         faceup: false,
         rezzed: false,
       }),
-      [sourceRoot]: instance(sourceRoot, "onr_proteus_062_lesley-major"),
-      [targetRoot]: instance(targetRoot, "agenda_target", {
+      [sourceRoot]: instance(sourceRoot, 120),
+      [targetRoot]: instance(targetRoot, 1078402943, {
         advancementCounters: 0,
       }),
-      [hqIce]: instance(hqIce, "hq_ice_def", {
+      [hqIce]: instance(hqIce, 2966027182, {
         zone: { side: "corp", zone: "hq" },
         faceup: false,
         rezzed: false,
       }),
     },
     run: {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "rd",
       phase: options.phase ?? "movement",
       position:
@@ -150,27 +150,21 @@ function makeState(
 
 function definitionsFor(state: GameState): Record<string, CardDefinition> {
   const definitions: Record<string, CardDefinition> = {
-    simple_ice: definition("simple_ice", { type: "ice", title: "Simple ICE" }),
-    hq_ice_def: definition("hq_ice_def", { type: "ice", title: "HQ ICE" }),
-    agenda_target: definition("agenda_target", {
+    2394377751: definition(2394377751, { type: "ice", title: "Simple ICE" }),
+    2966027182: definition(2966027182, { type: "ice", title: "HQ ICE" }),
+    1078402943: definition(1078402943, {
       type: "agenda",
       title: "Agenda Target",
     }),
-    "onr_proteus_062_lesley-major": definition("onr_proteus_062_lesley-major", {
+    120: definition(120, {
       title: "Lesley Major",
     }),
-    "onr_v1_369_singapore-city-grid": definition(
-      "onr_v1_369_singapore-city-grid",
-      { title: "HQ Ice Swap" },
-    ),
-    "onr_v1_364_omni-kismet-ph-d": definition("onr_v1_364_omni-kismet-ph-d", {
+    581: definition(581, { title: "HQ Ice Swap" }),
+    576: definition(576, {
       title: "Omni Kismet, Ph.D.",
     }),
-    "onr_proteus_033_mobile-barricade": definition(
-      "onr_proteus_033_mobile-barricade",
-      { type: "ice", title: "Mobile Barricade" },
-    ),
-    onr_classic_011_glacier: definition("onr_classic_011_glacier", {
+    91: definition(91, { type: "ice", title: "Mobile Barricade" }),
+    onr_classic_011_glacier: definition(15, {
       type: "ice",
       title: "Glacier",
     }),
@@ -255,10 +249,7 @@ describe("fort pass window", () => {
   it("builds and resolves fort pass advancement actions with stable payload", () => {
     const state = makeState();
     const plainTargetId = "plain_target" as CardInstanceId;
-    state.cardInstances[plainTargetId] = instance(
-      plainTargetId,
-      "plain_nonadvanceable_asset",
-    );
+    state.cardInstances[plainTargetId] = instance(plainTargetId, 3999870048);
     state.corp.servers[0]!.root.push(plainTargetId);
     const host = hostFor(state);
 
@@ -275,9 +266,9 @@ describe("fort pass window", () => {
     );
     expect(agendaAction?.payload).toMatchObject({
       cardId: "source_root",
-      sourceDefinitionId: "onr_proteus_062_lesley-major",
+      sourceDefinitionId: 120,
       targetCardId: "target_root",
-      targetCardDefinitionId: "agenda_target",
+      targetCardDefinitionId: 1078402943,
       serverId: "rd",
       serverLabel: "R&D",
       passedIceId: "ice_outer",
@@ -293,7 +284,7 @@ describe("fort pass window", () => {
     expect(result).toMatchObject({
       handled: true,
       windowPassed: true,
-      sourceDefinitionId: "onr_proteus_062_lesley-major",
+      sourceDefinitionId: 120,
       serverLabel: "R&D",
     });
     expect(state.corp.credits).toBe(3);
@@ -302,7 +293,7 @@ describe("fort pass window", () => {
       "source_root",
     ]);
     expect(state.run?.fortPassWindowPassedKeys).toEqual([
-      "fort-pass:run_1:server:rd",
+      "fort-pass:1:server:rd",
     ]);
   });
 
@@ -310,7 +301,7 @@ describe("fort pass window", () => {
     const state = makeState();
     state.cardInstances.source_root = {
       ...state.cardInstances.source_root!,
-      definitionId: "onr_v1_369_singapore-city-grid",
+      definitionId: 581,
     };
     const host = hostFor(state);
     const server = host.servers.mustServer("rd");
@@ -349,7 +340,7 @@ describe("fort pass window", () => {
 
     expect(state.pendingChoice).toMatchObject({
       source:
-        "card_implementation.hq_ice_swap:source_root:rd:ice_inner:0:run_1",
+        "card_implementation.hq_ice_swap:source_root:rd:ice_inner:0:1",
       kind: "select_cards",
       visibility: "hidden_info_barrier",
       options: [
@@ -389,7 +380,7 @@ describe("fort pass window", () => {
     expect(resolveAction.payload).toMatchObject({
       hiddenZoneBarrier: true,
       hiddenZoneAction: "hq_ice_swap_swap",
-      sourceDefinitionId: "onr_v1_369_singapore-city-grid",
+      sourceDefinitionId: 581,
       swappedIceCount: 1,
       oncePerRunConsumed: true,
     });
@@ -397,7 +388,7 @@ describe("fort pass window", () => {
     const outerState = makeState();
     outerState.cardInstances.source_root = {
       ...outerState.cardInstances.source_root!,
-      definitionId: "onr_v1_369_singapore-city-grid",
+      definitionId: 581,
     };
     const outerHost = hostFor(outerState);
     const outerServer = outerHost.servers.mustServer("rd");
@@ -435,7 +426,7 @@ describe("fort pass window", () => {
     expect(actions).toHaveLength(1);
     expect(actions[0]?.payload).toMatchObject({
       cardId: "ice_outer",
-      sourceDefinitionId: "onr_proteus_033_mobile-barricade",
+      sourceDefinitionId: 91,
       serverId: "rd",
       serverLabel: "R&D",
       sourceIceIndex: 1,
@@ -449,14 +440,14 @@ describe("fort pass window", () => {
     expect(result).toMatchObject({
       handled: true,
       iceOrderChanged: true,
-      sourceDefinitionId: "onr_proteus_033_mobile-barricade",
+      sourceDefinitionId: 91,
       selectedIceId: "ice_inner",
     });
     expect(server.ice).toEqual(["ice_outer", "ice_inner"]);
     expect(state.cardInstances.ice_outer?.faceup).toBe(true);
     expect(state.corp.credits).toBe(7);
     expect(actions[0]?.payload).toMatchObject({
-      publicRevealDefinitionId: "onr_proteus_033_mobile-barricade",
+      publicRevealDefinitionId: 91,
       revealedSource: true,
       newApproachIceRevealed: false,
       corpCreditsAfter: 7,
@@ -475,12 +466,12 @@ describe("fort pass window", () => {
       positionIceIndex: 3,
       serverIce: [iceInner, iceMiddleOne, iceMiddleTwo, iceOuter],
     });
-    state.cardInstances[iceMiddleOne] = instance(iceMiddleOne, "simple_ice", {
+    state.cardInstances[iceMiddleOne] = instance(iceMiddleOne, 2394377751, {
       zone: { side: "corp", zone: "serverIce", serverId: "rd" },
       faceup: false,
       rezzed: false,
     });
-    state.cardInstances[iceMiddleTwo] = instance(iceMiddleTwo, "simple_ice", {
+    state.cardInstances[iceMiddleTwo] = instance(iceMiddleTwo, 2394377751, {
       zone: { side: "corp", zone: "serverIce", serverId: "rd" },
       faceup: false,
       rezzed: false,
@@ -530,27 +521,22 @@ describe("fort pass window", () => {
     });
     // Relocation actions include real Engine rez projections. Every installed
     // card inspected by that projection must belong to the canonical registry.
-    state.cardInstances.target_root!.definitionId =
-      "onr_v1_189_artificial-security-directors";
+    state.cardInstances.target_root!.definitionId = 401;
     state.cardInstances.target_root!.rezzed = false;
-    state.cardInstances.ice_inner!.definitionId = "onr_v1_237_data-wall";
-    state.cardInstances.hq_ice!.definitionId = "onr_v1_237_data-wall";
+    state.cardInstances.ice_inner!.definitionId = 449;
+    state.cardInstances.hq_ice!.definitionId = 449;
     state.corp.servers.push({
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: ["glacier" as CardInstanceId],
       root: [],
     });
-    state.cardInstances.glacier = instance(
-      "glacier",
-      "onr_classic_011_glacier",
-      {
-        zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
-        faceup: false,
-        rezzed: false,
-      },
-    );
+    state.cardInstances.glacier = instance("glacier", 15, {
+      zone: { side: "corp", zone: "serverIce", serverId: "r1" },
+      faceup: false,
+      rezzed: false,
+    });
     const host = hostFor(state);
     const server = host.servers.mustServer("rd");
     const run = state.run!;
@@ -569,8 +555,8 @@ describe("fort pass window", () => {
 
     expect(glacierAction?.payload).toMatchObject({
       cardId: "glacier",
-      sourceDefinitionId: "onr_classic_011_glacier",
-      sourceServerId: "remote_1",
+      sourceDefinitionId: 15,
+      sourceServerId: "r1",
       targetServerId: "rd",
       sourceIceIndex: 0,
       targetIceIndex: 2,
@@ -583,10 +569,10 @@ describe("fort pass window", () => {
       handled: true,
       iceOrderChanged: true,
       selectedIceId: "glacier",
-      sourceDefinitionId: "onr_classic_011_glacier",
+      sourceDefinitionId: 15,
       serverId: "rd",
     });
-    expect(host.servers.mustServer("remote_1").ice).toEqual([]);
+    expect(host.servers.mustServer("r1").ice).toEqual([]);
     expect(host.servers.mustServer("rd").ice).toEqual([
       "ice_inner",
       "ice_outer",
@@ -606,7 +592,7 @@ describe("fort pass window", () => {
     expect(state.run?.approachedIceId).toBe("glacier");
     expect(state.corp.credits).toBe(7);
     expect(glacierAction?.payload).toMatchObject({
-      publicRevealDefinitionId: "onr_classic_011_glacier",
+      publicRevealDefinitionId: 15,
       revealedSource: true,
       corpCreditsAfter: 7,
     });
@@ -617,12 +603,12 @@ describe("fort pass window", () => {
     ).find(
       (candidate) =>
         candidate.payload?.cardId === "glacier" &&
-        candidate.payload?.targetServerId === "remote_1",
+        candidate.payload?.targetServerId === "r1",
     );
     expect(returnAction).toBeDefined();
     resolveStartRunIceRepositionWindow(host, returnAction!);
     expect(state.corp.credits).toBe(6);
     expect(state.run?.iceRepositionUsedSourceIdsThisRun).toBeUndefined();
-    expect(host.servers.mustServer("remote_1").ice).toEqual(["glacier"]);
+    expect(host.servers.mustServer("r1").ice).toEqual(["glacier"]);
   });
 });

@@ -1,7 +1,7 @@
 import type { AiDecisionInput } from "@netgrid/shared";
-import { visibleIcePathTraceContext } from "../run-analysis/trace-rules-profile-planning";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import { visibleIcePathTraceContext } from "../run-analysis/trace-rules-profile-planning";
 import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
@@ -22,7 +22,7 @@ export type RunnerTargetedIceTrashCommitment = {
   kind: "targeted_ice_trash";
   sourceActionId: string;
   sourceCardInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   plannedAtStateVersion: number;
   ownerModuleId: "runner.pressure_central" | "runner.contest_remote";
   ownerDedupeKey: string;
@@ -39,6 +39,7 @@ export type RunnerTargetedIceTrashChoiceContinuation =
     family: "runner_targeted_ice_trash";
     selectedActionId: string;
     selectedAtStateVersion: number;
+    engineContinuationAtStateVersion?: number;
   };
 
 export type RunnerTargetedIceTrashPlanTarget = {
@@ -124,7 +125,7 @@ export function runnerUnrezzedIceTrashRouteOpeningPayoff(
       creditBudget,
       server.root,
       input.playerView.opponent.credits,
-      visibleIcePathTraceContext(input),
+      targetedIceTrashTraceContext(input),
     );
     return (
       remainingPath.canReachAccess &&
@@ -230,7 +231,7 @@ export function runnerTargetedIceTrashPlanCommitment(params: {
         ),
         server.root,
         input.playerView.opponent.credits,
-        visibleIcePathTraceContext(input),
+        targetedIceTrashTraceContext(input),
       );
       return server.ice.flatMap((ice) => {
         const targetRezCost = ice.rezCost;
@@ -263,7 +264,7 @@ export function runnerTargetedIceTrashPlanCommitment(params: {
           runnerRunPathCreditBudgetWithVisiblePools(remainingCredits, rig),
           server.root,
           input.playerView.opponent.credits,
-          visibleIcePathTraceContext(input),
+          targetedIceTrashTraceContext(input),
         );
         if (
           !remainingPath.canReachAccess ||
@@ -340,4 +341,12 @@ export function runnerTargetedIceTrashPlanCommitment(params: {
         right.commitment.targetIceInstanceId,
       ),
   )[0]?.commitment;
+}
+
+function targetedIceTrashTraceContext(input: AiDecisionInput) {
+  const support = input.playerView.own.runnerTraceSupportQuote;
+  return {
+    ...visibleIcePathTraceContext(input),
+    ...(support ? { runnerTraceSupportQuote: support } : {}),
+  };
 }

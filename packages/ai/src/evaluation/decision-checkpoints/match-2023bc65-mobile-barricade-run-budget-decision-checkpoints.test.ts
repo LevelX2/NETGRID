@@ -8,9 +8,9 @@ import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
-const KRASH_INSTANCE_ID = "runner_onr_v1_039_krash_1";
+const KRASH_INSTANCE_ID = "c1jt";
 const SPIN_CHIP_INSTANCE_ID =
-  "runner_onr_proteus_139_eurocorpse-tm-spin-chip_1";
+  "c17t";
 
 describe("match 2023BC65 Mobile Barricade run-budget checkpoints", () => {
   it("uses the pool-funded HQ path while the remote contest remains underfunded", () => {
@@ -28,7 +28,7 @@ describe("match 2023BC65 Mobile Barricade run-budget checkpoints", () => {
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId = "2023BC65-C01-LOW-CORP-REZ-CAPACITY";
         checkpoint.expectation = {
-          acceptableActions: [{ actionId: "runner.start_run.remote_1" }],
+          acceptableActions: [{ actionId: "rs.r1" }],
         };
       },
     );
@@ -47,21 +47,21 @@ describe("match 2023BC65 Mobile Barricade run-budget checkpoints", () => {
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId = "2023BC65-C02-HIGH-CORP-REZ-CAPACITY";
         checkpoint.expectation = {
-          acceptableActions: [{ actionId: "runner.start_run.hq" }],
-          forbiddenActions: [{ actionId: "runner.start_run.remote_1" }],
+          acceptableActions: [{ actionId: "rs.hq" }],
+          forbiddenActions: [{ actionId: "rs.r1" }],
           planExecution: {
             acceptablePlanKinds: ["runner.pressure_central"],
             acceptableCapabilities: ["pressure_hq_information"],
           },
           runTargets: [
             {
-              actionId: "runner.start_run.hq",
+              actionId: "rs.hq",
               recommendation: "run_if_free",
               pathCost: 2,
               creditsAfterRun: 10,
             },
             {
-              actionId: "runner.start_run.remote_1",
+              actionId: "rs.r1",
               recommendation: "gain_credits_first",
               creditsAfterRun: 0,
             },
@@ -79,7 +79,7 @@ describe("match 2023BC65 Mobile Barricade run-budget checkpoints", () => {
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "2023BC65-C03-UNHOSTED-SPIN-CHIP";
       checkpoint.expectation = {
-        forbiddenActions: [{ actionId: "runner.start_run.remote_1" }],
+        forbiddenActions: [{ actionId: "rs.r1" }],
       };
     });
 
@@ -95,7 +95,7 @@ describe("match 2023BC65 Mobile Barricade run-budget checkpoints", () => {
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "2023BC65-C04-HOSTED-SPIN-CHIP";
       checkpoint.expectation = {
-        acceptableActions: [{ actionId: "runner.start_run.remote_1" }],
+        acceptableActions: [{ actionId: "rs.r1" }],
       };
     });
 

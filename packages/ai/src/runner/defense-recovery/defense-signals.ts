@@ -59,6 +59,31 @@ export function runnerDefenseSupportSignals(
   const defenseSupportEvaluations = handDevelopment.filter(
     (evaluation) => evaluation.developmentRole === "defense_support",
   );
+  const { own } = input.playerView;
+  const canClearTagsOnLastClick =
+    own.clicks === 1 &&
+    own.tags > 0 &&
+    own.gripOrHq.length <= own.maxHandSize &&
+    candidates.some((candidate) =>
+      candidate.actionType === "remove_tag" &&
+      candidate.semanticActionType === "tag.remove" &&
+      currentRunnerTagReduction(candidate, own.tags) === own.tags,
+    );
+  const capacityOnlyInstalls = new Set(
+    canClearTagsOnLastClick
+      ? candidates.filter((candidate) =>
+          candidate.actionType === "install_card" &&
+          candidate.costProfile.clickCost === own.clicks &&
+          candidate.functionalEffects?.length &&
+          candidate.functionalEffects.every((effect) =>
+            effect.kind === "hand_size_modifier" &&
+            effect.scope === "runner" &&
+            effect.timing === "persistent" &&
+            (effect.amount ?? 0) > 0,
+          ),
+        ).map((candidate) => candidate.actionId)
+      : [],
+  );
   const defenseSupportInstallEvaluationActionIds = new Set(
     defenseSupportEvaluations.flatMap((evaluation) => {
       if (evaluation.legalActionId === undefined) return [];
@@ -88,6 +113,7 @@ export function runnerDefenseSupportSignals(
         defenseSupportInstallEvaluationActionIds.has(
           evaluation.legalActionId,
         ) &&
+        !capacityOnlyInstalls.has(evaluation.legalActionId) &&
         evaluation.availability === "legal_now" &&
         evaluation.currentNeed !== "none" &&
         evaluation.deferReason === "none",
@@ -222,7 +248,7 @@ export function buildRunnerDefenseSignals(params: {
             ((strategicIntent.riskProfile ?? []).includes(
               "runner.risky_universal_breaker_pressure",
             ) ||
-              rolesForDeckDoctrineCard(ice.definitionId ?? "").includes(
+              rolesForDeckDoctrineCard(ice.definitionId).includes(
                 "sentry_ice",
               )),
         ),
@@ -518,7 +544,7 @@ export function buildRunnerDefenseSignals(params: {
     tagClearFundingOpen
       ? {
           needId: "runner-defense-tag-clear-funding",
-          parentPlanInstanceId: "plan:runner.defense_and_recovery:runner",
+          parentPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
           targetCredits:
             tagClearTargetCredits * (bankTagClearFunding ? tags : 1),
           currentCreditsAtRevalidation: currentCredits,
@@ -573,7 +599,7 @@ export function buildRunnerDefenseSignals(params: {
               needId:
                 "runner-defense-persistent-hazard-counter-funding" as const,
               parentPlanInstanceId:
-                "plan:runner.defense_and_recovery:runner" as const,
+                "p1gzjb6yfcv4zbzow512kexs33" as const,
               counterType: quote.counterType,
               observedAmount: quote.observedAmount,
               targetCredits: quote.credits,
@@ -640,7 +666,7 @@ export function buildRunnerDefenseSignals(params: {
     reactionReserveOpen
       ? {
           needId: "runner-defense-reaction-reserve",
-          parentPlanInstanceId: "plan:runner.defense_and_recovery:runner",
+          parentPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
           targetCredits: reactionReserveTargetCredits,
           currentCreditsAtRevalidation: currentCredits,
           gap: Math.max(0, reactionReserveTargetCredits - currentCredits),
@@ -902,16 +928,16 @@ function nextCorpTurnTagProtectionActions(
     const credits = currentLegalActionResourceCost(install, "credits");
     const clicks = currentLegalActionResourceCost(install, "clicks");
     const remainingCredits = own.credits - credits;
-    const restoreGrip = handAfterInstall < minimumAfterInstall;
+    const drawsNeeded = Math.max(0, minimumAfterInstall - handAfterInstall);
     if (
       remainingCredits < 0 ||
       clicks > own.clicks ||
       (!confirmedDamage && (credits > 0 || clicks > 1)) ||
-      (restoreGrip &&
+      (drawsNeeded > 0 &&
         (!basicDraw ||
-          clicks + currentLegalActionResourceCost(basicDraw, "clicks") >
+          clicks + drawsNeeded * currentLegalActionResourceCost(basicDraw, "clicks") >
             own.clicks ||
-          own.stackOrRdCount < minimumAfterInstall - handAfterInstall ||
+          own.stackOrRdCount < drawsNeeded ||
           runnerDrawTaxLiabilityProjection(input, basicDraw).sourceCount >
             0)) ||
       !canAvoidOneNextCorpTag(card, remainingCredits, !confirmedDamage)
@@ -991,7 +1017,7 @@ function bindVisibleDrawTaxPreparation(
     return;
   defense.reactionReserveNeed = {
     needId: "runner-defense-reaction-reserve",
-    parentPlanInstanceId: "plan:runner.defense_and_recovery:runner",
+    parentPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
     targetCredits,
     currentCreditsAtRevalidation: input.playerView.own.credits,
     gap: targetCredits - input.playerView.own.credits,
@@ -1007,7 +1033,7 @@ function bindVisibleDrawTaxPreparation(
   defense.handBufferActionIds = [];
   defense.evidenceCodes.unshift("runner_visible_draw_tax_preparation");
 }
-function runnerDefinitionProvidesTraceDefense(definitionId: string): boolean {
+function runnerDefinitionProvidesTraceDefense(definitionId: number): boolean {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
   return (
     hint?.functionSignals?.includes("defense.trace_defense") === true ||
@@ -1086,9 +1112,9 @@ function runnerRiskAdjustedHandBufferForAttractiveRuns(
   let strongestRisk = -1;
   let sameTurnRunPreparation = false;
 
-  // A ready route keeps its own reserve. Preparing a different optional probe
-  // must not raise the global safety floor and preempt that executable route.
-  // Concrete agenda/score consumers can still require their own preparation.
+  // For quoted draw preparation, a ready route keeps its own reserve.
+  // Concrete agenda/score consumers can still request preparation. The
+  // second pass accounts separately for pressure from multiple unknown ICE.
   const currentRunAvailable = runTargets.some(
     (target) =>
       (target.recommendation === "run_now" ||

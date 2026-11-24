@@ -15,7 +15,7 @@ describe("assessCorpScoreRushRisk", () => {
     input.playerView.opponent.credits = 8;
     input.playerView.opponent.rig = [
       visibleCard("dwarf", "runner", "program", {
-        definitionId: "onr_v1_021_dwarf",
+        definitionId: 233,
         strength: 2,
         subtypes: ["icebreaker", "worm"],
       }),
@@ -53,11 +53,22 @@ describe("assessCorpScoreRushRisk", () => {
       admission: "accepted",
       reason: "runner_cannot_reach_before_score",
     });
+    expect(
+      assessCorpScoreRushRisk({
+        input,
+        server: target,
+        agendaPoints: 2,
+        remainingAdvancementClicks: 4,
+      }),
+    ).toMatchObject({
+      admission: "unknown",
+      reason: "score_horizon_too_slow",
+    });
   });
 });
 
 function fixedPostRezWallServer(input: AiDecisionInput, cardId: string) {
-  const definitionId = "onr_v1_279_wall-of-static";
+  const definitionId = 491;
   const runQuote: NonNullable<VisibleCard["effectiveRunQuote"]> = {
     iceInstanceId: cardId,
     iceDefinitionId: definitionId,
@@ -80,8 +91,8 @@ function fixedPostRezWallServer(input: AiDecisionInput, cardId: string) {
       context: "installed",
       complete: true,
       cardId,
-      targetServerId: "remote_1",
-      projectedServerId: "remote_1",
+      targetServerId: "r1",
+      projectedServerId: "r1",
       expiresAtStateVersion: input.playerView.stateVersion,
       baseCredits: 3,
       finalCredits: 3,
@@ -93,16 +104,16 @@ function fixedPostRezWallServer(input: AiDecisionInput, cardId: string) {
       complete: true,
       cardId,
       iceDefinitionId: definitionId,
-      targetServerId: "remote_1",
-      projectedServerId: "remote_1",
+      targetServerId: "r1",
+      projectedServerId: "r1",
       expiresAtStateVersion: input.playerView.stateVersion,
       effectiveRunQuote: runQuote,
     },
   });
-  const target = server("remote_1", [wall]);
+  const target = server("r1", [wall]);
   input.playerView.servers = [
     ...input.playerView.servers.filter(
-      (candidate) => candidate.id !== "remote_1",
+      (candidate) => candidate.id !== "r1",
     ),
     target,
   ];

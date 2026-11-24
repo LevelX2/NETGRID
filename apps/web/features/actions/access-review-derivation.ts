@@ -1,24 +1,25 @@
-import type {
-  LegalAction,
-  PlayerView,
-  PublicGameEvent,
-  Side,
-} from "@netgrid/shared";
+import { optionPresentation } from "../../lib/presented-player-view";
+import type { AccessPresentationId } from "../../app/access-reveal-ui";
+import { cardDefinitionIdValue, cardDefinitionIdsFromCsv } from "../../app/card-definition-id";
+import type { CardDefinitionId, MatchEventId, PublicGameEvent, Side } from "@netgrid/shared";
+import type { LegalAction, PlayerView } from "../../lib/presented-player-view";
 
 import {
   accessRevealStatusLabel,
   serverDisplayLabel,
 } from "../../app/action-board-ui";
 import { accessPresentationOutcomeAfter } from "../../app/access-presentation";
+import { isExposeOutermostIceEachDataFortPayload } from "../../app/action-payload";
 import {
   enrichVisibleCard,
   visibleCardFromCatalogDetail,
   visibleCardFromPublicEvent,
+  type DisplayVisibleCard,
 } from "../cards/card-view-model";
 import type { AccessReveal, ExposeReview } from "./AccessReviewModals";
 
 type CatalogCardSummary = {
-  catalogCardId: string;
+  catalogCardId: CardDefinitionId;
   title: string;
   side: Side;
   type: string;
@@ -35,12 +36,12 @@ type CatalogCardDetail = CatalogCardSummary & {
   numeric: Record<string, number | null | undefined>;
 };
 
-export function revealedEventCardIds(event: PublicGameEvent): string[] {
+export function revealedEventCardIds(event: PublicGameEvent): CardDefinitionId[] {
   const ids = [
     revealedEventCardId(event),
-    ...payloadStringList(event.publicPayload, "publicRevealDefinitionIds"),
-    ...payloadStringList(event.publicPayload, "revealedAgendaDefinitionIds"),
-  ].filter((value): value is string => Boolean(value));
+    ...cardDefinitionIdsFromCsv(event.publicPayload["publicRevealDefinitionIds"]),
+    ...cardDefinitionIdsFromCsv(event.publicPayload["revealedAgendaDefinitionIds"]),
+  ].filter((value): value is CardDefinitionId => value != null);
   return Array.from(new Set(ids));
 }
 
@@ -55,7 +56,7 @@ export function accessRevealFromLatestEvent(
   const agendaStolen = event.publicPayload.actionType === "steal_agenda";
   if (!agendaStolen && event.publicPayload.actionType !== "access_card")
     return null;
-  const cardId = payloadString(event.publicPayload, "cardDefinitionId");
+  const cardId = cardDefinitionIdValue(event.publicPayload["cardDefinitionId"]);
   const title = payloadString(event.publicPayload, "title");
   if (!cardId || !title) return null;
   const actorSide = payloadSide(event.publicPayload, "actor") ?? "runner";
@@ -144,7 +145,7 @@ export function accessRevealFromCurrentRun(
   viewerSide: Side,
   events: PublicGameEvent[],
   accessEvent: PublicGameEvent | null,
-  eventId?: string,
+  eventId?: MatchEventId,
 ): AccessReveal | null {
   const accessedCard = view.run?.accessedCard;
   if (!accessedCard?.known || !accessedCard.title) return null;
@@ -242,10 +243,10 @@ export function archivesRevealFromLatestEvent(
   const count =
     payloadPositiveInteger(event.publicPayload, "archivesRevealCount") ?? 0;
   const definitionIds =
-    payloadStringList(event.publicPayload, "archivesRevealDefinitionIds")
+    cardDefinitionIdsFromCsv(event.publicPayload["archivesRevealDefinitionIds"])
       .length > 0
-      ? payloadStringList(event.publicPayload, "archivesRevealDefinitionIds")
-      : payloadStringList(event.publicPayload, "publicRevealDefinitionIds");
+      ? cardDefinitionIdsFromCsv(event.publicPayload["archivesRevealDefinitionIds"])
+      : cardDefinitionIdsFromCsv(event.publicPayload["publicRevealDefinitionIds"]);
   if (definitionIds.length === 0) return null;
   const titles =
     payloadPipeStringList(event.publicPayload, "archivesRevealTitles").length >
@@ -254,7 +255,7 @@ export function archivesRevealFromLatestEvent(
       : payloadPipeStringList(event.publicPayload, "publicRevealTitles");
   const cards = definitionIds.map((definitionId, index) => {
     const detail = detailsById[definitionId] ?? null;
-    const title = detail?.title ?? titles[index] ?? definitionId;
+    const title = detail?.title ?? titles[index] ?? String(definitionId);
     return detail
       ? visibleCardFromCatalogDetail(detail)
       : visibleCardFromPublicEvent(event, definitionId, title);
@@ -289,10 +290,10 @@ export function hqAgendaRevealFromLatestEvent(
 ): AccessReveal | null {
   if (!event || !isCorpHqAgendaRevealEvent(event)) return null;
   const definitionIds =
-    payloadStringList(event.publicPayload, "publicRevealDefinitionIds").length >
+    cardDefinitionIdsFromCsv(event.publicPayload["publicRevealDefinitionIds"]).length >
     0
-      ? payloadStringList(event.publicPayload, "publicRevealDefinitionIds")
-      : payloadStringList(event.publicPayload, "revealedAgendaDefinitionIds");
+      ? cardDefinitionIdsFromCsv(event.publicPayload["publicRevealDefinitionIds"])
+      : cardDefinitionIdsFromCsv(event.publicPayload["revealedAgendaDefinitionIds"]);
   if (definitionIds.length === 0) return null;
   const titles = payloadPipeStringList(
     event.publicPayload,
@@ -300,7 +301,7 @@ export function hqAgendaRevealFromLatestEvent(
   );
   const cards = definitionIds.map((definitionId, index) => {
     const detail = detailsById[definitionId] ?? null;
-    const title = detail?.title ?? titles[index] ?? definitionId;
+    const title = detail?.title ?? titles[index] ?? String(definitionId);
     return detail
       ? visibleCardFromCatalogDetail(detail)
       : visibleCardFromPublicEvent(event, definitionId, title);
@@ -340,10 +341,7 @@ export function securityPurgeRevealFromLatestEvent(
   viewerSide: Side,
 ): AccessReveal | null {
   if (!event || !isSecurityPurgeRevealEvent(event)) return null;
-  const definitionIds = payloadStringList(
-    event.publicPayload,
-    "publicRevealDefinitionIds",
-  );
+  const definitionIds = cardDefinitionIdsFromCsv(event.publicPayload["publicRevealDefinitionIds"]);
   if (definitionIds.length === 0) return null;
   const titles = payloadPipeStringList(
     event.publicPayload,
@@ -351,7 +349,7 @@ export function securityPurgeRevealFromLatestEvent(
   );
   const cards = definitionIds.map((definitionId, index) => {
     const detail = detailsById[definitionId] ?? null;
-    const title = detail?.title ?? titles[index] ?? definitionId;
+    const title = detail?.title ?? titles[index] ?? String(definitionId);
     return detail
       ? visibleCardFromCatalogDetail(detail)
       : visibleCardFromPublicEvent(event, definitionId, title);
@@ -422,20 +420,20 @@ export function gypsyScheduleAnalyzerRevealFromPendingChoice(
     choice.stateVersion,
   );
   const definitionIds = revealEvent
-    ? payloadStringList(revealEvent.publicPayload, "publicRevealDefinitionIds")
+    ? cardDefinitionIdsFromCsv(revealEvent.publicPayload["publicRevealDefinitionIds"])
     : [];
   const titles = revealEvent
     ? payloadPipeStringList(revealEvent.publicPayload, "publicRevealTitles")
     : [];
   const cards = definitionIds.map((definitionId, index) => {
     const detail = detailsById[definitionId] ?? null;
-    const title = detail?.title ?? titles[index] ?? definitionId;
+    const title = detail?.title ?? titles[index] ?? String(definitionId);
     return detail
       ? visibleCardFromCatalogDetail(detail)
       : visibleCardFromPublicEvent(revealEvent!, definitionId, title);
   });
   const revealNextAvailable = choice.options.some(
-    (option) => option.id === "reveal_next",
+    (option) => optionPresentation(option) === "reveal_next",
   );
   const agendaRevealed = cards.some((card) => card.type === "agenda");
   return {
@@ -476,7 +474,7 @@ export function exposeReviewFromLatestEvent(
   if (definitionIds.length === 0) return null;
   const cards = definitionIds.map((definitionId) => {
     const detail = detailsById[definitionId] ?? null;
-    const title = detail?.title ?? definitionId;
+    const title = detail?.title ?? String(definitionId);
     return detail
       ? visibleCardFromCatalogDetail(detail)
       : visibleCardFromPublicEvent(event, definitionId, title);
@@ -486,12 +484,23 @@ export function exposeReviewFromLatestEvent(
     event.publicPayload,
     "exposedServerLabels",
   ).map(serverDisplayLabel);
+  const outermostIce = isExposeOutermostIceEachDataFortPayload(
+    event.publicPayload,
+  )
+    ? {
+        stateVersion: event.stateVersionAfter,
+        sourceTitle: payloadString(event.publicPayload, "sourceTitle"),
+        serverIds: payloadStringList(event.publicPayload, "exposedServerIds"),
+        positionKeys: payloadStringList(event.publicPayload, "exposedPositionKeys"),
+      }
+    : undefined;
   return {
     eventId: event.eventId,
     actorSide,
     viewerSide,
     cards,
     serverLabels,
+    ...(outermostIce ? { outermostIce } : {}),
     title:
       cards.length === 1
         ? "Karte angesehen"
@@ -505,9 +514,44 @@ export function exposeReviewFromLatestEvent(
   };
 }
 
+export function exposedBoardIceForReview(
+  review: ExposeReview,
+  view: Pick<PlayerView, "stateVersion" | "servers">,
+): ReadonlyMap<string, DisplayVisibleCard> {
+  const exposed = new Map<string, DisplayVisibleCard>();
+  const locations = review.outermostIce;
+  if (
+    !locations ||
+    locations.stateVersion !== view.stateVersion ||
+    locations.serverIds.length !== review.cards.length ||
+    locations.positionKeys.length !== review.cards.length
+  )
+    return exposed;
+
+  for (const [index, revealedCard] of review.cards.entries()) {
+    const server = view.servers.find(
+      ({ id }) => id === locations.serverIds[index],
+    );
+    const installedCard = server?.ice.at(-1);
+    if (
+      !server ||
+      !installedCard ||
+      locations.positionKeys[index] !== `ice:${server.ice.length - 1}` ||
+      installedCard.known
+    )
+      continue;
+    exposed.set(installedCard.instanceId, {
+      ...revealedCard,
+      ...installedCard,
+      known: true,
+    });
+  }
+  return exposed;
+}
+
 export function retainedArchivesRevealEvent(
   events: PublicGameEvent[],
-  dismissedEventIds: string[],
+  dismissedEventIds: AccessPresentationId[],
 ): PublicGameEvent | null {
   for (let index = events.length - 1; index >= 0; index -= 1) {
     const event = events[index];
@@ -521,7 +565,7 @@ export function retainedArchivesRevealEvent(
 
 export function retainedHqAgendaRevealEvent(
   events: PublicGameEvent[],
-  dismissedEventIds: string[],
+  dismissedEventIds: AccessPresentationId[],
 ): PublicGameEvent | null {
   for (let index = events.length - 1; index >= 0; index -= 1) {
     const event = events[index];
@@ -540,7 +584,7 @@ export function retainedHqAgendaRevealEvent(
 
 export function retainedSecurityPurgeRevealEvent(
   events: PublicGameEvent[],
-  dismissedEventIds: string[],
+  dismissedEventIds: AccessPresentationId[],
   options: { suppressTargetChoiceOpened?: boolean } = {},
 ): PublicGameEvent | null {
   for (let index = events.length - 1; index >= 0; index -= 1) {
@@ -560,25 +604,25 @@ export function retainedSecurityPurgeRevealEvent(
   return null;
 }
 
-function revealedEventCardId(event: PublicGameEvent): string | null {
+function revealedEventCardId(event: PublicGameEvent): CardDefinitionId | null {
   const cardId =
     event.publicPayload.cardDefinitionId ??
     event.publicPayload.sourceDefinitionId ??
     event.publicPayload.targetCardDefinitionId ??
     event.publicPayload.publicRevealDefinitionId ??
     event.publicPayload.priorityRequisitionTargetDefinitionId;
-  return typeof cardId === "string" ? cardId : null;
+  return cardDefinitionIdValue(cardId) ?? null;
 }
 
-function exposeReviewDefinitionIds(event: PublicGameEvent): string[] {
-  return Array.from(
-    new Set(
-      [
-        payloadString(event.publicPayload, "publicRevealDefinitionId"),
-        ...payloadStringList(event.publicPayload, "publicRevealDefinitionIds"),
-      ].filter((value): value is string => Boolean(value)),
-    ),
+function exposeReviewDefinitionIds(event: PublicGameEvent): CardDefinitionId[] {
+  const definitionIds = cardDefinitionIdsFromCsv(
+    event.publicPayload["publicRevealDefinitionIds"],
   );
+  if (definitionIds.length > 0) return definitionIds;
+  const definitionId = cardDefinitionIdValue(
+    event.publicPayload["publicRevealDefinitionId"],
+  );
+  return definitionId === undefined ? [] : [definitionId];
 }
 
 function exposeReviewDescription(
@@ -835,8 +879,8 @@ function isCorpHqAgendaRevealEvent(event: PublicGameEvent): boolean {
   if (!isCorpHqAgendaRevealCandidateEvent(event)) return false;
   const payload = event.publicPayload;
   return (
-    payloadStringList(payload, "publicRevealDefinitionIds").length > 0 ||
-    payloadStringList(payload, "revealedAgendaDefinitionIds").length > 0
+    cardDefinitionIdsFromCsv(payload["publicRevealDefinitionIds"]).length > 0 ||
+    cardDefinitionIdsFromCsv(payload["revealedAgendaDefinitionIds"]).length > 0
   );
 }
 
@@ -857,7 +901,7 @@ function isCorpHqAgendaRevealCandidateEvent(event: PublicGameEvent): boolean {
 function isSecurityPurgeRevealEvent(event: PublicGameEvent): boolean {
   if (!isSecurityPurgeRevealCandidateEvent(event)) return false;
   return (
-    payloadStringList(event.publicPayload, "publicRevealDefinitionIds").length >
+    cardDefinitionIdsFromCsv(event.publicPayload["publicRevealDefinitionIds"]).length >
     0
   );
 }
@@ -993,7 +1037,7 @@ function payloadAccessOrigin(
 function latestAccessAmbushPaymentStatus(
   events: PublicGameEvent[],
   accessEvent: PublicGameEvent | null,
-  cardDefinitionId?: string,
+  cardDefinitionId?: CardDefinitionId,
 ): string | undefined {
   if (!accessEvent || !cardDefinitionId) return undefined;
   const accessIndex = events.findIndex(
@@ -1004,8 +1048,8 @@ function latestAccessAmbushPaymentStatus(
     const payload = events[index]?.publicPayload;
     if (!payload || payload.actionType !== "resolve_choice") continue;
     const ambushDefinitionId =
-      payloadString(payload, "ambushDefinitionId") ??
-      payloadString(payload, "accessEffectSourceDefinitionId");
+      cardDefinitionIdValue(payload["ambushDefinitionId"]) ??
+      cardDefinitionIdValue(payload["accessEffectSourceDefinitionId"]);
     if (ambushDefinitionId !== cardDefinitionId) continue;
     const paidCost = payloadPositiveInteger(payload, "ambushPaidCost");
     if (paidCost)
@@ -1089,16 +1133,13 @@ function accessAmbushPaymentChoiceResolved(
     (event) => event.eventId === accessEvent.eventId,
   );
   if (accessIndex < 0) return false;
-  const accessDefinitionId = payloadString(
-    accessEvent.publicPayload,
-    "cardDefinitionId",
-  );
+  const accessDefinitionId = cardDefinitionIdValue(accessEvent.publicPayload["cardDefinitionId"]);
   for (let index = accessIndex + 1; index < events.length; index += 1) {
     const payload = events[index]?.publicPayload;
     if (!payload || payload.actionType !== "resolve_choice") continue;
     const ambushDefinitionId =
-      payloadString(payload, "ambushDefinitionId") ??
-      payloadString(payload, "accessEffectSourceDefinitionId");
+      cardDefinitionIdValue(payload["ambushDefinitionId"]) ??
+      cardDefinitionIdValue(payload["accessEffectSourceDefinitionId"]);
     if (
       accessDefinitionId &&
       ambushDefinitionId &&

@@ -8,7 +8,7 @@ import {
 } from "@netgrid/engine";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { buildAiDecisionInput } from "./ai-decision-input";
-import { corpUnconditionalScoreCreditGain } from "./corp-canonical-card-facts";
+import { corpUnconditionalScoreCreditGain } from "./corp-canonical-credit-facts";
 import { corpScoreRestoresRezReserveBeforeRunnerTurn } from "../corp/score/score-reserve-restoration";
 import { createAiHintsByCard } from "../ai-hints";
 import type { DeckDefinition } from "@netgrid/shared";
@@ -19,7 +19,7 @@ import {
   residentPlanPortfolioSnapshot,
 } from "../plans/resident-plan-portfolio-memory";
 
-const charity = "onr_proteus_002_charity-takeover";
+const charity = 60;
 function deck(side: "corp" | "runner"): DeckDefinition {
   const d = catalog.decks.find(
     (d) =>
@@ -57,7 +57,7 @@ it("projects the actual unconditional on-score payout into the existing reserve 
   if (!drawn.ok) throw Error(JSON.stringify(drawn.error));
   state = drawn.state;
   RealEngineFixtureBuilder.forState(state)
-    .withCorpRemoteRoot("remote_1", charity, 4)
+    .withCorpRemoteRoot("r1", charity, 4)
     .withCorpCredits(1)
     .withCorpHqSize(0);
   const input = buildAiDecisionInput(state, "corp", {
@@ -154,12 +154,12 @@ it("projects the actual unconditional on-score payout into the existing reserve 
   expect(getPlayerView(result.state, "corp").own.credits).toBe(10);
   expect(result.state.corp.badPublicity).toBe(1);
   expect(
-    corpUnconditionalScoreCreditGain("onr_v1_196_corporate-war"),
+    corpUnconditionalScoreCreditGain(408),
   ).toBeUndefined();
   expect(
-    corpUnconditionalScoreCreditGain("onr_v1_209_political-coup"),
+    corpUnconditionalScoreCreditGain(421),
   ).toBeUndefined();
-  expect(corpUnconditionalScoreCreditGain("onr_v1_203_hostile-takeover")).toBe(
+  expect(corpUnconditionalScoreCreditGain(415)).toBe(
     5,
   );
 });

@@ -58,10 +58,10 @@ it("finishes the already bound native pump payment under its original run owner"
   expect(decision.actionId).toBe(continuation.actionId);
   const plan = decision.decisionDebug!.planFirstDecision!;
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:runner.pressure_central:central%3Ahq",
+    "pa7nez1ioecg7mf06q1uwqq57o",
   );
   expect(plan.leafExecutorInstanceId).toBe(
-    "plan:runner.convert_run_window:run%3Arun_107",
+    "p9o0y4udd66inu4vd7pkvl1s7q",
   );
   expect(plan.lane).toBe("engine_window");
   expect(plan.engineWindowAction).toMatchObject({
@@ -71,7 +71,7 @@ it("finishes the already bound native pump payment under its original run owner"
   expect(plan.executionOrigin).toMatchObject({
     rootPlanInstanceId: plan.rootPlanInstanceId,
     leafPlanInstanceId: plan.leafExecutorInstanceId,
-    windowId: "runner_cost_penalty_support.108",
+    windowId: "108",
     stateVersion: 108,
   });
   expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);

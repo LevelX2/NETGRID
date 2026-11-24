@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -27,7 +28,7 @@ function load(game: number, decision: number, credits?: number) {
   };
   bindExplicitZeroPublicStealQuotes(
     input,
-    game === 33 ? ["onr_v1_363_olivia-salazar"] : ["onr_v1_352_chester-mix"],
+    game === 33 ? [575] : [564],
   );
   if (credits !== undefined) input.playerView.own.credits = credits;
   resetResidentPlanPortfolioMemory();
@@ -44,7 +45,7 @@ it.each([14, 16])(
   (credits) => {
     const input = load(33, 241, credits);
     const loan = input.legalActions.find(
-      (a) => a.type === "install_card" && a.source.includes("loan-from-chiba"),
+      (a) => a.type === "install_card" && referencesDefaultDeckCard(a.source, 380),
     )!;
     const result = chooseAiAction(input);
     expect(result.actionId).not.toBe(loan.actionId);
@@ -54,25 +55,31 @@ it.each([14, 16])(
       stateVersion: input.playerView.stateVersion,
     });
     if (credits === 16) {
-      expect(result.actionId).toBe("runner.start_run.remote_1");
+      expect(result.actionId).toBe("rs.r1");
       expect(
-        result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-      ).toContain("plan:runner.contest_remote:");
+        result.decisionDebug?.planFirstDecision?.portfolio.find(
+          (instance) => instance.instanceId === result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+        )?.moduleId,
+      ).toBe("runner.contest_remote");
       expect(
-        result.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-      ).toContain("plan:runner.contest_remote:");
+        result.decisionDebug?.planFirstDecision?.portfolio.find(
+          (instance) => instance.instanceId === result.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+        )?.moduleId,
+      ).toBe("runner.contest_remote");
     } else {
-      expect(result.actionId).toBe("runner.gain_credit");
+      expect(result.actionId).toBe("rb");
       expect(
-        result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-      ).toContain("plan:runner.economy:");
+        result.decisionDebug?.planFirstDecision?.portfolio.find(
+          (instance) => instance.instanceId === result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+        )?.moduleId,
+      ).toBe("runner.economy");
     }
   },
 );
 
 it("prices both same-encounter breaks once before the inner wall", () => {
   const input = load(33, 241);
-  const server = input.playerView.servers.find((s) => s.id === "remote_1")!;
+  const server = input.playerView.servers.find((s) => s.id === "r1")!;
   const quote = assessKnownRezzedIcePath(
     server.ice,
     input.playerView.own.rig!,
@@ -88,10 +95,10 @@ it("prices both same-encounter breaks once before the inner wall", () => {
   expect(quote.paidSubroutineBreaks).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
-        subroutineId: "printed_subroutines_damage_net",
+        subroutineId: "0",
       }),
       expect.objectContaining({
-        subroutineId: "printed_subroutines_prohibit_break_next_ice",
+        subroutineId: "1",
       }),
     ]),
   );
@@ -106,7 +113,7 @@ it("prices both same-encounter breaks once before the inner wall", () => {
 
 it("retains the funding blocker for the cheaper damage branch when mitigation cannot be funded", () => {
   const input = load(33, 241, 16);
-  const server = input.playerView.servers.find((s) => s.id === "remote_1")!;
+  const server = input.playerView.servers.find((s) => s.id === "r1")!;
   const quote = assessKnownRezzedIcePath(
     server.ice,
     input.playerView.own.rig!,
@@ -123,7 +130,7 @@ it("retains the funding blocker for the cheaper damage branch when mitigation ca
   const target = evaluateRunnerRunTargets({
     input,
     deckCapabilities: input.ownDeckCapabilities!,
-  }).find((t) => t.targetServerId === "remote_1")!;
+  }).find((t) => t.targetServerId === "r1")!;
   expect(target.pathPassability).toBe("blocked_unpayable");
 });
 
@@ -132,7 +139,7 @@ it("does not request a hand buffer for a fully paid damage break", () => {
   const target = evaluateRunnerRunTargets({
     input,
     deckCapabilities: input.ownDeckCapabilities!,
-  }).find((t) => t.targetServerId === "remote_1")!;
+  }).find((t) => t.targetServerId === "r1")!;
   expect(target).toMatchObject({
     pathPassability: "reachable",
     pathCost: 14,

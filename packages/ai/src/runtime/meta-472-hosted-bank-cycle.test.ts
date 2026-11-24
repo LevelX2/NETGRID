@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
@@ -109,7 +110,7 @@ describe("SP-456 exact current all-pool withdrawal at R6 G1/D200", () => {
     expect(decision.decisionDebug?.fallbackUsed).toBe(false);
     const plan = decision.decisionDebug?.planFirstDecision;
     expect(plan?.rootPlanInstanceId).toBe(
-      `plan:corp.economy:economy-visible-card-payout%3A${cashout.source}`,
+      planInstanceIdForProposal({ moduleId: "corp.economy", dedupeKey: `economy-visible-card-payout:${cashout.source}` }),
     );
     expect(plan?.priority?.effectiveClass).toBe("P4");
     expect(plan?.selectedStep?.planInstanceId).toBe(plan?.rootPlanInstanceId);
@@ -148,7 +149,7 @@ describe("SP-456 exact current all-pool withdrawal at R6 G1/D200", () => {
 describe("SP-456 actual Engine bank cycle through the normal Corp chooser", () => {
   it("preserves the original basic-credit result before the missing producer is supplied", () => {
     const decision = chooseAiAction(checkpoint().beforeInput);
-    expect(decision.actionId).toBe("corp.gain_credit");
+    expect(decision.actionId).toBe("cb");
     expect(decision.decisionDebug?.fallbackUsed).toBe(false);
   });
   it("runs rez, load, load and cashout with the current Score and Defense funding bindings", () => {
@@ -163,11 +164,9 @@ describe("SP-456 actual Engine bank cycle through the normal Corp chooser", () =
             (signal): signal is CorpEconomyParentFundingSignal =>
               signal.kind === "parent_funding",
           );
-        const short = funding.find(
-          (signal) =>
-            signal.parentNeedId?.endsWith("hostile-takeover_2:remote_1") ===
-            true,
-        )!;
+        const source = step.input.playerView.own.gripOrHq.find((card) => card.definitionId === 415);
+        expect(source).toBeDefined();
+        const short = funding.find((signal) => signal.parentNeedId?.endsWith(source!.instanceId + ":r1"))!;
         const cycle = funding.find(
           (signal) => signal.parentPlanInstanceId === plan?.rootPlanInstanceId,
         )!;
@@ -197,7 +196,11 @@ describe("SP-456 actual Engine bank cycle through the normal Corp chooser", () =
       expect(plan?.selectedStep).toMatchObject({
         parentInstanceId: step.expected.parent,
         needId: step.expected.need,
-        planInstanceId: expect.stringContaining("plan:corp.economy:"),
+        planInstanceId: expect.toBeOneOf(
+          plan?.portfolio
+            .filter((instance) => instance.moduleId === "corp.economy")
+            .map((instance) => instance.instanceId) ?? [],
+        ),
       });
       expect(decision.decisionDebug?.fallbackUsed).toBe(false);
       expect(

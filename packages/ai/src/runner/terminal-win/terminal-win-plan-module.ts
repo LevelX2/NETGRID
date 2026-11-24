@@ -41,6 +41,8 @@ export function createRunnerTerminalWinModule(): PlanModule {
         terminalWinCandidates(context, current.signal).length > 0,
         1,
         portfolio.executorInstanceId,
+        undefined,
+        "rules_proven",
       );
     },
     materialize: (instance, _assessment, context) => {

@@ -1,3 +1,4 @@
+import { type CardDefinitionId } from "@netgrid/shared";
 import type {
   LegalAction,
   PlayerView,
@@ -8,19 +9,87 @@ import { describe, expect, it } from "vitest";
 
 import {
   accessRevealFromLatestEvent,
+  exposedBoardIceForReview,
+  exposeReviewFromLatestEvent,
   gypsyScheduleAnalyzerRevealFromPendingChoice,
   hqAgendaRevealFromLatestEvent,
   retainedHqAgendaRevealEvent,
   retainedSecurityPurgeRevealEvent,
   securityPurgeRevealFromLatestEvent,
 } from "../features/actions/access-review-derivation";
+import { retainedExposeReviewEvent } from "./action-board-ui";
+
+describe("Ice and Data’s Guide to the Net presentation", () => {
+  const exposure = event(100, {
+    actionType: "play_event",
+    actor: "runner",
+    sourceTitle: "Ice and Data’s Guide to the Net",
+    hiddenZoneAction: "v1911_expose_outermost_ice_each_data_fort",
+    publicRevealKind: "expose",
+    publicRevealDefinitionIds: "589,589,601",
+    exposedServerIds: "hq,rd,r1",
+    exposedPositionKeys: "ice:0,ice:0,ice:1",
+    exposedServerLabels: "HQ,R&D,Remote 1",
+  });
+  const details = {
+    589: catalogCard(589, "Wall of Static", "ice"),
+    601: catalogCard(601, "Quandary", "ice"),
+  };
+
+  it("holds every exposed copy in server order until the event is confirmed", () => {
+    const events = [exposure, event(101, { actionType: "gain_credit" })];
+    const pending = retainedExposeReviewEvent(events, null);
+    const review = exposeReviewFromLatestEvent(pending ?? undefined, details, "runner");
+
+    expect(review?.cards.map((card) => [card.definitionId, card.known])).toEqual([
+      [589, true],
+      [589, true],
+      [601, true],
+    ]);
+    expect(review?.serverLabels).toEqual(["HQ", "R&D", "Remote 1"]);
+    expect(retainedExposeReviewEvent(events, exposure.eventId)).toBeNull();
+  });
+
+  it("turns over only the public outer ICE in the matching board state", () => {
+    const review = exposeReviewFromLatestEvent(exposure, details, "runner")!;
+    const hiddenIce = (instanceId: string) => ({
+      instanceId,
+      known: false,
+      rezzed: false,
+    });
+    const view = {
+      stateVersion: exposure.stateVersionAfter,
+      servers: [
+        { id: "hq", label: "HQ", ice: [hiddenIce("hq_outer")], root: [] },
+        { id: "rd", label: "R&D", ice: [hiddenIce("rd_outer")], root: [] },
+        {
+          id: "r1",
+          label: "Remote 1",
+          ice: [hiddenIce("remote_inner"), hiddenIce("remote_outer")],
+          root: [hiddenIce("remote_root")],
+        },
+      ],
+    } satisfies Pick<PlayerView, "stateVersion" | "servers">;
+
+    const exposed = exposedBoardIceForReview(review, view);
+    expect([...exposed.keys()]).toEqual(["hq_outer", "rd_outer", "remote_outer"]);
+    expect(exposed.get("remote_outer")).toMatchObject({
+      instanceId: "remote_outer",
+      definitionId: 601,
+      known: true,
+      rezzed: false,
+    });
+    expect(view.servers[2]?.ice.every((card) => !card.known)).toBe(true);
+    expect(exposedBoardIceForReview(review, { ...view, stateVersion: 3 }).size).toBe(0);
+  });
+});
 
 describe("Access outcome presentation", () => {
   it("explains a lethal Fetal AI access before any steal choice", () => {
-    const access = event("evt_fetal_ai", {
+    const access = event(100, {
       actionType: "access_card",
       actor: "runner",
-      cardDefinitionId: "fetal_ai",
+      cardDefinitionId: 9145,
       title: "Fetal AI",
       serverLabel: "R&D",
       damageResolved: true,
@@ -34,13 +103,13 @@ describe("Access outcome presentation", () => {
     expect(
       accessRevealFromLatestEvent(
         access,
-        { fetal_ai: catalogCard("fetal_ai", "Fetal AI", "agenda") },
+        { 9145: catalogCard(9145, "Fetal AI", "agenda") },
         [],
         "runner",
         [access],
       ),
     ).toMatchObject({
-      eventId: "evt_fetal_ai",
+      eventId: 100,
       trashStatus:
         "2 Net Damage wurden beim Zugriff sofort aufgelöst. Du wurdest dadurch flatlined; davor hattest du 1 Handkarte. Die Agenda konnte deshalb nicht mehr gestohlen werden.",
       actions: [],
@@ -48,17 +117,17 @@ describe("Access outcome presentation", () => {
   });
 
   it("adds the public trash outcome to the retained Setup access", () => {
-    const access = event("evt_access", {
+    const access = event(101, {
       actionType: "access_card",
       actor: "runner",
-      cardDefinitionId: "onr_v1_340_setup",
+      cardDefinitionId: 552,
       title: "Setup!",
       serverLabel: "R&D",
     });
-    const trash = event("evt_trash", {
+    const trash = event(102, {
       actionType: "trash_accessed_card",
       actor: "runner",
-      cardDefinitionId: "onr_v1_340_setup",
+      cardDefinitionId: 552,
       title: "Setup!",
       serverLabel: "R&D",
     });
@@ -67,14 +136,14 @@ describe("Access outcome presentation", () => {
       accessRevealFromLatestEvent(
         access,
         {
-          onr_v1_340_setup: catalogCard("onr_v1_340_setup", "Setup!", "asset"),
+          552: catalogCard(552, "Setup!", "asset"),
         },
         [],
         "corp",
         [access, trash],
       ),
     ).toMatchObject({
-      eventId: "evt_access",
+      eventId: 101,
       outcomeStatus: "Der Runner hat Setup! getrasht.",
     });
   });
@@ -87,26 +156,26 @@ describe("Access outcome presentation", () => {
   ])(
     "presents a stolen agenda from %s as a read-only confirmation",
     (serverLabel, accessOrigin) => {
-      const access = event(`evt_access_${accessOrigin}`, {
+      const access = event(2, {
         actionType: "access_card",
         actor: "runner",
-        cardDefinitionId: "public_agenda",
+        cardDefinitionId: 9148,
         title: "Public Agenda",
         serverLabel,
         accessOrigin,
       });
-      const steal = event(`evt_steal_${accessOrigin}`, {
+      const steal = event(3, {
         actionType: "steal_agenda",
         actor: "runner",
-        cardDefinitionId: "public_agenda",
+        cardDefinitionId: 9148,
       });
 
       expect(
         accessRevealFromLatestEvent(
           access,
           {
-            public_agenda: catalogCard(
-              "public_agenda",
+            9148: catalogCard(
+              9148,
               "Public Agenda",
               "agenda",
             ),
@@ -116,13 +185,13 @@ describe("Access outcome presentation", () => {
           [access, steal],
         ),
       ).toMatchObject({
-        eventId: `evt_access_${accessOrigin}`,
+        eventId: access.eventId,
         outcomeKind: "stolen",
         outcomeStatus: "Der Runner hat die Agenda Public Agenda erbeutet.",
         dismissLabel: "Agenda bestätigen",
         actions: [],
         card: {
-          definitionId: "public_agenda",
+          definitionId: 9148,
           title: "Public Agenda",
           type: "agenda",
         },
@@ -132,14 +201,14 @@ describe("Access outcome presentation", () => {
 
   it("separates central root upgrades from HQ, R&D and Archives cards", () => {
     const details = {
-      root_upgrade: catalogCard("root_upgrade", "Root Upgrade", "upgrade"),
-      central_card: catalogCard("central_card", "Central Card", "operation"),
+      9151: catalogCard(9151, "Root Upgrade", "upgrade"),
+      9152: catalogCard(9152, "Central Card", "operation"),
     };
     const hqRoot = accessRevealFromLatestEvent(
-      event("evt_hq_root", {
+      event(103, {
         actionType: "access_card",
         actor: "runner",
-        cardDefinitionId: "root_upgrade",
+        cardDefinitionId: 9151,
         title: "Root Upgrade",
         serverLabel: "HQ",
         accessOrigin: "central_root",
@@ -151,10 +220,10 @@ describe("Access outcome presentation", () => {
       "runner",
     );
     const hqCard = accessRevealFromLatestEvent(
-      event("evt_hq", {
+      event(104, {
         actionType: "access_card",
         actor: "runner",
-        cardDefinitionId: "central_card",
+        cardDefinitionId: 9152,
         title: "Central Card",
         serverLabel: "HQ",
         accessOrigin: "hq",
@@ -166,10 +235,10 @@ describe("Access outcome presentation", () => {
       "runner",
     );
     const rdRoot = accessRevealFromLatestEvent(
-      event("evt_rd_root", {
+      event(105, {
         actionType: "access_card",
         actor: "runner",
-        cardDefinitionId: "root_upgrade",
+        cardDefinitionId: 9151,
         title: "Root Upgrade",
         serverLabel: "R&D",
         accessOrigin: "central_root",
@@ -179,10 +248,10 @@ describe("Access outcome presentation", () => {
       "runner",
     );
     const archivesCard = accessRevealFromLatestEvent(
-      event("evt_archives", {
+      event(106, {
         actionType: "access_card",
         actor: "runner",
-        cardDefinitionId: "central_card",
+        cardDefinitionId: 9152,
         title: "Central Card",
         serverLabel: "Archive",
         accessOrigin: "archives",
@@ -212,40 +281,40 @@ describe("Access outcome presentation", () => {
   });
 
   it("shows generic Rush Hour progress for repeated R&D card definitions", () => {
-    const firstAccess = event("evt_11", {
+    const firstAccess = event(12, {
       actionType: "access_card",
       actor: "runner",
-      cardDefinitionId: "onr_v1_237_data-wall",
+      cardDefinitionId: 449,
       title: "Data Wall",
       serverLabel: "R&D",
       accessIndex: 0,
       baseAccessCount: 4,
       effectiveAccessCount: 4,
     });
-    const secondAccess = event("evt_12", {
+    const secondAccess = event(13, {
       actionType: "access_card",
       actor: "runner",
-      cardDefinitionId: "onr_v1_307_urban-renewal",
+      cardDefinitionId: 519,
       title: "Urban Renewal",
       serverLabel: "R&D",
       accessIndex: 1,
       baseAccessCount: 4,
       effectiveAccessCount: 4,
     });
-    const thirdAccess = event("evt_13", {
+    const thirdAccess = event(14, {
       actionType: "access_card",
       actor: "runner",
-      cardDefinitionId: "onr_v1_237_data-wall",
+      cardDefinitionId: 449,
       title: "Data Wall",
       serverLabel: "R&D",
       accessIndex: 2,
       baseAccessCount: 4,
       effectiveAccessCount: 4,
     });
-    const fourthAccess = event("evt_14", {
+    const fourthAccess = event(15, {
       actionType: "access_card",
       actor: "runner",
-      cardDefinitionId: "onr_v1_307_urban-renewal",
+      cardDefinitionId: 519,
       title: "Urban Renewal",
       serverLabel: "R&D",
       accessIndex: 3,
@@ -315,29 +384,29 @@ describe("Gypsy Schedule Analyzer reveal review", () => {
     const review = gypsyScheduleAnalyzerRevealFromPendingChoice(
       view,
       {
-        simple_economy_operation: catalogCard(
-          "simple_economy_operation",
+        596: catalogCard(
+          596,
           "Simple Economy Operation",
           "operation",
         ),
-        simple_agenda: catalogCard("simple_agenda", "Simple Agenda", "agenda"),
+        588: catalogCard(588, "Simple Agenda", "agenda"),
       },
       [action],
       "runner",
       [
-        event("evt_old", {
+        event(107, {
           actionType: "resolve_choice",
           hiddenZoneAction: "gypsy_schedule_analyzer_reveal_next",
-          publicRevealDefinitionIds: "old_card",
+          publicRevealDefinitionIds: "11005",
           publicRevealTitles: "Old Card",
         }),
         {
-          ...event("evt_gypsy", {
+          ...event(108, {
             actionType: "resolve_choice",
             hiddenZoneAction: "gypsy_schedule_analyzer_reveal_next",
-            publicRevealDefinitionIds: "simple_economy_operation,simple_agenda",
+            publicRevealDefinitionIds: "596,588",
             publicRevealTitles: "Simple Economy Operation||Simple Agenda",
-            revealedAgendaDefinitionIds: "simple_agenda",
+            revealedAgendaDefinitionIds: "588",
             revealedCount: 2,
           }),
           stateVersionAfter: 10,
@@ -346,7 +415,7 @@ describe("Gypsy Schedule Analyzer reveal review", () => {
     );
 
     expect(review).toMatchObject({
-      eventId: "evt_gypsy",
+      eventId: 108,
       kind: "gypsy_rd_reveal",
       trashStatus:
         "Agenda gefunden. Bestätige, um die Agenda nach HQ zu legen und die übrigen Karten in R&D zu mischen.",
@@ -366,14 +435,14 @@ describe("Gypsy Schedule Analyzer reveal review", () => {
 describe("Security Purge reveal review", () => {
   it("shows the revealed R&D cards when Security Purge finds no ICE", () => {
     const review = securityPurgeRevealFromLatestEvent(
-      event("evt_security_purge", {
+      event(109, {
         actionType: "score_agenda",
         actor: "corp",
         title: "Security Purge",
         agendaAbility: "agenda_purge",
         hiddenZoneAction: "agenda_purge_rd_top3",
         publicRevealDefinitionIds:
-          "simple_economy_asset,simple_economy_operation,simple_agenda",
+          "594,596,588",
         publicRevealTitles:
           "Simple Economy Asset||Simple Economy Operation||Simple Agenda",
         revealedCount: 3,
@@ -382,23 +451,23 @@ describe("Security Purge reveal review", () => {
         agendaPurgeTargetChoiceOpened: false,
       }),
       {
-        simple_economy_asset: catalogCard(
-          "simple_economy_asset",
+        594: catalogCard(
+          594,
           "Simple Economy Asset",
           "asset",
         ),
-        simple_economy_operation: catalogCard(
-          "simple_economy_operation",
+        596: catalogCard(
+          596,
           "Simple Economy Operation",
           "operation",
         ),
-        simple_agenda: catalogCard("simple_agenda", "Simple Agenda"),
+        588: catalogCard(588, "Simple Agenda"),
       },
       "corp",
     );
 
     expect(review).toMatchObject({
-      eventId: "evt_security_purge",
+      eventId: 109,
       kind: "security_purge_reveal",
       serverLabel: "R&D",
       description:
@@ -416,19 +485,19 @@ describe("Security Purge reveal review", () => {
   });
 
   it("retains a no-ICE reveal until it is explicitly dismissed", () => {
-    const reveal = event("evt_security_purge", {
+    const reveal = event(109, {
       actionType: "score_agenda",
       actor: "corp",
       agendaAbility: "agenda_purge",
       hiddenZoneAction: "agenda_purge_rd_top3",
-      publicRevealDefinitionIds: "simple_economy_asset",
+      publicRevealDefinitionIds: "594",
       revealedCount: 1,
       revealedIceCount: 0,
       trashedCount: 1,
       agendaPurgeTargetChoiceOpened: false,
     });
     const laterAction = {
-      ...event("evt_later", {
+      ...event(110, {
         actionType: "mandatory_draw",
         actor: "corp",
       }),
@@ -437,22 +506,22 @@ describe("Security Purge reveal review", () => {
 
     expect(
       retainedSecurityPurgeRevealEvent([reveal, laterAction], [])?.eventId,
-    ).toBe("evt_security_purge");
+    ).toBe(109);
     expect(
       retainedSecurityPurgeRevealEvent(
         [reveal, laterAction],
-        ["evt_security_purge"],
+        [109],
       ),
     ).toBeNull();
   });
 
   it("does not cover the active corp target-choice panel", () => {
-    const reveal = event("evt_security_purge_choice", {
+    const reveal = event(111, {
       actionType: "score_agenda",
       actor: "corp",
       agendaAbility: "agenda_purge",
       hiddenZoneAction: "agenda_purge_rd_top3_target_choice",
-      publicRevealDefinitionIds: "simple_barrier_ice,simple_economy_asset",
+      publicRevealDefinitionIds: "589,594",
       revealedCount: 2,
       revealedIceCount: 1,
       pendingTrashCount: 1,
@@ -468,22 +537,22 @@ describe("Security Purge reveal review", () => {
       retainedSecurityPurgeRevealEvent([reveal], [], {
         suppressTargetChoiceOpened: false,
       })?.eventId,
-    ).toBe("evt_security_purge_choice");
+    ).toBe(111);
   });
 
   it("stops retaining the initial reveal after Security Purge target choice resolves", () => {
-    const reveal = event("evt_security_purge_choice", {
+    const reveal = event(111, {
       actionType: "score_agenda",
       actor: "corp",
       agendaAbility: "agenda_purge",
       hiddenZoneAction: "agenda_purge_rd_top3_target_choice",
-      publicRevealDefinitionIds: "simple_barrier_ice,simple_economy_asset",
+      publicRevealDefinitionIds: "589,594",
       revealedCount: 2,
       revealedIceCount: 1,
       pendingTrashCount: 1,
       agendaPurgeTargetChoiceOpened: true,
     });
-    const resolved = event("evt_security_purge_resolved", {
+    const resolved = event(112, {
       actionType: "resolve_choice",
       actor: "corp",
       agendaAbility: "agenda_purge",
@@ -498,21 +567,21 @@ describe("Security Purge reveal review", () => {
 describe("Corporate Negotiating Center reveal review", () => {
   it("builds a persistent HQ agenda reveal review with visible agenda cards", () => {
     const review = hqAgendaRevealFromLatestEvent(
-      event("evt_cnc", {
+      event(113, {
         actionType: "resolve_choice",
         actor: "corp",
         hiddenZoneAction: "corp_hq_agenda_reveal",
         sourceTitle: "Corporate Negotiating Center",
         publicRevealKind: "reveal",
-        publicRevealDefinitionIds: "simple_agenda,onr_v1_203_hostile-takeover",
+        publicRevealDefinitionIds: "588,415",
         publicRevealTitles: "Simple Agenda||Hostile Takeover",
         revealedCount: 2,
         gainedCredits: 2,
       }),
       {
-        simple_agenda: catalogCard("simple_agenda", "Simple Agenda"),
-        "onr_v1_203_hostile-takeover": catalogCard(
-          "onr_v1_203_hostile-takeover",
+        588: catalogCard(588, "Simple Agenda"),
+        415: catalogCard(
+          415,
           "Hostile Takeover",
         ),
       },
@@ -520,7 +589,7 @@ describe("Corporate Negotiating Center reveal review", () => {
     );
 
     expect(review).toMatchObject({
-      eventId: "evt_cnc",
+      eventId: 113,
       kind: "hq_agenda_reveal",
       serverLabel: "HQ",
       description:
@@ -538,16 +607,16 @@ describe("Corporate Negotiating Center reveal review", () => {
   });
 
   it("retains the latest HQ agenda reveal until it is explicitly dismissed", () => {
-    const reveal = event("evt_cnc", {
+    const reveal = event(113, {
       actionType: "resolve_choice",
       actor: "corp",
       hiddenZoneAction: "corp_hq_agenda_reveal",
       publicRevealKind: "reveal",
-      publicRevealDefinitionIds: "simple_agenda",
+      publicRevealDefinitionIds: "588",
       publicRevealTitles: "Simple Agenda",
     });
     const laterAction = {
-      ...event("evt_later", {
+      ...event(110, {
         actionType: "mandatory_draw",
         actor: "corp",
       }),
@@ -556,22 +625,22 @@ describe("Corporate Negotiating Center reveal review", () => {
 
     expect(
       retainedHqAgendaRevealEvent([reveal, laterAction], [])?.eventId,
-    ).toBe("evt_cnc");
+    ).toBe(113);
     expect(
-      retainedHqAgendaRevealEvent([reveal, laterAction], ["evt_cnc"]),
+      retainedHqAgendaRevealEvent([reveal, laterAction], [113]),
     ).toBeNull();
   });
 
   it("does not open a card review when Corporate Negotiating Center reveals no agendas", () => {
-    const previousReveal = event("evt_cnc_previous", {
+    const previousReveal = event(114, {
       actionType: "resolve_choice",
       actor: "corp",
       hiddenZoneAction: "corp_hq_agenda_reveal",
       publicRevealKind: "reveal",
-      publicRevealDefinitionIds: "simple_agenda",
+      publicRevealDefinitionIds: "588",
       publicRevealTitles: "Simple Agenda",
     });
-    const noReveal = event("evt_cnc_none", {
+    const noReveal = event(115, {
       actionType: "resolve_choice",
       actor: "corp",
       hiddenZoneAction: "corp_hq_agenda_reveal",
@@ -591,7 +660,7 @@ describe("Corporate Negotiating Center reveal review", () => {
 });
 
 function event(
-  eventId: string,
+  eventId: number,
   publicPayload: Record<string, unknown>,
 ): PublicGameEvent {
   return {
@@ -604,7 +673,7 @@ function event(
   };
 }
 
-function catalogCard(catalogCardId: string, title: string, type = "agenda") {
+function catalogCard(catalogCardId: CardDefinitionId, title: string, type = "agenda") {
   return {
     catalogCardId,
     title,
@@ -654,7 +723,7 @@ function gypsyView(input: {
 
 function choiceAction(choiceId: string): LegalAction {
   return {
-    actionId: `runner.resolve_choice.${choiceId}`,
+    actionId: `rn.${choiceId}`,
     side: "runner",
     type: "resolve_choice",
     source: "runner",

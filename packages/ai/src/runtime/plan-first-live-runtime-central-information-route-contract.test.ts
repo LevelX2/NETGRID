@@ -20,7 +20,7 @@ describe("plan-first Central information-action ownership", () => {
   it("keeps a newly legal accumulated-pressure conversion on the resident Central plan", () => {
     resetResidentPlanPortfolioMemory();
     const pipeline = visibleCard("viral-pipeline", "runner", "program", {
-      definitionId: "onr_proteus_099_viral-pipeline",
+      definitionId: 157,
       title: "Viral Pipeline",
     });
     const firstRun = legalAction(
@@ -63,7 +63,7 @@ describe("plan-first Central information-action ownership", () => {
           cardId: pipeline.instanceId,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityId:
-            "onr_proteus_099_viral-pipeline:convert_socket_set_to_pipe_counter",
+            218,
           cardImplementationAbilityKey: "convert_socket_set_to_pipe_counter",
           cardImplementationAbilityTiming: "runner_paid",
         },
@@ -123,7 +123,7 @@ describe("plan-first Central information-action ownership", () => {
     });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_first_root:plan:runner.pressure_central:central%3Ahq",
+        "plan_first_root:pa7nez1ioecg7mf06q1uwqq57o",
         "plan_step_capability:central_pressure_convert_accumulated_pressure",
         "plan_priority_class:P3",
       ]),
@@ -163,7 +163,7 @@ describe("plan-first Central information-action ownership", () => {
   it("routes an exact productive R&D Protocol run through Central pressure instead of disposing it as preparation", () => {
     resetResidentPlanPortfolioMemory();
     const protocol = visibleCard("rd-protocol", "runner", "hardware", {
-      definitionId: "onr_v1_050_r-and-d-protocol-files",
+      definitionId: 262,
       title: "R&D Protocol Files",
     });
     const protocolRun = legalAction(
@@ -215,7 +215,7 @@ describe("plan-first Central information-action ownership", () => {
       "runner",
       "hardware",
       {
-        definitionId: "onr_v1_050_r-and-d-protocol-files",
+        definitionId: 262,
         title: "R&D Protocol Files",
       },
     );
@@ -224,7 +224,7 @@ describe("plan-first Central information-action ownership", () => {
       "runner",
       "hardware",
       {
-        definitionId: "onr_v1_050_r-and-d-protocol-files",
+        definitionId: 262,
         title: "R&D Protocol Files",
       },
     );
@@ -239,7 +239,7 @@ describe("plan-first Central information-action ownership", () => {
           source: cardId,
           payload: {
             cardId,
-            sourceDefinitionId: "onr_v1_050_r-and-d-protocol-files",
+            sourceDefinitionId: 262,
           },
         },
       );
@@ -285,7 +285,7 @@ describe("plan-first Central information-action ownership", () => {
       ({
         schemaVersion: "runner-hand-development-evaluation-v4",
         cardInstanceId,
-        definitionId: "onr_v1_050_r-and-d-protocol-files",
+        definitionId: 262,
         cardType: "hardware",
         availability: "legal_now",
         developmentRole: "access_payoff",
@@ -328,7 +328,7 @@ describe("plan-first Central information-action ownership", () => {
   it("does not materialize a known-no-payoff R&D Protocol variant beside an executable direct R&D run", () => {
     resetResidentPlanPortfolioMemory();
     const protocol = visibleCard("rd-protocol", "runner", "hardware", {
-      definitionId: "onr_v1_050_r-and-d-protocol-files",
+      definitionId: 262,
       title: "R&D Protocol Files",
     });
     const protocolRun = legalAction(
@@ -391,7 +391,7 @@ describe("plan-first Central information-action ownership", () => {
   it("keeps an underreserved private-look run blocked in its Central parent", () => {
     resetResidentPlanPortfolioMemory();
     const protocol = visibleCard("rd-protocol", "runner", "hardware", {
-      definitionId: "onr_v1_050_r-and-d-protocol-files",
+      definitionId: 262,
       title: "R&D Protocol Files",
     });
     const protocolRun = legalAction(
@@ -465,7 +465,7 @@ describe("plan-first Central information-action ownership", () => {
     });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_priority_delegated_from:plan:runner.pressure_central:central%3Ard",
+        "plan_priority_delegated_from:pa90fufw9vc5bkshp96ztlryxl",
       ]),
     );
   });
@@ -523,7 +523,7 @@ describe("plan-first Central information-action ownership", () => {
     expect(
       residentPlanPortfolioSnapshot(input)?.instances.find(
         (instance) =>
-          instance.instanceId === "plan:runner.pressure_central:central%3Ard",
+          instance.instanceId === "pa90fufw9vc5bkshp96ztlryxl",
       ),
     ).toMatchObject({
       moduleId: "runner.pressure_central",
@@ -552,6 +552,11 @@ function liveContext(overrides: Record<string, unknown> = {}) {
     buildRunnerEconomyPosture: () => ({
       minimumCreditFloor: 3,
       desiredCreditReserve: 5,
+      creditReservePolicy: {
+        emergencyReserve: 0,
+        contestReserve: 0,
+        remoteScoreThreat: "none",
+      },
       fundingNeed: false,
       evidence: ["test_central_information_route"],
     }),

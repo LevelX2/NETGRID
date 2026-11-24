@@ -28,8 +28,34 @@ describe("post-bid link choice option", () => {
         traceValue: 1,
         runnerLink: 0,
         runnerBid: 0,
+        traceRulesProfile: "classic_blind_corp_ties",
       }),
     ).toBe("trace_link_small");
+  });
+
+  it("skips disabled link and pass options", () => {
+    const choice = postBidChoice([
+      { id: "pass", label: "Pass", selectable: false },
+      {
+        id: "trace_link_disabled",
+        label: "Disabled",
+        selectable: false,
+        metadata: { postBidTraceLinkDelta: 1 },
+      },
+      {
+        id: "trace_link_current",
+        label: "Current",
+        metadata: { postBidTraceLinkDelta: 2 },
+      },
+    ]);
+    expect(
+      selectedPostBidLinkChoiceOptionId(choice, {
+        traceValue: 1,
+        runnerLink: 0,
+        runnerBid: 0,
+        traceRulesProfile: "modern_open",
+      }),
+    ).toBe("trace_link_current");
   });
 
   it("does not infer link deltas from labels without metadata", () => {
@@ -43,6 +69,7 @@ describe("post-bid link choice option", () => {
         traceValue: 1,
         runnerLink: 0,
         runnerBid: 0,
+        traceRulesProfile: "classic_blind_corp_ties",
       }),
     ).toBe("pass");
   });
@@ -50,9 +77,9 @@ describe("post-bid link choice option", () => {
 
 function postBidChoice(options: PendingChoice["options"]): PendingChoice {
   return {
-    choiceId: "trace_1.post_bid_link.1",
+    choiceId: "1.post_bid_link.1",
     side: "runner",
-    source: "trace_post_bid_link:trace_1",
+    source: "trace_post_bid_link:1",
     prompt: "Post-bid Link-Faehigkeit nutzen",
     kind: "select_option",
     options,

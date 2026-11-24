@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type {
   PlayerView,
   TraceSuccessEffect,
@@ -50,7 +51,7 @@ describe("AI input DTO effective ICE run quote contract", () => {
     const view = playerView("corp", baseIce());
     const converted: VisibleCard = {
       instanceId: "converted_agenda",
-      definitionId: "agenda_definition",
+      definitionId: syntheticCardDefinitionId("agenda_definition"),
       known: true,
       type: "agenda",
       owner: "corp",
@@ -126,7 +127,7 @@ describe("AI input DTO effective ICE run quote contract", () => {
     };
     const view = playerView("corp", encounteredIce);
     view.run = {
-      runId: "run_temporary_encounter",
+      runId: 1,
       attackedServerId: "hq",
       phase: "encounter_ice",
       position: { kind: "ice", serverId: "hq", iceIndex: 0 },
@@ -135,7 +136,7 @@ describe("AI input DTO effective ICE run quote contract", () => {
     };
 
     expect(buildInput(view).playerView.run).toMatchObject({
-      runId: "run_temporary_encounter",
+      runId: 1,
       encounteredIce: {
         instanceId: ICE_ID,
         rezzed: false,
@@ -299,7 +300,7 @@ describe("AI input DTO effective ICE run quote contract", () => {
 });
 
 const ICE_ID = "ice-1";
-const ICE_DEFINITION_ID = "ice-definition-1";
+const ICE_DEFINITION_ID = syntheticCardDefinitionId("ice-definition-1");
 const STATE_VERSION = 12;
 
 function validEffectiveRunQuote(): VisibleEffectiveIceRunQuote {
@@ -325,7 +326,7 @@ function validEffectiveRunQuote(): VisibleEffectiveIceRunQuote {
         deflectorCost: 2,
         deflectorAutoBreakIfNoTarget: true,
         breakTags: ["trace", "end_the_run"],
-        sourceDefinitionId: "dynamic-source-definition",
+        sourceDefinitionId: syntheticCardDefinitionId("dynamic-source-definition"),
         sourceTitle: "Dynamic Source",
         dynamicSourceKind: "additional_subroutine",
         unbrokenRunEffect: {
@@ -341,7 +342,7 @@ function validEffectiveRunQuote(): VisibleEffectiveIceRunQuote {
       },
     ],
     breakSubroutineAdditionalCostPerSubroutine: 2,
-    breakSubroutineCostSourceDefinitionIds: ["modifier-z", "modifier-a"],
+    breakSubroutineCostSourceDefinitionIds: [syntheticCardDefinitionId("modifier-z"), syntheticCardDefinitionId("modifier-a")],
     breakSubroutineCostSourceTitles: ["Modifier Z", "Modifier A"],
     encounterTemporaryTraceCredits: 3,
     conditionalEncounterEffects: [
@@ -652,7 +653,7 @@ function playerView(side: "corp" | "runner", ice: VisibleCard): PlayerView {
 function identity(side: "corp" | "runner"): VisibleCard {
   return {
     instanceId: `${side}-identity`,
-    definitionId: `${side}-identity`,
+    definitionId: syntheticCardDefinitionId(side + "-identity"),
     title: `${side} identity`,
     known: true,
     type: "identity",

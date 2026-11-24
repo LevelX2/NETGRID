@@ -1,4 +1,6 @@
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { decisionEventHistory } from "../../decision-event-history";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
+import { validOptionalCardDefinitionIds } from "../../card-definition-id-input";
 import {
   type AiDecisionInput,
   type CardDefinitionId,
@@ -44,6 +46,8 @@ export function readCorpCentralAgendaExposure(
   serverId: CorpCentralDefenseServerId,
   leavingHqCardId?: string,
 ): { expectedPoints: number; maximumPoints: number } | undefined {
+  if (input.side !== "corp" || input.playerView.side !== "corp")
+    return undefined;
   const quote = quotesForCurrentView(input)?.[serverId];
   const cards =
     serverId === "hq"
@@ -224,7 +228,8 @@ function quotesForCurrentView(
     )
       return undefined;
     if (
-      !sortedUnique(quote.sourceDefinitionIds) ||
+      !Array.isArray(quote.sourceDefinitionIds) ||
+      !validOptionalCardDefinitionIds(quote.sourceDefinitionIds) ||
       !sortedUnique(quote.serverBoundEffects.map((effect) => effect.id))
     )
       return undefined;
@@ -292,6 +297,8 @@ function centralInventory(
 export function knownCorpRdDefinitionCounts(
   input: AiDecisionInput,
 ): ReadonlyMap<CardDefinitionId, number> | undefined {
+  if (input.side !== "corp" || input.playerView.side !== "corp")
+    return undefined;
   const snapshot = (input as AiDecisionInputWithDeckCapabilities)
     .ownDeckSnapshot;
   if (!snapshot || snapshot.side !== "corp" || !Array.isArray(snapshot.cards))
@@ -306,7 +313,7 @@ export function knownCorpRdDefinitionCounts(
       remaining.has(entry.cardId)
     )
       return undefined;
-    if (!CARD_DEFINITIONS_BY_ID[entry.cardId]) return undefined;
+    if (!planningCardFactsByDefinitionId(entry.cardId)) return undefined;
     remaining.set(entry.cardId, entry.quantity);
   }
   const archivesCards = canonicalCorpArchives(input);
@@ -433,7 +440,7 @@ function inventoryForDefinitionCounts(
   let importantTrashableCardCount = 0;
   const agendaPointCounts = new Map<number, number>();
   for (const [definitionId, quantity] of definitionCounts) {
-    const definition = CARD_DEFINITIONS_BY_ID[definitionId];
+    const definition = planningCardFactsByDefinitionId(definitionId);
     if (
       !definition ||
       !Number.isSafeInteger(quantity) ||
@@ -564,13 +571,7 @@ function structuredRecentPressure(
 ): { events: number; successful: number } | undefined {
   const turns = new Set<number>();
   let events = 0;
-  const eventsById = new Map(
-    [...input.playerView.publicEvents, ...input.eventTail].map((event) => [
-      event.eventId,
-      event,
-    ]),
-  );
-  for (const event of eventsById.values()) {
+  for (const event of decisionEventHistory(input)) {
     if (
       !Number.isSafeInteger(event.stateVersionAfter) ||
       event.stateVersionAfter > input.playerView.stateVersion

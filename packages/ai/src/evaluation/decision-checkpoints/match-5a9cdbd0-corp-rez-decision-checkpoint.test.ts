@@ -7,7 +7,7 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 describe("match 5a9cdbd0 Corp rez regression", () => {
   it("rezzes free visible ICE on the active central run despite unrelated restricted credit pools", () => {
     const result = runAiDecisionCheckpoint(
-      rezFreeVisibleIceJson as AiDecisionCheckpointV1,
+      rezFreeVisibleIceJson as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result).toMatchObject({ ok: true });

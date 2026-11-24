@@ -18,7 +18,7 @@ type ReconstructedDecisionCapture = {
 
 describe("selfplay cycle 126 decision checkpoints", () => {
   it("ends score-protection backstop staging after two layers without inventing another remote", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       boundedScoreProtectionStagingJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
@@ -36,17 +36,17 @@ describe("selfplay cycle 126 decision checkpoints", () => {
       source: "basic_action",
     });
     expect(selectedAction?.actionId).not.toBe(
-      "corp.install_card.corp_onr_proteus_038_snowbank_3.remote_1.corp_onr_proteus_038_snowbank_3.4",
+      "cc.clj.r1.clj.4",
     );
     expect(selectedAction?.actionId).not.toContain(
-      "corp_onr_v1_296_off-site-backups_1",
+      "c351",
     );
     expect(decision.decisionDebug?.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId:
-        "plan:corp.economy:economy-residual-capacity%3Acorp%3A24",
+        "p37orq2bskzwy1ftnnx6qa79pq",
       leafExecutorInstanceId:
-        "plan:corp.economy:economy-residual-capacity%3Acorp%3A24",
+        "p37orq2bskzwy1ftnnx6qa79pq",
       route: {
         actionId: selectedAction?.actionId,
         actionType: "gain_credit",

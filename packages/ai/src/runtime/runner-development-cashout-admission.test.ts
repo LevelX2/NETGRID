@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 
 import type { RunnerHandDevelopmentEvaluation } from "../runner/hand-development/hand-development-evaluation";
@@ -367,7 +368,7 @@ function development(
   return {
     schemaVersion: "runner-hand-development-evaluation-v4",
     cardInstanceId: "development-1",
-    definitionId: "test-development",
+    definitionId: syntheticCardDefinitionId("test-development"),
     title: "Test Development",
     cardType: "resource",
     availability: "missing_credits",

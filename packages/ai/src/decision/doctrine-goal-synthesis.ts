@@ -1,7 +1,7 @@
 import type {
   DeckDoctrineV2Diagnostic,
   DeckDoctrineV2StrategyDiagnostic,
-} from "../deck-doctrine-strategy";
+} from "../deck-doctrine-diagnostic";
 import type { TacticalGoalLike } from "./semantic-decision-frame";
 
 const DOCTRINE_SCORE_NORMALIZATION_DIVISOR = 10;
@@ -211,27 +211,73 @@ function runnerEconomyEngineGoals(
   return [];
 }
 
+const CORP_SINGLE_DOCTRINE_GOALS: Readonly<
+  Partial<
+    Record<
+      string,
+      {
+        goalId: string;
+        family: string;
+        priority: number;
+        urgency: "high" | "medium";
+        evidence: string;
+      }
+    >
+  >
+> = {
+  "corp.fast_advance": {
+    goalId: "corp.doctrine.fast_advance",
+    family: "corp_scoreline",
+    priority: 805,
+    urgency: "high",
+    evidence: "doctrine_goal:fast_advance",
+  },
+  "corp.ice_tax_glacier": {
+    goalId: "corp.doctrine.ice_tax",
+    family: "corp_ice_defense",
+    priority: 780,
+    urgency: "medium",
+    evidence: "doctrine_goal:ice_tax",
+  },
+  "corp.asset_economy": {
+    goalId: "corp.doctrine.asset_economy",
+    family: "economy",
+    priority: 740,
+    urgency: "medium",
+    evidence: "doctrine_goal:asset_economy",
+  },
+  "corp.ambush_bluff": {
+    goalId: "corp.doctrine.remote_ambush",
+    family: "damage_pressure",
+    priority: 730,
+    urgency: "medium",
+    evidence: "doctrine_goal:remote_ambush",
+  },
+};
+
 function corpDoctrineGoals(
   strategy: DeckDoctrineV2StrategyDiagnostic,
 ): TacticalGoalLike[] {
   if (!hasStrategyAnchor(strategy)) return [];
+  const preset = Object.hasOwn(CORP_SINGLE_DOCTRINE_GOALS, strategy.strategyId)
+    ? CORP_SINGLE_DOCTRINE_GOALS[strategy.strategyId]
+    : undefined;
+  if (preset !== undefined) {
+    return strategy.status === "complete"
+      ? [
+          goal(preset.goalId, preset.family, preset.priority, preset.urgency, [
+            "doctrine_v2:" + strategy.strategyId,
+            "doctrine_status:complete",
+            preset.evidence,
+          ]),
+        ]
+      : corpPartialSetupGoal(strategy, preset.goalId + "_setup");
+  }
   if (strategy.strategyId === "corp.remote_scoring") {
     return corpRemoteScoringGoals(strategy);
   }
-  if (strategy.strategyId === "corp.fast_advance") {
-    return corpFastAdvanceGoals(strategy);
-  }
-  if (strategy.strategyId === "corp.ice_tax_glacier") {
-    return corpIceTaxGoals(strategy);
-  }
-  if (strategy.strategyId === "corp.asset_economy") {
-    return corpAssetEconomyGoals(strategy);
-  }
   if (strategy.strategyId === "corp.central_stabilize") {
     return corpCentralDefenseGoals(strategy);
-  }
-  if (strategy.strategyId === "corp.ambush_bluff") {
-    return corpRemoteAmbushGoals(strategy);
   }
   if (
     strategy.strategyId === "corp.tag_trace_punish" &&
@@ -297,51 +343,6 @@ function corpRemoteScoringGoals(
     ];
   }
   return [];
-}
-
-function corpFastAdvanceGoals(
-  strategy: DeckDoctrineV2StrategyDiagnostic,
-): TacticalGoalLike[] {
-  if (strategy.status === "complete") {
-    return [
-      goal("corp.doctrine.fast_advance", "corp_scoreline", 805, "high", [
-        "doctrine_v2:corp.fast_advance",
-        "doctrine_status:complete",
-        "doctrine_goal:fast_advance",
-      ]),
-    ];
-  }
-  return corpPartialSetupGoal(strategy, "corp.doctrine.fast_advance_setup");
-}
-
-function corpIceTaxGoals(
-  strategy: DeckDoctrineV2StrategyDiagnostic,
-): TacticalGoalLike[] {
-  if (strategy.status === "complete") {
-    return [
-      goal("corp.doctrine.ice_tax", "corp_ice_defense", 780, "medium", [
-        "doctrine_v2:corp.ice_tax_glacier",
-        "doctrine_status:complete",
-        "doctrine_goal:ice_tax",
-      ]),
-    ];
-  }
-  return corpPartialSetupGoal(strategy, "corp.doctrine.ice_tax_setup");
-}
-
-function corpAssetEconomyGoals(
-  strategy: DeckDoctrineV2StrategyDiagnostic,
-): TacticalGoalLike[] {
-  if (strategy.status === "complete") {
-    return [
-      goal("corp.doctrine.asset_economy", "economy", 740, "medium", [
-        "doctrine_v2:corp.asset_economy",
-        "doctrine_status:complete",
-        "doctrine_goal:asset_economy",
-      ]),
-    ];
-  }
-  return corpPartialSetupGoal(strategy, "corp.doctrine.asset_economy_setup");
 }
 
 function corpCentralDefenseGoals(
@@ -414,21 +415,6 @@ function partialCorpCentralDefenseGoals(
         ]
       : []),
   ];
-}
-
-function corpRemoteAmbushGoals(
-  strategy: DeckDoctrineV2StrategyDiagnostic,
-): TacticalGoalLike[] {
-  if (strategy.status === "complete") {
-    return [
-      goal("corp.doctrine.remote_ambush", "damage_pressure", 730, "medium", [
-        "doctrine_v2:corp.ambush_bluff",
-        "doctrine_status:complete",
-        "doctrine_goal:remote_ambush",
-      ]),
-    ];
-  }
-  return corpPartialSetupGoal(strategy, "corp.doctrine.remote_ambush_setup");
 }
 
 function corpPartialSetupGoal(

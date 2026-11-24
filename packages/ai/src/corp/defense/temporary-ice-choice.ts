@@ -1,5 +1,7 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import { corpCurrentRunAccessServerId } from "./corp-central-defense-facts-adapter";
 import { selectableChoiceOptions } from "../../runtime/choice-option";
+import { exactCurrentChoiceAction } from "../../runtime/plan-bound-choice-contract";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 
 type PendingChoice = NonNullable<
@@ -18,38 +20,34 @@ export function currentDelayedSuccessChoice(
     );
   const sourceCardId = source?.[1];
   const serverId = source?.[2];
-  const { stateVersion, timingPoint } = input.playerView;
-  const [requirement] = action.choiceRequirements ?? [];
+  const { stateVersion } = input.playerView;
+  const sourceCard = input.playerView.servers
+    .find((server) => server.id === serverId)
+    ?.root.find(
+      (card) =>
+        card.instanceId === sourceCardId &&
+        card.known &&
+        card.rezzed === true &&
+        card.definitionId === 570 &&
+        card.definitionId === choice.sourceCardDefinitionId,
+    );
   const options = selectableChoiceOptions(choice.options);
-  const optionIds = new Set(options.map(({ id }) => id));
   if (
     input.side !== "corp" ||
     !sourceCardId ||
     !serverId ||
     source?.[3] !== String(stateVersion) ||
-    input.playerView.run?.attackedServerId !== serverId ||
-    choice.side !== "corp" ||
+    choice.sourceCardInstanceId !== sourceCardId ||
+    !sourceCard ||
+    input.playerView.run?.position?.kind !== "server" ||
     choice.kind !== "select_option" ||
     choice.visibility !== "hidden_info_barrier" ||
-    choice.stateVersion !== stateVersion ||
     choice.minSelections !== 1 ||
     choice.maxSelections !== 1 ||
-    action.side !== "corp" ||
-    action.type !== "resolve_choice" ||
-    action.source !== "game_rule" ||
-    action.timingPoint !== timingPoint ||
-    action.expiresAtStateVersion !== stateVersion ||
-    action.choiceRequirements?.length !== 1 ||
-    requirement?.choiceId !== choice.choiceId ||
-    requirement.minSelections !== 1 ||
-    requirement.maxSelections !== 1 ||
-    optionIds.size !== options.length ||
-    requirement.optionIds.length !== options.length ||
-    new Set(requirement.optionIds).size !== optionIds.size ||
-    !requirement.optionIds.every((id) => optionIds.has(id))
+    exactCurrentChoiceAction(input, choice) !== action
   )
     return undefined;
-  return { sourceCardId, serverId, options };
+  return { sourceCard, sourceCardId, serverId, options };
 }
 
 /** The caller sorted legal effect-bearing choices by their Engine cost.
@@ -59,12 +57,12 @@ export function preferUnbreakableEquivalentTemporaryIce(
   input: AiDecisionInput,
   options: readonly Option[],
 ): Option | null | undefined {
-  const attackedServerId = input.playerView.run?.attackedServerId;
+  const accessServerId = corpCurrentRunAccessServerId(input);
   const agendaExposed =
     input.playerView.servers
-      .find((server) => server.id === attackedServerId)
+      .find((server) => server.id === accessServerId)
       ?.root.some((card) => card.known && card.type === "agenda") ||
-    (attackedServerId === "hq" &&
+    (accessServerId === "hq" &&
       input.playerView.own.gripOrHq.some(
         (card) => card.known && card.type === "agenda",
       ));
@@ -129,7 +127,7 @@ export function preferUnbreakableEquivalentTemporaryIce(
           .filter((a) => a.type === "resolve_choice")
           .map((a) => a.actionId),
         owner: "plan_module",
-        planInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+        planInstanceId: "penw02zfrkklof54c2nuye5att",
         removalCondition:
           "Provide the current Engine temporary-encounter break quote bound to this option, run, fort and StateVersion.",
       });

@@ -1,16 +1,11 @@
-import type {
-  AiDecisionInput,
-  AiDecisionScoreComponent,
-  LegalAction,
-} from "@netgrid/shared";
+import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import {
   runnerMultiRunEventAssessment,
   type RunnerMultiRunEventAssessment,
 } from "./runner-multi-run-event-assessment";
 import { runnerMultiRunEventExclusion } from "./runner-multi-run-event-exclusion";
-import { runnerMultiRunEventScoreComponent as buildRunnerMultiRunEventScoreComponent } from "./runner-multi-run-event-score";
-import { decisionDerivedValue } from "./decision-derived-cache";
+import { decisionDerivedValue } from "../decision-derived-cache";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 
 export type RunnerMultiRunContextDependencies<
@@ -20,7 +15,7 @@ export type RunnerMultiRunContextDependencies<
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string | undefined;
+  ) => number | undefined | undefined;
   targetServerId: (action: LegalAction) => string | undefined;
   payoffClass: (evaluation: RunnerRunTargetEvaluation | undefined) => string;
   canTakeRun: (evaluation: RunnerRunTargetEvaluation | undefined) => boolean;
@@ -50,10 +45,6 @@ export type RunnerMultiRunContext = {
     input: AiDecisionInput,
     action: LegalAction,
   ) => RunnerMultiRunEventAssessment | undefined;
-  runnerMultiRunEventScoreComponent: (
-    input: AiDecisionInput,
-    action: LegalAction,
-  ) => AiDecisionScoreComponent | undefined;
   runnerMultiRunTargetEvaluation: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -124,6 +115,28 @@ export function createRunnerMultiRunContext<
     });
   }
 
+  function scopedRunTargets(
+    input: AiDecisionInput,
+    offeredAction: LegalAction,
+  ) {
+    const legalActions = [offeredAction];
+    const deckCapabilities = dependencies.deckCapabilitiesForInput(input);
+    return dependencies
+      .runTargets({
+        input: {
+          ...input,
+          legalActions,
+          playerView: { ...input.playerView, legalActions },
+        },
+        deckCapabilities,
+        strategicIntent: dependencies.strategicIntentForInput(
+          input,
+          deckCapabilities,
+        ),
+      })
+      .filter((evaluation) => evaluation.actionId === offeredAction.actionId);
+  }
+
   function runnerMultiRunTargetEvaluation(
     input: AiDecisionInput,
     action: LegalAction,
@@ -137,24 +150,9 @@ export function createRunnerMultiRunContext<
           serverId: targetServerId,
         },
       };
-      const scopedInput: AiDecisionInput = {
-        ...input,
-        legalActions: [runAction],
-        playerView: {
-          ...input.playerView,
-          legalActions: [runAction],
-        },
-      };
-      const deckCapabilities = dependencies.deckCapabilitiesForInput(input);
-      const strategicIntent = dependencies.strategicIntentForInput(
-        input,
-        deckCapabilities,
+      return scopedRunTargets(input, runAction).find(
+        (evaluation) => evaluation.targetServerId === targetServerId,
       );
-      return dependencies.runTargets({
-        input: scopedInput,
-        deckCapabilities,
-        strategicIntent,
-      })[0];
     });
   }
 
@@ -184,26 +182,7 @@ export function createRunnerMultiRunContext<
       input,
       action,
       actionWithoutTargetCacheKey,
-      () => {
-        const scopedInput: AiDecisionInput = {
-          ...input,
-          legalActions: [action],
-          playerView: {
-            ...input.playerView,
-            legalActions: [action],
-          },
-        };
-        const deckCapabilities = dependencies.deckCapabilitiesForInput(input);
-        const strategicIntent = dependencies.strategicIntentForInput(
-          input,
-          deckCapabilities,
-        );
-        return dependencies.runTargets({
-          input: scopedInput,
-          deckCapabilities,
-          strategicIntent,
-        })[0];
-      },
+      () => scopedRunTargets(input, action)[0],
     );
   }
 
@@ -211,8 +190,6 @@ export function createRunnerMultiRunContext<
     semanticRuntimeRunnerMultiRunEventExclusion: (input, action) =>
       runnerMultiRunEventExclusion(input, action, { assessment }),
     runnerMultiRunEventAssessment: assessment,
-    runnerMultiRunEventScoreComponent: (input, action) =>
-      buildRunnerMultiRunEventScoreComponent(input, action, { assessment }),
     runnerMultiRunTargetEvaluation,
     semanticRuntimeRunnerRunTargetEvaluation,
     semanticRuntimeRunnerRunTargetEvaluationForAction,

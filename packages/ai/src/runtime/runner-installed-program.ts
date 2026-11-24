@@ -1,4 +1,4 @@
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { VisibleCard } from "@netgrid/shared";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 
@@ -85,16 +85,16 @@ export function runnerInstalledProgramTrashLoss(
   if (root.hostedOn) {
     const host = byId.get(root.hostedOn)!;
     const spec = host.definitionId
-      ? cardSpecPlanningCardByDefinitionId(host.definitionId)
+      ? planningCardByDefinitionId(host.definitionId)
       : undefined;
     if (!spec) fail("A bound program host needs its canonical CardSpec.", true);
     const daemon =
-      spec!.definition.type === "program" &&
-      spec!.definition.subtypes?.some(
+      spec!.cardType === "program" &&
+      spec!.engine.characteristics.subtypes?.some(
         (subtype) => subtype.toLowerCase().replaceAll("-", "_") === "daemon",
       );
     const replacesTrashWithHosting =
-      spec!.planning.engine.runnerUtilityLongtail?.kind ===
+      spec!.engine.runnerUtilityLongtail?.kind ===
       "replace_installed_program_trash_with_host_on_source";
     if (daemon || replacesTrashWithHosting) memoryCost = 0;
   }

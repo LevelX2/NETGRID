@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "./plan-instance";
 import type { PlanInstance } from "./plan-kernel-types";
 import type {
   RunnerPressureSignal,
@@ -15,14 +16,20 @@ export function runnerRunFundingParentHasCurrentNeed(
     parents.centralPressure.some(
       (signal) =>
         need.parentPlanInstanceId ===
-          `plan:runner.pressure_central:${encodeURIComponent(signal.pressureId)}` &&
+          planInstanceIdForProposal({
+            moduleId: "runner.pressure_central",
+            dedupeKey: signal.pressureId,
+          }) &&
         signal.supportNeedId === need.needId &&
         signal.marginalValue > 0,
     ) ||
     parents.remoteContests.some(
       (signal) =>
         need.parentPlanInstanceId ===
-          `plan:runner.contest_remote:${encodeURIComponent(signal.contestId)}` &&
+          planInstanceIdForProposal({
+            moduleId: "runner.contest_remote",
+            dedupeKey: signal.contestId,
+          }) &&
         signal.supportNeedId === need.needId &&
         signal.marginalValue > 0,
     )

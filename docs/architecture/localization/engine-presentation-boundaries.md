@@ -43,6 +43,15 @@ Regeln, LegalActions, Sichtbarkeit, RNG, Match-StateHash und Replay bleiben
 unberührt. Snapshot-Validierungsmetadaten sind keine zweite Regelautorität;
 aktuelle V0-Fixtures dürfen bei einer Vertragsumstellung neu erzeugt werden.
 
+## Bestätigung aufgedeckter ICE
+
+Die Bestätigungsansicht für Ice and Data’s Guide to the Net zeigt die
+öffentlichen ICE-Definitionen in der Reihenfolge der aufgedeckten Server.
+Jede Position behält ihre eigene Karte, auch bei gleicher Definition. Auf dem
+Spielbrett werden die öffentlichen Positionen nur während der offenen Ansicht
+und in der zum Ereignis gehörenden Zustandsversion aufgedeckt. „Gesehen“
+bestätigt die Ansicht lokal.
+
 ## Semantische Chronikdetails und Regressionen
 
 `formatChronicleEvent` verwendet bei gesetztem `context.translate` direkt
@@ -74,6 +83,25 @@ verlorenen Credits aus den beiden öffentlichen Ergebnisfeldern.
 Geplante Mengen sind kein Ergebnis: Bei unterbrochenem Kartenziehen zählt
 `resolvedEffects[].amount`, nicht die ursprünglich geplante `drawCardsAmount`.
 Verzögertes Agenda-Stehlen darf noch keine gewonnenen Agendapunkte melden.
+Die Chronik zeigt beim Jack-out den öffentlichen Server und die nächste
+ICE-Position beziehungsweise den Ausstieg vor dem Zugriff im Titel. Sie
+führt den Würfelwurf von Rio de Janeiro City Grid zusammen mit der passierten
+ICE-Position und dem Run-Ergebnis als eigenen Eintrag neben den Subroutinen.
+Auf dem Spielbrett zeigt eine Stärkeplakette bei ICE mit gedrucktem Zahlenwert
+die effektive Änderung gegenüber dem Aufdruck. Der ICE-Marker bleibt in den
+Kartendetails sichtbar.
+
+Die Chronik blendet die Zugriffsbestätigung `decline_trash` aus und zeigt
+öffentliche Effekte desselben Ereignisses weiterhin als eigene Einträge.
+Der gemeinsame Formatter beschreibt die Aktion als Zugriffsabschluss, da sie
+auch bei Zugriffen ohne legale Trash-Option verwendet wird.
+
+Kartenname und Tooltip verwenden die tatsächlich betroffene oder auslösende
+Karte aus den sichtbaren Ereignisfeldern. Ein mit dem Spieleintrag
+zusammengefasster Karteneffekt darf dessen Namen über dieselbe Definitions-ID
+beisteuern. Beim Rezzen, Werten oder Trashen durch einen Folgeeffekt zählt
+die Karte des Effektergebnisses. Der Runstart von Social Engineering steht
+in der öffentlich aufgelösten Zielwahl, sofern sie denselben Server nennt.
 
 Nur öffentliche oder für die Betrachtungsseite freigegebene Ereignisfelder
 sind Datenquellen. Texte aus `label`, Regeltexten oder KI-Begründungen werden

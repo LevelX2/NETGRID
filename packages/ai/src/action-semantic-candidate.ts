@@ -180,6 +180,14 @@ export function buildNeutralActionSemanticCandidate(
   action: LegalAction,
   options: BuildNeutralActionSemanticCandidateOptions = {},
 ): ActionSemanticCandidate {
+  if (
+    action.visibility === "private_to_actor" &&
+    options.observerSide !== undefined &&
+    options.observerSide !== "system" &&
+    options.observerSide !== action.side
+  ) {
+    throw new Error("actor_private_legal_action_projected_for_other_side");
+  }
   const originalPayloadKeys = Object.keys(action.payload ?? {}).sort();
 
   return {

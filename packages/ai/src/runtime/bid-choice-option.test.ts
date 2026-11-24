@@ -1,4 +1,15 @@
-import type { AiDecisionInput } from "@netgrid/shared";
+import {
+  applyAction,
+  createGameAfterSetup,
+  getLegalActions,
+  getPlayerView,
+} from "@netgrid/engine";
+import {
+  ORIGINALSET_DEFAULT_DECKS,
+  type AiDecisionInput,
+  type LegalAction,
+} from "@netgrid/shared";
+import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { describe, expect, it } from "vitest";
 
 import { selectedBidChoiceOptionId } from "./bid-choice-option";
@@ -18,6 +29,14 @@ describe("selectedBidChoiceOptionId", () => {
     ).toBe("bid_0");
   });
 
+  it("does not select a disabled bid option", () => {
+    const choice = bidChoice("trace:corp", [0, 1, 2, 3]);
+    choice.options[0]!.selectable = false;
+    expect(selectedBidChoiceOptionId(input("corp", "hard"), choice, {})).toBe(
+      "bid_1",
+    );
+  });
+
   it("uses the minimum guaranteed bid for the historical visible punish window", () => {
     expect(
       selectedBidChoiceOptionId(
@@ -26,8 +45,8 @@ describe("selectedBidChoiceOptionId", () => {
           ownClicks: 1,
           runnerCredits: 6,
           hq: [
-            card("closed", "onr_v1_285_closed-accounts", 1),
-            card("scorched", "onr_v1_302_scorched-earth", 3),
+            card("closed", 497, 1),
+            card("scorched", 514, 3),
           ],
         }),
         bidChoice("trace:corp", range(0, 11)),
@@ -57,9 +76,9 @@ describe("selectedBidChoiceOptionId", () => {
           ownCredits: 8,
           ownClicks: 0,
           runnerCredits: 0,
-          encounteredIceDefinitionId: "onr_v1_264_rex",
+          encounteredIceDefinitionId: 476,
         }),
-        bidChoice("trace:run_1.rex.0.trace", range(0, 5)),
+        bidChoice("trace:2", range(0, 5)),
         { traceLimit: 5, runnerLink: 0 },
       ),
     ).toBe("bid_0");
@@ -72,9 +91,9 @@ describe("selectedBidChoiceOptionId", () => {
           ownCredits: 8,
           ownClicks: 0,
           runnerCredits: 11,
-          encounteredIceDefinitionId: "onr_v1_264_rex",
+          encounteredIceDefinitionId: 476,
         }),
-        bidChoice("trace:run_1.rex.0.trace", range(0, 8)),
+        bidChoice("trace:2", range(0, 8)),
         { traceLimit: 5, runnerLink: 0 },
       ),
     ).toBe("bid_0");
@@ -87,7 +106,7 @@ describe("selectedBidChoiceOptionId", () => {
           ownCredits: 8,
           ownClicks: 0,
           runnerCredits: 5,
-          encounteredIceDefinitionId: "onr_v1_284_chance-observation",
+          encounteredIceDefinitionId: 496,
         }),
         bidChoice("trace:chance-observation", range(0, 5)),
         { traceLimit: 5, runnerLink: 0 },
@@ -102,7 +121,7 @@ describe("selectedBidChoiceOptionId", () => {
           ownCredits: 7,
           ownClicks: 1,
           runnerCredits: 11,
-          hq: [card("closed", "onr_v1_285_closed-accounts", 1)],
+          hq: [card("closed", 497, 1)],
         }),
         bidChoice("trace:corp", range(0, 11)),
         { traceLimit: 5, runnerLink: 0 },
@@ -117,7 +136,7 @@ describe("selectedBidChoiceOptionId", () => {
           ownCredits: 8,
           ownClicks: 1,
           runnerCredits: 0,
-          hq: [card("closed", "onr_v1_285_closed-accounts", 1)],
+          hq: [card("closed", 497, 1)],
         }),
         bidChoice("trace:corp", range(0, 5)),
         { traceLimit: 5, runnerLink: 0 },
@@ -132,7 +151,7 @@ describe("selectedBidChoiceOptionId", () => {
           ownCredits: 18,
           ownClicks: 0,
           runnerCredits: 11,
-          hq: [card("closed", "onr_v1_285_closed-accounts", 1)],
+          hq: [card("closed", 497, 1)],
         }),
         bidChoice("trace:corp", range(0, 11)),
         { traceLimit: 5, runnerLink: 0 },
@@ -154,18 +173,102 @@ describe("selectedBidChoiceOptionId", () => {
     ).toThrow("invalid_support_graph");
   });
 
-  it("uses the highest legal Runner bid against a hidden secret-spend comparison", () => {
-    expect(
-      selectedBidChoiceOptionId(
-        input("runner", "normal"),
-        bidChoice(
-          "card_implementation.secret_spend_compare:run:ice:0",
-          range(0, 2),
+  it.each(["corp", "runner"] as const)(
+    "spends zero as %s in the secret comparison instead of applying trace policy",
+    (side) => {
+      expect(
+        selectedBidChoiceOptionId(
+          input(side, "normal"),
+          bidChoice(
+            "card_implementation.secret_spend_compare:run:ice:0",
+            range(0, 2),
+          ),
+          {},
         ),
+      ).toBe("bid_0");
+    },
+  );
+
+  it.each([0, 1, 2])(
+    "keeps the Engine run continuing after a hidden Corp bid of %i",
+    (corpBid) => {
+      const definitionId = 484;
+      const corp = ORIGINALSET_DEFAULT_DECKS.corp;
+      let state = createGameAfterSetup({
+        seed: "secret-compare-runtime-choice",
+        corpDeck: {
+          ...corp,
+          cards: [...corp.cards, { id: definitionId, quantity: 1 }],
+        },
+      });
+      state.activeSide = "runner";
+      state.phase = "runner_action_phase";
+      state.timingPoint = "runner_action.main";
+      RealEngineFixtureBuilder.forState(state)
+        .withCorpCredits(5)
+        .withRunnerCredits(5)
+        .withRunnerClicks(4)
+        .withRezzedCorpIceOnServer("rd", definitionId);
+      function apply(action: LegalAction, selectedOptionIds?: string[]) {
+        const result = applyAction(state, {
+          matchId: state.matchId,
+          side: action.side,
+          actionId: action.actionId,
+          clientKnownStateVersion: state.stateVersion,
+          ...(selectedOptionIds
+            ? {
+                selectedChoices: {
+                  choiceId: state.pendingChoice!.choiceId,
+                  selectedOptionIds,
+                },
+              }
+            : {}),
+        });
+        if (!result.ok) throw Error(result.error.message);
+        state = result.state;
+      }
+      const start = getLegalActions(state, "runner").find(
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
+      );
+      expect(start).toBeDefined();
+      apply(start!);
+      for (let i = 0; i < 5 && !state.pendingChoice; i += 1) {
+        const advance = getLegalActions(state, state.activeSide).find(
+          (action) =>
+            action.type === "continue_run" || action.type === "decline_rez",
+        );
+        expect(advance).toBeDefined();
+        apply(advance!);
+      }
+      expect(
+        state.pendingChoice?.source.startsWith(
+          "card_implementation.secret_spend_compare:",
+        ),
+      ).toBe(true);
+      const corpChoice = getLegalActions(state, "corp").find(
+        (action) => action.type === "resolve_choice",
+      )!;
+      apply(corpChoice, ["bid_" + corpBid]);
+      const publicInput = {
+        ...input("runner", "hard"),
+        playerView: getPlayerView(state, "runner"),
+        legalActions: getLegalActions(state, "runner"),
+      };
+      const runnerChoice = publicInput.legalActions.find(
+        (action) => action.type === "resolve_choice",
+      )!;
+      const selected = selectedBidChoiceOptionId(
+        publicInput,
+        publicInput.playerView.pendingChoice!,
         {},
-      ),
-    ).toBe("bid_2");
-  });
+      );
+      expect(selected).toBe("bid_0");
+      apply(runnerChoice, [selected!]);
+      expect(state.run).toBeDefined();
+      expect(state.runner.credits).toBe(5);
+    },
+  );
 
   it("pays the exact visible Seed-7 trace guarantee when the Corp cannot bid", () => {
     expect(
@@ -173,7 +276,7 @@ describe("selectedBidChoiceOptionId", () => {
         input("runner", "normal", {
           ownCredits: 6,
           runnerCredits: 0,
-          encounteredIceDefinitionId: "onr_v1_246_fragmentation-storm",
+          encounteredIceDefinitionId: 458,
         }),
         bidChoice("trace:seed7.fragmentation-storm", range(0, 6)),
         {
@@ -181,7 +284,7 @@ describe("selectedBidChoiceOptionId", () => {
           traceLimit: 4,
           runnerLink: 0,
           traceRulesProfile: "modern_open",
-          sourceDefinitionId: "onr_v1_246_fragmentation-storm",
+          sourceDefinitionId: 458,
         },
       ),
     ).toBe("bid_4");
@@ -196,7 +299,7 @@ function input(
     ownClicks?: number;
     runnerCredits?: number;
     hq?: Array<Record<string, unknown>>;
-    encounteredIceDefinitionId?: string;
+    encounteredIceDefinitionId?: number;
   } = {},
 ): AiDecisionInput {
   return {
@@ -250,7 +353,7 @@ function input(
   } as unknown as AiDecisionInput;
 }
 
-function card(instanceId: string, definitionId: string, cost: number) {
+function card(instanceId: string, definitionId: number, cost: number) {
   return {
     instanceId,
     definitionId,

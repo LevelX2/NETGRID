@@ -26,10 +26,10 @@ it("projects the known hand gain before the private defense-draw boundary", () =
   );
   const before = JSON.stringify(input.playerView);
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("corp.draw_card");
+  expect(decision.actionId).toBe("c8");
   const plan = decision.decisionDebug!.planFirstDecision!;
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:corp.defend_servers:server-defense-portfolio",
+    "penw02zfrkklof54c2nuye5att",
   );
   expect(plan.leafExecutorInstanceId).toBe(plan.rootPlanInstanceId);
   expect(plan.route).toMatchObject({

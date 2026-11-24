@@ -14,15 +14,15 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("match 5285 runner harmful non-ETR break decision checkpoint", () => {
   it("keeps terminal remote contest ownership with a payable full-break continuation", () => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(harmfulNonEtrBreakJson) as AiDecisionCheckpointV1,
+      structuredClone(harmfulNonEtrBreakJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     expect(result.decision?.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-      leafExecutorInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      leafExecutorInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       selectedStep: {
-        planInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+        planInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       },
     });
   });
@@ -30,7 +30,7 @@ describe("match 5285 runner harmful non-ETR break decision checkpoint", () => {
   it("executes the quoted ten-credit route and preserves the hand and run owner through access", () => {
     const checkpoint = structuredClone(
       harmfulNonEtrBreakJson,
-    ) as AiDecisionCheckpointV1;
+    ) as unknown as AiDecisionCheckpointV1;
     const start = runAiDecisionCheckpoint(checkpoint);
     expect(start.ok, start.message).toBe(true);
     let state = checkpoint.engine.testOnlyGameState;
@@ -52,7 +52,7 @@ describe("match 5285 runner harmful non-ETR break decision checkpoint", () => {
         const incomplete = structuredClone(input);
         for (const action of incomplete.legalActions) {
           if (action.payload?.encounterContinue === true)
-            delete action.payload.encounterSubroutineIds;
+            delete action.encounterSubroutineIds;
         }
         expect(() =>
           currentEncounterUnbrokenSubroutineIndexes(incomplete),
@@ -112,8 +112,8 @@ describe("match 5285 runner harmful non-ETR break decision checkpoint", () => {
     expect(creditsSpent).toBe(10);
     expect(state.runner.credits).toBe(14);
     expect(breaks).toEqual([
-      { iceId: "corp_onr_v1_234_data-darts_1", index: 0 },
-      { iceId: "corp_onr_v1_234_data-darts_1", index: 1 },
+      { iceId: "c2r9", index: 0 },
+      { iceId: "c2r9", index: 1 },
     ]);
   });
 
@@ -127,7 +127,7 @@ describe("match 5285 runner harmful non-ETR break decision checkpoint", () => {
   ])("revalidates the complete live continuation: %s", (kind) => {
     const checkpoint = structuredClone(
       harmfulNonEtrBreakJson,
-    ) as AiDecisionCheckpointV1;
+    ) as unknown as AiDecisionCheckpointV1;
     const start = runAiDecisionCheckpoint(checkpoint);
     const state = applyDecision(
       checkpoint.engine.testOnlyGameState,
@@ -135,7 +135,7 @@ describe("match 5285 runner harmful non-ETR break decision checkpoint", () => {
     );
     const input = nextInput(state, checkpoint);
     const next = input.playerView.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     )!.ice[0]!;
     if (kind === "unknown") {
       next.known = false;

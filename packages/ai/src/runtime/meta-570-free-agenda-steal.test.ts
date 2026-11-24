@@ -14,6 +14,7 @@ import { buildAiDecisionInput } from "./ai-decision-input";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import { restoreAiRuntimeCheckpoint } from "../evaluation/decision-checkpoints/runtime-checkpoint";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
+import { buildPlanningStateIdentity } from "../plans/turn-planning-contracts";
 import { runnerFreeAgendaStealForCurrentAccess } from "../runner/run-window/run-window-action-facts";
 
 afterEach(resetResidentPlanPortfolioMemory);
@@ -40,6 +41,7 @@ function original() {
     ...checkpoint.input,
     ...buildAiDecisionInputDto(checkpoint.input),
   } as AiDecisionInputWithDeckCapabilities;
+  input.planningStateIdentity = buildPlanningStateIdentity(input);
   restoreAiRuntimeCheckpoint(
     input,
     input.ownDeckSnapshot!.deckSnapshotId,
@@ -93,7 +95,7 @@ it("converts the original free winning access without trashing and running Archi
   expect(after.action.costs).toEqual([]);
   expect(
     after.decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-  ).toBe("plan:runner.pressure_central:central%3Ahq");
+  ).toBe("pa7nez1ioecg7mf06q1uwqq57o");
   expect(getPlayerView(after.state, "runner")).toMatchObject({
     winner: "runner",
     own: { agendaPoints: 8 },
@@ -101,8 +103,8 @@ it("converts the original free winning access without trashing and running Archi
 });
 
 it.each([
-  "onr_v1_207_netwatch-operations-office",
-  "onr_v1_205_main-office-relocation",
+  419,
+  417,
 ])(
   "keeps the free agenda gain over virus trash without a terminal or card-name bonus: %s",
   (definitionId) => {

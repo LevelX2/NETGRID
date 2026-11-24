@@ -6,7 +6,7 @@ import type {
   PlanModule,
   PlanSchedulerContext,
 } from "./plan-scheduler";
-import { isStandardEndTurnCandidate } from "./plan-scheduler";
+import { isStandardEndTurnCandidate } from "./plan-early-end-turn";
 
 type TurnCompletionState = {
   kind: "turn_completion";
@@ -33,9 +33,7 @@ export function createTurnCompletionPlanModule(side: Side): PlanModule {
       ];
     },
     assess: (instance, context, portfolio) => {
-      const candidates = standardEndTurnCandidates(context);
-      const routeExists =
-        candidates.length > 0 && turnCompletionIsAdmissible(context);
+      const routeExists = completionCandidates(instance, context).length > 0;
       return completionAssessment(
         instance,
         routeExists,
@@ -43,7 +41,6 @@ export function createTurnCompletionPlanModule(side: Side): PlanModule {
       );
     },
     materialize: (instance, _assessment, context) => {
-      const current = completionState(instance);
       return {
         step: {
           stepId: `${instance.instanceId}:complete_turn`,
@@ -54,11 +51,9 @@ export function createTurnCompletionPlanModule(side: Side): PlanModule {
           purpose:
             "Complete the turn after every productive LegalAction route is exhausted.",
         },
-        candidates: standardEndTurnCandidates(context)
-          .filter((candidate) =>
-            current.standardEndTurnActionIds.includes(candidate.actionId),
-          )
-          .map((candidate) => ({ candidate, stepValue: -10_000 })),
+        candidates: completionCandidates(instance, context).map(
+          (candidate) => ({ candidate, stepValue: -10_000 }),
+        ),
       } satisfies PlanMaterialization;
     },
   };
@@ -80,7 +75,23 @@ function turnCompletionIsAdmissible(context: PlanSchedulerContext): boolean {
 }
 
 function standardEndTurnCandidates(context: PlanSchedulerContext) {
-  return context.actionCandidates.filter(isStandardEndTurnCandidate);
+  return context.actionCandidates.filter(
+    (candidate) =>
+      isStandardEndTurnCandidate(candidate) &&
+      candidate.actorSide === context.input.side &&
+      candidate.stateVersion === context.input.playerView.stateVersion,
+  );
+}
+
+function completionCandidates(
+  instance: PlanInstance,
+  context: PlanSchedulerContext,
+) {
+  if (!turnCompletionIsAdmissible(context)) return [];
+  const current = completionState(instance);
+  return standardEndTurnCandidates(context).filter((candidate) =>
+    current.standardEndTurnActionIds.includes(candidate.actionId),
+  );
 }
 
 function completionProposal(

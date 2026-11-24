@@ -30,7 +30,7 @@ export type FundingRouteStep = {
   netLiquidCreditGain: number;
   creditRestriction: CreditRestriction;
   reliability: FundingRouteReliability;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   evidence: string[];
 };
 
@@ -70,7 +70,7 @@ export type FutureFundingProjection = {
   earliestOwnTurnOffset: 1 | 2 | 3;
   reliability: FundingRouteReliability;
   requiredCurrentActionId?: string;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   evidence?: readonly string[];
 };
 
@@ -95,8 +95,8 @@ export type SearchFundingRoutesParams = {
 export type PaymentWindowFundingSetup = {
   actionId: string;
   sourceCardInstanceId: string;
-  sourceDefinitionId: string;
-  capabilityId: string;
+  sourceDefinitionId: number;
+  capabilityId: number;
   installClickCost: number;
   installCreditCost: number;
   activationCreditCost: number;
@@ -116,8 +116,6 @@ type RouteOption = {
   steps: FundingRouteStep[];
   currentTurnClickCost: number;
   eligibleCreditDelta: number;
-  generalCreditDelta: number;
-  creditCost: number;
   reliability: FundingRouteReliability;
   maximumTurnOffset: 0 | 1 | 2 | 3;
   maximumUses: number;
@@ -210,21 +208,35 @@ export function searchFundingRoutes(
       const optionUseCount = state.optionUseCounts.get(option.optionId) ?? 0;
       if (optionUseCount >= option.maximumUses) continue;
       if (option.currentTurnClickCost > state.remainingClicks) continue;
-      if (option.creditCost > state.generalCredits) continue;
-      if (
-        option.completesDemandOnly &&
-        state.eligibleCredits + option.eligibleCreditDelta <
-          params.demand.targetCredits
-      )
-        continue;
       if (!deadlineAllows(params.demand.deadline, option.maximumTurnOffset)) {
         continue;
       }
       if (state.steps.length + option.steps.length > maxSteps) continue;
+      if (option.completesDemandOnly && state.maximumTurnOffset > 0) continue;
+      const actionId = option.steps.find(
+        (step) => step.kind === "legal_action",
+      )?.actionId;
+      if (actionId && state.steps.some((step) => step.actionId === actionId)) {
+        const repeatableFromSameOption =
+          option.optionId === "action:" + actionId && optionUseCount > 0;
+        if (!repeatableFromSameOption) continue;
+      }
+      const steps = [...state.steps, ...option.steps];
+      if (state.maximumTurnOffset > 0)
+        steps.sort((left, right) => left.ownTurnOffset - right.ownTurnOffset);
+      const balance = fundingTimelineBalance(
+        params.demand.currentCredits,
+        steps,
+      );
+      if (
+        !balance ||
+        (option.completesDemandOnly &&
+          balance.eligibleCredits < params.demand.targetCredits)
+      )
+        continue;
       const next: SearchState = {
-        steps: [...state.steps, ...option.steps],
-        eligibleCredits: state.eligibleCredits + option.eligibleCreditDelta,
-        generalCredits: state.generalCredits + option.generalCreditDelta,
+        steps,
+        ...balance,
         remainingClicks: state.remainingClicks - option.currentTurnClickCost,
         reliability:
           state.reliability === "guaranteed" &&
@@ -250,7 +262,7 @@ export function searchFundingRoutes(
           continue;
         }
       }
-      queue.push(next);
+      if (!option.completesDemandOnly) queue.push(next);
     }
   }
 
@@ -277,7 +289,7 @@ function paymentWindowFundingOption(
         ownTurnOffset: 0,
         clickCost: setup.installClickCost,
         creditCost: setup.installCreditCost,
-        netLiquidCreditGain: 0,
+        netLiquidCreditGain: -setup.installCreditCost,
         creditRestriction: "general",
         reliability: "guaranteed",
         sourceDefinitionId: setup.sourceDefinitionId,
@@ -286,7 +298,7 @@ function paymentWindowFundingOption(
       {
         stepId: `payment_window:${setup.sourceCardInstanceId}:${setup.capabilityId}`,
         kind: "future_projection",
-        projectionId: setup.capabilityId,
+        projectionId: String(setup.capabilityId),
         ownTurnOffset: 0,
         clickCost: 0,
         creditCost: setup.activationCreditCost,
@@ -302,8 +314,6 @@ function paymentWindowFundingOption(
     ],
     currentTurnClickCost: setup.installClickCost,
     eligibleCreditDelta: setup.netPaymentGain - setup.installCreditCost,
-    generalCreditDelta: -setup.installCreditCost,
-    creditCost: setup.installCreditCost + setup.activationCreditCost,
     reliability: "guaranteed",
     maximumTurnOffset: 0,
     maximumUses: 1,
@@ -315,7 +325,9 @@ export function creditDemandHardBlockerIsResolved(
   demand: CreditDemand,
   route: FundingRoute,
 ): boolean {
-  if (demand.hardness !== "hard") return route.status !== "uncovered";
+  if (demand.hardness !== "hard") {
+    return route.status !== "uncovered" && route.status !== "invalidated";
+  }
   return route.status === "funded" || route.status === "covered_guaranteed";
 }
 
@@ -372,7 +384,10 @@ function currentFundingOption(
     projection?.kind !== "immediate_liquid" ||
     projection.timing !== "immediate" ||
     netGain === undefined ||
-    netGain <= 0
+    !Number.isSafeInteger(netGain) ||
+    netGain <= 0 ||
+    !isNonNegativeInteger(projection.clickCost) ||
+    !isNonNegativeInteger(projection.creditCost)
   ) {
     return undefined;
   }
@@ -404,9 +419,6 @@ function currentFundingOption(
     ],
     currentTurnClickCost: projection.clickCost,
     eligibleCreditDelta: netGain,
-    generalCreditDelta:
-      restriction === "general" ? netGain : -projection.creditCost,
-    creditCost: projection.creditCost,
     reliability,
     maximumTurnOffset: 0,
     maximumUses:
@@ -420,8 +432,15 @@ function futureFundingOption(
   candidates: readonly FundingActionCandidate[],
   demand: CreditDemand,
 ): RouteOption | undefined {
-  const netGain = wholeNonNegative(projection.netLiquidCreditGain);
-  if (netGain <= 0) return undefined;
+  const netGain = projection.netLiquidCreditGain;
+  if (
+    !isNonNegativeInteger(netGain) ||
+    netGain <= 0 ||
+    !isNonNegativeInteger(projection.clickCost) ||
+    !isNonNegativeInteger(projection.creditCost ?? 0) ||
+    ![1, 2, 3].includes(projection.earliestOwnTurnOffset)
+  )
+    return undefined;
   const restriction = projection.creditRestriction ?? "general";
   if (!demand.acceptedCreditRestrictions.includes(restriction)) {
     return undefined;
@@ -434,38 +453,46 @@ function futureFundingOption(
     : undefined;
   if (projection.requiredCurrentActionId && !setupCandidate) return undefined;
   const setupProjection = setupCandidate?.economyProjection;
-  const setupStep: FundingRouteStep[] = setupCandidate
-    ? [
-        {
-          stepId: `legal_action:${setupCandidate.actionId}`,
-          kind: "legal_action",
-          actionId: setupCandidate.actionId,
-          ownTurnOffset: 0,
-          clickCost: setupProjection?.clickCost ?? 0,
-          creditCost: setupProjection?.creditCost ?? 0,
-          netLiquidCreditGain: 0,
-          creditRestriction: "general",
-          reliability:
-            setupProjection?.reliability === "guaranteed"
-              ? "guaranteed"
-              : "contingent",
-          ...(setupCandidate.sourceDefinitionId
-            ? { sourceDefinitionId: setupCandidate.sourceDefinitionId }
-            : {}),
-          evidence: [
-            `required_setup_action:${setupCandidate.actionId}`,
-            ...(setupProjection?.evidence ?? []),
-          ],
-        },
-      ]
-    : [];
+  if (
+    setupCandidate &&
+    (!setupProjection ||
+      !isNonNegativeInteger(setupProjection.clickCost) ||
+      !isNonNegativeInteger(setupProjection.creditCost))
+  )
+    return undefined;
+  const setupStep: FundingRouteStep[] =
+    setupCandidate && setupProjection
+      ? [
+          {
+            stepId: `legal_action:${setupCandidate.actionId}`,
+            kind: "legal_action",
+            actionId: setupCandidate.actionId,
+            ownTurnOffset: 0,
+            clickCost: setupProjection.clickCost,
+            creditCost: setupProjection.creditCost,
+            netLiquidCreditGain: -setupProjection.creditCost,
+            creditRestriction: "general",
+            reliability:
+              setupProjection?.reliability === "guaranteed"
+                ? "guaranteed"
+                : "contingent",
+            ...(setupCandidate.sourceDefinitionId
+              ? { sourceDefinitionId: setupCandidate.sourceDefinitionId }
+              : {}),
+            evidence: [
+              `required_setup_action:${setupCandidate.actionId}`,
+              ...(setupProjection?.evidence ?? []),
+            ],
+          },
+        ]
+      : [];
   const futureStep: FundingRouteStep = {
     stepId: `future_projection:${projection.projectionId}`,
     kind: "future_projection",
     projectionId: projection.projectionId,
     ownTurnOffset: projection.earliestOwnTurnOffset,
-    clickCost: wholeNonNegative(projection.clickCost),
-    creditCost: wholeNonNegative(projection.creditCost ?? 0),
+    clickCost: projection.clickCost,
+    creditCost: projection.creditCost ?? 0,
     netLiquidCreditGain: netGain,
     creditRestriction: restriction,
     reliability: projection.reliability,
@@ -494,9 +521,6 @@ function futureFundingOption(
       0,
     ),
     eligibleCreditDelta: netGain - setupCreditCost,
-    generalCreditDelta:
-      (restriction === "general" ? netGain : 0) - setupCreditCost,
-    creditCost: setupCreditCost,
     reliability,
     maximumTurnOffset: projection.earliestOwnTurnOffset,
     maximumUses: 1,
@@ -606,14 +630,16 @@ function routeDominates(left: FundingRoute, right: FundingRoute): boolean {
     horizonRank(left.horizon) <= horizonRank(right.horizon) &&
     left.totalClickCost <= right.totalClickCost &&
     left.steps.length <= right.steps.length &&
-    left.projectedCredits >= right.projectedCredits;
+    left.projectedCredits >= right.projectedCredits &&
+    left.projectedGeneralCredits >= right.projectedGeneralCredits;
   const strictlyBetter =
     statusRank(left.status) > statusRank(right.status) ||
     reliabilityRank(left.reliability) > reliabilityRank(right.reliability) ||
     horizonRank(left.horizon) < horizonRank(right.horizon) ||
     left.totalClickCost < right.totalClickCost ||
     left.steps.length < right.steps.length ||
-    left.projectedCredits > right.projectedCredits;
+    left.projectedCredits > right.projectedCredits ||
+    left.projectedGeneralCredits > right.projectedGeneralCredits;
   return noWorse && strictlyBetter;
 }
 
@@ -629,6 +655,7 @@ function compareRoutes(
     left.steps.length - right.steps.length ||
     reliabilityRank(right.reliability) - reliabilityRank(left.reliability) ||
     right.projectedCredits - left.projectedCredits ||
+    right.projectedGeneralCredits - left.projectedGeneralCredits ||
     compareFrontLoadedLiquidGain(left, right);
   if (financialOrder !== 0) return financialOrder;
   const equalStepCosts =
@@ -751,6 +778,32 @@ function horizonRank(horizon: FundingRouteHorizon): number {
     case "within_three_own_turns":
       return 2;
   }
+}
+
+function fundingTimelineBalance(
+  start: number,
+  steps: readonly FundingRouteStep[],
+) {
+  let eligibleCredits = start;
+  let generalCredits = start;
+  for (const step of steps) {
+    if (step.creditCost > generalCredits) return undefined;
+    eligibleCredits += step.netLiquidCreditGain;
+    generalCredits +=
+      step.creditRestriction === "general"
+        ? step.netLiquidCreditGain
+        : -step.creditCost;
+    if (
+      !isNonNegativeInteger(eligibleCredits) ||
+      !isNonNegativeInteger(generalCredits)
+    )
+      return undefined;
+  }
+  return { eligibleCredits, generalCredits };
+}
+
+function isNonNegativeInteger(value: number): boolean {
+  return Number.isSafeInteger(value) && value >= 0;
 }
 
 function wholeNonNegative(value: number): number {

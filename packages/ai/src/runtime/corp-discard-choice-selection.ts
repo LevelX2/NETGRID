@@ -4,7 +4,7 @@ import { corpArchivesHasCertifiedPaidAccess } from "../corp/defense/corp-defense
 import { corpHandDispositionScore } from "../corp/hand-management/hand-disposition-score";
 import { prepareCorpPunishHandRetention } from "../corp/punish/punish-hand-retention";
 import { prepareCorpScoreHandRetention } from "../corp/score/score-hand-retention";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import type { ProjectedHandDisposition } from "../plans/turn-projection";
 import { boundedSelectionCount } from "./choice-option";
 import { discardOptionInstanceId } from "./discard-choice-option";
@@ -288,7 +288,7 @@ function comparePickOrder(left: DiscardGroup, right: DiscardGroup): number {
 
 function visibleAgendaPoints(card: VisibleCard): number | undefined {
   const definition = card.definitionId
-    ? CARD_DEFINITIONS_BY_ID[card.definitionId]
+    ? planningCardFactsByDefinitionId(card.definitionId)
     : undefined;
   const type = card.type ?? definition?.type;
   if (type !== "agenda") return 0;

@@ -83,7 +83,7 @@ describe("plan portfolio", () => {
       turnKey: "runner-turn-3",
       tacticalPlans: [
         plan("runner.develop_hand_card", 700, "card", "hand-a"),
-        plan("runner.contest_remote", 900, "server", "remote_1"),
+        plan("runner.contest_remote", 900, "server", "r1"),
         plan("runner.build_credit_bank", 800, "bank", "bank-a"),
         plan("runner.build_credit_bank", 790, "bank", "bank-b"),
         plan("runner.build_credit_bank", 780, "bank", "bank-c"),
@@ -105,7 +105,7 @@ describe("plan portfolio", () => {
       turnKey: "runner-turn-4",
       tacticalPlans: [
         plan("runner.clear_tags_or_survive", 990, "capability", "tag-clear"),
-        plan("runner.contest_remote", 900, "server", "remote_1"),
+        plan("runner.contest_remote", 900, "server", "r1"),
         plan("runner.build_credit_bank", 800, "bank", "bank-a"),
       ],
     });
@@ -137,7 +137,7 @@ describe("plan portfolio", () => {
       "corp.create_score_window",
       1_129,
       "server",
-      "remote_1",
+      "r1",
       13,
     );
     scoreConversion.status = "blocked";
@@ -191,7 +191,7 @@ describe("plan portfolio", () => {
       "corp.create_score_window",
       1_129,
       "server",
-      "remote_1",
+      "r1",
       14,
     );
     blockedScore.status = "blocked";
@@ -278,7 +278,7 @@ describe("plan portfolio", () => {
       input: decisionInput("corp", 30),
       turnKey: "corp-turn-8",
       tacticalPlans: [
-        plan("corp.create_score_window", 950, "server", "remote_1", 30),
+        plan("corp.create_score_window", 950, "server", "r1", 30),
         plan("corp.build_credit_bank", 700, "bank", "corp-bank", 30),
       ],
     });
@@ -416,14 +416,14 @@ describe("plan portfolio", () => {
       "corp.create_score_window",
       950,
       "server",
-      "remote_1",
+      "r1",
       80,
     );
     const background = plan(
       "corp.establish_scoring_remote",
       690,
       "server",
-      "remote_1",
+      "r1",
       80,
     );
     foreground.currentStep.actionCandidateIds = ["install-shared-ice"];
@@ -474,7 +474,7 @@ describe("plan portfolio", () => {
       "corp.create_score_window",
       950,
       "server",
-      "remote_1",
+      "r1",
       90,
     );
     foreground.creditDemands = [
@@ -582,7 +582,7 @@ describe("plan portfolio", () => {
       "corp.create_score_window",
       950,
       "server",
-      "remote_1",
+      "r1",
       92,
     );
     scorePlan.creditDemands = [
@@ -608,7 +608,7 @@ describe("plan portfolio", () => {
       input: nextInput,
       tacticalPlans: [scorePlan],
       previous: first,
-      candidates: [],
+      candidates: [economyCandidate("bbs-credit")],
     });
 
     expect(first.foreground?.selectedFundingRoute?.status).toBe(
@@ -750,7 +750,7 @@ describe("plan portfolio", () => {
     input.playerView.own.clicks = 2;
     input.playerView.servers = [
       {
-        id: "remote_1",
+        id: "r1",
         label: "Remote 1",
         ice: [],
         root: [
@@ -806,6 +806,35 @@ describe("plan portfolio", () => {
     expect(
       portfolio.backgrounds[0]?.selectedActionCapacityRoute?.steps,
     ).toEqual([]);
+  });
+
+  it("records the sum of counter costs when one route uses two abilities from the same source", () => {
+    const input = decisionInput("corp", 97);
+    input.playerView.own.clicks = 2;
+    input.playerView.servers = [
+      {
+        id: "r1",
+        label: "Remote 1",
+        ice: [],
+        root: [{ instanceId: "capacity-source", known: true, advancementCounters: 2 }],
+      },
+    ];
+    const actionIds = ["first-ability", "second-ability"];
+    input.legalActions = actionIds.map(actionCapacityLegalAction);
+    const foreground = plan("corp.create_score_window", 980, "card", "agenda", 97);
+    foreground.actionDemands = [corpActionDemand(foreground.planId, 2, 4)];
+    const candidates = actionIds.map((id) => ({
+      ...actionCapacityCandidate(id, 1, {
+        sourceCardInstanceId: "capacity-source",
+        sourceCounterType: "advancement",
+        sourceCounterCost: 1,
+      }),
+      actionType: "activated_card_ability" as const,
+    }));
+    const portfolio = buildPlanPortfolio({ input, tacticalPlans: [foreground], candidates });
+    expect(portfolio.foreground?.resourceReservation.sourceCounters).toEqual({
+      "capacity-source:advancement": 2,
+    });
   });
 
   it("invalidates a remembered action-capacity source when it disappears", () => {
@@ -943,17 +972,17 @@ function decisionInput(
 }
 
 function publicEvent(
-  eventId: string,
+  label: string,
   stateVersionAfter: number,
   actor: Side,
   actionType: string,
 ) {
   return {
-    eventId,
+    eventId: stateVersionAfter + 1,
     type: actionType,
     stateVersionBefore: stateVersionAfter - 1,
     stateVersionAfter,
-    stateHashAfter: `fnv1a:${eventId}`,
+    stateHashAfter: `fnv1a:${label}`,
     visibilityClass: "public" as const,
     publicPayload: { actor, actionType },
   };

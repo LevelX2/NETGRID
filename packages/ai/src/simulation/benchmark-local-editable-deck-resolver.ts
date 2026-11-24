@@ -7,6 +7,7 @@ import {
   validateEditableDeck,
   type EditableDeck,
 } from "@netgrid/decks";
+import { isCardDefinitionId } from "@netgrid/shared";
 import type {
   AiBenchmarkDeckReference,
   AiBenchmarkLocalEditableDeckResult,
@@ -18,7 +19,8 @@ import { classifyLocalEditableBenchmarkDeck } from "./local-editable-benchmark-c
 import { resolveLocalDeckEditorDecksDir } from "./local-deck-editor-dir";
 import { sortedUnique } from "../runtime/collection";
 
-const BENCHMARK_RUNTIME_CARDS_BY_ID = createRuntimeCardsById();
+const BENCHMARK_RUNTIME_CARDS_BY_ID: ReturnType<typeof createRuntimeCardsById> =
+  Object.assign(Object.create(null), createRuntimeCardsById());
 
 export function benchmarkDeckFromLocalEditableDeck(
   reference: Extract<AiBenchmarkDeckReference, { kind: "local_editable_deck" }>,
@@ -68,12 +70,9 @@ export function benchmarkDeckFromLocalEditableDeck(
     );
   }
 
-  let parsed: { schemaVersion?: string; deck?: EditableDeck };
+  let parsed: unknown;
   try {
-    parsed = JSON.parse(readFileSync(filePath, "utf8")) as {
-      schemaVersion?: string;
-      deck?: EditableDeck;
-    };
+    parsed = JSON.parse(readFileSync(filePath, "utf8"));
   } catch (error) {
     return emptyFailure(
       "unclear",
@@ -81,39 +80,61 @@ export function benchmarkDeckFromLocalEditableDeck(
     );
   }
 
-  if (parsed.schemaVersion !== "netgrid-editable-deck-v1" || !parsed.deck) {
+  const schemaVersion =
+    isRecord(parsed) && typeof parsed.schemaVersion === "string"
+      ? parsed.schemaVersion
+      : undefined;
+  if (
+    schemaVersion !== "netgrid-editable-deck-v1" ||
+    !isRecord(parsed) ||
+    !isRecord(parsed.deck)
+  ) {
     return emptyFailure(
       "unclear",
-      `Local Deck-Editor deck ${reference.fileName} has unsupported schema ${parsed.schemaVersion ?? "unknown"}.`,
+      `Local Deck-Editor deck ${reference.fileName} has unsupported schema ${schemaVersion ?? "unknown"}.`,
     );
   }
 
-  const deck = parsed.deck;
+  const rawDeck = parsed.deck;
   const shapeErrors = [
-    ...(deck.deckId !== reference.localDeckId
+    ...(rawDeck.deckId !== reference.localDeckId
       ? [
-          `Deck ID mismatch: expected ${reference.localDeckId}, got ${deck.deckId}.`,
+          `Deck ID mismatch: expected ${reference.localDeckId}, got ${rawDeck.deckId}.`,
         ]
       : []),
-    ...(deck.name !== reference.expectedName
+    ...(rawDeck.name !== reference.expectedName
       ? [
-          `Deck name mismatch: expected ${reference.expectedName}, got ${deck.name}.`,
+          `Deck name mismatch: expected ${reference.expectedName}, got ${rawDeck.name}.`,
         ]
       : []),
-    ...(deck.side !== "runner" && deck.side !== "corp"
-      ? [`Deck side is invalid: ${String(deck.side)}.`]
+    ...(rawDeck.side !== "runner" && rawDeck.side !== "corp"
+      ? [`Deck side is invalid: ${String(rawDeck.side)}.`]
       : []),
-    ...(!Array.isArray(deck.cards) || deck.cards.length === 0
+    ...(!isCardDefinitionId(rawDeck.identityCardId)
+      ? ["Deck has an invalid identity card identifier."]
+      : []),
+    ...(!Array.isArray(rawDeck.cards) || rawDeck.cards.length === 0
       ? ["Deck has no cards."]
-      : []),
+      : rawDeck.cards.some(
+            (entry) =>
+              !isRecord(entry) ||
+              !isCardDefinitionId(entry.cardId) ||
+              typeof entry.quantity !== "number",
+          )
+        ? ["Deck contains a malformed card entry."]
+        : []),
   ];
   if (shapeErrors.length > 0) {
     return emptyFailure(
-      deck.cards?.length === 0 ? "incomplete" : "unclear",
+      Array.isArray(rawDeck.cards) && rawDeck.cards.length === 0
+        ? "incomplete"
+        : "unclear",
       shapeErrors.join(" | "),
       shapeErrors,
     );
   }
+
+  const deck = rawDeck as EditableDeck;
 
   const missingCards = sortedUnique(
     deck.cards
@@ -191,7 +212,6 @@ export function benchmarkDeckFromLocalEditableDeck(
     },
     {
       snapshotId: `${deck.deckId}_local_benchmark_snapshot_v1`,
-      rulesBaselineId: "rules-baseline-mvp-0.4",
     },
   );
   const engineDeck = buildEngineDeck(snapshot);
@@ -221,4 +241,8 @@ export function benchmarkDeckFromLocalEditableDeck(
     unsupportedCards,
     nonDeckLegalCards,
   };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

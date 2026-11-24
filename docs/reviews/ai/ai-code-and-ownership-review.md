@@ -731,7 +731,7 @@ Geschätzt zwei bis vier Stunden für die Cadence, ein bis zwei Tage für
 das gemeinsame Routing mit unveränderten Parent- und Need-Bindungen.
 [Cadence](../../../packages/ai/src/runner/rig-coverage/coverage-signals.ts#L54) ·
 [Vorbereitungs- und Lückenpfade](../../../packages/ai/src/runner/rig-coverage/coverage-signals.ts#L158) ·
-[History](../../../packages/ai/src/runtime/public-event-history.ts#L18) ·
+[History](../../../packages/ai/src/public-event-history.ts#L17) ·
 [Nativer Coverage-Test](../../../packages/ai/src/runner/rig-coverage/coverage-credit-draw-real-engine.test.ts)
 
 ### 6. `plans/corp-tactical-plan-modules.ts`
@@ -989,8 +989,10 @@ Den ungenutzten skalaren Corp-Pfad aus der Factory entfernen und die
 Komposition auf den tatsächlich übergebenen Komponentenprovider
 zusammenziehen. Abnahme mit gleichen Komponenten und gleicher Reihenfolge
 für die bestehenden Corp-Diagnosefälle. Aufwand ungefähr zwei bis vier Stunden.
-[Context](../../../packages/ai/src/runtime/semantic-runtime-corp-score-context.ts#L13) ·
-[Einziger Anschluss](../../../packages/ai/src/runtime/semantic-runtime-corp-scoring-evidence-composition.ts#L128)
+Die spätere Reachability-Prüfung bestätigte, dass auch die Komponenten
+keinen lesenden Aufrufer mehr hatten. Context und Scoring-Komposition
+sind entfernt. Die produktive Score-Planung folgt dem
+[Corp-Planvertrag](../../architecture/ai/corp-plan-contracts.md).
 
 ### 6. `runtime/corp-scoreline/semantic-runtime-corp-score-action-economy.ts`
 
@@ -1004,14 +1006,11 @@ und einem Klick an. Der Gegenfall zeigt eine künftige Änderungsfalle.
 `corpBurstEconomyOperationForAction` bekommt zudem eine generische
 Abhängigkeit, die es gar nicht liest.
 
-Als kleinen Schnitt die ungenutzte Abhängigkeit entfernen. Bei einer
-Erweiterung des Advance-Vertrags den aktuellen LegalAction-Preis separat
-vom Preis möglicher Folgeschritte prüfen. Abnahme zunächst mit unveränderten
-Corp-Economy-Komponenten für die bekannten nativen Preise.
-Aufwand für die Signaturpflege ungefähr zwei bis vier Stunden.
-[Closeout](../../../packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-action-economy.ts#L92) ·
-[Economy-Helfer](../../../packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-action-economy.ts#L412) ·
-[Engine-Angebot](../../../packages/engine/src/game/turn/corp-main-actions.ts#L730)
+Der alte Closeout-Helfer hatte nach der Umstellung auf den produktiven
+[Corp-Planvertrag](../../architecture/ai/corp-plan-contracts.md) keinen
+Aufrufer mehr. Der Diagnosepfad und seine isolierten Tests sind entfernt.
+Das [Engine-Angebot](../../../packages/engine/src/game/turn/corp-main-actions.ts#L730)
+bleibt die Quelle für die Kosten aktueller Advance-Aktionen.
 
 ### 7. `simulation/runner-action-valuation-baseline-metrics.ts`
 
@@ -1369,8 +1368,8 @@ unbenutzten Evidence-Verdrahtung und des reinen Weiterleiters reduziert die
 Zahl der Schnittstellen beim Umbau des Score-/Defense-Pfads. Abnahme über
 identische Punish-Diagnosen sowie Score- und Live-Entscheidungen. Aufwand
 ungefähr ein halber Tag.
-[Verbleibende Score-Composition](../../../packages/ai/src/runtime/semantic-runtime-corp-scoring-composition.ts) ·
-[Simulations-Einstieg](../../../packages/ai/src/simulation/ai-product-simulation-composition.ts#L70)
+Die [Punish-Diagnostik](../../../packages/ai/src/simulation/corp-tag-punish-window-composition.ts)
+ist direkt an die Simulation angebunden.
 
 ### 3. `runtime/protection-definition.ts`
 
@@ -1567,7 +1566,12 @@ Quellstand `472f8edcc4908da3c5f586f3cd050fcc3301c92e`. Seed
 Losbestand. Testdateien, Testhilfen, Fixtures und Deklarationsdateien waren
 ausgeschlossen. Zusätzlich waren 144 noch vorhandene Dateinamen aus den
 bisherigen Reviews gesperrt. Die Ziehung verwendete Fisher–Yates ohne
-Zurücklegen und wurde nach der lokalen Main-Integration ausgeführt.
+Zurücklegen und wurde nach der lokalen Main-Integration ausgeführt. Die
+Quellverweise dieser Stichprobe zeigen auf die untersuchte Revision.
+Der heutige Prüfstand für Trace-Regeln und Rezreserven steht im
+[Corp-Planvertrag](../../architecture/ai/corp-plan-contracts.md). Die
+[Simulationsmatrix](../../architecture/ai/simulation-test-matrix.md) beschreibt
+die übernommenen Fehlerzähler und Timeout-Raten.
 
 ### 1. `runtime/corp-score-protection-assessment.ts`
 
@@ -1590,10 +1594,10 @@ Pruning-Schlüssel. Eine falsche Gesamtschutzquote wurde im Spielzustand
 noch nicht reproduziert. Die Gleichheit über die
 zahlungsrelevanten Felder des Kreditbuchs definieren und anschließend
 eine aktuelle Mehr-ICE-Route mit optionalem Einzelquellenverlust abdecken.
-[Zustandsschlüssel](../../../packages/ai/src/runtime/corp-score-protection-assessment.ts#L1192) ·
-[Zahlungsprüfung](../../../packages/ai/src/run-analysis/visible-run-credit-budget.ts#L614) ·
-[Optionales Einzelquellen-Beispiel](../../../packages/cards/src/specs/originalset-v1/onr_v1_036_jackhammer.card-spec.ts#L61) ·
-[Trace-Grenze](../../../packages/ai/src/runtime/corp-score-protection-assessment.ts#L690)
+[Zustandsschlüssel](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runtime/corp-score-protection-assessment.ts#L1192) ·
+[Zahlungsprüfung](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/run-analysis/visible-run-credit-budget.ts#L614) ·
+[Optionales Einzelquellen-Beispiel](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/cards/src/specs/originalset-v1/onr_v1_036_jackhammer.card-spec.ts#L61) ·
+[Trace-Grenze](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runtime/corp-score-protection-assessment.ts#L690)
 
 ### 2. `runner/defense-recovery/next-corp-turn-grip.ts`
 
@@ -1608,8 +1612,8 @@ Genaue ganzzahlige, sichere Hand- und Stack-Mengen aus der aktuellen
 Projektion verlangen und dieselbe Zulassung im Install-plus-Draw-Pfad
 verwenden. Die positiven Fälle aus Basic Draw und garantiertem
 Draw-Event bei der Abnahme erhalten.
-[Zulassung](../../../packages/ai/src/runner/defense-recovery/next-corp-turn-grip.ts#L60) ·
-[Bestehende Exact-Delta-Grenze](../../../packages/ai/src/actions/action-candidate-facts.ts#L4)
+[Zulassung](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runner/defense-recovery/next-corp-turn-grip.ts#L60) ·
+[Bestehende Exact-Delta-Grenze](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/actions/action-candidate-facts.ts#L4)
 
 ### 3. `runner/run-window/runner-run-start-order-choice.ts`
 
@@ -1621,9 +1625,9 @@ Der Funktionskommentar und die übergeordnete Fehlermeldung nennen nur
 reines Selbst-Trash. Kommentar und Diagnose auf die unterstützten Fälle
 abgleichen und die Entscheidungslogik unverändert mit den bestehenden
 Start-of-Run- und Choice-Tests verifizieren.
-[Auflösung](../../../packages/ai/src/runner/run-window/runner-run-start-order-choice.ts#L29) ·
-[Aktive Run-Bindung](../../../packages/ai/src/runner/run-window/run-window-start-continuation.ts#L101) ·
-[Diagnose](../../../packages/ai/src/runtime/selected-choices-for-decision.ts#L908)
+[Auflösung](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runner/run-window/runner-run-start-order-choice.ts#L29) ·
+[Aktive Run-Bindung](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runner/run-window/run-window-start-continuation.ts#L101) ·
+[Diagnose](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runtime/selected-choices-for-decision.ts#L908)
 
 ### 4. `runtime/runner-economy-commitment-score.ts`
 
@@ -1636,8 +1640,8 @@ Referenz im Plan-Memory-Exclusion-Pfad. Die beiden Score-Ausgaben
 und die daran hängende No-Run-Evidence entfernen. Die betroffenen
 Kompositionsoberflächen per Typecheck und die nativen Economy-Linien
 per Regression verifizieren.
-[Score-Ausgaben](../../../packages/ai/src/runtime/runner-economy-commitment-score.ts#L49) ·
-[Weitergabe](../../../packages/ai/src/runtime/runner-development-support-composition.ts#L135)
+[Score-Ausgaben](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runtime/runner-economy-commitment-score.ts#L49) ·
+[Weitergabe](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runtime/runner-development-support-composition.ts#L135)
 
 ### 5. `runner/resource-lifecycle/resource-lifecycle-dispositions.ts`
 
@@ -1647,9 +1651,9 @@ benannte Action-IDs mit dem festen Owner an die zentrale
 Dispositionserfassung. Verfügbarkeit und Bindung stammen aus
 dem Signalproduzenten. Das hält die Entscheidung über das Objekt
 bei seinem Modul und die Verwertung beim Scheduler.
-[Abbildung](../../../packages/ai/src/runner/resource-lifecycle/resource-lifecycle-dispositions.ts#L4) ·
-[Signalproduzent](../../../packages/ai/src/runner/resource-lifecycle/resource-lifecycle-signals.ts#L94) ·
-[Live-Verbrauch](../../../packages/ai/src/runtime/plan-first-live-runtime.ts#L1803)
+[Abbildung](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runner/resource-lifecycle/resource-lifecycle-dispositions.ts#L4) ·
+[Signalproduzent](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runner/resource-lifecycle/resource-lifecycle-signals.ts#L94) ·
+[Live-Verbrauch](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runtime/plan-first-live-runtime.ts#L1803)
 
 ### 6. `runtime/corp-scoreline/semantic-runtime-corp-board-triage-alignment.ts`
 
@@ -1660,8 +1664,8 @@ Fall liefert die Emergency-Remote-Bedingung `match`, ebenso wie ihr
 direkter Nachfolger. Die Projektion einmal durchführen und den
 wirkungslosen Zweig entfernen. Die bestehenden Fälle für Funding,
 Zielfort und Deckout-Matchpoint decken die relevante Reihenfolge ab.
-[Kontrollfluss](../../../packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-board-triage-alignment.ts#L145) ·
-[Verbrauch im Corp-Score](../../../packages/ai/src/runtime/semantic-runtime-corp-score.ts#L160)
+[Kontrollfluss](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-board-triage-alignment.ts#L145) ·
+[Verbrauch im Corp-Score](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runtime/semantic-runtime-corp-score.ts#L160)
 
 ### 7. `simulation/doctrine-quality-benchmark-types.ts`
 
@@ -1676,9 +1680,9 @@ Grenzwerte und Bericht auf dieselbe Einheit prüfen.
 `comparisonProfiles` ist zusätzlich öffentlich konfigurierbar,
 wird hier aber von keinem Consumer gelesen. Der separate
 Match-Progression-Benchmark besitzt einen eigenen benutzten Vertrag.
-[Typvertrag](../../../packages/ai/src/simulation/doctrine-quality-benchmark-types.ts#L22) ·
-[Berechnung](../../../packages/ai/src/simulation/doctrine-quality-benchmark-runner.ts#L76) ·
-[Gate](../../../packages/ai/src/simulation/benchmark-reports.ts#L39)
+[Typvertrag](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/simulation/doctrine-quality-benchmark-types.ts#L22) ·
+[Berechnung](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/simulation/doctrine-quality-benchmark-runner.ts#L76) ·
+[Gate](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/simulation/benchmark-reports.ts#L39)
 
 ### 8. `simulation/quality-metric-types.ts`
 
@@ -1691,9 +1695,9 @@ Entscheidungsfehler bei leerer Aktionsfolge liefert bereits
 Simulationsfehlern übernehmen. Ungültige Angebote bzw. abgelehnte
 Aktionen und Laufzeitfehler separat zählen und weiterhin beide
 Fehlerarten im Gate berücksichtigen.
-[Typvertrag](../../../packages/ai/src/simulation/quality-metric-types.ts#L1) ·
-[Metrik](../../../packages/ai/src/simulation/quality-metrics.ts#L40) ·
-[Fehlerproduzent](../../../packages/ai/src/simulation/ai-game-simulator.ts#L362)
+[Typvertrag](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/simulation/quality-metric-types.ts#L1) ·
+[Metrik](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/simulation/quality-metrics.ts#L40) ·
+[Fehlerproduzent](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/simulation/ai-game-simulator.ts#L362)
 
 ### 9. `runtime/ai-features.ts`
 
@@ -1707,9 +1711,9 @@ Feature-Berechnung auf den vorhandenen sichtbaren Breaker-Vertrag und
 die kanonische Noisy-Prüfung stützen. Gezielte Kontrollfälle für
 generische, nur über Fähigkeiten klassifizierbare und laute Breaker
 absichern, bevor die Suchbewertung umgestellt wird.
-[Feature](../../../packages/ai/src/runtime/ai-features.ts#L31) ·
-[Coverage-Klassifizierung](../../../packages/ai/src/runtime/runner-visible-breaker-coverage.ts#L202) ·
-[Suchbewertung](../../../packages/ai/src/runtime/search-choice-option.ts#L284)
+[Feature](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runtime/ai-features.ts#L31) ·
+[Coverage-Klassifizierung](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runtime/runner-visible-breaker-coverage.ts#L202) ·
+[Suchbewertung](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runtime/search-choice-option.ts#L284)
 
 ### 10. `runner/run-window/runner-run-window-additional-access.ts`
 
@@ -1723,8 +1727,8 @@ Archives-Gegenprobe bestätigen die jeweilige Einzelbindung. Aktuelle Aktionsbin
 deklarierte Effektscopes auf Übereinstimmung prüfen, falls beide
 verfügbar sind. Ein widersprüchliches natives Engine-Angebot ist
 bislang unbelegt.
-[Fortvereinigung](../../../packages/ai/src/runner/run-window/runner-run-window-additional-access.ts#L76) ·
-[Quelle des Aktions-Forts](../../../packages/ai/src/actions/run-access-decision-model.ts#L72)
+[Fortvereinigung](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runner/run-window/runner-run-window-additional-access.ts#L76) ·
+[Quelle des Aktions-Forts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/actions/run-access-decision-model.ts#L72)
 
 ### Gezielter Nachlauf zur Trace-Profil-Übergabe
 
@@ -1739,9 +1743,9 @@ ohne Trace-Relevanz und Bewertungs-/Simulationspfade. Er liefert
 eine Migrationsliste, die nach Owner und sichtbaren Trace-Fällen
 geprüft werden muss. Profil- und bidlose Aufrufe können auf
 `modern_open` und null Corp-Gebotsspielraum zurückfallen.
-[Profilauflösung](../../../packages/ai/src/run-analysis/trace-rules-profile-planning.ts#L21) ·
-[Pfad-API](../../../packages/ai/src/visible-run-analysis.ts#L146) ·
-[Lock-Release](../../../packages/ai/src/runtime/runner-run-lock-release-score.ts#L222)
+[Profilauflösung](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/run-analysis/trace-rules-profile-planning.ts#L21) ·
+[Pfad-API](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/visible-run-analysis.ts#L146) ·
+[Lock-Release](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runtime/runner-run-lock-release-score.ts#L222)
 
 **P1, zwei live angebundene Planer mit nativem A/B-Nachweis.** In einer
 Engine-Runner-Sicht mit Wall of Static und Rex vor R&D, zwölf
@@ -1760,10 +1764,10 @@ verbleibenden Pfad im Classic-Fall auch nach erfolgreichem Bypass
 oder Trash stoppen. Es wurde
 die Fachzulassung der beiden Owner geprüft, ohne den globalen Scheduler
 auf einen finalen Zug festzulegen.
-[Bypass](../../../packages/ai/src/runner/run-window/runner-targeted-bypass-plan.ts#L123) ·
-[ICE-Trash](../../../packages/ai/src/runtime/runner-targeted-ice-trash-plan.ts#L222) ·
-[Central-Owner](../../../packages/ai/src/runner/central-pressure/central-pressure-signals.ts#L336) ·
-[Remote-Owner](../../../packages/ai/src/runner/remote-contest/remote-contest-signals.ts#L199)
+[Bypass](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runner/run-window/runner-targeted-bypass-plan.ts#L123) ·
+[ICE-Trash](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runtime/runner-targeted-ice-trash-plan.ts#L222) ·
+[Central-Owner](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runner/central-pressure/central-pressure-signals.ts#L336) ·
+[Remote-Owner](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runner/remote-contest/remote-contest-signals.ts#L199)
 
 **P2, weitere verifizierte Aufruflücken.** Same-Turn-Breaker-Installation,
 Coverage-Recovery, Upgrades und Heap-Vorbereitung kennen sichtbare
@@ -1777,16 +1781,16 @@ belegen fehlende Eingaben. Einzelne Owner können Traces zusätzlich
 durch vorgelagerte Beschränkungen ausschließen. Die jeweilige
 Entscheidungswirkung braucht ein auf diesen Owner zugeschnittenes
 Engine-Szenario.
-[Same-Turn-Breaker](../../../packages/ai/src/runner/rig-coverage/coverage-same-turn-breaker-preparation.ts#L75) ·
-[Coverage-Recovery](../../../packages/ai/src/runner/rig-coverage/coverage-recovery.ts#L113) ·
-[Upgrade](../../../packages/ai/src/runner/rig-coverage/coverage-breaker-upgrades.ts#L201) ·
-[Heap](../../../packages/ai/src/runner/rig-coverage/coverage-heap-preparation.ts#L125) ·
-[Central Payoff](../../../packages/ai/src/known-central-access-payoff.ts#L1047) ·
-[Remote Payoff](../../../packages/ai/src/known-remote-access-payoff.ts#L702) ·
-[Defense-Layer](../../../packages/ai/src/corp/defense/corp-defense-layer-certification.ts#L131) ·
-[Scoring Window](../../../packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-scoring-window-runner-pressure.ts#L141) ·
-[Stärkeimpuls](../../../packages/ai/src/corp/defense/corp-temporary-ice-strength-pulse.ts#L171) ·
-[Mobile Defense](../../../packages/ai/src/corp/defense/mobile-ice-run-defense.ts#L159)
+[Same-Turn-Breaker](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runner/rig-coverage/coverage-same-turn-breaker-preparation.ts#L75) ·
+[Coverage-Recovery](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runner/rig-coverage/coverage-recovery.ts#L113) ·
+[Upgrade](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runner/rig-coverage/coverage-breaker-upgrades.ts#L201) ·
+[Heap](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runner/rig-coverage/coverage-heap-preparation.ts#L125) ·
+[Central Payoff](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/known-central-access-payoff.ts#L1047) ·
+[Remote Payoff](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/known-remote-access-payoff.ts#L702) ·
+[Defense-Layer](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/corp/defense/corp-defense-layer-certification.ts#L131) ·
+[Scoring Window](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-scoring-window-runner-pressure.ts#L141) ·
+[Stärkeimpuls](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/corp/defense/corp-temporary-ice-strength-pulse.ts#L171) ·
+[Mobile Defense](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/corp/defense/mobile-ice-run-defense.ts#L159)
 
 Der geplante Run und sein aktiver Encounter brauchen getrennt gebundene
 Kontexte. `currentRunPathContext` liefert vor dem Run ein leeres Objekt.
@@ -1799,9 +1803,9 @@ Access Payoff, gefolgt von Corp Defense und Scoring. Anschließend die
 trace-relevanten Simulationsprofile abgleichen. Je Owner
 Classic-/Modern-Kontrollen und danach fehlendes Profil bei
 sichtbarem Trace als strukturierten Fehler abnehmen.
-[Kontext des aktiven Runs](../../../packages/ai/src/run-analysis/current-run-path-context.ts#L6) ·
-[Investitionsbindung](../../../packages/ai/src/run-analysis/trace-rules-profile-planning.ts#L28) ·
-[Referenz Main-Run-Evaluation](../../../packages/ai/src/runner-run-target-evaluation.ts#L546)
+[Kontext des aktiven Runs](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/run-analysis/current-run-path-context.ts#L6) ·
+[Investitionsbindung](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/run-analysis/trace-rules-profile-planning.ts#L28) ·
+[Referenz Main-Run-Evaluation](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runner-run-target-evaluation.ts#L546)
 
 
 #### Aufrufinventar ohne sechstes Argument
@@ -1809,43 +1813,43 @@ sichtbarem Trace als strukturierten Fehler abnehmen.
 Die Zeilennummern beziehen sich auf den geprüften Quellstand. Die
 folgenden Einträge umfassen auch Wrapper und vorbereitende Berechnungen.
 
-- [corp/defense/corp-defense-domain-signals.ts](../../../packages/ai/src/corp/defense/corp-defense-domain-signals.ts#L625) · 625, 634
-- [corp/defense/corp-temporary-ice-strength-pulse.ts](../../../packages/ai/src/corp/defense/corp-temporary-ice-strength-pulse.ts#L171) · 171, 181
-- [corp/defense/mobile-ice-run-defense.ts](../../../packages/ai/src/corp/defense/mobile-ice-run-defense.ts#L159) · 159, 171
-- [known-central-access-payoff.ts](../../../packages/ai/src/known-central-access-payoff.ts#L1047) · 1047
-- [known-remote-access-payoff.ts](../../../packages/ai/src/known-remote-access-payoff.ts#L702) · 702
-- [plans/tactical-plan-breaker-coverage.ts](../../../packages/ai/src/plans/tactical-plan-breaker-coverage.ts#L19) · 19
-- [plans/tactical-plan-corp-score-window.ts](../../../packages/ai/src/plans/tactical-plan-corp-score-window.ts#L49) · 49
-- [runner-economy-posture.ts](../../../packages/ai/src/runner-economy-posture.ts#L613) · 613, 915, 988
-- [runner/central-pressure/post-break-trash-preparation.ts](../../../packages/ai/src/runner/central-pressure/post-break-trash-preparation.ts#L158) · 158, 223
-- [runner/rig-coverage/coverage-breaker-upgrades.ts](../../../packages/ai/src/runner/rig-coverage/coverage-breaker-upgrades.ts#L201) · 201
-- [runner/rig-coverage/coverage-heap-preparation.ts](../../../packages/ai/src/runner/rig-coverage/coverage-heap-preparation.ts#L125) · 125
-- [runner/rig-coverage/coverage-recovery.ts](../../../packages/ai/src/runner/rig-coverage/coverage-recovery.ts#L113) · 113, 167, 283, 378
-- [runner/rig-coverage/coverage-same-turn-breaker-preparation.ts](../../../packages/ai/src/runner/rig-coverage/coverage-same-turn-breaker-preparation.ts#L75) · 75, 124
-- [runner/rig-coverage/coverage-support.ts](../../../packages/ai/src/runner/rig-coverage/coverage-support.ts#L142) · 142
-- [runner/rig-coverage/runner-search-coverage-need.ts](../../../packages/ai/src/runner/rig-coverage/runner-search-coverage-need.ts#L43) · 43
-- [runner/run-window/run-window-assessment.ts](../../../packages/ai/src/runner/run-window/run-window-assessment.ts#L1268) · 1268
-- [runner/run-window/runner-targeted-bypass-plan.ts](../../../packages/ai/src/runner/run-window/runner-targeted-bypass-plan.ts#L123) · 123, 143
-- [runtime/corp-scoreline/semantic-runtime-corp-scoring-window-runner-pressure.ts](../../../packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-scoring-window-runner-pressure.ts#L201) · 201
-- [runtime/runner-run-only-action-adjustment.ts](../../../packages/ai/src/runtime/runner-run-only-action-adjustment.ts#L151) · 151
-- [runtime/runner-start-run-score.ts](../../../packages/ai/src/runtime/runner-start-run-score.ts#L56) · 56
-- [runtime/runner-targeted-ice-trash-plan.ts](../../../packages/ai/src/runtime/runner-targeted-ice-trash-plan.ts#L120) · 120, 222, 257
-- [runtime/runner-visible-card-discard-composition.ts](../../../packages/ai/src/runtime/runner-visible-card-discard-composition.ts#L35) · 35
-- [runtime/semantic-runtime-corp-remote-contestability-context.ts](../../../packages/ai/src/runtime/semantic-runtime-corp-remote-contestability-context.ts#L47) · 47
+- [corp/defense/corp-defense-domain-signals.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/corp/defense/corp-defense-domain-signals.ts#L625) · 625, 634
+- [corp/defense/corp-temporary-ice-strength-pulse.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/corp/defense/corp-temporary-ice-strength-pulse.ts#L171) · 171, 181
+- [corp/defense/mobile-ice-run-defense.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/corp/defense/mobile-ice-run-defense.ts#L159) · 159, 171
+- [known-central-access-payoff.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/known-central-access-payoff.ts#L1047) · 1047
+- [known-remote-access-payoff.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/known-remote-access-payoff.ts#L702) · 702
+- [plans/tactical-plan-breaker-coverage.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/plans/tactical-plan-breaker-coverage.ts#L19) · 19
+- [plans/tactical-plan-corp-score-window.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/plans/tactical-plan-corp-score-window.ts#L49) · 49
+- [runner-economy-posture.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runner-economy-posture.ts#L613) · 613, 915, 988
+- [runner/central-pressure/post-break-trash-preparation.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runner/central-pressure/post-break-trash-preparation.ts#L158) · 158, 223
+- [runner/rig-coverage/coverage-breaker-upgrades.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runner/rig-coverage/coverage-breaker-upgrades.ts#L201) · 201
+- [runner/rig-coverage/coverage-heap-preparation.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runner/rig-coverage/coverage-heap-preparation.ts#L125) · 125
+- [runner/rig-coverage/coverage-recovery.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runner/rig-coverage/coverage-recovery.ts#L113) · 113, 167, 283, 378
+- [runner/rig-coverage/coverage-same-turn-breaker-preparation.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runner/rig-coverage/coverage-same-turn-breaker-preparation.ts#L75) · 75, 124
+- [runner/rig-coverage/coverage-support.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runner/rig-coverage/coverage-support.ts#L142) · 142
+- [runner/rig-coverage/runner-search-coverage-need.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runner/rig-coverage/runner-search-coverage-need.ts#L43) · 43
+- [runner/run-window/run-window-assessment.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runner/run-window/run-window-assessment.ts#L1268) · 1268
+- [runner/run-window/runner-targeted-bypass-plan.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runner/run-window/runner-targeted-bypass-plan.ts#L123) · 123, 143
+- [runtime/corp-scoreline/semantic-runtime-corp-scoring-window-runner-pressure.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-scoring-window-runner-pressure.ts#L201) · 201
+- [runtime/runner-run-only-action-adjustment.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runtime/runner-run-only-action-adjustment.ts#L151) · 151
+- [runtime/runner-start-run-score.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runtime/runner-start-run-score.ts#L56) · 56
+- [runtime/runner-targeted-ice-trash-plan.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runtime/runner-targeted-ice-trash-plan.ts#L120) · 120, 222, 257
+- [runtime/runner-visible-card-discard-composition.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runtime/runner-visible-card-discard-composition.ts#L35) · 35
+- [runtime/semantic-runtime-corp-remote-contestability-context.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/runtime/semantic-runtime-corp-remote-contestability-context.ts#L47) · 47
 
 Die Aufrufe unter `simulation/` sind separat für Messung und Diagnose
 zu prüfen.
 
-- [simulation/central-pressure-card.ts](../../../packages/ai/src/simulation/central-pressure-card.ts#L70) · 70
-- [simulation/central-run-pressure-justification.ts](../../../packages/ai/src/simulation/central-run-pressure-justification.ts#L122) · 122, 195
-- [simulation/no-fresh-central.ts](../../../packages/ai/src/simulation/no-fresh-central.ts#L133) · 133, 316
-- [simulation/remote-server-threat.ts](../../../packages/ai/src/simulation/remote-server-threat.ts#L116) · 116, 367
-- [simulation/runner-central-pressure-diagnostics.ts](../../../packages/ai/src/simulation/runner-central-pressure-diagnostics.ts#L164) · 164
-- [simulation/runner-credit-reserve.ts](../../../packages/ai/src/simulation/runner-credit-reserve.ts#L23) · 23
-- [simulation/runner-known-no-access.ts](../../../packages/ai/src/simulation/runner-known-no-access.ts#L54) · 54, 81, 131, 234, 246, 371
-- [simulation/runner-pressure-metrics.ts](../../../packages/ai/src/simulation/runner-pressure-metrics.ts#L121) · 121, 191
-- [simulation/runner-setup-coverage-types.ts](../../../packages/ai/src/simulation/runner-setup-coverage-types.ts#L103) · 103
-- [simulation/visible-break-cost-metric.ts](../../../packages/ai/src/simulation/visible-break-cost-metric.ts#L14) · 14
+- [simulation/central-pressure-card.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/simulation/central-pressure-card.ts#L70) · 70
+- [simulation/central-run-pressure-justification.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/simulation/central-run-pressure-justification.ts#L122) · 122, 195
+- [simulation/no-fresh-central.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/simulation/no-fresh-central.ts#L133) · 133, 316
+- [simulation/remote-server-threat.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/simulation/remote-server-threat.ts#L116) · 116, 367
+- [simulation/runner-central-pressure-diagnostics.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/simulation/runner-central-pressure-diagnostics.ts#L164) · 164
+- [simulation/runner-credit-reserve.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/simulation/runner-credit-reserve.ts#L23) · 23
+- [simulation/runner-known-no-access.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/simulation/runner-known-no-access.ts#L54) · 54, 81, 131, 234, 246, 371
+- [simulation/runner-pressure-metrics.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/simulation/runner-pressure-metrics.ts#L121) · 121, 191
+- [simulation/runner-setup-coverage-types.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/simulation/runner-setup-coverage-types.ts#L103) · 103
+- [simulation/visible-break-cost-metric.ts](https://github.com/LevelX2/NETGRID/blob/472f8edcc4908da3c5f586f3cd050fcc3301c92e/packages/ai/src/simulation/visible-break-cost-metric.ts#L14) · 14
 
 ### Prüfstand
 

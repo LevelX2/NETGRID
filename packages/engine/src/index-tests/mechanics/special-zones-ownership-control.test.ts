@@ -188,7 +188,7 @@ describe("V1.2.2 Special Zones, Ownership and Control", () => {
     let state = toRunnerTurn(
       createMechanicFixtureGameAfterSetup({ seed: "v122-return-terminal" }),
     );
-    const setAsideId = moveRunnerCardToGrip(state, "simple_economy_event");
+    const setAsideId = moveRunnerCardToGrip(state, 595);
     state.specialZoneHarness = {
       actor: "runner",
       cardInstanceId: setAsideId,
@@ -217,7 +217,7 @@ describe("V1.2.2 Special Zones, Ownership and Control", () => {
     expect(state.runner.grip).toContain(setAsideId);
     expect(state.specialZones?.setAside).toEqual([]);
 
-    const removedId = moveRunnerCardToGrip(state, "simple_run_event");
+    const removedId = moveRunnerCardToGrip(state, 600);
     state.specialZoneHarness = {
       actor: "runner",
       cardInstanceId: removedId,
@@ -251,7 +251,7 @@ describe("V1.2.2 Special Zones, Ownership and Control", () => {
     let state = toRunnerTurn(
       createMechanicFixtureGameAfterSetup({ seed: "v122-control" }),
     );
-    const cardId = installRunnerProgramForTest(state, "simple_fracter");
+    const cardId = installRunnerProgramForTest(state, 597);
     const beforeHash = hashState(state);
     state.specialZoneHarness = {
       actor: "runner",
@@ -313,14 +313,14 @@ describe("V1.2.2 Special Zones, Ownership and Control", () => {
     let state = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.traceTags("v122-host-control-trash"),
     );
-    const resourceId = installRunnerResourceForTest(state, "onr_v1_154_broker");
+    const resourceId = installRunnerResourceForTest(state, 366);
     state.activeSide = "corp";
     state.phase = "corp_action_phase";
     state.timingPoint = "corp_action.main";
     state.corp.clicks = 3;
     state.corp.credits = 5;
     state.runner.tags = 1;
-    const hostedId = installRunnerProgramForTest(state, "simple_decoder");
+    const hostedId = installRunnerProgramForTest(state, 591);
     state.cardInstances[hostedId] = {
       ...state.cardInstances[hostedId]!,
       hostedOn: resourceId,

@@ -39,7 +39,7 @@ describe("meta 461 counter-bank current-turn conversion", () => {
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.score_agenda:counter-bank%3Ahandoff%3Acorp_onr_v1_347_vapor-ops_2%3Acorp_onr_proteus_008_project-zurich_1%3Aremote_1%3Anew_remote",
+            "p8amm65beazk299k9hsz1ef04n",
         },
       },
     });
@@ -47,7 +47,7 @@ describe("meta 461 counter-bank current-turn conversion", () => {
       input.legalActions.find((a) => a.actionId === result.actionId),
     ).toMatchObject({
       type: "install_card",
-      source: "corp_onr_proteus_008_project-zurich_1",
+      source: "cet",
       payload: { serverId: "new_remote" },
     });
   });
@@ -55,7 +55,7 @@ describe("meta 461 counter-bank current-turn conversion", () => {
     const input = fixture("g10-d139"),
       rez = input.legalActions.find(
         (a) =>
-          a.type === "rez_card" && a.source === "corp_onr_v1_347_vapor-ops_2",
+          a.type === "rez_card" && a.source === "c3ge",
       )!,
       result = chooseAiAction(input);
     expect(result).toMatchObject({
@@ -64,7 +64,7 @@ describe("meta 461 counter-bank current-turn conversion", () => {
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.score_agenda:counter-bank%3Arez-handoff%3Acorp_onr_v1_347_vapor-ops_2%3Acorp_onr_proteus_008_project-zurich_1%3Aremote_1%3Aremote_2",
+            "pd6l9zevng4r6vpxqqlgxg1iji",
           route: {
             actionId: rez.actionId,
             stateVersion: input.playerView.stateVersion,
@@ -81,7 +81,7 @@ describe("meta 461 counter-bank current-turn conversion", () => {
     )!;
     expect(action).toMatchObject({
       type: "install_card",
-      source: "corp_onr_proteus_008_project-zurich_2",
+      source: "ceu",
       payload: { serverId: "new_remote" },
     });
     expect(result).toMatchObject({
@@ -89,7 +89,7 @@ describe("meta 461 counter-bank current-turn conversion", () => {
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.score_agenda:counter-bank%3Ahandoff%3Acorp_onr_v1_347_vapor-ops_3%3Acorp_onr_proteus_008_project-zurich_2%3Aremote_1%3Anew_remote",
+            "p7ld0fn65oafq6l3y1kvzfuk19",
           priority: { effectiveClass: "P1" },
           route: {
             actionId: action.actionId,

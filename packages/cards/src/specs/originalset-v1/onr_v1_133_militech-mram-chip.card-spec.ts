@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_133_militech-mram-chip"),
+    cardDefinitionId: cardDefinitionId(345),
     title: "Militech MRAM Chip",
     side: "runner",
     cardType: "hardware",

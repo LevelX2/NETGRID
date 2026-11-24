@@ -48,7 +48,7 @@ it("quotes the native known program-protection payment before admitting the info
   const target = evaluateRunnerRunTargets({
     input,
     deckCapabilities: input.ownDeckCapabilities!,
-  }).find((t) => t.actionId === "runner.start_run.hq")!;
+  }).find((t) => t.actionId === "rs.hq")!;
   expect(target.pathCost).toBe(1);
   expect(target.creditsAfterRun).toBe(6);
   expect(target.prerunReserveQuote).toMatchObject({
@@ -73,14 +73,16 @@ it("keeps the native parent scheduler and chooses legal preparation instead of t
     decision = chooseAiAction(input);
   expect(JSON.stringify(input)).toBe(unchanged);
   expect(decision).toMatchObject({ fallbackUsed: false, timeoutUsed: false });
-  expect(decision.actionId).not.toBe("runner.start_run.hq");
+  expect(decision.actionId).not.toBe("rs.hq");
   expect(
     input.legalActions.find((a) => a.actionId === decision.actionId)
       ?.expiresAtStateVersion,
   ).toBe(input.playerView.stateVersion);
-  expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toMatch(
-    /^plan:runner\./,
-  );
+  expect(
+    decision.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+    )?.moduleId,
+  ).toMatch(/^runner\./);
 });
 
 it("charges no protection payment without an installed program", () => {
@@ -137,7 +139,7 @@ it("allows the fully funded original route after reserving the known payment", (
   const target = evaluateRunnerRunTargets({
     input,
     deckCapabilities: input.ownDeckCapabilities!,
-  }).find((t) => t.actionId === "runner.start_run.hq")!;
+  }).find((t) => t.actionId === "rs.hq")!;
   expect(target.prerunReserveQuote).toMatchObject({
     status: "satisfied",
     creditGap: 0,
@@ -151,7 +153,7 @@ it("preserves continuation after the budgeted payment while retaining an actual 
   const target = evaluateRunnerRunTargets({
     input: entry.input,
     deckCapabilities: entry.input.ownDeckCapabilities!,
-  }).find((t) => t.actionId === "runner.start_run.hq")!;
+  }).find((t) => t.actionId === "rs.hq")!;
   const current = JSON.parse(
     readFileSync(
       new URL(

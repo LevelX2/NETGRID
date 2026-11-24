@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type {
   AiDecisionInput,
+  CardDefinitionId,
   EngineRandomizedIceInstallSelectionQuoteResult,
   EngineRandomizedIceInstallSelectionRequest,
   LegalAction,
@@ -24,13 +25,13 @@ import {
 import { createSemanticRuntimeDecisionContext } from "./semantic-runtime-decision-context";
 import type { SemanticRuntimeDecisionContextDependencies } from "./semantic-runtime-decision-context";
 
-const DATA_WALL_DEFINITION_ID = "onr_v1_237_data-wall";
-const CORPORATE_WAR_DEFINITION_ID = "onr_v1_196_corporate-war";
-const CORPORATE_DOWNSIZING_DEFINITION_ID = "onr_v1_194_corporate-downsizing";
-const TYCHO_EXTENSION_DEFINITION_ID = "onr_v1_220_tycho-extension";
-const FILLER_DEFINITION_ID = "onr_v1_284_chance-observation";
-const DATA_MASONS_DEFINITION_ID = "onr_v1_317_data-masons";
-const RED_HERRINGS_DEFINITION_ID = "onr_v1_366_red-herrings";
+const DATA_WALL_DEFINITION_ID = 449;
+const CORPORATE_WAR_DEFINITION_ID = 408;
+const CORPORATE_DOWNSIZING_DEFINITION_ID = 406;
+const TYCHO_EXTENSION_DEFINITION_ID = 432;
+const FILLER_DEFINITION_ID = 496;
+const DATA_MASONS_DEFINITION_ID = 529;
+const RED_HERRINGS_DEFINITION_ID = 578;
 
 describe("plan-first live Corp central-defense allocation contract", () => {
   it("selects HQ from complete exact facts when HQ has the material agenda risk", () => {
@@ -97,7 +98,7 @@ describe("plan-first live Corp central-defense allocation contract", () => {
       (instance) => instance.moduleId === "corp.defend_servers",
     );
     expect(defense).toMatchObject({
-      instanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      instanceId: "penw02zfrkklof54c2nuye5att",
       moduleState: {
         kind: "defense",
         centralAllocation: {
@@ -192,7 +193,7 @@ describe("plan-first live Corp central-defense allocation contract", () => {
       (instance) => instance.moduleId === "corp.defend_servers",
     );
     expect(defenseParent?.instanceId).toBe(
-      "plan:corp.defend_servers:server-defense-portfolio",
+      "penw02zfrkklof54c2nuye5att",
     );
     expect(defenseParent?.moduleState).toMatchObject({
       kind: "defense",
@@ -294,8 +295,8 @@ describe("plan-first live Corp central-defense allocation contract", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [dataMasonsOne]),
-      server("remote_2", [], [dataMasonsTwo]),
+      server("r1", [], [dataMasonsOne]),
+      server("r2", [], [dataMasonsTwo]),
     ];
     attachOwnDeckSnapshot(first.input, {
       deckSnapshotId: "central-defense-runtime-contract-deck",
@@ -347,8 +348,8 @@ describe("plan-first live Corp central-defense allocation contract", () => {
         }),
       ]),
       server("archives"),
-      server("remote_1", [], [dataMasonsOne]),
-      server("remote_2", [], [dataMasonsTwo]),
+      server("r1", [], [dataMasonsOne]),
+      server("r2", [], [dataMasonsTwo]),
     ];
     second.playerView.corpCentralAccessQuotes =
       second.playerView.corpCentralAccessQuotes!.map((quote) => ({
@@ -394,8 +395,8 @@ describe("plan-first live Corp central-defense allocation contract", () => {
     third.playerView.own.gripOrHq.push(filler("drawn-filler"));
     third.playerView.own.stackOrRdCount -= 1;
     third.playerView.servers = third.playerView.servers.map((currentServer) =>
-      currentServer.id === "remote_1"
-        ? server("remote_1", [], [{ ...dataMasonsOne, rezzed: true }])
+      currentServer.id === "r1"
+        ? server("r1", [], [{ ...dataMasonsOne, rezzed: true }])
         : currentServer,
     );
     third.playerView.corpCentralAccessQuotes =
@@ -667,7 +668,7 @@ function fourPlusOneNearTieInput() {
 
 function centralDefenseInput(params: {
   hqCards: VisibleCard[];
-  rdDefinitionIds: string[];
+  rdDefinitionIds: number[];
   hqAccessCount: number;
   rdAccessCount: number;
 }) {
@@ -799,7 +800,7 @@ function iceInstall(source: VisibleCard, serverId: "hq" | "rd"): LegalAction {
           effectiveStrength: 0,
           subroutines: [
             {
-              id: "printed_subroutines_end_the_run",
+              id: "0",
               type: "end_the_run",
               sourceDefinitionId: DATA_WALL_DEFINITION_ID,
               sourceTitle: "Data Wall",
@@ -859,7 +860,7 @@ function centralAccessQuote(serverId: "hq" | "rd", accessCount: number) {
   };
 }
 
-function agenda(instanceId: string, definitionId: string): VisibleCard {
+function agenda(instanceId: string, definitionId: number): VisibleCard {
   return visibleCard(instanceId, "corp", "agenda", { definitionId });
 }
 
@@ -877,8 +878,8 @@ function filler(instanceId: string): VisibleCard {
   });
 }
 
-function definitionCounts(definitionIds: string[]) {
-  const counts = new Map<string, number>();
+function definitionCounts(definitionIds: readonly CardDefinitionId[]) {
+  const counts = new Map<CardDefinitionId, number>();
   for (const definitionId of definitionIds) {
     counts.set(definitionId, (counts.get(definitionId) ?? 0) + 1);
   }

@@ -12,9 +12,9 @@ import { RealEngineFixtureBuilder } from "../../evaluation/real-engine-fixture-b
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
 
-const BACKUP = "onr_v1_131_microtech-backup-drive";
-const PROGRAM = "onr_v1_014_codecracker";
-const ICE = "onr_v1_233_d-arc-knight";
+const BACKUP = 343;
+const PROGRAM = 226;
+const ICE = 445;
 
 function deck(id: string, side: "runner" | "corp") {
   const entry = catalog.decks.find((deck) => deck.standardDeckId === id);
@@ -128,7 +128,7 @@ it("binds both native backup choices to defense and preserves the program for re
   const { state, target } = fixture();
   expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
   const offer = chooseRunnerAction(input(state));
-  expect(offer.actionId).toBe("runner.resolve_choice");
+  expect(offer.actionId).toBe("rn");
   expect(offer.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
     "runner.defense_and_recovery",
   );
@@ -147,7 +147,7 @@ it("binds both native backup choices to defense and preserves the program for re
     offer.selectedChoices,
   );
   const decision = chooseRunnerAction(input(targets));
-  expect(decision.actionId).toBe("runner.resolve_choice");
+  expect(decision.actionId).toBe("rn");
   expect(
     decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
   ).toBe("runner.defense_and_recovery");

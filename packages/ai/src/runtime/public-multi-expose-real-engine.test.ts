@@ -8,6 +8,7 @@ import {
 } from "@netgrid/engine";
 import {
   DEMO_DECKS,
+  type CardDefinitionId,
   type DeckDefinition,
   type GameState,
   type LegalAction,
@@ -23,12 +24,12 @@ import { chooseAiAction } from "../ai-runtime-public-entrypoints";
 
 afterEach(resetResidentPlanPortfolioMemory);
 
-const HUNT = "onr_v1_091_hunt-club-bbs";
-const GUIDE = "onr_v1_092_ice-and-datas-guide-to-the-net";
-const REPORT = "onr_proteus_111_ice-and-data-special-report";
-const BLOCKS = "onr_proteus_017_credit-blocks";
-const WALL = "onr_v1_245_fire-wall";
-const FETAL = "onr_proteus_004_fetal-ai";
+const HUNT = 303;
+const GUIDE = 304;
+const REPORT = 169;
+const BLOCKS = 75;
+const WALL = 457;
+const FETAL = 62;
 const runnerDeck: DeckDefinition = {
   ...DEMO_DECKS.demo_runner_001,
   id: "public-multi-expose-runner",
@@ -72,7 +73,7 @@ function apply(
   return result.state;
 }
 
-function fixture(source: string) {
+function fixture(source: CardDefinitionId) {
   let state = createGameAfterSetup({
     seed: "public-multi-expose",
     runnerDeck,
@@ -86,12 +87,12 @@ function fixture(source: string) {
     .withRunnerGripSize(0)
     .withRunnerCardInGrip(source)
     .withCorpIceOnServer("hq", WALL)
-    .withCorpIceOnServer("remote_1", BLOCKS)
-    .withCorpRemoteRoot("remote_2", FETAL);
+    .withCorpIceOnServer("r1", BLOCKS)
+    .withCorpRemoteRoot("r2", FETAL);
   return state;
 }
 
-function playSource(state: GameState, source: string) {
+function playSource(state: GameState, source: CardDefinitionId) {
   const cardId = state.runner.grip.find(
     (id) => state.cardInstances[id]!.definitionId === source,
   )!;
@@ -102,7 +103,7 @@ function playSource(state: GameState, source: string) {
   );
 }
 
-function selectCards(state: GameState, definitionIds: string[]) {
+function selectCards(state: GameState, definitionIds: number[]) {
   const selected = definitionIds.map((definitionId) => {
     const option = state.pendingChoice!.options.find(
       (entry) =>
@@ -137,13 +138,13 @@ it.each([HUNT, REPORT, GUIDE])(
     let state = playSource(initial, source);
     if (source === REPORT)
       state = apply(state, "runner", (a) => a.type === "resolve_choice", [
-        "fort_remote_1",
+        "fort_r1",
       ]);
     if (source !== GUIDE) state = selectCards(state, [BLOCKS]);
     const event = state.eventLog.at(-1)!;
     expect(event.publicPayload).toMatchObject({
       publicRevealKind: "expose",
-      exposedServerIds: source === GUIDE ? "hq,remote_1" : "remote_1",
+      exposedServerIds: source === GUIDE ? "hq,r1" : "r1",
       exposedPositionKeys: source === GUIDE ? "ice:0,ice:0" : "ice:0",
     });
     const current = input(state);
@@ -152,7 +153,7 @@ it.each([HUNT, REPORT, GUIDE])(
       reconstructBeliefState(current).runnerOpponentModel!.knownPositionMemory,
     ).toContainEqual(
       expect.objectContaining({
-        zone: "remote_1",
+        zone: "r1",
         positionKey: "ice:0",
         definitionId: BLOCKS,
         sourceEventId: event.eventId,
@@ -163,7 +164,7 @@ it.each([HUNT, REPORT, GUIDE])(
       runnerExposeInstalledOpportunity(current).unseenPositions,
     ).not.toContainEqual(
       expect.objectContaining({
-        serverId: "remote_1",
+        serverId: "r1",
         area: "ice",
         index: 0,
       }),
@@ -185,7 +186,7 @@ it("keeps aligned observations from different server areas in one actual expose 
   state = selectCards(state, [WALL, FETAL]);
   expect(state.eventLog.at(-1)!.publicPayload).toMatchObject({
     publicRevealDefinitionIds: `${WALL},${FETAL}`,
-    exposedServerIds: "hq,remote_2",
+    exposedServerIds: "hq,r2",
     exposedPositionKeys: "ice:0,root:0",
   });
   const memory = reconstructBeliefState(input(state)).runnerOpponentModel!
@@ -198,7 +199,7 @@ it("keeps aligned observations from different server areas in one actual expose 
         definitionId: WALL,
       }),
       expect.objectContaining({
-        zone: "remote_2",
+        zone: "r2",
         positionKey: "root:0",
         definitionId: FETAL,
       }),
@@ -270,7 +271,7 @@ it("resolves the next real expose action toward an unseen target under the exist
   const before = hashState(state);
   const decision = chooseAiAction(current);
   expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
-  expect(decision.actionId).toBe("runner.resolve_choice");
+  expect(decision.actionId).toBe("rn");
   expect(decision.selectedChoices).toEqual({
     choiceId: state.pendingChoice!.choiceId,
     selectedOptionIds: [expected.id],

@@ -51,7 +51,7 @@ it("replays the native selected search through actual Engine source, target and 
     .withRunnerCredits(20)
     .withRunnerClicks(1)
     .withRunnerGripSize(0)
-    .withRunnerProgramInstalled("onr_classic_031_rent-i-con");
+    .withRunnerProgramInstalled(35);
   const sourceId =
     checkpoint.input.playerView.pendingChoice.sourceCardInstanceId;
   state.runner.stack = state.runner.stack.filter((id) => id !== sourceId);
@@ -116,5 +116,5 @@ it("replays the native selected search through actual Engine source, target and 
     state.runner.rig.programs.map(
       (id) => state.cardInstances[id]!.definitionId,
     ),
-  ).toContain("onr_v1_011_cloak");
+  ).toContain(223);
 });

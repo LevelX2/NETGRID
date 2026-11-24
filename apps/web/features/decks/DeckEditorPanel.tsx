@@ -1,5 +1,6 @@
 "use client";
 
+import { type CardDefinitionId } from "@netgrid/shared";
 import {
   BookOpen,
   Cable,
@@ -136,7 +137,7 @@ type CatalogStatusKey =
 type CatalogStatuses = Record<CatalogStatusKey, boolean>;
 
 type CatalogCardSummary = {
-  catalogCardId: string;
+  catalogCardId: CardDefinitionId;
   title: string;
   side: Side;
   type: string;
@@ -159,7 +160,7 @@ type CatalogCardDetail = CatalogCardSummary & {
   collectorNumber: string;
   text: string;
   numeric: Record<string, number | null>;
-  engineCardId: string | null;
+  engineCardId: CardDefinitionId | null;
 };
 
 import type { DeckValidationResult } from "@netgrid/decks";
@@ -170,7 +171,7 @@ type DeckSnapshot = {
   deckVersion: string;
   name: string;
   side: Side;
-  identityCardId: string;
+  identityCardId: CardDefinitionId;
   cardPoolSnapshotId: string;
   cardPoolVersion?: string;
   formatProfileId: string;
@@ -306,7 +307,7 @@ export function DeckEditorPanel({
   onSelectDeck(deckId: string): void;
   onUpdateDeck(deck: EditableDeck): void;
   onSave(): void;
-  onUpdateQuantity(cardId: string, quantity: number): void;
+  onUpdateQuantity(cardId: CardDefinitionId, quantity: number): void;
   onDuplicate(): void;
   onDelete(): void;
   onValidate(): void;
@@ -389,7 +390,7 @@ export function DeckEditorPanel({
   const [standardCopyDeckId, setStandardCopyDeckId] = useState("");
   const [standardCopyName, setStandardCopyName] = useState("");
   const [deckSideFilter, setDeckSideFilter] = useState<DeckSideFilter>("all");
-  const [previewCardId, setPreviewCardId] = useState<string | null>(null);
+  const [previewCardId, setPreviewCardId] = useState<CardDefinitionId | null>(null);
   const standardPreviewActive = Boolean(
     standardDeckPreview &&
     standardPreviewDraft?.deckId ===
@@ -408,7 +409,7 @@ export function DeckEditorPanel({
     }
     onUpdatePersonalDeck(deck);
   };
-  const onUpdateQuantity = (cardId: string, quantity: number) => {
+  const onUpdateQuantity = (cardId: CardDefinitionId, quantity: number) => {
     if (standardPreviewActive) return;
     onUpdatePersonalQuantity(cardId, quantity);
   };
@@ -559,8 +560,8 @@ export function DeckEditorPanel({
             deckBuilderCardGroup(left.card).localeCompare(
               deckBuilderCardGroup(right.card),
             ) ||
-            (left.card?.title ?? left.entry.cardId).localeCompare(
-              right.card?.title ?? right.entry.cardId,
+            (left.card?.title ?? String(left.entry.cardId)).localeCompare(
+              right.card?.title ?? String(right.entry.cardId),
             ),
         ),
     [cardLookup, selectedDeck?.cards],
@@ -1028,7 +1029,7 @@ export function DeckEditorPanel({
     });
   };
   const addTableCardToPile = (
-    cardId: string,
+    cardId: CardDefinitionId,
     pileId: string,
     targetOrder?: number,
   ) => {
@@ -1116,7 +1117,7 @@ export function DeckEditorPanel({
     updateTableLayout(nextLayout);
   };
   const moveTableCardToPile = (
-    cardId: string,
+    cardId: CardDefinitionId,
     sourcePileId: string,
     targetPileId: string,
     quantity = 1,
@@ -1198,7 +1199,7 @@ export function DeckEditorPanel({
   };
   const duplicateTableCard = (
     pileId: string,
-    cardId: string,
+    cardId: CardDefinitionId,
     sourceOrder: number,
     copiesToAdd: number,
   ) => {
@@ -1244,7 +1245,7 @@ export function DeckEditorPanel({
   };
   const removeTableCardFromPile = (
     pileId: string,
-    cardId: string,
+    cardId: CardDefinitionId,
     sourceOrder: number,
   ) => {
     if (!tableLayout) return;
@@ -1475,7 +1476,7 @@ export function DeckEditorPanel({
     try {
       const payload = JSON.parse(payloadText) as {
         cards?: DeckTableSelectionEntry[];
-        cardId?: string;
+        cardId?: CardDefinitionId;
         sourcePileId?: string;
         quantity?: number;
         sourceOrder?: number;

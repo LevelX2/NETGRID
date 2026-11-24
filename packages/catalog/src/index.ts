@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import { createRuntimeCardsFromCardSets } from "./card-set-loader";
 import { CATALOG_RARITY_CODES, CATALOG_RARITY_LABELS } from "./rarity";
 import type {
@@ -103,7 +104,7 @@ export function normalizeSnapshot(snapshot: CardSnapshot): CardSnapshot {
             }
           : null,
       }))
-      .sort((a, b) => a.catalogCardId.localeCompare(b.catalogCardId)),
+      .sort((a, b) => a.catalogCardId - b.catalogCardId),
   };
 }
 
@@ -113,10 +114,11 @@ export function validateSnapshot(
   const errors: string[] = [];
   if (snapshot.schemaVersion !== "card-snapshot-v0.5")
     errors.push("Snapshot schemaVersion must be card-snapshot-v0.5.");
-  const seen = new Set<string>();
+  const seen = new Set<CardDefinitionId>();
   const seenPrintingIds = new Set<string>();
   for (const card of snapshot.cards) {
-    if (!card.catalogCardId) errors.push("Card is missing catalogCardId.");
+    if (!Number.isSafeInteger(card.catalogCardId) || card.catalogCardId <= 0)
+      errors.push("Card has an invalid catalogCardId.");
     if (seen.has(card.catalogCardId))
       errors.push(`Duplicate catalogCardId ${card.catalogCardId}.`);
     seen.add(card.catalogCardId);
@@ -255,7 +257,7 @@ export function toCatalogSummary(card: CatalogCard): CatalogCardSummary {
 
 export function getCatalogCard(
   snapshot: CardSnapshot,
-  catalogCardId: string,
+  catalogCardId: CardDefinitionId,
 ): CatalogCard | undefined {
   return normalizeSnapshot(snapshot).cards.find(
     (card) => card.catalogCardId === catalogCardId,
@@ -378,7 +380,7 @@ function compareCatalogCards(left: CatalogCard, right: CatalogCard): number {
     left.side.localeCompare(right.side) ||
     left.type.localeCompare(right.type) ||
     left.title.localeCompare(right.title) ||
-    left.catalogCardId.localeCompare(right.catalogCardId)
+    (left.catalogCardId - right.catalogCardId)
   );
 }
 

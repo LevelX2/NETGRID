@@ -20,12 +20,6 @@ export { summarizeActionCapacityBaselineMetrics } from "./simulation/action-capa
 export type { ActionCapacityBaselineMetrics } from "./simulation/action-capacity-baseline-metrics";
 export { summarizeRunnerActionValuationBaselineMetrics } from "./simulation/runner-action-valuation-baseline-metrics";
 export type { RunnerActionValuationBaselineMetrics } from "./simulation/runner-action-valuation-baseline-metrics";
-export { evaluatePracticalTacticBenchmark } from "./evaluation/practical-tactic-benchmark";
-export type {
-  PracticalTacticBenchmarkCase,
-  PracticalTacticBenchmarkCategory,
-  PracticalTacticBenchmarkResult,
-} from "./evaluation/practical-tactic-benchmark";
 export { buildSelfplayActionTypeDominanceReport } from "./simulation/selfplay-action-type-dominance";
 export type {
   AiSelfplayActionTypeDominanceBucket,
@@ -107,6 +101,7 @@ export type {
   AiQualityMetrics,
   AiSoakResult,
 } from "./simulation/quality-metrics";
+export type { AiSoakConfig } from "./simulation/ai-soak-runner";
 export { detectAiSelfplaySuspiciousDecisions } from "./simulation/selfplay-trace-mining";
 export type {
   AiSelfplayActionLimitClusterId,

@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
@@ -28,9 +29,9 @@ it("does not demote a real HQ access route to the physical Archives information 
     input.ownDeckSnapshot!.deckSnapshotId,
     cp.runtime,
   );
+  const archivedRun = canonicalCapabilityId(274, capabilityKey("abilities_activated_runner_main_make_run"));
   const route = input.legalActions.find(
-    (a) =>
-      a.type === "activated_card_ability" && a.actionId.includes("shredder"),
+    (a) => a.abilityRef?.sourceAbilityId === archivedRun,
   )!;
   const before = JSON.stringify({
     view: input.playerView,
@@ -42,7 +43,7 @@ it("does not demote a real HQ access route to the physical Archives information 
     (h) => h.actionId === route.actionId,
   )!;
   expect(head.rootPlanInstanceId).toBe(
-    "plan:runner.pressure_central:central%3Aarchives",
+    "p22f66p721g9dgs7gsawwpf6hs",
   );
   expect(head).toMatchObject({
     assessment: { effectivePriorityClass: "P4" },

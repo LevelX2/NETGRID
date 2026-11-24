@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { Side } from "@netgrid/shared";
+import type { MatchEventId, Side } from "@netgrid/shared";
 import {
   assertSemanticObjectSideSafe,
   redactSemanticString,
@@ -12,8 +12,7 @@ export type ReplayDecisionCaseSplit = "discovery" | "holdout";
 
 export type ReplayDecisionTraceInput = {
   matchId: string;
-  traceId: string;
-  eventId: string;
+  eventId: MatchEventId;
   mode: string;
   status: string;
   createdAt: string;
@@ -66,8 +65,7 @@ export type ReplayDecisionCase = {
   split: ReplayDecisionCaseSplit;
   source: {
     matchId: string;
-    traceId: string;
-    eventId: string;
+    eventId: MatchEventId;
     mode: string;
     status: string;
     stateVersion: number;
@@ -102,7 +100,7 @@ export type ReplayDecisionCase = {
   };
   reproducibility: {
     stateVersion: number;
-    eventId: string;
+    eventId: MatchEventId;
     decisionIndex: number;
     requiresLocalRuntimeState: true;
     legalActionReconstructionRequired: true;
@@ -201,8 +199,7 @@ export function extractReplayDecisionCaseFromTrace(
     split: replayDecisionCaseSplit(trace.matchId),
     source: {
       matchId: safeText(trace.matchId),
-      traceId: safeText(trace.traceId),
-      eventId: safeText(trace.eventId),
+      eventId: trace.eventId,
       mode: safeText(trace.mode),
       status: safeText(trace.status),
       stateVersion: trace.stateVersion,
@@ -237,7 +234,7 @@ export function extractReplayDecisionCaseFromTrace(
     },
     reproducibility: {
       stateVersion: trace.stateVersion,
-      eventId: safeText(trace.eventId),
+      eventId: trace.eventId,
       decisionIndex: trace.decisionIndex,
       requiresLocalRuntimeState: true,
       legalActionReconstructionRequired: true,
@@ -258,13 +255,7 @@ export function replayDecisionCaseSplit(
 
 function replayDecisionCaseId(trace: ReplayDecisionTraceInput): string {
   return `replay-case-${digest(
-    [
-      trace.matchId,
-      trace.traceId,
-      trace.eventId,
-      trace.stateVersion,
-      trace.decisionIndex,
-    ].join(":"),
+    `${trace.matchId}:${trace.decisionIndex}`,
   ).slice(0, 16)}`;
 }
 
@@ -389,12 +380,12 @@ function countBy<T>(
   values: readonly T[],
   keyFor: (value: T) => string,
 ): Record<string, number> {
-  const counts: Record<string, number> = {};
+  const counts = new Map<string, number>();
   for (const value of values) {
     const key = keyFor(value);
-    counts[key] = (counts[key] ?? 0) + 1;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
   }
   return Object.fromEntries(
-    Object.entries(counts).sort(([left], [right]) => left.localeCompare(right)),
+    [...counts].sort(([left], [right]) => left.localeCompare(right)),
   );
 }

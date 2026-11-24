@@ -11,7 +11,7 @@ describe("persistent numeric state invariants", () => {
     state.randomCounter += 1;
 
     expect(validateGameState(state).errors).toContain(
-      "Random counter must equal the recorded draw count.",
+      "Engine random history must contain contiguous domain-bound draw records.",
     );
   });
 

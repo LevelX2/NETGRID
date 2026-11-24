@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import {
   canonicalCapabilityId,
   engineCardByDefinitionId,
@@ -37,7 +38,7 @@ export function quoteCorpHostedCreditBankCycle(
     source.owner !== "corp" ||
     source.controller !== "corp" ||
     !server ||
-    !server.id.startsWith("remote_") ||
+    !isRemoteServerId(server.id) ||
     !implementation ||
     implementation.abilities?.length !== 2 ||
     Object.keys(implementation).some(

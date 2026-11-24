@@ -38,7 +38,7 @@ export function resolveCorpPunishTraceWindow(
     leafPlanInstanceId: leaf.instanceId,
     side: "corp",
     windowKind: "trace",
-    windowId: input.playerView.trace.traceId,
+    windowId: String(input.playerView.trace.traceId),
     stateVersion: input.playerView.stateVersion,
     timingPoint: input.playerView.timingPoint,
   };
@@ -83,7 +83,7 @@ export function boundCorpPunishTraceChoices(
     origin.stateVersion !== input.playerView.stateVersion ||
     origin.timingPoint !== input.playerView.timingPoint ||
     origin.windowKind !== "trace" ||
-    origin.windowId !== trace.traceId ||
+    origin.windowId !== String(trace.traceId) ||
     !root ||
     !Number.isSafeInteger(binding.amount) ||
     binding.amount < 0 ||

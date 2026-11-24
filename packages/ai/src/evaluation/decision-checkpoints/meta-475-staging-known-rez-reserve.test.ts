@@ -7,10 +7,8 @@ import { buildAiDecisionInputDto } from "../../input-dto";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-source-definitions";
 import { prepareCorpDefenseDiscovery } from "../../corp/defense/defense-discovery";
-import {
-  CORP_DEFENSE_DOMAIN_SIGNAL_FACTS,
-  corpDefensiveUpgradePlacement,
-} from "../../corp/defense/defense-discovery-support";
+import { CORP_DEFENSE_DOMAIN_SIGNAL_FACTS } from "../../corp/defense/defense-discovery-support";
+import { corpDefensiveUpgradePlacement } from "../../corp/defense/defense-install-discovery";
 import { corpQualitativeIceStagingSignal } from "../../corp/defense/corp-defense-domain-signals";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import {
@@ -61,7 +59,7 @@ function discovery(
   const candidate = candidates.find(
     (c) =>
       c.actionId ===
-      "corp.install_card.corp_onr_classic_005_baskerville_1.hq.corp_onr_classic_005_baskerville_1.2",
+      "cc.c25.hq.c25.2",
   )!;
   expect(candidate).toBeDefined();
   return { domain, candidate, candidates };
@@ -137,7 +135,7 @@ describe("pairing 475: local central rez reserve survives unknown global allocat
       const upgrade = candidates.find(
         (c) =>
           c.actionId ===
-          "corp.install_card.corp_onr_classic_020_london-city-grid_2.rd.corp_onr_classic_020_london-city-grid_2",
+          "cc.c5i.rd.c5i",
       )!;
       expect(upgrade.costProfile.creditCost).toBe(3);
       const placement = corpDefensiveUpgradePlacement(
@@ -162,7 +160,7 @@ describe("pairing 475: local central rez reserve survives unknown global allocat
       runtime,
     );
     const decision = chooseAiAction(input);
-    expect(decision.actionId).toBe("corp.gain_credit");
+    expect(decision.actionId).toBe("cb");
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.timeoutUsed).toBe(false);
     const pf = decision.decisionDebug!.planFirstDecision!;

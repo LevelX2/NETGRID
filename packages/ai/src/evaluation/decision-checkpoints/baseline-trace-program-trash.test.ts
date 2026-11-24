@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { applyAction, getLegalActions, hashGameState } from "@netgrid/engine";
@@ -52,7 +53,7 @@ it.each(["05", "07"])(
     const decision = chooseAiAction(input);
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.timeoutUsed).toBe(false);
-    expect(decision.actionId).toBe("corp.resolve_choice");
+    expect(decision.actionId).toBe("cn");
     const pf = decision.decisionDebug!.planFirstDecision!;
     expect(pf.lane).toBe("plan");
     expect(pf.selectedPlan?.moduleId).toBe("corp.defend_servers");
@@ -114,9 +115,9 @@ it.each([
     .find((c) => c.instanceId === trace.sourceCardInstanceId)!;
   if (kind === "missing_trace") delete input.playerView.trace;
   if (kind === "trace_phase") trace.phase = "runner_bid";
-  if (kind === "trace_id") trace.traceId += "_wrong";
+  if (kind === "trace_id") trace.traceId++;
   if (kind === "trace_source") trace.sourceCardInstanceId += "_wrong";
-  if (kind === "trace_definition") trace.sourceDefinitionId += "_wrong";
+  if (kind === "trace_definition") trace.sourceDefinitionId = syntheticCardDefinitionId("wrong-trace-source");
   if (kind === "choice_origin")
     choice.source = choice.source.replace(/:trace_success$/, ":encounter");
   if (kind === "source_quote") delete source.effectiveRunQuote;
@@ -148,7 +149,7 @@ it.each(["executor", "state", "origin", "target"])(
     if (kind === "executor") portfolio.executorInstanceId = "missing_executor";
     if (kind === "state") resolution.sourceStateVersion--;
     if (kind === "origin")
-      resolution.origin = { kind: "encounter", runId: "run_92" };
+      resolution.origin = { kind: "encounter", runId: 92 };
     if (kind === "target") resolution.targetCardInstanceId = "missing_program";
     const choice = input.playerView.pendingChoice!;
     expect(() =>

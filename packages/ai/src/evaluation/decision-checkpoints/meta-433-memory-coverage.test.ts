@@ -28,7 +28,7 @@ it("SP-366 distinguishes canonical Wall and Code-Gate functions before binding t
   const rig = input.playerView.own.rig!;
   expect(
     visibleBreakerRoles(
-      rig.find((x) => x.definitionId === "onr_proteus_095_skeleton-passkeys")!,
+      rig.find((x) => x.definitionId === 153)!,
     ),
   ).toEqual(["decoder"]);
   const action = input.legalActions.find((x) => x.type === "install_card")!;
@@ -39,9 +39,9 @@ it("SP-366 distinguishes canonical Wall and Code-Gate functions before binding t
     decisionDebug: {
       planFirstDecision: {
         rootPlanInstanceId:
-          "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry",
+          "pde8a64nmn1hkbrzgi9sbuf6fo",
         leafExecutorInstanceId:
-          "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry",
+          "pde8a64nmn1hkbrzgi9sbuf6fo",
         route: {
           actionId: action.actionId,
           stateVersion: input.playerView.stateVersion,
@@ -57,7 +57,7 @@ it("SP-366 distinguishes canonical Wall and Code-Gate functions before binding t
     requiredMemoryToFree: 1,
     selectedCards: [
       {
-        cardInstanceId: "runner_onr_proteus_100_wrecking-ball_1",
+        cardInstanceId: "cz5",
         memoryCost: 1,
       },
     ],
@@ -67,10 +67,10 @@ it("SP-366 distinguishes canonical Wall and Code-Gate functions before binding t
 it("does not reopen an already bound historical memory choice", () => {
   const input = fixture(boundChoice);
   expect(chooseAiAction(input)).toMatchObject({
-    actionId: "runner.resolve_choice",
+    actionId: "rn",
     fallbackUsed: false,
     selectedChoices: {
-      selectedOptionIds: ["card_runner_onr_proteus_095_skeleton-passkeys_2"],
+      selectedOptionIds: ["card_cy2"],
     },
   });
 });

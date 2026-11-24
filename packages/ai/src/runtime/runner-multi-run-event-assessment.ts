@@ -2,7 +2,7 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 
 export type RunnerMultiRunEventAssessment = {
-  sourceDefinitionId: string;
+  sourceDefinitionId?: number;
   targetServerId: string;
   phase: "first_run" | "followup_run";
   canTakeRun: boolean;
@@ -16,7 +16,7 @@ export type RunnerMultiRunEventAssessmentDependencies = {
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string | undefined;
+  ) => number | undefined | undefined;
   targetServerId: (action: LegalAction) => string | undefined;
   targetEvaluation: (
     input: AiDecisionInput,
@@ -86,7 +86,7 @@ export function runnerMultiRunEventAssessment(
   ];
 
   return {
-    sourceDefinitionId: sourceDefinitionId || "bonus_run",
+    ...(sourceDefinitionId !== undefined ? { sourceDefinitionId } : {}),
     targetServerId,
     phase,
     canTakeRun,

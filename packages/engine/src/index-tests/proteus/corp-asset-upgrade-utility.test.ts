@@ -25,19 +25,19 @@ import {
 } from "@netgrid/shared";
 import { CARD_IMPLEMENTATIONS } from "../../card-implementations/registry";
 
-const CYBERTECH = "onr_proteus_055_cybertech-think-tank";
-const DEPARTMENT = "onr_proteus_056_department-of-misinformation";
-const GOVERNMENT_CONTRACT = "onr_proteus_059_government-contract";
-const LDL = "onr_proteus_061_ldl-traffic-analyzers";
-const PANIC_BUTTON = "onr_proteus_067_panic-button";
-const STRATEGIC_PLANNING_GROUP = "onr_classic_025_strategic-planning-group";
-const RAYMOND = "onr_proteus_071_raymond-ellison";
-const SIREN = "onr_proteus_074_siren";
-const SYD = "onr_proteus_076_syd-meyer-superstores";
-const ROVING_SUBMARINE = "onr_v1_368_roving-submarine";
-const WALL = "onr_v1_279_wall-of-static";
-const MOUSE = "onr_v1_042_mouse";
-const SCORCHED_EARTH = "onr_v1_302_scorched-earth";
+const CYBERTECH = 113;
+const DEPARTMENT = 114;
+const GOVERNMENT_CONTRACT = 117;
+const LDL = 119;
+const PANIC_BUTTON = 125;
+const STRATEGIC_PLANNING_GROUP = 29;
+const RAYMOND = 129;
+const SIREN = 132;
+const SYD = 134;
+const ROVING_SUBMARINE = 580;
+const WALL = 491;
+const MOUSE = 254;
+const SCORCHED_EARTH = 514;
 
 const PRO014_IDS = [
   CYBERTECH,
@@ -77,7 +77,7 @@ function baseState(seed: string): GameState {
 
 function addCorpRoot(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
   serverId: Exclude<ServerId, "new_remote">,
   rezzed = true,
@@ -114,7 +114,7 @@ function addCorpRoot(
 
 function addCorpIce(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
   serverId: Exclude<ServerId, "new_remote">,
   rezzed = true,
@@ -151,7 +151,7 @@ function addCorpIce(
 
 function addCorpHq(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
 ): CardInstanceId {
   const cardId = id as CardInstanceId;
@@ -173,7 +173,7 @@ function addCorpHq(
 
 function addCorpRd(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
 ): CardInstanceId {
   const cardId = id as CardInstanceId;
@@ -195,7 +195,7 @@ function addCorpRd(
 
 function addRunnerProgram(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
 ): CardInstanceId {
   const cardId = id as CardInstanceId;
@@ -221,7 +221,7 @@ function addRunnerGrip(state: GameState, id: string): void {
   state.runner.grip.push(cardId);
   state.cardInstances[cardId] = {
     instanceId: cardId,
-    definitionId: "onr_v1_001_afreet" as CardDefinitionId,
+    definitionId: 213 as CardDefinitionId,
     owner: "runner",
     controller: "runner",
     zone: { side: "runner", zone: "grip" },
@@ -278,7 +278,7 @@ function openCorpTraceBidWindow(
   sourceCardId: CardInstanceId,
 ): void {
   state.trace = {
-    traceId: "pro014_trace",
+    traceId: 1,
     sourceCardInstanceId: sourceCardId,
     sourceDefinitionId: state.cardInstances[sourceCardId]!.definitionId,
     traceLimit: 5,
@@ -290,9 +290,9 @@ function openCorpTraceBidWindow(
     returnActiveSide: "corp",
   };
   state.pendingChoice = {
-    choiceId: "pro014_trace.corp.bid",
+    choiceId: "1.corp.bid",
     side: "corp",
-    source: "trace:pro014_trace",
+    source: "trace:1",
     prompt: "Corp Trace-Bid",
     kind: "bid_amount",
     options: Array.from({ length: 6 }, (_, amount) => ({
@@ -318,14 +318,14 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
           (implementation) =>
             implementation.cardDefinitionId === cardDefinitionId,
         ),
-        cardDefinitionId,
+        String(cardDefinitionId),
       ).toHaveLength(1);
     }
   });
 
   it("opens a corp Siren start-of-run window, supports pass and redirect, and rejects stale runner bypass", () => {
     const before = baseState("pro014-siren");
-    const sirenId = addCorpRoot(before, SIREN, "siren_1", "remote_1", true);
+    const sirenId = addCorpRoot(before, SIREN, "siren_1", "r1", true);
 
     const runHq = mustAction(
       before,
@@ -341,13 +341,19 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
 
     let state = applyLegal(before, "runner", runHq.actionId);
     expect(state.pendingChoice?.source).toContain("corp.start_of_run_redirect");
+    expect(getPlayerView(state, "corp").pendingChoice?.options).toContainEqual(
+      expect.objectContaining({
+        value: sirenId,
+        metadata: expect.objectContaining({ creditCost: 1 }),
+      }),
+    );
     expect(state.run?.runStartInterventions).toEqual([
       {
         kind: "start_run_redirect_to_source_fort",
         originalServerId: "hq",
         sourceCardInstanceId: sirenId,
         sourceDefinitionId: SIREN,
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         costCredits: 1,
       },
     ]);
@@ -365,9 +371,14 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
     state = applyChoice(state, "corp", "pass");
     expect(state.run?.attackedServerId).toBe("hq");
     expect(state.run?.runStartInterventions).toBeUndefined();
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "access_card",
+      ),
+    ).toBe(true);
 
     const redirectedBefore = baseState("pro014-siren-redirect");
-    addCorpRoot(redirectedBefore, SIREN, "siren_2", "remote_1", true);
+    addCorpRoot(redirectedBefore, SIREN, "siren_2", "r1", true);
     let redirected = apply(
       redirectedBefore,
       "runner",
@@ -375,19 +386,56 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
         action.type === "start_run" && action.payload?.serverId === "hq",
     );
     redirected = applyChoice(redirected, "corp", "redirect_siren_2");
-    expect(redirected.run?.attackedServerId).toBe("remote_1");
+    expect(redirected.run?.attackedServerId).toBe("r1");
+    expect(redirected.run?.position).toEqual({
+      kind: "server",
+      serverId: "r1",
+    });
+    redirected = apply(
+      redirected,
+      "runner",
+      (action) => action.type === "access_card",
+    );
+    expect(redirected.run?.accessedCardId).toBe("siren_2");
     expect(redirected.corp.credits).toBe(19);
     expectReplayStable(redirectedBefore, redirected);
   });
 
+  it("approaches the destination fort’s outermost ICE after a Siren redirect", () => {
+    const before = baseState("pro014-siren-protected-destination");
+    const siren = addCorpRoot(before, SIREN, "siren_protected", "r1");
+    addCorpIce(before, WALL, "inner_wall", "r1", false);
+    const outer = addCorpIce(before, WALL, "outer_wall", "r1", false);
+    let state = apply(
+      before,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    state = applyChoice(state, "corp", `redirect_${siren}`);
+    expect(state.run?.position).toEqual({
+      kind: "ice",
+      serverId: "r1",
+      iceIndex: 1,
+    });
+    expect(state.run?.approachedIceId).toBe(outer);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === outer,
+    );
+    expect(state.run?.encounteredIceId).toBe(outer);
+    expectReplayStable(before, state);
+  });
+
   it("does not offer Siren redirect to an otherwise illegal source fort", () => {
     const before = baseState("pro014-siren-roving-blocked");
-    addCorpRoot(before, SIREN, "siren_roving", "remote_1", true);
+    addCorpRoot(before, SIREN, "siren_roving", "r1", true);
     addCorpRoot(
       before,
       ROVING_SUBMARINE,
-      "roving_blocks_remote_1",
-      "remote_1",
+      "roving_blocks_r1",
+      "r1",
       true,
     );
 
@@ -410,10 +458,10 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
       before,
       GOVERNMENT_CONTRACT,
       "target_asset",
-      "remote_1",
+      "r1",
       false,
     );
-    addCorpRoot(before, DEPARTMENT, "department_1", "remote_1", false);
+    addCorpRoot(before, DEPARTMENT, "department_1", "r1", false);
     addRunnerProgram(before, MOUSE, "mouse_1");
 
     let state = apply(
@@ -429,7 +477,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
     const targetOptionId = state.pendingChoice?.options.find(
       (option) => option.value === targetId,
     )?.id;
-    expect(targetOptionId).toMatch(/^card_hidden_/);
+    expect(targetOptionId).toBe("card_hr1.r0");
     state = applyChoice(state, "runner", targetOptionId ?? "");
     expect(state.pendingChoice?.source).toContain("corp.expose_prevention");
     expect(state.cardInstances[targetId]?.faceup).toBe(false);
@@ -458,10 +506,10 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
       useBefore,
       GOVERNMENT_CONTRACT,
       "target_asset_2",
-      "remote_1",
+      "r1",
       false,
     );
-    addCorpRoot(useBefore, DEPARTMENT, "department_2", "remote_1", false);
+    addCorpRoot(useBefore, DEPARTMENT, "department_2", "r1", false);
     addRunnerProgram(useBefore, MOUSE, "mouse_2");
     state = apply(
       useBefore,
@@ -473,7 +521,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
     const useTargetOptionId = state.pendingChoice?.options.find(
       (option) => option.value === useTarget,
     )?.id;
-    expect(useTargetOptionId).toMatch(/^card_hidden_/);
+    expect(useTargetOptionId).toBe("card_hr1.r0");
     state = applyChoice(state, "runner", useTargetOptionId ?? "");
     state = applyChoice(state, "corp", "department_department_2");
     expect(state.cardInstances["department_2" as CardInstanceId]?.rezzed).toBe(
@@ -498,14 +546,14 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
       rezThenPassBefore,
       GOVERNMENT_CONTRACT,
       "target_asset_3",
-      "remote_1",
+      "r1",
       false,
     );
     addCorpRoot(
       rezThenPassBefore,
       DEPARTMENT,
       "department_3",
-      "remote_1",
+      "r1",
       false,
     );
     addRunnerProgram(rezThenPassBefore, MOUSE, "mouse_3");
@@ -539,10 +587,10 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
       rezzedBefore,
       GOVERNMENT_CONTRACT,
       "target_asset_4",
-      "remote_1",
+      "r1",
       false,
     );
-    addCorpRoot(rezzedBefore, DEPARTMENT, "department_4", "remote_1", true);
+    addCorpRoot(rezzedBefore, DEPARTMENT, "department_4", "r1", true);
     addRunnerProgram(rezzedBefore, MOUSE, "mouse_4");
     state = apply(
       rezzedBefore,
@@ -566,14 +614,14 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
       unaffordableBefore,
       GOVERNMENT_CONTRACT,
       "target_asset_5",
-      "remote_1",
+      "r1",
       false,
     );
     addCorpRoot(
       unaffordableBefore,
       DEPARTMENT,
       "department_5",
-      "remote_1",
+      "r1",
       true,
     );
     addRunnerProgram(unaffordableBefore, MOUSE, "mouse_5");
@@ -607,7 +655,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
       state,
       CYBERTECH,
       "cybertech_1",
-      "remote_1",
+      "r1",
       true,
     );
     state.cardInstances[cybertechId]!.advancementCounters = 1;
@@ -636,7 +684,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
       state,
       CYBERTECH,
       "cybertech_2",
-      "remote_1",
+      "r1",
       true,
     );
     state.cardInstances[useCybertech]!.advancementCounters = 1;
@@ -664,7 +712,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
       state,
       GOVERNMENT_CONTRACT,
       "government_1",
-      "remote_1",
+      "r1",
       true,
     );
     state.cardInstances[governmentId]!.advancementCounters = 1;
@@ -706,7 +754,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
       state.eventLog.at(-1)?.publicPayload.cardImplementationAbilityTiming,
     ).toBe("corp_paid");
 
-    addCorpRoot(state, SIREN, "siren_temp_only", "remote_1", true);
+    addCorpRoot(state, SIREN, "siren_temp_only", "r1", true);
     for (const cardId of state.corp.hq.slice()) removeEverywhere(state, cardId);
     state = apply(state, "corp", (action) => action.type === "end_turn");
     expect(state.corp.credits).toBe(0);
@@ -727,7 +775,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
       installState,
       GOVERNMENT_CONTRACT,
       "government_2",
-      "remote_1",
+      "r1",
       true,
     );
     installState.cardInstances[govInstall]!.advancementCounters = 1;
@@ -758,7 +806,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
       paidWindowState,
       GOVERNMENT_CONTRACT,
       "government_paid_window",
-      "remote_1",
+      "r1",
       true,
     );
     paidWindowState.cardInstances[paidWindowGovernment]!.advancementCounters =
@@ -777,7 +825,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
 
   it("grants LDL credits to the Corp pool and returns the unspent amount when the trace ends", () => {
     let state = baseState("pro014-ldl");
-    const ldlId = addCorpRoot(state, LDL, "ldl_1", "remote_1", true);
+    const ldlId = addCorpRoot(state, LDL, "ldl_1", "r1", true);
     state.cardInstances[ldlId]!.advancementCounters = 1;
     openCorpTraceBidWindow(state, ldlId);
     state.corp.credits = 0;
@@ -812,7 +860,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
     });
 
     const noTrace = baseState("pro014-ldl-no-trace");
-    const noTraceLdl = addCorpRoot(noTrace, LDL, "ldl_2", "remote_1", false);
+    const noTraceLdl = addCorpRoot(noTrace, LDL, "ldl_2", "r1", false);
     noTrace.cardInstances[noTraceLdl]!.advancementCounters = 1;
     expect(
       getLegalActions(noTrace, "corp").some(
@@ -825,7 +873,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
 
   it("rezzes LDL through a canonical trace-window LegalAction before using its ability", () => {
     const before = baseState("pro014-ldl-self-rez");
-    const ldlId = addCorpRoot(before, LDL, "ldl_self_rez", "remote_1", false);
+    const ldlId = addCorpRoot(before, LDL, "ldl_self_rez", "r1", false);
     before.cardInstances[ldlId]!.advancementCounters = 1;
     before.corp.credits = 0;
     openCorpTraceBidWindow(before, ldlId);
@@ -843,8 +891,8 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
 
     let state = applyLegal(before, "corp", rezAction.actionId);
     expect(state.cardInstances[ldlId]?.rezzed).toBe(true);
-    expect(state.trace?.traceId).toBe("pro014_trace");
-    expect(state.pendingChoice?.source).toBe("trace:pro014_trace");
+    expect(state.trace?.traceId).toBe(1);
+    expect(state.pendingChoice?.source).toBe("trace:1");
     expectReplayStable(before, state);
 
     const stale = applyAction(state, {
@@ -881,9 +929,9 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
 
     let hqRun = baseState("pro014-panic-run-hq");
     const panicId = addCorpRoot(hqRun, PANIC_BUTTON, "panic_1", "hq", true);
-    addCorpRoot(hqRun, STRATEGIC_PLANNING_GROUP, "panic_spg", "remote_1", true);
+    addCorpRoot(hqRun, STRATEGIC_PLANNING_GROUP, "panic_spg", "r1", true);
     addCorpRd(hqRun, WALL, "rd_draw");
-    addCorpRd(hqRun, "simple_economy_operation", "rd_spg_extra");
+    addCorpRd(hqRun, 596, "rd_spg_extra");
     hqRun = apply(
       hqRun,
       "runner",
@@ -928,7 +976,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
   it("uses Raymond Ellison only in remote forts and converts same-fort counters into run-bound credits", () => {
     let installState = baseState("pro014-raymond-install");
     installState.corp.servers.push({
-      id: "remote_9",
+      id: "r9",
       kind: "remote",
       label: "Remote 9",
       ice: [],
@@ -943,7 +991,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
           action.payload?.cardId === "raymond_install",
       )
       .map((action) => action.payload?.serverId);
-    expect(raymondInstallServers).toContain("remote_9");
+    expect(raymondInstallServers).toContain("r9");
     expect(raymondInstallServers).not.toContain("hq");
 
     let state = baseState("pro014-raymond-run");
@@ -951,14 +999,14 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
       state,
       RAYMOND,
       "raymond_1",
-      "remote_1",
+      "r1",
       true,
     );
     const sameFortIce = addCorpIce(
       state,
       WALL,
       "raymond_wall_same",
-      "remote_1",
+      "r1",
       true,
     );
     const otherFortIce = addCorpIce(
@@ -974,7 +1022,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state.timingPoint = "run.jack_out_window";
     state = apply(
@@ -996,14 +1044,14 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
       state,
       RAYMOND,
       "raymond_spend",
-      "remote_1",
+      "r1",
       true,
     );
     const sameFortIce = addCorpIce(
       state,
       WALL,
       "raymond_spend_wall",
-      "remote_1",
+      "r1",
       true,
     );
     const panicId = addCorpRoot(
@@ -1064,14 +1112,14 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
       state,
       RAYMOND,
       "raymond_cleanup",
-      "remote_1",
+      "r1",
       true,
     );
     const sameFortIce = addCorpIce(
       state,
       WALL,
       "raymond_cleanup_wall",
-      "remote_1",
+      "r1",
       true,
     );
     state.cardInstances[sameFortIce]!.advancementCounters = 2;
@@ -1079,7 +1127,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state.timingPoint = "run.jack_out_window";
     state = apply(
@@ -1102,14 +1150,14 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
       state,
       RAYMOND,
       "raymond_outside",
-      "remote_1",
+      "r1",
       true,
     );
     const sameFortIce = addCorpIce(
       state,
       WALL,
       "raymond_outside_wall",
-      "remote_1",
+      "r1",
       true,
     );
     state.cardInstances[sameFortIce]!.advancementCounters = 1;
@@ -1123,7 +1171,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
 
     state.corp.credits = 4;
     state.run = {
-      runId: "raymond_orphan_pool",
+      runId: 922087,
       attackedServerId: "hq",
       phase: "movement",
       position: { kind: "server", serverId: "hq" },
@@ -1178,13 +1226,13 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
 
   it("lets Syd Meyer Superstores trash only own rezzed ICE for credits", () => {
     let state = baseState("pro014-syd");
-    const sydId = addCorpRoot(state, SYD, "syd_1", "remote_1", true);
+    const sydId = addCorpRoot(state, SYD, "syd_1", "r1", true);
     const rezzedIce = addCorpIce(state, WALL, "syd_wall_rezzed", "hq", true);
     const hostedCard = addCorpRoot(
       state,
       DEPARTMENT,
       "syd_hosted_card",
-      "remote_1",
+      "r1",
       true,
     );
     state.cardInstances[hostedCard] = {

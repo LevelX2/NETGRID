@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type {
   CardDefinition,
   CardInstance,
@@ -29,7 +30,7 @@ const BARTMOSS_BREAKER_ID = "bartmoss_breaker" as CardInstanceId;
 
 function instance(
   id: CardInstanceId,
-  definitionId = id,
+  definitionId = syntheticCardDefinitionId(id),
   options: Partial<CardInstance> = {},
 ): CardInstance {
   return {
@@ -46,14 +47,14 @@ function instance(
 }
 
 function definitionForId(
-  id: string,
+  id: number,
   subroutines: readonly SubroutineDefinition[] = [],
 ): CardDefinition {
   return {
     id,
-    title: id,
-    side: id.startsWith("runner") ? "runner" : "corp",
-    type: id.includes("ice") ? "ice" : "program",
+    title: String(id),
+    side: "corp",
+    type: "ice",
     subroutines,
   } as CardDefinition;
 }
@@ -107,16 +108,20 @@ function makeState(
       servers: [server],
     },
     cardInstances: {
-      [ICE_ID]: instance(ICE_ID, "simple_barrier_ice"),
-      [INNER_ICE_ID]: instance(INNER_ICE_ID, "simple_code_gate_ice"),
-      [BARTMOSS_BREAKER_ID]: instance(BARTMOSS_BREAKER_ID, "runner_bartmoss", {
-        owner: "runner",
-        controller: "runner",
-        zone: { side: "runner", zone: "rig" },
-      }),
+      [ICE_ID]: instance(ICE_ID, 589),
+      [INNER_ICE_ID]: instance(INNER_ICE_ID, 590),
+      [BARTMOSS_BREAKER_ID]: instance(
+        BARTMOSS_BREAKER_ID,
+        syntheticCardDefinitionId("runner_bartmoss"),
+        {
+          owner: "runner",
+          controller: "runner",
+          zone: { side: "runner", zone: "rig" },
+        },
+      ),
     },
     run: {
-      runId: "run_8",
+      runId: 8,
       attackedServerId: "hq",
       phase: options.phase ?? "encounter_ice",
       position:
@@ -292,7 +297,8 @@ function hostFor(
       },
       callbacks: {
         finishRun: (successful) => calls.push(`finishRun:${successful}`),
-        icebreakerSpecialSourceDefinitionId: () => "bartmoss_def",
+        icebreakerSpecialSourceDefinitionId: () =>
+          syntheticCardDefinitionId("bartmoss_def"),
         rollDeterministicDie: () => 1,
         trashRunnerInstalledProgram: (breakerId) =>
           calls.push(`trashRunnerInstalledProgram:${breakerId}`),
@@ -389,9 +395,9 @@ describe("run-continuation-execution", () => {
     state.runner.credits = 2;
     const firstAction = action();
     firstAction.costs = [{ credits: 1 }];
+    firstAction.encounterSubroutineIds = ["first_pay_or_end"];
+    firstAction.payOrEndRunSubroutineIndexes = [0];
     firstAction.payload = {
-      encounterSubroutineIds: "first_pay_or_end",
-      payOrEndRunSubroutineIndexes: "0",
       payOrEndRunSubroutinePayment: 1,
     };
     const { host, calls } = hostFor(state, subroutines);
@@ -404,9 +410,7 @@ describe("run-continuation-execution", () => {
     expect(calls).toEqual([]);
 
     const secondAction = action();
-    secondAction.payload = {
-      encounterSubroutineIds: "second_pay_or_end",
-    };
+    secondAction.encounterSubroutineIds = ["second_pay_or_end"];
     continueRun(host, secondAction);
 
     expect(state.runner.credits).toBe(1);
@@ -431,7 +435,7 @@ describe("run-continuation-execution", () => {
     ];
     const state = makeState(subroutines);
     const firstAction = action();
-    firstAction.payload = { encounterSubroutineIds: "gain_credit" };
+    firstAction.encounterSubroutineIds = ["gain_credit"];
     const { host, calls } = hostFor(state, subroutines);
 
     continueRun(host, firstAction);
@@ -459,7 +463,7 @@ describe("run-continuation-execution", () => {
     state.runner.rig.programs = [];
     state.runner.credits = 0;
     const declineAction = action();
-    declineAction.payload = { encounterSubroutineIds: "first_pay_or_end" };
+    declineAction.encounterSubroutineIds = ["first_pay_or_end"];
     const { host, calls } = hostFor(state, subroutines);
 
     continueRun(host, declineAction);

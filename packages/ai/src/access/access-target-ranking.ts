@@ -5,7 +5,7 @@ import type { AccessDecisionProjection } from "./access-decision-projection";
 export type KnownRemoteAccessCandidate = {
   positionKey: string;
   instanceId?: string;
-  definitionId: string;
+  definitionId: number;
   targetKind: AccessTargetKind;
   commitment: KnownRemoteAccessCommitment;
   projection: AccessDecisionProjection;

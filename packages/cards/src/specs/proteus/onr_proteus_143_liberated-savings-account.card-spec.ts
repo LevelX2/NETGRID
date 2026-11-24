@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_proteus_143_liberated-savings-account",
+      201,
     ),
     title: "Liberated Savings Account",
     side: "runner",

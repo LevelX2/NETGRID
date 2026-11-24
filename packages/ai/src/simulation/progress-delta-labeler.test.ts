@@ -109,6 +109,27 @@ describe("progress delta labeler", () => {
     expect(labels[0]?.followUp.within5).toContain("progress_access");
   });
 
+  it("does not attribute the opponent’s score to Runner economy", () => {
+    const labels = labelProgressDeltaWindow([
+      { side: "runner", actionType: "gain_credit" },
+      { side: "corp", actionType: "score_agenda" },
+    ]);
+
+    expect(labels[0]?.primaryProgress).toBe(false);
+    expect(labels[0]?.followUp.within5).toEqual(["progress_score"]);
+  });
+
+  it("honors an observed lack of coverage improvement", () => {
+    expect(
+      actionLabel({
+        side: "runner",
+        actionType: "install_card",
+        runnerCoverageImproved: false,
+        reasonCode: "runner.install.decoder",
+      }),
+    ).toBe("no_progress_stale");
+  });
+
   it("bounds economy conversion text signals to exact tokens", () => {
     const funded = labelProgressDeltaWindow([
       {

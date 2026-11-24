@@ -17,6 +17,68 @@ import {
 import { publicCounterMutation } from "../counters/public-counter-mutations";
 
 describe("game event builder", () => {
+  it("publishes actual draw and hand sizes without exposing drawn cards", () => {
+    const state = createGame({
+      seed: "public-draw-count",
+      setupMode: "completed",
+    });
+    const drawnId = state.corp.rd[0];
+    const legalAction = mandatoryDrawLegalAction(state);
+    const result = applyAction(state, playerActionFor(state, legalAction));
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error("Expected a completed draw");
+    for (const surface of [
+      toPublicEvent(result.event),
+      toPublicEventForSide(result.event, "runner"),
+    ]) {
+      expect(surface.publicPayload).toMatchObject({
+        corpHqCountBefore: state.corp.hq.length,
+        corpHqCountAfter: result.state.corp.hq.length,
+        corpRdDrawnToHqCount: 1,
+      });
+      expect(JSON.stringify(surface)).not.toContain(drawnId);
+      expect(surface.publicPayload.creditChanges).toBeUndefined();
+      expect(surface).not.toHaveProperty("privatePayload");
+    }
+  });
+
+  it("reports both public credit pools at the actual boundaries of a payment", () => {
+    const previous = createGame({
+      seed: "public-credit-changes",
+      setupMode: "completed",
+    });
+    previous.corp.credits = 7;
+    previous.runner.credits = 5;
+    const next = nextState(previous);
+    next.corp.credits = 3;
+    next.runner.credits = 6;
+    const action = {
+      ...mandatoryDrawLegalAction(previous),
+      type: "activated_card_ability",
+      costs: [{ credits: 6 }],
+    } satisfies LegalAction;
+    const event = buildEventWithHost(
+      testBuildEventHost(),
+      previous.stateVersion,
+      next.stateVersion,
+      hashState(next),
+      previous,
+      next,
+      action,
+      playerActionFor(previous, action),
+    );
+    for (const surface of [
+      toPublicEvent(event),
+      toPublicEventForSide(event, "runner"),
+      toPublicEventForSide(event, "corp"),
+    ]) {
+      expect(surface.publicPayload.creditChanges).toEqual([
+        { side: "corp", before: 7, after: 3 },
+        { side: "runner", before: 5, after: 6 },
+      ]);
+    }
+  });
+
   it.each([
     "start_run",
     "play_event",
@@ -31,7 +93,7 @@ describe("game event builder", () => {
       });
       const next = nextState(previous);
       next.run = {
-        runId: "run_public",
+        runId: 441226,
         attackedServerId: "hq",
         accessServerOverride: "rd",
         phase: "access",
@@ -45,6 +107,23 @@ describe("game event builder", () => {
         type,
         side: "runner",
       };
+      const internalEffectId = "private.debug.effect";
+      if (type !== "start_run") {
+        action.resolvedEffects = [
+          {
+            effectId: internalEffectId,
+            kind: "gain_credits",
+            visibility: "public",
+            amount: 1,
+          },
+          {
+            effectId: internalEffectId,
+            kind: "gain_credits",
+            visibility: "public",
+            amount: 2,
+          },
+        ];
+      }
       const event = buildEventWithHost(
         testBuildEventHost({ damageResolved: true, damageAmount: 0 }),
         previous.stateVersion,
@@ -66,11 +145,23 @@ describe("game event builder", () => {
       else {
         expect(event.publicPayload.resolvedEffects).toEqual([
           {
-            effectId: "run_public.start",
+            effectId: 0,
+            kind: "gain_credits",
+            visibility: "public",
+            amount: 1,
+          },
+          {
+            effectId: 1,
+            kind: "gain_credits",
+            visibility: "public",
+            amount: 2,
+          },
+          {
+            effectId: 2,
             kind: "start_run",
             visibility: "public",
             side: "runner",
-            runId: "run_public",
+            runId: 441226,
             serverId: "hq",
             accessServerId: "rd",
           },
@@ -80,6 +171,11 @@ describe("game event builder", () => {
             toPublicEventForSide(event, side).publicPayload.resolvedEffects,
           ).toEqual(event.publicPayload.resolvedEffects);
         }
+        expect(JSON.stringify(event.publicPayload)).not.toContain(internalEffectId);
+        expect(action.resolvedEffects?.map((effect) => effect.effectId)).toEqual([
+          internalEffectId,
+          internalEffectId,
+        ]);
       }
       expect(event.privatePayload?.runner).toEqual({
         action: playerActionFor(previous, action),
@@ -112,7 +208,7 @@ describe("game event builder", () => {
 
     expect(JSON.stringify(state)).toBe(before);
     expect(event).toMatchObject({
-      eventId: `evt_${next.stateVersion}`,
+      eventId: next.stateVersion + 1,
       type: legalAction.type,
       stateVersionBefore: state.stateVersion,
       stateVersionAfter: next.stateVersion,
@@ -146,16 +242,16 @@ describe("game event builder", () => {
         label: "Rent-I-Con: Subroutine brechen",
         payload: {
           runnerCostPenaltySupportWindowOpened: true,
-          runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.1",
+          runnerCostPenaltySupportWindowId: 1,
         },
       } satisfies LegalAction;
 
       next.runnerCostPenaltySupportWindow = {
-        windowId: "runner_cost_penalty_support.1",
+        windowId: 1,
         originalActionId:
           origin === "same_action"
             ? legalAction.actionId
-            : "runner.continue_run",
+            : "r5",
         amountDue: 2,
         kind: "cost",
         createdAtStateVersion: previous.stateVersion,
@@ -176,7 +272,7 @@ describe("game event builder", () => {
         actionType: "break_subroutine",
         label: "Kostenfenster geöffnet.",
         runnerCostPenaltySupportWindowOpened: true,
-        runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.1",
+        runnerCostPenaltySupportWindowId: 1,
         runnerCostPenaltySupportOriginalActionId:
           next.runnerCostPenaltySupportWindow.originalActionId,
       });
@@ -194,7 +290,7 @@ describe("game event builder", () => {
       type: "trigger_ability",
       visibility: "public",
       payload: {
-        serverId: "remote_1",
+        serverId: "r1",
         counterType: "spy",
         removedCounterAmount: 1,
         remainingCounters: 0,
@@ -203,7 +299,7 @@ describe("game event builder", () => {
         publicCounterMutation({
           operation: "remove",
           counterType: "spy",
-          scope: { kind: "server", serverId: "remote_1" },
+          scope: { kind: "server", serverId: "r1" },
           before: 1,
           after: 0,
         }),
@@ -212,14 +308,14 @@ describe("game event builder", () => {
         {
           kind: "counter_threshold_identity_visibility_ended",
           counterType: "spy",
-          scope: { kind: "server", serverId: "remote_1" },
+          scope: { kind: "server", serverId: "r1" },
           activeAtOrAbove: 1,
           before: 1,
           after: 0,
           cards: [
             {
-              definitionId: "known_remote_card",
-              serverId: "remote_1",
+              definitionId: 342907630,
+              serverId: "r1",
               area: "root",
               positionKey: "root:0",
             },
@@ -242,7 +338,7 @@ describe("game event builder", () => {
     expect(event.publicPayload.counterMutations).toEqual([
       expect.objectContaining({
         counterType: "spy",
-        scope: { kind: "server", serverId: "remote_1" },
+        scope: { kind: "server", serverId: "r1" },
         before: 1,
         amount: 1,
         after: 0,
@@ -251,12 +347,12 @@ describe("game event builder", () => {
     expect(event.publicPayload.publicVisibilityTransitions).toEqual([
       expect.objectContaining({
         kind: "counter_threshold_identity_visibility_ended",
-        scope: { kind: "server", serverId: "remote_1" },
+        scope: { kind: "server", serverId: "r1" },
         before: 1,
         after: 0,
         cards: [
           expect.objectContaining({
-            definitionId: "known_remote_card",
+            definitionId: 342907630,
             positionKey: "root:0",
           }),
         ],
@@ -276,7 +372,7 @@ describe("game event builder", () => {
       payload: {
         v1922RunnerEventAbility:
           "successful_hq_run_pay_rez_cost_trash_rezzed_ice",
-        sourceDefinitionId: "onr_v1_080_core-command-jettison-ice",
+        sourceDefinitionId: 292,
       },
     } satisfies LegalAction;
 
@@ -322,8 +418,8 @@ describe("game event builder", () => {
     const event = buildEventWithHost(
       testBuildEventHost({
         sourceVisibility: "redacted",
-        sourceCardDefinitionId: "hidden_source",
-        sourceDefinitionId: "hidden_source",
+        sourceCardDefinitionId: 129984511,
+        sourceDefinitionId: 129984511,
         sourceTitle: "Hidden Source",
       }),
       previous.stateVersion,
@@ -353,7 +449,7 @@ describe("game event builder", () => {
     const assetId = previous.corp.hq[0]!;
     previous.cardInstances[assetId] = {
       ...previous.cardInstances[assetId]!,
-      definitionId: "onr_v1_309_bbs-whispering-campaign",
+      definitionId: 521,
     };
     const next = structuredClone(previous);
     next.cardInstances[assetId] = {
@@ -386,7 +482,7 @@ describe("game event builder", () => {
     expect(event.type).toBe("rez_card");
     expect(event.publicPayload).toMatchObject({
       actionType: "rez_card",
-      cardDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      cardDefinitionId: 521,
     });
     expect(event.visibilityClass).toBe("hidden_info_barrier");
     expect(event.privatePayload?.corp?.legalAction).toMatchObject({
@@ -462,11 +558,11 @@ describe("game event builder", () => {
       expiresAtStateVersion: previous.stateVersion,
       payload: {
         cardId: sourceCardInstanceId,
-        sourceDefinitionId: "runner_identity_001",
+        sourceDefinitionId: 587,
       },
     } satisfies LegalAction;
     const event = buildEventWithHost(
-      testBuildEventHost({ sourceDefinitionId: "runner_identity_001" }),
+      testBuildEventHost({ sourceDefinitionId: 587 }),
       previous.stateVersion,
       next.stateVersion,
       hashState(next),
@@ -478,7 +574,7 @@ describe("game event builder", () => {
 
     expect(toPublicEventForSide(event, "runner").publicPayload).toMatchObject({
       sourceCardInstanceId,
-      sourceDefinitionId: "runner_identity_001",
+      sourceDefinitionId: 587,
     });
     expect(toPublicEvent(event).publicPayload).not.toHaveProperty(
       "sourceCardInstanceId",
@@ -507,11 +603,11 @@ describe("game event builder", () => {
       expiresAtStateVersion: previous.stateVersion,
       payload: {
         cardId: "different-source-instance",
-        sourceDefinitionId: "runner_identity_001",
+        sourceDefinitionId: 587,
       },
     } satisfies LegalAction;
     const event = buildEventWithHost(
-      testBuildEventHost({ sourceDefinitionId: "runner_identity_001" }),
+      testBuildEventHost({ sourceDefinitionId: 587 }),
       previous.stateVersion,
       next.stateVersion,
       hashState(next),

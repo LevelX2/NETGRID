@@ -40,23 +40,23 @@ it.each([false, true])(
     expect(action.type).toBe("start_run");
     expect(
       decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-    ).toBe("plan:runner.pressure_central:central%3Ard");
+    ).toBe("pa90fufw9vc5bkshp96ztlryxl");
     expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({
       actionId: action.actionId,
       stateVersion: 142,
-      stepId: "plan:runner.pressure_central:central%3Ard:pressure:rd",
+      stepId: "pa90fufw9vc5bkshp96ztlryxl:pressure:rd",
     });
     const modes = input.legalActions.filter(
       (a) =>
         a.type === "install_card" &&
-        a.payload?.cardId === "runner_onr_proteus_092_morphing-tool_1" &&
+        a.payload?.cardId === "cxd" &&
         !a.payload.runnerProgramTrashBeforeInstall,
     );
     expect(modes).toHaveLength(3);
     const development = residentPlanPortfolioSnapshot(input)!.instances.find(
       (instance) =>
         instance.instanceId ===
-        "plan:runner.develop_board_and_hand:card%3Arunner_onr_proteus_092_morphing-tool_1",
+        "pdyonmjhtxxvvyqdpb1jw71txs",
     );
     expect(development?.moduleState).toMatchObject({
       kind: "development",

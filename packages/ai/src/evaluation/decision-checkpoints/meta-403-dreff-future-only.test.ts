@@ -47,7 +47,7 @@ it("SP-287 binds decline instead of consuming a future-only HQ ICE after success
   });
   const decision = chooseAiAction(input);
   expect(decision).toMatchObject({
-    actionId: "corp.resolve_choice",
+    actionId: "cn",
     fallbackUsed: false,
     selectedChoices: {
       choiceId: choice.choiceId,
@@ -55,9 +55,9 @@ it("SP-287 binds decline instead of consuming a future-only HQ ICE after success
     },
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+        rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
         leafExecutorInstanceId:
-          "plan:corp.defend_servers:server-defense-portfolio",
+          "penw02zfrkklof54c2nuye5att",
       },
     },
   });
@@ -70,14 +70,14 @@ it("fails closed on missing current effect facts instead of silently declining",
   expect(() => chooseAiAction(input)).toThrow(/window_origin_missing/);
 });
 
-it.each<{ definitionId: string; types: SubroutineType[]; useIce: boolean }>([
+it.each<{ definitionId: number; types: SubroutineType[]; useIce: boolean }>([
   {
-    definitionId: "onr_proteus_016_coyote",
+    definitionId: 74,
     types: ["set_run_future_strength_bonus"],
     useIce: false,
   },
   {
-    definitionId: "onr_v1_223_banpei",
+    definitionId: 435,
     types: ["trash_installed_program", "end_the_run"],
     useIce: true,
   },
@@ -118,9 +118,9 @@ it.each<{ definitionId: string; types: SubroutineType[]; useIce: boolean }>([
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           leafExecutorInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
         },
       },
     });
@@ -151,7 +151,9 @@ it.each(["wrong_timing", "disabled_decline"] as const)(
         code: "window_origin_missing",
         context: expect.objectContaining({
           owner: "continuation",
-          removalCondition: expect.stringContaining("Failed=choice_contract"),
+          removalCondition: expect.stringContaining(
+            invalidContract === "wrong_timing" ? "Failed=choice_contract" : "Failed=decline",
+          ),
         }),
       }),
     );

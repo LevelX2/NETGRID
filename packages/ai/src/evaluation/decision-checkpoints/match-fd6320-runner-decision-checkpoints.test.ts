@@ -54,7 +54,7 @@ describe("match FD6320 runner decision checkpoints", () => {
         const installedKrashIds = state.runner.rig.programs.filter(
           (instanceId) =>
             state.cardInstances[instanceId]?.definitionId ===
-            "onr_v1_039_krash",
+            251,
         );
         state.runner.rig.programs = state.runner.rig.programs.filter(
           (instanceId) => !installedKrashIds.includes(instanceId),
@@ -73,7 +73,7 @@ describe("match FD6320 runner decision checkpoints", () => {
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId = "FD6320-C02-NO-MATCHPOINT-FORCE";
         checkpoint.expectation = {
-          acceptableActions: [{ actionId: "runner.gain_credit" }],
+          acceptableActions: [{ actionId: "rb" }],
           planExecution: {
             acceptablePlanKinds: ["runner.defense_and_recovery"],
             acceptableCapabilities: ["fund_active_tag_removal"],

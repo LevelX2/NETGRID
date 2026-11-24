@@ -1,6 +1,8 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import { describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   aiInput,
   legalAction,
@@ -33,7 +35,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
       expect.arrayContaining([
         "plan_priority_class:P3",
         "plan_assessment_evidence:corp_engine_certified_immediate_root_rez_credit_conversion",
-        "plan_scheduler:route:corp_window.rez:plan:corp.economy:economy-campaign%3Aeconomy-root",
+        `plan_scheduler:route:corp_window.rez:${planInstanceIdForProposal({ moduleId: "corp.economy", dedupeKey: "economy-campaign:economy-root" })}`,
       ]),
     );
   });
@@ -69,10 +71,10 @@ describe("plan-first Corp conditional root-rez contract", () => {
     resetResidentPlanPortfolioMemory();
     const chester = corpUpgrade(
       "chester",
-      "onr_v1_352_chester-mix",
+      564,
       "Chester Mix",
     );
-    const ice = corpIce("data-wall", "onr_v1_237_data-wall", "Data Wall");
+    const ice = corpIce("data-wall", 449, "Data Wall");
     const rezChester = rezAction(chester, "rez-chester");
     const installIce = legalAction(
       "install-hq-ice",
@@ -103,7 +105,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     input.playerView.servers = [
       server(
         "hq",
-        [corpIce("existing-hq-ice", "onr_v1_237_data-wall", "Data Wall", true)],
+        [corpIce("existing-hq-ice", 449, "Data Wall", true)],
         [chester],
       ),
       server("rd"),
@@ -119,7 +121,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     resetResidentPlanPortfolioMemory();
     const chester = corpUpgrade(
       "chester",
-      "onr_v1_352_chester-mix",
+      564,
       "Chester Mix",
     );
     const gainCredit = legalAction(
@@ -150,10 +152,10 @@ describe("plan-first Corp conditional root-rez contract", () => {
   it("declines Dr. Dreff without an engine-certified future-encounter rez quote [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const input = drDreffInput({
-      attackedServerId: "remote_1",
-      dreffServerId: "remote_1",
+      attackedServerId: "r1",
+      dreffServerId: "r1",
       iceIndex: 0,
-      hqIce: [corpIce("data-wall", "onr_v1_237_data-wall", "Data Wall")],
+      hqIce: [corpIce("data-wall", 449, "Data Wall")],
       credits: 0,
     });
 
@@ -174,37 +176,37 @@ describe("plan-first Corp conditional root-rez contract", () => {
   it.each([
     {
       label: "an earlier ICE window",
-      attackedServerId: "remote_1",
-      dreffServerId: "remote_1",
+      attackedServerId: "r1",
+      dreffServerId: "r1",
       iceIndex: 1,
-      hqIce: [corpIce("data-wall", "onr_v1_237_data-wall", "Data Wall")],
+      hqIce: [corpIce("data-wall", 449, "Data Wall")],
       credits: 0,
     },
     {
       label: "a run on another fort",
-      attackedServerId: "remote_2",
-      dreffServerId: "remote_1",
+      attackedServerId: "r2",
+      dreffServerId: "r1",
       iceIndex: 0,
-      hqIce: [corpIce("data-wall", "onr_v1_237_data-wall", "Data Wall")],
+      hqIce: [corpIce("data-wall", 449, "Data Wall")],
       credits: 0,
     },
     {
       label: "no visible HQ ICE",
-      attackedServerId: "remote_1",
-      dreffServerId: "remote_1",
+      attackedServerId: "r1",
+      dreffServerId: "r1",
       iceIndex: 0,
       hqIce: [],
       credits: 4,
     },
     {
       label: "only unaffordable visible HQ ICE",
-      attackedServerId: "remote_1",
-      dreffServerId: "remote_1",
+      attackedServerId: "r1",
+      dreffServerId: "r1",
       iceIndex: 0,
       hqIce: [
         corpIce(
           "haunting-inquisition",
-          "onr_v1_247_haunting-inquisition",
+          459,
           "Haunting Inquisition",
         ),
       ],
@@ -387,7 +389,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
   it("routes Encoder Inc. only when a visible installed code gate makes its exact rez productive [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const encoder = visibleCard("encoder", "corp", "asset", {
-      definitionId: "onr_v1_320_encoder-inc",
+      definitionId: 532,
       title: "Encoder, Inc.",
       rezzed: false,
     });
@@ -400,11 +402,11 @@ describe("plan-first Corp conditional root-rez contract", () => {
     ]);
     input.playerView.servers = [
       server("hq", [
-        corpIce("quandary", "onr_v1_261_quandary", "Quandary", true),
+        corpIce("quandary", 473, "Quandary", true),
       ]),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [encoder]),
+      server("r1", [], [encoder]),
     ];
 
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
@@ -417,7 +419,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
   it("disposes Encoder Inc. exactly when no installed code gate can use it [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const encoder = visibleCard("encoder", "corp", "asset", {
-      definitionId: "onr_v1_320_encoder-inc",
+      definitionId: 532,
       title: "Encoder, Inc.",
       rezzed: false,
     });
@@ -437,7 +439,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [encoder]),
+      server("r1", [], [encoder]),
     ];
 
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
@@ -451,7 +453,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     resetResidentPlanPortfolioMemory();
     const lockout = corpUpgrade(
       "fort-stealth-lockout",
-      "onr_v1_373_twenty-four-hour-surveillance",
+      585,
       "Fort Stealth Lockout",
     );
     const input = corpInput(
@@ -466,7 +468,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     input.playerView.servers = [
       server(
         "hq",
-        [corpIce("hq-ice", "onr_v1_237_data-wall", "Data Wall", true)],
+        [corpIce("hq-ice", 449, "Data Wall", true)],
         [lockout],
       ),
       server("rd"),
@@ -498,7 +500,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     {
       label: "when the current run attacks another fort",
       rig: [runnerStealthCreditPool("stealth-pool", 6)],
-      runServerId: "remote_1" as const,
+      runServerId: "r1" as const,
     },
   ])(
     "declines a fort-bound stealth-credit lockout $label [legacy_compare]",
@@ -506,7 +508,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
       resetResidentPlanPortfolioMemory();
       const lockout = corpUpgrade(
         "fort-stealth-lockout",
-        "onr_v1_373_twenty-four-hour-surveillance",
+        585,
         "Fort Stealth Lockout",
       );
       const input = corpInput(
@@ -519,12 +521,12 @@ describe("plan-first Corp conditional root-rez contract", () => {
       input.playerView.servers = [
         server(
           "hq",
-          [corpIce("hq-ice", "onr_v1_237_data-wall", "Data Wall", true)],
+          [corpIce("hq-ice", 449, "Data Wall", true)],
           [lockout],
         ),
         server("rd"),
         server("archives"),
-        ...(runServerId === "remote_1" ? [server("remote_1")] : []),
+        ...(runServerId === "r1" ? [server("r1")] : []),
       ];
 
       const decision = liveContext().chooseSemanticRuntimeAction(input, {});
@@ -537,7 +539,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
       expect(decision.evidence).toEqual(
         expect.arrayContaining([
           "plan_module:corp.defend_servers",
-          "plan_scheduler:route:corp_window.decline_rez:plan:corp.defend_servers:server-defense-portfolio",
+          "plan_scheduler:route:corp_window.decline_rez:penw02zfrkklof54c2nuye5att",
         ]),
       );
     },
@@ -559,7 +561,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     ({ timingPoint, includeDecline }) => {
       resetResidentPlanPortfolioMemory();
       const pacifica = visibleCard("pacifica", "corp", "asset", {
-        definitionId: "onr_v1_334_pacifica-regional-ai",
+        definitionId: 546,
         title: "Pacifica Regional AI",
         rezzed: false,
         advancementCounters: 0,
@@ -582,10 +584,10 @@ describe("plan-first Corp conditional root-rez contract", () => {
         server("hq"),
         server("rd"),
         server("archives"),
-        server("remote_1", [], [pacifica]),
+        server("r1", [], [pacifica]),
       ];
       if (includeDecline) {
-        input.playerView.run = activeRun("remote_1", 0);
+        input.playerView.run = activeRun("r1", 0);
       }
 
       expect(
@@ -600,7 +602,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
   it("routes Data Masons only through visible installed Wall support [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const dataMasons = visibleCard("data-masons", "corp", "asset", {
-      definitionId: "onr_v1_317_data-masons",
+      definitionId: 529,
       title: "Data Masons",
       rezzed: false,
     });
@@ -613,11 +615,11 @@ describe("plan-first Corp conditional root-rez contract", () => {
     ]);
     input.playerView.servers = [
       server("hq", [
-        corpIce("data-wall", "onr_v1_237_data-wall", "Data Wall", true),
+        corpIce("data-wall", 449, "Data Wall", true),
       ]),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [dataMasons]),
+      server("r1", [], [dataMasons]),
     ];
 
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
@@ -630,11 +632,11 @@ describe("plan-first Corp conditional root-rez contract", () => {
   it("keeps productive Data Masons executable when central ICE allocation is unknown [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const dataMasons = visibleCard("data-masons", "corp", "asset", {
-      definitionId: "onr_v1_317_data-masons",
+      definitionId: 529,
       title: "Data Masons",
       rezzed: false,
     });
-    const rdIce = corpIce("rd-data-wall", "onr_v1_237_data-wall", "Data Wall");
+    const rdIce = corpIce("rd-data-wall", 449, "Data Wall");
     const installCentralIce = (serverId: "hq" | "rd") =>
       legalAction(
         `install-${serverId}-ice`,
@@ -682,11 +684,11 @@ describe("plan-first Corp conditional root-rez contract", () => {
     }));
     input.playerView.servers = [
       server("hq", [
-        corpIce("installed-wall", "onr_v1_237_data-wall", "Data Wall", true),
+        corpIce("installed-wall", 449, "Data Wall", true),
       ]),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [dataMasons]),
+      server("r1", [], [dataMasons]),
     ];
 
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
@@ -710,32 +712,32 @@ describe("plan-first Corp conditional root-rez contract", () => {
     resetResidentPlanPortfolioMemory();
     const tesseract = corpUpgrade(
       "tesseract",
-      "onr_v1_370_tesseract-fort-construction",
+      582,
       "Tesseract Fort Construction",
     );
     const input = corpInput(
       [rezAction(tesseract, "rez-tesseract"), declineRez()],
       "run.approach_ice",
     );
-    input.playerView.run = activeRun("remote_1", 0);
+    input.playerView.run = activeRun("r1", 0);
     input.playerView.servers = [
       server("hq"),
       server("rd"),
       server("archives"),
       server(
-        "remote_1",
-        [corpIce("remote-ice", "onr_v1_237_data-wall", "Data Wall")],
+        "r1",
+        [corpIce("remote-ice", 449, "Data Wall")],
         [tesseract],
       ),
     ];
 
     input.playerView.servers.find(
-      (s) => s.id === "remote_1",
+      (s) => s.id === "r1",
     )!.ice[0]!.effectiveRezCostQuote = {
       context: "installed",
       cardId: "remote-ice",
-      targetServerId: "remote_1",
-      projectedServerId: "remote_1",
+      targetServerId: "r1",
+      projectedServerId: "r1",
       expiresAtStateVersion: input.playerView.stateVersion,
       complete: true,
       baseCredits: 1,
@@ -751,11 +753,42 @@ describe("plan-first Corp conditional root-rez contract", () => {
     });
   });
 
+  it("does not use already-passed ICE to fund the current Tesseract encounter", () => {
+    resetResidentPlanPortfolioMemory();
+    const tesseract = corpUpgrade(
+      "tesseract",
+      582,
+      "Tesseract Fort Construction",
+    );
+    const input = corpInput(
+      [rezAction(tesseract, "rez-tesseract"), declineRez()],
+      "run.approach_ice",
+    );
+    input.playerView.run = activeRun("r1", 0);
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "r1",
+        [
+          corpIce("inner", 449, "Data Wall"),
+          corpIce("passed", 449, "Data Wall", true),
+        ],
+        [tesseract],
+      ),
+    ];
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: "decline-rez",
+      fallbackUsed: false,
+    });
+  });
+
   it("declines Tesseract after the run has passed the last ICE [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const tesseract = corpUpgrade(
       "tesseract",
-      "onr_v1_370_tesseract-fort-construction",
+      582,
       "Tesseract Fort Construction",
     );
     const input = corpInput(
@@ -763,17 +796,17 @@ describe("plan-first Corp conditional root-rez contract", () => {
       "run.movement_rez_window",
     );
     input.playerView.run = {
-      ...activeRun("remote_1", 0),
+      ...activeRun("r1", 0),
       phase: "movement",
-      position: { kind: "server", serverId: "remote_1" },
+      position: { kind: "server", serverId: "r1" },
     };
     input.playerView.servers = [
       server("hq"),
       server("rd"),
       server("archives"),
       server(
-        "remote_1",
-        [corpIce("remote-ice", "onr_v1_237_data-wall", "Data Wall", true)],
+        "r1",
+        [corpIce("remote-ice", 449, "Data Wall", true)],
         [tesseract],
       ),
     ];
@@ -788,7 +821,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     resetResidentPlanPortfolioMemory();
     const interfaceRoutines = corpUpgrade(
       "interface-routines",
-      "onr_v1_350_antiquated-interface-routines",
+      562,
       "Antiquated Interface Routines",
     );
     const input = corpInput([
@@ -801,7 +834,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     input.playerView.servers = [
       server(
         "hq",
-        [corpIce("hq-ice", "onr_v1_237_data-wall", "Data Wall", true)],
+        [corpIce("hq-ice", 449, "Data Wall", true)],
         [interfaceRoutines],
       ),
       server("rd"),
@@ -828,10 +861,10 @@ describe("plan-first Corp conditional root-rez contract", () => {
     resetResidentPlanPortfolioMemory();
     const interfaceRoutines = corpUpgrade(
       "interface-routines",
-      "onr_v1_350_antiquated-interface-routines",
+      562,
       "Antiquated Interface Routines",
     );
-    const rdIce = corpIce("rd-data-wall", "onr_v1_237_data-wall", "Data Wall");
+    const rdIce = corpIce("rd-data-wall", 449, "Data Wall");
     const installRdIce = legalAction(
       "install-rd-ice",
       "corp",
@@ -867,7 +900,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     input.playerView.servers = [
       server(
         "hq",
-        [corpIce("hq-ice", "onr_v1_237_data-wall", "Data Wall", true)],
+        [corpIce("hq-ice", 449, "Data Wall", true)],
         [interfaceRoutines],
       ),
       server("rd"),
@@ -885,7 +918,7 @@ describe("plan-first Corp conditional root-rez contract", () => {
     resetResidentPlanPortfolioMemory();
     const interfaceRoutines = corpUpgrade(
       "interface-routines",
-      "onr_v1_350_antiquated-interface-routines",
+      562,
       "Antiquated Interface Routines",
     );
     const gainCredit = legalAction(
@@ -917,20 +950,20 @@ describe("plan-first Corp conditional root-rez contract", () => {
     resetResidentPlanPortfolioMemory();
     const grid = corpUpgrade(
       "singapore-grid",
-      "onr_v1_369_singapore-city-grid",
+      581,
       "Singapore City Grid",
     );
     grid.rezzed = true;
     const currentIce = corpIce(
       "current-fatal-attractor",
-      "onr_v1_242_fatal-attractor",
+      454,
       "Fatal Attractor",
     );
     currentIce.strength = 4;
     currentIce.rulesText = "Do 3 Net damage.";
     const sameIce = corpIce(
       "hq-fatal-attractor",
-      "onr_v1_242_fatal-attractor",
+      454,
       "Fatal Attractor",
     );
     sameIce.strength = 4;
@@ -959,16 +992,16 @@ describe("plan-first Corp conditional root-rez contract", () => {
     resetResidentPlanPortfolioMemory();
     const grid = corpUpgrade(
       "singapore-grid",
-      "onr_v1_369_singapore-city-grid",
+      581,
       "Singapore City Grid",
     );
     grid.rezzed = true;
-    const currentIce = corpIce("current-filter", "onr_v1_244_filter", "Filter");
+    const currentIce = corpIce("current-filter", 456, "Filter");
     currentIce.strength = 0;
     currentIce.rulesText = "End the run.";
     const replacementIce = corpIce(
       "hq-data-naga",
-      "onr_v1_235_data-naga",
+      447,
       "Data Naga",
     );
     replacementIce.strength = 5;
@@ -1003,15 +1036,15 @@ describe("plan-first Corp conditional root-rez contract", () => {
 });
 
 type DrDreffInputParams = {
-  attackedServerId: "remote_1" | "remote_2";
-  dreffServerId: "remote_1" | "remote_2";
+  attackedServerId: "r1" | "r2";
+  dreffServerId: "r1" | "r2";
   iceIndex: number;
   hqIce: VisibleCard[];
   credits: number;
 };
 
 function drDreffInput(params: DrDreffInputParams): AiDecisionInput {
-  const dreff = corpUpgrade("dr-dreff", "onr_v1_358_dr-dreff", "Dr. Dreff");
+  const dreff = corpUpgrade("dr-dreff", 570, "Dr. Dreff");
   const input = corpInput(
     [rezAction(dreff, "rez-dr-dreff"), declineRez()],
     "run.approach_ice",
@@ -1024,26 +1057,26 @@ function drDreffInput(params: DrDreffInputParams): AiDecisionInput {
     server("rd"),
     server("archives"),
     server(
-      "remote_1",
+      "r1",
       [
-        corpIce("remote-1-inner", "onr_v1_237_data-wall", "Data Wall", true),
+        corpIce("remote-1-inner", 449, "Data Wall", true),
         ...(params.iceIndex > 0
           ? [
               corpIce(
                 "remote-1-outer",
-                "onr_v1_237_data-wall",
+                449,
                 "Data Wall",
                 true,
               ),
             ]
           : []),
       ],
-      params.dreffServerId === "remote_1" ? [dreff] : [],
+      params.dreffServerId === "r1" ? [dreff] : [],
     ),
     server(
-      "remote_2",
-      [corpIce("remote-2-inner", "onr_v1_237_data-wall", "Data Wall", true)],
-      params.dreffServerId === "remote_2" ? [dreff] : [],
+      "r2",
+      [corpIce("remote-2-inner", 449, "Data Wall", true)],
+      params.dreffServerId === "r2" ? [dreff] : [],
     ),
   ];
   return input;
@@ -1055,10 +1088,10 @@ function jennyJettInput(params: {
   credits: number;
   quote?: "exact" | "missing";
 }): AiDecisionInput {
-  const jenny = corpUpgrade("jenny", "onr_v1_359_jenny-jett", "Jenny Jett");
+  const jenny = corpUpgrade("jenny", 571, "Jenny Jett");
   const hqIce = corpIce(
     "haunting-inquisition",
-    "onr_v1_247_haunting-inquisition",
+    459,
     "Haunting Inquisition",
   );
   const rezJenny = rezAction(jenny, "rez-jenny", 1);
@@ -1073,7 +1106,7 @@ function jennyJettInput(params: {
       cardImplementationFortRunRezSupportQuoteComplete: true,
       cardImplementationFortRunRezSupportQuoteSourceCardInstanceId:
         jenny.instanceId,
-      cardImplementationFortRunRezSupportQuoteTargetServerId: "remote_1",
+      cardImplementationFortRunRezSupportQuoteTargetServerId: "r1",
       cardImplementationFortRunRezSupportQuoteStateVersion: 1,
       cardImplementationFortRunRezSupportQuoteActionId: rezJenny.actionId,
       cardImplementationFortRunRezSupportQuoteRezCredits: 1,
@@ -1090,17 +1123,17 @@ function jennyJettInput(params: {
   const input = corpInput([rezJenny, declineRez()], "run.approach_ice");
   input.playerView.own.credits = params.credits;
   input.playerView.own.gripOrHq = [hqIce];
-  input.playerView.run = activeRun("remote_1", params.iceIndex);
+  input.playerView.run = activeRun("r1", params.iceIndex);
   input.playerView.servers = [
     server("hq"),
     server("rd"),
     server("archives"),
     server(
-      "remote_1",
+      "r1",
       Array.from({ length: params.installedIceCount }, (_entry, index) =>
         corpIce(
           `remote-ice-${index}`,
-          "onr_v1_237_data-wall",
+          449,
           "Data Wall",
           true,
         ),
@@ -1133,11 +1166,11 @@ function corpInput(
 }
 
 function activeRun(
-  attackedServerId: "hq" | "remote_1" | "remote_2",
+  attackedServerId: "hq" | "r1" | "r2",
   iceIndex: number,
 ): NonNullable<PlayerView["run"]> {
   return {
-    runId: "corp-rez-contract-run",
+    runId: 1,
     attackedServerId,
     phase: "approach_ice",
     position: {
@@ -1151,7 +1184,7 @@ function activeRun(
 
 function corpUpgrade(
   instanceId: string,
-  definitionId: string,
+  definitionId: number,
   title: string,
 ): VisibleCard {
   return visibleCard(instanceId, "corp", "upgrade", {
@@ -1163,7 +1196,7 @@ function corpUpgrade(
 
 function corpIce(
   instanceId: string,
-  definitionId: string,
+  definitionId: number,
   title: string,
   rezzed = false,
 ): VisibleCard {
@@ -1171,6 +1204,7 @@ function corpIce(
     definitionId,
     title,
     rezzed,
+    subtypes: [...(planningCardFactsByDefinitionId(definitionId)?.subtypes ?? [])],
   });
 }
 
@@ -1179,7 +1213,7 @@ function runnerStealthCreditPool(
   amount: number,
 ): VisibleCard {
   return visibleCard(instanceId, "runner", "program", {
-    definitionId: "onr_v1_011_cloak",
+    definitionId: 223,
     title: "Visible Stealth Credit Pool",
     subtypes: ["stealth"],
     counterDisplays: [
@@ -1200,7 +1234,7 @@ function runnerStealthCreditPool(
 
 function corpAsset(
   instanceId: string,
-  definitionId: string,
+  definitionId: number,
   title: string,
 ): VisibleCard {
   return visibleCard(instanceId, "corp", "asset", {
@@ -1220,7 +1254,7 @@ function rootRezEconomyInput(
 ): AiDecisionInput {
   const asset = corpAsset(
     "economy-root",
-    "simple_economy_asset",
+    594,
     "Simple Economy Asset",
   );
   const rezCredits = outcome === "nonpositive" ? 3 : 1;
@@ -1235,7 +1269,7 @@ function rootRezEconomyInput(
       payload: {
         cardId: asset.instanceId,
         rootRez: true,
-        serverId: "remote_1",
+        serverId: "r1",
         ...(outcome === "missing"
           ? {}
           : {
@@ -1243,7 +1277,7 @@ function rootRezEconomyInput(
                 "corp-root-rez-credit-outcome-quote-v1",
               rootRezCreditOutcomeQuoteComplete: true,
               rootRezCreditOutcomeQuoteSourceCardInstanceId: asset.instanceId,
-              rootRezCreditOutcomeQuoteTargetServerId: "remote_1",
+              rootRezCreditOutcomeQuoteTargetServerId: "r1",
               rootRezCreditOutcomeQuoteStateVersion: 2,
               rootRezCreditOutcomeQuoteTimingPoint: "run.movement_rez_window",
               rootRezCreditOutcomeQuoteActionId:
@@ -1262,17 +1296,17 @@ function rootRezEconomyInput(
   const input = corpInput([rez, declineRez()], "run.movement_rez_window", 2);
   input.playerView.own.credits = 5;
   input.playerView.run = {
-    runId: "root-rez-economy-run",
-    attackedServerId: "remote_1",
+    runId: 2,
+    attackedServerId: "r1",
     phase: "movement",
-    position: { kind: "server", serverId: "remote_1" },
+    position: { kind: "server", serverId: "r1" },
     successful: false,
   };
   input.playerView.servers = [
     server("hq"),
     server("rd"),
     server("archives"),
-    server("remote_1", [], [asset]),
+    server("r1", [], [asset]),
   ];
   return input;
 }

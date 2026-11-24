@@ -1,4 +1,7 @@
+import { RandomPurposeCode } from "@netgrid/shared";
+import { serializedDefinitionReferences } from "./test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
+import { cardSpecSetIdsForDefinitionId } from "@netgrid/cards/engine";
 import {
   applyAction,
   applyEffectCommands,
@@ -199,11 +202,11 @@ const PRO007_CORP_DECK: DeckDefinition = {
   id: "proteus_pro007_corp_test_harness",
   cards: [
     ...ONR_V1_CORP_DECK.cards,
-    { id: "onr_proteus_047_credit-consolidation", quantity: 1 },
-    { id: "onr_proteus_048_data-sifters", quantity: 1 },
-    { id: "onr_proteus_050_manhunt", quantity: 1 },
-    { id: "onr_proteus_052_schlaghund-pointers", quantity: 1 },
-    { id: "onr_proteus_053_underworld-mole", quantity: 1 },
+    { id: 105, quantity: 1 },
+    { id: 106, quantity: 1 },
+    { id: 108, quantity: 1 },
+    { id: 110, quantity: 1 },
+    { id: 111, quantity: 1 },
   ],
 };
 
@@ -212,8 +215,8 @@ const PRO007_RUNNER_DECK: DeckDefinition = {
   id: "proteus_pro007_runner_test_harness",
   cards: [
     ...ONR_V1_RUNNER_DECK.cards,
-    { id: "onr_proteus_128_airport-locker", quantity: 1 },
-    { id: "onr_proteus_150_streetware-distributor", quantity: 1 },
+    { id: 186, quantity: 1 },
+    { id: 208, quantity: 1 },
   ],
 };
 
@@ -239,7 +242,7 @@ function playCorpOperationByDefinition(
   const cardId = addCorpCardToHqForTest(
     state,
     definitionId,
-    definitionId.replace(/[^a-z0-9]/gi, "_"),
+    String(definitionId),
   );
   keepOnlyCorpHqCard(state, cardId);
   return apply(
@@ -321,7 +324,7 @@ function playRunnerEventByDefinition(
   addRunnerCardToGripForTest(
     state,
     definitionId,
-    definitionId.replace(/[^a-z0-9]/gi, "_"),
+    String(definitionId),
   );
   return apply(
     state,
@@ -360,7 +363,7 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
       state.corp.credits = 11;
       state.runner.credits = 6;
       state.runnerTurnFlags!.runAttemptsLastTurn = 1;
-      state = playCorpOperationByDefinition(state, "onr_proteus_050_manhunt");
+      state = playCorpOperationByDefinition(state, 108);
       state = applyChoice(state, "corp", "bid_1");
       state = applyChoice(state, "runner", `bid_${bid}`);
       if (state.pendingChoice?.source.startsWith("trace_post_bid_link:"))
@@ -382,7 +385,7 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
 
     const dataSiftersId = addCorpCardToHqForTest(
       state,
-      "onr_proteus_048_data-sifters",
+      106,
       "data_sifters",
     );
     keepOnlyCorpHqCard(state, dataSiftersId);
@@ -414,7 +417,7 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
     state.corp.credits = 20;
     state = playCorpOperationByDefinition(
       state,
-      "onr_proteus_047_credit-consolidation",
+      105,
     );
     expect(state.corp.credits).toBe(25);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -435,7 +438,7 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
       runAttemptsThisGame: 1,
     };
 
-    state = playCorpOperationByDefinition(state, "onr_proteus_050_manhunt");
+    state = playCorpOperationByDefinition(state, 108);
     expect(state.trace).toMatchObject({
       traceLimit: 6,
       successEffect: { type: "add_tags_by_trace_margin_over_runner_link" },
@@ -459,7 +462,7 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
     };
     const schlaghundId = addCorpCardToHqForTest(
       state,
-      "onr_proteus_052_schlaghund-pointers",
+      110,
       "schlaghund_pointers",
     );
     keepOnlyCorpHqCard(state, schlaghundId);
@@ -484,7 +487,7 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
     state.corp.credits = 20;
     const resourceId = installRunnerResourceForTest(
       state,
-      "onr_proteus_150_streetware-distributor",
+      208,
     );
     state.runnerTurnFlags = {
       ...(state.runnerTurnFlags ?? {
@@ -495,7 +498,7 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
     };
     const moleId = addCorpCardToHqForTest(
       state,
-      "onr_proteus_053_underworld-mole",
+      111,
       "underworld_mole",
     );
     keepOnlyCorpHqCard(state, moleId);
@@ -506,7 +509,7 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
     expect(legal).toHaveLength(1);
     expect(legal[0]?.payload).toMatchObject({
       traceSuccessTargetCardId: resourceId,
-      traceSuccessTargetDefinitionId: "onr_proteus_150_streetware-distributor",
+      traceSuccessTargetDefinitionId: 208,
     });
 
     state = apply(
@@ -530,7 +533,7 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
       tagsAdded: 1,
       trashedCardType: "resource",
       trashedCount: 1,
-      trashedCardDefinitionId: "onr_proteus_150_streetware-distributor",
+      trashedCardDefinitionId: 208,
     });
   });
 
@@ -539,7 +542,7 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
     state.corp.credits = 20;
     const hiddenResourceId = installRunnerResourceForTest(
       state,
-      "onr_proteus_128_airport-locker",
+      186,
     );
     state.cardInstances[hiddenResourceId] = {
       ...state.cardInstances[hiddenResourceId]!,
@@ -555,7 +558,7 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
     };
     const moleId = addCorpCardToHqForTest(
       state,
-      "onr_proteus_053_underworld-mole",
+      111,
       "underworld_hidden_mole",
     );
     keepOnlyCorpHqCard(state, moleId);
@@ -569,7 +572,7 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
     const hiddenResourceSlotId = String(
       legal[0]?.payload?.hiddenResourceSlotId ?? "",
     );
-    expect(hiddenResourceSlotId).toMatch(/^hidden_runner_resource_/);
+    expect(hiddenResourceSlotId).toMatch(/^s[a-z0-9]{1,7}$/);
     expect(legal[0]?.payload).toMatchObject({
       traceSuccessTargetCardId: hiddenResourceSlotId,
       traceSuccessTargetResourceSlotId: hiddenResourceSlotId,
@@ -580,8 +583,8 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
     expect(legal[0]?.payload).not.toHaveProperty(
       "traceSuccessTargetDefinitionId",
     );
-    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
-      "onr_proteus_128_airport-locker",
+    expect(serializedDefinitionReferences(JSON.stringify(getPlayerView(state, "corp")))).not.toContain(
+      186,
     );
 
     state = apply(
@@ -596,8 +599,8 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
         targetCardInstanceId: hiddenResourceId,
       },
     });
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
-      "onr_proteus_128_airport-locker",
+    expect(serializedDefinitionReferences(JSON.stringify(state.eventLog.at(-1)?.publicPayload))).not.toContain(
+      186,
     );
 
     state = resolveTraceWithMaximumCorpBid(state);
@@ -608,7 +611,7 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
       tagsAdded: 1,
       trashedCardType: "resource",
       trashedCount: 1,
-      trashedCardDefinitionId: "onr_proteus_128_airport-locker",
+      trashedCardDefinitionId: 186,
       hiddenResourceSlotId,
       hiddenRunnerResourceRevealed: true,
     });
@@ -640,7 +643,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     addRunnerCardToGripForTest(
       state,
       definitionId,
-      definitionId.replace(/[^a-z0-9]/gi, "_"),
+      String(definitionId),
     );
     const action = mustAction(
       state,
@@ -668,7 +671,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
   it("covers Drone for a Day, On the Fast Track and Prearranged Drop economy", () => {
     let state = runnerMain("proteus-pro008-drone");
     const droneBefore = state.runner.credits;
-    const drone = playEventAction(state, "onr_proteus_107_drone-for-a-day");
+    const drone = playEventAction(state, 165);
     state = drone.state;
     expect(state.runner.credits).toBe(droneBefore - drone.creditCost + 9);
     expect(state.runner.tags).toBe(1);
@@ -678,7 +681,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
       getLegalActions(state, "runner").some(
         (candidate) =>
           sourceDefinition(state, candidate) ===
-          "onr_proteus_114_on-the-fast-track",
+          172,
       ),
     ).toBe(false);
     state.runnerTurnFlags = {
@@ -689,7 +692,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
       trashedAdvertisementThisTurn: true,
     };
     const fastBefore = state.runner.credits;
-    const fast = playEventAction(state, "onr_proteus_114_on-the-fast-track");
+    const fast = playEventAction(state, 172);
     expect(fast.action.payload).toMatchObject({ gainCreditsAmount: 8 });
     state = fast.state;
     expect(state.runner.credits).toBe(fastBefore - fast.creditCost + 8);
@@ -707,7 +710,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     };
     const transactionsFast = playEventAction(
       transactionsState,
-      "onr_proteus_114_on-the-fast-track",
+      172,
     );
     expect(transactionsFast.action.payload).toMatchObject({
       gainCreditsAmount: 6,
@@ -716,15 +719,15 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     state = runnerMain("proteus-pro008-prearranged-drop");
     const accessedAgendaId = addCorpCardToRdForTest(
       state,
-      "simple_agenda",
+      588,
       "prearranged_agenda",
     );
     const dropBefore = state.runner.credits;
-    const drop = playEventAction(state, "onr_proteus_118_prearranged-drop");
+    const drop = playEventAction(state, 176);
     state = drop.state;
     const secondDropId = addRunnerCardToGripForTest(
       state,
-      "onr_proteus_118_prearranged-drop",
+      176,
       "prearranged_second",
     );
     state = apply(
@@ -769,7 +772,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
 
   it("starts All-Hands and Rush Hour central runs with +3 access and noisy breaker lock", () => {
     let state = runnerMain("proteus-pro008-all-hands");
-    state = playEventAction(state, "onr_proteus_101_all-hands").state;
+    state = playEventAction(state, 159).state;
     expect(state.run).toMatchObject({
       attackedServerId: "hq",
       accessCount: 4,
@@ -779,16 +782,16 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     state = runnerMain("proteus-pro008-rush-hour");
     addInstalledRunnerProgramForTest(
       state,
-      "onr_v1_036_jackhammer",
+      248,
       "jackhammer",
     );
     const iceId = addRezzedCorpIceForTest(
       state,
-      "onr_v1_232_crystal-wall",
+      444,
       "rd",
       "rush_wall",
     );
-    state = playEventAction(state, "onr_proteus_122_rush-hour").state;
+    state = playEventAction(state, 180).state;
     expect(state.run).toMatchObject({
       attackedServerId: "rd",
       accessCount: 4,
@@ -802,19 +805,19 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     };
     expect(
       getLegalActions(state, "runner").some(
-        (action) => sourceDefinition(state, action) === "onr_v1_036_jackhammer",
+        (action) => sourceDefinition(state, action) === 248,
       ),
     ).toBe(false);
   });
 
   it("exposes Decoy Signal approach ICE before rez without hidden-info leakage", () => {
     let state = runnerMain("proteus-pro008-decoy");
-    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_232_crystal-wall");
+    const iceId = putCorpIceOnServer(state, "rd", 444);
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
       "Crystal Wall",
     );
 
-    state = playEventAction(state, "onr_proteus_104_decoy-signal", "rd").state;
+    state = playEventAction(state, 162, "rd").state;
     const replayStart = state.eventLog.length;
     const replayInitial = structuredClone(state);
     const exposeAction = mustAction(
@@ -838,7 +841,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
       (action) => action.actionId === exposeAction.actionId,
     );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      publicRevealDefinitionId: "onr_v1_232_crystal-wall",
+      publicRevealDefinitionId: 444,
     });
     expect(
       getLegalActions(state, "runner").some(
@@ -857,13 +860,13 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     let state = runnerMain("proteus-pro008-demolition");
     const iceId = addRezzedCorpIceForTest(
       state,
-      "onr_v1_232_crystal-wall",
+      444,
       "rd",
       "demo_wall",
     );
     state = playEventAction(
       state,
-      "onr_proteus_105_demolition-run",
+      163,
       "rd",
     ).state;
     state.run = {
@@ -884,7 +887,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     let state = runnerMain("proteus-pro008-remote-detonator");
     const fallGuyId = addRunnerCardToGripForTest(
       state,
-      "onr_v1_161_fall-guy",
+      373,
       "remote_detonator_fall_guy",
     );
     state = apply(
@@ -896,14 +899,14 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     );
     addRunnerCardToGripForTest(
       state,
-      "onr_proteus_121_remote-detonator",
+      179,
       "remote_detonator_gated",
     );
     expect(
       getLegalActions(state, "runner").some(
         (action) =>
           sourceDefinition(state, action) ===
-          "onr_proteus_121_remote-detonator",
+          179,
       ),
     ).toBe(false);
 
@@ -921,7 +924,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
       (candidate) =>
         candidate.type === "play_event" &&
         sourceDefinition(state, candidate) ===
-          "onr_proteus_121_remote-detonator",
+          179,
     );
     expect(emptyFortAction.payload).toMatchObject({
       runnerFortIceTrashQuoteSchemaVersion: "runner-fort-ice-trash-quote-v1",
@@ -932,7 +935,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     });
     const iceId = addRezzedCorpIceForTest(
       state,
-      "onr_v1_232_crystal-wall",
+      444,
       "rd",
       "remote_detonator_wall",
     );
@@ -942,7 +945,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
       (candidate) =>
         candidate.type === "play_event" &&
         sourceDefinition(state, candidate) ===
-          "onr_proteus_121_remote-detonator",
+          179,
     );
     expect(action.payload?.runnerFortIceTrashRezzedIceCount).toBe(1);
     const stale = applyAction(state, {
@@ -965,7 +968,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     expect(state.pendingAddTagContinuation).toMatchObject({ kind: "terminal" });
     expect(state.pendingChoice?.source).toContain("event_modification");
     const remoteServerTrashTagSequenceEffect =
-      cardImplementationForDefinitionId("onr_proteus_121_remote-detonator")
+      cardImplementationForDefinitionId(179)
         ?.abilities?.flatMap((ability) =>
           "effects" in ability ? ability.effects : [],
         )
@@ -999,13 +1002,13 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     let state = runnerMain("meta-403-removed-successful-fort");
     const rootId = addRezzedCorpRootForTest(
       state,
-      "onr_v1_312_chicago-branch",
-      "remote_1",
+      524,
+      "r1",
       "removed_successful_fort",
     );
     const eventId = addRunnerCardToGripForTest(
       state,
-      "onr_proteus_121_remote-detonator",
+      179,
       "draw_after_removed_fort",
     );
     state.runner.grip = state.runner.grip.filter((id) => id !== eventId);
@@ -1020,7 +1023,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
     state = apply(
@@ -1029,12 +1032,12 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
       (action) => action.type === "trash_accessed_card",
     );
     expect(state.corp.archives).toContain(rootId);
-    expect(state.corp.servers.some((server) => server.id === "remote_1")).toBe(
+    expect(state.corp.servers.some((server) => server.id === "r1")).toBe(
       false,
     );
     expect(state.runnerTurnFlags).toMatchObject({
       successfulRunThisTurn: true,
-      lastSuccessfulRunServerId: "remote_1",
+      lastSuccessfulRunServerId: "r1",
     });
     state = apply(state, "runner", (action) => action.type === "draw_card");
     expect(state.runner.grip).toContain(eventId);
@@ -1055,13 +1058,13 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     let state = runnerMain("proteus-pro008-disgruntled");
     const iceId = addRezzedCorpIceForTest(
       state,
-      "onr_v1_232_crystal-wall",
+      444,
       "rd",
       "disgruntled_wall",
     );
     state = playEventAction(
       state,
-      "onr_proteus_106_disgruntled-ice-technician",
+      164,
       "rd",
     ).state;
     const eventId = state.run?.successfulRunSourceCardId;
@@ -1088,10 +1091,10 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
       expiresAtStateVersion: state.stateVersion,
       payload: {
         cardId: eventId,
-        sourceDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
+        sourceDefinitionId: 164,
         abilityId: "derez_fully_broken_passed_ice_and_end_run",
         targetIceId: iceId,
-        targetIceDefinitionId: "onr_v1_232_crystal-wall",
+        targetIceDefinitionId: 444,
         runnerUtilityAbility: "derez_fully_broken_passed_ice_and_end_run",
       },
     });
@@ -1106,10 +1109,10 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
 
   it("rewards Reconnaissance rezzes and tracks Weefle Initiation prevention pool", () => {
     let state = runnerMain("proteus-pro008-recon");
-    putCorpIceOnServer(state, "rd", "onr_v1_232_crystal-wall");
+    putCorpIceOnServer(state, "rd", 444);
     state = playEventAction(
       state,
-      "onr_proteus_120_reconnaissance",
+      178,
       "rd",
     ).state;
     const beforeRezRunnerCredits = state.runner.credits;
@@ -1118,7 +1121,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "onr_v1_232_crystal-wall",
+        sourceDefinition(state, action) === 444,
     );
     expect(state.runner.credits).toBe(beforeRezRunnerCredits + 1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -1128,25 +1131,25 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     state = runnerMain("proteus-pro008-weefle");
     state = playEventAction(
       state,
-      "onr_proteus_127_weefle-initiation",
+      185,
       "rd",
     ).state;
     expect(state.run?.damagePreventionPool).toMatchObject({
-      sourceDefinitionId: "onr_proteus_127_weefle-initiation",
+      sourceDefinitionId: 185,
       remaining: 7,
     });
   });
 
   function traceRewardState(
     definitionId:
-      | "onr_proteus_130_back-door-to-rivals"
-      | "onr_proteus_148_runner-sensei",
+      | 188
+      | 206,
     seed: string,
   ): GameState {
     let state = corpActionStateForProteusPro007(seed);
     state.corp.credits = 30;
     state.runner.credits = 30;
-    addRunnerResourceToRigForTest(state, definitionId, definitionId);
+    addRunnerResourceToRigForTest(state, definitionId, String(definitionId));
     state.runnerTurnFlags = {
       ...(state.runnerTurnFlags ?? {
         stoleAgendaThisTurn: false,
@@ -1156,15 +1159,15 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     };
     state = playCorpOperationByDefinition(
       state,
-      "onr_proteus_052_schlaghund-pointers",
+      110,
     );
     return applyChoice(state, "corp", "bid_0");
   }
 
   it("rewards exactly the chosen base-link ability when it avoids a trace", () => {
     for (const definitionId of [
-      "onr_proteus_130_back-door-to-rivals",
-      "onr_proteus_148_runner-sensei",
+      188,
+      206,
     ] as const) {
       let state = traceRewardState(
         definitionId,
@@ -1184,14 +1187,14 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
       state = applyChoice(
         state,
         "runner",
-        definitionId.endsWith("back-door-to-rivals") ? "bid_1" : "bid_0",
+        definitionId === 188 ? "bid_1" : "bid_0",
       );
       state = applyChoice(state, "runner", "pass");
       expect(state.runner.tags).toBe(0);
       const expectedCredits =
         beforeBaseLinkCredits -
-        (definitionId.endsWith("runner-sensei") ? 2 : 0) -
-        (definitionId.endsWith("back-door-to-rivals") ? 1 : 0) +
+        (definitionId === 206 ? 2 : 0) -
+        (definitionId === 188 ? 1 : 0) +
         1;
       expect(state.runner.credits).toBe(expectedCredits);
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -1203,8 +1206,8 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
 
   it("rewards exactly the chosen post-bid link ability when it avoids a trace", () => {
     for (const definitionId of [
-      "onr_proteus_130_back-door-to-rivals",
-      "onr_proteus_148_runner-sensei",
+      188,
+      206,
     ] as const) {
       let state = traceRewardState(
         definitionId,
@@ -1219,7 +1222,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
         traceChoiceOptionIdForDefinition(state, definitionId, "trace_link_"),
       );
       state = applyChoice(state, "runner", "pass");
-      const postBidCost = definitionId.endsWith("back-door-to-rivals") ? 3 : 2;
+      const postBidCost = definitionId === 188 ? 3 : 2;
       expect(state.runner.tags).toBe(0);
       expect(state.runner.credits).toBe(
         beforeRunnerBidCredits - 2 - postBidCost + 1,
@@ -1257,7 +1260,7 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     const cardId = addRunnerCardToGripForTest(
       state,
       definitionId,
-      definitionId.replace(/[^a-z0-9]/gi, "_"),
+      String(definitionId),
     );
     const action = mustAction(
       state,
@@ -1284,7 +1287,7 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     serverId: ServerId = "rd",
   ): GameState {
     state.run = {
-      runId: `pro009_run_${state.stateVersion}`,
+      runId: state.stateVersion + 1,
       attackedServerId: serverId as Exclude<ServerId, "new_remote">,
       phase: "encounter_ice",
       position: {
@@ -1304,11 +1307,11 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
 
   it("requires install choices for Black Widow and Morphing Tool, while Fubar chooses once after install", () => {
     let state = runnerMain("proteus-pro009-install-choices");
-    const targetIceId = putCorpIceOnServer(state, "rd", "onr_v1_245_fire-wall");
+    const targetIceId = putCorpIceOnServer(state, "rd", 457);
 
     const blackWidow = installFromGrip(
       state,
-      "onr_proteus_080_black-widow",
+      138,
       (action) => action.payload?.selectedCardId === targetIceId,
     );
     state = blackWidow.state;
@@ -1334,7 +1337,7 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
       "Fire Wall",
     );
 
-    const fubar = installFromGrip(state, "onr_proteus_088_fubar");
+    const fubar = installFromGrip(state, 146);
     state = fubar.state;
     expect(state.cardInstances[fubar.cardId]?.selectedSubtype).toBeUndefined();
     expect(
@@ -1385,7 +1388,7 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
 
     const morphing = installFromGrip(
       state,
-      "onr_proteus_092_morphing-tool",
+      150,
       (action) => action.payload?.selectedSubtype === "code_gate",
     );
     state = morphing.state;
@@ -1426,18 +1429,18 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
 
   it("preserves Black Widow's chosen ICE through a program-trash installation choice", () => {
     let state = runnerMain("proteus-pro009-black-widow-trash-install-target");
-    const targetIceId = putCorpIceOnServer(state, "rd", "onr_v1_245_fire-wall");
+    const targetIceId = putCorpIceOnServer(state, "rd", 457);
     const installedProgramIds = [
-      addInstalledRunnerProgramForTest(state, "simple_decoder", "trash_a"),
-      addInstalledRunnerProgramForTest(state, "simple_fracter", "trash_b"),
-      addInstalledRunnerProgramForTest(state, "simple_killer", "trash_c"),
-      addInstalledRunnerProgramForTest(state, "simple_decoder", "trash_d"),
+      addInstalledRunnerProgramForTest(state, 591, "trash_a"),
+      addInstalledRunnerProgramForTest(state, 597, "trash_b"),
+      addInstalledRunnerProgramForTest(state, 598, "trash_c"),
+      addInstalledRunnerProgramForTest(state, 591, "trash_d"),
     ];
     state.runner.memoryUsed = 4;
     expect(state.runner.memoryUsed).toBe(4);
     const sourceCardId = addRunnerCardToGripForTest(
       state,
-      "onr_proteus_080_black-widow",
+      138,
       "black_widow_trash_install_target",
     );
     const initial = structuredClone(state);
@@ -1484,17 +1487,17 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     let state = runnerMain("proteus-pro009-type-break");
     const wallId = addRezzedCorpIceForTest(
       state,
-      "onr_v1_245_fire-wall",
+      457,
       "rd",
       "fire_wall",
     );
     const sentryId = addRezzedCorpIceForTest(
       state,
-      "onr_v1_223_banpei",
+      435,
       "rd",
       "banpei",
     );
-    const fubar = installFromGrip(state, "onr_proteus_088_fubar");
+    const fubar = installFromGrip(state, 146);
     state = fubar.state;
     state = setEncounter(state, sentryId);
     state = apply(
@@ -1526,19 +1529,19 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     state = runnerMain("proteus-pro009-black-widow");
     const chosenIceId = addRezzedCorpIceForTest(
       state,
-      "onr_v1_224_bolter-cluster",
+      436,
       "rd",
       "chosen_bolter",
     );
     const otherIceId = addRezzedCorpIceForTest(
       state,
-      "onr_v1_224_bolter-cluster",
+      436,
       "rd",
       "other_bolter",
     );
     const blackWidow = installFromGrip(
       state,
-      "onr_proteus_080_black-widow",
+      138,
       (action) => action.payload?.selectedCardId === chosenIceId,
     );
     state = blackWidow.state;
@@ -1564,25 +1567,25 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     let state = runnerMain("proteus-pro009-bulldozer");
     const wallId = addRezzedCorpIceForTest(
       state,
-      "onr_v1_232_crystal-wall",
+      444,
       "rd",
       "wall",
     );
     const sentryId = addRezzedCorpIceForTest(
       state,
-      "onr_v1_223_banpei",
+      435,
       "rd",
       "sentry",
     );
     const bulldozerId = addInstalledRunnerProgramForTest(
       state,
-      "onr_proteus_082_bulldozer",
+      140,
       "bulldozer",
     );
     state.cardInstances[bulldozerId]!.strengthModifier = 10;
     const stealthId = addInstalledRunnerProgramForTest(
       state,
-      "onr_v1_011_cloak",
+      223,
       "cloak",
     );
     state.cardInstances[stealthId]!.counters = { recurring_credit: 2 };
@@ -1598,7 +1601,7 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
       {
         sourceBreakerInstanceId: bulldozerId,
         sourceAbilityId:
-          "onr_proteus_082_bulldozer:break_wall_with_stealth_tradeoff_and_sentry_reward",
+          190,
         iceSubtype: "sentry",
         remainingUses: 1,
         mustBeNextEncounteredIce: true,
@@ -1611,7 +1614,7 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
         {
           sourceBreakerInstanceId: bulldozerId,
           sourceAbilityId:
-            "onr_proteus_082_bulldozer:break_wall_with_stealth_tradeoff_and_sentry_reward",
+            190,
           iceSubtype: "sentry",
           remainingUses: 1,
           mustBeNextEncounteredIce: true,
@@ -1633,7 +1636,7 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
       cardImplementationAbilityKey:
         "break_wall_with_stealth_tradeoff_and_sentry_reward",
       cardImplementationAbilityId:
-        "onr_proteus_082_bulldozer:break_wall_with_stealth_tradeoff_and_sentry_reward",
+        190,
     });
     expect(freeBreak.payload).not.toHaveProperty(
       "cardImplementationAbilityIndex",
@@ -1654,22 +1657,22 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     let state = runnerMain("proteus-pro009-modifiers");
     const lockjawId = addInstalledRunnerProgramForTest(
       state,
-      "onr_proteus_091_lockjaw",
+      149,
       "lockjaw",
     );
     const targetId = addInstalledRunnerProgramForTest(
       state,
-      "onr_v1_036_jackhammer",
+      248,
       "jackhammer",
     );
     const otherId = addInstalledRunnerProgramForTest(
       state,
-      "onr_v1_014_codecracker",
+      226,
       "codecracker",
     );
     state = setEncounter(
       state,
-      addRezzedCorpIceForTest(state, "onr_v1_245_fire-wall", "rd", "wall"),
+      addRezzedCorpIceForTest(state, 457, "rd", "wall"),
     );
     const lockjaw = mustAction(
       state,
@@ -1680,8 +1683,8 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
         action.payload?.targetCardId === targetId,
     );
     expect(lockjaw.payload).toMatchObject({
-      sourceCardDefinitionId: "onr_proteus_091_lockjaw",
-      targetCardDefinitionId: "onr_v1_036_jackhammer",
+      sourceCardDefinitionId: 149,
+      targetCardDefinitionId: 248,
       runnerAbility: "boost_icebreaker_for_run",
       strengthBoostAmount: 2,
     });
@@ -1703,7 +1706,7 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
       state,
       addRezzedCorpIceForTest(
         state,
-        "onr_v1_245_fire-wall",
+        457,
         "rd",
         "second_wall",
       ),
@@ -1719,17 +1722,17 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     state = runnerMain("proteus-pro009-personal-touch");
     const breakerId = addInstalledRunnerProgramForTest(
       state,
-      "onr_v1_036_jackhammer",
+      248,
       "personal_jackhammer",
     );
     const untouchedId = addInstalledRunnerProgramForTest(
       state,
-      "onr_v1_014_codecracker",
+      226,
       "personal_codecracker",
     );
     addRunnerCardToGripForTest(
       state,
-      "onr_proteus_115_personal-touch-the",
+      173,
       "personal_touch",
     );
     state = apply(
@@ -1760,18 +1763,18 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     let state = runnerMain("proteus-pro009-eurocorpse");
     const chipInstall = installFromGrip(
       state,
-      "onr_proteus_139_eurocorpse-tm-spin-chip",
+      197,
     );
     state = chipInstall.state;
     const chipId = chipInstall.cardId;
     const oneMuBreakerId = addRunnerCardToGripForTest(
       state,
-      "onr_v1_036_jackhammer",
+      248,
       "eurocorpse_one_mu_breaker",
     );
     const twoMuBreakerId = addRunnerCardToGripForTest(
       state,
-      "onr_classic_031_rent-i-con",
+      35,
       "eurocorpse_two_mu_breaker",
     );
     const hostedInstallActions = getLegalActions(state, "runner").filter(
@@ -1803,7 +1806,7 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     );
     const hostedId = addInstalledRunnerProgramForTest(
       state,
-      "onr_v1_036_jackhammer",
+      248,
       "euro_jackhammer",
     );
     state.cardInstances[hostedId] = {
@@ -1830,7 +1833,7 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     state.runner.rig.resources.push(hiddenHostId);
     state.cardInstances[hiddenHostId] = {
       instanceId: hiddenHostId,
-      definitionId: "onr_proteus_128_airport-locker",
+      definitionId: 186,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "rig" },
@@ -1841,7 +1844,7 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     };
     const hiddenHostedId = addInstalledRunnerProgramForTest(
       state,
-      "onr_v1_014_codecracker",
+      226,
       "hidden_hosted_codecracker",
     );
     state.cardInstances[hiddenHostedId] = {
@@ -1860,13 +1863,13 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     );
     const otherId = addInstalledRunnerProgramForTest(
       state,
-      "onr_v1_014_codecracker",
+      226,
       "euro_codecracker",
     );
     state.runner.credits = 0;
     const wallId = addRezzedCorpIceForTest(
       state,
-      "onr_v1_245_fire-wall",
+      457,
       "rd",
       "euro_wall",
     );
@@ -1913,8 +1916,8 @@ describe("MVP 0.1 engine foundation", () => {
       {
         v1922RunnerEventAbility:
           "successful_hq_run_pay_rez_cost_trash_rezzed_ice",
-        sourceDefinitionId: "onr_v1_080_core-command-jettison-ice",
-        targetCardDefinitionId: "onr_v1_232_crystal-wall",
+        sourceDefinitionId: 292,
+        targetCardDefinitionId: 444,
         cardId: "corp_hidden_card_instance_1",
         paidCredits: 3,
         v1921DieRoll: 4,
@@ -1927,11 +1930,11 @@ describe("MVP 0.1 engine foundation", () => {
       abilityFamily: "hidden-zone",
       abilityId: "successful_hq_run_pay_rez_cost_trash_rezzed_ice",
       effectKind: "hidden_zone",
-      sourceDefinitionId: "onr_v1_080_core-command-jettison-ice",
+      sourceDefinitionId: 292,
       amounts: { paidCredits: 3, randomRoll: 4 },
       targets: {
-        sourceDefinitionId: "onr_v1_080_core-command-jettison-ice",
-        targetCardDefinitionId: "onr_v1_232_crystal-wall",
+        sourceDefinitionId: 292,
+        targetCardDefinitionId: 444,
         redactedKind: "hidden_zone",
       },
       visibility: {
@@ -1994,9 +1997,11 @@ describe("MVP 0.1 engine foundation", () => {
     ].map((instanceId) => state.cardInstances[instanceId]!.definitionId);
 
     expect(deckCardIds.length).toBeGreaterThan(0);
-    expect(deckCardIds.every((cardId) => cardId.startsWith("onr_v1_"))).toBe(
-      true,
-    );
+    expect(
+      deckCardIds.every((cardId) =>
+        cardSpecSetIdsForDefinitionId(cardId)?.includes("originalset-v1"),
+      ),
+    ).toBe(true);
   });
 
   it("lets the Corp rez non-ICE root cards, but not score agendas, between Runner actions", () => {
@@ -2011,9 +2016,9 @@ describe("MVP 0.1 engine foundation", () => {
     state.corp.credits = 10;
     const upgradeId = putCorpRootInRemote(
       state,
-      "onr_v1_350_antiquated-interface-routines",
+      562,
     );
-    const agendaId = putCorpRootInRemote(state, "onr_v1_203_hostile-takeover");
+    const agendaId = putCorpRootInRemote(state, 415);
     state.cardInstances[agendaId] = {
       ...state.cardInstances[agendaId]!,
       advancementCounters: 99,
@@ -2047,42 +2052,42 @@ describe("MVP 0.1 engine foundation", () => {
       id: "local_corp_master_shuffle_regression",
       name: "The Korp Master Shuffle Regression",
       side: "corp",
-      identity: "corp_identity_001",
+      identity: 3,
       cards: [
-        { id: "onr_v1_193_corporate-coup", quantity: 1 },
-        { id: "onr_v1_201_executive-extraction", quantity: 1 },
-        { id: "onr_v1_207_netwatch-operations-office", quantity: 1 },
-        { id: "onr_v1_208_on-call-solo-team", quantity: 1 },
-        { id: "onr_v1_209_political-coup", quantity: 1 },
-        { id: "onr_v1_211_polymer-breakthrough", quantity: 1 },
-        { id: "onr_v1_212_priority-requisition", quantity: 1 },
-        { id: "onr_v1_213_private-cybernet-police", quantity: 1 },
-        { id: "onr_v1_214_project-babylon", quantity: 1 },
-        { id: "onr_v1_215_security-net-optimization", quantity: 1 },
-        { id: "onr_v1_217_strike-force-kali", quantity: 1 },
-        { id: "onr_v1_219_superior-net-barriers", quantity: 1 },
-        { id: "onr_v1_245_fire-wall", quantity: 1 },
-        { id: "onr_v1_259_in-the-face", quantity: 1 },
-        { id: "onr_v1_263_reinforced-wall", quantity: 1 },
-        { id: "onr_v1_265_rock-is-strong", quantity: 1 },
-        { id: "onr_v1_268_shock-r", quantity: 2 },
-        { id: "onr_v1_270_sleeper", quantity: 2 },
-        { id: "onr_v1_273_triggerman", quantity: 1 },
-        { id: "onr_v1_275_vacuum-link", quantity: 1 },
-        { id: "onr_v1_278_wall-of-ice", quantity: 1 },
-        { id: "onr_v1_279_wall-of-static", quantity: 2 },
-        { id: "onr_v1_281_accounts-receivable", quantity: 2 },
-        { id: "onr_v1_282_annual-reviews", quantity: 2 },
-        { id: "onr_v1_288_day-shift", quantity: 1 },
-        { id: "onr_v1_290_efficiency-experts", quantity: 3 },
-        { id: "onr_v1_295_night-shift", quantity: 2 },
-        { id: "onr_v1_297_overtime-incentives", quantity: 2 },
-        { id: "onr_v1_308_acme-savings-and-loan", quantity: 1 },
-        { id: "onr_v1_317_data-masons", quantity: 1 },
-        { id: "onr_v1_320_encoder-inc", quantity: 1 },
-        { id: "onr_v1_341_skalderviken-sa-beta-test-site", quantity: 1 },
-        { id: "onr_v1_350_antiquated-interface-routines", quantity: 2 },
-        { id: "onr_v1_371_tokyo-chiba-infighting", quantity: 2 },
+        { id: 405, quantity: 1 },
+        { id: 413, quantity: 1 },
+        { id: 419, quantity: 1 },
+        { id: 420, quantity: 1 },
+        { id: 421, quantity: 1 },
+        { id: 423, quantity: 1 },
+        { id: 424, quantity: 1 },
+        { id: 425, quantity: 1 },
+        { id: 426, quantity: 1 },
+        { id: 427, quantity: 1 },
+        { id: 429, quantity: 1 },
+        { id: 431, quantity: 1 },
+        { id: 457, quantity: 1 },
+        { id: 471, quantity: 1 },
+        { id: 475, quantity: 1 },
+        { id: 477, quantity: 1 },
+        { id: 480, quantity: 2 },
+        { id: 482, quantity: 2 },
+        { id: 485, quantity: 1 },
+        { id: 487, quantity: 1 },
+        { id: 490, quantity: 1 },
+        { id: 491, quantity: 2 },
+        { id: 493, quantity: 2 },
+        { id: 494, quantity: 2 },
+        { id: 500, quantity: 1 },
+        { id: 502, quantity: 3 },
+        { id: 507, quantity: 2 },
+        { id: 509, quantity: 2 },
+        { id: 520, quantity: 1 },
+        { id: 529, quantity: 1 },
+        { id: 532, quantity: 1 },
+        { id: 553, quantity: 1 },
+        { id: 562, quantity: 2 },
+        { id: 583, quantity: 2 },
       ],
     };
     const agendaCardsInDeck = corpMasterDeck.cards.reduce(
@@ -2199,12 +2204,12 @@ describe("MVP 0.1 engine foundation", () => {
     });
     expect(
       state.randomDrawRecords.some(
-        (record) => record.purpose === "setup.shuffle.runner.mulligan",
+        (record) => record.purpose[0] === RandomPurposeCode.MulliganRunnerShuffle,
       ),
     ).toBe(true);
     expect(
       state.randomDrawRecords.some(
-        (record) => record.purpose === "setup.draw.runner.mulligan_hand",
+        (record) => record.purpose[0] === RandomPurposeCode.MulliganRunnerDraw,
       ),
     ).toBe(true);
     expect(
@@ -2255,10 +2260,10 @@ describe("MVP 0.1 turns and cards", () => {
       createMechanicFixtureGameAfterSetup({ seed: "runner-cards" }),
     );
     state.runner.credits = 10;
-    moveRunnerCardToGrip(state, "simple_economy_event");
-    moveRunnerCardToGrip(state, "simple_fracter");
-    moveRunnerCardToGrip(state, "simple_decoder");
-    moveRunnerCardToGrip(state, "simple_killer");
+    moveRunnerCardToGrip(state, 595);
+    moveRunnerCardToGrip(state, 597);
+    moveRunnerCardToGrip(state, 591);
+    moveRunnerCardToGrip(state, 598);
 
     const beforeCredits = state.runner.credits;
     const creditsBeforeClearingRunLock = state.runner.credits;
@@ -2267,7 +2272,7 @@ describe("MVP 0.1 turns and cards", () => {
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(state, action) === "simple_economy_event",
+        sourceDefinition(state, action) === 595,
     );
     expect(state.runner.credits).toBe(beforeCredits + 4);
 
@@ -2276,11 +2281,11 @@ describe("MVP 0.1 turns and cards", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "simple_fracter",
+        sourceDefinition(state, action) === 597,
     );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "install_card",
-      cardDefinitionId: "simple_fracter",
+      cardDefinitionId: 597,
       title: "Simple Fracter",
     });
     state = apply(
@@ -2288,14 +2293,14 @@ describe("MVP 0.1 turns and cards", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "simple_decoder",
+        sourceDefinition(state, action) === 591,
     );
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "simple_killer",
+        sourceDefinition(state, action) === 598,
     );
 
     expect(state.runner.memoryUsed).toBe(3);
@@ -2303,7 +2308,7 @@ describe("MVP 0.1 turns and cards", () => {
       state.runner.rig.programs
         .map((id) => state.cardInstances[id]?.definitionId)
         .sort(),
-    ).toEqual(["simple_decoder", "simple_fracter", "simple_killer"]);
+    ).toEqual([591, 597, 598]);
   });
 
   it("plays Corp economy operation", () => {
@@ -2312,14 +2317,14 @@ describe("MVP 0.1 turns and cards", () => {
     });
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 5;
-    moveCorpCardToHq(state, "simple_economy_operation");
+    moveCorpCardToHq(state, 596);
     const before = state.corp.credits;
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "simple_economy_operation",
+        sourceDefinition(state, action) === 596,
     );
     expect(state.corp.credits).toBe(before + 4);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -2327,12 +2332,12 @@ describe("MVP 0.1 turns and cards", () => {
       actionCostClicks: 1,
       turnActionOrdinalStart: 1,
       turnActionOrdinalEnd: 1,
-      cardDefinitionId: "simple_economy_operation",
+      cardDefinitionId: 596,
       title: "Simple Economy Operation",
     });
     const archivedOperation = state.corp.archives.find(
       (id) =>
-        state.cardInstances[id]?.definitionId === "simple_economy_operation",
+        state.cardInstances[id]?.definitionId === 596,
     );
     expect(archivedOperation).toBeDefined();
     expect(state.cardInstances[archivedOperation!]).toMatchObject({
@@ -2346,7 +2351,7 @@ describe("MVP 0.1 turns and cards", () => {
       seed: "corp-ice-new-remote",
     });
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    const iceId = moveCorpCardToHq(state, "simple_barrier_ice");
+    const iceId = moveCorpCardToHq(state, 589);
 
     const install = mustAction(
       state,
@@ -2384,11 +2389,11 @@ describe("MVP 0.1 turns and cards", () => {
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 20;
 
-    const firstIceId = moveCorpCardToHq(state, "simple_barrier_ice");
-    const secondIceId = moveCorpCardToHq(state, "simple_sentry_ice");
+    const firstIceId = moveCorpCardToHq(state, 589);
+    const secondIceId = moveCorpCardToHq(state, 601);
     const thirdIceEntry = Object.entries(state.cardInstances).find(
       ([id, card]) =>
-        card.definitionId === "simple_barrier_ice" &&
+        card.definitionId === 589 &&
         id !== firstIceId &&
         id !== secondIceId,
     );
@@ -2470,7 +2475,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
     let state = toRunnerTurn(
       createMechanicFixtureGameAfterSetup({ seed: "steal-rd" }),
     );
-    putCorpCardOnTopOfRd(state, "simple_agenda");
+    putCorpCardOnTopOfRd(state, 588);
 
     state = apply(
       state,
@@ -2481,7 +2486,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
-      cardDefinitionId: "simple_agenda",
+      cardDefinitionId: 588,
       title: "Simple Agenda",
       serverLabel: "R&D",
     });
@@ -2522,9 +2527,9 @@ describe("MVP 0.1 runs, access and scoring", () => {
       }),
     );
     state.runner.credits = 10;
-    const accessedId = putCorpCardOnTopOfRd(state, "simple_upgrade");
+    const accessedId = putCorpCardOnTopOfRd(state, 606);
     for (const [cardId, card] of Object.entries(state.cardInstances)) {
-      if (cardId !== accessedId && card.definitionId === "simple_upgrade") {
+      if (cardId !== accessedId && card.definitionId === 606) {
         removeEverywhere(state, cardId);
         state.corp.rd.push(cardId as CardInstanceId);
         state.cardInstances[cardId] = {
@@ -2549,7 +2554,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
     const runnerView = getPlayerView(state, "runner");
     expect(runnerView.run?.accessedCard).toMatchObject({
       known: true,
-      definitionId: "simple_upgrade",
+      definitionId: 606,
       title: "Simple Upgrade",
       type: "upgrade",
       trashCost: 4,
@@ -2596,7 +2601,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
     let state = toRunnerTurn(
       createMechanicFixtureGameAfterSetup({ seed: "access-hq" }),
     );
-    const accessedId = moveCorpCardToHq(state, "simple_economy_operation");
+    const accessedId = moveCorpCardToHq(state, 596);
     keepOnlyCorpHqCard(state, accessedId);
 
     state = apply(
@@ -2609,7 +2614,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
 
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
-      cardDefinitionId: "simple_economy_operation",
+      cardDefinitionId: 596,
       title: "Simple Economy Operation",
       serverLabel: "HQ",
     });
@@ -2618,7 +2623,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
       getPlayerView(state, "corp").publicEvents.at(-1)?.publicPayload,
     ).toMatchObject({
       actionType: "access_card",
-      cardDefinitionId: "simple_economy_operation",
+      cardDefinitionId: 596,
       title: "Simple Economy Operation",
       serverLabel: "HQ",
     });
@@ -2630,13 +2635,13 @@ describe("MVP 0.1 runs, access and scoring", () => {
 
   it("randomizes single HQ access across all current HQ cards with replay-stable records", () => {
     const hqDefinitions = [
-      "simple_economy_operation",
-      "simple_economy_asset",
-      "simple_barrier_ice",
-      "simple_agenda",
-      "simple_priority_agenda",
+      596,
+      594,
+      589,
+      588,
+      599,
     ];
-    const seenDefinitions = new Set<string>();
+    const seenDefinitions = new Set<number>();
 
     for (let index = 0; index < 80; index += 1) {
       let state = toRunnerTurn(
@@ -2669,7 +2674,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
       expect(state.randomDrawRecords).toHaveLength(randomBefore + 1);
       expect(state.randomDrawRecords.at(-1)).toMatchObject({
         counter: randomBefore,
-        purpose: `hq_multiaccess:${state.run?.runId}:selection:0`,
+        purpose: [RandomPurposeCode.HqMultiaccess, state.run?.runId, 0],
       });
       expect(state.randomCounter).toBe(randomBefore + 1);
       for (const definitionId of hqDefinitions) {
@@ -2687,7 +2692,9 @@ describe("MVP 0.1 runs, access and scoring", () => {
         cardDefinitionId: selectedDefinitionId,
         serverLabel: "HQ",
       });
-      seenDefinitions.add(String(selectedDefinitionId));
+      if (selectedDefinitionId === undefined)
+        throw new Error("The accessed card definition is missing.");
+      seenDefinitions.add(selectedDefinitionId);
 
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
       expect(replay.ok).toBe(true);
@@ -2703,7 +2710,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
       createMechanicFixtureGameAfterSetup({ seed: "trash-hq-asset" }),
     );
     state.runner.credits = 10;
-    const accessedId = moveCorpCardToHq(state, "simple_economy_asset");
+    const accessedId = moveCorpCardToHq(state, 594);
     keepOnlyCorpHqCard(state, accessedId);
 
     state = apply(
@@ -2726,11 +2733,11 @@ describe("MVP 0.1 runs, access and scoring", () => {
     expect(state.corp.archives).toContain(accessedId);
     expect(runnerView.opponent.discardCount).toBe(state.corp.archives.length);
     expect(archives?.root.map((card) => card.definitionId)).toContain(
-      "simple_economy_asset",
+      594,
     );
     expect(
       archives?.root.find(
-        (card) => card.definitionId === "simple_economy_asset",
+        (card) => card.definitionId === 594,
       )?.title,
     ).toBe("Simple Economy Asset");
   });
@@ -2740,20 +2747,20 @@ describe("MVP 0.1 runs, access and scoring", () => {
       createMechanicFixtureGameAfterSetup({ seed: "empty-remote-access" }),
     );
     state.corp.servers.push({
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: [],
       root: [],
     });
-    putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+    putCorpIceOnServer(state, "r1", 589);
     const randomDrawsBefore = state.randomDrawRecords.length;
 
     state = apply(
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "corp", (action) => action.type === "decline_rez");
 
@@ -2777,13 +2784,13 @@ describe("MVP 0.1 runs, access and scoring", () => {
         seed: "non-empty-remote-access",
       }),
     );
-    putCorpRootInRemote(state, "simple_agenda");
+    putCorpRootInRemote(state, 588);
 
     state = apply(
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
 
     expect(
@@ -2794,7 +2801,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
-      cardDefinitionId: "simple_agenda",
+      cardDefinitionId: 588,
       title: "Simple Agenda",
       serverLabel: "Remote 1",
     });
@@ -2809,9 +2816,9 @@ describe("MVP 0.1 runs, access and scoring", () => {
       }),
     );
     state.runner.credits = 10;
-    installRunnerProgramForTest(state, "efficient_fracter");
-    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    installRunnerProgramForTest(state, 4);
+    putCorpIceOnServer(state, "rd", 589);
+    putCorpCardOnTopOfRd(state, 596);
     state.corp.credits = 5;
 
     state = apply(
@@ -2825,7 +2832,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
     state = apply(state, "runner", (action) => action.type === "pump_breaker");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "pump_breaker",
-      cardDefinitionId: "efficient_fracter",
+      cardDefinitionId: 4,
       title: "Efficient Fracter",
     });
     state = apply(
@@ -2835,7 +2842,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
     );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "break_subroutine",
-      cardDefinitionId: "efficient_fracter",
+      cardDefinitionId: 4,
       title: "Efficient Fracter",
     });
     state = continueRunThroughMovement(state);
@@ -2843,7 +2850,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
 
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
-      cardDefinitionId: "simple_economy_operation",
+      cardDefinitionId: 596,
       title: "Simple Economy Operation",
       serverLabel: "R&D",
     });
@@ -2861,16 +2868,16 @@ describe("MVP 0.1 runs, access and scoring", () => {
       }),
     );
     state.runner.credits = 20;
-    installRunnerProgramForTest(state, "efficient_fracter");
+    installRunnerProgramForTest(state, 4);
     const innerIceId = putCorpIceCopyOnServer(
       state,
       "rd",
-      "simple_barrier_ice",
+      589,
     );
     const outerIceId = putCorpIceCopyOnServer(
       state,
       "rd",
-      "simple_barrier_ice",
+      589,
     );
     for (const iceId of [innerIceId, outerIceId]) {
       state.cardInstances[iceId] = {
@@ -2879,7 +2886,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
         rezzed: true,
       };
     }
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    putCorpCardOnTopOfRd(state, 596);
     const rdServer = state.corp.servers.find((server) => server.id === "rd");
     expect(rdServer?.ice).toEqual([innerIceId, outerIceId]);
 
@@ -2941,8 +2948,8 @@ describe("MVP 0.1 runs, access and scoring", () => {
     let state = toRunnerTurn(
       createMechanicFixtureGameAfterSetup({ seed: "etr" }),
     );
-    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
-    putCorpCardOnTopOfRd(state, "simple_agenda");
+    putCorpIceOnServer(state, "rd", 589);
+    putCorpCardOnTopOfRd(state, 588);
     state.corp.credits = 5;
 
     state = apply(
@@ -2958,15 +2965,15 @@ describe("MVP 0.1 runs, access and scoring", () => {
     expect(agendaPoints(state, "runner")).toBe(0);
     expect(
       state.corp.rd.map((id) => state.cardInstances[id]?.definitionId),
-    ).toContain("simple_agenda");
+    ).toContain(588);
   });
 
   it("skips the Corp rez window when a later run approaches already rezzed ICE", () => {
     let state = toRunnerTurn(
       createMechanicFixtureGameAfterSetup({ seed: "rezzed-ice-repeat-run" }),
     );
-    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
-    putCorpCardOnTopOfRd(state, "simple_agenda");
+    putCorpIceOnServer(state, "rd", 589);
+    putCorpCardOnTopOfRd(state, 588);
     state.corp.credits = 5;
 
     state = apply(
@@ -3002,11 +3009,11 @@ describe("MVP 0.1 runs, access and scoring", () => {
     );
     state.corp.credits = 10;
     state.runner.credits = 10;
-    const drDreffId = putCorpRootInRemote(state, "onr_v1_358_dr-dreff");
+    const drDreffId = putCorpRootInRemote(state, 570);
     const banpeiId = addRezzedCorpIceForTest(
       state,
-      "onr_v1_223_banpei",
-      "remote_1",
+      435,
+      "r1",
       "banpei",
     );
     const initial = structuredClone(state);
@@ -3016,7 +3023,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
 
     expect(state.timingPoint).toBe("run.approach_ice");
@@ -3083,12 +3090,12 @@ describe("MVP 0.1 runs, access and scoring", () => {
         corpDeck: {
           ...ONR_V1_CORP_DECK,
           cards: [
-            { id: "onr_v1_230_cortical-scanner", quantity: 1 },
-            { id: "onr_v1_350_antiquated-interface-routines", quantity: 1 },
+            { id: 442, quantity: 1 },
+            { id: 562, quantity: 1 },
             ...ONR_V1_CORP_DECK.cards.filter(
               (card) =>
-                card.id !== "onr_v1_230_cortical-scanner" &&
-                card.id !== "onr_v1_350_antiquated-interface-routines",
+                card.id !== 442 &&
+                card.id !== 562,
             ),
           ],
         },
@@ -3099,12 +3106,12 @@ describe("MVP 0.1 runs, access and scoring", () => {
     state.runner.credits = 10;
     const antiquatedId = putCorpRootInRemote(
       state,
-      "onr_v1_350_antiquated-interface-routines",
+      562,
     );
     const scannerId = putCorpIceOnServer(
       state,
-      "remote_1",
-      "onr_v1_230_cortical-scanner",
+      "r1",
+      442,
     );
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -3113,7 +3120,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
 
     expect(state.timingPoint).toBe("run.approach_ice");
@@ -3195,14 +3202,14 @@ describe("MVP 0.1 runs, access and scoring", () => {
       corpDeck: {
         ...ONR_V1_CORP_DECK,
         cards: [
-          { id: "onr_v1_232_crystal-wall", quantity: 1 },
-          { id: "onr_v1_355_crystal-palace-station-grid", quantity: 1 },
-          { id: "onr_v1_370_tesseract-fort-construction", quantity: 1 },
+          { id: 444, quantity: 1 },
+          { id: 567, quantity: 1 },
+          { id: 582, quantity: 1 },
           ...ONR_V1_CORP_DECK.cards.filter(
             (card) =>
-              card.id !== "onr_v1_232_crystal-wall" &&
-              card.id !== "onr_v1_355_crystal-palace-station-grid" &&
-              card.id !== "onr_v1_370_tesseract-fort-construction",
+              card.id !== 444 &&
+              card.id !== 567 &&
+              card.id !== 582,
           ),
         ],
       },
@@ -3212,11 +3219,11 @@ describe("MVP 0.1 runs, access and scoring", () => {
     state.corp.credits = 20;
     const tesseractId = putCorpRootInRemote(
       state,
-      "onr_v1_370_tesseract-fort-construction",
+      582,
     );
     const crystalPalaceId = putCorpRootInRemote(
       state,
-      "onr_v1_355_crystal-palace-station-grid",
+      567,
     );
     state.cardInstances[crystalPalaceId] = {
       ...state.cardInstances[crystalPalaceId]!,
@@ -3225,8 +3232,8 @@ describe("MVP 0.1 runs, access and scoring", () => {
     };
     const crystalWallId = putCorpIceOnServer(
       state,
-      "remote_1",
-      "onr_v1_232_crystal-wall",
+      "r1",
+      444,
     );
     state.cardInstances[crystalWallId] = {
       ...state.cardInstances[crystalWallId]!,
@@ -3242,7 +3249,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(
       state,
@@ -3281,14 +3288,14 @@ describe("MVP 0.1 runs, access and scoring", () => {
     state.corp.credits = 10;
     state.corp.clicks = 4;
     scoreTwoAgendasForTest(state);
-    moveCorpCardToHq(state, "simple_agenda");
+    moveCorpCardToHq(state, 588);
 
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "simple_agenda",
+        sourceDefinition(state, action) === 588,
     );
     state = apply(state, "corp", (action) => action.type === "advance_card");
     state = apply(state, "corp", (action) => action.type === "advance_card");
@@ -3346,15 +3353,15 @@ describe("O:NR v1 Limited local private test access", () => {
     let state = toRunnerTurn(onrV1Game("onr-v1-runner-cards"));
     state.runner.credits = 40;
     state.runner.clicks = 20;
-    moveRunnerCardToGrip(state, "onr_v1_079_bodyweight-synthetic-blood");
-    moveRunnerCardToGrip(state, "onr_v1_095_jack-n-joe");
-    moveRunnerCardToGrip(state, "onr_v1_097_livewires-contacts");
-    moveRunnerCardToGrip(state, "onr_v1_108_score");
-    moveRunnerCardToGrip(state, "onr_v1_145_wutech-mem-chip");
-    moveRunnerCardToGrip(state, "onr_v1_006_black-dahlia");
-    moveRunnerCardToGrip(state, "onr_v1_014_codecracker");
-    moveRunnerCardToGrip(state, "onr_v1_040_loony-goon");
-    moveRunnerCardToGrip(state, "onr_v1_073_wizards-book");
+    moveRunnerCardToGrip(state, 291);
+    moveRunnerCardToGrip(state, 307);
+    moveRunnerCardToGrip(state, 309);
+    moveRunnerCardToGrip(state, 320);
+    moveRunnerCardToGrip(state, 357);
+    moveRunnerCardToGrip(state, 218);
+    moveRunnerCardToGrip(state, 226);
+    moveRunnerCardToGrip(state, 252);
+    moveRunnerCardToGrip(state, 285);
 
     const beforeBodyweightGrip = state.runner.grip.length;
     state = apply(
@@ -3363,7 +3370,7 @@ describe("O:NR v1 Limited local private test access", () => {
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(state, action) ===
-          "onr_v1_079_bodyweight-synthetic-blood",
+          291,
     );
     expect(state.runner.grip.length).toBe(beforeBodyweightGrip + 4);
 
@@ -3373,7 +3380,7 @@ describe("O:NR v1 Limited local private test access", () => {
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(state, action) === "onr_v1_095_jack-n-joe",
+        sourceDefinition(state, action) === 307,
     );
     expect(state.runner.grip.length).toBe(beforeJackGrip + 2);
 
@@ -3383,7 +3390,7 @@ describe("O:NR v1 Limited local private test access", () => {
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(state, action) === "onr_v1_097_livewires-contacts",
+        sourceDefinition(state, action) === 309,
     );
     expect(state.runner.credits).toBe(beforeContactsCredits + 3);
 
@@ -3393,7 +3400,7 @@ describe("O:NR v1 Limited local private test access", () => {
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(state, action) === "onr_v1_108_score",
+        sourceDefinition(state, action) === 320,
     );
     expect(state.runner.credits).toBe(beforeScoreCredits + 4);
 
@@ -3402,7 +3409,7 @@ describe("O:NR v1 Limited local private test access", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_145_wutech-mem-chip",
+        sourceDefinition(state, action) === 357,
     );
     expect(state.runner.memoryLimit).toBe(4);
     expect(getPlayerView(state, "runner").own.memoryLimit).toBe(5);
@@ -3411,28 +3418,28 @@ describe("O:NR v1 Limited local private test access", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_006_black-dahlia",
+        sourceDefinition(state, action) === 218,
     );
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_014_codecracker",
+        sourceDefinition(state, action) === 226,
     );
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_040_loony-goon",
+        sourceDefinition(state, action) === 252,
     );
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_073_wizards-book",
+        sourceDefinition(state, action) === 285,
     );
 
     expect(state.runner.memoryUsed).toBe(4);
@@ -3441,19 +3448,19 @@ describe("O:NR v1 Limited local private test access", () => {
         .map((id) => state.cardInstances[id]?.definitionId)
         .sort(),
     ).toEqual([
-      "onr_v1_006_black-dahlia",
-      "onr_v1_014_codecracker",
-      "onr_v1_040_loony-goon",
-      "onr_v1_073_wizards-book",
+      218,
+      226,
+      252,
+      285,
     ]);
   });
 
   it("resolves O:NR code gates, sentries and multi-damage ICE through existing run rules", () => {
     let codeGateState = toRunnerTurn(onrV1Game("onr-v1-code-gate"));
     codeGateState.runner.credits = 20;
-    installRunnerProgramForTest(codeGateState, "onr_v1_014_codecracker");
-    putCorpIceOnServer(codeGateState, "rd", "onr_v1_261_quandary");
-    putCorpCardOnTopOfRd(codeGateState, "onr_v1_220_tycho-extension");
+    installRunnerProgramForTest(codeGateState, 226);
+    putCorpIceOnServer(codeGateState, "rd", 473);
+    putCorpCardOnTopOfRd(codeGateState, 432);
     codeGateState.corp.credits = 20;
 
     codeGateState = apply(
@@ -3467,7 +3474,7 @@ describe("O:NR v1 Limited local private test access", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(codeGateState, action) === "onr_v1_261_quandary",
+        sourceDefinition(codeGateState, action) === 473,
     );
     codeGateState = enterEncounterFromMovementWindow(codeGateState);
     codeGateState = apply(
@@ -3475,14 +3482,14 @@ describe("O:NR v1 Limited local private test access", () => {
       "runner",
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinition(codeGateState, action) === "onr_v1_014_codecracker",
+        sourceDefinition(codeGateState, action) === 226,
     );
     codeGateState = apply(
       codeGateState,
       "runner",
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinition(codeGateState, action) === "onr_v1_014_codecracker",
+        sourceDefinition(codeGateState, action) === 226,
     );
     codeGateState = apply(
       codeGateState,
@@ -3502,14 +3509,14 @@ describe("O:NR v1 Limited local private test access", () => {
     );
     expect(codeGateState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
-      cardDefinitionId: "onr_v1_220_tycho-extension",
+      cardDefinitionId: 432,
     });
 
     let sentryState = toRunnerTurn(onrV1Game("onr-v1-sentry"));
     sentryState.runner.credits = 20;
-    installRunnerProgramForTest(sentryState, "onr_v1_040_loony-goon");
-    putCorpIceOnServer(sentryState, "rd", "onr_v1_259_in-the-face");
-    putCorpCardOnTopOfRd(sentryState, "onr_v1_220_tycho-extension");
+    installRunnerProgramForTest(sentryState, 252);
+    putCorpIceOnServer(sentryState, "rd", 471);
+    putCorpCardOnTopOfRd(sentryState, 432);
     sentryState.corp.credits = 20;
 
     sentryState = apply(
@@ -3523,7 +3530,7 @@ describe("O:NR v1 Limited local private test access", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(sentryState, action) === "onr_v1_259_in-the-face",
+        sourceDefinition(sentryState, action) === 471,
     );
     sentryState = enterEncounterFromMovementWindow(sentryState);
     sentryState = apply(
@@ -3531,21 +3538,21 @@ describe("O:NR v1 Limited local private test access", () => {
       "runner",
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinition(sentryState, action) === "onr_v1_040_loony-goon",
+        sourceDefinition(sentryState, action) === 252,
     );
     sentryState = apply(
       sentryState,
       "runner",
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinition(sentryState, action) === "onr_v1_040_loony-goon",
+        sourceDefinition(sentryState, action) === 252,
     );
     sentryState = apply(
       sentryState,
       "runner",
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinition(sentryState, action) === "onr_v1_040_loony-goon",
+        sourceDefinition(sentryState, action) === 252,
     );
     sentryState = apply(
       sentryState,
@@ -3560,11 +3567,11 @@ describe("O:NR v1 Limited local private test access", () => {
     );
     expect(sentryState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
-      cardDefinitionId: "onr_v1_220_tycho-extension",
+      cardDefinitionId: 432,
     });
 
     let wallState = toRunnerTurn(onrV1Game("onr-v1-wall-of-ice"));
-    putCorpIceOnServer(wallState, "rd", "onr_v1_278_wall-of-ice");
+    putCorpIceOnServer(wallState, "rd", 490);
     wallState.corp.credits = 20;
     const beforeGrip = wallState.runner.grip.length;
 
@@ -3579,7 +3586,7 @@ describe("O:NR v1 Limited local private test access", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(wallState, action) === "onr_v1_278_wall-of-ice",
+        sourceDefinition(wallState, action) === 490,
     );
     const continueIntoWall = getLegalActions(wallState, "runner").find(
       (action) => action.type === "continue_run",
@@ -3611,7 +3618,7 @@ describe("O:NR v1 Limited local private test access", () => {
       resolvedEffects: [
         {
           kind: "resolve_subroutine",
-          sourceDefinitionId: "onr_v1_278_wall-of-ice",
+          sourceDefinitionId: 490,
           sourceTitle: "Wall of Ice",
           subroutineIndex: 0,
           subroutineType: "do_damage",
@@ -3621,7 +3628,7 @@ describe("O:NR v1 Limited local private test access", () => {
         },
         {
           kind: "resolve_subroutine",
-          sourceDefinitionId: "onr_v1_278_wall-of-ice",
+          sourceDefinitionId: 490,
           sourceTitle: "Wall of Ice",
           subroutineIndex: 1,
           subroutineType: "do_damage",
@@ -3631,7 +3638,7 @@ describe("O:NR v1 Limited local private test access", () => {
         },
         {
           kind: "resolve_subroutine",
-          sourceDefinitionId: "onr_v1_278_wall-of-ice",
+          sourceDefinitionId: 490,
           sourceTitle: "Wall of Ice",
           subroutineIndex: 2,
           subroutineType: "end_the_run",
@@ -3656,13 +3663,13 @@ describe("O:NR v1 Limited local private test access", () => {
     state.corp.clicks = 20;
     state.runner.tags = 1;
     state.runner.credits = 9;
-    moveCorpCardToHq(state, "onr_v1_281_accounts-receivable");
-    moveCorpCardToHq(state, "onr_v1_288_day-shift");
-    moveCorpCardToHq(state, "onr_v1_290_efficiency-experts");
-    moveCorpCardToHq(state, "onr_v1_293_netwatch-credit-voucher");
-    moveCorpCardToHq(state, "onr_v1_295_night-shift");
-    moveCorpCardToHq(state, "onr_v1_285_closed-accounts");
-    moveCorpCardToHq(state, "onr_v1_287_datapool-by-zetatech");
+    moveCorpCardToHq(state, 493);
+    moveCorpCardToHq(state, 500);
+    moveCorpCardToHq(state, 502);
+    moveCorpCardToHq(state, 505);
+    moveCorpCardToHq(state, 507);
+    moveCorpCardToHq(state, 497);
+    moveCorpCardToHq(state, 499);
 
     const beforeAccounts = state.corp.credits;
     state = apply(
@@ -3670,7 +3677,7 @@ describe("O:NR v1 Limited local private test access", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_281_accounts-receivable",
+        sourceDefinition(state, action) === 493,
     );
     expect(state.corp.credits).toBe(beforeAccounts + 4);
 
@@ -3680,7 +3687,7 @@ describe("O:NR v1 Limited local private test access", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_288_day-shift",
+        sourceDefinition(state, action) === 500,
     );
     expect(state.corp.hq.length).toBe(beforeDayShiftHq + 1);
 
@@ -3690,7 +3697,7 @@ describe("O:NR v1 Limited local private test access", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_290_efficiency-experts",
+        sourceDefinition(state, action) === 502,
     );
     expect(state.corp.credits).toBe(beforeEfficiency + 3);
 
@@ -3702,7 +3709,7 @@ describe("O:NR v1 Limited local private test access", () => {
       (action) =>
         action.type === "play_operation" &&
         sourceDefinition(state, action) ===
-          "onr_v1_293_netwatch-credit-voucher",
+          505,
     );
     expect(state.runner.tags).toBe(beforeVoucherTags + 1);
     expect(state.corp.credits).toBe(beforeVoucherCredits + 1);
@@ -3714,7 +3721,7 @@ describe("O:NR v1 Limited local private test access", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_295_night-shift",
+        sourceDefinition(state, action) === 507,
     );
     expect(state.corp.credits).toBe(beforeNightShiftCredits + 2);
     expect(state.corp.hq.length).toBe(beforeNightShiftHq);
@@ -3725,7 +3732,7 @@ describe("O:NR v1 Limited local private test access", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_287_datapool-by-zetatech",
+        sourceDefinition(state, action) === 499,
     );
     expect(state.runner.tags).toBe(beforeDatapoolTags + 2);
 
@@ -3734,14 +3741,14 @@ describe("O:NR v1 Limited local private test access", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_285_closed-accounts",
+        sourceDefinition(state, action) === 497,
     );
     expect(state.runner.credits).toBe(0);
 
     for (const [definitionId, amount] of [
-      ["onr_v1_301_punitive-counterstrike", 2],
-      ["onr_v1_302_scorched-earth", 4],
-      ["onr_v1_307_urban-renewal", 5],
+      [513, 2],
+      [514, 4],
+      [519, 5],
     ] as const) {
       let damageState = createGameAfterSetup({
         seed: `onr-v1-${definitionId}`,
@@ -3792,62 +3799,62 @@ describe("O:NR v1 Limited local private test access", () => {
     );
     scoringState.corp.credits = 20;
     scoringState.corp.clicks = 10;
-    moveCorpCardToHq(scoringState, "onr_v1_220_tycho-extension");
+    moveCorpCardToHq(scoringState, 432);
 
     scoringState = apply(
       scoringState,
       "corp",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(scoringState, action) === "onr_v1_220_tycho-extension",
+        sourceDefinition(scoringState, action) === 432,
     );
     scoringState = apply(
       scoringState,
       "corp",
       (action) =>
         action.type === "advance_card" &&
-        sourceDefinition(scoringState, action) === "onr_v1_220_tycho-extension",
+        sourceDefinition(scoringState, action) === 432,
     );
     scoringState = apply(
       scoringState,
       "corp",
       (action) =>
         action.type === "advance_card" &&
-        sourceDefinition(scoringState, action) === "onr_v1_220_tycho-extension",
+        sourceDefinition(scoringState, action) === 432,
     );
     scoringState = apply(
       scoringState,
       "corp",
       (action) =>
         action.type === "advance_card" &&
-        sourceDefinition(scoringState, action) === "onr_v1_220_tycho-extension",
+        sourceDefinition(scoringState, action) === 432,
     );
     scoringState = apply(
       scoringState,
       "corp",
       (action) =>
         action.type === "advance_card" &&
-        sourceDefinition(scoringState, action) === "onr_v1_220_tycho-extension",
+        sourceDefinition(scoringState, action) === 432,
     );
     scoringState = apply(
       scoringState,
       "corp",
       (action) =>
         action.type === "score_agenda" &&
-        sourceDefinition(scoringState, action) === "onr_v1_220_tycho-extension",
+        sourceDefinition(scoringState, action) === 432,
     );
     expect(agendaPoints(scoringState, "corp")).toBe(4);
   });
 
   it("keeps repaired O:NR simple wall mappings playable", () => {
     for (const definitionId of [
-      "onr_v1_237_data-wall",
-      "onr_v1_238_data-wall-2-0",
-      "onr_v1_265_rock-is-strong",
+      449,
+      450,
+      477,
     ] as const) {
       let state = toRunnerTurn(onrV1Game(`onr-v1-repaired-${definitionId}`));
       putCorpIceOnServer(state, "rd", definitionId);
-      putCorpCardOnTopOfRd(state, "onr_v1_220_tycho-extension");
+      putCorpCardOnTopOfRd(state, 432);
       state.corp.credits = 20;
 
       state = apply(
@@ -3873,7 +3880,7 @@ describe("O:NR v1 Limited local private test access", () => {
       expect(agendaPoints(state, "runner")).toBe(0);
       expect(
         state.corp.rd.map((id) => state.cardInstances[id]?.definitionId),
-      ).toContain("onr_v1_220_tycho-extension");
+      ).toContain(432);
     }
   });
 });
@@ -3916,8 +3923,8 @@ describe("MVP 0.93 M1 effect, ability and choice foundation", () => {
       }),
     );
     state.runner.credits = 10;
-    installRunnerProgramForTest(state, "v08_steady_fracter");
-    putCorpIceOnServer(state, "rd", "v08_wall_ice");
+    installRunnerProgramForTest(state, 618);
+    putCorpIceOnServer(state, "rd", 619);
     state.corp.credits = 10;
 
     state = apply(
@@ -3931,7 +3938,7 @@ describe("MVP 0.93 M1 effect, ability and choice foundation", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "v08_wall_ice",
+        sourceDefinition(state, action) === 619,
     );
     state = enterEncounterFromMovementWindow(state);
     const pump = mustAction(
@@ -3939,7 +3946,7 @@ describe("MVP 0.93 M1 effect, ability and choice foundation", () => {
       "runner",
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinition(state, action) === "v08_steady_fracter",
+        sourceDefinition(state, action) === 618,
     );
 
     expect(pump.abilityRef).toMatchObject({
@@ -3963,7 +3970,7 @@ describe("MVP 0.93 M1 effect, ability and choice foundation", () => {
       "runner",
       (action) =>
         action.type === "break_subroutine" &&
-        sourceDefinition(state, action) === "v08_steady_fracter",
+        sourceDefinition(state, action) === 618,
     );
 
     expect(breaker.abilityRef).toMatchObject({
@@ -3990,12 +3997,12 @@ describe("MVP 0.4 controlled card pool and tags", () => {
     expect(expanded.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(
       Object.values(expanded.cardInstances).some(
-        (card) => card.definitionId === "simple_setup_hardware",
+        (card) => card.definitionId === 602,
       ),
     ).toBe(true);
     expect(
       Object.values(expanded.cardInstances).some(
-        (card) => card.definitionId === "simple_tag_ice",
+        (card) => card.definitionId === 603,
       ),
     ).toBe(true);
     expect(
@@ -4033,8 +4040,8 @@ describe("MVP 0.4 controlled card pool and tags", () => {
       }),
     );
     state.runner.credits = 10;
-    moveRunnerCardToGrip(state, "simple_draw_event");
-    moveRunnerCardToGrip(state, "simple_setup_hardware");
+    moveRunnerCardToGrip(state, 592);
+    moveRunnerCardToGrip(state, 602);
 
     const beforeGrip = state.runner.grip.length;
     state = apply(
@@ -4042,7 +4049,7 @@ describe("MVP 0.4 controlled card pool and tags", () => {
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(state, action) === "simple_draw_event",
+        sourceDefinition(state, action) === 592,
     );
     expect(state.runner.grip.length).toBe(beforeGrip + 1);
 
@@ -4052,14 +4059,14 @@ describe("MVP 0.4 controlled card pool and tags", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "simple_setup_hardware",
+        sourceDefinition(state, action) === 602,
     );
     expect(state.runner.memoryLimit).toBe(beforeMemoryLimit + 1);
     expect(
       state.runner.rig.hardware.map(
         (id) => state.cardInstances[id]?.definitionId,
       ),
-    ).toContain("simple_setup_hardware");
+    ).toContain(602);
   });
 
   it("rezzes and trashes a simple upgrade without leaking its title before access", () => {
@@ -4071,7 +4078,7 @@ describe("MVP 0.4 controlled card pool and tags", () => {
       }),
     );
     state.runner.credits = 10;
-    putCorpRootInRemote(state, "simple_upgrade");
+    putCorpRootInRemote(state, 606);
 
     let runnerView = getPlayerView(state, "runner");
     expect(JSON.stringify(runnerView)).not.toContain("Simple Upgrade");
@@ -4085,7 +4092,7 @@ describe("MVP 0.4 controlled card pool and tags", () => {
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(state, action) === "simple_upgrade",
+        sourceDefinition(state, action) === 606,
     );
     runnerView = getPlayerView(state, "runner");
     expect(JSON.stringify(runnerView)).toContain("Simple Upgrade");
@@ -4096,7 +4103,7 @@ describe("MVP 0.4 controlled card pool and tags", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
     state = apply(
@@ -4106,7 +4113,7 @@ describe("MVP 0.4 controlled card pool and tags", () => {
     );
     expect(
       state.corp.archives.map((id) => state.cardInstances[id]?.definitionId),
-    ).toContain("simple_upgrade");
+    ).toContain(606);
   });
 
   it("applies tags from ICE and lets Runner remove one tag", () => {
@@ -4117,7 +4124,7 @@ describe("MVP 0.4 controlled card pool and tags", () => {
         corpDeckId: "demo_corp_004",
       }),
     );
-    putCorpIceOnServer(state, "rd", "simple_tag_ice");
+    putCorpIceOnServer(state, "rd", 603);
     state.corp.credits = 5;
     state.runner.credits = 5;
 
@@ -4147,12 +4154,12 @@ describe("MVP 0.4 controlled card pool and tags", () => {
     });
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 5;
-    moveCorpCardToHq(state, "simple_tag_punishment_operation");
+    moveCorpCardToHq(state, 604);
 
     expect(
       getLegalActions(state, "corp").some(
         (action) =>
-          sourceDefinition(state, action) === "simple_tag_punishment_operation",
+          sourceDefinition(state, action) === 604,
       ),
     ).toBe(false);
     state.runner.tags = 1;
@@ -4162,7 +4169,7 @@ describe("MVP 0.4 controlled card pool and tags", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "simple_tag_punishment_operation",
+        sourceDefinition(state, action) === 604,
     );
     expect(state.runner.credits).toBe(3);
   });
@@ -4185,12 +4192,12 @@ describe("MVP 0.8 playable starter slice", () => {
     expect(state.deckMetadata?.corp.formatProfileId).toBe("local-demo-v0.8");
     expect(
       Object.values(state.cardInstances).some(
-        (card) => card.definitionId === "v08_burst_credit_event",
+        (card) => card.definitionId === 609,
       ),
     ).toBe(true);
     expect(
       Object.values(state.cardInstances).some(
-        (card) => card.definitionId === "v08_watchdog_ice",
+        (card) => card.definitionId === 620,
       ),
     ).toBe(true);
     expect(
@@ -4217,9 +4224,9 @@ describe("MVP 0.8 playable starter slice", () => {
       }),
     );
     state.runner.credits = 10;
-    moveRunnerCardToGrip(state, "v08_burst_credit_event");
-    moveRunnerCardToGrip(state, "v08_deep_draw_event");
-    moveRunnerCardToGrip(state, "v08_memory_chip");
+    moveRunnerCardToGrip(state, 609);
+    moveRunnerCardToGrip(state, 612);
+    moveRunnerCardToGrip(state, 614);
 
     const beforeCredits = state.runner.credits;
     state = apply(
@@ -4227,7 +4234,7 @@ describe("MVP 0.8 playable starter slice", () => {
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(state, action) === "v08_burst_credit_event",
+        sourceDefinition(state, action) === 609,
     );
     expect(state.runner.credits).toBe(beforeCredits + 5);
 
@@ -4237,7 +4244,7 @@ describe("MVP 0.8 playable starter slice", () => {
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(state, action) === "v08_deep_draw_event",
+        sourceDefinition(state, action) === 612,
     );
     expect(state.runner.grip.length).toBe(beforeGrip + 2);
 
@@ -4247,7 +4254,7 @@ describe("MVP 0.8 playable starter slice", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "v08_memory_chip",
+        sourceDefinition(state, action) === 614,
     );
     expect(state.runner.memoryLimit).toBe(beforeMemoryLimit + 1);
   });
@@ -4261,10 +4268,10 @@ describe("MVP 0.8 playable starter slice", () => {
       }),
     );
     state.runner.credits = 10;
-    moveRunnerCardToGrip(state, "v08_overclock_run_event");
-    installRunnerProgramForTest(state, "v08_steady_fracter");
-    putCorpIceOnServer(state, "rd", "v08_wall_ice");
-    putCorpCardOnTopOfRd(state, "v08_credit_surge_operation");
+    moveRunnerCardToGrip(state, 615);
+    installRunnerProgramForTest(state, 618);
+    putCorpIceOnServer(state, "rd", 619);
+    putCorpCardOnTopOfRd(state, 611);
     state.corp.credits = 10;
 
     state = apply(
@@ -4272,7 +4279,7 @@ describe("MVP 0.8 playable starter slice", () => {
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(state, action) === "v08_overclock_run_event" &&
+        sourceDefinition(state, action) === 615 &&
         action.payload?.serverId === "rd",
     );
     state = apply(
@@ -4280,21 +4287,21 @@ describe("MVP 0.8 playable starter slice", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "v08_wall_ice",
+        sourceDefinition(state, action) === 619,
     );
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "pump_breaker" &&
-        sourceDefinition(state, action) === "v08_steady_fracter",
+        sourceDefinition(state, action) === 618,
     );
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "break_subroutine" &&
-        sourceDefinition(state, action) === "v08_steady_fracter",
+        sourceDefinition(state, action) === 618,
     );
     state = continueRunThroughMovement(state);
     expect(state.run?.pendingSuccessBonusCredits).toBe(3);
@@ -4314,10 +4321,10 @@ describe("MVP 0.8 playable starter slice", () => {
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 10;
     state.corp.clicks = 8;
-    moveCorpCardToHq(state, "v08_credit_surge_operation");
-    moveCorpCardToHq(state, "v08_archive_planning_operation");
-    moveCorpCardToHq(state, "v08_cashout_asset");
-    moveCorpCardToHq(state, "v08_project_agenda");
+    moveCorpCardToHq(state, 611);
+    moveCorpCardToHq(state, 608);
+    moveCorpCardToHq(state, 610);
+    moveCorpCardToHq(state, 617);
 
     const beforeCredits = state.corp.credits;
     state = apply(
@@ -4325,7 +4332,7 @@ describe("MVP 0.8 playable starter slice", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "v08_credit_surge_operation",
+        sourceDefinition(state, action) === 611,
     );
     expect(state.corp.credits).toBe(beforeCredits + 6);
 
@@ -4335,7 +4342,7 @@ describe("MVP 0.8 playable starter slice", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "v08_archive_planning_operation",
+        sourceDefinition(state, action) === 608,
     );
     expect(state.corp.hq.length).toBe(beforeHq + 2);
 
@@ -4344,7 +4351,7 @@ describe("MVP 0.8 playable starter slice", () => {
       "corp",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "v08_cashout_asset",
+        sourceDefinition(state, action) === 610,
     );
     const beforeRezCredits = state.corp.credits;
     state = apply(
@@ -4352,7 +4359,7 @@ describe("MVP 0.8 playable starter slice", () => {
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(state, action) === "v08_cashout_asset",
+        sourceDefinition(state, action) === 610,
     );
     expect(state.corp.credits).toBe(beforeRezCredits + 2);
 
@@ -4361,35 +4368,35 @@ describe("MVP 0.8 playable starter slice", () => {
       "corp",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "v08_project_agenda",
+        sourceDefinition(state, action) === 617,
     );
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "advance_card" &&
-        sourceDefinition(state, action) === "v08_project_agenda",
+        sourceDefinition(state, action) === 617,
     );
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "advance_card" &&
-        sourceDefinition(state, action) === "v08_project_agenda",
+        sourceDefinition(state, action) === 617,
     );
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "advance_card" &&
-        sourceDefinition(state, action) === "v08_project_agenda",
+        sourceDefinition(state, action) === 617,
     );
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "score_agenda" &&
-        sourceDefinition(state, action) === "v08_project_agenda",
+        sourceDefinition(state, action) === 617,
     );
 
     expect(agendaPoints(state, "corp")).toBe(2);
@@ -4403,7 +4410,7 @@ describe("MVP 0.8 playable starter slice", () => {
         corpDeckId: "demo_corp_008",
       }),
     );
-    putCorpIceOnServer(state, "rd", "v08_watchdog_ice");
+    putCorpIceOnServer(state, "rd", 620);
     state.corp.credits = 10;
     state.runner.credits = 5;
 
@@ -4422,7 +4429,7 @@ describe("MVP 0.8 playable starter slice", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "v08_watchdog_ice",
+        sourceDefinition(state, action) === 620,
     );
     expect(JSON.stringify(getPlayerView(state, "runner"))).toContain(
       "Watchdog ICE",

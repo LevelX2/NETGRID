@@ -19,8 +19,8 @@
       },
       "requireIdentity": true,
       "allowedIdentityCards": {
-        "runner": ["runner_identity_001"],
-        "corp": ["corp_identity_001"]
+        "runner": [587],
+        "corp": [3]
       },
       "hiddenInfoPolicy": {
         "opponentDecklistPrivateByDefault": true,

@@ -1,3 +1,7 @@
+import { instantiatePlanProposal } from "../plans/plan-instance";
+import type { PlanInstance, PlanModuleId } from "../plans/plan-kernel-types";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
+import type { RunnerRunTargetEvaluation } from "../run-analysis/runner-run-target-types";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -9,7 +13,8 @@ import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
 import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
-import { aiInput } from "../semantic-ai-runtime-cutover.test-support";
+import { aiInput, legalAction, safeRuntimeRunTarget } from "../semantic-ai-runtime-cutover.test-support";
+import { runnerRezOrTrashPreparationBeatsImmediateRun } from "../run-analysis/runner-run-preparation";
 import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
 import {
   rememberResidentPlanPortfolio,
@@ -28,7 +33,7 @@ import {
   type RunnerTargetedIceTrashChoiceContinuation,
 } from "./runner-targeted-ice-trash-plan";
 import { runnerActionDispositions } from "./plan-first-live-runtime";
-import { bindSelectedRunnerTargetedIceTrashChoiceContinuation } from "../run-analysis/runner-run-preparation-choice-binding";
+import { bindSelectedRunnerTargetedPreparationChoiceContinuation } from "../run-analysis/runner-run-preparation-choice-binding";
 import { selectedChoicesForDecision } from "./selected-choices-for-decision";
 import { centralPressureModule } from "../runner/central-pressure/central-pressure-plan-module";
 
@@ -38,51 +43,75 @@ afterEach(() => {
 
 describe("Runner targeted ICE disruption plan", () => {
   it.each([
-    ["rezzed removal", targetedTrashCandidate, "Remove the preflighted rezzed ICE target from rd."],
-    ["unrezzed removal", targetedUnrezzedTrashCandidate, "Remove the preflighted unrezzed ICE target from rd."],
-    ["rez or trash", canonicalForgedCandidate, "Make the Corp rez or trash the preflighted ICE target on rd."],
-  ] as const)("describes the committed target for %s", (kind, buildCandidate, purpose) => {
-    const candidate = buildCandidate();
-    const input = kind === "rezzed removal"
-      ? planningInput()
-      : planningInput({
-          credits: 20,
-          ice: [blockingIce("rd-wall", "wall", 1), unrezzedIce("rd-hidden")],
-        });
-    const commitment = runnerTargetedIceTrashPlanCommitment({
-      input,
-      candidate,
-      planTargets: [{
-        ownerModuleId: "runner.pressure_central",
-        ownerDedupeKey: "central:rd",
-        serverId: "rd",
-        payoffValue: 1_000,
-      }],
-    });
-    expect(commitment).toBeDefined();
-    const [instance] = pressurePortfolio(commitment!).instances;
-    instance!.moduleState = {
-      kind: "central_pressure",
-      signal: {
-        routePreparation: "targeted_ice_trash",
-        serverId: commitment!.serverId,
-        marginalValue: 1_000,
-        preparationActionIds: [commitment!.sourceActionId],
-        sourceDefinitionIds: [commitment!.sourceDefinitionId],
-        targetedIceTrashCommitment: commitment,
-      },
-    };
-    const pressure = centralPressureModule();
-    const materialized = pressure.materialize(instance!, {} as never, {
-      input,
-      actionCandidates: [candidate],
-      turnKey: "runner:turn:1",
-    });
-    expect(materialized?.step.purpose).toBe(purpose);
-    expect(materialized?.step.stepId).toBe(`${instance!.instanceId}:pressure:rd`);
-    expect(materialized?.candidates.map(({ candidate }) => candidate.actionId))
-      .toEqual([commitment!.sourceActionId]);
-  });
+    [
+      "rezzed removal",
+      targetedTrashCandidate,
+      "Remove the preflighted rezzed ICE target from rd.",
+    ],
+    [
+      "unrezzed removal",
+      targetedUnrezzedTrashCandidate,
+      "Remove the preflighted unrezzed ICE target from rd.",
+    ],
+    [
+      "rez or trash",
+      canonicalForgedCandidate,
+      "Make the Corp rez or trash the preflighted ICE target on rd.",
+    ],
+  ] as const)(
+    "describes the committed target for %s",
+    (kind, buildCandidate, purpose) => {
+      const candidate = buildCandidate();
+      const input =
+        kind === "rezzed removal"
+          ? planningInput()
+          : planningInput({
+              credits: 20,
+              ice: [
+                blockingIce("rd-wall", "wall", 1),
+                unrezzedIce("rd-hidden"),
+              ],
+            });
+      const commitment = runnerTargetedIceTrashPlanCommitment({
+        input,
+        candidate,
+        planTargets: [
+          {
+            ownerModuleId: "runner.pressure_central",
+            ownerDedupeKey: "central:rd",
+            serverId: "rd",
+            payoffValue: 1_000,
+          },
+        ],
+      });
+      expect(commitment).toBeDefined();
+      const [instance] = pressurePortfolio(commitment!).instances;
+      instance!.moduleState = {
+        kind: "central_pressure",
+        signal: {
+          routePreparation: "targeted_ice_trash",
+          serverId: commitment!.serverId,
+          marginalValue: 1_000,
+          preparationActionIds: [commitment!.sourceActionId],
+          sourceDefinitionIds: [commitment!.sourceDefinitionId],
+          targetedIceTrashCommitment: commitment,
+        },
+      };
+      const pressure = centralPressureModule();
+      const materialized = pressure.materialize(instance!, {} as never, {
+        input,
+        actionCandidates: [candidate],
+        turnKey: "runner:turn:1",
+      });
+      expect(materialized?.step.purpose).toBe(purpose);
+      expect(materialized?.step.stepId).toBe(
+        `${instance!.instanceId}:pressure:rd`,
+      );
+      expect(
+        materialized?.candidates.map(({ candidate }) => candidate.actionId),
+      ).toEqual([commitment!.sourceActionId]);
+    },
+  );
   it.each([
     ["rezzed removal", targetedTrashCandidate],
     ["unrezzed removal", targetedUnrezzedTrashCandidate],
@@ -239,16 +268,14 @@ describe("Runner targeted ICE disruption plan", () => {
       portfolio,
       diagnostics: [],
     } as unknown as Parameters<
-      typeof bindSelectedRunnerTargetedIceTrashChoiceContinuation
+      typeof bindSelectedRunnerTargetedPreparationChoiceContinuation
     >[1];
 
-    bindSelectedRunnerTargetedIceTrashChoiceContinuation(input, result, [
+    bindSelectedRunnerTargetedPreparationChoiceContinuation(input, result, [
       candidate,
     ]);
     expect(candidate.actionId).toBe("runner.play.jettison-1");
-    expect(portfolio.executorInstanceId).toBe(
-      "plan:runner.pressure_central:central%3Ard",
-    );
+    expect(portfolio.executorInstanceId).toBe("pa90fufw9vc5bkshp96ztlryxl");
     const continuation = (
       portfolio.instances[0]!.moduleState as {
         choiceContinuation: RunnerTargetedIceTrashChoiceContinuation;
@@ -275,13 +302,29 @@ describe("Runner targeted ICE disruption plan", () => {
     expect(
       selectedChoicesForDecision(
         choiceInput,
-        resolveChoiceAction(),
+        choiceInput.legalActions[0]!,
         choiceDependencies(),
       ),
     ).toEqual({
       choiceId: "trash-rezzed-ice-11",
       selectedOptionIds: ["card_rd-sentry"],
     });
+
+    // Selection at version 8, bank support at 9, resumed event at 10.
+    continuation.plannedAtStateVersion = 8;
+    continuation.selectedAtStateVersion = 8;
+    continuation.engineContinuationAtStateVersion = 10;
+    const resolvePaidChoice = () =>
+      selectedRunnerTargetedIceTrashChoiceOptionId(
+        choiceInput,
+        resolveChoiceAction(),
+        choice,
+        choice.options,
+        portfolio,
+      );
+    expect(resolvePaidChoice()).toBe("card_rd-sentry");
+    continuation.engineContinuationAtStateVersion = 9;
+    expect(resolvePaidChoice).toThrow(/window_origin_missing/);
   });
 
   it("binds an unrezzed ICE effect to the outermost side-safe slot of a material central target", () => {
@@ -334,9 +377,9 @@ describe("Runner targeted ICE disruption plan", () => {
       portfolio,
       diagnostics: [],
     } as unknown as Parameters<
-      typeof bindSelectedRunnerTargetedIceTrashChoiceContinuation
+      typeof bindSelectedRunnerTargetedPreparationChoiceContinuation
     >[1];
-    bindSelectedRunnerTargetedIceTrashChoiceContinuation(input, result, [
+    bindSelectedRunnerTargetedPreparationChoiceContinuation(input, result, [
       candidate,
     ]);
     rememberResidentPlanPortfolio(input, portfolio);
@@ -351,10 +394,47 @@ describe("Runner targeted ICE disruption plan", () => {
     ).toBe("ice_3");
   });
 
+  it("only compares preparation against an actually executable alternative run", () => {
+    const action = legalAction("run-other", "runner", "start_run", "Run HQ", { credits: 0, clicks: 1 });
+    const input = aiInput("runner", [action]);
+    input.playerView.opponent.credits = 8;
+    const target = safeRuntimeRunTarget(action.actionId, "hq") as unknown as RunnerRunTargetEvaluation;
+    const compare = (overrides: Partial<RunnerRunTargetEvaluation>) =>
+      runnerRezOrTrashPreparationBeatsImmediateRun({
+        input,
+        targetIceState: "rez_or_trash",
+        serverId: "rd",
+        payoffValue: 500,
+        runTargets: [{ ...target, score: 800, ...overrides }],
+      });
+    expect(compare({ pathPassability: "blocked_unpayable", recommendation: "gain_credits_first" })).toBe(true);
+    expect(compare({ pathPassability: "reachable", recommendation: "run_now" })).toBe(false);
+    expect(compare({ actionId: "stale-run", pathPassability: "reachable", recommendation: "run_now" })).toBe(true);
+  });
+
+  it("requires the current Trace profile before quoting removal that leaves a Trace ICE", () => {
+    const ice = withEffectiveRunQuote(blockingIce("trace-wall", "wall", 1), {
+      effectiveStrength: 3,
+      subroutines: [{
+        id: "trace",
+        type: "initiate_trace",
+        sourceDefinitionId: 444,
+        sourceTitle: "Trace wall",
+        traceLimit: 2,
+        traceSuccessEffect: { type: "add_tag", amount: 1 },
+      }],
+    });
+    const input = planningInput({ ice: [ice, unrezzedIce("hidden")] });
+    expect(() => runnerUnrezzedIceTrashRouteOpeningPayoff(input, "rd"))
+      .toThrowError("invalid_player_view_card_projection");
+    input.playerView.traceRulesProfile = "modern_open";
+    expect(() => runnerUnrezzedIceTrashRouteOpeningPayoff(input, "rd")).not.toThrow();
+  });
+
   it("recognizes the canonical unrezzed-ICE capability and values the route it opens", () => {
     const action = {
       actionId:
-        "runner.play_event.worm-1.worm-1.onr_v1_109_security-code-worm-chip:abilities_on_play_trash_unrezzed_ice",
+        "rh.worm-1.worm-1.onr_v1_109_security-code-worm-chip:abilities_on_play_trash_unrezzed_ice",
       type: "play_event",
       side: "runner",
       label: "Security Code WORM Chip spielen",
@@ -367,14 +447,14 @@ describe("Runner targeted ICE disruption plan", () => {
       abilityRef: {
         sourceCardInstanceId: "worm-1",
         sourceAbilityId:
-          "onr_v1_109_security-code-worm-chip:abilities_on_play_trash_unrezzed_ice",
+          405,
       },
       payload: {
         cardId: "worm-1",
         cardImplementationCapabilityBindingKind: "card_spec_capability_key",
         cardImplementationAbilityKey: "abilities_on_play_trash_unrezzed_ice",
         cardImplementationAbilityId:
-          "onr_v1_109_security-code-worm-chip:abilities_on_play_trash_unrezzed_ice",
+          405,
       },
     } satisfies LegalAction;
     const [candidate] = buildActionSemanticCandidates({
@@ -469,9 +549,9 @@ describe("Runner targeted ICE disruption plan", () => {
       portfolio,
       diagnostics: [],
     } as unknown as Parameters<
-      typeof bindSelectedRunnerTargetedIceTrashChoiceContinuation
+      typeof bindSelectedRunnerTargetedPreparationChoiceContinuation
     >[1];
-    bindSelectedRunnerTargetedIceTrashChoiceContinuation(input, result, [
+    bindSelectedRunnerTargetedPreparationChoiceContinuation(input, result, [
       candidate,
     ]);
     rememberResidentPlanPortfolio(input, portfolio);
@@ -494,10 +574,10 @@ describe("Runner targeted ICE disruption plan", () => {
       schemaVersion: "resident-plan-portfolio-v2",
       side: "runner",
       stateVersion: 10,
-      executorInstanceId: "plan:runner.develop_board_and_hand:jettison",
+      executorInstanceId: "p85e2anuqvf9fdg1movaib1a81",
       instances: [
         {
-          instanceId: "plan:runner.develop_board_and_hand:jettison",
+          instanceId: "p85e2anuqvf9fdg1movaib1a81",
           moduleId: "runner.develop_board_and_hand",
           executionState: "executor",
           moduleState: { kind: "development" },
@@ -507,7 +587,7 @@ describe("Runner targeted ICE disruption plan", () => {
       transitions: [],
     } as unknown as ResidentPlanPortfolio;
     expect(() =>
-      bindSelectedRunnerTargetedIceTrashChoiceContinuation(
+      bindSelectedRunnerTargetedPreparationChoiceContinuation(
         input,
         {
           lane: "plan",
@@ -526,7 +606,7 @@ describe("Runner targeted ICE disruption plan", () => {
           portfolio: genericPortfolio,
           diagnostics: [],
         } as unknown as Parameters<
-          typeof bindSelectedRunnerTargetedIceTrashChoiceContinuation
+          typeof bindSelectedRunnerTargetedPreparationChoiceContinuation
         >[1],
         [candidate],
       ),
@@ -576,7 +656,7 @@ function targetedTrashCandidate(): ActionSemanticCandidate {
     actionType: "play_event",
     actorSide: "runner",
     semanticActionType: "play.runner_event",
-    sourceDefinitionId: "runner-targeted-ice-trash-event",
+    sourceDefinitionId: syntheticCardDefinitionId("runner-targeted-ice-trash-event"),
     sourceCardInstanceId: "jettison-1",
     effectTargets: ["pay_rez_cost_to_trash_rezzed_ice"],
     costProfile: {
@@ -592,7 +672,7 @@ function targetedUnrezzedTrashCandidate(): ActionSemanticCandidate {
   return {
     ...targetedTrashCandidate(),
     actionId: "runner.play.worm-1",
-    sourceDefinitionId: "runner-targeted-unrezzed-ice-trash-event",
+    sourceDefinitionId: syntheticCardDefinitionId("runner-targeted-unrezzed-ice-trash-event"),
     sourceCardInstanceId: "worm-1",
     effectTargets: [],
     targetContext: {
@@ -611,7 +691,7 @@ function targetedUnrezzedTrashCandidate(): ActionSemanticCandidate {
 function canonicalForgedCandidate(): ActionSemanticCandidate {
   const action = {
     actionId:
-      "runner.play_event.forged-1.forged-1.onr_v1_086_forged-activation-orders:abilities_on_play_corp_choice_rez_or_trash_ice",
+      "rh.forged-1.forged-1.onr_v1_086_forged-activation-orders:abilities_on_play_corp_choice_rez_or_trash_ice",
     type: "play_event",
     side: "runner",
     label: "Forged Activation Orders spielen",
@@ -624,7 +704,7 @@ function canonicalForgedCandidate(): ActionSemanticCandidate {
     abilityRef: {
       sourceCardInstanceId: "forged-1",
       sourceAbilityId:
-        "onr_v1_086_forged-activation-orders:abilities_on_play_corp_choice_rez_or_trash_ice",
+        382,
     },
     payload: {
       cardId: "forged-1",
@@ -632,7 +712,7 @@ function canonicalForgedCandidate(): ActionSemanticCandidate {
       cardImplementationAbilityKey:
         "abilities_on_play_corp_choice_rez_or_trash_ice",
       cardImplementationAbilityId:
-        "onr_v1_086_forged-activation-orders:abilities_on_play_corp_choice_rez_or_trash_ice",
+        382,
     },
   } satisfies LegalAction;
   const [candidate] = buildActionSemanticCandidates({
@@ -694,8 +774,8 @@ function blockingIce(
     instanceId,
     definitionId:
       subtype === "wall"
-        ? "onr_v1_232_crystal-wall"
-        : "test-targeted-trash-sentry",
+        ? 444
+        : syntheticCardDefinitionId("test-targeted-trash-sentry"),
     title: subtype === "wall" ? "Crystal Wall" : "Blocking Sentry",
     type: "ice",
     subtypes: [subtype],
@@ -720,7 +800,7 @@ function blockingIce(
 function fracter(instanceId: string): VisibleCard {
   return {
     instanceId,
-    definitionId: "onr_v1_047_pile-driver",
+    definitionId: 259,
     title: "Pile Driver",
     type: "program",
     subtypes: ["icebreaker", "fracter", "noisy"],
@@ -743,29 +823,25 @@ function unrezzedIce(instanceId: string): VisibleCard {
 function pressurePortfolio(
   commitment: RunnerTargetedIceTrashCommitment,
 ): ResidentPlanPortfolio {
+  const instance = currentTargetedPlanInstance(
+    "runner.pressure_central",
+    "central:rd",
+    {
+      kind: "central_pressure",
+      signal: { targetedIceTrashCommitment: commitment },
+    },
+    10,
+  );
   return {
     schemaVersion: "resident-plan-portfolio-v2",
     side: "runner",
     stateVersion: 10,
-    rootForegroundInstanceId: "plan:runner.pressure_central:central%3Ard",
-    executorInstanceId: "plan:runner.pressure_central:central%3Ard",
-    instances: [
-      {
-        instanceId: "plan:runner.pressure_central:central%3Ard",
-        moduleId: "runner.pressure_central",
-        dedupeKey: "central:rd",
-        executionState: "executor",
-        moduleState: {
-          kind: "central_pressure",
-          signal: {
-            targetedIceTrashCommitment: commitment,
-          },
-        },
-      },
-    ],
+    rootForegroundInstanceId: instance.instanceId,
+    executorInstanceId: instance.instanceId,
+    instances: [instance],
     completionHistory: [],
     transitions: [],
-  } as unknown as ResidentPlanPortfolio;
+  };
 }
 
 function targetedChoiceInput(
@@ -788,7 +864,20 @@ function targetedChoiceInput(
     profileId: "test",
     actionNumber: 11,
     eventTail: [],
-    legalActions: [resolveChoiceAction()],
+    legalActions: [
+      {
+        ...resolveChoiceAction(),
+        source: "game_rule",
+        choiceRequirements: [
+          {
+            choiceId: "trash-rezzed-ice-11",
+            minSelections: 1,
+            maxSelections: 1,
+            optionIds: options.map((option) => option.id),
+          },
+        ],
+      },
+    ],
     playerView: {
       stateVersion: 11,
       timingPoint: "runner_action.main",
@@ -854,6 +943,8 @@ function resolveChoiceAction(): LegalAction {
     actionId: "runner.resolve-choice.11",
     type: "resolve_choice",
     side: "runner",
+    timingPoint: "runner_action.main",
+    expiresAtStateVersion: 11,
   } as LegalAction;
 }
 
@@ -876,5 +967,46 @@ function choiceDependencies(): Parameters<
     }),
     rolesForCardId: () => [],
     effectsForCardId: () => [],
+  };
+}
+
+function currentTargetedPlanInstance(
+  moduleId: PlanModuleId,
+  dedupeKey: string,
+  moduleState: unknown,
+  stateVersion: number,
+): PlanInstance {
+  return {
+    ...instantiatePlanProposal(
+      {
+        moduleId,
+        moduleVersion: "1",
+        dedupeKey,
+        side: "runner",
+        strategyLineIds: [],
+        executionClass: "bounded_sequence",
+        initialViability: "ready",
+        persistencePolicy: "locked_sequence",
+        retentionPolicy: {
+          blockedStateVersionTtl: 2,
+          dormantStateVersionTtl: 2,
+          completedHistoryStateVersionTtl: 4,
+          abandonWhenTargetMissing: true,
+          protectedWhileNeedOpen: true,
+          protectedWhileCommitted: true,
+        },
+        phase: "targeted_preparation",
+        milestone: "choice_bound",
+        moduleState,
+        blockers: [],
+        resumeConditions: [],
+        completionConditions: [],
+        abandonmentConditions: [],
+        evidenceRefs: [],
+      },
+      stateVersion,
+    ),
+    executionState: "executor",
+    portfolioRole: "foreground",
   };
 }

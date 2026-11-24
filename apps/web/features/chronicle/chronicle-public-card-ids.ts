@@ -1,16 +1,17 @@
-import type { PublicGameEvent } from "@netgrid/shared";
+import { isCardDefinitionId, type CardDefinitionId, type PublicGameEvent } from "@netgrid/shared";
+import { cardDefinitionIdsFromCsv } from "../../app/card-definition-id";
 
 export function publicChronicleCardDefinitionIds(
   event: PublicGameEvent,
-): string[] {
-  const ids = new Set<string>();
+): CardDefinitionId[] {
+  const ids = new Set<CardDefinitionId>();
   collectPublicCardDefinitionIds(event.publicPayload, ids);
   return Array.from(ids);
 }
 
 function collectPublicCardDefinitionIds(
   value: unknown,
-  ids: Set<string>,
+  ids: Set<CardDefinitionId>,
 ): void {
   if (!value || typeof value !== "object") return;
   if (Array.isArray(value)) {
@@ -18,20 +19,12 @@ function collectPublicCardDefinitionIds(
     return;
   }
   for (const [key, entry] of Object.entries(value)) {
-    if (key.endsWith("DefinitionId") && typeof entry === "string") {
-      if (entry.length > 0) ids.add(entry);
+    if (key.endsWith("DefinitionId") && isCardDefinitionId(entry)) {
+      ids.add(entry);
     } else if (key.endsWith("DefinitionIds")) {
       const definitionIds = Array.isArray(entry)
-        ? entry.filter(
-            (item): item is string =>
-              typeof item === "string" && item.length > 0,
-          )
-        : typeof entry === "string"
-          ? entry
-              .split(",")
-              .map((item) => item.trim())
-              .filter(Boolean)
-          : [];
+        ? entry.filter(isCardDefinitionId)
+        : cardDefinitionIdsFromCsv(entry);
       for (const definitionId of definitionIds) ids.add(definitionId);
     }
     collectPublicCardDefinitionIds(entry, ids);

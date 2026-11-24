@@ -38,7 +38,7 @@ export function runnerResourceLifecycleFundingNeeds(
         gap: signal.fundingGap,
         priorityClass: "P5" as const,
         revalidation: {
-          stateVersion: stateVersion,
+          stateVersion,
           status: "material_parent_open" as const,
         },
         routeActionIds: signal.fundingRouteActionIds,

@@ -4,11 +4,11 @@ import { createRunnerInstallClassificationContext } from "./runner-install-class
 
 export type RunnerInstallClassificationCompositionDependencies = {
   rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
-  rolesForCardId: (definitionId: string | undefined) => string[];
+  rolesForCardId: (definitionId: number | undefined) => string[];
   sourceDefinitionIdForSimulationAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string | undefined;
+  ) => number | undefined;
   isSearchChoice: (
     choice: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>,
   ) => boolean;

@@ -22,12 +22,12 @@ import { activeRunRootPlan } from "../run-window/run-window-origin";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 
-const demolition = "onr_proteus_105_demolition-run";
-const dwarf = "onr_v1_021_dwarf";
-const krash = "onr_v1_039_krash";
-const highlighter = "onr_proteus_090_highlighter";
-const cheapWall = "onr_v1_238_data-wall-2-0";
-const costlyWall = "onr_v1_245_fire-wall";
+const demolition = 163;
+const dwarf = 233;
+const krash = 251;
+const highlighter = 148;
+const cheapWall = 450;
+const costlyWall = 457;
 
 function takeDeckCard(
   state: GameState,
@@ -54,7 +54,7 @@ afterEach(resetResidentPlanPortfolioMemory);
 
 function fixture(
   expensive = false,
-  serverId: "rd" | "remote_1" = "rd",
+  serverId: "rd" | "r1" = "rd",
   credits = expensive ? 60 : 21,
   wallCount = 2,
 ) {
@@ -92,8 +92,8 @@ function fixture(
     state.runner.rig.programs.push(card.instanceId);
   }
   for (const definition of [
-    "onr_v1_220_tycho-extension",
-    "onr_v1_214_project-babylon",
+    432,
+    426,
   ]) {
     const card = takeDeckCard(state, "corp", definition);
     card.controller = "runner";
@@ -101,7 +101,7 @@ function fixture(
     card.faceup = true;
     state.runner.scoreArea.push(card.instanceId);
   }
-  if (serverId === "remote_1") {
+  if (serverId === "r1") {
     state.corp.servers.push({
       id: serverId,
       kind: "remote",
@@ -150,7 +150,7 @@ function fixture(
     (target) => target.actionId === selected.actionId,
   );
   const normal = targets.find(
-    (target) => target.actionId === `runner.start_run.${serverId}`,
+    (target) => target.actionId === `rs.${serverId}`,
   );
   if (!eventTarget || !normal) throw Error("Missing native comparison routes");
   return { state, input, selected, eventTarget, normal, runnerDeck, corpDeck };
@@ -224,7 +224,7 @@ describe("Demolition Run's native successful-run replacement", () => {
   });
 
   it("admits no empty Remote follow-up despite positive known cash savings", () => {
-    const { eventTarget } = fixture(true, "remote_1");
+    const { eventTarget } = fixture(true, "r1");
     expect(eventTarget).toMatchObject({
       accessPayoff: "known_low_value",
       knownAccessState: "known_no_current_payoff",
@@ -304,8 +304,11 @@ describe("Demolition Run's native successful-run replacement", () => {
       selected.payload?.successfulRunAccessReplacement,
       start.actionId,
     ).toBe("trash_rezzed_ice_on_fort_and_tag_runner");
-    const rootId = start.decisionDebug?.planFirstDecision?.rootPlanInstanceId;
-    expect(rootId).toContain("runner.pressure_central");
+    const plan = start.decisionDebug?.planFirstDecision;
+    const rootId = plan?.rootPlanInstanceId;
+    expect(plan?.portfolio.find(
+      (instance) => instance.instanceId === rootId,
+    )?.moduleId).toBe("runner.pressure_central");
     const played = applyAction(state, {
       matchId: state.matchId,
       side: "runner",

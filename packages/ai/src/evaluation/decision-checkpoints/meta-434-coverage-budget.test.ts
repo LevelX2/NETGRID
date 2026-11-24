@@ -27,7 +27,7 @@ it.each([17, 21, 22, 24])(
     const { input } = fixture();
     input.playerView.own.credits = credits;
     const target = evaluateRunnerRunTargets({ input }).find(
-      (t) => t.actionId === "runner.start_run.remote_1",
+      (t) => t.actionId === "rs.r1",
     )!;
     expect(target.routeQuote?.reachability).toBe("no_access");
     expect(target.pathPassability).toBe("blocked_unpayable");
@@ -45,16 +45,16 @@ it("does not install a duplicate breaker in the original Remote support chain", 
     cp.runtime,
   );
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("runner.draw_card");
+  expect(decision.actionId).toBe("r8");
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.evidence).not.toContain(
     "plan_module:runner.rig_and_coverage",
   );
   expect(decision.evidence).toEqual(
     expect.arrayContaining([
-      "plan_first_root:plan:runner.develop_board_and_hand:generic%3Adraw-options",
-      "plan_first_executor:plan:runner.develop_board_and_hand:generic%3Adraw-options",
-      "plan_step_id:plan:runner.develop_board_and_hand:generic%3Adraw-options:execute",
+      "plan_first_root:p6hb5l9cujr02om3vqn7gbqr35",
+      "plan_first_executor:p6hb5l9cujr02om3vqn7gbqr35",
+      "plan_step_id:p6hb5l9cujr02om3vqn7gbqr35:execute",
     ]),
   );
   expect(
@@ -72,7 +72,7 @@ it("preserves actual missing coverage when the installed breaker is absent", () 
     (c: VisibleCard) => c.type !== "program",
   );
   const target = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.remote_1",
+    (t) => t.actionId === "rs.r1",
   )!;
   expect(["blocked_unbreakable", "blocked_missing_coverage"]).toContain(
     target.pathPassability,
@@ -84,7 +84,7 @@ it("retains the same installed breaker and admits its fully funded path", () => 
   const { input } = fixture();
   input.playerView.own.credits = 26;
   const target = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.remote_1",
+    (t) => t.actionId === "rs.r1",
   )!;
   expect(target.pathPassability).toBe("reachable");
   expect(target.routeQuote?.reachability).toBe("guaranteed_access");

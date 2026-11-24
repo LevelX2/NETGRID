@@ -1,11 +1,15 @@
-import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
-import { legalActionCreditCost } from "../../runtime/legal-action-credit-cost";
+import { visibleRunnerPathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
+import { runnerFundingRouteCandidateIsMaterializable } from "../../plans/runner-funding-candidates";
+import {
+  actionClickCost,
+  nonNegativeActionCreditCost,
+} from "../../runtime/action-cost";
 import { runnerPartialProgramSearchIsPayable } from "../../runtime/runner-partial-program-search-facts";
 import { runnerCandidateExecutesProgramSearch } from "../../runtime/runner-program-search-facts";
 import { runnerCandidateSourceDefinitionId } from "../../runtime/runner-action-source-facts";
 import { uniqueBy } from "../../runtime/collection";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
-import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
+import type { AiDecisionInput, CardDefinitionId, VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
@@ -23,7 +27,7 @@ import { runnerTargetHasTerminalContestThreat } from "../../runtime/runner-termi
 import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
 import { runnerRunPathCreditBudgetWithVisiblePools } from "../../run-analysis/visible-run-credit-budget";
 import { runnerBreakerCapabilityCoversRole } from "./coverage-card-facts";
-import { coverageKindForPlanRole } from "./coverage-card-facts";
+import { RUNNER_BREAKER_COVERAGE } from "../../plans/runner-coverage-contracts";
 import type { RunnerCoverageServices } from "./coverage-services";
 import { runnerDrawProjectionFor } from "../../actions/action-economy-projection";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
@@ -88,6 +92,27 @@ export function runnerCoverageGapIsTerminalRemoteThreat(
   return runnerTargetHasTerminalContestThreat(input, evaluation.targetServerId);
 }
 
+export function runnerCoverageTraceContext(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+) {
+  const maximumFundingStep = candidates.reduce(
+    (maximum, candidate) =>
+      runnerFundingRouteCandidateIsMaterializable(candidate)
+        ? Math.max(maximum, candidate.economyProjection!.netLiquidCreditGain!)
+        : maximum,
+    0,
+  );
+  // A price comparison may quote breaker payments beyond current liquidity.
+  // Trace abilities only spend credits possible before this turn's run.
+  const maxFundingSteps = Math.max(1, input.playerView.own.clicks);
+  return {
+    ...visibleRunnerPathTraceContext(input),
+    runnerTraceCreditLimit:
+      input.playerView.own.credits + maximumFundingStep * maxFundingSteps,
+  };
+}
+
 export function runnerUrgentRemoteCoverageConversionQuote(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -126,15 +151,14 @@ export function runnerUrgentRemoteCoverageConversionQuote(
     installActionIds,
   );
   const runAction = input.legalActions.find(
-    (action) => action.actionId === evaluation.actionId,
+    (action) =>
+      action.actionId === evaluation.actionId &&
+      action.side === "runner" &&
+      action.timingPoint === input.playerView.timingPoint &&
+      action.expiresAtStateVersion === input.playerView.stateVersion,
   );
-  const runClickCost = runAction?.costs.reduce(
-    (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
-    0,
-  );
-  if (!installRoute || !runAction || !runClickCost || runClickCost <= 0) {
-    return undefined;
-  }
+  if (!installRoute || !runAction) return undefined;
+  const runClickCost = actionClickCost(runAction);
   const requiredClicksAfterFunding = installRoute.clickCost + runClickCost;
   if (input.playerView.own.clicks < requiredClicksAfterFunding) {
     return undefined;
@@ -157,7 +181,7 @@ export function runnerUrgentRemoteCoverageConversionQuote(
     ),
     server.root,
     input.playerView.opponent.credits,
-    visibleIcePathTraceContext(input),
+    runnerCoverageTraceContext(input, candidates),
   );
   const projectedKnownPathCost = projectedPath.visibleBreakCost;
   if (
@@ -193,7 +217,7 @@ export function runnerUrgentRemoteCoverageConversionQuote(
   const projectedKnownPathLiquidCost = quoteLiquidity - remainingLiquidity;
   const requiredCreditsWithoutFloor =
     (answerInstallCost as number) +
-    legalActionCreditCost(runAction) +
+    nonNegativeActionCreditCost(runAction) +
     projectedKnownPathLiquidCost;
   const remainingFundingClicks = Math.max(
     0,
@@ -235,7 +259,7 @@ export function runnerUrgentRemoteCoverageConversionQuote(
   };
 }
 
-export function runnerUrgentCoverageInstallProjection(
+function runnerUrgentCoverageInstallProjection(
   input: AiDecisionInput,
   visibleAnswer: VisibleCard,
   answerInstallCost: number,
@@ -253,12 +277,18 @@ export function runnerUrgentCoverageInstallProjection(
       const action = input.legalActions.find(
         (candidate) => candidate.actionId === actionId,
       );
-      if (!action) return [];
-      const clickCost = action.costs.reduce(
-        (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
-        0,
-      );
-      return clickCost > 0 ? [{ actionId, clickCost }] : [];
+      if (
+        !action ||
+        action.side !== "runner" ||
+        action.type !== "install_card" ||
+        action.timingPoint !== input.playerView.timingPoint ||
+        action.expiresAtStateVersion !== input.playerView.stateVersion ||
+        (action.payload?.cardId ?? action.source) !==
+          visibleAnswer.instanceId ||
+        nonNegativeActionCreditCost(action) !== answerInstallCost
+      )
+        return [];
+      return [{ actionId, clickCost: actionClickCost(action) }];
     })
     .sort(
       (left, right) =>
@@ -273,7 +303,7 @@ export function runnerUrgentCoverageInstallProjection(
   }
 
   const definition = visibleAnswer.definitionId
-    ? CARD_DEFINITIONS_BY_ID[visibleAnswer.definitionId]
+    ? planningCardFactsByDefinitionId(visibleAnswer.definitionId)
     : undefined;
   const memoryCost = definition?.memoryCost;
   const memoryUsed = input.playerView.own.memoryUsed;
@@ -350,7 +380,7 @@ export function coverageSupportActionIds(
   requiredRole: RunnerCoverageGapSignal["requiredRole"],
   options: Readonly<{
     deckHasStackAnswerOverride?: boolean;
-    targetDefinitionIdOverride?: string;
+    targetDefinitionIdOverride?: CardDefinitionId;
     handRotation?: Pick<
       RunnerHandRotationAssessment,
       "exactKnownNeedDrawAdmissible" | "stackHasCards"
@@ -553,11 +583,14 @@ export function coverageSupportActionIds(
     searchEngineSetupActionIds: searchEngineSetupCandidates.map(
       (candidate) => candidate.actionId,
     ),
-    drawForAnswerActionIds: [
-      ...safeCardDrawForAnswerCandidates,
-      ...safeBasicDrawSubstitutes,
-      ...sideSafeRoleBasicDraws,
-    ]
+    drawForAnswerActionIds: uniqueBy(
+      [
+        ...safeCardDrawForAnswerCandidates,
+        ...safeBasicDrawSubstitutes,
+        ...sideSafeRoleBasicDraws,
+      ],
+      (candidate) => candidate.actionId,
+    )
       .filter((candidate) => {
         const action = input.legalActions.find(
           (legalAction) => legalAction.actionId === candidate.actionId,
@@ -590,7 +623,7 @@ function runnerDeckHasHeapRecoveryDrawAnswer(
       (card) =>
         card.known &&
         visibleCardCoversRequiredCoverage(card, requiredRole, (cardId) =>
-          rolesForDeckDoctrineCard(cardId ?? ""),
+          rolesForDeckDoctrineCard(cardId),
         ),
     )
   ) {
@@ -649,10 +682,7 @@ export function runnerCoverageSearchTargetIsPayable(
     (legalAction) => legalAction.actionId === candidate.actionId,
   );
   if (!action) return false;
-  const sourceCreditCost = action.costs.reduce(
-    (total, cost) => total + Math.max(0, cost.credits ?? 0),
-    0,
-  );
+  const sourceCreditCost = nonNegativeActionCreditCost(action);
   return (
     input.playerView.own.credits >= sourceCreditCost + targetBreaker.installCost
   );
@@ -661,7 +691,7 @@ export function runnerCoverageSearchTargetIsPayable(
 export function runnerPreferredCoverageSearchDefinitionId(
   deckCapabilities: DeckCapabilityProfile,
   requiredRole: RunnerCoverageGapSignal["requiredRole"],
-): string | undefined {
+): number | undefined {
   return (deckCapabilities.runner?.breakerInventory ?? [])
     .filter(
       (breaker) =>
@@ -674,7 +704,7 @@ export function runnerPreferredCoverageSearchDefinitionId(
       (left, right) =>
         (left.installCost ?? Number.POSITIVE_INFINITY) -
           (right.installCost ?? Number.POSITIVE_INFINITY) ||
-        left.cardId.localeCompare(right.cardId),
+        (left.cardId - right.cardId),
     )[0]?.cardId;
 }
 
@@ -732,7 +762,7 @@ export function runnerCoverageRecoveryTarget(
       : visibleHeapCards;
   return targets.find((card) =>
     visibleCardCoversRequiredCoverage(card, requiredRole, (cardId) =>
-      rolesForDeckDoctrineCard(cardId ?? ""),
+      rolesForDeckDoctrineCard(cardId),
     ),
   );
 }
@@ -741,7 +771,7 @@ export function runnerDeckHasCoverageAnswer(
   deckCapabilities: DeckCapabilityProfile,
   requiredRole: RunnerCoverageGapSignal["requiredRole"],
 ): boolean {
-  const requiredCoverage = coverageKindForPlanRole(requiredRole);
+  const requiredCoverage = RUNNER_BREAKER_COVERAGE[requiredRole].deckKind;
   return (
     deckCapabilities.runner?.breakerInventory.some(
       (breaker) =>

@@ -1,7 +1,6 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 import { isFiniteNonNegativeInteger } from "../../runtime/exact-action-cost-facts";
 
 export function corpSupportRetainsFundedIce(
@@ -83,18 +82,48 @@ export function corpStructuredIceSupportAssessment(
         : []
       : input.playerView.servers;
   const requiredSubtypes = profile.requiredSubtypes ?? [];
+  const run = input.playerView.run;
+  const requiresUpcomingIce =
+    profile.activeRunConstraint === "same_fort_upcoming_ice_when_active" &&
+    run !== undefined;
+  const position = requiresUpcomingIce ? run?.position : undefined;
+  const upcomingIceIndex =
+    position?.kind === "ice" &&
+    position.serverId === sourceServerId &&
+    run?.attackedServerId === sourceServerId &&
+    Number.isSafeInteger(position.iceIndex) &&
+    position.iceIndex >= 0
+      ? position.iceIndex
+      : undefined;
+  if (requiresUpcomingIce && upcomingIceIndex === undefined) {
+    return {
+      productive: false,
+      serverId: sourceServerId,
+      value: 0,
+      evidenceCode:
+        run?.attackedServerId === sourceServerId
+          ? "corp_rez_structured_ice_support_no_upcoming_same_fort_encounter"
+          : "corp_rez_structured_ice_support_current_run_on_other_fort",
+    };
+  }
   const matchingIceIds = servers.flatMap((server) =>
-    server.ice.flatMap((ice) => {
-      const definition = ice.definitionId
-        ? CARD_DEFINITIONS_BY_ID[ice.definitionId]
-        : undefined;
-      const matchesSubtypes = requiredSubtypes.every((subtype) =>
-        definition?.subtypes.some(
-          (visibleSubtype) =>
-            visibleSubtype.trim().toLowerCase().replaceAll(" ", "_") ===
-            subtype,
-        ),
-      );
+    server.ice.flatMap((ice, index) => {
+      if (
+        upcomingIceIndex !== undefined &&
+        (server.id !== sourceServerId ||
+          index > upcomingIceIndex ||
+          ice.instanceId === run?.pendingAutoPassIceId)
+      )
+        return [];
+      const matchesSubtypes =
+        ice.known &&
+        requiredSubtypes.every((subtype) =>
+          ice.subtypes?.some(
+            (visibleSubtype) =>
+              visibleSubtype.trim().toLowerCase().replaceAll(" ", "_") ===
+              subtype,
+          ),
+        );
       return matchesSubtypes ? [ice.instanceId] : [];
     }),
   );
@@ -126,30 +155,14 @@ export function corpStructuredIceSupportAssessment(
     };
   }
 
-  if (
-    profile.activeRunConstraint === "same_fort_upcoming_ice_when_active" &&
-    input.playerView.run
-  ) {
-    const run = input.playerView.run;
-    const exactUpcomingEncounter =
-      run.attackedServerId === sourceServerId && run.position?.kind === "ice";
-    return exactUpcomingEncounter
-      ? {
-          productive: true,
-          serverId: sourceServerId,
-          value: 160,
-          evidenceCode:
-            "corp_rez_structured_ice_support_current_same_fort_encounter",
-        }
-      : {
-          productive: false,
-          serverId: sourceServerId,
-          value: 0,
-          evidenceCode:
-            run.attackedServerId === sourceServerId
-              ? "corp_rez_structured_ice_support_no_upcoming_same_fort_encounter"
-              : "corp_rez_structured_ice_support_current_run_on_other_fort",
-        };
+  if (requiresUpcomingIce) {
+    return {
+      productive: true,
+      serverId: sourceServerId,
+      value: 160,
+      evidenceCode:
+        "corp_rez_structured_ice_support_current_same_fort_encounter",
+    };
   }
 
   return {

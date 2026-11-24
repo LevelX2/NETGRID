@@ -2,12 +2,8 @@
 
 import type { CSSProperties } from "react";
 import { useMemo, useState } from "react";
-import type {
-  LegalAction,
-  PlayerView,
-  Side,
-  VisibleCard,
-} from "@netgrid/shared";
+import type { Side, VisibleCard } from "@netgrid/shared";
+import type { LegalAction, PlayerView } from "../../lib/presented-player-view";
 import { useLocale, useTranslations } from "use-intl/react";
 
 import { type BoardHighlight } from "../../app/action-cues";

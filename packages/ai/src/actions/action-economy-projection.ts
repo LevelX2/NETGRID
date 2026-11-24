@@ -115,6 +115,16 @@ export function actionEconomyProjectionFor(
     action.payload?.hostedCreditTakeAmount,
   );
   const runnerDrawProjection = runnerDrawProjectionFor(action);
+  const malformedRunnerDrawProjection =
+    action.side === "runner" &&
+    runnerDrawProjection === undefined &&
+    [
+      action.payload?.runnerDrawProjectionSchemaVersion,
+      action.payload?.projectedGrossDrawCount,
+      action.payload?.projectedPostDrawDispositionCount,
+      action.payload?.projectedNetHandDelta,
+      action.payload?.visibleDrawTaxSourceCount,
+    ].some((field) => field !== undefined);
   const topHeapReturn = runnerTopHeapReturnStatus(candidate, action);
   const handSetAside = runnerHandSetAsideStatus(candidate, action);
   const recycleDraw = runnerRecycleDrawProjectionStatus(candidate, action);
@@ -272,36 +282,31 @@ export function actionEconomyProjectionFor(
       : []),
   ];
 
-  const reliability =
-    corpZoneTransition.status === "terminal_deckout" ||
-    corpZoneTransition.status === "malformed" ||
-    topHeapReturn === "malformed" ||
-    handSetAside === "malformed" ||
-    recycleDraw.status === "malformed"
-      ? ("unknown" as const)
-      : rootRezOutcome.status === "runner_interruptible"
-        ? ("conditional" as const)
-        : rootRezOutcome.status === "missing" ||
-            rootRezOutcome.status === "malformed"
-          ? ("unknown" as const)
-          : source === "legal_action_payload" ||
-              source === "basic_action_contract"
-            ? ("guaranteed" as const)
-            : ("unknown" as const);
-  const confidence =
+  const incompleteEconomyFact =
     corpZoneTransition.status === "terminal_deckout" ||
     corpZoneTransition.status === "malformed" ||
     topHeapReturn === "malformed" ||
     handSetAside === "malformed" ||
     recycleDraw.status === "malformed" ||
+    malformedRunnerDrawProjection ||
     rootRezOutcome.status === "missing" ||
-    rootRezOutcome.status === "malformed"
-      ? ("none" as const)
-      : source === "legal_action_payload"
-        ? ("high" as const)
-        : source === "basic_action_contract"
-          ? ("medium" as const)
-          : ("none" as const);
+    rootRezOutcome.status === "malformed";
+  const reliability = incompleteEconomyFact
+    ? ("unknown" as const)
+    : rootRezOutcome.status === "runner_interruptible"
+      ? ("conditional" as const)
+      : source === "legal_action_payload" || source === "basic_action_contract"
+        ? ("guaranteed" as const)
+        : ("unknown" as const);
+  const confidence = incompleteEconomyFact
+    ? ("none" as const)
+    : source === "legal_action_payload"
+      ? ("high" as const)
+      : source === "basic_action_contract"
+        ? ("medium" as const)
+        : ("none" as const);
+  if (malformedRunnerDrawProjection)
+    evidence.push("runner_draw_projection:malformed");
 
   return {
     schemaVersion: "action-economy-projection-v1",
@@ -344,16 +349,7 @@ export function actionEconomyProjectionFor(
           ? true
           : "unknown",
     reliability,
-    source:
-      corpZoneTransition.status === "terminal_deckout" ||
-      corpZoneTransition.status === "malformed" ||
-      topHeapReturn === "malformed" ||
-      handSetAside === "malformed" ||
-      recycleDraw.status === "malformed" ||
-      rootRezOutcome.status === "missing" ||
-      rootRezOutcome.status === "malformed"
-        ? "unknown"
-        : source,
+    source: incompleteEconomyFact ? "unknown" : source,
     confidence,
     evidence,
   };
@@ -451,14 +447,14 @@ function runnerHandSetAsideStatus(
     payload.abilityId === "set_aside_from_grip" &&
     payload.abilityFamily === "hosting-counters" &&
     payload.effectKind === "counter_change" &&
-    typeof payload.sourceDefinitionId === "string" &&
+    typeof payload.sourceDefinitionId === "number" &&
     (candidate.sourceDefinitionId === undefined ||
       candidate.sourceDefinitionId === payload.sourceDefinitionId) &&
     typeof target === "string" &&
     target.length > 0 &&
     target !== source &&
-    typeof payload.targetCardDefinitionId === "string" &&
-    payload.targetCardDefinitionId.length > 0 &&
+    typeof payload.targetCardDefinitionId === "number" &&
+    payload.targetCardDefinitionId > 0 &&
     action.targetRequirements.some(
       (requirement) =>
         requirement.kind === "card" &&
@@ -496,7 +492,7 @@ function runnerTopHeapReturnStatus(
     action.abilityRef?.sourceCardInstanceId === source &&
     payload.cardImplementationCapabilityBindingKind ===
       "card_spec_capability_key" &&
-    typeof payload.cardImplementationAbilityId === "string" &&
+    typeof payload.cardImplementationAbilityId === "number" &&
     payload.cardImplementationAbilityId === action.abilityRef.sourceAbilityId &&
     typeof target === "string" &&
     target.length > 0 &&
@@ -577,7 +573,7 @@ export function corpZoneTransitionProjectionStatus(
     typeof sourceCardInstanceId === "string" &&
     sourceCardInstanceId === action.source &&
     sourceCardInstanceId === candidate.sourceCardInstanceId &&
-    typeof sourceDefinitionId === "string" &&
+    typeof sourceDefinitionId === "number" &&
     (candidate.sourceDefinitionId === undefined ||
       sourceDefinitionId === candidate.sourceDefinitionId) &&
     stateVersion === action.expiresAtStateVersion &&
@@ -757,7 +753,7 @@ export function rootRezCreditOutcomeProjectionStatus(
     targetServerId === "rd" ||
     targetServerId === "archives" ||
     (typeof targetServerId === "string" &&
-      /^remote_[1-9][0-9]*$/.test(targetServerId));
+      /^r[1-9][0-9]*$/.test(targetServerId));
   const exactCandidateStateVersion =
     candidate.stateVersion === undefined ||
     candidate.stateVersion === stateVersion;

@@ -39,6 +39,7 @@ export function residentPlanPortfolioSnapshot(
         "Discard incompatible resident portfolio state; no v1 migration is supported.",
     });
   }
+  assertResidentPlanPortfolio(snapshot, input.playerView.timingPoint);
   return structuredClone(snapshot);
 }
 
@@ -62,6 +63,7 @@ export function rememberResidentPlanPortfolio(
         "Persist only a current v2 resident portfolio for the matching side.",
     });
   }
+  assertResidentPlanPortfolio(snapshot, input.playerView.timingPoint);
   memory.set(
     memoryKey(input),
     structuredClone(snapshot),
@@ -139,15 +141,24 @@ function bindingFailure(
 }
 
 function memoryKey(input: AiDecisionInput): string {
-  return [
+  return JSON.stringify([
     memoryContextId(input),
     input.side,
     input.profileId,
     RESIDENT_PLAN_PORTFOLIO_SCHEMA_VERSION,
-  ].join(":");
+  ]);
 }
 
 function memoryContextId(input: AiDecisionInput): string {
-  const [decisionScope] = input.decisionId.split(":");
-  return decisionScope || input.seed;
+  // Simulation and replay may select a decision scope distinct from the match ID.
+  // Split at the decision suffix so a colon inside that scope stays significant.
+  const decisionScope = /^(.*):\d+:(?:corp|runner)(?::[^:]+)?$/.exec(
+    input.decisionId,
+  )?.[1];
+  return (
+    decisionScope ||
+    input.matchId ||
+    input.decisionId.split(":")[0] ||
+    input.seed
+  );
 }

@@ -15,7 +15,7 @@ export type RunnerRunRouteEffect = {
     | "run_lock"
     | "future_modifier";
   timing: "before_access" | "at_access" | "after_access";
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   sourceTitle?: string;
   amount?: number;
   preventsAccess: boolean;
@@ -209,8 +209,9 @@ function routeEffectsForHazard(
       "damage",
       hazard.expectedDamage,
       false,
-      hazard.canCauseFlatlineBeforeAccess &&
-        hazard.expectedDamage >= runnerGripCount,
+      hazard.effectTiming === "before_access" &&
+        hazard.canCauseFlatlineBeforeAccess &&
+        hazard.expectedDamage > runnerGripCount,
     );
   }
   if (hazard.kind === "trace_trash") add("trash", undefined);

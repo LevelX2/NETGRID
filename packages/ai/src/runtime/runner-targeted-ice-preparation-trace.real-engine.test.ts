@@ -23,12 +23,12 @@ import { buildAiDecisionInput } from "./ai-decision-input";
 import { scoringWindowPostRezProtectionAssessment } from "./corp-scoreline/semantic-runtime-corp-scoring-window-runner-pressure";
 import { runnerTargetedIceTrashPlanCommitment } from "./runner-targeted-ice-trash-plan";
 
-const wall = "onr_v1_279_wall-of-static";
-const rex = "onr_v1_264_rex";
-const socialEngineering = "onr_v1_111_social-engineering";
-const jettisonIce = "onr_v1_080_core-command-jettison-ice";
+const wall = 491;
+const rex = 476;
+const socialEngineering = 323;
+const jettisonIce = 292;
 
-function addCards(deck: DeckDefinition, ...ids: string[]): DeckDefinition {
+function addCards(deck: DeckDefinition, ...ids: number[]): DeckDefinition {
   return {
     ...deck,
     cards: [
@@ -261,7 +261,7 @@ describe("trace rules shared by Runner and Corp quotes", () => {
       const { state, corpDeck } = setup(profile);
       RealEngineFixtureBuilder.forState(state)
         .withCorpCredits(7)
-        .withCorpIceOnServer("remote_1", rex);
+        .withCorpIceOnServer("r1", rex);
       const input = buildAiDecisionInput(state, "corp", {
         ownDeckSnapshot: {
           deckSnapshotId: corpDeck.id,
@@ -273,7 +273,7 @@ describe("trace rules shared by Runner and Corp quotes", () => {
         },
       });
       const remote = input.playerView.servers.find(
-        ({ id }) => id === "remote_1",
+        ({ id }) => id === "r1",
       );
       const ice = remote?.ice.find(({ definitionId }) => definitionId === rex);
       expect(ice?.effectivePostRezRunQuote?.complete).toBe(true);

@@ -8,6 +8,7 @@ import {
 } from "@netgrid/engine";
 import {
   ORIGINALSET_DEFAULT_DECKS,
+  type CardDefinitionId,
   type GameState,
   type LegalAction,
 } from "@netgrid/shared";
@@ -28,20 +29,20 @@ import { buildAiDecisionInputDto } from "../../input-dto";
 const runnerDeck = {
   ...ORIGINALSET_DEFAULT_DECKS.runner,
   cards: [
-    { id: "onr_v1_068_startup-immolator", quantity: 3 },
-    { id: "onr_v1_039_krash", quantity: 3 },
-    { id: "onr_v1_108_score", quantity: 3 },
+    { id: 280, quantity: 3 },
+    { id: 251, quantity: 3 },
+    { id: 320, quantity: 3 },
   ],
 };
-function fixture() {
+function fixture(iceDefinitionId: CardDefinitionId = 450) {
   const state = createGameAfterSetup({
     seed: "sp350-preparation",
     runnerDeck,
     corpDeck: {
       ...ORIGINALSET_DEFAULT_DECKS.corp,
       cards: [
-        { id: "onr_v1_238_data-wall-2-0", quantity: 3 },
-        { id: "onr_v1_188_ai-chief-financial-officer", quantity: 6 },
+        { id: iceDefinitionId, quantity: 3 },
+        { id: 400, quantity: 6 },
       ],
     },
   });
@@ -50,13 +51,13 @@ function fixture() {
   state.timingPoint = "runner_action.main";
   state.runner.credits = 14;
   state.runner.clicks = 4;
-  const find = (suffix: string) =>
-    Object.values(state.cardInstances).find((c) =>
-      c.definitionId.endsWith(suffix),
+  const find = (definitionId: CardDefinitionId) =>
+    Object.values(state.cardInstances).find(
+      (card) => card.definitionId === definitionId,
     )!;
-  const startup = find("_startup-immolator"),
-    krash = find("_krash"),
-    ice = find("_data-wall-2-0");
+  const startup = find(280),
+    krash = find(251),
+    ice = find(iceDefinitionId);
   for (const card of [startup, krash, ice])
     removeEverywhere(state, card.instanceId);
   krash.zone = { side: "runner", zone: "rig" };
@@ -99,7 +100,7 @@ const pressure: RunnerPressureSignal = {
   reachable: true,
   marginalValue: 100,
   evidenceCode: "test_admitted_hq_access",
-  runActionIds: ["runner.start_run.hq"],
+  runActionIds: ["rs.hq"],
 };
 function signals(state: GameState) {
   const input = inputFor(state);
@@ -142,10 +143,10 @@ describe("SP-350 current Engine post-break trash preparation", () => {
       const currentSignal = {
         ...signal,
         reachable: true,
-        runActionIds: ["runner.start_run.rd"],
+        runActionIds: ["rs.rd"],
       };
       const run = input.legalActions.find(
-        (a: LegalAction) => a.actionId === "runner.start_run.rd",
+        (a: LegalAction) => a.actionId === "rs.rd",
       )!;
       const quote = JSON.parse(run.payload.runnerPostBreakTrashQuoteJson);
       if (condition === "source_removed")
@@ -201,7 +202,7 @@ describe("SP-350 current Engine post-break trash preparation", () => {
     );
     const preparation = chooseAiAction(first.input);
     expect(preparation.actionId).toContain(
-      "runner.install_card.runner_onr_v1_068_startup-immolator_2",
+      "rc.c1qa",
     );
     for (const cp of checkpoints.slice(1)) {
       const decision = chooseAiAction(cp.input);
@@ -232,7 +233,7 @@ describe("SP-350 current Engine post-break trash preparation", () => {
       expect(owner.moduleState).toMatchObject({
         signal: {
           postBreakTrashCommitment: {
-            sourceCardInstanceId: "runner_onr_v1_068_startup-immolator_2",
+            sourceCardInstanceId: "c1qa",
             serverId: "rd",
           },
         },
@@ -252,7 +253,7 @@ describe("SP-350 current Engine post-break trash preparation", () => {
     );
     const input = cp.input;
     const run = input.legalActions.find(
-      (a: LegalAction) => a.actionId === "runner.start_run.hq",
+      (a: LegalAction) => a.actionId === "rs.hq",
     );
     // Exact new Engine addition checked independently against actual applyAction
     // transitions above; the old checkpoint predates this quote projection.
@@ -263,15 +264,15 @@ describe("SP-350 current Engine post-break trash preparation", () => {
       serverId: "hq",
       sources: [
         {
-          sourceCardInstanceId: "runner_onr_v1_068_startup-immolator_1",
-          sourceDefinitionId: "onr_v1_068_startup-immolator",
+          sourceCardInstanceId: "c1q9",
+          sourceDefinitionId: 280,
           installed: false,
         },
       ],
       targets: [
         {
-          targetIceInstanceId: "corp_onr_v1_238_data-wall-2-0_2",
-          targetDefinitionId: "onr_v1_238_data-wall-2-0",
+          targetIceInstanceId: "c2s6",
+          targetDefinitionId: 450,
           trashCredits: 2,
         },
       ],
@@ -285,7 +286,7 @@ describe("SP-350 current Engine post-break trash preparation", () => {
     );
     const decision = chooseAiAction(input);
     expect(decision.actionId).toContain(
-      "runner.install_card.runner_onr_v1_068_startup-immolator_1",
+      "rc.c1q9",
     );
     expect(decision.reasonCode).toBe("plan_first.runner.pressure_central");
     expect(decision.fallbackUsed).toBe(false);
@@ -294,7 +295,7 @@ describe("SP-350 current Engine post-break trash preparation", () => {
     const { state, startup, ice } = fixture();
     const input = inputFor(state);
     for (const actions of [input.legalActions, input.playerView.legalActions]) {
-      const raw = actions.find((a) => a.actionId === "runner.start_run.hq")
+      const raw = actions.find((a) => a.actionId === "rs.hq")
         ?.payload?.runnerPostBreakTrashQuoteJson;
       expect(typeof raw).toBe("string");
       expect(JSON.parse(raw as string)).toMatchObject({
@@ -349,7 +350,7 @@ describe("SP-350 current Engine post-break trash preparation", () => {
       state.runner.credits = credits;
       state.runner.clicks = clicks;
       const input = inputFor(state);
-      const runActionId = "runner.start_run.hq";
+      const runActionId = "rs.hq";
       const result = runnerPostBreakTrashPreparationSignals(
         input,
         buildActionSemanticCandidates(input),
@@ -396,7 +397,7 @@ describe("SP-350 current Engine post-break trash preparation", () => {
     "multiple_ice",
     "deflector",
   ])("does not promise an unsupported route: %s", (condition) => {
-    const { state, ice } = fixture();
+    const { state, ice } = fixture(condition === "deflector" ? 14 : 450);
     if (condition === "insufficient_credits") state.runner.credits = 5;
     if (condition === "last_click") state.runner.clicks = 1;
     if (condition === "hidden_ice") {
@@ -423,8 +424,6 @@ describe("SP-350 current Engine post-break trash preparation", () => {
         .find((server) => server.id === "hq")!
         .ice.push(second.instanceId);
     }
-    if (condition === "deflector")
-      ice.definitionId = "onr_classic_010_entrapment";
     expect(signals(state)).toEqual([]);
   });
   it.each(["stale_state", "wrong_action", "invalid_json"])(
@@ -433,13 +432,13 @@ describe("SP-350 current Engine post-break trash preparation", () => {
       const { state } = fixture();
       const input = inputFor(state);
       const run = input.legalActions.find(
-        (a) => a.actionId === "runner.start_run.hq",
+        (a) => a.actionId === "rs.hq",
       )!;
       const quote = JSON.parse(
         run.payload!.runnerPostBreakTrashQuoteJson as string,
       );
       if (condition === "stale_state") quote.stateVersion--;
-      if (condition === "wrong_action") quote.actionId = "runner.start_run.rd";
+      if (condition === "wrong_action") quote.actionId = "rs.rd";
       run.payload!.runnerPostBreakTrashQuoteJson =
         condition === "invalid_json" ? "{" : JSON.stringify(quote);
       expect(() =>
@@ -454,7 +453,7 @@ describe("SP-350 current Engine post-break trash preparation", () => {
   it("revalidates a prepared installation and executes the bound post-pass ability through the live chooser", () => {
     let { state } = fixture();
     for (const agenda of Object.values(state.cardInstances)
-      .filter((c) => c.definitionId === "onr_v1_188_ai-chief-financial-officer")
+      .filter((c) => c.definitionId === 400)
       .slice(0, 3)) {
       removeEverywhere(state, agenda.instanceId);
       agenda.zone = { side: "runner", zone: "scoreArea" };
@@ -487,7 +486,7 @@ describe("SP-350 current Engine post-break trash preparation", () => {
       // Isolate this real, already admitted server route; all retained actions
       // are unchanged Engine actions, including the full encounter menu.
       input.legalActions = input.legalActions.filter(
-        (a) => state.run || a.actionId === "runner.start_run.hq",
+        (a) => state.run || a.actionId === "rs.hq",
       );
       input.playerView.legalActions = input.legalActions;
       const decision = chooseAiAction(input);

@@ -1,5 +1,5 @@
+import { visibleRunnerPathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import type { AiDecisionInput } from "@netgrid/shared";
-import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import {
@@ -9,7 +9,7 @@ import {
 import { runnerActionRequiresTargetedIceTrashPlan } from "../../runtime/runner-targeted-ice-trash-plan";
 import { runnerAgendaStealCreditRequirement } from "../../run-analysis/runner-agenda-steal-cost";
 
-export const SOCIAL_ENGINEERING_DEFINITION_ID = "onr_v1_111_social-engineering";
+export const SOCIAL_ENGINEERING_DEFINITION_ID = 323;
 
 export type RunnerTargetedBypassCommitment = {
   kind: "targeted_bypass_run";
@@ -53,7 +53,7 @@ export function runnerActionRequiresTargetedBypassPlan(
 }
 
 export function runnerDefinitionRequiresTargetedBypassPlan(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): boolean {
   return definitionId === SOCIAL_ENGINEERING_DEFINITION_ID;
 }
@@ -130,7 +130,7 @@ export function runnerTargetedBypassPlanCommitment(params: {
       ),
       server.root,
       input.playerView.opponent.credits,
-      visibleIcePathTraceContext(input),
+      visibleRunnerPathTraceContext(input),
     );
     return server.ice.flatMap((ice, icePosition) => {
       const remainingIce = server.ice.filter(
@@ -149,7 +149,7 @@ export function runnerTargetedBypassPlanCommitment(params: {
         runnerRunPathCreditBudgetWithVisiblePools(projectedCredits, rig),
         server.root,
         input.playerView.opponent.credits,
-        visibleIcePathTraceContext(input),
+        visibleRunnerPathTraceContext(input),
       );
       if (
         !remainingPath.canReachAccess ||

@@ -1,3 +1,5 @@
+import { planInstanceIdForProposal } from "./plan-instance";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { RunnerCorePlanDomain } from "./runner-core-plan-contracts";
 import {
   type RunnerPlanDomain,
@@ -17,7 +19,6 @@ import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
 import type { PlanSchedulerContext } from "./plan-scheduler";
 import {
   createRunnerTacticalPlanModules,
-  runnerVoluntaryActionFamilyOwner,
 } from "./runner-tactical-plan-modules";
 import { runnerPressureProgressReceipt } from "../runner/central-pressure/central-pressure-plan-module";
 
@@ -27,7 +28,7 @@ describe("Runner tactical plan modules", () => {
       ...candidate("play-guide", "play_event", "play.runner_event"),
       sourceKind: "card" as const,
       sourceCardInstanceId: "guide-card",
-      sourceDefinitionId: "onr_v1_092_ice-and-datas-guide-to-the-net",
+      sourceDefinitionId: 304,
       abilityKey: "abilities_on_play_expose_outermost_ice_each_fort",
     };
     const module = tacticalModule("runner.expose_information");
@@ -37,7 +38,7 @@ describe("Runner tactical plan modules", () => {
           kind: "proactive",
           informationId: "card:guide-card",
           sourceCardInstanceId: "guide-card",
-          sourceDefinitionId: "onr_v1_092_ice-and-datas-guide-to-the-net",
+          sourceDefinitionId: 304,
           targetPositionKeys: ["hq:ice:0"],
           phase: "play_information_event",
           selectedActionId: "play-guide",
@@ -64,17 +65,11 @@ describe("Runner tactical plan modules", () => {
     expect(
       materialized.candidates.map(({ candidate }) => candidate.actionId),
     ).toEqual(["play-guide"]);
-    expect(
-      runnerVoluntaryActionFamilyOwner(
-        guide,
-        runnerContext.domain as RunnerPlanDomain,
-      ),
-    ).toBe("runner.expose_information");
   });
 
   it("owns early EndTurn only through a rules-proven terminal-win plan", () => {
     const endTurn = candidate(
-      "runner.end_turn",
+      "r9",
       "end_turn",
       "turn_flow.end_turn",
     );
@@ -101,6 +96,11 @@ describe("Runner tactical plan modules", () => {
         reasonCode: "terminal_win",
         witness: { guarantee: "rules_proven" },
       },
+      expectedOutcome: {
+        outcomeKind: "terminal_win",
+        terminal: true,
+        guarantee: "rules_proven",
+      },
     });
     const materialization = module.materialize(
       instance,
@@ -109,20 +109,11 @@ describe("Runner tactical plan modules", () => {
     );
     expect(
       materialization.candidates.map((entry) => entry.candidate.actionId),
-    ).toEqual(["runner.end_turn"]);
+    ).toEqual(["r9"]);
     expect(materialization.earlyEndTurnJustification).toEqual({
       kind: "rules_proven_terminal_win",
       terminalCondition: "corp_empty_rd_mandatory_draw",
     });
-    expect(
-      runnerVoluntaryActionFamilyOwner(
-        endTurn,
-        runnerContext.domain as RunnerPlanDomain,
-      ),
-    ).toBe("runner.secure_terminal_win");
-    expect(
-      runnerVoluntaryActionFamilyOwner(endTurn, domain({})),
-    ).toBeUndefined();
   });
 
   it.each([
@@ -176,7 +167,7 @@ describe("Runner tactical plan modules", () => {
       const social = {
         ...candidate("play-social", "play_event", "play.runner_event"),
         sourceKind: "card" as const,
-        sourceDefinitionId: "onr_v1_111_social-engineering",
+        sourceDefinitionId: 323,
         sourceCardInstanceId: "social-card",
         functionalEffects: [
           {
@@ -205,14 +196,14 @@ describe("Runner tactical plan modules", () => {
             reachable: true,
             marginalValue: 120,
             evidenceCode: "runner_targeted_bypass_preflight:hq:0",
-            sourceDefinitionIds: ["onr_v1_111_social-engineering"],
+            sourceDefinitionIds: [323],
             preparationActionIds: ["play-social"],
             routePreparation: "targeted_bypass",
             targetedBypassCommitment: {
               kind: "targeted_bypass_run",
               sourceActionId: "play-social",
               sourceCardInstanceId: "social-card",
-              sourceDefinitionId: "onr_v1_111_social-engineering",
+              sourceDefinitionId: 323,
               plannedAtStateVersion: 10,
               ownerModuleId: "runner.pressure_central",
               ownerDedupeKey: "central:hq",
@@ -278,7 +269,7 @@ describe("Runner tactical plan modules", () => {
     delete protocol.runProjectionSummary;
     protocol.semanticActionType = "ability.activate";
     protocol.sourceKind = "card";
-    protocol.sourceDefinitionId = "onr_v1_050_r-and-d-protocol-files";
+    protocol.sourceDefinitionId = 262;
     const module = tacticalModule("runner.pressure_central");
     const runnerContext = context([basic, protocol], {
       centralPressure: [
@@ -321,7 +312,7 @@ describe("Runner tactical plan modules", () => {
     const protocol = run("run-rd-protocol", "rd");
     protocol.semanticActionType = "play.runner_event";
     protocol.sourceKind = "card";
-    protocol.sourceDefinitionId = "onr_v1_050_r-and-d-protocol-files";
+    protocol.sourceDefinitionId = 262;
     const module = tacticalModule("runner.pressure_central");
     const runnerContext = context([basic, protocol], {
       centralPressure: [
@@ -334,7 +325,7 @@ describe("Runner tactical plan modules", () => {
           reachable: true,
           marginalValue: 20,
           evidenceCode: "mixed_exact_rd_routes",
-          sourceDefinitionIds: ["onr_v1_050_r-and-d-protocol-files"],
+          sourceDefinitionIds: [262],
           runActionIds: ["run-rd-basic"],
         },
       ],
@@ -370,7 +361,7 @@ describe("Runner tactical plan modules", () => {
       actionType: "play_event",
       semanticActionType: "play.runner_event",
       sourceKind: "card" as const,
-      sourceDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
+      sourceDefinitionId: 164,
       costProfile: {
         clickCost: 1,
         creditCost: 2,
@@ -467,7 +458,7 @@ describe("Runner tactical plan modules", () => {
       actionType: "play_event",
       semanticActionType: "play.runner_event",
       sourceKind: "card" as const,
-      sourceDefinitionId: "onr_proteus_105_demolition-run",
+      sourceDefinitionId: 163,
       costProfile: {
         clickCost: 1,
         creditCost: 4,
@@ -542,7 +533,7 @@ describe("Runner tactical plan modules", () => {
       actionType: "play_event",
       semanticActionType: "play.runner_event",
       sourceKind: "card" as const,
-      sourceDefinitionId: "onr_v1_094_inside-job",
+      sourceDefinitionId: 306,
       costProfile: {
         clickCost: 1,
         creditCost: 2,
@@ -615,7 +606,7 @@ describe("Runner tactical plan modules", () => {
       actionType: "play_event",
       semanticActionType: "play.runner_event",
       sourceKind: "card" as const,
-      sourceDefinitionId: "trace-link-run-event",
+      sourceDefinitionId: syntheticCardDefinitionId("trace-link-run-event"),
       costProfile: {
         clickCost: 1,
         creditCost: 2,
@@ -676,13 +667,13 @@ describe("Runner tactical plan modules", () => {
         rezzed: true,
         effectiveRunQuote: {
           iceInstanceId: "known-trace-ice",
-          iceDefinitionId: "trace-ice",
+          iceDefinitionId: syntheticCardDefinitionId("trace-ice"),
           effectiveStrength: 2,
           subroutines: [
             {
               id: "trace-subroutine",
               type: "initiate_trace",
-              sourceDefinitionId: "trace-ice",
+              sourceDefinitionId: syntheticCardDefinitionId("trace-ice"),
               sourceTitle: "Trace ICE",
               traceLimit: 3,
               traceSuccessEffect: { type: "add_tag", amount: 1 },
@@ -701,7 +692,7 @@ describe("Runner tactical plan modules", () => {
   it("keeps source binding on the concrete central payoff-development phase", () => {
     const develop = cardAction(
       "install-rd-protocol",
-      "onr_v1_050_r-and-d-protocol-files",
+      262,
     );
     const module = tacticalModule("runner.pressure_central");
     const runnerContext = context([develop], {
@@ -715,7 +706,7 @@ describe("Runner tactical plan modules", () => {
           reachable: true,
           marginalValue: 20,
           evidenceCode: "develop_rd_payoff",
-          sourceDefinitionIds: ["onr_v1_050_r-and-d-protocol-files"],
+          sourceDefinitionIds: [262],
           preparationActionIds: ["install-rd-protocol"],
           routePreparation: "develop_payoff",
         },
@@ -732,7 +723,7 @@ describe("Runner tactical plan modules", () => {
     );
 
     expect(materialized.step.capability.requiredSourceDefinitionIds).toEqual([
-      "onr_v1_050_r-and-d-protocol-files",
+      262,
     ]);
     expect(
       bindBestCurrentPlanRoute({
@@ -788,11 +779,11 @@ describe("Runner tactical plan modules", () => {
 
   it("raises a known agenda remote as a witnessed P2 contest", () => {
     const module = tacticalModule("runner.contest_remote");
-    const runnerContext = context([run("remote", "remote_1")], {
+    const runnerContext = context([run("remote", "r1")], {
       remoteContests: [
         {
           contestId: "remote-1",
-          serverId: "remote_1",
+          serverId: "r1",
           purpose: "contest",
           knownAgendaThreat: true,
           reachable: true,
@@ -820,13 +811,13 @@ describe("Runner tactical plan modules", () => {
   });
 
   it("keeps a belief-dependent targeted bypass below P2 even against a known agenda", () => {
-    const bypass = run("targeted-bypass", "remote_1");
+    const bypass = run("targeted-bypass", "r1");
     const module = tacticalModule("runner.contest_remote");
     const runnerContext = context([bypass], {
       remoteContests: [
         {
           contestId: "remote-1",
-          serverId: "remote_1",
+          serverId: "r1",
           purpose: "contest",
           knownAgendaThreat: true,
           reachable: true,
@@ -850,19 +841,19 @@ describe("Runner tactical plan modules", () => {
   });
 
   it("does not retain a superseded support gap when a remote contest route becomes executable", () => {
-    const remoteRun = run("remote-run", "remote_1");
+    const remoteRun = run("remote-run", "r1");
     const module = tacticalModule("runner.contest_remote");
     const runnerContext = context([remoteRun], {
       remoteContests: [
         {
-          contestId: "remote:remote_1",
-          serverId: "remote_1",
+          contestId: "remote:r1",
+          serverId: "r1",
           purpose: "contest",
           knownAgendaThreat: true,
           terminalPatternThreat: true,
           reachable: true,
           marginalValue: 1400,
-          evidenceCode: "runner_matchpoint_remote_pattern_focus:remote_1",
+          evidenceCode: "runner_matchpoint_remote_pattern_focus:r1",
           supportNeedId: "coverage:breaker_wall",
           runActionAssessments: {
             [remoteRun.actionId]: {
@@ -920,7 +911,7 @@ describe("Runner tactical plan modules", () => {
     expect(materialized.step).toMatchObject({
       stepId: `${instance.instanceId}:contest`,
       capability: { capabilityId: "contest_remote" },
-      target: { kind: "server", id: "remote_1" },
+      target: { kind: "server", id: "r1" },
     });
     const route = bindBestCurrentPlanRoute({
       side: "runner",
@@ -941,14 +932,14 @@ describe("Runner tactical plan modules", () => {
 
   it("does not create generic development without admission", () => {
     const module = tacticalModule("runner.develop_board_and_hand");
-    const install = cardAction("install-special", "special");
+    const install = cardAction("install-special", syntheticCardDefinitionId("special"));
     expect(
       module.discover(
         context([install], {
           developments: [
             {
               developmentId: "special",
-              definitionId: "special",
+              definitionId: syntheticCardDefinitionId("special"),
               phase: "execute",
               assignedDomainPlanIds: [],
               duplicateAlreadyInstalled: false,
@@ -972,7 +963,7 @@ describe("Runner tactical plan modules", () => {
         developments: [
           {
             developmentId: "card:breaker",
-            definitionId: "breaker",
+            definitionId: syntheticCardDefinitionId("breaker"),
             phase: "fund",
             purposeCode: "breaker_or_rig_piece:setup",
             assignedDomainPlanIds: [],
@@ -991,7 +982,7 @@ describe("Runner tactical plan modules", () => {
 
     expect(proposal).toMatchObject({
       initialViability: "blocked",
-      target: { kind: "card", id: "breaker" },
+      target: { kind: "card", id: String(syntheticCardDefinitionId("breaker")) },
       blockers: [
         {
           code: "development_funding_route_unavailable_this_turn",
@@ -1031,7 +1022,7 @@ describe("Runner tactical plan modules", () => {
       "economy.gain_credit",
     );
     bank.sourceKind = "card";
-    bank.sourceDefinitionId = "broker";
+    bank.sourceDefinitionId = syntheticCardDefinitionId("broker");
     bank.economyProjection = {
       ...basic.economyProjection,
       grossLiquidCreditGain: 3,
@@ -1043,7 +1034,7 @@ describe("Runner tactical plan modules", () => {
       developments: [
         {
           developmentId: "card:breaker",
-          definitionId: "breaker",
+          definitionId: syntheticCardDefinitionId("breaker"),
           phase: "fund",
           purposeCode: "breaker_or_rig_piece:useful_now",
           assignedDomainPlanIds: [],
@@ -1069,8 +1060,8 @@ describe("Runner tactical plan modules", () => {
     );
 
     expect(materialized.step).toMatchObject({
-      capability: { capabilityId: "fund_breaker" },
-      purpose: "Fund the resident breaker development plan.",
+      capability: { capabilityId: `fund_${syntheticCardDefinitionId("breaker")}` },
+      purpose: `Fund the resident ${syntheticCardDefinitionId("breaker")} development plan.`,
     });
     expect(materialized.step.target).toBeUndefined();
     expect(
@@ -1091,13 +1082,13 @@ describe("Runner tactical plan modules", () => {
       "card_ability.trigger",
     );
     expose.sourceKind = "card";
-    expose.sourceDefinitionId = "seeya";
+    expose.sourceDefinitionId = syntheticCardDefinitionId("seeya");
     const module = tacticalModule("runner.contest_remote");
     const runnerContext = context([expose], {
       remoteContests: [
         {
-          contestId: "remote:remote_1",
-          serverId: "remote_1",
+          contestId: "remote:r1",
+          serverId: "r1",
           purpose: "information",
           knownAgendaThreat: false,
           reachable: true,
@@ -1142,8 +1133,8 @@ describe("Runner tactical plan modules", () => {
         {
           windowId: "access-7",
           serverId: "rd",
-          rootPlanInstanceId: "plan:runner.pressure_central:rd",
-          leafPlanInstanceId: "plan:runner.convert_run_window:access-7",
+          rootPlanInstanceId: "p38stoh90qlansmp2rmcijavgw",
+          leafPlanInstanceId: "pbfz62otcor5fiokwoikzjhjlp",
           semanticActionTypes: ["access.resolve_card"],
           purposeCode: "resolve_rd_access",
           evidenceCode: "successful_rd_run",
@@ -1164,7 +1155,7 @@ describe("Runner tactical plan modules", () => {
       runnerContext,
     );
 
-    expect(proposal.parentInstanceId).toBe("plan:runner.pressure_central:rd");
+    expect(proposal.parentInstanceId).toBe("p38stoh90qlansmp2rmcijavgw");
     expect(
       materialized.candidates.map((entry) => entry.candidate.actionId),
     ).toEqual(["access"]);
@@ -1179,7 +1170,7 @@ describe("Runner tactical plan modules", () => {
           windowId: `bonus:${serverId}`,
           serverId,
           rootPlanInstanceId: "rules.restricted_action_sequence",
-          leafPlanInstanceId: `plan:runner.convert_run_window:bonus%3A${serverId}`,
+          leafPlanInstanceId: planInstanceIdForProposal({ moduleId: "runner.convert_run_window", dedupeKey: `bonus:${serverId}` }),
           semanticActionTypes: ["run.start"],
           purposeCode: "continue_engine_restricted_run_sequence",
           evidenceCode: "runner_engine_restricted_run_sequence_continuation",
@@ -1246,7 +1237,7 @@ describe("Runner tactical plan modules", () => {
           windowId: "unassessed-access",
           rootPlanInstanceId: "rules.access_window",
           leafPlanInstanceId:
-            "plan:runner.convert_run_window:unassessed-access",
+            "pbda36eddx3a1b7lhv2bkk7jxq",
           semanticActionTypes: ["access.resolve_card"],
           purposeCode: "resolve_access",
           evidenceCode: "legal_access_window_without_run_snapshot",
@@ -1279,9 +1270,9 @@ describe("Runner tactical plan modules", () => {
         {
           windowId: "dangerous-next-encounter",
           serverId: "hq",
-          rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
+          rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
           leafPlanInstanceId:
-            "plan:runner.convert_run_window:dangerous-next-encounter",
+            "p7ctuuhaz5tsq1ywsd9cal8pp9",
           semanticActionTypes: ["run.continue", "run.jack_out"],
           purposeCode: "convert_active_run_window",
           evidenceCode: "runner_future_encounter_damage_requires_jack_out",
@@ -1338,9 +1329,9 @@ describe("Runner tactical plan modules", () => {
         {
           windowId: "fatal-attractor-encounter",
           serverId: "hq",
-          rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
+          rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
           leafPlanInstanceId:
-            "plan:runner.convert_run_window:fatal-attractor-encounter",
+            "p35ihmz3ziywo0w5dpdsj7g6zs",
           semanticActionTypes: ["breaker.boost_strength", "run.continue"],
           purposeCode: "convert_active_run_window",
           evidenceCode:
@@ -1387,7 +1378,7 @@ describe("Runner tactical plan modules", () => {
     const trash = {
       ...candidate("trash-krumz", "trash_accessed_card", "access.trash_card"),
       sourceKind: "card" as const,
-      sourceDefinitionId: "onr_v1_330_krumz",
+      sourceDefinitionId: 542,
       costProfile: {
         costKnownStatus: "known" as const,
         creditCost: 2,
@@ -1404,15 +1395,15 @@ describe("Runner tactical plan modules", () => {
         {
           windowId: "access-hq-trash",
           serverId: "hq",
-          rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-          leafPlanInstanceId: "plan:runner.convert_run_window:access-hq-trash",
+          rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+          leafPlanInstanceId: "p8q2cg9qhcz2qnia8g2ljhrkde",
           semanticActionTypes: ["access.decline_trash", "access.trash_card"],
           purposeCode: "convert_active_run_window",
           evidenceCode: "visible_active_run",
           accessCommitment: {
             payoff: "trash_affordable",
             intendedAction: "trash",
-            knownTargetDefinitionIds: ["onr_v1_330_krumz"],
+            knownTargetDefinitionIds: [542],
             trashBudget: 2,
             evidenceCode: "central_memory_payoff:trash_affordable",
           },
@@ -1489,26 +1480,24 @@ describe("Runner tactical plan modules", () => {
     });
   });
 
-  it("leaves unsupported generic draw and probe runs visibly ownerless", () => {
-    const planDomain = domain({});
-    expect(
-      runnerVoluntaryActionFamilyOwner(
-        candidate("draw", "draw_card", "draw.card"),
-        planDomain,
-      ),
-    ).toBeUndefined();
-    expect(
-      runnerVoluntaryActionFamilyOwner(run("unplanned-run", "hq"), planDomain),
-    ).toBeUndefined();
+  it("does not discover a plan for unsupported generic draw and probe runs", () => {
+    const runnerContext = context([
+      candidate("draw", "draw_card", "draw.card"),
+      run("unplanned-run", "hq"),
+    ], {});
+    const proposals = createRunnerTacticalPlanModules().flatMap(
+      (module) => module.discover(runnerContext),
+    );
+    expect(proposals).toEqual([]);
   });
 
   it("assigns a generic draw to its existing hand-development signal", () => {
     const draw = candidate("draw", "draw_card", "draw.card");
-    const planDomain = domain({
+    const runnerContext = context([draw], {
       developments: [
         {
           developmentId: "generic:draw-options",
-          definitionId: "runner_option_development",
+          definitionId: syntheticCardDefinitionId("runner_option_development"),
           targetKind: "capability",
           phase: "execute",
           purposeCode: "increase_hand_option_density",
@@ -1525,9 +1514,11 @@ describe("Runner tactical plan modules", () => {
       ],
     });
 
-    expect(runnerVoluntaryActionFamilyOwner(draw, planDomain)).toBe(
-      "runner.develop_board_and_hand",
-    );
+    const module = tacticalModule("runner.develop_board_and_hand");
+    const [proposal] = module.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+    const result = module.materialize(instance, {} as never, runnerContext);
+    expect(result.candidates.map(({ candidate }) => candidate.actionId)).toEqual([draw.actionId]);
   });
 });
 
@@ -1615,7 +1606,7 @@ function run(actionId: string, serverId: string): ActionSemanticCandidate {
 
 function cardAction(
   actionId: string,
-  definitionId: string,
+  definitionId: number,
 ): ActionSemanticCandidate {
   return {
     ...candidate(actionId, "install_card", "install.card"),

@@ -40,24 +40,24 @@ function project(change?: "not_stored" | "no_identity" | "private_sentinels") {
 }
 it("retains the two published HQ-storage facts through the real native DTO boundary", () => {
   const input = project(),
-    event = input.playerView.publicEvents.find((e) => e.eventId === "evt_105");
+    event = input.playerView.publicEvents.find((e) => e.eventId === saved.enginePublicEvent.eventId);
   expect(event?.publicPayload).toMatchObject({
     agendaStoredInHq: true,
-    storedAgendaDefinitionId: "onr_v1_212_priority-requisition",
+    storedAgendaDefinitionId: 424,
   });
   expect(
-    input.eventTail.find((e) => e.eventId === "evt_105")?.publicPayload,
+    input.eventTail.find((e) => e.eventId === saved.enginePublicEvent.eventId)?.publicPayload,
   ).toMatchObject({
     agendaStoredInHq: true,
-    storedAgendaDefinitionId: "onr_v1_212_priority-requisition",
+    storedAgendaDefinitionId: 424,
   });
 });
 it("lets the existing belief owner learn the agenda that the Engine publicly moved to HQ", () => {
   const memory =
     reconstructBeliefState(project()).runnerOpponentModel?.hqHandMemory;
-  expect(memory?.knownDefinitions).toContain("onr_v1_212_priority-requisition");
+  expect(memory?.knownDefinitions).toContain(424);
   expect(memory?.invalidationReasons).toContain(
-    "gypsy_known_agenda_stored_in_hq:evt_105",
+    `gypsy_known_agenda_stored_in_hq:${saved.enginePublicEvent.eventId}`,
   );
 });
 it.each(["not_stored", "no_identity"] as const)(
@@ -66,7 +66,7 @@ it.each(["not_stored", "no_identity"] as const)(
     expect(
       reconstructBeliefState(project(boundary)).runnerOpponentModel
         ?.hqHandMemory?.knownDefinitions,
-    ).not.toContain("onr_v1_212_priority-requisition");
+    ).not.toContain(424);
   },
 );
 it("retains public knowledge while rejecting unrelated private hand and deck identities", () => {
@@ -76,5 +76,5 @@ it("retains public knowledge while rejecting unrelated private hand and deck ide
   expect(
     reconstructBeliefState(input).runnerOpponentModel?.hqHandMemory
       ?.knownDefinitions,
-  ).toContain("onr_v1_212_priority-requisition");
+  ).toContain(424);
 });

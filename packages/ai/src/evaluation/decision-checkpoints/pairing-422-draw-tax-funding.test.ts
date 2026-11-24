@@ -32,11 +32,11 @@ it("funds the publicly quoted draw tax before the defensive hand-buffer draw", (
       ?.visibleDrawTaxSourceCount,
   ).toBe(1);
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("runner.gain_credit");
+  expect(decision.actionId).toBe("rb");
   expect(decision.fallbackUsed).toBe(false);
   const portfolio = residentPlanPortfolioSnapshot(input)!;
   expect(portfolio.rootForegroundInstanceId).toBe(
-    "plan:runner.defense_and_recovery:runner",
+    "p1gzjb6yfcv4zbzow512kexs33",
   );
   expect(portfolio.executorInstanceId).toBe(portfolio.rootForegroundInstanceId);
   expect(
@@ -68,7 +68,7 @@ it.each(["hidden_source", "already_funded", "last_click", "hand_buffer_met"])(
       )!.payload!.visibleDrawTaxSourceCount = 0;
       for (const server of input.playerView.servers)
         server.root = server.root.filter(
-          (c) => c.definitionId !== "onr_v1_313_city-surveillance",
+          (c) => c.definitionId !== 525,
         );
     }
     if (variant === "already_funded") input.playerView.own.credits = 1;

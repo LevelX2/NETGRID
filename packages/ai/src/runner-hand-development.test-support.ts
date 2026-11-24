@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -99,7 +100,7 @@ export function breakerVariantDeckCapabilities(): DeckCapabilityProfile {
     runner: {
       breakerInventory: [
         {
-          cardId: "onr_v1_021_dwarf",
+          cardId: 233,
           title: "Dwarf",
           coverage: ["wall"],
           breakCost: 1,
@@ -112,7 +113,7 @@ export function breakerVariantDeckCapabilities(): DeckCapabilityProfile {
           evidence: ["test_deck_variant"],
         },
         {
-          cardId: "onr_v1_047_pile-driver",
+          cardId: 259,
           title: "Pile Driver",
           coverage: ["wall"],
           breakCost: 3,
@@ -288,7 +289,7 @@ export function startRunAction(
 export function visibleIdentity(side: Side): VisibleCard {
   return {
     instanceId: `${side}-identity`,
-    definitionId: `${side}-identity`,
+    definitionId: syntheticCardDefinitionId(side + "-identity"),
     title: `${side} identity`,
     owner: side,
     controller: side,

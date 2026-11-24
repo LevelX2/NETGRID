@@ -78,11 +78,10 @@ export function buildReplayDecisionCandidateClusterReport(
     .filter((entry) => entry.split === "discovery")
     .map(candidateFromCase)
     .filter((entry): entry is ReplayDecisionCandidate => entry !== undefined);
-  const clusters = clusterCandidates(
-    candidates.filter(
-      (entry) => entry.status === "candidate_needs_same_state_repro",
-    ),
+  const reproCandidates = candidates.filter(
+    (entry) => entry.status === "candidate_needs_same_state_repro",
   );
+  const clusters = clusterCandidates(reproCandidates);
   const output: ReplayDecisionCandidateClusterReport = {
     schemaVersion: REPLAY_DECISION_CASE_CLUSTERING_SCHEMA_VERSION,
     scope: "local_replay_decision_candidate_clustering",
@@ -94,9 +93,7 @@ export function buildReplayDecisionCandidateClusterReport(
       holdoutCasesIgnored: sourceCases.filter(
         (entry) => entry.split === "holdout",
       ).length,
-      candidates: candidates.filter(
-        (entry) => entry.status === "candidate_needs_same_state_repro",
-      ).length,
+      candidates: reproCandidates.length,
       blockedShadowOnly: candidates.filter(
         (entry) => entry.status === "blocked_shadow_only",
       ).length,
@@ -116,7 +113,7 @@ export function buildReplayDecisionCandidateClusterReport(
       "holdout_ignored:true",
       "shadow_ranking_not_confirmed_without_repro:true",
       `source_case_count:${sourceCases.length}`,
-      `candidate_count:${candidates.length}`,
+      `candidate_count:${reproCandidates.length}`,
       `cluster_count:${clusters.length}`,
     ],
   };
@@ -276,6 +273,11 @@ function clusterCandidates(
       const mistakeClasses = unique(
         entries.flatMap((entry) => entry.mistakeClasses),
       );
+      const averageScoreGap = average(scoreGaps);
+      const maxScoreGap = scoreGaps.reduce(
+        (largest, gap) => Math.max(largest, gap),
+        0,
+      );
       return {
         clusterId: `replay-cluster-${digest(clusterKey).slice(0, 12)}`,
         status: "candidate_cluster_needs_repro" as const,
@@ -291,16 +293,16 @@ function clusterCandidates(
           ),
         ),
         mistakeClasses,
-        averageScoreGap: average(scoreGaps),
-        maxScoreGap: Math.max(...scoreGaps, 0),
+        averageScoreGap,
+        maxScoreGap,
         sampleCandidateIds: entries
           .slice(0, 12)
           .map((entry) => entry.candidateId),
         evidence: [
           "cluster_status:candidate_needs_same_state_repro",
           `candidate_count:${entries.length}`,
-          `average_score_gap:${average(scoreGaps)}`,
-          `max_score_gap:${Math.max(...scoreGaps, 0)}`,
+          `average_score_gap:${averageScoreGap}`,
+          `max_score_gap:${maxScoreGap}`,
           ...mistakeClasses.map((entry) => `mistake_class:${entry}`),
         ],
       };

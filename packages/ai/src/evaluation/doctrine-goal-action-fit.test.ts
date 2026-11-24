@@ -10,13 +10,15 @@ describe("DoctrineGoal action fit coverage", () => {
     const samples = buildRealEngineDecisionCorpus(
       buildRealEngineDecisionCorpusScenarios(),
     );
-    const report = buildDoctrineGoalActionFitReport(
-      samples.map((sample) => ({
-        scenarioId: sample.scenarioId,
-        ...(sample.deckDoctrine ? { diagnostic: sample.deckDoctrine } : {}),
-        actionCandidates: sample.frame.actionCandidates,
-      })),
-    );
+    const cases = samples.map((sample) => ({
+      scenarioId: sample.scenarioId,
+      ...(sample.deckDoctrine ? { diagnostic: sample.deckDoctrine } : {}),
+      actionCandidates: sample.frame.actionCandidates,
+    }));
+    const report = buildDoctrineGoalActionFitReport(cases);
+    expect(
+      buildDoctrineGoalActionFitReport([...cases].reverse()).topFitByFamily,
+    ).toEqual(report.topFitByFamily);
 
     expect(report).toMatchObject({
       version: "doctrine-goal-action-fit-v1",

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { afterEach, describe, expect, it } from "vitest";
 import type { AiDecisionInput, LegalAction, PlayerView } from "@netgrid/shared";
 import { buildStrategicIntentState } from "./strategic-intent-state";
@@ -48,6 +49,29 @@ describe("StrategicIntent memory", () => {
     expect(continued.commitment.decisionsCommitted).toBe(2);
     expect(JSON.stringify(snapshot)).not.toMatch(
       /cardInstances|privatePayload|sessionToken|fullGameState/i,
+    );
+  });
+
+  it("does not read or overwrite a newer decision's memory", () => {
+    const input = aiInput("runner", "match-a", "deck-runner-a");
+    const state = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: input.playerView.stateVersion,
+      strategyProfile: strategyProfile("runner", "runner.rnd_pressure"),
+      availableCredits: 8,
+    });
+    rememberStrategicIntentState(input, state);
+    const older = {
+      ...input,
+      playerView: {
+        ...input.playerView,
+        stateVersion: input.playerView.stateVersion - 1,
+      },
+    };
+    expect(getStrategicIntentMemorySnapshot(older)).toBeUndefined();
+    expect(rememberStrategicIntentState(older, state)).toBeUndefined();
+    expect(getStrategicIntentMemorySnapshot(input)?.updatedAtStateVersion).toBe(
+      input.playerView.stateVersion,
     );
   });
 
@@ -186,7 +210,7 @@ function score(strategyId: string): DeckStrategyScore {
     runtimeBlockers: [],
     anchorEvidence: [
       {
-        cardId: "fixture-anchor",
+        cardId: syntheticCardDefinitionId("fixture-anchor"),
         quantity: 1,
         source: "derivedStrategyAnchor",
         strategyId,

@@ -13,6 +13,7 @@ export function sanitizeCorpStartDrawQuote(
     choice.stateVersion !== stateVersion ||
     quote.observedAtStateVersion !== stateVersion ||
     typeof quote.sourceCardInstanceId !== "string" ||
+    quote.sourceCardInstanceId.length === 0 ||
     choice.source !==
       `scored_agenda.start_draw_choice:${quote.sourceCardInstanceId}:${stateVersion}` ||
     ![

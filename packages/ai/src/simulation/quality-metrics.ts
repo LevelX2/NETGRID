@@ -1,6 +1,7 @@
 import type { AiSimulationRuntimeFailure } from "./ai-simulation-runtime-failure";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import { sortedUnique } from "../runtime/collection";
+import { roundNumber as round } from "../runtime/number-rounding";
 import type { AiDoctrineQualityMetrics } from "./doctrine-quality-types";
 import type { AiQualityMetrics } from "./quality-metric-types";
 export type { AiQualityMetrics } from "./quality-metric-types";
@@ -9,6 +10,7 @@ export type AiSoakResult = {
   summaries: AiSimulationSummary[];
   aggregate: {
     seeds: number;
+    games: number;
     illegalActions: number;
     runtimeFailures: number;
     replayFailures: number;
@@ -65,8 +67,4 @@ export function metricsForSimulationActionSequence(
     holdout,
     doctrine,
   };
-}
-
-function round(value: number): number {
-  return Math.round(value * 1000) / 1000;
 }

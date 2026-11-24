@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { describe, expect, it } from "vitest";
+import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-source-definitions";
 import {
   chooseAiAction,
   restoreResidentPlanPortfolioMemorySnapshot,
@@ -50,21 +51,18 @@ function restore(captured: CapturedCheckpoint) {
 function expectTerminalHqClosure(input: AiDecisionInput) {
   const decision = chooseAiAction(input, { persistTacticalPlanMemory: false });
   expect(decision).toMatchObject({
-    actionId: expect.stringMatching(
-      /^corp\.install_card\.corp_onr_v1_244_filter_[12]\.hq\./,
-    ),
     fallbackUsed: false,
     timeoutUsed: false,
   });
-  expect(
-    input.legalActions.some((action) => action.actionId === decision.actionId),
-  ).toBe(true);
+  const action = input.legalActions.find((a) => a.actionId === decision.actionId)!;
+  expect(action).toMatchObject({ type: "install_card", payload: { serverId: "hq" } });
+  expect(visibleSourceDefinitionsByInstanceId(input.playerView)[action.source]).toBe(456);
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
-    leafExecutorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+    rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
+    leafExecutorInstanceId: "penw02zfrkklof54c2nuye5att",
     priority: { effectiveClass: "P2" },
     selectedStep: {
-      stepId: "plan:corp.defend_servers:server-defense-portfolio:allocate",
+      stepId: "penw02zfrkklof54c2nuye5att:allocate",
     },
   });
 }
@@ -82,19 +80,19 @@ describe("pairing 472: exact terminal central-defense ownership", () => {
     const forgo = chooseAiAction(first.input, {
       persistTacticalPlanMemory: false,
     });
-    expect(forgo.actionId).toBe("corp.forgo_action");
+    expect(forgo.actionId).toBe("ca");
     expect(forgo.fallbackUsed || forgo.timeoutUsed).toBe(false);
 
     const draw = chooseAiAction(checkpoint(109).input, {
       persistTacticalPlanMemory: false,
     });
     expect(draw).toMatchObject({
-      actionId: "corp.draw_card",
+      actionId: "c8",
       fallbackUsed: false,
       timeoutUsed: false,
     });
     expect(draw.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-      "plan:corp.defend_servers:server-defense-portfolio",
+      "penw02zfrkklof54c2nuye5att",
     );
 
     expectTerminalHqClosure(checkpoint(110).input);

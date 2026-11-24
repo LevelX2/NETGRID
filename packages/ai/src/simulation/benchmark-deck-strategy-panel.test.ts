@@ -22,6 +22,7 @@ describe("benchmark deck strategy panel", () => {
     const existing = [
       slot("remote", "remote_scoring"),
       slot("tag", "tag_punish"),
+      { ...slot("pending-fast", "fast_advance"), status: "pending" } as const,
     ];
 
     const gaps = missingCorpStrategyPanelSlots(existing);

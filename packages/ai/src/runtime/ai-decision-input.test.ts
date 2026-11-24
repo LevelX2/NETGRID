@@ -28,7 +28,7 @@ describe("aiDecisionEventTail", () => {
 
 function publicEvent(index: number): PublicGameEvent {
   return {
-    eventId: `event-${index}`,
+    eventId: (index + 1) + 1,
     type: "test_event",
     stateVersionBefore: index,
     stateVersionAfter: index + 1,

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import traceCheckpoint from "../../../../data/scenarios/ai-decision-checkpoints/cp-03575-01-trace-bid-economy.json";
 import { createGame, getLegalActions, getPlayerView } from "@netgrid/engine";
 import type {
@@ -16,13 +17,14 @@ import {
   visibleTraceSuccessEffect,
 } from "./trace-bid-assessment";
 import { latestTraceContext } from "./trace-context";
+import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 
 describe("Blind Trace bid assessment", () => {
   it("binds a lethal Runner safety floor to quoted Link strength rather than the credit payment", () => {
     const input = decisionInput({
       profile: "classic_blind",
       side: "runner",
-      sourceDefinitionId: "onr_v1_248_homewrecker",
+      sourceDefinitionId: 460,
       printedTrace: 5,
       bidMax: 6,
       ownCredits: 8,
@@ -50,7 +52,7 @@ describe("Blind Trace bid assessment", () => {
       const input = decisionInput({
         profile: "classic_blind",
         side: "runner",
-        sourceDefinitionId: "onr_v1_248_homewrecker",
+        sourceDefinitionId: 460,
         printedTrace: 5,
         bidMax: 5,
         runnerGripCount,
@@ -70,7 +72,7 @@ describe("Blind Trace bid assessment", () => {
     const input = decisionInput({
       profile: "classic_blind",
       side: "runner",
-      sourceDefinitionId: "onr_v1_248_homewrecker",
+      sourceDefinitionId: 460,
       printedTrace: 5,
       bidMax: 5,
     });
@@ -116,7 +118,7 @@ describe("Blind Trace bid assessment", () => {
     const input = decisionInput({
       profile: "classic_blind",
       side: "corp",
-      sourceDefinitionId: "onr_v1_249_hunter",
+      sourceDefinitionId: 461,
       printedTrace: 5,
       bidMax: 5,
       ownCredits: 10,
@@ -125,7 +127,7 @@ describe("Blind Trace bid assessment", () => {
     input.playerView.opponent.rig = [
       {
         instanceId: "public-signpost",
-        definitionId: "onr_v1_063_signpost",
+        definitionId: 275,
         known: true,
       },
     ];
@@ -137,7 +139,7 @@ describe("Blind Trace bid assessment", () => {
       const input = decisionInput({
         profile,
         side: "corp",
-        sourceDefinitionId: "onr_v1_249_hunter",
+        sourceDefinitionId: 461,
         printedTrace: 12,
         bidMax: 12,
         ownCredits: 30,
@@ -146,7 +148,7 @@ describe("Blind Trace bid assessment", () => {
       input.playerView.opponent.rig = [
         {
           instanceId: "public-bakdoor",
-          definitionId: "onr_v1_004_bakdoor",
+          definitionId: 216,
           known: true,
         },
       ];
@@ -164,7 +166,7 @@ describe("Blind Trace bid assessment", () => {
     const blind = decisionInput({
       profile: "classic_blind",
       side: "corp",
-      sourceDefinitionId: "unknown_low_stakes_trace" as CardDefinitionId,
+      sourceDefinitionId: syntheticCardDefinitionId("unknown_low_stakes_trace"),
       printedTrace: 3,
       bidMax: 3,
     });
@@ -190,7 +192,7 @@ describe("Blind Trace bid assessment", () => {
     const modern = decisionInput({
       profile: "modern_open",
       side: "corp",
-      sourceDefinitionId: "unknown_low_stakes_trace" as CardDefinitionId,
+      sourceDefinitionId: syntheticCardDefinitionId("unknown_low_stakes_trace"),
       printedTrace: 3,
       bidMax: 8,
     });
@@ -208,7 +210,7 @@ describe("Blind Trace bid assessment", () => {
       decisionInput({
         profile: "classic_blind",
         side: "runner",
-        sourceDefinitionId: "unknown_low_stakes_trace" as CardDefinitionId,
+        sourceDefinitionId: syntheticCardDefinitionId("unknown_low_stakes_trace"),
         printedTrace: 5,
         bidMax: 5,
         ownCredits: 5,
@@ -218,7 +220,7 @@ describe("Blind Trace bid assessment", () => {
       decisionInput({
         profile: "classic_blind",
         side: "runner",
-        sourceDefinitionId: "onr_v1_248_homewrecker" as CardDefinitionId,
+        sourceDefinitionId: 460 as CardDefinitionId,
         printedTrace: 5,
         bidMax: 5,
         ownCredits: 5,
@@ -239,21 +241,15 @@ describe("Blind Trace bid assessment", () => {
     const tagInput = decisionInput({
       profile: "classic_blind",
       side: "corp",
-      sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
+      sourceDefinitionId: 448 as CardDefinitionId,
       printedTrace: 5,
       bidMax: 5,
     });
     const tag = assess(tagInput);
-    const punishInput = decisionInput({
-      profile: "classic_blind",
-      side: "corp",
-      sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
-      printedTrace: 5,
-      bidMax: 5,
-    });
+    const punishInput = structuredClone(tagInput);
     punishInput.playerView.own.gripOrHq.push({
       instanceId: "visible_punish",
-      definitionId: "onr_v1_302_scorched-earth",
+      definitionId: 514,
       title: "Scorched Earth",
       type: "operation",
       known: true,
@@ -266,7 +262,7 @@ describe("Blind Trace bid assessment", () => {
         profile: "classic_blind",
         side: "corp",
         sourceDefinitionId:
-          "onr_proteus_025_homing-missile" as CardDefinitionId,
+          83 as CardDefinitionId,
         printedTrace: 0,
         effectiveTraceLimit: 5,
         bidMax: 5,
@@ -276,7 +272,7 @@ describe("Blind Trace bid assessment", () => {
       decisionInput({
         profile: "classic_blind",
         side: "corp",
-        sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
+        sourceDefinitionId: 448 as CardDefinitionId,
         printedTrace: 5,
         bidMax: 5,
         runnerLink: 4,
@@ -286,7 +282,7 @@ describe("Blind Trace bid assessment", () => {
       decisionInput({
         profile: "classic_blind",
         side: "corp",
-        sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
+        sourceDefinitionId: 448 as CardDefinitionId,
         printedTrace: 5,
         bidMax: 1,
         ownCredits: 1,
@@ -296,7 +292,7 @@ describe("Blind Trace bid assessment", () => {
       decisionInput({
         profile: "classic_blind",
         side: "corp",
-        sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
+        sourceDefinitionId: 448 as CardDefinitionId,
         printedTrace: 5,
         bidMax: 5,
         ownCredits: 2,
@@ -329,7 +325,7 @@ describe("Blind Trace bid assessment", () => {
       decisionInput({
         profile: "classic_blind",
         side: "corp",
-        sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
+        sourceDefinitionId: 448 as CardDefinitionId,
         printedTrace: 5,
         bidMax: 5,
       }),
@@ -338,7 +334,7 @@ describe("Blind Trace bid assessment", () => {
       decisionInput({
         profile: "classic_blind_corp_ties",
         side: "corp",
-        sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
+        sourceDefinitionId: 448 as CardDefinitionId,
         printedTrace: 5,
         bidMax: 5,
       }),
@@ -347,7 +343,7 @@ describe("Blind Trace bid assessment", () => {
       decisionInput({
         profile: "classic_blind",
         side: "runner",
-        sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
+        sourceDefinitionId: 448 as CardDefinitionId,
         printedTrace: 5,
         bidMax: 5,
       }),
@@ -356,7 +352,7 @@ describe("Blind Trace bid assessment", () => {
       decisionInput({
         profile: "classic_blind_corp_ties",
         side: "runner",
-        sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
+        sourceDefinitionId: 448 as CardDefinitionId,
         printedTrace: 5,
         bidMax: 5,
       }),
@@ -376,7 +372,7 @@ describe("Blind Trace bid assessment", () => {
     const lowHiddenBid = decisionInput({
       profile: "classic_blind",
       side: "runner",
-      sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
+      sourceDefinitionId: 448 as CardDefinitionId,
       printedTrace: 5,
       bidMax: 5,
       hiddenCorpBid: 0,
@@ -384,7 +380,7 @@ describe("Blind Trace bid assessment", () => {
     const highHiddenBid = decisionInput({
       profile: "classic_blind",
       side: "runner",
-      sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
+      sourceDefinitionId: 448 as CardDefinitionId,
       printedTrace: 5,
       bidMax: 5,
       hiddenCorpBid: 5,
@@ -399,7 +395,7 @@ describe("Blind Trace bid assessment", () => {
     const corpNormalOnly = decisionInput({
       profile: "classic_blind",
       side: "corp",
-      sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
+      sourceDefinitionId: 448 as CardDefinitionId,
       printedTrace: 6,
       bidMax: 6,
       opponentCredits: 3,
@@ -408,7 +404,7 @@ describe("Blind Trace bid assessment", () => {
     const corpWithVisibleRunnerPool = decisionInput({
       profile: "classic_blind",
       side: "corp",
-      sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
+      sourceDefinitionId: 448 as CardDefinitionId,
       printedTrace: 6,
       bidMax: 6,
       opponentCredits: 3,
@@ -417,7 +413,7 @@ describe("Blind Trace bid assessment", () => {
     const runnerNormalOnly = decisionInput({
       profile: "classic_blind",
       side: "runner",
-      sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
+      sourceDefinitionId: 448 as CardDefinitionId,
       printedTrace: 5,
       bidMax: 6,
       opponentCredits: 3,
@@ -426,7 +422,7 @@ describe("Blind Trace bid assessment", () => {
     const runnerWithVisibleCorpPool = decisionInput({
       profile: "classic_blind",
       side: "runner",
-      sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
+      sourceDefinitionId: 448 as CardDefinitionId,
       printedTrace: 5,
       bidMax: 6,
       opponentCredits: 3,
@@ -458,7 +454,7 @@ describe("Blind Trace bid assessment", () => {
         decisionInput({
           profile: "classic_blind",
           side: "corp",
-          sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
+          sourceDefinitionId: 448 as CardDefinitionId,
           printedTrace: 6,
           bidMax: 6,
           opponentCredits: 3,
@@ -472,7 +468,7 @@ describe("Blind Trace bid assessment", () => {
     const input = decisionInput({
       profile: "classic_blind",
       side: "runner",
-      sourceDefinitionId: "onr_v1_284_chance-observation" as CardDefinitionId,
+      sourceDefinitionId: 496 as CardDefinitionId,
       printedTrace: 5,
       bidMax: 10,
       ownCredits: 10,
@@ -482,7 +478,7 @@ describe("Blind Trace bid assessment", () => {
     });
     input.playerView.opponent.clicks = 2;
     const hqLook = runnerHqLookEvent(
-      ["onr_v1_307_urban-renewal"] as CardDefinitionId[],
+      [519] as CardDefinitionId[],
       input.playerView.stateVersion,
     );
     input.playerView.publicEvents = [hqLook];
@@ -493,7 +489,7 @@ describe("Blind Trace bid assessment", () => {
         .safeDefinitions,
     ).toEqual([
       expect.objectContaining({
-        definitionId: "onr_v1_307_urban-renewal",
+        definitionId: 519,
         count: 1,
       }),
     ]);
@@ -519,7 +515,7 @@ function runnerHqLookEvent(
   stateVersion: number,
 ): PublicGameEvent {
   return {
-    eventId: "runner-known-hq-payoff",
+    eventId: stateVersion + 1,
     type: "resolve_choice",
     stateVersionBefore: Math.max(0, stateVersion - 1),
     stateVersionAfter: stateVersion,
@@ -605,6 +601,8 @@ function traceState(input: {
     setupMode: "completed",
     traceRulesProfile: input.profile,
   });
+  if (input.side === "corp")
+    RealEngineFixtureBuilder.forState(state).withCorpHqSize(0);
   const effectiveTraceLimit = input.effectiveTraceLimit ?? input.printedTrace;
   state.activeSide = input.side;
   if (input.side === "corp") {
@@ -618,7 +616,7 @@ function traceState(input: {
     state.runner.grip = state.runner.grip.slice(0, input.runnerGripCount);
   }
   state.trace = {
-    traceId: "trace_assessment_1",
+    traceId: 1,
     sourceCardInstanceId: state.corp.identity,
     sourceDefinitionId: input.sourceDefinitionId,
     traceRulesProfile: input.profile,
@@ -637,9 +635,9 @@ function traceState(input: {
     successEffect: { type: "add_tag", amount: 1 },
   };
   state.pendingChoice = {
-    choiceId: `trace_assessment_1.${input.side}.bid.${state.stateVersion}`,
+    choiceId: `1.${input.side}.bid.${state.stateVersion}`,
     side: input.side,
-    source: "trace:trace_assessment_1",
+    source: "trace:1",
     prompt: "Gebot wählen",
     kind: "bid_amount",
     options: Array.from({ length: input.bidMax + 1 }, (_, bid) => ({

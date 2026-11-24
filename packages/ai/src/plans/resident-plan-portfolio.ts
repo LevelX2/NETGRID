@@ -1,9 +1,16 @@
+import {
+  isRunnerPaymentWindowId,
+  type MatchEventId,
+  type RunnerPaymentWindowId,
+  type Side,
+} from "@netgrid/shared";
 import type { RunnerExposeInformationMemoryRecord } from "../runner/expose-information/expose-information-types";
-import type { Side } from "@netgrid/shared";
+import { compactCampaignId, comparePlanIdentities, type CampaignIdentity } from "./compact-plan-identity";
 import {
   assertValidPlanInstance,
   deduplicatePlanProposals,
   instantiatePlanProposal,
+  planInstanceIdForProposal,
   planProposalKey,
 } from "./plan-instance";
 import type {
@@ -60,7 +67,7 @@ export const RESIDENT_CORP_CAMPAIGN_SCHEMA_VERSION =
 
 export type ResidentCorpCampaignPublicOutcome = {
   outcomeId: string;
-  eventId: string;
+  eventId: MatchEventId;
   eventType: string;
   stateVersionAfter: number;
   kind:
@@ -89,6 +96,7 @@ export type ResidentCorpCampaignPublicOutcome = {
 export type ResidentCorpCampaign = {
   schemaVersion: typeof RESIDENT_CORP_CAMPAIGN_SCHEMA_VERSION;
   campaignId: string;
+  identity: CampaignIdentity;
   kind: "agenda" | "defense" | "opening_rush";
   status:
     | "awaiting_opponent_outcome"
@@ -141,8 +149,20 @@ export type ResidentPlanPortfolio = {
   turnPlanCommitment?: TurnPlanCommitment;
   turnPlanExecutionLease?: TurnPlanExecutionLease;
   selectedActionOrigin?: ResidentSelectedActionOrigin;
+  pendingRunnerCentralAccessVariation?: PendingRunnerCentralAccessVariation;
   pendingRunnerCostPenaltySupportOrigin?: PendingRunnerCostPenaltySupportOrigin;
   runnerExposeInformationMemory?: RunnerExposeInformationMemoryRecord[];
+};
+
+export type PendingRunnerCentralAccessVariation = {
+  engineSelectionKey: string;
+  origins: Array<{
+    targetServerId: "hq" | "rd";
+    origin: Extract<
+      ResidentSelectedActionOrigin,
+      { immediateChoicePolicy: "resolve_runner_run_start_order" }
+    >;
+  }>;
 };
 
 export type PendingRunnerCostPenaltySupportOrigin = Readonly<{
@@ -151,7 +171,7 @@ export type PendingRunnerCostPenaltySupportOrigin = Readonly<{
   sourceStepId: string;
   originalActionId: string;
   selectedAtStateVersion: number;
-  windowId?: string;
+  windowId?: RunnerPaymentWindowId;
 }>;
 
 export type ResidentSelectedActionOrigin = Readonly<{
@@ -167,7 +187,7 @@ export type ResidentSelectedActionOrigin = Readonly<{
     | Readonly<{
         immediateChoicePolicy: "select_bound_corp_archives_cards_to_hq";
         sourceCardInstanceId: string;
-        sourceCardDefinitionId: string;
+        sourceCardDefinitionId: number;
         selectionMode: "one" | "all";
         eligibleArchiveCardInstanceIds: string[];
         selectedArchiveCardInstanceIds: string[];
@@ -183,7 +203,7 @@ export type ResidentSelectedActionOrigin = Readonly<{
         sourceStepId: string;
         sourceActionType: "continue_run";
         sourceCardInstanceId: string;
-        sourceCardDefinitionId: string;
+        sourceCardDefinitionId: number;
       }>
     | Readonly<{
         immediateChoicePolicy: "resolve_runner_program_trash_before_install";
@@ -243,7 +263,10 @@ export function reconcileResidentPlanPortfolio(
 
 /** Computes lifecycle transitions once, then binds roles for the requested phase. */
 export function prepareResidentPlanPortfolioReconciliation(
-  params: Omit<ReconcileResidentPlanPortfolioParams, "selectedExecutorInstanceId" | "selectionReason">,
+  params: Omit<
+    ReconcileResidentPlanPortfolioParams,
+    "selectedExecutorInstanceId" | "selectionReason"
+  >,
 ) {
   assertPortfolioInput(params);
   const proposals = deduplicatePlanProposals(
@@ -406,7 +429,12 @@ export function prepareResidentPlanPortfolioReconciliation(
     executorId?: string,
     reason: ReconcileResidentPlanPortfolioParams["selectionReason"] = "executor_selected",
   ): ResidentPlanPortfolio => {
-    const assigned = assignExecutor(portfolio, executorId, reason, params.timingPoint);
+    const assigned = assignExecutor(
+      portfolio,
+      executorId,
+      reason,
+      params.timingPoint,
+    );
     assertResidentPlanPortfolio(assigned, params.timingPoint);
     return assigned;
   };
@@ -514,12 +542,18 @@ export function applyPlanOutcomeReceipt(
       ),
     ],
   };
-  if (portfolio.executorInstanceId === updated.instanceId && terminal) {
+  const residentIds = new Set(next.instances.map(({ instanceId }) => instanceId));
+  if (
+    !portfolio.executorInstanceId ||
+    !residentIds.has(portfolio.executorInstanceId) ||
+    !portfolio.rootForegroundInstanceId ||
+    !residentIds.has(portfolio.rootForegroundInstanceId)
+  ) {
     delete next.executorInstanceId;
-  }
-  if (portfolio.rootForegroundInstanceId === updated.instanceId && terminal) {
     delete next.rootForegroundInstanceId;
+    next.instances = next.instances.map(clearAssignment);
   }
+  delete next.selectedActionOrigin;
   assertResidentPlanPortfolio(next, timingPoint);
   return next;
 }
@@ -563,18 +597,16 @@ export function assertResidentPlanPortfolio(
     portfolio.instances.map((instance) => instance.instanceId),
   );
   const duplicateCount = portfolio.instances.length - ids.size;
-  const executor = portfolio.executorInstanceId
-    ? portfolio.instances.find(
-        (instance) => instance.instanceId === portfolio.executorInstanceId,
-      )
-    : undefined;
   if (
     portfolio.schemaVersion !== RESIDENT_PLAN_PORTFOLIO_SCHEMA_VERSION ||
     duplicateCount > 0 ||
+    portfolio.instances.some((instance) => instance.side !== portfolio.side) ||
+    portfolio.completionHistory.some((record) =>
+      record.instanceId !== planInstanceIdForProposal(record) ||
+      !record.moduleId.startsWith(`${portfolio.side}.`)
+    ) ||
     executors.length > 1 ||
-    (portfolio.executorInstanceId !== undefined &&
-      (executors.length !== 1 || !executor)) ||
-    (executor !== undefined && executor.executionState !== "executor")
+    executors[0]?.instanceId !== portfolio.executorInstanceId
   ) {
     throw portfolioFailure(
       "executor_invariant_broken",
@@ -594,7 +626,11 @@ export function assertResidentPlanPortfolio(
       portfolio.campaigns.some(
         (campaign) =>
           campaign.schemaVersion !== RESIDENT_CORP_CAMPAIGN_SCHEMA_VERSION ||
-          campaign.campaignId.trim().length === 0 ||
+          !campaign.identity ||
+          campaign.identity.ownerModuleId !== campaign.origin.moduleId ||
+          typeof campaign.identity.objectiveKey !== "string" ||
+          !campaign.identity.objectiveKey.trim() ||
+          campaign.campaignId !== compactCampaignId(campaign.identity) ||
           campaign.origin.rootPlanInstanceId.trim().length === 0 ||
           campaign.milestoneId.trim().length === 0 ||
           campaign.createdAtStateVersion > campaign.updatedAtStateVersion ||
@@ -706,7 +742,7 @@ export function assertResidentPlanPortfolio(
         selectedActionOrigin.sourceActionType === "continue_run" &&
         selectedActionOrigin.sourceCardInstanceId.trim().length > 0 &&
         selectedActionOrigin.sourceCardDefinitionId ===
-          "onr_v1_275_vacuum-link") ||
+          487) ||
       (selectedActionOrigin.immediateChoicePolicy ===
         "resolve_runner_program_trash_before_install" &&
         selectedActionOrigin.sourceCardInstanceId.trim().length > 0 &&
@@ -738,7 +774,7 @@ export function assertResidentPlanPortfolio(
       (selectedActionOrigin.immediateChoicePolicy ===
         "select_bound_corp_archives_cards_to_hq" &&
         selectedActionOrigin.sourceCardInstanceId.trim().length > 0 &&
-        selectedActionOrigin.sourceCardDefinitionId.trim().length > 0 &&
+        selectedActionOrigin.sourceCardDefinitionId > 0 &&
         (selectedActionOrigin.selectionMode === "one" ||
           selectedActionOrigin.selectionMode === "all") &&
         selectedActionOrigin.eligibleArchiveCardInstanceIds.length > 0 &&
@@ -778,6 +814,43 @@ export function assertResidentPlanPortfolio(
       );
     }
   }
+  const accessVariation = portfolio.pendingRunnerCentralAccessVariation;
+  if (
+    accessVariation &&
+    (portfolio.side !== "runner" ||
+      accessVariation.engineSelectionKey !==
+        portfolio.turnPlanExecutionLease?.engineSelectionKey ||
+      accessVariation.origins.length !== 2 ||
+      new Set(accessVariation.origins.map((entry) => entry.targetServerId))
+        .size !== 2 ||
+      new Set(
+        accessVariation.origins.map((entry) => entry.origin.selectedActionId),
+      ).size !== 2 ||
+      accessVariation.origins.some(
+        ({ targetServerId, origin }) =>
+          origin.selectedAtStateVersion !== portfolio.stateVersion ||
+          origin.continuedThroughStateVersion !== portfolio.stateVersion ||
+          origin.sourceActionType !== "start_run" ||
+          origin.rootPlanInstanceId !== origin.executorInstanceId ||
+          !portfolio.instances.some(
+            (instance) =>
+              instance.instanceId === origin.executorInstanceId &&
+              instance.moduleId === "runner.pressure_central" &&
+              instance.target?.kind === "server" &&
+              instance.target.id === targetServerId &&
+              instance.viability === "ready",
+          ),
+      ))
+  ) {
+    throw portfolioFailure(
+      "executor_invariant_broken",
+      portfolio,
+      timingPoint,
+      portfolio.executorInstanceId,
+      "Persist both current Runner central run origins with the exact Engine selection lease.",
+    );
+  }
+
   const paymentOrigin = portfolio.pendingRunnerCostPenaltySupportOrigin;
   if (
     paymentOrigin &&
@@ -790,7 +863,7 @@ export function assertResidentPlanPortfolio(
       paymentOrigin.selectedAtStateVersion < 0 ||
       paymentOrigin.selectedAtStateVersion > portfolio.stateVersion ||
       (paymentOrigin.windowId !== undefined &&
-        paymentOrigin.windowId.trim().length === 0))
+        !isRunnerPaymentWindowId(paymentOrigin.windowId)))
   ) {
     throw portfolioFailure(
       "executor_invariant_broken",
@@ -824,9 +897,6 @@ function assignExecutor(
   reason: NonNullable<ReconcileResidentPlanPortfolioParams["selectionReason"]>,
   timingPoint: string,
 ): ResidentPlanPortfolio {
-  const previousExecutorId = portfolio.instances.find(
-    (instance) => instance.executionState === "executor",
-  )?.instanceId;
   if (!selectedId) {
     return {
       ...portfolio,
@@ -877,17 +947,15 @@ function assignExecutor(
           ),
         );
       }
-    } else if (
-      instance.executionState === "executor" ||
-      (previousExecutorId === instance.instanceId &&
-        instance.instanceId !== selectedId)
-    ) {
+    } else if (before === "executor") {
       next.executionState =
         instance.viability === "ready" ? "preempted" : "idle";
       next.portfolioRole =
-        instance.executionClass === "urgent_response"
-          ? "response_candidate"
-          : "background";
+        instance.instanceId === rootId
+          ? "foreground"
+          : instance.executionClass === "urgent_response"
+            ? "response_candidate"
+            : "background";
       transitions.push(
         transition(
           next,
@@ -1050,14 +1118,14 @@ function pruneHistory(
     .sort(
       (left, right) =>
         left.terminalAtStateVersion - right.terminalAtStateVersion ||
-        left.instanceId.localeCompare(right.instanceId),
+        comparePlanIdentities(left, right),
     );
 }
 
 function stableInstances(instances: readonly PlanInstance[]): PlanInstance[] {
   return [...instances]
     .map((instance) => structuredClone(instance))
-    .sort((left, right) => left.instanceId.localeCompare(right.instanceId));
+    .sort(comparePlanIdentities);
 }
 
 function transition(
@@ -1101,6 +1169,9 @@ function assertPortfolioInput(
       undefined,
       "Discard legacy or future portfolio snapshots instead of migrating them.",
     );
+  }
+  if (params.previous) {
+    assertResidentPlanPortfolio(params.previous, params.timingPoint);
   }
 }
 

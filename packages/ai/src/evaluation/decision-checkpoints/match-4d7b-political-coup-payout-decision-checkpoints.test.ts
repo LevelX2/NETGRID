@@ -5,7 +5,7 @@ import politicalCoupPayoutJson from "../../../../../data/scenarios/ai-decision-c
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
-const POLITICAL_COUP_INSTANCE_ID = "corp_onr_v1_209_political-coup_1";
+const POLITICAL_COUP_INSTANCE_ID = "c2lp";
 
 describe("match 4d7b Corp scored-card economy payout", () => {
   it("uses a guaranteed three-credit scored-card payout before Basic Credit", () => {
@@ -28,14 +28,14 @@ describe("match 4d7b Corp scored-card economy payout", () => {
       acceptableActions: [
         {
           actionId:
-            "corp.install_card.corp_onr_v1_238_data-wall-2-0_1.new_remote.corp_onr_v1_238_data-wall-2-0_1",
+            "cc.c2s5.new_remote.c2s5",
         },
       ],
       planExecution: {
         acceptablePlanKinds: ["corp.defend_servers"],
         acceptableCapabilities: ["improve_remote_protection_path"],
         requiredAssessmentEvidence: [
-          "corp_layered_remote_ice_staging:remote:strategic-score-remote:new_remote:corp.install_card.corp_onr_v1_238_data-wall-2-0_1.new_remote.corp_onr_v1_238_data-wall-2-0_1:layers_0:unrezzed_0:rez_gap_2",
+          "corp_layered_remote_ice_staging:remote:strategic-score-remote:new_remote:cc.c2s5.new_remote.c2s5:layers_0:unrezzed_0:rez_gap_2",
         ],
       },
     };

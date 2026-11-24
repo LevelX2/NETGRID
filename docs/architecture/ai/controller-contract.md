@@ -99,6 +99,30 @@ AI konfiguriert ist. Dabei gilt:
   wiederhergestellten residenten Portfolio neu.
 - Standardpayloads bleiben side-gefiltert.
 
+Der HTTP-Server lässt produktive KI-Entscheidungen in einem Pool mit bis zu
+zwei Worker-Threads berechnen. Beim Serverstart lädt der erste Worker die
+KI-Runtime und bestätigt vor dem Öffnen des HTTP-Ports seine Bereitschaft.
+Der zweite Worker startet bei parallelem Bedarf. Im Quellbetrieb lädt der
+Worker direkt den Entscheidungseinstieg.
+
+Der Auftrag enthält das seitensichere KI-DTO und
+den laufenden KI-Speicher. Regelabfragen laufen über typisierte Nachrichten
+gegen den vom Server gehaltenen, für diese Partie gesperrten Zustand.
+Der Server übernimmt den fortgeschriebenen KI-Speicher und wendet das
+Ergebnis in der Engine an. Eine Übergabe zwischen Threads erhält die
+laufende Bindung des Zugplans. Der Workerfehler führt zum bestehenden
+strukturierten Entscheidungsfehler.
+
+Der Live-Pfad hält pro Partie und Seite die bereits in das KI-DTO
+projizierten Ereignisse vor und projiziert nur neue Einträge. Beim
+Wiederöffnen entsteht die Sicht aus der gespeicherten Engine-Historie.
+Manuell und automatisch bestätigtes Undo setzen die Historie auf den
+Zielzustand zurück und verwerfen das persistierte Portfolio. Nach dem
+SQLite-Commit gibt der Server die Projektion, den laufenden KI-Speicher
+und vorbereitete Entscheidungen frei. Partieabschluss und Schließen des
+Servers geben diese Daten ebenfalls frei.
+[Manuelle und automatische Undo-Pfade](../../../apps/server/src/multiplayer.ts)
+
 ### Idempotente Aktionsantworten
 
 Nach erfolgreicher Sessionprüfung liefert eine bekannte Idempotenz-ID ihr
@@ -132,7 +156,9 @@ gemacht werden.
 `releaseAiMatchRuntime(matchId)` gibt residente Portfolios, Portfolio-
 Snapshots, Strategic Intent und Runner-Runpläne aller Seiten und Profile des
 benannten Matches frei. Die Speicher halten ihre Matchzuständigkeit als
-eigene Metadaten; die Freigabe interpretiert keine opaken Cachekeys.
+eigene Metadaten. Die Freigabe interpretiert keine opaken Cachekeys.
+Das residente Portfolio übernimmt bei einer gebundenen Entscheidungs-ID
+den vollständigen Scope vor dem Versions- und Seitensuffix.
 
 Der Server gibt dieses Gedächtnis und vorbereitete KI-Debugentscheidungen
 nach erfolgreicher terminaler Persistenz, nach Matchlöschung, nach akzeptiertem
@@ -148,8 +174,9 @@ Bei Engine-Zufall bindet die ausstehende Lease den ausgegebenen Quote.
 Das aktorprivate Receipt bestätigt die gezogene Variante aus genau dieser
 Kandidatenmenge. Ein bestätigter Zufallsschritt bildet eine Beobachtungsgrenze
 für die Planung. Reguläre Aktionen schreiben das Commitment anhand des
-gebundenen Steps fort. Eine Abweichung führt zur Revalidierung am aktuellen
-Engine-Zustand.
+gebundenen Steps fort. Die Lease bindet dazu die aktuelle Zustandsversion
+und den side-sicheren Planning-Fingerprint. Eine Abweichung führt zur
+Revalidierung am aktuellen Engine-Zustand.
 
 Der Produktsimulator verwendet den in seiner `decisionId` gebundenen
 `simulationScopeId` als Owner des Prozessgedächtnisses. Nach der Deckprüfung

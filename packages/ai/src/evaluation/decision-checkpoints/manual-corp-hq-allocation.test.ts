@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import fixture from "../../../../../data/scenarios/ai-decision-checkpoints/cp-manual-20261108-corp-hq-allocation.json";
 import firstRemoteFixture from "../../../../../data/scenarios/ai-decision-checkpoints/cp-manual-d09-hq-d30.json";
 import secondRemoteLayerFixture from "../../../../../data/scenarios/ai-decision-checkpoints/cp-manual-d09-hq-d33.json";
@@ -48,11 +49,11 @@ it("retains higher HQ agenda exposure in the concrete installation at D34", () =
 });
 
 it.each([
-  [firstRemoteFixture, "filter", 2],
-  [secondRemoteLayerFixture, "data-wall", 3],
+  ["Filter", firstRemoteFixture, 456, 2],
+  ["Data Wall", secondRemoteLayerFixture, 449, 3],
 ] as const)(
   "protects repeated HQ exposure with %s",
-  (fixture, ice, recentTurns) => {
+  (_label, fixture, ice, recentTurns) => {
     const input = capturedInput(fixture);
     expect(allocateCorpCentralDefenseFromAiFacts({ input })).toMatchObject({
       selectedServerId: "hq",
@@ -68,12 +69,12 @@ it.each([
       (entry) => entry.actionId === decision.actionId,
     );
     expect(decision.fallbackUsed).toBe(false);
-    expect(action?.actionId).toContain(ice);
+    expect(referencesDefaultDeckCard(action?.source, ice)).toBe(true);
     expect(action?.payload?.serverId).toBe("hq");
     expect(action?.costs).toEqual([{ clicks: 1, credits: 2 }]);
     expect(decision.evidence).toContain("plan_priority_class:P3");
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
       route: {
         actionId: decision.actionId,
         stateVersion: input.playerView.stateVersion,
@@ -85,7 +86,9 @@ it.each([
 it("keeps the score parent if HQ has no repeat access", () => {
   const input = capturedInput(firstRemoteFixture);
   const isEarlierAccess = (event: (typeof input.eventTail)[number]) =>
-    event.eventId === "evt_37";
+    event.type === "access_card" &&
+    event.stateVersionBefore === 36 &&
+    event.publicPayload.serverId === "hq";
   input.playerView.publicEvents = input.playerView.publicEvents.filter(
     (event) => !isEarlierAccess(event),
   );
@@ -95,9 +98,11 @@ it("keeps the score parent if HQ has no repeat access", () => {
   });
   const decision = chooseAiAction(input);
   expect(decision.actionId).toContain(".new_remote.");
-  expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toMatch(
-    /^plan:corp\.score_agenda:/,
-  );
+  expect(
+    decision.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+    )?.moduleId,
+  ).toBe("corp.score_agenda");
 });
 
 it("keeps immediately effective remote protection in the same priority band", () => {
@@ -107,9 +112,11 @@ it("keeps immediately effective remote protection in the same priority band", ()
   );
   const decision = chooseAiAction(input);
   expect(decision.actionId).toContain(".new_remote.");
-  expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toMatch(
-    /^plan:corp\.score_agenda:/,
-  );
+  expect(
+    decision.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+    )?.moduleId,
+  ).toBe("corp.score_agenda");
   expect(
     decision.evidence?.some((code) =>
       code.includes("score_protection_satisfied"),
@@ -124,7 +131,7 @@ it.each([true, false])(
     expect(input.playerView.opponent.agendaPoints).toBe(6);
     if (!diversionVisible) {
       input.playerView.opponent.rig = input.playerView.opponent.rig!.filter(
-        (card) => card.definitionId !== "onr_v1_062_shredder-uplink-protocol",
+        (card) => card.definitionId !== 274,
       );
     }
     const decision = chooseAiAction(input);
@@ -134,11 +141,11 @@ it.each([true, false])(
     expect(decision.fallbackUsed).toBe(false);
     expect(head?.payload?.serverId).toBe(diversionVisible ? "archives" : "hq");
     if (diversionVisible) {
-      expect(head?.actionId).toContain("wall-of-static");
+      expect(head?.actionId).toSatisfy((reference: string | undefined) => referencesDefaultDeckCard(reference, 491));
       expect(head?.payload?.postInstallRezQuoteFinalCredits).toBe(3);
     }
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
       priority: { effectiveClass: "P2" },
       route: {
         actionId: decision.actionId,

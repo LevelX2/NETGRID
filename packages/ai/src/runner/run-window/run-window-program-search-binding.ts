@@ -1,4 +1,5 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type {
   EngineWindowResolution,
   PlanSchedulerContext,
@@ -29,17 +30,20 @@ export function resolvePlanBoundRunnerRunProgramSearchChoice(
   const action = input.legalActions.find(
     (entry) => entry.type === "resolve_choice",
   );
-  if (
-    !action ||
-    !selectedRunnerRunProgramSearchOptionIds(input, action, choice, previous)
-  )
-    return undefined;
+  if (!action) return undefined;
+  const binding = resolveRunnerRunProgramSearchBinding(
+    input,
+    action,
+    choice,
+    previous ?? residentPlanPortfolioSnapshot(input),
+  );
+  if (!binding) return undefined;
   return {
     actionId: action.actionId,
     reasonCode: "plan_bound_runner_run_program_search_choice",
     origin: {
-      rootPlanInstanceId: previous!.rootForegroundInstanceId!,
-      leafPlanInstanceId: previous!.executorInstanceId!,
+      rootPlanInstanceId: binding.rootPlanInstanceId,
+      leafPlanInstanceId: binding.leafPlanInstanceId,
       side: "runner",
       windowKind: "mandatory_choice",
       windowId: choice.choiceId,
@@ -73,9 +77,9 @@ export function bindSelectedRunnerRunProgramSearch(
     !executor ||
     executor.executionState !== "executor" ||
     assessment?.admissible !== true ||
-    binding.sourceActionId !== action?.actionId ||
+    !actionMatchesCurrentDecision(input, action) ||
+    binding.sourceActionId !== action.actionId ||
     action.type !== "activated_card_ability" ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
     action.source !== binding.sourceCardInstanceId ||
     state?.signal.rootPlanInstanceId !==
       result.portfolio.rootForegroundInstanceId ||
@@ -109,7 +113,20 @@ export function selectedRunnerRunProgramSearchOptionIds(
     !choice.source.startsWith("p3_38.search_stack_install:")
   )
     return undefined;
-  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  return resolveRunnerRunProgramSearchBinding(
+    input,
+    action,
+    choice,
+    currentPortfolio ?? residentPlanPortfolioSnapshot(input),
+  )?.optionIds;
+}
+
+function resolveRunnerRunProgramSearchBinding(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  portfolio: ResidentPlanPortfolio | undefined,
+) {
   const executor = portfolio?.instances.find(
     (instance) =>
       instance.instanceId === portfolio.executorInstanceId &&
@@ -125,7 +142,8 @@ export function selectedRunnerRunProgramSearchOptionIds(
     return undefined;
   }
   const state = executor.moduleState as RunWindowState | undefined;
-  const bindings = Object.values(state?.signal.actionAssessments ?? {}).flatMap(
+  const signal = state?.kind === "run_window" ? state.signal : undefined;
+  const bindings = Object.values(signal?.actionAssessments ?? {}).flatMap(
     (assessment) =>
       assessment.programSearchCommitment?.selectedAtStateVersion !== undefined
         ? [assessment.programSearchCommitment]
@@ -139,15 +157,17 @@ export function selectedRunnerRunProgramSearchOptionIds(
       option.card.definitionId === binding?.targetDefinitionId,
   );
   const requirement = action.choiceRequirements?.[0];
+  const rootPlanInstanceId = portfolio?.rootForegroundInstanceId;
   const exact =
     portfolio &&
-    state?.kind === "run_window" &&
+    rootPlanInstanceId !== undefined &&
+    signal &&
     bindings.length === 1 &&
     binding &&
     executor.executionState === "executor" &&
-    portfolio.rootForegroundInstanceId === state.signal.rootPlanInstanceId &&
+    rootPlanInstanceId === signal.rootPlanInstanceId &&
     portfolio.instances.some(
-      (instance) => instance.instanceId === portfolio.rootForegroundInstanceId,
+      (instance) => instance.instanceId === rootPlanInstanceId,
     ) &&
     binding.selectedAtStateVersion === binding.plannedAtStateVersion &&
     binding.selectedAtStateVersion === portfolio.stateVersion &&
@@ -165,8 +185,7 @@ export function selectedRunnerRunProgramSearchOptionIds(
     choice.cardSearchPresentation.destination === "install_program" &&
     choice.cardSearchPresentation.selectableFilter === "program" &&
     action.type === "resolve_choice" &&
-    action.side === "runner" &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    actionMatchesCurrentDecision(input, action) &&
     action.choiceRequirements?.length === 1 &&
     requirement?.choiceId === choice.choiceId &&
     requirement.minSelections === 1 &&
@@ -187,5 +206,10 @@ export function selectedRunnerRunProgramSearchOptionIds(
       action,
       "The run search choice must preserve its exact selected source, immediate state version, run parent and prebound funded program; the resolver cannot select a replacement target.",
     );
-  return [options.slice().sort((a, b) => a.id.localeCompare(b.id))[0]!.id];
+  options.sort((a, b) => a.id.localeCompare(b.id));
+  return {
+    rootPlanInstanceId,
+    leafPlanInstanceId: executor.instanceId,
+    optionIds: [options[0]!.id],
+  };
 }

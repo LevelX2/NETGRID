@@ -103,7 +103,7 @@ export function buildTargetChoiceShadowCandidateCoverageReport(
     .map((coverageCase) => coverageCase.expectedCandidateCount)
     .filter((count): count is number => count !== undefined);
   const expectedCandidateCount =
-    expectedCandidateCounts.length > 0
+    expectedCandidateCounts.length === cases.length && cases.length > 0
       ? expectedCandidateCounts.reduce((sum, count) => sum + count, 0)
       : undefined;
   const report: TargetChoiceShadowCandidateCoverageReport = {

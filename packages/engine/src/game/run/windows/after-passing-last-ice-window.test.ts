@@ -12,11 +12,11 @@ function stateAtServer(
     position?: NonNullable<GameState["run"]>["position"];
     lastPassedIceId?: CardInstanceId;
     serverIce?: CardInstanceId[];
-    attackedServerId?: "remote_1" | "remote_2";
+    attackedServerId?: "r1" | "r2";
     timingPoint?: GameState["timingPoint"];
   } = {},
 ): GameState {
-  const attackedServerId = input.attackedServerId ?? "remote_1";
+  const attackedServerId = input.attackedServerId ?? "r1";
   return {
     matchId: "match_1",
     stateVersion: 1,
@@ -32,7 +32,7 @@ function stateAtServer(
       scoreArea: [],
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           label: "Remote 1",
           kind: "remote",
           ice:
@@ -52,7 +52,7 @@ function stateAtServer(
     },
     cardInstances: {},
     run: {
-      runId: "run_1",
+      runId: 1,
       attackedServerId,
       phase: "approach_server",
       position: input.position ?? {
@@ -79,7 +79,7 @@ describe("after passing last ice window", () => {
     ).toBe(true);
     expect(afterPassingLastIceWindowContext(state)).toMatchObject({
       passedIceId: "ice_outer",
-      server: { id: "remote_1" },
+      server: { id: "r1" },
     });
   });
 
@@ -87,13 +87,13 @@ describe("after passing last ice window", () => {
     expect(
       isAfterPassingLastIceWindowOpen(
         stateAtServer({
-          position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+          position: { kind: "ice", serverId: "r1", iceIndex: 0 },
         }),
       ),
     ).toBe(false);
     expect(
       isAfterPassingLastIceWindowOpen(
-        stateAtServer({ attackedServerId: "remote_2" }),
+        stateAtServer({ attackedServerId: "r2" }),
       ),
     ).toBe(false);
     expect(

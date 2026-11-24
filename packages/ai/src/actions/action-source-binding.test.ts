@@ -1,3 +1,5 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
@@ -25,25 +27,26 @@ describe("applyCardActionSourceBinding", () => {
   });
 
   it("binds canonical AbilityRef exactly and rejects a hybrid ref", () => {
+    const abilityId = canonicalCapabilityId(366, capabilityKey("store_credits"));
     const canonical: LegalAction = {
       ...action("activated_card_ability"),
       source: "source",
       payload: {
         cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-        cardImplementationAbilityId: "test_card:gain",
-        cardImplementationAbilityKey: "gain",
+        cardImplementationAbilityId: abilityId,
+        cardImplementationAbilityKey: "store_credits",
       },
       abilityRef: {
         sourceCardInstanceId: "source",
-        sourceAbilityId: "test_card:gain",
+        sourceAbilityId: abilityId,
       },
     };
     expect(
       applyCardActionSourceBinding(candidate(), canonical, [], undefined),
     ).toMatchObject({
       sourceCardInstanceId: "source",
-      sourceDefinitionId: "test_card",
-      abilityId: "test_card:gain",
+      sourceDefinitionId: 366,
+      abilityId: abilityId,
       abilityBindingMethod: "canonical_capability_id",
     });
     const hybrid = {
@@ -51,7 +54,7 @@ describe("applyCardActionSourceBinding", () => {
       abilityRef: {
         sourceCardInstanceId: "source",
         abilityId: "legacy",
-        sourceAbilityId: "test_card:gain",
+        sourceAbilityId: abilityId,
       },
     } as unknown as LegalAction;
     expect(() =>
@@ -62,7 +65,7 @@ describe("applyCardActionSourceBinding", () => {
       ...canonical,
       payload: {
         ...canonical.payload,
-        sourceDefinitionId: "other_card",
+        sourceDefinitionId: syntheticCardDefinitionId("other_card"),
       },
     } as LegalAction;
     expect(() =>
@@ -70,7 +73,7 @@ describe("applyCardActionSourceBinding", () => {
     ).toThrow(/definition conflicts/);
     expect(() =>
       applyCardActionSourceBinding(candidate(), canonical, [], {
-        source: "other_card",
+        source: syntheticCardDefinitionId("other_card"),
       }),
     ).toThrow(/definition conflicts/);
 

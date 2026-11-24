@@ -19,13 +19,13 @@ const FIXTURES = [
 
 describe("Rent-I-Con versus CODE ROT cycle-seven remediation checkpoints", () => {
   it.each(FIXTURES)("%s", (_label, checkpoint) => {
-    const current = structuredClone(checkpoint) as AiDecisionCheckpointV1;
+    const current = structuredClone(checkpoint) as unknown as AiDecisionCheckpointV1;
     if (checkpoint === noNeedSearchJson)
       current.expectation = {
         acceptableActions: [
           {
             actionId:
-              "runner.install_card.runner_onr_v1_035_invisibility_1.runner_onr_v1_035_invisibility_1",
+              "rc.c1ix.c1ix",
           },
         ],
         planExecution: {
@@ -44,9 +44,9 @@ describe("Rent-I-Con versus CODE ROT cycle-seven remediation checkpoints", () =>
   it("retains the original setup funding when the free recurring source is unavailable", () => {
     const checkpoint = structuredClone(
       noNeedSearchJson,
-    ) as AiDecisionCheckpointV1;
+    ) as unknown as AiDecisionCheckpointV1;
     const state = checkpoint.engine.testOnlyGameState;
-    const id = "runner_onr_v1_035_invisibility_1";
+    const id = "c1ix";
     state.runner.grip = state.runner.grip.filter((cardId) => cardId !== id);
     state.runner.stack.push(id);
     Object.assign(state.cardInstances[id]!, {

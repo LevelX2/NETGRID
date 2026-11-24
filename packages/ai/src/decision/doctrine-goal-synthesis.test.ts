@@ -3,7 +3,7 @@ import type {
   DeckDoctrineV2Diagnostic,
   DeckDoctrineV2DiagnosticStatus,
   DeckDoctrineV2StrategyDiagnostic,
-} from "../deck-doctrine-strategy";
+} from "../deck-doctrine-diagnostic";
 import {
   normalizedDoctrineGoalPriority,
   synthesizeDoctrineTacticalGoals,

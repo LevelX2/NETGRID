@@ -1,5 +1,6 @@
+import { decisionEventHistory } from "../decision-event-history";
 import { currentRunPathContext } from "../run-analysis/current-run-path-context";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import {
   assessKnownRezzedIcePath,
@@ -33,7 +34,7 @@ export const DEFAULT_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE: RandomBreakOrDamageRis
   };
 
 export function randomBreakOrDamageRiskProfileForDefinitionId(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): RandomBreakOrDamageRiskProfile | undefined {
   if (!definitionId) return undefined;
   return randomBreakOrDamageRiskProfileForHint(
@@ -472,10 +473,7 @@ function recentRandomBreakFailureFromEvents(
   recentDamageAmount: number;
   targetServerId?: string;
 } {
-  const history = [
-    ...(input.playerView.publicEvents ?? []),
-    ...(input.eventTail ?? []),
-  ];
+  const history = decisionEventHistory(input);
   let activeRunServerId: string | undefined;
   for (let index = history.length - 1; index >= 0; index -= 1) {
     const event = history[index]!;
@@ -681,7 +679,7 @@ function visibleRandomBreakCandidateSubroutineCountForIce(
     ).length;
   }
   return (
-    CARD_DEFINITIONS_BY_ID[ice.definitionId]?.subroutines?.filter(
+    planningCardFactsByDefinitionId(ice.definitionId)?.subroutines?.filter(
       (subroutine) =>
         subroutine.type === "end_the_run" ||
         subroutine.type === "end_the_run_unless_runner_pays",

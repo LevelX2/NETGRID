@@ -1,4 +1,5 @@
-import type { AiDecisionInput } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
+import { isRunnerPaymentWindowId, type AiDecisionInput } from "@netgrid/shared";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import type { RunnerRemoteContestSignal } from "../../plans/runner-tactical-plan-contracts";
 import type { RunnerCoverageGapSignal } from "../../plans/runner-coverage-contracts";
@@ -28,12 +29,11 @@ export function runnerRemoteCoveragePaymentNeed(
   const windowId = continuation?.payload?.runnerCostPenaltySupportWindowId;
   if (
     !continuation ||
-    typeof windowId !== "string" ||
+    !isRunnerPaymentWindowId(windowId) ||
     continuation.actionId !== pending.originalActionId ||
     !input.legalActions.every(
       (a) =>
-        a.side === "runner" &&
-        a.expiresAtStateVersion === input.playerView.stateVersion &&
+        actionMatchesCurrentDecision(input, a) &&
         (a === continuation ||
           (a.payload?.costPenaltySupportWindowId === windowId &&
             a.payload.costPenaltySupportOriginalActionId ===

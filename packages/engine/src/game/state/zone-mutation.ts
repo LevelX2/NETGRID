@@ -151,7 +151,7 @@ export function createRemote(state: GameState): CorpServer {
     throw new Error(
       "Neue Remote-ID kann aus nichtkanonischem Serverzustand nicht abgeleitet werden.",
     );
-  const nextId = Number(id.slice("remote_".length));
+  const nextId = Number(id.slice(1));
   const server: CorpServer = {
     id,
     kind: "remote",

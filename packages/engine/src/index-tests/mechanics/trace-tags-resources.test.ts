@@ -1,3 +1,8 @@
+import {
+  canonicalCapabilityId,
+  capabilityKey as cardSpecCapabilityKey,
+} from "@netgrid/cards/engine";
+import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
@@ -183,7 +188,7 @@ import {
   addInstalledRunnerProgramForTest,
 } from "../../test-fixtures/index-test-helpers";
 
-const BROKER_DEFINITION_ID = "onr_v1_154_broker";
+const BROKER_DEFINITION_ID = 366;
 
 function isBrokerCapabilityAction(
   action: LegalAction,
@@ -197,7 +202,10 @@ function isBrokerCapabilityAction(
       "card_spec_capability_key" &&
     action.payload?.cardImplementationAbilityKey === capabilityKey &&
     action.payload?.cardImplementationAbilityId ===
-      `${BROKER_DEFINITION_ID}:${capabilityKey}` &&
+      canonicalCapabilityId(
+        BROKER_DEFINITION_ID,
+        cardSpecCapabilityKey(capabilityKey),
+      ) &&
     action.payload?.cardImplementationAbilityIndex === undefined &&
     action.payload?.cardImplementationLifecycleIndex === undefined
   );
@@ -212,7 +220,10 @@ function expectCanonicalBrokerCapability(
     cardId: brokerId,
     cardImplementationCapabilityBindingKind: "card_spec_capability_key",
     cardImplementationAbilityKey: capabilityKey,
-    cardImplementationAbilityId: `${BROKER_DEFINITION_ID}:${capabilityKey}`,
+    cardImplementationAbilityId: canonicalCapabilityId(
+      BROKER_DEFINITION_ID,
+      cardSpecCapabilityKey(capabilityKey),
+    ),
   });
   expect(action.payload).not.toHaveProperty("cardImplementationAbilityIndex");
   expect(action.payload).not.toHaveProperty("cardImplementationLifecycleIndex");
@@ -223,13 +234,13 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(MECHANIC_SMOKE_CARD_IDS.traceTags).toHaveLength(25);
     for (const definitionId of MECHANIC_SMOKE_CARD_IDS.traceTags) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
-      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+      expect(definition?.rulesText, String(definitionId)).not.toContain("WIP");
     }
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus,
+      CARD_DEFINITIONS_BY_ID[488]?.implementationStatus,
     ).toBe("playable_mvp");
   });
 
@@ -244,7 +255,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     rd.ice.push(aspInstanceId);
     state.cardInstances[aspInstanceId] = {
       instanceId: aspInstanceId,
-      definitionId: "onr_v1_221_asp",
+      definitionId: 433,
       owner: "corp",
       controller: "corp",
       zone: { side: "corp", zone: "serverIce", serverId: "rd" },
@@ -267,7 +278,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "onr_v1_221_asp",
+        sourceDefinition(state, action) === 433,
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
 
@@ -305,13 +316,13 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
 
   it("runs each V1.9.14 Trace ICE through the side-safe bid window", () => {
     const traceIce = [
-      ["onr_v1_221_asp", 5],
-      ["onr_v1_228_cinderella", 6],
-      ["onr_v1_240_fang", 4],
-      ["onr_v1_241_fang-2-0", 5],
-      ["onr_v1_248_homewrecker", 5],
-      ["onr_v1_260_pocket-virtual-reality", 6],
-      ["onr_v1_264_rex", 3],
+      [433, 5],
+      [440, 6],
+      [452, 4],
+      [453, 5],
+      [460, 5],
+      [472, 6],
+      [476, 3],
     ] as const;
 
     for (const [definitionId, traceLimit] of traceIce) {
@@ -341,13 +352,13 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
         (action) => action.type === "continue_run",
       );
 
-      expect(state.pendingChoice?.side, definitionId).toBe("corp");
-      expect(state.pendingChoice?.kind, definitionId).toBe("bid_amount");
+      expect(state.pendingChoice?.side, String(definitionId)).toBe("corp");
+      expect(state.pendingChoice?.kind, String(definitionId)).toBe("bid_amount");
       expect(
         getPlayerView(state, "runner").pendingChoice,
-        definitionId,
+        String(definitionId),
       ).toBeUndefined();
-      expect(state.trace, definitionId).toMatchObject({
+      expect(state.trace, String(definitionId)).toMatchObject({
         status: "corp_bid",
         traceLimit,
       });
@@ -360,27 +371,27 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     );
     const hackerTrackerId = putCorpRootInRemote(
       state,
-      "onr_v1_325_hacker-tracker-central",
+      537,
     );
     const hackerTrackerServer = state.corp.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     if (!hackerTrackerServer) throw new Error("Missing Hacker Tracker server.");
-    hackerTrackerServer.id = "remote_2";
+    hackerTrackerServer.id = "r2";
     hackerTrackerServer.label = "Remote 2";
     state.cardInstances[hackerTrackerId] = {
       ...state.cardInstances[hackerTrackerId]!,
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_2" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r2" },
       counters: { bit: 2 },
     };
     state.corp.servers.push({
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: [],
       root: [],
     });
-    const fangId = putCorpIceOnServer(state, "remote_1", "onr_v1_241_fang-2-0");
+    const fangId = putCorpIceOnServer(state, "r1", 453);
     state.corp.credits = 10;
     state.runner.credits = 10;
     const initial = structuredClone(state);
@@ -390,10 +401,10 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
-    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
-      "onr_v1_325_hacker-tracker-central",
+    expect(serializedDefinitionReferences(JSON.stringify(getPlayerView(state, "runner")))).not.toContain(
+      537,
     );
     const hackerTrackerRezAction = mustAction(
       state,
@@ -408,7 +419,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       payload: {
         cardId: hackerTrackerId,
         rootRez: true,
-        serverId: "remote_2",
+        serverId: "r2",
       },
     });
     state = apply(
@@ -419,14 +430,14 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(state.cardInstances[hackerTrackerId]).toMatchObject({
       faceup: true,
       rezzed: true,
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_2" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r2" },
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "rez_card",
-      cardDefinitionId: "onr_v1_325_hacker-tracker-central",
+      cardDefinitionId: 537,
     });
     expect(JSON.stringify(getPlayerView(state, "runner"))).toContain(
-      "onr_v1_325_hacker-tracker-central",
+      537,
     );
     state = apply(
       state,
@@ -527,11 +538,11 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
               (cardId) =>
                 state.cardInstances[cardId]?.definitionId === definitionId,
             );
-      expect(installed, definitionId).toBe(true);
+      expect(installed, String(definitionId)).toBe(true);
       if (definition?.type === "event")
-        expect(state.runner.tags, definitionId).toBe(0);
+        expect(state.runner.tags, String(definitionId)).toBe(0);
       if (definition?.type === "program")
-        expect(state.runner.memoryUsed, definitionId).toBeGreaterThan(0);
+        expect(state.runner.memoryUsed, String(definitionId)).toBeGreaterThan(0);
     }
 
     let shortTermState = toRunnerTurn(
@@ -541,7 +552,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     shortTermState.runner.clicks = 10;
     const shortTermId = moveRunnerCardToGrip(
       shortTermState,
-      "onr_v1_178_short-term-contract",
+      390,
     );
     const initial = structuredClone(shortTermState);
     const replayStart = shortTermState.eventLog.length;
@@ -597,16 +608,16 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     );
     linkState.runner.credits = 12;
     linkState.runner.memoryLimit = 8;
-    moveRunnerCardToGrip(linkState, "onr_v1_132_microtech-trode-set");
+    moveRunnerCardToGrip(linkState, 344);
     linkState = apply(
       linkState,
       "runner",
       (action) =>
         action.type === "install_card" &&
         sourceDefinition(linkState, action) ===
-          "onr_v1_132_microtech-trode-set",
+          344,
     );
-    putCorpIceOnServer(linkState, "rd", "onr_v1_221_asp");
+    putCorpIceOnServer(linkState, "rd", 433);
     linkState.corp.credits = 9;
     linkState = apply(
       linkState,
@@ -619,7 +630,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(linkState, action) === "onr_v1_221_asp",
+        sourceDefinition(linkState, action) === 433,
     );
     linkState = apply(
       linkState,
@@ -637,18 +648,18 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     );
     resourceState.runner.credits = 12;
     resourceState.runner.memoryLimit = 8;
-    moveRunnerCardToGrip(resourceState, "onr_v1_154_broker");
+    moveRunnerCardToGrip(resourceState, 366);
     resourceState = apply(
       resourceState,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(resourceState, action) === "onr_v1_154_broker",
+        sourceDefinition(resourceState, action) === 366,
     );
     const brokerId = resourceState.runner.rig.resources.find(
       (cardId) =>
         resourceState.cardInstances[cardId]?.definitionId ===
-        "onr_v1_154_broker",
+        366,
     );
     expect(brokerId).toBeDefined();
     if (!brokerId) throw new Error("Broker was not installed.");
@@ -685,17 +696,17 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       MECHANIC_SMOKE_GAMES.traceTags("v1914-broker-resource-actions"),
     );
     state.runner.credits = 12;
-    moveRunnerCardToGrip(state, "onr_v1_154_broker");
+    moveRunnerCardToGrip(state, 366);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_154_broker",
+        sourceDefinition(state, action) === 366,
     );
     const brokerId = state.runner.rig.resources.find(
       (cardId) =>
-        state.cardInstances[cardId]?.definitionId === "onr_v1_154_broker",
+        state.cardInstances[cardId]?.definitionId === 366,
     );
     expect(brokerId).toBeDefined();
     if (!brokerId) throw new Error("Broker was not installed.");
@@ -835,7 +846,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       MECHANIC_SMOKE_GAMES.traceTags("v1914-rig-exit-clears-counters"),
     );
     state.runner.credits = 12;
-    const brokerId = installRunnerResourceForTest(state, "onr_v1_154_broker");
+    const brokerId = installRunnerResourceForTest(state, 366);
     setCardCounterForTest(state, brokerId, "power", 3);
     state.specialZoneHarness = {
       actor: "runner",
@@ -862,7 +873,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(state.runner.grip).toContain(brokerId);
     expect(state.cardInstances[brokerId]?.counters).toBeUndefined();
 
-    const programId = installRunnerProgramForTest(state, "simple_decoder");
+    const programId = installRunnerProgramForTest(state, 591);
     setCardCounterForTest(state, programId, "power", 2);
     state.specialZoneHarness = {
       actor: "runner",
@@ -895,31 +906,31 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     );
     state.runner.credits = 12;
     state.runner.memoryLimit = 8;
-    moveRunnerCardToGrip(state, "onr_v1_120_armadillo-armored-road-home");
+    moveRunnerCardToGrip(state, 332);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
         sourceDefinition(state, action) ===
-          "onr_v1_120_armadillo-armored-road-home",
+          332,
     );
     const hardwareId = state.runner.rig.hardware.find(
       (cardId) =>
         state.cardInstances[cardId]?.definitionId ===
-        "onr_v1_120_armadillo-armored-road-home",
+        332,
     );
     expect(hardwareId).toBeDefined();
     const operationId = moveCorpCardToHq(
       state,
-      "onr_v1_299_power-grid-overload",
+      511,
     );
     const corpPowerGridView = getPlayerView(state, "corp").own.gripOrHq.find(
       (card) => card.instanceId === operationId,
     );
     expect(corpPowerGridView).toMatchObject({
       known: true,
-      definitionId: "onr_v1_299_power-grid-overload",
+      definitionId: 511,
       playCost: {
         kind: "variable_x",
         minimumX: 0,
@@ -928,8 +939,8 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       },
     });
     expect(corpPowerGridView).not.toHaveProperty("cost");
-    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
-      "onr_v1_299_power-grid-overload",
+    expect(serializedDefinitionReferences(JSON.stringify(getPlayerView(state, "runner")))).not.toContain(
+      511,
     );
 
     let untagged = apply(
@@ -965,7 +976,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(tagged, action) === "onr_v1_299_power-grid-overload" &&
+        sourceDefinition(tagged, action) === 511 &&
         action.payload?.hardwareTrashByCounterTrashCount === 1,
     );
     const taggedTargetOption = tagged.pendingChoice?.options.find(
@@ -988,9 +999,9 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       id: "installed_hardware_trash_by_counter_rd_interface_runner",
       cards: [
         ...MECHANIC_SMOKE_DECKS.traceTags.runner.cards,
-        { id: "onr_v1_127_full-body-conversion", quantity: 1 },
-        { id: "onr_v1_139_r-and-d-interface", quantity: 1 },
-        { id: "simple_setup_hardware", quantity: 1 },
+        { id: 339, quantity: 1 },
+        { id: 351, quantity: 1 },
+        { id: 602, quantity: 1 },
       ],
     };
     const makeState = (seed: string) =>
@@ -1007,7 +1018,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     let zeroOnly = makeState("v1914-power-grid-overload-zero");
     const zeroOnlyOperationId = moveCorpCardToHq(
       zeroOnly,
-      "onr_v1_299_power-grid-overload",
+      511,
     );
     zeroOnly.runner.tags = 1;
     zeroOnly = apply(
@@ -1039,15 +1050,15 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     let rdOnly = makeState("v1914-power-grid-overload-rd-only");
     const rdOnlyInterfaceId = installRunnerHardwareForTest(
       rdOnly,
-      "onr_v1_139_r-and-d-interface",
+      351,
     );
     const rdOnlyCyberneticsId = installRunnerHardwareForTest(
       rdOnly,
-      "onr_v1_127_full-body-conversion",
+      339,
     );
     const rdOnlyOperationId = moveCorpCardToHq(
       rdOnly,
-      "onr_v1_299_power-grid-overload",
+      511,
     );
     rdOnly.runner.tags = 25;
     rdOnly = apply(rdOnly, "runner", (action) => action.type === "end_turn");
@@ -1062,7 +1073,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(rdOnly, action) === "onr_v1_299_power-grid-overload" &&
+        sourceDefinition(rdOnly, action) === 511 &&
         action.payload?.cardId === rdOnlyOperationId &&
         action.payload?.hardwareTrashByCounterTrashCount === 1,
     );
@@ -1089,19 +1100,19 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     let state = makeState("v1914-power-grid-overload-rd-interface-choice");
     const rdInterfaceId = installRunnerHardwareForTest(
       state,
-      "onr_v1_139_r-and-d-interface",
+      351,
     );
     const simpleHardwareId = installRunnerHardwareForTest(
       state,
-      "simple_setup_hardware",
+      602,
     );
     const cyberneticsId = installRunnerHardwareForTest(
       state,
-      "onr_v1_127_full-body-conversion",
+      339,
     );
     const operationId = moveCorpCardToHq(
       state,
-      "onr_v1_299_power-grid-overload",
+      511,
     );
     state.runner.tags = 25;
     state = apply(state, "runner", (action) => action.type === "end_turn");
@@ -1113,7 +1124,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
         (action) =>
           action.type === "play_operation" &&
           sourceDefinition(state, action) ===
-            "onr_v1_299_power-grid-overload" &&
+            511 &&
           action.payload?.cardId === operationId,
       )
       .sort(
@@ -1242,7 +1253,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_299_power-grid-overload" &&
+        sourceDefinition(state, action) === 511 &&
         action.payload?.cardId === operationId &&
         action.payload?.hardwareTrashByCounterTrashCount === 1,
     );
@@ -1285,7 +1296,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       actionType: "resolve_choice",
       hardwareTrashByCounterTrashCount: 1,
       trashedHardwareCount: 1,
-      trashedHardwareDefinitionIds: "onr_v1_139_r-and-d-interface",
+      trashedHardwareDefinitionIds: "351",
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -1298,19 +1309,19 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     );
     state.runner.credits = 2;
     state.runner.clicks = 5;
-    moveRunnerCardToGrip(state, "onr_v1_120_armadillo-armored-road-home");
+    moveRunnerCardToGrip(state, 332);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
         sourceDefinition(state, action) ===
-          "onr_v1_120_armadillo-armored-road-home",
+          332,
     );
     const armadilloId = state.runner.rig.hardware.find(
       (cardId) =>
         state.cardInstances[cardId]?.definitionId ===
-        "onr_v1_120_armadillo-armored-road-home",
+        332,
     );
     expect(armadilloId).toBeDefined();
     if (!armadilloId) throw new Error("Missing Armadillo");
@@ -1318,7 +1329,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(
       getPlayerView(state, "corp").opponent.rig?.find(
         (card) =>
-          card.definitionId === "onr_v1_120_armadillo-armored-road-home",
+          card.definitionId === 332,
       )?.counters?.bit,
     ).toBe(2);
 
@@ -1339,7 +1350,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       tagRemovalRecurringCreditsSpent: 2,
       runnerCreditsSpent: 0,
       tagRemovalCreditSourceDefinitionIds:
-        "onr_v1_120_armadillo-armored-road-home",
+        "332",
     });
 
     state = apply(state, "runner", (action) => action.type === "end_turn");
@@ -1374,26 +1385,26 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     );
     state.runner.credits = 0;
     state.runner.clicks = 5;
-    moveRunnerCardToGrip(state, "onr_v1_126_drifter-mobile-environment");
+    moveRunnerCardToGrip(state, 338);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
         sourceDefinition(state, action) ===
-          "onr_v1_126_drifter-mobile-environment",
+          338,
     );
     const drifterId = state.runner.rig.hardware.find(
       (cardId) =>
         state.cardInstances[cardId]?.definitionId ===
-        "onr_v1_126_drifter-mobile-environment",
+        338,
     );
     expect(drifterId).toBeDefined();
     if (!drifterId) throw new Error("Missing Drifter");
     expect(cardCounterAmount(state, drifterId, "bit")).toBe(2);
     expect(
       getPlayerView(state, "corp").opponent.rig?.find(
-        (card) => card.definitionId === "onr_v1_126_drifter-mobile-environment",
+        (card) => card.definitionId === 338,
       )?.counters?.bit,
     ).toBe(2);
 
@@ -1413,7 +1424,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       tagRemovalRecurringCreditsSpent: 2,
       runnerCreditsSpent: 0,
       tagRemovalCreditSourceDefinitionIds:
-        "onr_v1_126_drifter-mobile-environment",
+        "338",
     });
     expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
       "armadilloRecurringCreditsSpent",

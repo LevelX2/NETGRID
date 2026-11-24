@@ -1,8 +1,11 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { visibleRunnerHeapBreakerPreparations } from "../../runtime/corp-public-heap-breaker-preparation";
 import { visibleRunnerNextTurnPreparationCreditGain } from "@netgrid/engine";
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
+import { actionClickCost, actionCreditCost } from "../../runtime/action-cost";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   corpEconomyActionIsOwned,
   corpEconomyCandidateHasExecutablePayload,
@@ -118,7 +121,11 @@ export function corpScoreProtectionInstallRouteScan(
     const action = input.legalActions.find(
       (legalAction) => legalAction.actionId === candidate.actionId,
     );
-    if (!action || action.payload?.serverId !== need.targetServerId) return [];
+    if (
+      !actionMatchesCurrentDecision(input, action) ||
+      action.payload?.serverId !== need.targetServerId
+    )
+      return [];
     const projectedInstallCredits = finiteNonNegativeIntegerOrResolutionFailure(
       input,
       candidate.costProfile.creditCost,
@@ -137,29 +144,7 @@ export function corpScoreProtectionInstallRouteScan(
       currentCorpClicks: input.playerView.own.clicks,
       currentCorpAgendaPoints: input.playerView.own.agendaPoints,
       visibleCorpHand: input.playerView.own.gripOrHq,
-      ...(currentServer
-        ? {
-            currentServer: {
-              id: currentServer.id,
-              ice: currentServer.ice.map((ice) => ({
-                instanceId: ice.instanceId,
-                known: ice.known,
-                ...(ice.definitionId ? { definitionId: ice.definitionId } : {}),
-                ...(ice.rezzed !== undefined ? { rezzed: ice.rezzed } : {}),
-                ...(ice.strength !== undefined
-                  ? { strength: ice.strength }
-                  : {}),
-                ...(ice.subtypes ? { subtypes: ice.subtypes } : {}),
-                ...(ice.effectiveRunQuote
-                  ? { effectiveRunQuote: ice.effectiveRunQuote }
-                  : {}),
-                ...(ice.effectiveRezCostQuote
-                  ? { effectiveRezCostQuote: ice.effectiveRezCostQuote }
-                  : {}),
-              })),
-            },
-          }
-        : {}),
+      ...(currentServer ? { currentServer } : {}),
       runnerRig: input.playerView.opponent.rig ?? [],
       runnerSetAside: input.playerView.specialZones?.setAside ?? [],
       ...(input.playerView.opponent.memoryUsed !== undefined
@@ -195,9 +180,7 @@ export function corpScoreProtectionInstallRouteScan(
     return [
       {
         candidate,
-        action,
         projection,
-        projectedInstallCredits,
       },
     ];
   });
@@ -266,7 +249,7 @@ export function corpScoreProtectionStagingInstallSignal(
   const need = project.protectionNeed;
   const serverId = project.serverId;
   const existingRemote =
-    serverId?.startsWith("remote_") === true
+    isRemoteServerId(serverId) === true
       ? input.playerView.servers.find((server) => server.id === serverId)
       : undefined;
   const boundedStagingLayerLimitReached =
@@ -274,14 +257,14 @@ export function corpScoreProtectionStagingInstallSignal(
     (serverId === "new_remote" &&
       input.playerView.servers.some(
         (server) =>
-          server.id.startsWith("remote_") &&
+          isRemoteServerId(server.id) &&
           server.root.length === 0 &&
           server.ice.length >= 2,
       ));
   if (
     !need ||
     !serverId ||
-    (serverId !== "new_remote" && !serverId.startsWith("remote_")) ||
+    (serverId !== "new_remote" && !isRemoteServerId(serverId)) ||
     (serverId !== "new_remote" && existingRemote === undefined) ||
     // Productive routes were already admitted by the exact route scan. This
     // backstop may stage the first two layers, but it must not manufacture an
@@ -299,13 +282,13 @@ export function corpScoreProtectionStagingInstallSignal(
     input,
     candidate.sourceCardInstanceId,
   );
-  const definition = CARD_DEFINITIONS_BY_ID[candidate.sourceDefinitionId];
-  const stagingAction = input.legalActions.find(
+  const definition = planningCardFactsByDefinitionId(candidate.sourceDefinitionId);
+  const action = input.legalActions.find(
     (a) => a.actionId === candidate.actionId,
   );
   const sourceDefense = corpIceInstallDefenseProfile(
     input,
-    stagingAction,
+    action,
     source,
     serverId,
   );
@@ -339,15 +322,10 @@ export function corpScoreProtectionStagingInstallSignal(
   ) {
     return undefined;
   }
-  const action = input.legalActions.find(
-    (legalAction) => legalAction.actionId === candidate.actionId,
-  );
   if (
-    action?.side !== "corp" ||
+    !actionMatchesCurrentDecision(input, action) ||
     action.type !== "install_card" ||
     action.source !== candidate.sourceCardInstanceId ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
-    action.timingPoint !== input.playerView.timingPoint ||
     action.payload?.placement !== "ice" ||
     action.payload.serverId !== serverId ||
     action.targetRequirements.length > 0 ||
@@ -367,14 +345,8 @@ export function corpScoreProtectionStagingInstallSignal(
   ) {
     return undefined;
   }
-  const totalClicks = action.costs.reduce(
-    (sum, cost) => sum + (cost.clicks ?? 0),
-    0,
-  );
-  const totalCredits = action.costs.reduce(
-    (sum, cost) => sum + (cost.credits ?? 0),
-    0,
-  );
+  const totalClicks = actionClickCost(action);
+  const totalCredits = actionCreditCost(action);
   if (
     totalClicks !== 1 ||
     !Number.isSafeInteger(totalCredits) ||
@@ -475,8 +447,14 @@ export function corpPreparedScoreProjectHasExecutableCurrentStep(
 ): boolean {
   if (
     project.feasible &&
-    project.actionIds?.some((actionId) =>
-      candidates.some((candidate) => candidate.actionId === actionId),
+    project.actionIds?.some(
+      (actionId) =>
+        candidates.some((candidate) => candidate.actionId === actionId) &&
+        input.legalActions.some(
+          (action) =>
+            action.actionId === actionId &&
+            actionMatchesCurrentDecision(input, action),
+        ),
     ) === true
   ) {
     return true;
@@ -543,7 +521,7 @@ function corpBoundedScoreProtectionLayerCanPrecedeFunding(
   candidates: readonly ActionSemanticCandidate[],
 ): boolean {
   const agendaDefinition = project.agendaDefinitionId
-    ? CARD_DEFINITIONS_BY_ID[project.agendaDefinitionId]
+    ? planningCardFactsByDefinitionId(project.agendaDefinitionId)
     : undefined;
   const advancementRequirement = agendaDefinition?.advancementRequirement;
   const centralsHaveInitialCoverage = ["hq", "rd"].every(
@@ -556,10 +534,7 @@ function corpBoundedScoreProtectionLayerCanPrecedeFunding(
       input,
       candidates,
     );
-  const installCredits = action.costs.reduce(
-    (sum, cost) => sum + (cost.credits ?? 0),
-    0,
-  );
+  const installCredits = actionCreditCost(action);
   const rezCredits = action.payload?.postInstallRezQuoteFinalCredits;
   const stagingLayerCanBeRezzedFromCurrentLiquidity =
     project.terminalScore &&
@@ -622,14 +597,8 @@ function corpScoreProtectionStagingRezPortfolioIsNearTermFundable(
         : Number.NaN,
     0,
   );
-  const installCredits = action.costs.reduce(
-    (sum, cost) => sum + (cost.credits ?? 0),
-    0,
-  );
-  const installClicks = action.costs.reduce(
-    (sum, cost) => sum + (cost.clicks ?? 0),
-    0,
-  );
+  const installCredits = actionCreditCost(action);
+  const installClicks = actionClickCost(action);
   const sourceRezCredits = action.payload?.postInstallRezQuoteFinalCredits;
   if (
     !Number.isSafeInteger(scoreReserveCredits) ||
@@ -689,20 +658,17 @@ function corpScoreProtectionStagingPairFitsCurrentTurn(
   const agendaAction = input.legalActions.find(
     (action) =>
       project.actionIds?.includes(action.actionId) === true &&
-      action.side === "corp" &&
+      actionMatchesCurrentDecision(input, action) &&
       action.type === "install_card" &&
+      action.source === project.agendaInstanceId &&
       action.payload?.placement === "root" &&
-      action.payload.serverId === project.serverId &&
-      action.expiresAtStateVersion === input.playerView.stateVersion &&
-      action.timingPoint === input.playerView.timingPoint,
+      action.payload.serverId === project.serverId,
   );
   if (!agendaAction) return false;
-  const total = (action: LegalAction, resource: "clicks" | "credits") =>
-    action.costs.reduce((sum, cost) => sum + (cost[resource] ?? 0), 0);
   return (
-    total(agendaAction, "clicks") + total(iceAction, "clicks") <=
+    actionClickCost(agendaAction) + actionClickCost(iceAction) <=
       input.playerView.own.clicks &&
-    total(agendaAction, "credits") + total(iceAction, "credits") <=
+    actionCreditCost(agendaAction) + actionCreditCost(iceAction) <=
       input.playerView.own.credits
   );
 }

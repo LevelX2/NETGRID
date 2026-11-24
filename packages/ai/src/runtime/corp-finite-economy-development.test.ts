@@ -10,17 +10,17 @@ import { buildAiDecisionInput } from "./ai-decision-input";
 import { chooseAiAction } from "../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { residentPlanPortfolioSnapshot } from "../plans/resident-plan-portfolio-memory";
-const pool = "onr_v1_337_rockerboy-promotion";
-const wall = "onr_v1_279_wall-of-static";
+const pool = 549;
+const wall = 491;
 const deck = {
   ...DEMO_DECKS.demo_corp_001,
   cards: [
     ...DEMO_DECKS.demo_corp_001.cards,
     { id: pool, quantity: 1 },
-    { id: "onr_v1_285_closed-accounts", quantity: 1 },
+    { id: 497, quantity: 1 },
     { id: wall, quantity: 1 },
-    { id: "onr_v1_237_data-wall", quantity: 1 },
-    { id: "onr_v1_278_wall-of-ice", quantity: 1 },
+    { id: 449, quantity: 1 },
+    { id: 490, quantity: 1 },
   ],
 };
 afterEach(resetResidentPlanPortfolioMemory);
@@ -50,10 +50,10 @@ function prepared(protectedRemote: boolean, credits = 8) {
     .withCorpCardInHq(pool)
     .withCorpCredits(credits);
   setup
-    .withRezzedCorpIceOnServer("hq", "onr_v1_237_data-wall")
-    .withRezzedCorpIceOnServer("rd", "onr_v1_278_wall-of-ice");
-  setup.withCorpCardInHq("onr_v1_285_closed-accounts");
-  if (protectedRemote) setup.withRezzedCorpIceOnServer("remote_1", wall);
+    .withRezzedCorpIceOnServer("hq", 449)
+    .withRezzedCorpIceOnServer("rd", 490);
+  setup.withCorpCardInHq(497);
+  if (protectedRemote) setup.withRezzedCorpIceOnServer("r1", wall);
   return state;
 }
 function input(state: GameState) {
@@ -78,7 +78,7 @@ it("develops funded economy before speculative agenda search and takes the actua
   expect(campaign.moduleState).toMatchObject({
     signal: {
       phase: "install",
-      payback: { projectedNetCredits: 3 },
+      payback: { projectedNetCredits: 5 },
       riskAdjustment: { protectionState: "protected_not_contestable" },
     },
   });
@@ -87,12 +87,12 @@ it("develops funded economy before speculative agenda search and takes the actua
   )!;
   expect(chosen).toMatchObject({
     type: "install_card",
-    payload: { serverId: "remote_1" },
+    payload: { serverId: "r1" },
   });
-  expect(
-    installationDecision.decisionDebug?.planFirstDecision
-      ?.leafExecutorInstanceId,
-  ).toMatch(/^plan:corp\.economy:/);
+  const installPlan = installationDecision.decisionDebug?.planFirstDecision;
+  expect(installPlan?.portfolio.find(
+    (instance) => instance.instanceId === installPlan.leafExecutorInstanceId,
+  )?.moduleId).toBe("corp.economy");
   expect(state.cardInstances[chosen.source]!.definitionId).toBe(pool);
   state = apply(state, chosen);
   resetResidentPlanPortfolioMemory();
@@ -108,8 +108,10 @@ it("develops funded economy before speculative agenda search and takes the actua
   )!;
   expect(rezAction).toMatchObject({ type: "rez_card", source: chosen.source });
   expect(
-    rezDecision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toMatch(/^plan:corp\.economy:/);
+    rezDecision.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === rezDecision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    )?.moduleId,
+  ).toBe("corp.economy");
   state = apply(state, rezAction);
   resetResidentPlanPortfolioMemory();
   const payoutInput = input(state);
@@ -122,8 +124,10 @@ it("develops funded economy before speculative agenda search and takes the actua
     source: chosen.source,
   });
   expect(
-    payout.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toMatch(/^plan:corp\.economy:/);
+    payout.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === payout.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    )?.moduleId,
+  ).toBe("corp.economy");
   expect(payout.decisionDebug?.planFirstDecision?.route).toMatchObject({
     actionId: payoutAction.actionId,
     stateVersion: state.stateVersion,
@@ -138,8 +142,8 @@ it("develops funded economy before speculative agenda search and takes the actua
     signal: {
       withdrawalCampaign: {
         remainingPoolCredits: 15,
-        projectedNetCredits: 8,
-        projectedPayoutExecutions: 4,
+        projectedNetCredits: 10,
+        projectedPayoutExecutions: 5,
       },
     },
   });

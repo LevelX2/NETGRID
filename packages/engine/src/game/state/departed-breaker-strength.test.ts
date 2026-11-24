@@ -43,7 +43,7 @@ function fixture() {
   const cardId = "boosted-breaker" as CardInstanceId;
   state.cardInstances[cardId] = {
     instanceId: cardId,
-    definitionId: "onr_v1_023_evil-twin",
+    definitionId: 235,
     owner: "runner",
     controller: "runner",
     zone: { side: "runner", zone: "rig" },
@@ -126,7 +126,7 @@ describe("breaker strength ends when its installation leaves play", () => {
     state.cardInstances[backupId] = {
       ...state.cardInstances[cardId]!,
       instanceId: backupId,
-      definitionId: "onr_v1_131_microtech-backup-drive",
+      definitionId: 343,
       strengthModifier: 0,
     };
     state.runner.rig.hardware.push(backupId);
@@ -144,7 +144,7 @@ describe("breaker strength ends when its installation leaves play", () => {
     const iceId = "trash-subroutine-ice" as CardInstanceId;
     state.cardInstances[iceId] = {
       instanceId: iceId,
-      definitionId: "onr_v1_223_banpei",
+      definitionId: 435,
       owner: "corp",
       controller: "corp",
       zone: { side: "corp", zone: "serverIce", serverId: "hq" },

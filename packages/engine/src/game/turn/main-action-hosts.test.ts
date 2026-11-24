@@ -55,8 +55,8 @@ describe("main-action-hosts", () => {
     );
 
     expect(actions.map((candidate) => candidate.actionId)).toEqual([
-      "corp.gain_credit",
-      "corp.end_turn",
+      "cb",
+      "c9",
     ]);
   });
 
@@ -70,12 +70,12 @@ describe("main-action-hosts", () => {
     );
 
     expect(actions.map((candidate) => candidate.actionId)).toEqual([
-      "runner.gain_credit",
-      "runner.draw_card",
-      "runner.start_run.hq",
-      "runner.start_run.rd",
-      "runner.start_run.archives",
-      "runner.end_turn",
+      "rb",
+      "r8",
+      "rs.hq",
+      "rs.rd",
+      "rs.archives",
+      "r9",
     ]);
   });
 

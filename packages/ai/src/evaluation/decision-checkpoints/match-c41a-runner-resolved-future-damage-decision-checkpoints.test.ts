@@ -7,23 +7,23 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("match c41a runner resolved future damage decision checkpoint", () => {
   it("jacks out under the existing remote contest plan after the source resolves", () => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(resolvedFutureDamageJson) as AiDecisionCheckpointV1,
+      structuredClone(resolvedFutureDamageJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
-    expect(result.decision?.actionId).toBe("runner.jack_out");
+    expect(result.decision?.actionId).toBe("rd");
     expect(
       result.decision?.decisionDebug?.planFirstDecision
         ?.assessmentEvidenceCodes,
     ).toContain(
-      "runner_future_encounter_damage_requires_jack_out|source:onr_v1_242_fatal-attractor|damage:3|hand:4|projected_hand:1|required_floor:4",
+      "runner_future_encounter_damage_requires_jack_out|source:454|damage:3|hand:4|projected_hand:1|required_floor:4",
     );
     expect(result.decision?.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_82",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+      leafExecutorInstanceId: "p8kyw2m8259x1xx0ftk3rudzhw",
       selectedStep: {
-        planInstanceId: "plan:runner.convert_run_window:run%3Arun_82",
-        parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+        planInstanceId: "p8kyw2m8259x1xx0ftk3rudzhw",
+        parentInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       },
     });
   });

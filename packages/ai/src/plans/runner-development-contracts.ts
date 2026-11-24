@@ -5,7 +5,6 @@ import type {
   RunnerHandDevelopmentStrategicFit,
 } from "../runner/hand-development/runner-hand-development-types";
 export function runnerDevelopmentCardAdmission(params: {
-  definitionId: string;
   assignedDomainPlanIds: readonly string[];
   concretePurposeCode?: string;
   duplicateAlreadyInstalled: boolean;
@@ -19,15 +18,16 @@ export function runnerDevelopmentCardAdmission(params: {
       reasonCode: `assigned_domain_requires_domain_owner:${[...params.assignedDomainPlanIds].sort()[0]}`,
     };
   }
-  if (!isConcreteRunnerDevelopmentPurpose(params.concretePurposeCode))
+  const purposeCode = params.concretePurposeCode?.trim();
+  if (!isConcreteRunnerDevelopmentPurpose(purposeCode))
     return { admitted: false, reasonCode: "no_concrete_plan_purpose" };
   if (params.duplicateAlreadyInstalled)
     return { admitted: false, reasonCode: "redundant_board_copy" };
   return {
     admitted: true,
     reasonCode: params.affordableOrSupportable
-      ? `card_specific_purpose:${params.concretePurposeCode}`
-      : `card_specific_waiting_route:${params.concretePurposeCode}`,
+      ? `card_specific_purpose:${purposeCode}`
+      : `card_specific_waiting_route:${purposeCode}`,
   };
 }
 
@@ -89,11 +89,10 @@ export function runnerDevelopmentFundingMilestone(params: {
 function isConcreteRunnerDevelopmentPurpose(
   purposeCode: string | undefined,
 ): purposeCode is string {
-  const normalized = purposeCode?.trim();
   return (
-    normalized !== undefined &&
-    normalized.length > 0 &&
-    normalized !== "unknown" &&
-    !normalized.startsWith("unknown:")
+    purposeCode !== undefined &&
+    purposeCode.length > 0 &&
+    purposeCode !== "unknown" &&
+    !purposeCode.startsWith("unknown:")
   );
 }

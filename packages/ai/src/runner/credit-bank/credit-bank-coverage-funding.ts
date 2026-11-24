@@ -1,6 +1,8 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { RunnerCoverageGapSignal } from "../../plans/runner-coverage-contracts";
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import type { PlanInstance } from "../../plans/plan-kernel-types";
 import { runnerStrategicExchangeRequiresBoundParent } from "../../runtime/runner-strategic-exchange";
 import type { RunnerHandDevelopmentEvaluation } from "../hand-development/runner-hand-development-types";
@@ -31,7 +33,19 @@ export function bindRunnerCreditBankCoverageFunding(
     clicks < 2
   )
     return unchanged();
-  const basic = candidates.find(
+  const stateVersion = input.playerView.stateVersion;
+  const legalActionIds = new Set(
+    input.legalActions
+      .filter((action) => actionMatchesCurrentDecision(input, action))
+      .map((action) => action.actionId),
+  );
+  const currentCandidates = candidates.filter(
+    (candidate) =>
+      candidate.actorSide === "runner" &&
+      candidate.stateVersion === stateVersion &&
+      legalActionIds.has(candidate.actionId),
+  );
+  const basic = currentCandidates.find(
     (c) =>
       c.actionType === "gain_credit" &&
       c.sourceKind === "basic_action" &&
@@ -75,7 +89,7 @@ export function bindRunnerCreditBankCoverageFunding(
       continue;
     const missing = targetCredits - input.playerView.own.credits;
     if (missing < installGap) continue;
-    const ordinaryFasterIncome = candidates.some((c) => {
+    const ordinaryFasterIncome = currentCandidates.some((c) => {
       const p = c.economyProjection;
       return (
         c.planOwnerBinding?.owner !== "runner.credit_bank" &&
@@ -99,7 +113,7 @@ export function bindRunnerCreditBankCoverageFunding(
           signal.runFunding
         )
           return [];
-        return candidates
+        return currentCandidates
           .filter((c) => {
             const p = c.economyProjection;
             return (
@@ -118,13 +132,7 @@ export function bindRunnerCreditBankCoverageFunding(
               p.cardsConsumed === 0 &&
               p.netLiquidCreditGain !== undefined &&
               p.netLiquidCreditGain >= missing &&
-              p.netLiquidCreditGain === signal.estimatedPayout &&
-              input.legalActions.some(
-                (a) =>
-                  a.actionId === c.actionId &&
-                  a.side === "runner" &&
-                  a.expiresAtStateVersion === input.playerView.stateVersion,
-              )
+              p.netLiquidCreditGain === signal.estimatedPayout
             );
           })
           .map((candidate) => ({ signal, candidate }));
@@ -137,10 +145,12 @@ export function bindRunnerCreditBankCoverageFunding(
     const option = options[0];
     if (!option) continue;
     const funding = {
-      stateVersion: input.playerView.stateVersion,
+      stateVersion,
       needId: "coverage-bank-funding:" + gap.gapId,
-      parentPlanInstanceId:
-        "plan:runner.rig_and_coverage:" + encodeURIComponent(gap.gapId),
+      parentPlanInstanceId: planInstanceIdForProposal({
+        moduleId: "runner.rig_and_coverage",
+        dedupeKey: gap.gapId,
+      }),
       gapId: gap.gapId,
       targetDefinitionId: gap.handAnswerDefinitionId,
       targetCredits,
@@ -201,6 +211,7 @@ export function runnerCreditBankCoverageParentValue(
     state.gap.bankFunding?.needId === need.needId &&
     state.gap.bankFunding.stateVersion === stateVersion &&
     state.gap.bankFunding.actionId === need.actionId &&
+    state.gap.bankFunding.bankId === need.bankId &&
     state.gap.bankFunding.targetCredits === need.targetCredits
     ? 60 + need.gap
     : undefined;

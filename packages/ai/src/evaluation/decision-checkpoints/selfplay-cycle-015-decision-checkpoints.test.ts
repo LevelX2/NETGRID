@@ -8,7 +8,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("selfplay cycle 015 decision checkpoints", () => {
   it("recovers before repeating a known lethal and unfunded agenda access", () => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(knownAccessContractJson) as AiDecisionCheckpointV1,
+      structuredClone(knownAccessContractJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
@@ -16,7 +16,7 @@ describe("selfplay cycle 015 decision checkpoints", () => {
 
   it("rejects both card-backed and direct runs that break the known damage buffer", () => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(runActionHandCostJson) as AiDecisionCheckpointV1,
+      structuredClone(runActionHandCostJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
