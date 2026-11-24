@@ -1,11 +1,4 @@
-/**
- * Builds the public ActiveModifier list exposed through PlayerView.
- *
- * This module translates current CardImplementation modifiers and selected
- * legacy run-state modifiers into redacted public summaries. It must not decide
- * legality or apply modifier math used by gameplay; effective-value and cost
- * modules remain the gameplay authority for those calculations.
- */
+/** Inspect active Engine modifiers in rule regressions. */
 import {
   type CardDefinitionId,
   type CardInstanceId,
@@ -20,7 +13,7 @@ import {
   isPublicRezzedCorpRootModifier,
   isPublicRunnerInstalledModifier,
   isPublicScoredCorpAgendaModifier,
-} from "./card-implementation-modifiers";
+} from "../ability-engine/card-implementation-modifiers";
 import { currentTemporaryBreakerStrengthModifiers } from "../game/state/temporary-breaker-strength";
 
 export type ActiveModifierDuration =

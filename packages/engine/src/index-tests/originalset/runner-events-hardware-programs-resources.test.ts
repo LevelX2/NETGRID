@@ -23,7 +23,7 @@ import {
   validateDeckDefinition,
   validateGameState,
 } from "../../index";
-import { collectActiveModifiers } from "../../ability-engine/active-modifiers";
+import { collectActiveModifiers } from "../../test-fixtures/active-modifier-inspection";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
 import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";

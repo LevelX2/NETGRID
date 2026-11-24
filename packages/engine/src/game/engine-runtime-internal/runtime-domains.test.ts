@@ -1,5 +1,4 @@
 import { readFileSync } from "node:fs";
-import { cardSpecRuntimeDefinitionIds } from "@netgrid/cards/engine";
 import { describe, expect, it } from "vitest";
 import { createActivatedCardRuntimeHosts } from "./activated-card-runtime-hosts";
 import { configureActionRuntimeBootstrap } from "./action-runtime-bootstrap";
@@ -31,10 +30,7 @@ import { createHiddenZoneNonSearchRuntime } from "./hidden-zone-nonsearch-runtim
 import { createHiddenZoneSearchRuntime } from "./hidden-zone-search-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createPendingChoiceRuntimeHosts } from "./pending-choice-runtime-hosts";
-import {
-  RUNNER_EVENT_RESOLVERS,
-  validateDeckDefinition,
-} from "./public-event-runtime-bootstrap";
+import { validateDeckDefinition } from "./public-event-runtime-bootstrap";
 import { createStateCorpRuntimeResolvers } from "./state-corp-runtime-resolvers";
 import { initializeStateRuntimeBootstrap } from "./state-runtime-bootstrap";
 import {
@@ -260,9 +256,6 @@ describe("engine runtime internal domains", () => {
     expect(typeof configureFlowRuntimeBootstrap).toBe("function");
     expect(typeof configureActionRuntimeBootstrap).toBe("function");
     expect(typeof initializeStateRuntimeBootstrap).toBe("function");
-    expect(RUNNER_EVENT_RESOLVERS).toEqual({});
-    for (const definitionId of cardSpecRuntimeDefinitionIds())
-      expect(RUNNER_EVENT_RESOLVERS[definitionId]).toBeUndefined();
     expect(typeof validateDeckDefinition).toBe("function");
     expect(typeof delegatedCorpRunnerActionPaidWindowActions).toBe("function");
     expect(typeof delegatedRunMovementHostForState).toBe("function");

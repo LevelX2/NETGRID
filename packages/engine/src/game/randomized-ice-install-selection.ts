@@ -215,11 +215,9 @@ export function buildApplyRandomizedIceInstallSelection(
     return { ok: false, error: applied.error, state };
   }
 
-  const randomDraw = applied.state.randomDrawRecords.find(
-    (record) => record.counter === counterBefore,
-  );
+  const randomDraw = applied.state.randomDrawRecords[counterBefore];
   if (
-    !randomDraw ||
+    randomDraw?.counter !== counterBefore ||
     serializeRandomPurpose(randomDraw.purpose) !==
       serializeRandomPurpose(purpose)
   ) {

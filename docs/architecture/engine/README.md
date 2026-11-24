@@ -68,6 +68,22 @@ zentralen Producer in `game/state/draw-random.ts`. Schaden zieht erst nach den
 Replacement- und Prevention-Fenstern und enthält seine typisierte Quelle im
 Zufallszweck.
 
+## Aufwand je Aktion
+
+Die Engine berechnet den StateHash weiterhin über den vollständigen
+regelrelevanten Zustand. Die Prozess-Registry ist fest, daher teilt der Hashpfad
+den Kartenregel-Fingerprint zwischen Zuständen mit exakt derselben
+Snapshot-Identität und derselben sortierten Menge an CardSpec-Definitionen.
+Der Prozess hält dafür höchstens 128 Einträge. Replays projizieren bei der
+erneuten Anwendung jedes Ereignisses nur das neue öffentliche Ereignis. Der
+Replayzustand enthält weiterhin das Journal der nachgespielten Aktionen.
+
+Aktionen und gebundene Verteidigungsvorschauen, die Effekte ausführen, kopieren
+die Journal-Liste flach und den veränderlichen Kernzustand tief. Beide behandeln
+Journal-Einträge als unveränderlich. Die ICE-Installationsvorschau erzeugt pro
+Angebot eine lokale Projektion der betroffenen Hand, Fortposition und Karte.
+Das Journal und der Zufallsverlauf werden dabei nur gelesen.
+
 ## Pflegeprinzip
 
 Neue Dokumente gehören nur dauerhaft in diesen Ordner, wenn sie einen aktuellen Engine-Architektur- oder Strukturvertrag beschreiben, der nicht sinnvoll in eines der bestehenden Dokumente integriert werden kann.

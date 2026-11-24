@@ -144,7 +144,7 @@ export let variableTraceSubroutineForCurrentEncounter: RuntimePortGroups["cardRu
 export let relativeDamageSubroutineForCurrentEncounter: RuntimePortGroups["cardRuntimeHosts"]["relativeDamageSubroutineForCurrentEncounter"];
 export let relativeTraceSubroutinesForCurrentEncounter: RuntimePortGroups["cardRuntimeHosts"]["relativeTraceSubroutinesForCurrentEncounter"];
 export let runCardImplementationActionHost: RuntimePortGroups["cardRuntimeHosts"]["runCardImplementationActionHost"];
-export let runStartTaxForServerUpgrades: RuntimePortGroups["cardRuntimeHosts"]["runStartTaxForServerUpgrades"];
+export let runStartCreditLossForServer: RuntimePortGroups["cardRuntimeHosts"]["runStartCreditLossForServer"];
 export let runStartTaxForCorpRootAssets: RuntimePortGroups["cardRuntimeHosts"]["runStartTaxForCorpRootAssets"];
 export let spendRunnerAccessTrashCredits: RuntimePortGroups["cardRuntimeHosts"]["spendRunnerAccessTrashCredits"];
 export let runnerSpecialTriggerExecutionHost: RuntimePortGroups["cardRuntimeHosts"]["runnerSpecialTriggerExecutionHost"];
@@ -689,8 +689,7 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
     ports.cardRuntimeHosts.relativeTraceSubroutinesForCurrentEncounter;
   runCardImplementationActionHost =
     ports.cardRuntimeHosts.runCardImplementationActionHost;
-  runStartTaxForServerUpgrades =
-    ports.cardRuntimeHosts.runStartTaxForServerUpgrades;
+  runStartCreditLossForServer = ports.cardRuntimeHosts.runStartCreditLossForServer;
   runStartTaxForCorpRootAssets =
     ports.cardRuntimeHosts.runStartTaxForCorpRootAssets;
   spendRunnerAccessTrashCredits =

@@ -1,5 +1,13 @@
 import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token";
-import type { RuntimeDeps, GameState, LegalAction, PlayerAction, ChoiceRequest, CardDefinitionId, CardInstanceId } from "./runtime-shared";
+import type {
+  RuntimeDeps,
+  GameState,
+  LegalAction,
+  PlayerAction,
+  ChoiceRequest,
+  CardDefinitionId,
+  CardInstanceId,
+} from "./runtime-shared";
 
 export function createTurnCorpRuntime(
   deps: RuntimeDeps,

@@ -1,18 +1,23 @@
 import * as runtimePorts from "./runtime-port-bindings";
-import { quoteCorpRootRezCost, rezCostForCard, rezCostReductionSourceDefinitionIdsFor } from "../payment";
+import {
+  quoteCorpRootRezCost,
+  rezCostForCard,
+  rezCostReductionSourceDefinitionIdsFor,
+} from "../payment";
 import { startRunnerMemoryCheckpointChoice } from "../checkpoints/runner-memory-checkpoint";
-import { corpInstalledCardIds, corpRootAssetIdsInServer, corpRootMainCardIdsInServer, definitionFor, mustInstance, mustServer } from "../state/card-server-lookup";
-import { cardCounter, ensureRunnerTurnFlags } from "../state/turn-flags-counters";
-export { getLegalActions, legalActionsFor } from "../legal-actions";
+import {
+  corpInstalledCardIds,
+  corpRootAssetIdsInServer,
+  corpRootMainCardIdsInServer,
+  definitionFor,
+  mustInstance,
+  mustServer,
+} from "../state/card-server-lookup";
+import { cardCounter } from "../state/turn-flags-counters";
 import {
   configureLegalActionHostComposition,
   type LegalActionHostCompositionHost,
 } from "../legal-action-hosts";
-export {
-  eventVisibilityForAction,
-  isHiddenInfoBarrierEvent,
-} from "../events/build-event";
-export { checkWinConditions } from "../win-conditions";
 import {
   buildLegalAction as action,
   makeActionId,
@@ -33,7 +38,10 @@ import {
   buildCorpServerIceInstallAction,
   buildCorpServerRootInstallAction,
 } from "../turn/corp-install-actions";
-import { buildCorpTrashNewDataFortCreationLockActions, corpNewDataFortCreationLocked } from "../turn/corp-data-fort-lock";
+import {
+  buildCorpTrashNewDataFortCreationLockActions,
+  corpNewDataFortCreationLocked,
+} from "../turn/corp-data-fort-lock";
 import {
   buildRunnerEndTurnAction,
   buildRunnerGainCreditAction,
@@ -41,7 +49,11 @@ import {
 } from "../turn/runner-basic-actions";
 import { buildRunnerDrawCardActions } from "../turn/runner-draw-actions";
 import { corpActionDebtPending, purgeableRunnerVirusCounterTotal } from "../turn/turn-basic-execution";
-import { delayedInstallCounterCost, delayedInstallPreparedTargetIds, delayedInstallPrepareTargetIds } from "../abilities/runner-special-trigger-execution";
+import {
+  delayedInstallCounterCost,
+  delayedInstallPreparedTargetIds,
+  delayedInstallPrepareTargetIds,
+} from "../abilities/runner-special-trigger-execution";
 import {
   buildRunnerHardwareInstallAction,
   buildRunnerProgramInstallAction,
@@ -61,27 +73,30 @@ import {
 } from "../turn/runner-special-zone-install-actions";
 import { buildScoredAgendaAbilityActionsForCard } from "../corp/scored-agenda-abilities";
 import { buildCorpSpecialDamageAbilityActionsForCard } from "../corp/special-damage-abilities";
-import { activeRunActionSpendingCapSourceIds, availableRunnerRunStartCredits, runDurationPaymentHost } from "../run/run-duration-payment";
-import { canPlayCorpOperation, cardImplementationOperationLegalActions, corpUtilityImplementationForDefinition } from "../play/corp-operation-resolution";
-export { quoteCorpRezCost } from "../payment";
-export { createGame, createGameAfterSetup } from "../create-game";
+import {
+  activeRunActionSpendingCapSourceIds,
+  availableRunnerRunStartCredits,
+  runDurationPaymentHost,
+} from "../run/run-duration-payment";
+import {
+  canPlayCorpOperation,
+  cardImplementationOperationLegalActions,
+  corpUtilityImplementationForDefinition,
+} from "../play/corp-operation-resolution";
 import { applyAction as applyActionFromGame } from "../apply-action";
-export { applyAction } from "../apply-action";
 import {
   configureApplyActionHostComposition,
   type ApplyActionHostCompositionHost,
 } from "../apply/apply-action-hosts";
-export { applyGameAction } from "../apply-game-action";
-export { getPlayerView, playerViewFor } from "../player-view";
-export { replayEvents, replayGameEvents } from "../replay";
 import { hiddenRunnerResourceSlotId, isConcealedRunnerResource } from "../view/card-view";
-export { redactPublicEventForSide } from "../view/public-event-view";
-export { hashGameState, hashState } from "../hash";
-export { validateGameState, validateGameStateForDebug } from "../validation";
 import { effectiveAgendaDifficulty, runnerMemoryLimit } from "../../ability-engine/effective-values";
 import { serverChoiceDisplayLabel } from "../../public-context";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import { canPlayPrintedCostOnPlayImplementation, pushActivatedCardImplementationActions, pushCardImplementationEndOfRunnerTurnActions } from "../../ability-engine/card-implementation-runtime";
+import {
+  canPlayPrintedCostOnPlayImplementation,
+  pushActivatedCardImplementationActions,
+  pushCardImplementationEndOfRunnerTurnActions,
+} from "../../ability-engine/card-implementation-runtime";
 import type { CardInstallCapabilityImplementation } from "../../ability-engine/definition-types";
 
 import {
@@ -90,7 +105,6 @@ import {
   pickRunnerAgendaForAgendaPointCost,
 } from "./runtime-bootstrap-support";
 import type { RuntimeDeps } from "./runtime-shared";
-import { RUNNER_EVENT_RESOLVERS } from "./public-event-runtime-bootstrap";
 
 export function configureActionRuntimeBootstrap({
   cardImplementationRuntimeDeps,
@@ -188,7 +202,6 @@ export function configureActionRuntimeBootstrap({
     runner: {
       isConcealedRunnerResource,
       hiddenRunnerResourceSlotId,
-      ensureRunnerTurnFlags,
       availableRunnerTagRemovalCredits:
         runtimePorts.availableRunnerTagRemovalCredits,
       availableRunnerProgramInstallCredits:
@@ -207,7 +220,7 @@ export function configureActionRuntimeBootstrap({
     run: {
       activeRunActionSpendingCapSourceIds,
       runDurationPaymentHost,
-      runStartTaxForServerUpgrades: runtimePorts.runStartTaxForServerUpgrades,
+      runStartCreditLossForServer: runtimePorts.runStartCreditLossForServer,
       runStartTaxForCorpRootAssets: runtimePorts.runStartTaxForCorpRootAssets,
     },
     install: {
@@ -288,9 +301,6 @@ export function configureActionRuntimeBootstrap({
       mustServer,
       serverChoiceDisplayLabel,
       runnerMemoryLimit,
-      constants: {
-        RUNNER_EVENT_RESOLVERS,
-      },
     },
   } satisfies MainActionHostCompositionHost);
 

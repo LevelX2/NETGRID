@@ -7,19 +7,35 @@ import { ensureCorpTurnFlags } from "../state/turn-flags-counters";
 import { removeFromAllZones } from "../state/zone-mutation";
 import { buildLegalAction as action } from "../turn/action-builders";
 import { addRunnerTagsWithPrevention, resolveDamageOperation } from "../damage/damage-core";
-import { resolveConcealAndReorderInstalledIce, startCorpRdTopReorderChoice } from "../hidden-zone/arrange-choice-handlers";
-import { startCorpArchivesToHqChoice, startCorpHqCardToRdChoice } from "../hidden-zone/nonsearch-choice-handlers";
+import {
+  resolveConcealAndReorderInstalledIce,
+  startCorpRdTopReorderChoice,
+} from "../hidden-zone/arrange-choice-handlers";
+import {
+  startCorpArchivesToHqChoice,
+  startCorpHqCardToRdChoice,
+} from "../hidden-zone/nonsearch-choice-handlers";
 import { spendRestrictedHostedCredits } from "../run/run-duration-payment";
 import { markFortActivityForRunGate } from "../run/fort-run-side-families";
 import { type PlayCardExecutionHost } from "../play/play-card-execution";
-import { canPlayCorpOperation, hasPrintedCostOnPlayCardImplementation, onPlayCardImplementationAdditionalOperationCost, onPlayCardImplementationNeedsLastTurnResourceTarget, resolveCorpOperation, type CorpOperationResolutionHost } from "../play/corp-operation-resolution";
+import {
+  canPlayCorpOperation,
+  hasPrintedCostOnPlayCardImplementation,
+  onPlayCardImplementationAdditionalOperationCost,
+  onPlayCardImplementationNeedsLastTurnResourceTarget,
+  resolveCorpOperation,
+  type CorpOperationResolutionHost,
+} from "../play/corp-operation-resolution";
 import { type BoardStateActionExecutionHost } from "../board/board-state-action-execution";
 import {
   hiddenRunnerResourceSlotId,
   isConcealedRunnerResource,
   resolveHiddenRunnerResourceSlot,
 } from "../view/card-view";
-import { canPlayPrintedCostOnPlayImplementation, executeOnPlayCardImplementationAbility } from "../../ability-engine/card-implementation-runtime";
+import {
+  canPlayPrintedCostOnPlayImplementation,
+  executeOnPlayCardImplementationAbility,
+} from "../../ability-engine/card-implementation-runtime";
 import type { RuntimeDeps } from "./runtime-shared";
 
 export function createPlayBoardRuntimeHosts(
@@ -68,9 +84,7 @@ export function createPlayBoardRuntimeHosts(
         },
       },
       events: {
-        runnerEventResolver: (definition) =>
-          deps.cardImplementationRunnerEventResolver(definition) ??
-          deps.RUNNER_EVENT_RESOLVERS[definition.id],
+        runnerEventResolver: deps.cardImplementationRunnerEventResolver,
       },
       operations: {
         canPlayCorpOperation: (definition) =>

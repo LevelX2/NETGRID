@@ -55,6 +55,12 @@ ihnen aber nicht zurückimportiert.
 
 ## Nicht offensichtliche Verträge
 
+- Das reguläre Bewegungsfenster nach einem ICE, der anschließende Breach und
+  der Runcredit-Pool aus Bad Publicity gehören zum aktuellen Regelstand.
+  Die Engine verwendet diese Regeln direkt. Runstartkosten aus globalen
+  Assets und tagabhängige Kreditverluste am Zielfort werden aus ihren
+  CardSpec-Fähigkeiten gebildet.
+
 - Die sichtbare Subroutinenprojektion von `set_next_encounter_lock` enthält
   beide echten Wirkungen: `preventsFutureBreaking` und `preventsJackOut`.
   Eine reine Run-Jack-out-Sperre erhält dagegen kein Break-Verbot. Die

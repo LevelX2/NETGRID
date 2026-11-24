@@ -1,5 +1,12 @@
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
-import { type CardDefinitionId, type CardInstanceId, type CorpServer, type GameState, type LegalAction, type ServerId } from "@netgrid/shared";
+import {
+  type CardDefinitionId,
+  type CardInstanceId,
+  type CorpServer,
+  type GameState,
+  type LegalAction,
+  type ServerId,
+} from "@netgrid/shared";
 import { definitionFor, mustInstance } from "../state/card-server-lookup";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import type { ActiveRun, RuntimeDeps } from "./runtime-shared";

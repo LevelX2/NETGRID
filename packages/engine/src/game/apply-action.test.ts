@@ -191,6 +191,11 @@ describe("game apply-action core", () => {
         errorCode: "ERR_WRONG_SIDE",
       },
       {
+        name: "unrecognized side",
+        action: { ...validAction, side: "invalid" as PlayerAction["side"] },
+        errorCode: "ERR_WRONG_SIDE",
+      },
+      {
         name: "unknown action",
         action: { ...validAction, actionId: "arch_61_unknown_action" },
         errorCode: "ERR_UNKNOWN_ACTION",

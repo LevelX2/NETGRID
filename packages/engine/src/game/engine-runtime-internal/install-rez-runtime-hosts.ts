@@ -1,10 +1,22 @@
-import { type CardDefinition, type CardInstanceId, type CorpServer, type GameState } from "@netgrid/shared";
-import { corpRootAssetIdsInServer, corpRootMainCardIdsInServer, definitionFor } from "../state/card-server-lookup";
+import {
+  type CardDefinition,
+  type CardInstanceId,
+  type CorpServer,
+  type GameState,
+} from "@netgrid/shared";
+import {
+  corpRootAssetIdsInServer,
+  corpRootMainCardIdsInServer,
+  definitionFor,
+} from "../state/card-server-lookup";
 import { rezCard as executeRezCard } from "../rez/rez-card";
 import { passCorpRunRootRezWindow } from "../run/run-rez-window";
 import { passApproachedIce } from "../run/run-movement";
 import { type RezActionExecutionHost } from "../rez/rez-action-execution";
-import type { CardFortCapacityModifierImplementation, CardInstallCapabilityImplementation } from "../../ability-engine/definition-types";
+import type {
+  CardFortCapacityModifierImplementation,
+  CardInstallCapabilityImplementation,
+} from "../../ability-engine/definition-types";
 import type { RuntimeDeps } from "./runtime-shared";
 
 export function createInstallRezRuntimeHosts(

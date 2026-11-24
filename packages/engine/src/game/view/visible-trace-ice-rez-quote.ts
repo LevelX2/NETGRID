@@ -33,18 +33,17 @@ export function visibleCorpTraceIceRezQuotes(
     run?.secretSpendGuessRunAutoPassIceId === id
   )
     return [];
-  const server = state.corp.servers.find((s) => s.ice.includes(id));
   if (
     !ice.known ||
     ice.rezzed ||
-    !server ||
     !run ||
     run.phase !== "approach_ice" ||
     run.approachedIceId !== id ||
-    run.attackedServerId !== server.id ||
     state.traceRulesProfile !== "modern_open"
   )
     return [];
+  const server = state.corp.servers.find((s) => s.ice.includes(id));
+  if (run.attackedServerId !== server?.id) return [];
   const maximumRunnerStrength = visibleRunnerMaximumTraceStrength(state);
   if (maximumRunnerStrength === undefined) return [];
   const cost = projectInstalledCorpIceRezCost(state, id);

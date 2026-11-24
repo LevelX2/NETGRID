@@ -1,4 +1,8 @@
-import { type CardInstanceId, type GameState, type PurgeableRunnerVirusCounterType } from "@netgrid/shared";
+import {
+  type CardInstanceId,
+  type GameState,
+  type PurgeableRunnerVirusCounterType,
+} from "@netgrid/shared";
 import { mustInstance } from "../state/card-server-lookup";
 import { CARD_IMPLEMENTATIONS } from "../../card-implementations/registry";
 import type { CardVirusCounterImplementation } from "../../ability-engine/definition-types";

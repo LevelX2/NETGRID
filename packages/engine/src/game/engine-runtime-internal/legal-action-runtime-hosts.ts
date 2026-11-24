@@ -1,14 +1,30 @@
-import { type CardInstanceId, type GameState, type LegalAction, type ServerId, type Side } from "@netgrid/shared";
-import { corpRootRezCreditOutcomeQuotePayload, quoteCorpRootRezCreditOutcome, quoteCorpRootRezCost } from "../payment";
+import {
+  type CardInstanceId,
+  type GameState,
+  type LegalAction,
+  type ServerId,
+  type Side,
+} from "@netgrid/shared";
+import {
+  corpRootRezCreditOutcomeQuotePayload,
+  quoteCorpRootRezCreditOutcome,
+  quoteCorpRootRezCost,
+} from "../payment";
 import { definitionFor, mustInstance } from "../state/card-server-lookup";
 import { cardCounter } from "../state/turn-flags-counters";
 import { buildLegalAction as action } from "../turn/action-builders";
 import { delayedInstallPreparedTargetIds } from "../abilities/runner-special-trigger-execution";
 import { buildRunnerDelayedInstallRemoveCounterAction } from "../turn/runner-special-zone-install-actions";
-import { buildCorpTraceDamageAbilityActionsForCard, type CorpTraceDamageAbilityHost } from "../corp/trace-damage-abilities";
+import {
+  buildCorpTraceDamageAbilityActionsForCard,
+  type CorpTraceDamageAbilityHost,
+} from "../corp/trace-damage-abilities";
 import { buildRunnerAccessStartCardImplementationActions } from "../run/card-implementation-run-actions";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import { pushActivatedCardImplementationActions, pushActivatedCardImplementationActionsForTiming } from "../../ability-engine/card-implementation-runtime";
+import {
+  pushActivatedCardImplementationActions,
+  pushActivatedCardImplementationActionsForTiming,
+} from "../../ability-engine/card-implementation-runtime";
 import type { RuntimeDeps } from "./runtime-shared";
 
 export function createLegalActionRuntimeHosts(

@@ -1,7 +1,23 @@
-import { type CardDefinition, type CardInstanceId, type GameState, type LegalAction } from "@netgrid/shared";
+import {
+  type CardDefinition,
+  type CardInstanceId,
+  type GameState,
+  type LegalAction,
+} from "@netgrid/shared";
 import { definitionFor } from "../state/card-server-lookup";
-import { ensureCorpTurnFlags, ensureRunnerTurnFlags, setCardCounter } from "../state/turn-flags-counters";
-import { RESTRICTED_ACTION_GRANT_KEYS, clearRestrictedActionGrant, consumeRestrictedActionGrant, restrictedActionGrant, restrictedActionGrantRemaining, restrictedActionGrantTemporaryCredits } from "../state/restricted-action-grants";
+import {
+  ensureCorpTurnFlags,
+  ensureRunnerTurnFlags,
+  setCardCounter,
+} from "../state/turn-flags-counters";
+import {
+  RESTRICTED_ACTION_GRANT_KEYS,
+  clearRestrictedActionGrant,
+  consumeRestrictedActionGrant,
+  restrictedActionGrant,
+  restrictedActionGrantRemaining,
+  restrictedActionGrantTemporaryCredits,
+} from "../state/restricted-action-grants";
 import { type RunnerDrawActionContext } from "../turn/runner-draw-actions";
 import { runnerMemoryLimit } from "../../ability-engine/effective-values";
 import type { RuntimeDeps } from "./runtime-shared";
@@ -93,7 +109,7 @@ export function createEconomyRuntimeServices(
   }
 
   function valuPakProgramInstallActionsRemaining(state: GameState): number {
-    const flags = ensureRunnerTurnFlags(state);
+    const flags = state.runnerTurnFlags;
     const grant = restrictedActionGrant(
       flags,
       RESTRICTED_ACTION_GRANT_KEYS.valuPakProgramInstall,
@@ -105,12 +121,12 @@ export function createEconomyRuntimeServices(
       );
     return Math.max(
       0,
-      Math.floor(flags.valuPakProgramInstallActionsRemaining ?? 0),
+      Math.floor(flags?.valuPakProgramInstallActionsRemaining ?? 0),
     );
   }
 
   function valuPakTemporaryProgramInstallCredits(state: GameState): number {
-    const flags = ensureRunnerTurnFlags(state);
+    const flags = state.runnerTurnFlags;
     const grant = restrictedActionGrant(
       flags,
       RESTRICTED_ACTION_GRANT_KEYS.valuPakProgramInstall,
@@ -122,7 +138,7 @@ export function createEconomyRuntimeServices(
       );
     return Math.max(
       0,
-      Math.floor(flags.valuPakTemporaryProgramInstallCredits ?? 0),
+      Math.floor(flags?.valuPakTemporaryProgramInstallCredits ?? 0),
     );
   }
 

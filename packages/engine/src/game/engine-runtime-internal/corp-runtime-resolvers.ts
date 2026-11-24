@@ -1,6 +1,14 @@
 import { spendCorpAgendaPoints } from "../state/corp-agenda-point-cost";
 import { parseCanonicalCapabilityId } from "@netgrid/cards/engine";
-import { type ChoiceRequest, type CardDefinition, type CardDefinitionId, type CardInstanceId, type GameState, type LegalAction, type PlayerAction } from "@netgrid/shared";
+import {
+  type ChoiceRequest,
+  type CardDefinition,
+  type CardDefinitionId,
+  type CardInstanceId,
+  type GameState,
+  type LegalAction,
+  type PlayerAction,
+} from "@netgrid/shared";
 import { fixedPlayCostCredits, playCostForDefinition } from "../payment";
 import { selectedChoiceIds } from "../choices/choice-validation";
 import { definitionFor, mustInstance } from "../state/card-server-lookup";

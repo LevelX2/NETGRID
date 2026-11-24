@@ -164,10 +164,6 @@ export type RunFlowHost = {
     ) => string | undefined;
     randomHqAccess: (state: GameState) => CardInstanceId | undefined;
   };
-  rules: {
-    isV097OrLater: (state: GameState) => boolean;
-    isV099OrLater: (state: GameState) => boolean;
-  };
   turn: {
     ensureRunnerTurnFlags: (
       state: GameState,

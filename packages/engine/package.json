@@ -5,7 +5,6 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./game": "./src/game/index.ts",
     "./test-fixtures/synthetic-card-definition-id": "./src/test-fixtures/synthetic-card-definition-id.ts"
   },
   "types": "./src/index.ts",

@@ -1,4 +1,4 @@
-import type { GameEvent, GameState, PlayerAction } from "@netgrid/shared";
+import type { ApplyActionOptions, GameEvent, GameState, PlayerAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
@@ -49,10 +49,12 @@ describe("game replay facade", () => {
     const action2 = replayAction(state1, "corp", "arch_58_action_2");
     const state2 = nextReplayState(state1, 2);
     const calls: PlayerAction[] = [];
+    const options: ApplyActionOptions[] = [];
     const host: ReplayHost = {
       actions: {
-        applyAction: (_state, action) => {
+        applyAction: (_state, action, actionOptions) => {
           calls.push(action);
+          options.push(actionOptions);
           const state = calls.length === 1 ? state1 : state2;
           return {
             ok: true,
@@ -72,6 +74,10 @@ describe("game replay facade", () => {
 
     expect(replay.ok).toBe(true);
     expect(calls).toEqual([action1, action2]);
+    expect(options).toEqual([
+      { publicEventsMode: "latest" },
+      { publicEventsMode: "latest" },
+    ]);
     expect(replay.actualFinalStateHash).toBe(hashState(state2));
   });
 
@@ -116,6 +122,19 @@ describe("game replay facade", () => {
         "Invalid match event ID at state version 1.",
       ]);
     }
+  });
+
+  it("rejects a journal entry whose transition starts at a different state version", () => {
+    const initial = createGame({ seed: "replay-invalid-transition", setupMode: "completed" });
+    const draw = getLegalActions(initial, "corp").find((action) => action.type === "mandatory_draw")!;
+    const result = applyAction(initial, replayAction(initial, "corp", draw.actionId));
+    if (!result.ok) throw new Error(result.error.message);
+
+    const replay = replayGameEvents(initial, [{ ...result.event, stateVersionBefore: 1 }]);
+
+    expect(replay.ok).toBe(false);
+    expect(replay.errors).toEqual(["Invalid state version transition at event 2."]);
+    expect(replay.state.stateVersion).toBe(initial.stateVersion);
   });
 
   it("never falls back to direct action replay for an invalid randomized command", () => {

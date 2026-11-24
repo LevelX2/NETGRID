@@ -330,7 +330,7 @@ function buildLegalActionsUnchecked(
       : [];
   }
   if (state.timingPoint === "run.movement_rez_window") {
-    if (side === "runner") return [];
+    if (side !== "corp") return [];
     if (!isCorpRunRootRezWindowOpen(host.hosts.runRezWindowHost())) return [];
     return [
       ...buildCorpRunRootRezWindowActions(host.hosts.runRezWindowHost()),

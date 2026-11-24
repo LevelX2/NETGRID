@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { getPlayerView as engineGetPlayerView } from "../index";
 import { createGame } from "./create-game";
 import { legalActionsFor } from "./legal-actions";
-import { playerViewFor } from "./player-view";
+import { buildPlayerViewProjection, playerViewFor } from "./player-view";
 
 describe("game player-view facade", () => {
   it.each(["corp", "runner"] as const)(
@@ -10,6 +10,7 @@ describe("game player-view facade", () => {
     (side) => {
       const state = createGame({ seed: "bounded-player-view", setupMode: "completed" });
       const complete = engineGetPlayerView(state, side);
+      expect(buildPlayerViewProjection(state, side, legalActionsFor(state, side))).toEqual(complete);
       const limited = engineGetPlayerView(state, side, { publicEventLimit: 0 });
       expect(limited).toEqual({ ...complete, publicEvents: [] });
       Object.defineProperty(state, "eventLog", {

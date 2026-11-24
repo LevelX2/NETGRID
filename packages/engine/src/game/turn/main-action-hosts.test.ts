@@ -286,7 +286,6 @@ function hostFor(
     runner: {
       isConcealedRunnerResource: () => false,
       hiddenRunnerResourceSlotId: unexpected("hiddenRunnerResourceSlotId"),
-      ensureRunnerTurnFlags: () => state.runnerTurnFlags ?? {},
       availableRunnerTagRemovalCredits: () => state.runner.credits,
       availableRunnerProgramInstallCredits: () => state.runner.credits,
       availableRunnerRunStartCredits: () => state.runner.credits,
@@ -302,7 +301,7 @@ function hostFor(
       runDurationPaymentHost: () => ({}),
       isActivityGatedFortRunBlocked: () => false,
       fortRunSideFamiliesHostForState: () => ({}),
-      runStartTaxForServerUpgrades: () => ({
+      runStartCreditLossForServer: () => ({
         amount: 0,
         sourceDefinitionIds: [],
       }),
@@ -373,10 +372,6 @@ function hostFor(
         state.corp.servers.find((server) => server.id === serverId)?.label ??
         serverId,
       runnerMemoryLimit: () => state.runner.memoryLimit,
-      constants: {
-        CODE_VIRAL_CACHE_ID: "code_viral_cache",
-        RUNNER_EVENT_RESOLVERS: {},
-      },
     },
   } as unknown as MainActionHostCompositionHost;
 }

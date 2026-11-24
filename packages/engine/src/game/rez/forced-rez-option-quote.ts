@@ -4,6 +4,7 @@ import type {
   GameState,
   LegalAction,
 } from "@netgrid/shared";
+import { cloneGameStateForAction } from "../apply-action-state";
 import { agendaPoints, visibleOwnCard } from "../view/card-view";
 import { visibleEffectiveIceRunQuote } from "../view/visible-run-quote";
 import { rezCard, type RezCardHost } from "./rez-card";
@@ -17,7 +18,7 @@ export function projectForcedIceRezOptionQuote(
   binding: { choiceId: string; choiceSource: string; optionId: string },
   hostForState: (state: GameState) => RezCardHost,
 ): CorpForcedIceRezChoiceQuote {
-  const projected = structuredClone(state);
+  const projected = cloneGameStateForAction(state);
   delete projected.pendingChoice;
   const projectedAction = structuredClone(action);
   const creditsBeforeRez = state.corp.credits;

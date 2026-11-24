@@ -1,11 +1,27 @@
-import { CARD_VIRUS_COUNTER_TYPES, type CardDefinition, type CardDefinitionId, type CardInstanceId, type GameState, type Side } from "@netgrid/shared";
+import {
+  CARD_VIRUS_COUNTER_TYPES,
+  type CardDefinition,
+  type CardDefinitionId,
+  type CardInstanceId,
+  type GameState,
+  type Side,
+} from "@netgrid/shared";
 import { rezCostForCard } from "../payment";
-import { corpInstalledCardIds, definitionFor, mustInstance, mustServer, runnerInstalledCardIds } from "../state/card-server-lookup";
+import {
+  corpInstalledCardIds,
+  definitionFor,
+  mustInstance,
+  mustServer,
+  runnerInstalledCardIds,
+} from "../state/card-server-lookup";
 import { cardCounter } from "../state/turn-flags-counters";
 import { hostedCardsOn } from "../state/zone-mutation";
 import { corpUtilityImplementationForDefinition } from "../play/corp-operation-resolution";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import type { CardCorpUtilityImplementation, CardVirusCounterImplementation } from "../../ability-engine/definition-types";
+import type {
+  CardCorpUtilityImplementation,
+  CardVirusCounterImplementation,
+} from "../../ability-engine/definition-types";
 import type { RuntimeDeps } from "./runtime-shared";
 
 export function createLookupRuntimeServices(

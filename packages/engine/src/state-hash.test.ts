@@ -230,6 +230,32 @@ describe("mechanical StateHash baseline", () => {
     expect(broker.fingerprint).not.toBe(empty.fingerprint);
   });
 
+  it("uses the canonical rules fingerprint across different match pools and snapshots", () => {
+    const base = {
+      baseline: CURRENT_RULES_BASELINE,
+      eventLog: [],
+      cardInstances: { card: { instanceId: "card", definitionId: 366 } },
+      deckMetadata: {
+        corp: { cardPoolSnapshotId: "state-hash-cache-a" },
+        runner: { cardPoolSnapshotId: "state-hash-cache-b" },
+      },
+    } as unknown as GameState;
+    const differentPool = structuredClone(base);
+    differentPool.cardInstances.card!.definitionId = 380;
+    const differentSnapshot = structuredClone(base);
+    differentSnapshot.deckMetadata!.corp.cardPoolSnapshotId = "state-hash-cache-c";
+
+    for (const state of [base, differentPool, differentSnapshot, base]) {
+      const rules = createCurrentCardRegistryRulesContext({
+        cardPoolSnapshotId: cardPoolSnapshotIdentityForState(state),
+        matchCardPoolDefinitionIds: matchCardSpecDefinitionIdsForState(state),
+      });
+      expect(hashStateSnapshot(state)).toBe(
+        hashStateSnapshotWithRulesContext(state, rules.fingerprint),
+      );
+    }
+  });
+
   it("fails closed when the state has no card-instance authority", () => {
     const state = {
       baseline: CURRENT_RULES_BASELINE,

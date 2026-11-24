@@ -54,7 +54,6 @@ export type RunnerMainActionGenerationHost = {
     hasInstalledUniqueCardDefinition: HostFn<boolean>;
   };
   runner: {
-    ensureRunnerTurnFlags: HostFn<any>;
     filterActionsForRestrictedExtraActions?: HostFn<LegalAction[]>;
     availableRunnerTagRemovalCredits: HostFn<number>;
     availableRunnerProgramInstallCredits: HostFn<number>;
@@ -71,11 +70,9 @@ export type RunnerMainActionGenerationHost = {
   run: {
     activeRunActionSpendingCapSourceIds: HostFn<string[]>;
     runDurationPaymentHost: HostFn<unknown>;
-    runStartTaxForServerUpgrades: HostFn<{
+    runStartCreditLossForServer: HostFn<{
       amount: number;
       sourceDefinitionIds: number[];
-      runStartLossAmount?: number;
-      runStartLossSourceDefinitionIds?: number[];
     }>;
     runStartTaxForCorpRootAssets: HostFn<{
       amount: number;
@@ -117,9 +114,6 @@ export type RunnerMainActionGenerationHost = {
     printedCostMakeRunEffect: HostFn<any>;
     pushActivatedActions: HostFn<void>;
   };
-  constants: {
-    RUNNER_EVENT_RESOLVERS: Record<string, any>;
-  };
 };
 
 function runnerInstallCapabilitiesMet(
@@ -132,14 +126,14 @@ function runnerInstallCapabilitiesMet(
   for (const capability of installCapabilities) {
     if (capability.kind !== "runner_made_successful_run_on_server_this_turn")
       continue;
-    const flags = host.runner.ensureRunnerTurnFlags(host.state);
-    if (capability.server === "hq" && flags.successfulHqRunThisTurn !== true)
+    const flags = host.state.runnerTurnFlags;
+    if (capability.server === "hq" && flags?.successfulHqRunThisTurn !== true)
       return false;
-    if (capability.server === "rd" && flags.successfulRdRunThisTurn !== true)
+    if (capability.server === "rd" && flags?.successfulRdRunThisTurn !== true)
       return false;
     if (
       capability.server === "any_data_fort" &&
-      flags.successfulRunThisTurn !== true
+      flags?.successfulRunThisTurn !== true
     )
       return false;
   }
@@ -247,7 +241,6 @@ export function buildRunnerMainActions(
     host.cards.hasInstalledUniqueCardDefinition;
   const cardImplementationForDefinitionId =
     host.cardImplementation.cardImplementationForDefinitionId;
-  const ensureRunnerTurnFlags = host.runner.ensureRunnerTurnFlags;
   const filterActionsForRestrictedExtraActions =
     host.runner.filterActionsForRestrictedExtraActions ??
     ((_state: GameState, _side: "runner", candidateActions: LegalAction[]) =>
@@ -278,7 +271,7 @@ export function buildRunnerMainActions(
   const activeRunActionSpendingCapSourceIds =
     host.run.activeRunActionSpendingCapSourceIds;
   const runDurationPaymentHost = host.run.runDurationPaymentHost;
-  const runStartTaxForServerUpgrades = host.run.runStartTaxForServerUpgrades;
+  const runStartCreditLossForServer = host.run.runStartCreditLossForServer;
   const runStartTaxForCorpRootAssets = host.run.runStartTaxForCorpRootAssets;
   const shouldOfferRunnerProgramTrashBeforeInstall =
     host.install.shouldOfferRunnerProgramTrashBeforeInstall;
@@ -308,7 +301,6 @@ export function buildRunnerMainActions(
     host.runner.runnerUtilityLongtailKindForCard;
   const uniqueDirectLongtailImplementationForCard =
     host.runner.uniqueDirectLongtailImplementationForCard;
-  const RUNNER_EVENT_RESOLVERS = host.constants.RUNNER_EVENT_RESOLVERS;
 
   const actions: LegalAction[] = [];
   const pushRunnerProgramInstallAction = (
@@ -352,16 +344,16 @@ export function buildRunnerMainActions(
         : paymentActions),
     );
   };
-  const flags = ensureRunnerTurnFlags(state);
+  const flags = state.runnerTurnFlags;
   const canStartRun = runnerCanStartRun(state);
   const hasClicks = state.runner.clicks > 0;
   const unusedRunOnlyActionSourceIds = activeRunActionSpendingCapSourceIds(
     runDurationPaymentHost(state),
   ).filter(
     (sourceCardId) =>
-      !(flags.runOnlyActionUsedSourceIdsThisTurn ?? []).includes(sourceCardId),
+      !flags?.runOnlyActionUsedSourceIdsThisTurn?.includes(sourceCardId),
   );
-  const bodyweightExtraRunPending = flags.successfulRunExtraRunPending === true;
+  const bodyweightExtraRunPending = flags?.successfulRunExtraRunPending === true;
   const pendingSequence = nextMultiServerSuccessSequence(flags);
   const nextSequenceServerId = bodyweightExtraRunPending
     ? undefined
@@ -394,9 +386,9 @@ export function buildRunnerMainActions(
     ];
   }
   const bonusRunPending =
-    flags.bonusRunPending === true || nextSequenceServerId !== undefined;
+    flags?.bonusRunPending === true || nextSequenceServerId !== undefined;
   const optionalBonusRunPending =
-    flags.bonusRunPending === true &&
+    flags?.bonusRunPending === true &&
     !bodyweightExtraRunPending &&
     nextSequenceServerId === undefined;
   // Paid abilities stay open after the last basic action. The canonical
@@ -841,9 +833,7 @@ export function buildRunnerMainActions(
         }
         continue;
       }
-      const resolver =
-        cardImplementationRunnerEventResolver(definition) ??
-        RUNNER_EVENT_RESOLVERS[definition.id];
+      const resolver = cardImplementationRunnerEventResolver(definition);
       if (!resolver && !canPlayCardImplementation) continue;
       const resolverActionPayload =
         resolver?.actionPayload?.({
@@ -1048,7 +1038,7 @@ export function buildRunnerMainActions(
       ) {
         const limitKey = "optional_extra_action_with_delayed_damage";
         const used = new Set(
-          ensureRunnerTurnFlags(state).abilityUsedSourceIdsByLimitKey?.[
+          flags?.abilityUsedSourceIdsByLimitKey?.[
             limitKey
           ] ?? [],
         );
@@ -1150,20 +1140,14 @@ export function buildRunnerMainActions(
       }
     }
   }
+  const { amount: runStartTaxCredits, sourceDefinitionIds: runStartTaxSources } =
+    runStartTaxForCorpRootAssets(state);
   for (const server of state.corp.servers) {
     const serverRunAllowed = evaluateRunStartEligibility(
       state,
       server.id,
     ).allowed;
-    const upgradeRunStartTax = runStartTaxForServerUpgrades(state, server.id);
-    const rootAssetRunTax = runStartTaxForCorpRootAssets(state);
-    const runStartTaxCredits =
-      upgradeRunStartTax.amount + rootAssetRunTax.amount;
-    const runStartLossCredits = upgradeRunStartTax.runStartLossAmount ?? 0;
-    const runStartTaxSourceDefinitionIds = [
-      ...upgradeRunStartTax.sourceDefinitionIds,
-      ...rootAssetRunTax.sourceDefinitionIds,
-    ];
+    const runStartLoss = runStartCreditLossForServer(state, server.id);
     const runCosts = [
       {
         clicks: 1,
@@ -1176,15 +1160,13 @@ export function buildRunnerMainActions(
         ? {
             runStartTaxCredits,
             runStartTaxSourceDefinitionIds:
-              runStartTaxSourceDefinitionIds.join(","),
+              runStartTaxSources.join(","),
           }
         : {}),
-      ...(runStartLossCredits > 0
+      ...(runStartLoss.amount > 0
         ? {
-            runStartLossCredits,
-            runStartLossSourceDefinitionIds: (
-              upgradeRunStartTax.runStartLossSourceDefinitionIds ?? []
-            ).join(","),
+            runStartLossCredits: runStartLoss.amount,
+            runStartLossSourceDefinitionIds: runStartLoss.sourceDefinitionIds.join(","),
           }
         : {}),
     };
@@ -1274,7 +1256,7 @@ export function buildRunnerMainActions(
               : {}),
             bonusRunSource: nextSequenceServerId
               ? pendingSequence?.sourceDefinitionId
-              : flags.successfulRunExtraRunPending === true
+              : flags?.successfulRunExtraRunPending === true
                 ? uniqueInstalledSuccessfulRunFollowupOwner(state, host)
                     .definitionId
                 : uniqueOptionalRunOnPlayOwnerDefinitionId(state, host),
@@ -1448,9 +1430,9 @@ function uniqueOptionalRunOnPlayOwnerDefinitionId(
 }
 
 function nextMultiServerSuccessSequence(
-  flags: NonNullable<GameState["runnerTurnFlags"]>,
+  flags: GameState["runnerTurnFlags"],
 ): MultiServerSuccessSequenceState | undefined {
-  return flags.pendingSequences?.find(
+  return flags?.pendingSequences?.find(
     (sequence) =>
       sequence.kind === "multi_server_success_sequence" &&
       sequence.pendingServerIds.length > 0,
@@ -1471,17 +1453,9 @@ function buildMultiServerSuccessSequenceForcedRunActions(
   );
   if (!server) return [];
   if (!evaluateRunStartEligibility(state, server.id).allowed) return [];
-  const upgradeRunStartTax = host.run.runStartTaxForServerUpgrades(
-    state,
-    server.id,
-  );
-  const rootAssetRunTax = host.run.runStartTaxForCorpRootAssets(state);
-  const runStartTaxCredits = upgradeRunStartTax.amount + rootAssetRunTax.amount;
-  const runStartLossCredits = upgradeRunStartTax.runStartLossAmount ?? 0;
-  const runStartTaxSourceDefinitionIds = [
-    ...upgradeRunStartTax.sourceDefinitionIds,
-    ...rootAssetRunTax.sourceDefinitionIds,
-  ];
+  const runStartLoss = host.run.runStartCreditLossForServer(state, server.id);
+  const { amount: runStartTaxCredits, sourceDefinitionIds: runStartTaxSources } =
+    host.run.runStartTaxForCorpRootAssets(state);
   if (
     runStartTaxCredits > 0 &&
     host.runner.availableRunnerRunStartCredits(input.runDurationPaymentHost) <
@@ -1494,15 +1468,13 @@ function buildMultiServerSuccessSequenceForcedRunActions(
       ? {
           runStartTaxCredits,
           runStartTaxSourceDefinitionIds:
-            runStartTaxSourceDefinitionIds.join(","),
+            runStartTaxSources.join(","),
         }
       : {}),
-    ...(runStartLossCredits > 0
+    ...(runStartLoss.amount > 0
       ? {
-          runStartLossCredits,
-          runStartLossSourceDefinitionIds: (
-            upgradeRunStartTax.runStartLossSourceDefinitionIds ?? []
-          ).join(","),
+          runStartLossCredits: runStartLoss.amount,
+          runStartLossSourceDefinitionIds: runStartLoss.sourceDefinitionIds.join(","),
         }
       : {}),
     bonusRunNoClick: true,

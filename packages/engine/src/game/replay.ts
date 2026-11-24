@@ -1,5 +1,6 @@
 import { isMatchEventId } from "@netgrid/shared";
 import type {
+  ApplyActionOptions,
   EngineResult,
   EngineRandomizedIceInstallSelectionCommand,
   EngineRandomizedIceInstallSelectionResult,
@@ -24,21 +25,30 @@ import { sanitizeEventPayloadForSurface } from "./view/surface-policy";
 
 export type ReplayHost = {
   actions: {
-    applyAction: (state: GameState, action: PlayerAction) => EngineResult;
+    applyAction: (
+      state: GameState,
+      action: PlayerAction,
+      options: ApplyActionOptions,
+    ) => EngineResult;
     applyRandomizedIceInstallSelection?: (
       state: GameState,
       command: EngineRandomizedIceInstallSelectionCommand,
+      options: ApplyActionOptions,
     ) => EngineRandomizedIceInstallSelectionResult;
     applyRandomizedTurnPlanSelection?: (
       state: GameState,
       command: EngineRandomizedTurnPlanSelectionCommand,
+      options: ApplyActionOptions,
     ) => EngineRandomizedTurnPlanSelectionResult;
     applyRandomizedTraceBidSelection?: (
       state: GameState,
       command: EngineRandomizedTraceBidSelectionCommand,
+      options: ApplyActionOptions,
     ) => EngineRandomizedTraceBidSelectionResult;
   };
 };
+
+const replayActionOptions = { publicEventsMode: "latest" } as const;
 
 let defaultReplayHost: ReplayHost | undefined;
 
@@ -81,6 +91,13 @@ export function buildReplayEvents(
       break;
     }
     if (event.type === "game_created") continue;
+    if (
+      event.stateVersionBefore !== current.stateVersion ||
+      event.stateVersionAfter !== current.stateVersion + 1
+    ) {
+      errors.push(`Invalid state version transition at event ${event.eventId}.`);
+      break;
+    }
     try {
       sanitizeEventPayloadForSurface(event.publicPayload, "replay_public");
     } catch (error) {
@@ -163,18 +180,21 @@ export function buildReplayEvents(
       ? host.actions.applyRandomizedIceInstallSelection!(
           current,
           randomizedCommand,
+          replayActionOptions,
         )
       : randomizedTurnPlanCommand
         ? host.actions.applyRandomizedTurnPlanSelection!(
             current,
             randomizedTurnPlanCommand,
+            replayActionOptions,
           )
         : randomizedTraceBidCommand
           ? host.actions.applyRandomizedTraceBidSelection!(
               current,
               randomizedTraceBidCommand,
+              replayActionOptions,
             )
-          : host.actions.applyAction(current, playerAction!);
+          : host.actions.applyAction(current, playerAction!, replayActionOptions);
     if (!result.ok) {
       errors.push(`Replay failed at ${event.eventId}: ${result.error.code}`);
       break;

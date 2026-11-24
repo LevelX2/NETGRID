@@ -1,9 +1,33 @@
-import { type CardDefinition, type CardDefinitionId, type CardInstanceId, type CounterType, type GameState, type LegalAction, type PlayerAction } from "@netgrid/shared";
-import { assertCorpRootRezCostQuoteValid, assertCorpRezCostQuoteValid, rezCostForCard } from "../payment";
-import { corpRootAssetIdsInServer, corpRootMainCardIdsInServer, definitionFor, mustInstance, mustRun, mustServer } from "../state/card-server-lookup";
+import {
+  type CardDefinition,
+  type CardDefinitionId,
+  type CardInstanceId,
+  type CounterType,
+  type GameState,
+  type LegalAction,
+  type PlayerAction,
+} from "@netgrid/shared";
+import {
+  assertCorpRootRezCostQuoteValid,
+  assertCorpRezCostQuoteValid,
+  rezCostForCard,
+} from "../payment";
+import {
+  corpRootAssetIdsInServer,
+  corpRootMainCardIdsInServer,
+  definitionFor,
+  mustInstance,
+  mustRun,
+  mustServer,
+} from "../state/card-server-lookup";
 import { rollDeterministicDie, shuffleStateIds } from "../state/draw-random";
 import { spendClick, spendCredits } from "../state/economy-mutation";
-import { addCardCounter, cardCounter, ensureRunnerTurnFlags, setCardCounter } from "../state/turn-flags-counters";
+import {
+  addCardCounter,
+  cardCounter,
+  ensureRunnerTurnFlags,
+  setCardCounter,
+} from "../state/turn-flags-counters";
 import { createRemote, ensureSpecialZones, removeFromAllZones } from "../state/zone-mutation";
 import { assertCorpCanCreateNewDataFort } from "../turn/corp-data-fort-lock";
 import {
@@ -16,11 +40,19 @@ import {
   runnerInstallPaymentPublicPayload,
 } from "../install/runner-program-install-payment";
 import { type RezCardHost } from "../rez/rez-card";
-import { addRunnerTagsWithPrevention, damagePreventionSourcesForDefinition, isRunnerHardwareDeckDefinition } from "../damage/damage-core";
+import {
+  addRunnerTagsWithPrevention,
+  damagePreventionSourcesForDefinition,
+  isRunnerHardwareDeckDefinition,
+} from "../damage/damage-core";
 import { hostedPaymentCredits, shouldLoadLegacyRecurringCredits } from "../run/run-duration-payment";
 import { beginEncounter, continueAfterCorpRootRezIfWindowIsComplete } from "../run/encounter-entry";
 import { corpRunRootRezActionsAvailable, handleRunRootRezPostRez } from "../run/run-rez-window";
-import { isFortTraceBitPoolSource, markFortActivityForRunGate, fortTraceBitPoolCapacityForCard } from "../run/fort-run-side-families";
+import {
+  isFortTraceBitPoolSource,
+  markFortActivityForRunGate,
+  fortTraceBitPoolCapacityForCard,
+} from "../run/fort-run-side-families";
 import { passApproachedIce } from "../run/run-movement";
 import { onPlayCardImplementationEffects } from "../play/corp-operation-resolution";
 import { hiddenRunnerResourceSlotId } from "../view/card-view";

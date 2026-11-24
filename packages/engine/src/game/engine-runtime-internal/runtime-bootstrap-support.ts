@@ -1,6 +1,16 @@
 import { scoredAgendaPointValue } from "../state/corp-agenda-point-cost";
 import * as runtimePorts from "./runtime-port-bindings";
-import { type CardDefinition, type CardDefinitionId, type CardInstanceId, type GameState, type LegalAction, type PlayerController, type ResolvedGameEffect, type ServerId, type Side } from "@netgrid/shared";
+import {
+  type CardDefinition,
+  type CardDefinitionId,
+  type CardInstanceId,
+  type GameState,
+  type LegalAction,
+  type PlayerController,
+  type ResolvedGameEffect,
+  type ServerId,
+  type Side,
+} from "@netgrid/shared";
 import { type CorpTracePaymentDependencies, type RunnerTracePaymentDependencies } from "../payment";
 import { definitionFor, mustInstance } from "../state/card-server-lookup";
 import { spendCredits } from "../state/economy-mutation";
@@ -13,7 +23,13 @@ export {
 } from "../events/build-event";
 export { checkWinConditions } from "../win-conditions";
 import { handleRunEndCleanup } from "../run/run-end-cleanup";
-import { recordRunnerRunCreditSpend, recordRunActionSpendingCapSpend, restrictedHostedCreditSourceForDefinition, restrictedHostedCreditSourceIds, runDurationPaymentHost } from "../run/run-duration-payment";
+import {
+  recordRunnerRunCreditSpend,
+  recordRunActionSpendingCapSpend,
+  restrictedHostedCreditSourceForDefinition,
+  restrictedHostedCreditSourceIds,
+  runDurationPaymentHost,
+} from "../run/run-duration-payment";
 import { fortTraceBitPoolTotal, spendFortTraceBitPool } from "../run/fort-run-side-families";
 export { quoteCorpRezCost } from "../payment";
 export { createGame, createGameAfterSetup } from "../create-game";
@@ -423,8 +439,6 @@ export const runnerTracePaymentDeps: RunnerTracePaymentDependencies = {
   },
   definitionIdForCard: (state, cardId) => definitionFor(state, cardId).id,
 };
-
-export { isV097OrLater, isV099OrLater, isVersionAtLeast } from "../rules-version";
 
 export function cloneState<T>(state: T): T {
   return structuredClone(state) as T;

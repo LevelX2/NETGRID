@@ -110,10 +110,6 @@ function hostFor(calls: string[]): RunFlowHost {
       publicServerLabel: () => "HQ",
       randomHqAccess: () => undefined,
     },
-    rules: {
-      isV097OrLater: () => true,
-      isV099OrLater: () => true,
-    },
     turn: {
       ensureRunnerTurnFlags: (targetState) => {
         calls.push("ensureRunnerTurnFlags");

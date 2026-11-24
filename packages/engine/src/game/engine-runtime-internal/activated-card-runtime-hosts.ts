@@ -5,9 +5,19 @@ import { cardCounter } from "../state/turn-flags-counters";
 import { type TraceOrchestrationHost } from "../trace/trace-orchestration";
 import { handleScoredAgendaActivatedAbilityAction } from "../corp/scored-agenda-abilities";
 import { handleCorpTraceDamageActivatedAbility } from "../corp/trace-damage-abilities";
-import { hostedPaymentCredits, recordRunActionSpendingCapSpend, runDurationPaymentHost } from "../run/run-duration-payment";
-import { isTraceLinkForceJackOutSource, markTraceLinkForceJackOutAfterEncounter } from "../run/encounter-special-windows";
-import { applyPrintedTraceSuccessFollowups, isSupportedEncounterTraceSuccessEffect } from "../run/encounter-printed-effects";
+import {
+  hostedPaymentCredits,
+  recordRunActionSpendingCapSpend,
+  runDurationPaymentHost,
+} from "../run/run-duration-payment";
+import {
+  isTraceLinkForceJackOutSource,
+  markTraceLinkForceJackOutAfterEncounter,
+} from "../run/encounter-special-windows";
+import {
+  applyPrintedTraceSuccessFollowups,
+  isSupportedEncounterTraceSuccessEffect,
+} from "../run/encounter-printed-effects";
 import { fortTraceBitPoolSource } from "../run/fort-run-side-families";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { resolveActivatedCardImplementationAbility } from "../../ability-engine/card-implementation-runtime";

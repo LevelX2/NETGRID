@@ -1,19 +1,61 @@
 import { effectiveCardHasNormalizedSubtype } from "../../ability-engine/card-implementation-modifiers";
-import { type CardInstanceId, type CorpServer, type GameState, type LegalAction, type PlayerAction } from "@netgrid/shared";
-import { projectHqInstallRezOptionQuote, projectInstalledCorpSequenceRezPayment, type CorpSequenceRezPaymentProjection } from "../payment";
-import { corpInstalledCardIds, definitionFor, mustInstance, mustServer } from "../state/card-server-lookup";
+import {
+  type CardInstanceId,
+  type CorpServer,
+  type GameState,
+  type LegalAction,
+  type PlayerAction,
+} from "@netgrid/shared";
+import {
+  projectHqInstallRezOptionQuote,
+  projectInstalledCorpSequenceRezPayment,
+  type CorpSequenceRezPaymentProjection,
+} from "../payment";
+import {
+  corpInstalledCardIds,
+  definitionFor,
+  mustInstance,
+  mustServer,
+} from "../state/card-server-lookup";
 import { drawCorpCard, rollDeterministicDie } from "../state/draw-random";
 import { credits, loseAllCorpCredits, spendClick, spendCredits } from "../state/economy-mutation";
-import { addCardCounter, cardCounter, ensureCorpTurnFlags, setCardCounter } from "../state/turn-flags-counters";
+import {
+  addCardCounter,
+  cardCounter,
+  ensureCorpTurnFlags,
+  setCardCounter,
+} from "../state/turn-flags-counters";
 import { cleanupEmptyRemotes, createRemote, removeFromAllZones } from "../state/zone-mutation";
 import { buildLegalAction as action } from "../turn/action-builders";
 import { corpNewDataFortCreationLocked } from "../turn/corp-data-fort-lock";
-import { finalizeCorpIceInstallAfterExternalPayment, finalizeCorpRootInstallAfterExternalPayment } from "../install/install-card";
+import {
+  finalizeCorpIceInstallAfterExternalPayment,
+  finalizeCorpRootInstallAfterExternalPayment,
+} from "../install/install-card";
 import { canInstallCorpIceInServer } from "../install/corp-ice-install-restrictions";
-import { effectDrivenCorpIceRezAgendaPointCost, effectDrivenCorpIceRezVariants, finalizeCorpRezAfterExternalPayment, rezCard as executeRezCard } from "../rez/rez-card";
-import { createDamageImminentEvent, openDamageResolutionWindow, resolveDamageImminentEvent, resolveDamageOperation, setDamagePayload } from "../damage/damage-core";
-import { resolveHqArchivesShuffleDraw, startScoredAgendaHqShuffleCreditsChoice } from "../hidden-zone/corp-zone-choice-handlers";
-import { resolveAgendaPurgeInstallTargets, startHqToNewRemoteInstallRezChoice, startScoredAgendaFreeRezChoice, type CorpInstallRezSequenceHandlerHost } from "../corp/install-rez-sequence-handlers";
+import {
+  effectDrivenCorpIceRezAgendaPointCost,
+  effectDrivenCorpIceRezVariants,
+  finalizeCorpRezAfterExternalPayment,
+  rezCard as executeRezCard,
+} from "../rez/rez-card";
+import {
+  createDamageImminentEvent,
+  openDamageResolutionWindow,
+  resolveDamageImminentEvent,
+  resolveDamageOperation,
+  setDamagePayload,
+} from "../damage/damage-core";
+import {
+  resolveHqArchivesShuffleDraw,
+  startScoredAgendaHqShuffleCreditsChoice,
+} from "../hidden-zone/corp-zone-choice-handlers";
+import {
+  resolveAgendaPurgeInstallTargets,
+  startHqToNewRemoteInstallRezChoice,
+  startScoredAgendaFreeRezChoice,
+  type CorpInstallRezSequenceHandlerHost,
+} from "../corp/install-rez-sequence-handlers";
 import { type ScoredAgendaFlowHost } from "../corp/scored-agenda-flow";
 import { type ScoredAgendaAbilityHost } from "../corp/scored-agenda-abilities";
 import { type CorpTraceDamageAbilityHost } from "../corp/trace-damage-abilities";
@@ -21,7 +63,12 @@ import { type CorpSpecialDamageAbilityHost } from "../corp/special-damage-abilit
 import { resolveCorpRootRezEffect } from "../run/run-rez-window";
 import { effectiveAgendaDifficulty } from "../../ability-engine/effective-values";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import { executeCardImplementationLifecycleEffects, pushActivatedCardImplementationActions, pushActivatedCardImplementationActionsForTiming, resolveActivatedCardImplementationAbility } from "../../ability-engine/card-implementation-runtime";
+import {
+  executeCardImplementationLifecycleEffects,
+  pushActivatedCardImplementationActions,
+  pushActivatedCardImplementationActionsForTiming,
+  resolveActivatedCardImplementationAbility,
+} from "../../ability-engine/card-implementation-runtime";
 import type { RuntimeDeps } from "./runtime-shared";
 
 export function createScoredEconomyRuntimeHosts(

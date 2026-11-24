@@ -1,5 +1,11 @@
 import { type GameState } from "@netgrid/shared";
-import { corpInstalledCardIds, definitionFor, mustInstance, publicInstalledCorpCardIdentityKnown, runnerInstalledCardIds } from "../state/card-server-lookup";
+import {
+  corpInstalledCardIds,
+  definitionFor,
+  mustInstance,
+  publicInstalledCorpCardIdentityKnown,
+  runnerInstalledCardIds,
+} from "../state/card-server-lookup";
 import { drawCorpCard, nextRandom } from "../state/draw-random";
 import {
   credits,
@@ -7,7 +13,12 @@ import {
   spendClicks,
   spendCredits,
 } from "../state/economy-mutation";
-import { addCardCounter, cardCounter, ensureRunnerTurnFlags, spendCardCounter } from "../state/turn-flags-counters";
+import {
+  addCardCounter,
+  cardCounter,
+  ensureRunnerTurnFlags,
+  spendCardCounter,
+} from "../state/turn-flags-counters";
 import { uninstallCorpInstalledCardToHq } from "../state/zone-mutation";
 import { handleTraceOrchestrationAction } from "../trace/trace-orchestration";
 import { type TurnBasicExecutionHost } from "../turn/turn-basic-execution";

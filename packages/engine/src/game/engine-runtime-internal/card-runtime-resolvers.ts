@@ -1,6 +1,15 @@
 import type { RandomHqDiscardContext } from "@netgrid/shared";
 import { engineCardByDefinitionId } from "@netgrid/cards/engine";
-import { type CardDefinition, type CardDefinitionId, type CardInstanceId, type GameState, type LegalAction, type PlayerAction, RUNNER_AGENDA_POINT_TRANSFER_QUOTE_SCHEMA_VERSION, type ServerId } from "@netgrid/shared";
+import {
+  type CardDefinition,
+  type CardDefinitionId,
+  type CardInstanceId,
+  type GameState,
+  type LegalAction,
+  type PlayerAction,
+  RUNNER_AGENDA_POINT_TRANSFER_QUOTE_SCHEMA_VERSION,
+  type ServerId,
+} from "@netgrid/shared";
 import { selectedChoiceIds } from "../choices/choice-validation";
 import { definitionFor, mustInstance } from "../state/card-server-lookup";
 import { rollDeterministicDie, mustArrayValue, nextRandom } from "../state/draw-random";
@@ -8,14 +17,28 @@ import { credits } from "../state/economy-mutation";
 import { creditGainPublicPayload } from "../economy/credit-gain";
 import { hasSuccessfulRunThisTurn } from "../state/turn-flags-counters";
 import { removeFromAllZones } from "../state/zone-mutation";
-import { addRunnerTagsWithPrevention, doDamage, hiddenRunnerResourceRevealPayload, type DamageSummary } from "../damage/damage-core";
-import { searchStackInstallTargets, startSearchStackToGripActivation } from "../hidden-zone/search-choice-activations";
+import {
+  addRunnerTagsWithPrevention,
+  doDamage,
+  hiddenRunnerResourceRevealPayload,
+  type DamageSummary,
+} from "../damage/damage-core";
+import {
+  searchStackInstallTargets,
+  startSearchStackToGripActivation,
+} from "../hidden-zone/search-choice-activations";
 import { startSuccessfulRunFortIceReorderChoice } from "../hidden-zone/arrange-choice-handlers";
 import { startSecretSpendGuessThenTargetedBypassRunHideChoice } from "../hidden-zone/nonsearch-choice-handlers";
 import { maxHandSize, runnerMemoryLimit } from "../../ability-engine/effective-values";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { isPrintedCostOnPlayAbility } from "../../ability-engine/card-implementation-runtime-shared";
-import type { CardHiddenReplacementLongtailImplementation, CardRunnerEventLongtailImplementation, CardScoredAgendaImplementation, CardVariableRezImplementation, MakeRunEffectImplementation } from "../../ability-engine/definition-types";
+import type {
+  CardHiddenReplacementLongtailImplementation,
+  CardRunnerEventLongtailImplementation,
+  CardScoredAgendaImplementation,
+  CardVariableRezImplementation,
+  MakeRunEffectImplementation,
+} from "../../ability-engine/definition-types";
 import type {
   RunnerDrawSummary,
   RunnerEventResolver,

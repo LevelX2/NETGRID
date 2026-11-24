@@ -27,7 +27,6 @@ export type MainActionHostCompositionHost = {
     mustServer: RunnerMainActionGenerationHost["servers"]["mustServer"];
     serverChoiceDisplayLabel: RunnerMainActionGenerationHost["servers"]["serverChoiceDisplayLabel"];
     runnerMemoryLimit: RunnerMainActionGenerationHost["memory"]["runnerMemoryLimit"];
-    constants: RunnerMainActionGenerationHost["constants"];
   };
 };
 
@@ -203,7 +202,6 @@ export function createMainActionHostComposition(
           cards.hasInstalledUniqueCardDefinition,
       },
       runner: {
-        ensureRunnerTurnFlags: runner.ensureRunnerTurnFlags,
         availableRunnerTagRemovalCredits:
           runner.availableRunnerTagRemovalCredits,
         availableRunnerProgramInstallCredits:
@@ -231,7 +229,7 @@ export function createMainActionHostComposition(
         activeRunActionSpendingCapSourceIds:
           run.activeRunActionSpendingCapSourceIds,
         runDurationPaymentHost: run.runDurationPaymentHost,
-        runStartTaxForServerUpgrades: run.runStartTaxForServerUpgrades,
+        runStartCreditLossForServer: run.runStartCreditLossForServer,
         runStartTaxForCorpRootAssets: run.runStartTaxForCorpRootAssets,
       },
       install: {
@@ -277,7 +275,6 @@ export function createMainActionHostComposition(
         printedCostMakeRunEffect: cardImplementation.printedCostMakeRunEffect,
         pushActivatedActions: cardImplementation.pushActivatedActions,
       },
-      constants: callbacks.constants,
     }),
   };
 }

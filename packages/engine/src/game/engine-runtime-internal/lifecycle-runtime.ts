@@ -1,5 +1,17 @@
 import type { RandomHqDiscardContext } from "@netgrid/shared";
-import type { CardDefinitionId, CardInstanceId, ChoiceRequest, CorpServer, DrawTaxDecision, GameState, LegalAction, PlayerAction, RunnerDrawSummary, RuntimeDeps, ServerId } from "./runtime-shared";
+import type {
+  CardDefinitionId,
+  CardInstanceId,
+  ChoiceRequest,
+  CorpServer,
+  DrawTaxDecision,
+  GameState,
+  LegalAction,
+  PlayerAction,
+  RunnerDrawSummary,
+  RuntimeDeps,
+  ServerId,
+} from "./runtime-shared";
 import type { CardLeavePlayCleanupImplementation } from "../../ability-engine/definition-types";
 import { clearDepartedBreakerStrength } from "../state/temporary-breaker-strength";
 import {

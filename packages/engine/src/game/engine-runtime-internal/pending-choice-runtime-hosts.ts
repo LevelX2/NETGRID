@@ -1,5 +1,16 @@
 import { parseRunIdToken } from "@netgrid/shared";
-import type { CardInstanceId, ChoiceRequest, GameState, LegalAction, PendingChoiceResolutionHost, PlayerAction, ResolvedGameEffect, RuntimeDeps, ServerId, Side } from "./runtime-shared";
+import type {
+  CardInstanceId,
+  ChoiceRequest,
+  GameState,
+  LegalAction,
+  PendingChoiceResolutionHost,
+  PlayerAction,
+  ResolvedGameEffect,
+  RuntimeDeps,
+  ServerId,
+  Side,
+} from "./runtime-shared";
 import type {
   CardCreditGainContinuation,
   CorpDrawContinuation,

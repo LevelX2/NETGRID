@@ -44,15 +44,11 @@ export function validateChoiceAction(
     selectedOptionIds.length > choice.maxSelections
   )
     return "Die Anzahl der gewaehlten Optionen ist ungueltig.";
-  const optionIds = new Set(choice.options.map((option) => option.id));
-  if (selectedOptionIds.some((id) => !optionIds.has(id)))
+  const optionsById = new Map(choice.options.map((option) => [option.id, option]));
+  const selectedOptions = selectedOptionIds.map((id) => optionsById.get(id));
+  if (selectedOptions.some((option) => option === undefined))
     return "Eine gewaehlte Option ist nicht legal.";
-  if (
-    selectedOptionIds.some(
-      (id) =>
-        choice.options.find((option) => option.id === id)?.selectable === false,
-    )
-  )
+  if (selectedOptions.some((option) => option?.selectable === false))
     return "Eine gewaehlte Option ist fuer diesen Effekt nicht auswaehlbar.";
   if (new Set(selectedOptionIds).size !== selectedOptionIds.length)
     return "Eine Option wurde doppelt gewaehlt.";

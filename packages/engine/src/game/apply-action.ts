@@ -104,7 +104,7 @@ export function applyMatchActionOffer(
 
 function validateActionScope(
   state: GameState,
-  action: Pick<PlayerAction, "matchId" | "clientKnownStateVersion">,
+  action: Pick<PlayerAction, "matchId" | "clientKnownStateVersion" | "side">,
 ): EngineResult | undefined {
   if (action.matchId !== state.matchId)
     return fail(
@@ -118,6 +118,8 @@ function validateActionScope(
       "ERR_STALE_STATE",
       "Der Spielzustand ist veraltet. Bitte aktualisiere die Ansicht.",
     );
+  if (action.side !== "corp" && action.side !== "runner")
+    return fail(state, "ERR_WRONG_SIDE", "Die Spielerseite ist ungültig.");
 }
 
 function applyLegalAction(

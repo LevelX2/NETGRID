@@ -1,4 +1,5 @@
 import type { GameState, LegalAction, VisibleCard } from "@netgrid/shared";
+import { cloneGameStateForAction } from "../apply-action-state";
 import { agendaPoints, visibleCorpCard } from "./card-view";
 import { visibleEffectiveIceRunQuote } from "./visible-run-quote";
 import { projectInstalledCorpIceRezCost } from "../payment";
@@ -44,7 +45,7 @@ export function visibleMobileIceMoveQuote(
   };
   const before = path(state);
   if (!before) return undefined;
-  const projected = structuredClone(state);
+  const projected = cloneGameStateForAction(state);
   projected.corp.servers.find((s) => s.id === origin.id)!.ice =
     origin.ice.filter((id) => id !== sourceId);
   projected.corp.servers.find((s) => s.id === target.id)!.ice.push(sourceId);

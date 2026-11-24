@@ -301,13 +301,11 @@ export function buildApplyRandomizedTraceBidSelection(
     secretGuess
       ? applied.state.aiTurnPlanRandomDrawRecords!
       : applied.state.randomDrawRecords
-  ).find(
-    (record) =>
-      record.counter === counterBefore &&
-      serializeRandomPurpose(record.purpose) ===
-        serializeRandomPurpose(purpose),
-  );
-  if (!randomDraw) {
+  )[counterBefore];
+  if (
+    randomDraw?.counter !== counterBefore ||
+    serializeRandomPurpose(randomDraw.purpose) !== serializeRandomPurpose(purpose)
+  ) {
     return applyFail(
       state,
       "ERR_INVARIANT_FAILED",

@@ -109,6 +109,7 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
     credits: {
       spendClick: () => undefined,
       spendCredits: () => undefined,
+      syncPendingChoiceAfterRunnerCostPenaltySupport: () => undefined,
       gainCredits: (gameState, input) => {
         if (input.destination?.kind === "runner_run_temporary") {
           if (!gameState.run) throw new Error("Missing run");
@@ -377,6 +378,7 @@ describe("game card implementation runtime deps root", () => {
         "corpScoredAgendaSubtypeLastTurn",
         "spendClick",
         "spendCredits",
+        "syncPendingChoiceAfterRunnerCostPenaltySupport",
         "createAction",
         "appendResolvedEffectsToPayload",
         "addRunnerTagsWithPrevention",

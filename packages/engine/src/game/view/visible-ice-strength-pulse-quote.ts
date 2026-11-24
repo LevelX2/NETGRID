@@ -4,6 +4,7 @@ import type {
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
+import { cloneGameStateForAction } from "../apply-action-state";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import { activatedAbilityBindingsForDefinition } from "../../ability-engine/card-capability-binding";
@@ -203,7 +204,7 @@ export function visibleTemporaryIceStrengthPulseQuote(
     return { ...card, effectiveRunQuote };
   };
   const beforeIce = visible(beforeState);
-  const afterState = structuredClone(beforeState);
+  const afterState = cloneGameStateForAction(beforeState);
   afterState.corp.credits = state.corp.credits - total;
   for (const s of afterState.corp.servers)
     s.root = s.root.filter((id) => id !== action.source);

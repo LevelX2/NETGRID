@@ -1,7 +1,13 @@
 import { type CardDefinitionId, type CardInstanceId, type GameState } from "@netgrid/shared";
 import { definitionFor, mustInstance, mustServer } from "../state/card-server-lookup";
 import { spendClick, spendClicks, spendCredits } from "../state/economy-mutation";
-import { addCardCounter, cardCounter, ensureRunnerTurnFlags, setCardCounter, spendCardCounter } from "../state/turn-flags-counters";
+import {
+  addCardCounter,
+  cardCounter,
+  ensureRunnerTurnFlags,
+  setCardCounter,
+  spendCardCounter,
+} from "../state/turn-flags-counters";
 import { ensureSpecialZones, removeFromAllZones } from "../state/zone-mutation";
 import { newDataFortCreationLockForSource } from "../turn/corp-data-fort-lock";
 import { type TriggerAbilityExecutionHost } from "../abilities/trigger-ability-execution";
@@ -10,15 +16,32 @@ import {
   type CounterUtilityTriggerExecutionHost,
 } from "../abilities/counter-utility-trigger-execution";
 import { handleHiddenZoneTriggerExecution } from "../abilities/hidden-zone-trigger-execution";
-import { handleRunFortTriggerExecution, type RunFortTriggerExecutionHost } from "../abilities/run-fort-trigger-execution";
-import { handleRunnerSpecialTriggerExecution, type RunnerSpecialTriggerExecutionHost } from "../abilities/runner-special-trigger-execution";
+import {
+  handleRunFortTriggerExecution,
+  type RunFortTriggerExecutionHost,
+} from "../abilities/run-fort-trigger-execution";
+import {
+  handleRunnerSpecialTriggerExecution,
+  type RunnerSpecialTriggerExecutionHost,
+} from "../abilities/runner-special-trigger-execution";
 import { openRunnerInstalledTrashPreventionWindow } from "../damage/damage-core";
 import { startHiddenStackProgramInstallActivation } from "../hidden-zone/search-choice-activations";
 import { resolveSuccessfulRunFollowupAbility } from "../run/successful-run-interventions";
 import { shouldLoadLegacyRecurringCredits } from "../run/run-duration-payment";
-import { resolveFullyBrokenPassedIceDerez as resolveFullyBrokenPassedIceDerezInRunModule, resolveFullyBrokenPassedIceDerezAndEndRun as resolveFullyBrokenPassedIceDerezAndEndRunInRunModule, resolveFullyBrokenPassedIceTrash as resolveFullyBrokenPassedIceTrashInRunModule } from "../run/encounter-special-windows";
-import { resolveApproachIceExposeAbility, resolveApproachIceExposeViewingDecision } from "../run/encounter-entry";
-import { resolveFortPassAdvancementWindow, resolveStartRunIceRepositionWindow, startHqIceSwapChoice } from "../run/fort-pass-window";
+import {
+  resolveFullyBrokenPassedIceDerez as resolveFullyBrokenPassedIceDerezInRunModule,
+  resolveFullyBrokenPassedIceDerezAndEndRun as resolveFullyBrokenPassedIceDerezAndEndRunInRunModule,
+  resolveFullyBrokenPassedIceTrash as resolveFullyBrokenPassedIceTrashInRunModule,
+} from "../run/encounter-special-windows";
+import {
+  resolveApproachIceExposeAbility,
+  resolveApproachIceExposeViewingDecision,
+} from "../run/encounter-entry";
+import {
+  resolveFortPassAdvancementWindow,
+  resolveStartRunIceRepositionWindow,
+  startHqIceSwapChoice,
+} from "../run/fort-pass-window";
 import { runnerMemoryLimit } from "../../ability-engine/effective-values";
 import { publicServerLabel } from "../../public-context";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";

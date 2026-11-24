@@ -47,7 +47,6 @@ export type RunMovementHost = {
     ) => string | undefined;
   };
   rules: {
-    isV097OrLater: () => boolean;
     corpRunRootRezActionsAvailable: () => boolean;
     corpRunRootRezWindowOpen: () => boolean;
     approachIceExposeCanBeOfferedForCurrentIce: () => boolean;
@@ -495,35 +494,10 @@ export function movePastCurrentIce(
       nextIndex,
       "Naechstes ICE fehlt.",
     );
-    if (host.rules.isV097OrLater()) {
-      const { encounteredIceId: _encounteredIceId, ...runWithoutEncounter } =
-        run;
-      void _encounteredIceId;
-      state.run = {
-        ...runWithoutEncounter,
-        phase: "movement",
-        position: { kind: "ice", serverId: server.id, iceIndex: nextIndex },
-        approachedIceId,
-        ...passedIceFollowups,
-        ...fortPassFollowupsForPassedIce(host, server, passedIceId),
-        brokenSubroutineIndexes: [],
-        resolvedSubroutineIndexes: [],
-      };
-      state.timingPoint = "run.jack_out_window";
-      state.activeSide = state.run.corpPostPassIceReturnToHq
-        ? "corp"
-        : "runner";
-      return {
-        handled: true,
-        runContinues: true,
-        movedPastIceId: passedIceId,
-        nextIceId: approachedIceId,
-        stateChanged: true,
-      };
-    }
+    const { encounteredIceId: _encounteredIceId, ...runWithoutEncounter } = run;
     state.run = {
-      ...run,
-      phase: "approach_ice",
+      ...runWithoutEncounter,
+      phase: "movement",
       position: { kind: "ice", serverId: server.id, iceIndex: nextIndex },
       approachedIceId,
       ...passedIceFollowups,
@@ -531,41 +505,29 @@ export function movePastCurrentIce(
       brokenSubroutineIndexes: [],
       resolvedSubroutineIndexes: [],
     };
-    const approach = approachOrEncounterIce(host, approachedIceId, legalAction);
-    return {
-      ...approach,
-      movedPastIceId: passedIceId,
-      nextIceId: approachedIceId,
-    };
-  }
-  if (host.rules.isV097OrLater()) {
-    const { encounteredIceId: _encounteredIceId, ...runWithoutEncounter } = run;
-    void _encounteredIceId;
-    state.run = {
-      ...runWithoutEncounter,
-      position: { kind: "server", serverId: server.id },
-      phase: "movement",
-      ...passedIceFollowups,
-      ...fortPassFollowupsForPassedIce(host, server, passedIceId),
-    };
     state.timingPoint = "run.jack_out_window";
     state.activeSide = state.run.corpPostPassIceReturnToHq ? "corp" : "runner";
     return {
       handled: true,
       runContinues: true,
       movedPastIceId: passedIceId,
-      accessShouldStart: true,
+      nextIceId: approachedIceId,
       stateChanged: true,
     };
   }
+  const { encounteredIceId: _encounteredIceId, ...runWithoutEncounter } = run;
   state.run = {
-    ...run,
+    ...runWithoutEncounter,
     position: { kind: "server", serverId: server.id },
-    phase: "access",
+    phase: "movement",
+    ...passedIceFollowups,
+    ...fortPassFollowupsForPassedIce(host, server, passedIceId),
   };
-  host.access.startAccessFromSuccessfulRun();
+  state.timingPoint = "run.jack_out_window";
+  state.activeSide = state.run.corpPostPassIceReturnToHq ? "corp" : "runner";
   return {
     handled: true,
+    runContinues: true,
     movedPastIceId: passedIceId,
     accessShouldStart: true,
     stateChanged: true,

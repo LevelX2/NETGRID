@@ -1,4 +1,10 @@
-import type { GameState, HiddenZoneArrangeChoiceHandlerHost, LegalAction, PlayerAction, RuntimeDeps } from "./runtime-shared";
+import type {
+  GameState,
+  HiddenZoneArrangeChoiceHandlerHost,
+  LegalAction,
+  PlayerAction,
+  RuntimeDeps,
+} from "./runtime-shared";
 import type { ChoiceHiddenZoneRuntimeLinks } from "./choice-hidden-zone-runtime-links";
 
 export function createHiddenZoneArrangeRuntime(

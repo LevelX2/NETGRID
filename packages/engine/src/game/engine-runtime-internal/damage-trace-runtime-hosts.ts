@@ -1,12 +1,27 @@
-import { type CardDefinitionId, type CardInstanceId, type CounterType, type GameState, type LegalAction } from "@netgrid/shared";
+import {
+  type CardDefinitionId,
+  type CardInstanceId,
+  type CounterType,
+  type GameState,
+  type LegalAction,
+} from "@netgrid/shared";
 import { corpInstalledCardIds, definitionFor, mustInstance } from "../state/card-server-lookup";
 import { addCardCounter, cardCounter, spendCardCounter } from "../state/turn-flags-counters";
-import { createDamageImminentEvent, openDamageResolutionWindow, resolveDamageImminentEvent, setDamagePayload } from "../damage/damage-core";
+import {
+  createDamageImminentEvent,
+  openDamageResolutionWindow,
+  resolveDamageImminentEvent,
+  setDamagePayload,
+} from "../damage/damage-core";
 import {
   CARD_IMPLEMENTATIONS,
   cardImplementationForDefinitionId,
 } from "../../card-implementations/registry";
-import type { CardRemainingReplacementLongtailImplementation, CardRunnerUtilityLongtailImplementation, CardUniqueDirectLongtailImplementation } from "../../ability-engine/definition-types";
+import type {
+  CardRemainingReplacementLongtailImplementation,
+  CardRunnerUtilityLongtailImplementation,
+  CardUniqueDirectLongtailImplementation,
+} from "../../ability-engine/definition-types";
 import type {
   RunnerTraceCounterEffectRuntime,
   RuntimeDeps,

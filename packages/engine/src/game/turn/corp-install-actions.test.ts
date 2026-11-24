@@ -76,7 +76,7 @@ describe("corp install main actions", () => {
     });
   });
 
-  it("attaches an Engine-certified ordered run quote for a real ICE installation", () => {
+  it.each(["new_remote", "hq"] as const)("quotes a real ICE installation at %s without changing the state", (target) => {
     const state = createGame({
       seed: "arch-7-corp-ice-install-run-quote",
       setupMode: "completed",
@@ -96,10 +96,18 @@ describe("corp install main actions", () => {
       faceup: false,
     };
 
-    const action = buildCorpNewRemoteIceInstallAction(state, cardId);
+    const original = structuredClone(state);
+    const action = target === "new_remote"
+      ? buildCorpNewRemoteIceInstallAction(state, cardId)
+      : buildCorpServerIceInstallAction(state, cardId, state.corp.servers[0]!, {
+          baseCost: 0,
+          additionalCost: 0,
+          reduction: 0,
+          totalCost: 0,
+        });
     expect(action.payload).toMatchObject({
       postInstallRezQuoteComplete: true,
-      postInstallRezQuoteProjectedServerId: "r1",
+      postInstallRezQuoteProjectedServerId: target === "new_remote" ? "r1" : "hq",
     });
     expect(
       JSON.parse(action.payload?.postInstallEffectiveRunQuoteJson as string),
@@ -108,6 +116,7 @@ describe("corp install main actions", () => {
       iceDefinitionId: 449,
       subroutines: expect.any(Array),
     });
+    expect(state).toEqual(original);
   });
 
   it("builds a new-remote root install action without revealing card identity in the label", () => {

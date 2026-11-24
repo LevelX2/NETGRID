@@ -1,29 +1,87 @@
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import * as runtimePorts from "./runtime-port-bindings";
-import { type CardDefinition, type CardDefinitionId, type CardInstanceId, type CounterType, type GameState, type LegalAction, type ServerId } from "@netgrid/shared";
-import { costQuotePublicPayload, costQuoteToLegalActionCosts, corpServerIdForInstalledCard, quoteCorpRootRezCost, rezCostForCard } from "../payment";
-import { corpRootMainCardIdsInServer, definitionFor, mustInstance, mustRun, mustServer, publicInstalledCorpCardIdentityKnown, runnerInstalledCardIds, scoredCorpAgendaIds } from "../state/card-server-lookup";
-import { drawCorpCards, randomHqAccess, rollDeterministicDie, shuffleStateIds, nextRandom } from "../state/draw-random";
+import {
+  type CardDefinition,
+  type CardDefinitionId,
+  type CardInstanceId,
+  type CounterType,
+  type GameState,
+  type LegalAction,
+  type ServerId,
+} from "@netgrid/shared";
+import {
+  costQuotePublicPayload,
+  costQuoteToLegalActionCosts,
+  corpServerIdForInstalledCard,
+  quoteCorpRootRezCost,
+  rezCostForCard,
+} from "../payment";
+import {
+  corpRootMainCardIdsInServer,
+  definitionFor,
+  mustInstance,
+  mustRun,
+  mustServer,
+  publicInstalledCorpCardIdentityKnown,
+  runnerInstalledCardIds,
+  scoredCorpAgendaIds,
+} from "../state/card-server-lookup";
+import {
+  drawCorpCards,
+  randomHqAccess,
+  rollDeterministicDie,
+  shuffleStateIds,
+  nextRandom,
+} from "../state/draw-random";
 import { credits, spendCredits } from "../state/economy-mutation";
-import { addCardCounter, cardCounter, cardInstanceWithoutCounters, ensureRunnerTurnFlags, setCardCounter, spendCardCounter } from "../state/turn-flags-counters";
+import {
+  addCardCounter,
+  cardCounter,
+  cardInstanceWithoutCounters,
+  ensureRunnerTurnFlags,
+  setCardCounter,
+  spendCardCounter,
+} from "../state/turn-flags-counters";
 import { cleanupEmptyRemotes, ensureSpecialZones, removeFromAllZones } from "../state/zone-mutation";
-export { getLegalActions, legalActionsFor } from "../legal-actions";
-export {
-  eventVisibilityForAction,
-  isHiddenInfoBarrierEvent,
-} from "../events/build-event";
 import { configureEventContextHostComposition } from "../events/event-context-hosts";
 import { BAD_PUBLICITY_LOSS_THRESHOLD } from "../win-conditions";
-export { checkWinConditions } from "../win-conditions";
-import { calculateRunnerLink as calculateRunnerLinkInTrace, traceBidChoice, startTraceFromOperation as startTraceFromOperationInTrace } from "../trace/trace-orchestration";
+import {
+  calculateRunnerLink as calculateRunnerLinkInTrace,
+  traceBidChoice,
+  startTraceFromOperation as startTraceFromOperationInTrace,
+} from "../trace/trace-orchestration";
 import { buildLegalAction as action } from "../turn/action-builders";
 import { finalizeCorpIceInstallAfterExternalPayment } from "../install/install-card";
 import { rezCard as executeRezCard } from "../rez/rez-card";
-import { addRunnerTagsWithPrevention, configureDamageCoreHost, createDamageImminentEvent, doDamage, openDamageResolutionWindow, openEventModificationWindow, openReplacementWindow, openRunnerInstalledTrashPreventionWindow, resolveDamageImminentEvent, resolveDamageOperation, setDamagePayload, type DamageCoreHost, type DamageSummary } from "../damage/damage-core";
+import {
+  addRunnerTagsWithPrevention,
+  configureDamageCoreHost,
+  createDamageImminentEvent,
+  doDamage,
+  openDamageResolutionWindow,
+  openEventModificationWindow,
+  openReplacementWindow,
+  openRunnerInstalledTrashPreventionWindow,
+  resolveDamageImminentEvent,
+  resolveDamageOperation,
+  setDamagePayload,
+  type DamageCoreHost,
+  type DamageSummary,
+} from "../damage/damage-core";
 import { advanceArchivesBreachPastNonDecisionCards } from "../access/access-flow";
-import { installedAccessBonusForServer, runnerHqAccessBonus as runnerHqAccessBonusForBreach } from "../access/breach-state";
+import {
+  installedAccessBonusForServer,
+  runnerHqAccessBonus as runnerHqAccessBonusForBreach,
+} from "../access/breach-state";
 import { resetBreakerStrength } from "../run/run-end-cleanup";
-import { availableRunnerRunCredits, availableRunnerRunStartCredits, hostedPaymentCredits, isRestrictedHostedCreditSource, restrictedHostedCreditSourceIds, runDurationPaymentHost } from "../run/run-duration-payment";
+import {
+  availableRunnerRunCredits,
+  availableRunnerRunStartCredits,
+  hostedPaymentCredits,
+  isRestrictedHostedCreditSource,
+  restrictedHostedCreditSourceIds,
+  runDurationPaymentHost,
+} from "../run/run-duration-payment";
 import { isSupportedEncounterTraceSuccessEffect } from "../run/encounter-printed-effects";
 import { isActivityGatedFortRunBlocked } from "../run/fort-run-side-families";
 import {
@@ -32,15 +90,6 @@ import {
 } from "../run/run-access-legal-action-hosts";
 import { resumePaidRunnerBreakerAction } from "../run/runner-breaker-action-execution";
 import { corpUtilityImplementationForDefinition } from "../play/corp-operation-resolution";
-export { quoteCorpRezCost } from "../payment";
-export { createGame, createGameAfterSetup } from "../create-game";
-export { applyAction } from "../apply-action";
-export { applyGameAction } from "../apply-game-action";
-export { getPlayerView, playerViewFor } from "../player-view";
-export { replayEvents, replayGameEvents } from "../replay";
-export { redactPublicEventForSide } from "../view/public-event-view";
-export { hashGameState, hashState } from "../hash";
-export { validateGameState, validateGameStateForDebug } from "../validation";
 import { publicServerLabel } from "../../public-context";
 import { traceSuccessEffectForCardImplementation } from "../../ability-engine/trace-implementations";
 import { type RuntimeIcebreakerAbility } from "../../ability-engine/icebreaker-abilities";
@@ -52,7 +101,12 @@ import type { CardImplementationDefinition } from "../../card-implementations/ty
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import type { CardCorpUtilityImplementation } from "../../ability-engine/definition-types";
 
-import { cloneState, agendaPointsForScoredCard, finishRun, isV097OrLater, isV099OrLater, recurringTraceCreditPoolTotal } from "./runtime-bootstrap-support";
+import {
+  cloneState,
+  agendaPointsForScoredCard,
+  finishRun,
+  recurringTraceCreditPoolTotal,
+} from "./runtime-bootstrap-support";
 import type { RuntimeDeps } from "./runtime-shared";
 
 function accessSourceDefinitionIdsForRuntime(): {
@@ -305,13 +359,8 @@ export function configureFlowRuntimeBootstrap({
       )
     )
       return false;
-    const upgradeRunStartTax = runtimePorts.runStartTaxForServerUpgrades(
-      state,
-      serverId,
-    );
-    const rootAssetRunTax = runtimePorts.runStartTaxForCorpRootAssets(state);
-    const runStartTaxCredits =
-      upgradeRunStartTax.amount + rootAssetRunTax.amount;
+    const { amount: runStartTaxCredits } =
+      runtimePorts.runStartTaxForCorpRootAssets(state);
     return (
       runStartTaxCredits === 0 ||
       availableRunnerRunStartCredits(runDurationPaymentHost(state)) >=
@@ -847,10 +896,6 @@ export function configureFlowRuntimeBootstrap({
           accessSourceDefinitionIds.advancementCoreDamageAsset,
       },
       callbacks: {
-        rules: {
-          isV097OrLater,
-          isV099OrLater,
-        },
         turn: {
           ensureRunnerTurnFlags,
           consumeRunnerFutureActionDebt:

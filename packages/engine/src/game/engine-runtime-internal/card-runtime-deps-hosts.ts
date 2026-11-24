@@ -1,20 +1,48 @@
-import { type CardDefinition, type CardDefinitionId, type CardInstanceId, type GameState, type LegalAction, type ServerId, type Side } from "@netgrid/shared";
-import { definitionFor, mustInstance, mustRun, mustServer, runnerInstalledCardIds } from "../state/card-server-lookup";
+import {
+  type CardDefinition,
+  type CardDefinitionId,
+  type CardInstanceId,
+  type GameState,
+  type LegalAction,
+  type ServerId,
+  type Side,
+} from "@netgrid/shared";
+import {
+  definitionFor,
+  mustInstance,
+  mustRun,
+  mustServer,
+  runnerInstalledCardIds,
+} from "../state/card-server-lookup";
 import { spendCredits } from "../state/economy-mutation";
 import { publicIceRunSubroutineDerivation } from "../run/public-ice-run-derivation";
 import { effectiveIceRunSubroutines } from "../run/effective-ice-run-subroutines";
 import { cardCounter } from "../state/turn-flags-counters";
 import { temporaryBreakerStrengthBonusUntilEndOfTurn } from "../state/temporary-breaker-strength";
 import { buildLegalAction as action } from "../turn/action-builders";
-import { availableRunnerAccessTrashCredits, runnerAccessTrashRecurringCreditSourceIds } from "../access/access-actions";
-import { hostedPaymentCredits, runDurationPaymentHost, spendHostedPaymentCredits, spendRunnerRunCredits } from "../run/run-duration-payment";
+import {
+  availableRunnerAccessTrashCredits,
+  runnerAccessTrashRecurringCreditSourceIds,
+} from "../access/access-actions";
+import {
+  hostedPaymentCredits,
+  runDurationPaymentHost,
+  spendHostedPaymentCredits,
+  spendRunnerRunCredits,
+} from "../run/run-duration-payment";
 import { breakAbilityMatchesIce, breakAbilityMatchesSubroutine } from "../run/encounter-actions";
-import { applyPostBreakStealthLoss, shouldOpenAardvarkInterception, startAardvarkInterceptionChoice } from "../run/fort-run-side-families";
+import {
+  applyPostBreakStealthLoss,
+  shouldOpenAardvarkInterception,
+  startAardvarkInterceptionChoice,
+} from "../run/fort-run-side-families";
 import { icebreakerStrengthModifierFromDeclarativeCounters } from "../../ability-engine/effective-values";
-import { icebreakerAbilityForLegalAction, icebreakerHasRunEndCounterAward, type RuntimeIcebreakerAbility } from "../../ability-engine/icebreaker-abilities";
+import {
+  icebreakerAbilityForLegalAction,
+  icebreakerHasRunEndCounterAward,
+  type RuntimeIcebreakerAbility,
+} from "../../ability-engine/icebreaker-abilities";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import { RUN_START_CREDIT_LOSS_SOURCE } from "../../mechanics/global-modifiers";
-import { RUN_TAX_UPGRADE_SOURCES } from "../../mechanics/trace-tags";
 import { pushActivatedCardImplementationActionsForTiming } from "../../ability-engine/card-implementation-runtime";
 import type { ActivatedCardAbilityImplementation } from "../../ability-engine/definition-types";
 import type { RuntimeDeps } from "./runtime-shared";
@@ -38,7 +66,7 @@ export function createCardRuntimeDepsHosts(
   | "relativeDamageSubroutineForCurrentEncounter"
   | "relativeTraceSubroutinesForCurrentEncounter"
   | "runCardImplementationActionHost"
-  | "runStartTaxForServerUpgrades"
+  | "runStartCreditLossForServer"
   | "runStartTaxForCorpRootAssets"
   | "spendRunnerAccessTrashCredits"
 > {
@@ -561,27 +589,17 @@ export function createCardRuntimeDepsHosts(
     };
   }
 
-  function runStartTaxForServerUpgrades(
+  function runStartCreditLossForServer(
     state: GameState,
     serverId: Exclude<ServerId, "new_remote">,
   ): {
     amount: number;
     sourceDefinitionIds: CardDefinitionId[];
-    runStartLossAmount: number;
-    runStartLossSourceDefinitionIds: CardDefinitionId[];
   } {
     const server = mustServer(state, serverId);
-    const sourceDefinitionIds = server.root
-      .filter((cardId) => mustInstance(state.cardInstances, cardId).rezzed)
-      .map((cardId) => definitionFor(state, cardId).id)
-      .filter(
-        (definitionId) =>
-          RUN_TAX_UPGRADE_SOURCES.has(definitionId) &&
-          !cardImplementationForDefinitionId(definitionId),
-      );
-    let amount = sourceDefinitionIds.length;
-    let runStartLossAmount = 0;
-    const runStartLossSourceDefinitionIds: CardDefinitionId[] = [];
+    const tagLoss = Math.max(0, Math.floor(state.runner.tags));
+    const sourceDefinitionIds: CardDefinitionId[] = [];
+    if (tagLoss <= 0) return { amount: 0, sourceDefinitionIds };
     for (const cardId of server.root.slice().sort()) {
       const instance = mustInstance(state.cardInstances, cardId);
       if (!instance.rezzed) continue;
@@ -593,16 +611,11 @@ export function createCardRuntimeDepsHosts(
         )
       )
         continue;
-      const tagLoss = Math.max(0, Math.floor(state.runner.tags));
-      if (tagLoss <= 0) continue;
-      runStartLossAmount += tagLoss;
-      runStartLossSourceDefinitionIds.push(definitionFor(state, cardId).id);
+      sourceDefinitionIds.push(instance.definitionId);
     }
     return {
-      amount,
+      amount: tagLoss * sourceDefinitionIds.length,
       sourceDefinitionIds,
-      runStartLossAmount,
-      runStartLossSourceDefinitionIds,
     };
   }
 
@@ -614,7 +627,6 @@ export function createCardRuntimeDepsHosts(
       .rezzedCorpRootCardIds(state)
       .filter(
         (cardId: CardInstanceId) =>
-          definitionFor(state, cardId).id === RUN_START_CREDIT_LOSS_SOURCE ||
           deps.hasCorpUtilityKind(state, cardId, "run_start_tax"),
       )
       .map((cardId: CardInstanceId) => definitionFor(state, cardId).id);
@@ -667,7 +679,7 @@ export function createCardRuntimeDepsHosts(
     relativeDamageSubroutineForCurrentEncounter,
     relativeTraceSubroutinesForCurrentEncounter,
     runCardImplementationActionHost,
-    runStartTaxForServerUpgrades,
+    runStartCreditLossForServer,
     runStartTaxForCorpRootAssets,
     spendRunnerAccessTrashCredits,
   };

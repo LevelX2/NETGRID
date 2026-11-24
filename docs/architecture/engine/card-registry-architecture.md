@@ -42,6 +42,9 @@ Eine separate `coverage-source-locations.ts` ist ausdrücklich nicht mehr zuläs
 
 ## Verantwortungsgrenze
 
+Das Aktionsangebot und die Ausführung von Runner-Events verwenden denselben
+Resolver aus der CardSpec-Projektion.
+
 ### CardSpec-Verträge statt leerer Mechanics-Profile
 
 `mechanics/agenda-scoring.ts`, `payment-costs.ts` und `hosting-counters.ts`

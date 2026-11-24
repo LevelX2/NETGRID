@@ -121,14 +121,12 @@ export type CardRuntimeHostPort = {
       ) => void;
     };
   };
-  runStartTaxForServerUpgrades: (
+  runStartCreditLossForServer: (
     state: GameState,
     serverId: Exclude<ServerId, "new_remote">,
   ) => {
     amount: number;
     sourceDefinitionIds: CardDefinitionId[];
-    runStartLossAmount?: number;
-    runStartLossSourceDefinitionIds?: CardDefinitionId[];
   };
   runStartTaxForCorpRootAssets: (state: GameState) => {
     amount: number;

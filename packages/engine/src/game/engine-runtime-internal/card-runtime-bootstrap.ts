@@ -2,28 +2,42 @@ import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token"
 import * as runtimePorts from "./runtime-port-bindings";
 import { temporaryIceStrengthPulseBonus } from "../../ability-engine/temporary-ice-strength-pulse";
 import { grantSourceBoundActions } from "./turn-action-economy-runtime";
-import { type CardDefinitionId, type CardInstanceId, type CounterType, type GameState, type LegalAction, type PlayerAction, type Side } from "@netgrid/shared";
+import {
+  type CardDefinitionId,
+  type CardInstanceId,
+  type CounterType,
+  type GameState,
+  type LegalAction,
+  type PlayerAction,
+  type Side,
+} from "@netgrid/shared";
 import { rezCostForCard } from "../payment";
 import { selectedChoiceIds } from "../choices/choice-validation";
-import { corpInstalledCardIds, definitionFor, mustInstance, runnerInstalledCardIds } from "../state/card-server-lookup";
+import {
+  corpInstalledCardIds,
+  definitionFor,
+  mustInstance,
+  runnerInstalledCardIds,
+} from "../state/card-server-lookup";
 import { drawCorpCards } from "../state/draw-random";
 import { spendClick, spendCredits } from "../state/economy-mutation";
 import {
   applyCreditGain,
   creditGainPublicPayload,
 } from "../economy/credit-gain";
-import { addCardCounter, cardCounter, ensureRunnerTurnFlags, hasSuccessfulHqRunThisTurn, spendCardCounter } from "../state/turn-flags-counters";
+import {
+  addCardCounter,
+  cardCounter,
+  ensureRunnerTurnFlags,
+  hasSuccessfulHqRunThisTurn,
+  spendCardCounter,
+} from "../state/turn-flags-counters";
 import { removeFromAllZones } from "../state/zone-mutation";
-export { getLegalActions, legalActionsFor } from "../legal-actions";
-export {
-  eventVisibilityForAction,
-  isHiddenInfoBarrierEvent,
-} from "../events/build-event";
-export { checkWinConditions } from "../win-conditions";
 import { buildLegalAction as action } from "../turn/action-builders";
 import { purgeableRunnerVirusCounterAmount } from "../turn/turn-basic-execution";
 import { addPurgeableRunnerVirusCounter } from "../run/run-end-counter-triggers";
 import { effectiveIceRunSubroutines } from "../run/effective-ice-run-subroutines";
+import { syncPendingChoiceAfterRunnerCostPenaltySupport } from "../payment/runner-payment-support";
 import { topRunnerHeapCardId } from "../abilities/runner-special-trigger-execution";
 import { addRunnerTagsWithPrevention, hiddenRunnerResourceRevealPayload } from "../damage/damage-core";
 import { startCorpDiscardHqWithRetainPaymentChoice } from "../hidden-zone/nonsearch-choice-handlers";
@@ -35,15 +49,6 @@ import { type HiddenZoneRuntimeDepsHost } from "../card-implementation/hidden-zo
 import { type InstallRezRuntimeDepsHost } from "../card-implementation/install-rez-runtime-deps";
 import { type CounterLifecycleRuntimeDepsHost } from "../card-implementation/counter-lifecycle-runtime-deps";
 import { type TraceRuntimeDepsHost } from "../card-implementation/trace-runtime-deps";
-export { quoteCorpRezCost } from "../payment";
-export { createGame, createGameAfterSetup } from "../create-game";
-export { applyAction } from "../apply-action";
-export { applyGameAction } from "../apply-game-action";
-export { getPlayerView, playerViewFor } from "../player-view";
-export { replayEvents, replayGameEvents } from "../replay";
-export { redactPublicEventForSide } from "../view/public-event-view";
-export { hashGameState, hashState } from "../hash";
-export { validateGameState, validateGameStateForDebug } from "../validation";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
 import { executeCardImplementationLifecycleEffects } from "../../ability-engine/card-implementation-runtime";
@@ -562,6 +567,7 @@ export function configureCardRuntimeBootstrap() {
       credits: {
         spendClick,
         spendCredits: spendCardImplementationCredits,
+        syncPendingChoiceAfterRunnerCostPenaltySupport,
         gainCredits: (state, input) => {
           const result = applyCreditGain(state, {
             side: input.side,

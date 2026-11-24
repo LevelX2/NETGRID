@@ -7,7 +7,8 @@ Stand: 2026-08-12
 
 `corepack pnpm check:engine-source-structure` schützt die produktive Rules Engine gegen neue Importzyklen, untypisierte Runtime-Komposition, rückwärts gerichtete Schichtabhängigkeiten und die Wiedereinführung bereits entfernter Legacy-Strukturen.
 
-Der Guard analysiert produktive TypeScript-Dateien unter `packages/engine/src` mit dem TypeScript-Parser.
+Der Guard analysiert TypeScript-Module unter `packages/engine/src` mit dem
+TypeScript-Parser. Testdateien mit der Endung `.test.ts` sind ausgenommen.
 
 ## Aktuell geschützte Verträge
 
@@ -16,10 +17,9 @@ Der Guard analysiert produktive TypeScript-Dateien unter `packages/engine/src` m
 - Relative Imports im produktiven Engine-Graph müssen azyklisch bleiben.
 - `game/engine-runtime-internal/` darf von außen nur über `game/engine-runtime.ts` betreten werden.
 - `ability-engine/` und `card-implementations/` dürfen nicht zurück in `game/` importieren.
-- Zwei aktuell ausdrücklich inventarisierte Ability-Engine-Kanten sind noch als abzubauende Layer-Schuld erlaubt:
-  - `ability-engine/active-modifiers.ts -> game/state/temporary-breaker-strength.ts`
-  - `ability-engine/card-implementation-runtime-activated-costs.ts -> game/payment/runner-payment-support.ts`
-- Neue unerlaubte Kanten und inzwischen verschwundene, aber noch eingetragene Schuld sind beide Fehler.
+- Das Zahlungsfenster liefert die Aktualisierung seiner ausstehenden Choice
+  über den typisierten Engine-Port. Die Modifier-Inspektion der
+  Regelregressionen gehört zu den Testfixtures.
 
 ### Runtime-Komposition
 
@@ -44,10 +44,6 @@ Alle `definition-*-contracts.ts` unter `ability-engine/` sind reine deklarative 
 ### Öffentliche Effektverträge
 
 Produktive Engine-Dateien dürfen `ResolvedGameEffect` nicht durch Type Assertions umgehen. Ein Effekt muss seinen gemeinsamen Vertrag beim Producer erfüllen.
-
-## Fail-closed-Ratchet
-
-Die ausdrücklich inventarisierten Ausnahmen sind kein Dauerbestand. Der Guard behandelt sowohl neue Schulden als auch veraltete Allowlist-Einträge als Fehler. Wird eine der zwei verbleibenden Layer-Kanten entfernt, muss ihr Allowlist-Eintrag im selben Änderungsschnitt verschwinden.
 
 ## Selftest
 

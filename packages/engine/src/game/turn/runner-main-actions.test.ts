@@ -109,14 +109,12 @@ describe("runner main action generation", () => {
         }) as never;
       host.cards.isUniqueCard = () => false;
       host.cards.hasInstalledUniqueCardDefinition = () => false;
-      host.constants.RUNNER_EVENT_RESOLVERS = {
-        locked_run_event: {
-          name: "locked_run_event",
-          startsRun: true,
-          requiresServer: true,
-          resolve: () => undefined,
-        },
-      };
+      host.cardImplementation.runnerEventResolver = () => ({
+        name: "locked_run_event",
+        startsRun: true,
+        requiresServer: true,
+        resolve: () => undefined,
+      });
 
       const actions = buildRunnerMainActions(host);
 
@@ -485,7 +483,6 @@ function testRunnerMainHost(state: GameState): RunnerMainActionGenerationHost {
       ),
     },
     runner: {
-      ensureRunnerTurnFlags: () => state.runnerTurnFlags ?? {},
       availableRunnerTagRemovalCredits: () => state.runner.credits,
       availableRunnerProgramInstallCredits: () => state.runner.credits,
       runnerCostPenaltySupportCreditCapacity: () => 0,
@@ -506,7 +503,7 @@ function testRunnerMainHost(state: GameState): RunnerMainActionGenerationHost {
     run: {
       activeRunActionSpendingCapSourceIds: () => [],
       runDurationPaymentHost: () => ({}),
-      runStartTaxForServerUpgrades: () => ({
+      runStartCreditLossForServer: () => ({
         amount: 0,
         sourceDefinitionIds: [],
       }),
@@ -546,9 +543,6 @@ function testRunnerMainHost(state: GameState): RunnerMainActionGenerationHost {
       runnerEventResolver: () => undefined,
       printedCostMakeRunEffect: () => undefined,
       pushActivatedActions: () => undefined,
-    },
-    constants: {
-      RUNNER_EVENT_RESOLVERS: {},
     },
   };
 }

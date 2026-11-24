@@ -9,7 +9,7 @@ import {
   replayEvents,
   validateGameState,
 } from "../../index";
-import { collectActiveModifiers } from "../../ability-engine/active-modifiers";
+import { collectActiveModifiers } from "../../test-fixtures/active-modifier-inspection";
 import {
   MECHANIC_SMOKE_DECKS,
   apply,

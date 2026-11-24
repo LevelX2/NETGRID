@@ -1,4 +1,11 @@
-import { type CardDefinition, type CardInstanceId, type CorpServer, type GameState, type LegalAction, type ServerId } from "@netgrid/shared";
+import {
+  type CardDefinition,
+  type CardInstanceId,
+  type CorpServer,
+  type GameState,
+  type LegalAction,
+  type ServerId,
+} from "@netgrid/shared";
 import { quoteCorpIceInstallCost } from "../payment";
 import { assertCorpIceInstallAllowed } from "../install/corp-ice-install-restrictions";
 import { mustServer } from "../state/card-server-lookup";

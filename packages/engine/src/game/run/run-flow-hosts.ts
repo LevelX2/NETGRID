@@ -186,9 +186,6 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         corpDuringRunCardImplementationLegalActions:
           host.run.corpDuringRunCardImplementationLegalActions,
       },
-      rules: {
-        isV099OrLater: () => host.rules.isV099OrLater(state),
-      },
       callbacks: {
         beginRunnerRunStartOrdering: host.run.beginRunnerRunStartOrdering,
         applyRunnerTraceCounterRunStartEffects:
@@ -374,7 +371,6 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           host.servers.publicServerLabel(state, serverId),
       },
       rules: {
-        isV097OrLater: () => host.rules.isV097OrLater(state),
         corpRunRootRezActionsAvailable: () =>
           corpRunRootRezActionsAvailable(runRezWindowHostForState(state)),
         corpRunRootRezWindowOpen: () =>
@@ -1296,7 +1292,6 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           ),
       },
       run: {
-        isV097OrLater: () => host.rules.isV097OrLater(state),
         finishRun: (successful, legalAction) =>
           host.callbacks.finishRun(state, successful, legalAction),
         successfulRunInterventionKindForSource: (sourceCardId) => {
@@ -1345,7 +1340,6 @@ export function assertRequiredHostGroups(host: RunFlowHost): void {
   for (const group of [
     "cards",
     "servers",
-    "rules",
     "turn",
     "access",
     "run",

@@ -72,9 +72,6 @@ export type RunCoreExecutionHost = {
       state: GameState,
     ) => LegalAction[];
   };
-  rules: {
-    isV099OrLater: () => boolean;
-  };
   callbacks: {
     beginRunnerRunStartOrdering: (
       state: GameState,
@@ -229,9 +226,7 @@ export function startRun(
             options.runTraceLinkBonusSourceDefinitionId,
         }
       : {}),
-    ...(host.rules.isV099OrLater()
-      ? { badPublicityCredits: state.corp.badPublicity }
-      : {}),
+    badPublicityCredits: state.corp.badPublicity,
     ...(options?.runnerRunTemporaryCredits
       ? {
           runnerRunTemporaryCredits: {
@@ -357,7 +352,6 @@ function openServerMovementWindowBeforeAccess(
   serverId: Exclude<ServerId, "new_remote">,
 ): boolean {
   const movementHost = host.run.movementHost();
-  if (!movementHost.rules.isV097OrLater()) return false;
   const hasCorpWindowActions =
     movementHost.rules.corpRunRootRezActionsAvailable() ||
     (host.run.corpDuringRunCardImplementationLegalActions?.(host.state)
@@ -382,7 +376,6 @@ function assertRequiredHostGroups(host: RunCoreExecutionHost): void {
     "turn",
     "access",
     "run",
-    "rules",
     "callbacks",
   ] as const) {
     if (!host[group])

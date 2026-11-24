@@ -1,5 +1,18 @@
 import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token";
-import type { CardDefinition, CardDefinitionId, CardInstanceId, CardRunnerEventLongtailImplementation, ChoiceRequest, GameState, HiddenZoneNonSearchChoiceHandlerHost, LegalAction, PlayerAction, RuntimeDeps, ServerId, Side } from "./runtime-shared";
+import type {
+  CardDefinition,
+  CardDefinitionId,
+  CardInstanceId,
+  CardRunnerEventLongtailImplementation,
+  ChoiceRequest,
+  GameState,
+  HiddenZoneNonSearchChoiceHandlerHost,
+  LegalAction,
+  PlayerAction,
+  RuntimeDeps,
+  ServerId,
+  Side,
+} from "./runtime-shared";
 import type { PurgeableRunnerVirusCounterType } from "@netgrid/shared";
 import type { ChoiceHiddenZoneRuntimeLinks } from "./choice-hidden-zone-runtime-links";
 import {

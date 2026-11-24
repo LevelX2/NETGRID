@@ -1,4 +1,19 @@
-import { CARD_VIRUS_COUNTER_TYPES, type CardDefinition, type CardDefinitionId, type CardInstance, type CardInstanceId, type CounterType, type EffectCommand, type GameState, type LegalAction, type PlayerAction, type ModifierKind, type ServerId, type Side, type TraceId } from "@netgrid/shared";
+import {
+  CARD_VIRUS_COUNTER_TYPES,
+  type CardDefinition,
+  type CardDefinitionId,
+  type CardInstance,
+  type CardInstanceId,
+  type CounterType,
+  type EffectCommand,
+  type GameState,
+  type LegalAction,
+  type PlayerAction,
+  type ModifierKind,
+  type ServerId,
+  type Side,
+  type TraceId,
+} from "@netgrid/shared";
 import {
   closeRunnerCostPenaltySupportWindowForPayment as closeRunnerCostPenaltySupportWindowForPaymentHelper,
   openRunnerCostPenaltySupportWindow as openRunnerCostPenaltySupportWindowHelper,
@@ -6,7 +21,13 @@ import {
 } from "../payment/runner-payment-support";
 import { validatedEncounterTemporaryTraceCreditRemainder } from "../trace/encounter-temporary-trace-credits";
 import { selectedChoiceIds } from "../choices/choice-validation";
-import { definitionFor, mustInstance, mustRun, mustServer, runnerInstalledCardIds } from "../state/card-server-lookup";
+import {
+  definitionFor,
+  mustInstance,
+  mustRun,
+  mustServer,
+  runnerInstalledCardIds,
+} from "../state/card-server-lookup";
 import { drawCorpCards } from "../state/draw-random";
 import { spendCredits } from "../state/economy-mutation";
 import { applyCreditGain } from "../economy/credit-gain";
@@ -14,14 +35,37 @@ import {
   abilityUsageSourceUsed,
   markAbilityUsageSourceUsed,
 } from "../../ability-engine/card-implementation-ability-limits";
-import { addCardCounter, cardCounter, ensureCorpTurnFlags, ensureRunnerTurnFlags, setCardCounter, spendCardCounter } from "../state/turn-flags-counters";
+import {
+  addCardCounter,
+  cardCounter,
+  ensureCorpTurnFlags,
+  ensureRunnerTurnFlags,
+  setCardCounter,
+  spendCardCounter,
+} from "../state/turn-flags-counters";
 import {
   RESTRICTED_ACTION_GRANT_KEYS,
   spendRestrictedActionGrantTemporaryCredits,
 } from "../state/restricted-action-grants";
 import { purgeVirusCounters } from "../turn/turn-basic-execution";
-import { createDamageImminentEvent, doDamage, openDamageResolutionWindow, openRunnerInstalledTrashPreventionWindow, createRunnerInstalledTrashImminentEvent, resolveDamageImminentEvent, resolveRunnerInstalledTrashImminentEvent, setDamagePayload } from "../damage/damage-core";
-import { hostedPaymentCredits, restrictedHostedCreditSourceForDefinition, restrictedHostedCreditSourceIds, restrictedHostedCredits, spendHostedPaymentCredits, spendRestrictedHostedCredits } from "../run/run-duration-payment";
+import {
+  createDamageImminentEvent,
+  doDamage,
+  openDamageResolutionWindow,
+  openRunnerInstalledTrashPreventionWindow,
+  createRunnerInstalledTrashImminentEvent,
+  resolveDamageImminentEvent,
+  resolveRunnerInstalledTrashImminentEvent,
+  setDamagePayload,
+} from "../damage/damage-core";
+import {
+  hostedPaymentCredits,
+  restrictedHostedCreditSourceForDefinition,
+  restrictedHostedCreditSourceIds,
+  restrictedHostedCredits,
+  spendHostedPaymentCredits,
+  spendRestrictedHostedCredits,
+} from "../run/run-duration-payment";
 import {
   runnerInstallPaymentSourcePaymentsFromPayload,
   runnerProgramInstallOptionalCreditSourceIds,
@@ -1320,7 +1364,7 @@ export function createStateRuntimeResolvers(
     side: Side,
     effects?: AutomaticEffectCollector,
   ): void {
-    if (side !== "runner" || !deps.isV099OrLater(state)) return;
+    if (side !== "runner") return;
     for (const cardId of runnerInstalledCardIds(state)) {
       const definition = definitionFor(state, cardId);
       const restrictedSource =
