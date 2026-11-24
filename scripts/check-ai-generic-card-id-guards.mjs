@@ -65,12 +65,12 @@ const allowedCardIdUses = createAllowances([
       "The definition ID restores Dr. Dreff's resident delayed-success plan source.",
   },
   {
-    relativePath: "corp/defense/defense-choice-continuation.ts",
+    relativePath: "corp/defense/temporary-ice-choice.ts",
     cardId: 570,
     category: "lifecycle_binding",
     expectedCount: 1,
     reason:
-      "The definition ID validates the visible rezzed source of Dr. Dreff's already selected resolution choice.",
+      "The shared choice binding validates Dr. Dreff's rezzed source on the successful-run fort.",
   },
   {
     relativePath: "runtime/selected-choices-for-decision.ts",
