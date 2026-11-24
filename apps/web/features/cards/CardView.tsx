@@ -194,11 +194,6 @@ export function CardView({
   const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">(
     "below",
   );
-  const [actionMenuPlacement, setActionMenuPlacement] = useState<
-    "above" | "below"
-  >("below");
-  const [actionMenuPositionStyle, setActionMenuPositionStyle] =
-    useState<CSSProperties>({});
   const [suppressCardTooltip, setSuppressCardTooltip] = useState(false);
   const [tooltipFocusVisible, setTooltipFocusVisible] = useState(false);
   const [tooltipPinnedVisible, setTooltipPinnedVisible] = useState(false);
@@ -583,89 +578,34 @@ export function CardView({
     setTooltipPinnedVisible(visible);
   };
 
-  const updateOverlayPlacement = () => {
+  const updateTooltipPlacement = () => {
     const element = cardRef.current;
-    if (!element) return;
+    if (!element || !tooltipEnabled) return;
     const cardRect = element.getBoundingClientRect();
     const visualViewport = window.visualViewport;
-    const viewportWidth = visualViewport?.width ?? window.innerWidth;
     const viewportHeight = visualViewport?.height ?? window.innerHeight;
-    const viewportBottom = viewportHeight;
-    const spaceBelow = viewportBottom - cardRect.bottom;
+    const spaceBelow = viewportHeight - cardRect.bottom;
     const spaceAbove = cardRect.top;
     const tooltipHeight = estimatedTooltipHeight();
     const nextTooltipPlacement =
       spaceBelow < tooltipHeight && spaceAbove > spaceBelow ? "above" : "below";
-    if (tooltipEnabled) {
-      const tooltipMaxWidth = computedTooltipMaxWidth();
-      const margin = 16;
-      const left = Math.max(
-        margin,
-        Math.min(
-          cardRect.left + 6,
-          window.innerWidth - tooltipMaxWidth - margin,
-        ),
-      );
-      const tooltipSizeStyle = showImageTooltip
-        ? { width: `${tooltipMaxWidth}px` }
-        : { width: "max-content", maxWidth: `${tooltipMaxWidth}px` };
-      setTooltipPositionStyle(
-        nextTooltipPlacement === "below"
-          ? {
-              left: `${left}px`,
-              top: `${cardRect.bottom + 8}px`,
-              ...tooltipSizeStyle,
-            }
-          : {
-              left: `${left}px`,
-              top: `${cardRect.top - 8}px`,
-              ...tooltipSizeStyle,
-            },
-      );
-    }
-    const estimatedActionMenuHeight = Math.min(
-      260,
-      Math.max(56, actions.length * 51 + Math.max(0, actions.length - 1) * 5),
+    const tooltipMaxWidth = computedTooltipMaxWidth();
+    const margin = 16;
+    const left = Math.max(
+      margin,
+      Math.min(cardRect.left + 6, window.innerWidth - tooltipMaxWidth - margin),
     );
-    const nextActionMenuPlacement =
-      spaceBelow < estimatedActionMenuHeight && spaceAbove > spaceBelow
-        ? "above"
-        : "below";
-    if (tooltipEnabled) setTooltipPlacement(nextTooltipPlacement);
-    if (hasCardActions) {
-      const margin = viewportWidth < 360 ? 8 : 16;
-      const availableWidth = Math.max(160, viewportWidth - margin * 2);
-      const preferredWidth = Math.max(
-        cardRect.width,
-        Math.min(availableWidth, 224),
-      );
-      const actionMenuWidth = Math.min(
-        availableWidth,
-        Math.min(260, preferredWidth),
-      );
-      const cardCenter = cardRect.left + cardRect.width / 2;
-      const left = Math.max(
-        margin,
-        Math.min(
-          cardCenter - actionMenuWidth / 2,
-          viewportWidth - actionMenuWidth - margin,
-        ),
-      );
-      const top =
-        nextActionMenuPlacement === "below"
-          ? cardRect.bottom + 7
-          : Math.max(margin, cardRect.top - estimatedActionMenuHeight - 7);
-      setActionMenuPlacement(nextActionMenuPlacement);
-      setActionMenuPositionStyle({
-        position: "fixed",
-        left: `${left}px`,
-        top: `${top}px`,
-        bottom: "auto",
-        width: `${actionMenuWidth}px`,
-        minWidth: `${Math.min(cardRect.width, actionMenuWidth)}px`,
-        maxHeight: `${Math.max(72, viewportHeight - margin * 2)}px`,
-      });
-    }
+    const tooltipSizeStyle = showImageTooltip
+      ? { width: `${tooltipMaxWidth}px` }
+      : { width: "max-content", maxWidth: `${tooltipMaxWidth}px` };
+    const top =
+      nextTooltipPlacement === "below" ? cardRect.bottom + 8 : cardRect.top - 8;
+    setTooltipPositionStyle({
+      left: `${left}px`,
+      top: `${top}px`,
+      ...tooltipSizeStyle,
+    });
+    setTooltipPlacement(nextTooltipPlacement);
   };
 
   const setCounterHelpTooltipActive = (active: boolean) => {
@@ -704,7 +644,7 @@ export function CardView({
         }),
       );
     }
-    updateOverlayPlacement();
+    updateTooltipPlacement();
   };
 
   const closePinnedTooltip = () => {
@@ -716,7 +656,7 @@ export function CardView({
 
   useEffect(() => {
     if (!showTooltip) return;
-    updateOverlayPlacement();
+    updateTooltipPlacement();
   }, [showTooltip, tooltipMode]);
 
   useEffect(() => {
@@ -774,14 +714,6 @@ export function CardView({
       clearTooltipOutsideCloseTimer();
     };
   }, [tooltipPinnedVisible]);
-
-  useEffect(() => {
-    if (!showCardActions) {
-      setActionMenuPositionStyle({});
-      return;
-    }
-    updateOverlayPlacement();
-  }, [showCardActions, actions.length]);
 
   useEffect(
     () => () => {
@@ -939,12 +871,12 @@ export function CardView({
         style={cardStyle}
         onClick={() => {
           if (showCardActions) setSuppressCardTooltip(true);
-          updateOverlayPlacement();
+          updateTooltipPlacement();
           if (onSelect) onSelect(card, hiddenSide);
           onFocus?.(card, hiddenSide);
         }}
         onFocus={(event) => {
-          updateOverlayPlacement();
+          updateTooltipPlacement();
           if (tooltipEnabled && event.currentTarget.matches(":focus-visible"))
             setTooltipFocusVisible(true);
           onFocus?.(card, hiddenSide);
@@ -957,7 +889,7 @@ export function CardView({
           togglePinnedTooltip();
         }}
         onPointerEnter={(event) => {
-          updateOverlayPlacement();
+          updateTooltipPlacement();
           if (tooltipEnabled) hover.open(event);
         }}
         onPointerMove={(event) => {
@@ -1253,14 +1185,10 @@ export function CardView({
           aria-haspopup="menu"
           data-testid="card-action-marker"
           onPointerDown={(event) => {
-            if (event.pointerType === "touch") {
-              setSuppressCardTooltip(true);
-              updateOverlayPlacement();
-            }
+            if (event.pointerType === "touch") setSuppressCardTooltip(true);
           }}
           onClick={() => {
             if (showCardActions) setSuppressCardTooltip(true);
-            updateOverlayPlacement();
             onFocus?.(card, hiddenSide);
             if (card.known) onActionContextSelect?.(card, hiddenSide);
           }}
@@ -1268,7 +1196,6 @@ export function CardView({
             if (actions.length === 1 && onAction && !actionDisabled)
               onAction(actions[0]!);
           }}
-          onPointerEnter={updateOverlayPlacement}
           onPointerLeave={() => setSuppressCardTooltip(false)}
         >
           <Play size={10} strokeWidth={2.35} />
@@ -1277,9 +1204,8 @@ export function CardView({
       {showCardActions ? (
         <CardActionsPopover
           actions={actions}
+          anchorRef={cardRef}
           disabled={actionDisabled}
-          placement={actionMenuPlacement}
-          style={actionMenuPositionStyle}
           actionLabelForAction={resolvedActionLabelForAction}
           onAction={onAction!}
         />

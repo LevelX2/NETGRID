@@ -1,9 +1,16 @@
 import { canonicalCapabilityId, listPublicCardViews } from "@netgrid/cards/server";
+import { buildMatchPlayerOffer, getPlayerView } from "@netgrid/engine";
 import type { LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import {
+  apply,
+  MECHANIC_SMOKE_GAMES,
+  putCorpRootInRemote,
+} from "../../../packages/engine/src/test-fixtures/mechanic-smoke-fixtures";
+import {
   actionButtonLabel,
+  boardCardActionLabel,
   contextualCardActionLabel,
 } from "../app/action-board-ui";
 import {
@@ -15,6 +22,50 @@ const EXPECTED_MULTI_CAPABILITY_CARD_COUNT = 21;
 const EXPECTED_MULTI_CAPABILITY_LABEL_COUNT = 46;
 
 describe("card capability action translations", () => {
+  it.each([
+    [
+      14,
+      "2 Credits von der Karte nehmen",
+      "Take 2 credits from this card",
+      "Prendre 2 crédits sur cette carte",
+    ],
+    [
+      1,
+      "1 Credit von der Karte nehmen",
+      "Take 1 credit from this card",
+      "Prendre 1 crédit sur cette carte",
+    ],
+  ] as const)(
+    "shows the offered payout with %i credits on BBS in the card menu and action list",
+    (balance, de, en, fr) => {
+      let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("bbs-action-menu");
+      state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+      const bbsId = putCorpRootInRemote(state, 521);
+      state = apply(
+        state,
+        "corp",
+        (action) => action.type === "rez_card" && action.payload?.cardId === bbsId,
+      );
+      state.cardInstances[bbsId]!.counters = { bit: balance };
+      const view = buildMatchPlayerOffer(getPlayerView(state, "corp"));
+      const action = view.legalActions.find(
+        (entry) =>
+          entry.type === "activated_card_ability" && entry.source === bbsId,
+      )!;
+      expect(action.costs).toEqual([{ clicks: 1 }]);
+      for (const [locale, text] of [
+        ["de", de],
+        ["en", en],
+        ["fr", fr],
+      ] as const) {
+        expect(boardCardActionLabel(view, action, undefined, locale)).toBe(text);
+        expect(actionButtonLabel(action, undefined, locale)).toBe(
+          `BBS Whispering Campaign${locale === "fr" ? " :" : ":"} ${text}`,
+        );
+      }
+    },
+  );
+
   it("names Data Fort Remapping and its run-ending effect without needing a catalog lookup", () => {
     const capabilityId =
       4;

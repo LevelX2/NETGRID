@@ -1,9 +1,14 @@
 import { isCanonicalCapabilityId, type CanonicalCapabilityId } from "@netgrid/shared";
 import type { LegalAction } from "../lib/presented-player-view";
 
+import {
+  actionPresentationNoun,
+  actionPresentationText,
+} from "./action-presentation";
 import type { AppLocale } from "./locale";
 
 type TranslatedCapabilityActionLocale = Exclude<AppLocale, "de">;
+const BBS_PAYOUT_CAPABILITY_ID: CanonicalCapabilityId = 635;
 
 export type CardCapabilityActionTranslationCatalog = Readonly<
   Partial<Record<CanonicalCapabilityId, string>>
@@ -218,11 +223,26 @@ export function cardCapabilityIdForAction(
 }
 
 export function localizedCardCapabilityActionLabel(
-  action: Pick<LegalAction, "abilityRef" | "payload">,
-  locale: TranslatedCapabilityActionLocale,
+  action: Pick<LegalAction, "type" | "abilityRef" | "payload">,
+  locale: AppLocale,
 ): string | null {
   const capabilityId = cardCapabilityIdForAction(action);
-  return capabilityId
+  if (
+    action.type === "activated_card_ability" &&
+    capabilityId === BBS_PAYOUT_CAPABILITY_ID
+  ) {
+    const count = action.payload?.hostedCreditTakeAmount;
+    if (typeof count !== "number" || !Number.isSafeInteger(count) || count < 1)
+      throw new Error(
+        `card_action_invalid_hosted_credit_take_amount:${capabilityId}`,
+      );
+    return actionPresentationText(locale, "actionTakeCreditsFromThisCard", {
+      card: "BBS Whispering Campaign",
+      count,
+      credits: actionPresentationNoun(locale, "credit", count),
+    });
+  }
+  return capabilityId && locale !== "de"
     ? (CARD_CAPABILITY_ACTION_TRANSLATION_CATALOGS[locale][capabilityId] ??
         null)
     : null;
