@@ -17,6 +17,14 @@ export type CorpScorePhase =
   | "advance_agenda"
   | "score_agenda";
 
+export type CorpDeferredAdvanceWindow = Readonly<{
+  selectedAtStateVersion: number;
+  selectedOnTurnSerial: number;
+  scoreByTurnSerial: number;
+  agendaRequirement: number;
+  defenseIceInstanceId: string;
+}>;
+
 export type CorpScoreFundingMilestone = Readonly<{
   kind: "score_credit_milestone";
   basis:
@@ -27,6 +35,7 @@ export type CorpScoreFundingMilestone = Readonly<{
         observedAtStateVersion: number;
       }>
     | Readonly<{ kind: "score_conversion_floor" }>
+    | Readonly<{ kind: "score_deferred_advance_floor" }>
     | Readonly<{ kind: "score_continuation_floor" }>;
   targetCredits: number;
   observedCredits: number;
@@ -128,6 +137,13 @@ export type CorpScoreProjectSignal = {
   };
   fundingGap?: number;
   sameTurnFundingActionIds?: string[];
+  /** Carried by the score campaign only after its exact funding head is selected. */
+  deferredAdvanceWindow?: CorpDeferredAdvanceWindow;
+  /** Requotable current-turn draw/credit opportunity cost of preserving the window. */
+  deferredAdvanceBudget?: Readonly<{
+    advancesDue: number;
+    requiredCredits: number;
+  }>;
   /**
    * Published by cr for its exact current credit objective.
    * Support leaves may advance it and lower-priority siblings may preserve it,

@@ -101,6 +101,7 @@ import {
   resolveCorpPunishTraceWindow,
 } from "../corp/punish/punish-trace-binding";
 import { buildCorpAgendaTurnPlanningSlice } from "../corp/score/corp-agenda-turn-planning";
+import { bindSelectedCorpDeferredAdvanceWindow } from "../corp/score/score-deferred-advance-window";
 import { bindSelectedCorpScoreChoiceContinuation } from "../corp/score/score-choice-continuation";
 import {
   discoverCorpDirectScoreProjects,
@@ -814,6 +815,7 @@ export function choosePlanFirstLiveAction(
     result,
     dependencies.discardKeepScore,
   );
+  bindSelectedCorpDeferredAdvanceWindow(input, result);
   bindSelectedCorpDefenseDrawAttempt(input, result);
   bindSelectedCorpHqOverflowConversion(input, result);
   bindSelectedCorpArchivesToHqChoiceContinuation(
@@ -3745,6 +3747,7 @@ function buildCorpDomain(
     residentScoreDefenseBinding,
     residentScoreAgendaInstanceId,
     centralDefenseAllocation,
+    previous,
   });
   const redirectChoiceSignal =
     input.playerView.pendingChoice?.source.startsWith(

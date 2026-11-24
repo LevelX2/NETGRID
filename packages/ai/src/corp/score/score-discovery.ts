@@ -24,6 +24,7 @@ import {
 import { corpConditionalScoreCreditFunding } from "./score-conditional-credit-funding";
 import { withCorpSameTurnScoreDefenseReserve } from "./score-reserve-restoration";
 import { withCorpFirstAdvanceRezFunding } from "./score-first-advance-timing";
+import { withCorpDeferredAdvanceBudget } from "./score-deferred-advance-window";
 import {
   corpShorterTerminalScoreRouteDominates,
   corpWinningScoreSiblingDominates,
@@ -129,6 +130,7 @@ export function reconcileCorpScoreProjects({
   residentScoreDefenseBinding,
   residentScoreAgendaInstanceId,
   centralDefenseAllocation,
+  previous,
 }: {
   input: AiDecisionInput;
   candidates: readonly ActionSemanticCandidate[];
@@ -141,6 +143,7 @@ export function reconcileCorpScoreProjects({
   >;
   residentScoreAgendaInstanceId: string | undefined;
   centralDefenseAllocation: CorpCentralDefenseAllocation;
+  previous: ResidentPlanPortfolio | undefined;
 }): {
   requiredScoreCreditFloor: number;
   scoreProjects: CorpScoreProjectSignal[];
@@ -497,7 +500,17 @@ export function reconcileCorpScoreProjects({
   ]
     .map((project) => withCorpCampaignSlotRelease(input, candidates, project))
     .map((project) =>
-      withCorpFirstAdvanceRezFunding(input, candidates, project),
+      withCorpFirstAdvanceRezFunding(
+        input,
+        candidates,
+        withCorpDeferredAdvanceBudget(
+          input,
+          project,
+          previous,
+          centralDefenseAllocation,
+        ),
+        centralDefenseAllocation,
+      ),
     );
   const deferredLastClickScoreProject =
     corpKnownDeferredLastClickScoreProject(scoreProjects);

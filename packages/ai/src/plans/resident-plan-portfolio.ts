@@ -133,6 +133,7 @@ export type ResidentCorpCampaign = {
     lastTransitionAtStateVersion: number;
   };
   publicOutcomes: ResidentCorpCampaignPublicOutcome[];
+  deferredAdvanceWindow?: import("./corp-score-contracts").CorpDeferredAdvanceWindow;
   evidenceCodes: string[];
 };
 

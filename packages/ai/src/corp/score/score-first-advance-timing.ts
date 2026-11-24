@@ -3,6 +3,7 @@ import type { ActionSemanticCandidate } from "../../action-semantic-candidate-ty
 import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { requireVisibleAgendaAdvancementRequirement } from "../../runtime/visible-agenda-facts";
+import type { CorpCentralDefenseAllocation } from "../defense/corp-central-defense-allocation";
 import { corpExactCurrentBasicLiquidCreditCandidate } from "../economy/economy-domain-signals";
 import { corpInstalledIceInteractionRezQuote } from "./corp-score-defense-continuity";
 import { corpScorePriorityClass } from "./corp-score-priority";
@@ -15,6 +16,7 @@ export function withCorpFirstAdvanceRezFunding(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   project: CorpScoreProjectSignal,
+  centralDefenseAllocation: CorpCentralDefenseAllocation,
 ): CorpScoreProjectSignal {
   const view = input.playerView;
   const own = view.own;
@@ -25,6 +27,7 @@ export function withCorpFirstAdvanceRezFunding(
     view.timingPoint !== "corp_action.main" ||
     own.clicks !== 1 ||
     own.corpEndTurnCreditObligation ||
+    !corpDeferredAdvanceCentralExposureAllows(centralDefenseAllocation) ||
     (own.installRezOnlyCredits ?? 0) > 0 ||
     project.phase !== "advance_agenda" ||
     !project.feasible ||
@@ -46,6 +49,7 @@ export function withCorpFirstAdvanceRezFunding(
   const installation = input.eventTail.at(-1);
   if (
     installation?.type !== "install_card" ||
+    view.turnSerial === undefined ||
     installation.stateVersionAfter !== view.stateVersion ||
     installation.turnSerial !== view.turnSerial ||
     installation.publicPayload.actor !== "corp" ||
@@ -66,20 +70,7 @@ export function withCorpFirstAdvanceRezFunding(
   )
     return project;
 
-  const advance = input.legalActions.find(
-    (action) => action.actionId === project.actionIds?.[0],
-  );
-  if (
-    !actionMatchesCurrentDecision(input, advance) ||
-    advance.type !== "advance_card" ||
-    advance.source !== agenda.instanceId ||
-    advance.costs.length !== 1 ||
-    advance.costs[0]?.clicks !== 1 ||
-    advance.costs[0]?.credits !== 1 ||
-    advance.targetRequirements.length !== 0 ||
-    (advance.choiceRequirements?.length ?? 0) !== 0
-  )
-    return project;
+  if (!corpHasExactBasicAdvance(input, project)) return project;
 
   const protection = project.protectionNeed;
   const baseline = protection?.baseline;
@@ -137,7 +128,48 @@ export function withCorpFirstAdvanceRezFunding(
     ...project,
     fundingGap: 1,
     sameTurnFundingActionIds: [funding.actionId],
+    ...(scoreTurnOffset === 2
+      ? {
+          deferredAdvanceWindow: {
+            selectedAtStateVersion: view.stateVersion,
+            selectedOnTurnSerial: view.turnSerial,
+            scoreByTurnSerial: view.turnSerial + 4,
+            agendaRequirement: remaining,
+            defenseIceInstanceId: newlyAffordableIce.instanceId,
+          },
+        }
+      : {}),
     routeAssessment: "corp_first_advance_waits_for_rez_reserve",
     evidenceCode: `corp_first_advance_waits_for_rez_reserve:${newlyAffordableIce.instanceId}:${spareCredits + 1}:score_turn_plus_${scoreTurnOffset}`,
   };
+}
+
+export function corpDeferredAdvanceCentralExposureAllows(
+  allocation: CorpCentralDefenseAllocation,
+): boolean {
+  return (
+    allocation.status === "known" &&
+    allocation.evidence.hq.threat !== "terminal" &&
+    allocation.evidence.rd.threat !== "terminal"
+  );
+}
+
+export function corpHasExactBasicAdvance(
+  input: AiDecisionInput,
+  project: CorpScoreProjectSignal,
+): boolean {
+  if (project.actionIds?.length !== 1) return false;
+  const advance = input.legalActions.find(
+    (action) => action.actionId === project.actionIds?.[0],
+  );
+  return (
+    actionMatchesCurrentDecision(input, advance) &&
+    advance.type === "advance_card" &&
+    advance.source === project.agendaInstanceId &&
+    advance.costs.length === 1 &&
+    advance.costs[0]?.clicks === 1 &&
+    advance.costs[0]?.credits === 1 &&
+    advance.targetRequirements.length === 0 &&
+    (advance.choiceRequirements?.length ?? 0) === 0
+  );
 }

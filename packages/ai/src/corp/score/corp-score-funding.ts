@@ -103,24 +103,27 @@ export function corpScoreFundingMilestone(
     incrementalFundingTarget,
     conversionTarget,
     continuationTarget,
+    signal.deferredAdvanceBudget?.requiredCredits ?? 0,
   );
   if (!Number.isSafeInteger(targetCredits) || targetCredits <= 0)
     return undefined;
   const priorityClass = corpScorePriorityClass(signal);
   const basis: CorpScoreFundingMilestone["basis"] =
-    targetCredits === incrementalFundingTarget &&
-    protectionFundingGap === fundingGap &&
-    protectionNeed
-      ? {
-          kind: "score_protection_gap",
-          needId: protectionNeed.needId,
-          observedAtStateVersion: protectionNeed.observedAtStateVersion,
-        }
-      : targetCredits === incrementalFundingTarget
-        ? { kind: "score_route_gap" }
-        : targetCredits === conversionTarget
-          ? { kind: "score_conversion_floor" }
-          : { kind: "score_continuation_floor" };
+    targetCredits === signal.deferredAdvanceBudget?.requiredCredits
+      ? { kind: "score_deferred_advance_floor" }
+      : targetCredits === incrementalFundingTarget &&
+          protectionFundingGap === fundingGap &&
+          protectionNeed
+        ? {
+            kind: "score_protection_gap",
+            needId: protectionNeed.needId,
+            observedAtStateVersion: protectionNeed.observedAtStateVersion,
+          }
+        : targetCredits === incrementalFundingTarget
+          ? { kind: "score_route_gap" }
+          : targetCredits === conversionTarget
+            ? { kind: "score_conversion_floor" }
+            : { kind: "score_continuation_floor" };
   return {
     kind: "score_credit_milestone",
     basis,

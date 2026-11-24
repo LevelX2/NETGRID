@@ -115,5 +115,22 @@
     ["corp", "ce"],
     ["corp", "c8"],
     ["corp", "cc.c2h2.r1.c2h2"]
+  ],
+  "commandsToNextCorpMain": [
+    ["corp", "c9"],
+    [
+      "corp",
+      "cn",
+      {
+        "choiceId": "discard_corp_167",
+        "selectedOptionIds": ["card_c392"]
+      }
+    ],
+    ["runner", "rc.c17t.c17t"],
+    ["runner", "r8"],
+    ["runner", "rc.c1jv.c1jv.c17t"],
+    ["runner", "r8"],
+    ["runner", "r9"],
+    ["corp", "ce"]
   ]
 }

@@ -689,6 +689,21 @@ Score oder eine unmittelbar siegbringende Runner-Steal-Linie behalten
 ihre bestehende Bewertung. Der Vergleich gilt für die unmittelbar
 vorangegangene Installation und wird nach dem Geldklick neu geprüft.
 
+Rollt der Aufschub über zwei eigene Züge, hält die Score-Kampagne nach Wahl
+ihres Economy-Steps den spätesten Wertungszug und das zu finanzierende ICE
+fest. Der Folgezugsbedarf entsteht erst mit dem passenden Engine-Ereignis
+für den ausgeführten Geldklick. Score bindet die im jetzigen Zug fälligen
+Advances an die sichtbare Klickkapazität des Wertungszugs und hält die
+Deckung für noch nötige Advances und den gewählten Rez bereit. Nach jedem
+Schritt wird neu gequotet. Sobald die fälligen Advances erledigt sind,
+endet ihre zusätzliche Dringlichkeit und die normale Score-Fortsetzung
+übernimmt die Wertung. Ein erreichbarer terminaler Zentralzugriff sperrt
+bereits den Aufschub und setzt einen späteren Folgezugsbedarf aus.
+Geänderte Agendakosten, eine kompromittierte Remote oder fehlendes Geld
+machen die frühere Zusage hinfällig. Defense bleibt für Schutzangebot und
+Rez zuständig. Der TurnPlanner nutzt die vorhandenen Prioritätsklassen
+und den Score-Finanzierungsmeilenstein.
+
 Nach der exakten Installation bleibt derselbe Nachweis erhalten, wenn die
 Agenda nun im gebundenen Zielserver liegt und weder eine weitere HQ-Agenda
 noch eine installierte Geschwisteragenda exponiert ist. Der Wechsel aus HQ
