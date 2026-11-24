@@ -138,6 +138,12 @@ export function boundCurrentStepProjection(
     !input.playerView.run &&
     candidate.actionType === "install_card" &&
     (cost.creditCost ?? 0) > 0;
+  const eventPayment =
+    input.side === "runner" &&
+    input.playerView.timingPoint === "runner_action.main" &&
+    !input.playerView.run &&
+    candidate.actionType === "play_event" &&
+    (cost.creditCost ?? 0) > 0;
   const tagPayment =
     input.side === "runner" &&
     candidate.actionType === "remove_tag" &&
@@ -147,6 +153,7 @@ export function boundCurrentStepProjection(
     !runPayment &&
     !breakerPayment &&
     !programInstallPayment &&
+    !eventPayment &&
     !tagPayment &&
     cost.additionalCosts.every((field) => field === "agendaPointCost")
   )
@@ -180,8 +187,15 @@ export function boundCurrentStepProjection(
   )
     return undefined;
 
-  if (tagPayment && extras.length === 0) {
-    const restrictedCredits = visibleCurrentTagRemovalCredits(input);
+  if (
+    (tagPayment || eventPayment) &&
+    extras.length === 0 &&
+    action.timingPoint === input.playerView.timingPoint
+  ) {
+    const restrictedCredits = visibleCurrentRestrictedCredits(
+      input,
+      tagPayment ? "remove_tags" : "play_events",
+    );
     if (restrictedCredits > 0)
       return {
         liquidCreditCost: Math.max(0, quoted.creditCost - restrictedCredits),
@@ -310,7 +324,10 @@ export function boundCurrentStepProjection(
   return undefined;
 }
 
-function visibleCurrentTagRemovalCredits(input: AiDecisionInput): number {
+function visibleCurrentRestrictedCredits(
+  input: AiDecisionInput,
+  use: "remove_tags" | "play_events",
+): number {
   let total = 0;
   const sources = new Set<string>();
   for (const card of input.playerView.own.rig ?? []) {
@@ -318,7 +335,7 @@ function visibleCurrentTagRemovalCredits(input: AiDecisionInput): number {
     for (const display of card.counterDisplays ?? []) {
       if (
         display.creditPool?.kind !== "restricted_credit" ||
-        !display.creditPool.uses?.includes("remove_tags")
+        !display.creditPool.uses?.includes(use)
       )
         continue;
       const key = `${card.instanceId}:${display.counterType}`;
@@ -327,9 +344,12 @@ function visibleCurrentTagRemovalCredits(input: AiDecisionInput): number {
         !isNonNegativeInteger(display.amount) ||
         !Number.isSafeInteger(total + display.amount)
       )
-        throw new TurnProjectionError("invalid_restricted_tag_credit_pool", [
-          key,
-        ]);
+        throw new TurnProjectionError(
+          use === "remove_tags"
+            ? "invalid_restricted_tag_credit_pool"
+            : "invalid_restricted_event_credit_pool",
+          [key],
+        );
       sources.add(key);
       total += display.amount;
     }

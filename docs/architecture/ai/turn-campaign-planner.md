@@ -1684,6 +1684,13 @@ Einkommen noch in derselben hypothetischen Linie mehrfach ausgegeben.
 Paarung634 D305 sichert die native legale Tagentfernung bei null freien
 Credits ab, die zuvor als unterfinanziert aus dem einzigen Defensepfad fiel.
 
+Für ein bezahltes `play_event` im aktuellen Runner-Hauptfenster gilt dieselbe
+Zahlgrenze mit dem eigenen Poolzweck `play_events`. Der gebundene Kopf
+reserviert nur den nach dem Prep-Guthaben offenen Betrag. Die Engine wickelt
+die Zahlung und den Karteneffekt ab. Paarung 865 D74 (zwei Klicks und
+anschließender Draw) und Paarung 866 D101 (Decksuche mit anschließender
+Choice) belegen dieselbe Zahlung unter zwei verschiedenen Plan-Ownern.
+
 Unmittelbare eigene Zonenwechsel zählen auch ohne Einkommen: Ein aktuell
 gebundener Grip-zu-Set-aside-Schritt verbraucht genau seine Zielhandkarte.
 Die öffentliche Pflichtablage ist kein Draw und kein liquider Gewinn.
