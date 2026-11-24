@@ -857,6 +857,15 @@ bleiben und dadurch den gesamten TurnPlanner trotz ausführbarer Erholung
 abbrechen. Der native Präfix von Paarung 578 G27 sowie die wieder
 aufgefüllte Hand prüfen Sperre, vollständige Coverage und regulären Tagabbau.
 
+Ein Erstbegegnungs-Bypass um unbekanntes, rezzbares ICE erhält den Wert
+eines frischen Zugriffs, wenn er den Pfad zur unbekannten Remote-Root
+vollständig finanziert und die Mindestreserve erhält. Bei einem garantierten
+Pfad ohne offene ICE-Wirkungen darf er die allgemeine Entwicklungsreserve
+nutzen. Eine akute Scorebedrohung behält ihre Reserve. Die Root bleibt
+unbekannt und der Verbrauch der Eventkarte fließt in die Bewertung ein.
+Match 734d6341 D34 belegt den bezahlbaren Bypass und den Gegenfall mit
+weiterem unbekanntem ICE.
+
 Coverage-Unterstützung gehört zur exakt bewerteten Run-Action. Eine auf demselben
 Server bereits ausführbare Bypass-Variante übernimmt nicht den Breakerbedarf
 des normalen Runs, auch bei einer terminalen Scorebedrohung. Die bestehende
@@ -3003,6 +3012,13 @@ erzeugen. „Abwehr“ bezeichnet damit das Ziel, nicht nur eine aktuell
 verfügbare Abwehraktion.
 
 ## 8. `runner.convert_run_window`
+
+Der Run-Owner berücksichtigt ausgelösten Folgeschaden bis zur nächsten
+tatsächlichen ICE-Begegnung. Für deren Abschluss konsumiert er die
+öffentlichen Felder `encounterContinue` und `passedIcePosition` aus der
+AI-Projektion. Ein Passieren ohne Begegnung verbraucht den Effekt nicht.
+Match ad373209 D114 belegt die Fortsetzung nach dem vollständigen Break
+des Folge-ICE unter demselben Run-Parent.
 
 Ein optionaler Post-Pass-Derez mit Run-Abbruch darf einen gebundenen
 Mehrfachzugriff nicht verdrängen, solange dessen vollständiger bekannter

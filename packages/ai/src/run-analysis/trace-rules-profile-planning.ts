@@ -47,6 +47,30 @@ export function visibleIcePathTraceContext(
   };
 }
 
+/** Bind visible and hypothetical path quotes to the active game's trace rules. */
+export function visibleIcePathTraceContext(
+  input: AiDecisionInput,
+): Pick<
+  VisibleDeflectorContext,
+  "traceRulesProfile" | "onMissingTraceRulesProfile"
+> {
+  const { traceRulesProfile } = input.playerView;
+  if (traceRulesProfile !== undefined) return { traceRulesProfile };
+  return {
+    onMissingTraceRulesProfile: () => {
+      throw new PlanResolutionFailure("invalid_player_view_card_projection", {
+        side: input.side,
+        stateVersion: input.playerView.stateVersion,
+        timingPoint: input.playerView.timingPoint,
+        legalActionTypes: input.legalActions.map(({ type }) => type),
+        owner: "rules_contract",
+        removalCondition:
+          "A visible ICE Trace path quote requires the current Engine trace rules profile.",
+      });
+    },
+  };
+}
+
 export function planningTraceCorpBaseStrength(
   subroutine: VisibleEffectiveSubroutine,
   profile: TraceRulesProfile | undefined,

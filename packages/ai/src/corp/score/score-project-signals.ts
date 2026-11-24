@@ -34,7 +34,10 @@ import {
   corpScorelineFeasibilityForDecisionInput,
   type CorpScorelineFeasibility,
 } from "../../runtime/corp-scoreline-feasibility";
-import { CorpScoreAccelerationSetupBinding } from "../../runtime/corp-scoreline/score-hand-support";
+import {
+  corpCampaignSlotJustCleared,
+  type CorpScoreAccelerationSetupBinding,
+} from "../../runtime/corp-scoreline/score-hand-support";
 import {
   hasExactNonNegativeCostProfile,
   isFiniteNonNegativeInteger,
@@ -656,9 +659,16 @@ export function scoreProjectForCandidate(
       protectionNeed?.baseline.knowledge === "known" &&
       protectionNeed.baseline.agendaPointsAfterDefense + agendaPoints >=
         input.playerView.agendaPointsToWin;
+    const continuedCampaignSlotRelease =
+      certifiedNearTermScoreHorizon &&
+      serverId !== undefined &&
+      input.playerView.own.clicks === 1 &&
+      corpCampaignSlotJustCleared(input, serverId);
     const developmentClickAvailable =
       input.playerView.own.clicks >=
-        (boundedStagedScoreWindow || protectedNearTermMatchpointWindow
+        (boundedStagedScoreWindow ||
+        protectedNearTermMatchpointWindow ||
+        continuedCampaignSlotRelease
           ? 1
           : 2) || deadlinePressure;
     const protectedScoreWindow =

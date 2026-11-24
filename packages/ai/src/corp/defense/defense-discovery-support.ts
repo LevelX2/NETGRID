@@ -42,7 +42,10 @@ import {
 } from "../../runtime/visible-action-facts";
 import { archivesHasVisibleKnownAgenda } from "../../runtime/visible-server-agenda-facts";
 import { assessCorpSpendAgainstScoreFundingMilestones } from "../score/corp-score-funding";
-import { corpReservedScoreServerIds } from "../../runtime/corp-scoreline/score-hand-support";
+import {
+  corpReservedScoreServerIds,
+  corpScoreProjectReservesSlotAfterCampaign,
+} from "../../runtime/corp-scoreline/score-hand-support";
 import { corpInstalledIceHasFreeFullBreak } from "./corp-free-full-break";
 import { CorpDefensiveUpgradePlacement } from "./defense-runtime-types";
 import {
@@ -504,7 +507,12 @@ function corpGlobalIceSupportPlacementSignal(
   // the subsequent agenda installation immediately destroy that investment.
   if (
     existing &&
-    corpReservedScoreServerIds(input, scoreProjects).has(existing.id)
+    corpReservedScoreServerIds(
+      input,
+      scoreProjects.filter((project) =>
+        corpScoreProjectReservesSlotAfterCampaign(input, project),
+      ),
+    ).has(existing.id)
   )
     return undefined;
   const p = action.payload;

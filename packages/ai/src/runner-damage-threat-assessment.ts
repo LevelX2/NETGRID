@@ -1172,6 +1172,7 @@ function futureEncounterDamageTrigger(
   afterExclusive: number,
   beforeExclusive: number,
 ): PublicGameEvent | undefined {
+  let seenCompletedEncounter = false;
   for (
     let index = Math.min(beforeExclusive, history.length) - 1;
     index > afterExclusive;
@@ -1179,9 +1180,19 @@ function futureEncounterDamageTrigger(
   ) {
     const event = history[index];
     if (!event || event.type !== "continue_run") continue;
-    const sourceDefinitionId = event.publicPayload?.sourceDefinitionId;
+    const payload = event.publicPayload;
+    if (
+      payload.encounterContinue === true &&
+      Number.isSafeInteger(payload.passedIcePosition)
+    ) {
+      // An earlier encounter's effect was applied to the last completed
+      // encounter. Passing ICE without an encounter leaves it pending.
+      if (seenCompletedEncounter) return undefined;
+      seenCompletedEncounter = true;
+    }
+    const sourceDefinitionId = payload.sourceDefinitionId;
     if (typeof sourceDefinitionId !== "string") continue;
-    const futureEffectResolved = event.publicPayload?.resolvedEffects?.some(
+    const futureEffectResolved = payload.resolvedEffects?.some(
       (effect) =>
         effect.kind === "resolve_subroutine" &&
         effect.sourceDefinitionId === sourceDefinitionId &&
