@@ -1,24 +1,5 @@
 import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token";
-import type {
-  CardDefinition,
-  CardDefinitionId,
-  CardInstanceId,
-  ChoiceRequest,
-  CounterType,
-  CorpServer,
-  CorpZoneChoiceHandlerHost,
-  GameState,
-  HiddenZoneArrangeChoiceHandlerHost,
-  HiddenZoneNonSearchChoiceHandlerHost,
-  HiddenZoneSearchActivationHandlerHost,
-  HiddenZoneSearchChoiceHandlerHost,
-  LegalAction,
-  PendingChoiceResolutionHost,
-  PlayerAction,
-  RuntimeDeps,
-  ServerId,
-  Side,
-} from "./runtime-shared";
+import type { CardDefinition, CardDefinitionId, CardInstanceId, CounterType, CorpServer, CorpZoneChoiceHandlerHost, GameState, LegalAction, PlayerAction, RuntimeDeps, ServerId } from "./runtime-shared";
 import type { ChoiceHiddenZoneRuntimeLinks } from "./choice-hidden-zone-runtime-links";
 import {
   costQuotePublicPayload,

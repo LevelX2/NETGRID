@@ -1,29 +1,5 @@
 import type { RandomHqDiscardContext } from "@netgrid/shared";
-import type {
-  CardDefinition,
-  CardDefinitionId,
-  CardInstanceId,
-  CardRunnerEventLongtailImplementation,
-  ChoiceRequest,
-  CorpServer,
-  CorpZoneChoiceHandlerHost,
-  CounterType,
-  DamageSummary,
-  DrawTaxDecision,
-  GameState,
-  HiddenZoneArrangeChoiceHandlerHost,
-  HiddenZoneNonSearchChoiceHandlerHost,
-  HiddenZoneSearchActivationHandlerHost,
-  HiddenZoneSearchChoiceHandlerHost,
-  LegalAction,
-  PendingChoiceResolutionHost,
-  PlayerAction,
-  ResolvedGameEffect,
-  RunnerDrawSummary,
-  RuntimeDeps,
-  ServerId,
-  Side,
-} from "./runtime-shared";
+import type { CardDefinitionId, CardInstanceId, ChoiceRequest, CorpServer, DrawTaxDecision, GameState, LegalAction, PlayerAction, RunnerDrawSummary, RuntimeDeps, ServerId } from "./runtime-shared";
 import type { CardLeavePlayCleanupImplementation } from "../../ability-engine/definition-types";
 import { clearDepartedBreakerStrength } from "../state/temporary-breaker-strength";
 import {
