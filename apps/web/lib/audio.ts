@@ -97,7 +97,7 @@ function playSyntheticMatchStartJingle(volume: number): void {
   const safeVolume = Math.min(1, Math.max(0, volume));
   const now = context.currentTime;
 
-  scheduleJingleTone(context, {
+  scheduleTone(context, {
     start: now,
     frequency: 146.83,
     endFrequency: 73.42,
@@ -112,7 +112,7 @@ function playSyntheticMatchStartJingle(volume: number): void {
     { offset: 0.31, frequency: 587.33, type: "triangle" as const },
     { offset: 0.46, frequency: 880, type: "sine" as const },
   ].forEach((note, index) => {
-    scheduleJingleTone(context, {
+    scheduleTone(context, {
       start: now + note.offset,
       frequency: note.frequency,
       duration: index === 3 ? 0.34 : 0.2,
@@ -122,7 +122,7 @@ function playSyntheticMatchStartJingle(volume: number): void {
   });
 
   [293.66, 440, 587.33, 880].forEach((frequency, index) => {
-    scheduleJingleTone(context, {
+    scheduleTone(context, {
       start: now + 0.74,
       frequency,
       duration: 0.58,
@@ -193,6 +193,10 @@ function playSyntheticActionCueSound(
   }
   if (kind === "credit") {
     playCoinClink(context, safeVolume);
+    return;
+  }
+  if (kind === "advance") {
+    playAdvancementSound(context, safeVolume);
     return;
   }
   if (kind === "damage" || kind.startsWith("damage_")) {
@@ -315,7 +319,7 @@ function actionSoundForPremiumCue(cue: PremiumAudioCueKey): ActionSoundKind {
   }
 }
 
-function scheduleJingleTone(
+function scheduleTone(
   context: AudioContext,
   tone: {
     start: number;
@@ -326,6 +330,7 @@ function scheduleJingleTone(
     type: OscillatorType;
   },
 ): void {
+  if (tone.gain === 0) return;
   const oscillator = context.createOscillator();
   const gain = context.createGain();
   oscillator.type = tone.type;
@@ -345,6 +350,33 @@ function scheduleJingleTone(
   gain.connect(context.destination);
   oscillator.start(tone.start);
   oscillator.stop(tone.start + tone.duration + 0.02);
+}
+
+function playAdvancementSound(context: AudioContext, volume: number): void {
+  const now = context.currentTime;
+  // A damped mechanical contact settles into two overlapping notes a major third apart.
+  scheduleTone(context, {
+    start: now,
+    frequency: 250,
+    endFrequency: 155,
+    duration: 0.075,
+    gain: volume * 0.14,
+    type: "triangle",
+  });
+  scheduleTone(context, {
+    start: now + 0.075,
+    frequency: 293.66,
+    duration: 0.41,
+    gain: volume * 0.15,
+    type: "triangle",
+  });
+  scheduleTone(context, {
+    start: now + 0.095,
+    frequency: 369.99,
+    duration: 0.46,
+    gain: volume * 0.1,
+    type: "sine",
+  });
 }
 
 function playDamageLaserBursts(

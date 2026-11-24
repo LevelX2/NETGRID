@@ -125,6 +125,7 @@ export type ActionSoundKind =
   | "credit"
   | "install_hidden"
   | "install_known"
+  | "advance"
   | "play"
   | "rez"
   | "ice_rez"
@@ -825,8 +826,9 @@ export function actionSoundForActionType(
     case "gain_credit":
       return "credit";
     case "install_card":
-    case "advance_card":
       return visibility === "redacted" ? "install_hidden" : "install_known";
+    case "advance_card":
+      return "advance";
     case "play_event":
     case "play_operation":
       return "play";

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createTranslator } from "use-intl/core";
 import enMessages from "../messages/en.json";
+import { localActionSoundKind } from "../features/actions/local-action-sounds";
 import type { PlayerView, PublicGameEvent, Side } from "@netgrid/shared";
 import {
   actionSoundCountForAction,
@@ -1685,6 +1686,35 @@ describe("deriveOpponentActionCues", () => {
     expect(actionSoundCountForAction("draw_card", { amount: 12 })).toBe(5);
     expect(actionSoundCountForAction("mandatory_draw", {})).toBe(1);
     expect(actionSoundCountForAction("gain_credit", { amount: 3 })).toBe(1);
+  });
+
+  it("uses the advancement sound for public and hidden targets and suppresses the local echo", () => {
+    const action = legalAction("corp", "advance_card");
+    const events = [
+      event(147, action.type, {
+        actor: "corp",
+        redactedKind: "installed_card",
+        serverId: "r1",
+      }),
+    ];
+
+    expect(localActionSoundKind(action)).toBe("advance");
+    expect(actionSoundForActionType(action.type, "public")).toBe("advance");
+    const opponentCues = deriveOpponentActionCues({
+      viewerSide: "runner",
+      playerView: view("runner"),
+      events,
+    });
+    expect(opponentCues).toMatchObject([{ visibility: "redacted", sound: "advance" }]);
+    const ownCues = deriveOpponentActionCues({
+      viewerSide: "corp",
+      playerView: view("corp"),
+      events,
+      includeOwnActions: true,
+      locallySoundedEventIds: new Set([147]),
+    });
+    expect(ownCues).toHaveLength(1);
+    expect(ownCues[0]?.sound).toBeUndefined();
   });
 
   it("covers non-card system sounds without leaking hidden details", () => {

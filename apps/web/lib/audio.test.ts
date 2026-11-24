@@ -51,14 +51,14 @@ describe("playMatchStartJingle", () => {
   });
 });
 
-describe("resource sound playback", () => {
+describe("synthetic action sound playback", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
   });
 
   it("plays a short metallic coin cluster at the configured volume", async () => {
     vi.resetModules();
-    const context = resourceAudioContext();
+    const context = testAudioContext();
     vi.stubGlobal("window", { AudioContext: context.AudioContext });
     const { playActionCueSound } = await import("./audio");
 
@@ -81,6 +81,30 @@ describe("resource sound playback", () => {
     expect(context.sources).toHaveLength(0);
   });
 
+  it("plays advancement as a damped contact with a warm, overlapping major third", async () => {
+    vi.resetModules();
+    const context = testAudioContext();
+    vi.stubGlobal("window", { AudioContext: context.AudioContext });
+    const { playActionCueSound } = await import("./audio");
+
+    playActionCueSound("advance", 0);
+    expect(context.oscillators).toHaveLength(0);
+    playActionCueSound("advance", 0.5);
+
+    expect(context.oscillators).toMatchObject([
+      { type: "triangle", frequency: { initial: 250, ramp: { value: 155 } } },
+      { type: "triangle", frequency: { initial: 293.66 } },
+      { type: "sine", frequency: { initial: 369.99 } },
+    ]);
+    expect(context.oscillators[1]?.startedAt).toBeCloseTo(10.075);
+    expect(context.oscillators[2]?.startedAt).toBeCloseTo(10.095);
+    expect(context.oscillators[2]?.stoppedAt).toBeCloseTo(10.575);
+    const peaks = context.gains.map((gain) => gain.gain.ramps[0]!.value);
+    playActionCueSound("advance", 0.25);
+    const quieterPeaks = context.gains.slice(3).map((gain) => gain.gain.ramps[0]!.value);
+    expect(quieterPeaks).toEqual(peaks.map((peak) => peak / 2));
+  });
+
   it.each([
     [3, 3],
     [12, 5],
@@ -88,7 +112,7 @@ describe("resource sound playback", () => {
     "plays %i drawn cards as %i bounded paper snaps",
     async (amount, count) => {
       vi.resetModules();
-      const context = resourceAudioContext();
+      const context = testAudioContext();
       vi.stubGlobal("window", { AudioContext: context.AudioContext });
       const { playActionCueSound } = await import("./audio");
 
@@ -148,7 +172,7 @@ class FakeGain {
   connect() {}
 }
 
-function resourceAudioContext() {
+function testAudioContext() {
   const oscillators: FakeOscillator[] = [];
   const gains: FakeGain[] = [];
   const sources: FakeBufferSource[] = [];
