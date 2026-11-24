@@ -214,10 +214,10 @@ export function strengthModifierBadgeValue(
   return modifier === 0 ? null : modifier;
 }
 
-export function strengthModifierBadgeLabel(amount: number): string {
+export function signedStrengthModifier(amount: number): string {
   const modifier = Math.trunc(amount);
   const sign = modifier < 0 ? "−" : "+";
-  return `${sign}${Math.abs(modifier)} Stärke`;
+  return `${sign}${Math.abs(modifier)}`;
 }
 
 function addCatalogSetDisplay(

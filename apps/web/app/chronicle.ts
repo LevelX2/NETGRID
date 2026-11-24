@@ -6576,6 +6576,8 @@ export function shouldSuppressChronicleEventItem(
   const actionType = stringValue(payload.actionType) ?? event.type;
   if (actionType === "decline_rez" || actionType === "decline_trash")
     return true;
+  if (actionType === "jack_out")
+    return payload.runnerCostPenaltySupportWindowOpened === true;
   if (isSocialEngineeringHiddenAmountSelectionEvent(event)) return true;
   if (
     actionType === "resolve_choice" &&
@@ -6587,6 +6589,11 @@ export function shouldSuppressChronicleEventItem(
     if (item.title.includes("eine Entscheidung beantwortet")) return true;
   }
   if (actionType !== "continue_run" || payload.encounterContinue !== true)
+    return false;
+  if (
+    payloadAbilityId(payload) === "rio_de_janeiro_passed_ice" &&
+    typeof payload.rioRunEnded === "boolean"
+  )
     return false;
   return resolvedEffectsFromPayload(payload.resolvedEffects).some(
     (effect) => stringValue(effect.kind) === "resolve_subroutine",

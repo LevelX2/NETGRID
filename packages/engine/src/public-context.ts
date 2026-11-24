@@ -771,6 +771,17 @@ export function publicContextForAction(
       }
     }
   }
+  if (
+    legalAction.type === "jack_out" &&
+    legalAction.payload?.runnerCostPenaltySupportWindowOpened !== true
+  ) {
+    if (typeof legalAction.payload?.serverId === "string")
+      context.serverId = legalAction.payload.serverId;
+    if (typeof legalAction.payload?.jackOutIcePosition === "number")
+      context.jackOutIcePosition = legalAction.payload.jackOutIcePosition;
+    if (legalAction.payload?.jackOutBeforeAccess === true)
+      context.jackOutBeforeAccess = true;
+  }
   if (legalAction.type === "continue_run") {
     context.result = state.run ? "continued" : "ended";
     if (state.run) {

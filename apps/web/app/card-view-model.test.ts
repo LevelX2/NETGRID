@@ -6,7 +6,7 @@ import {
   aiBoonRunStrengthBadgeValue,
   enrichVisibleCard,
   iceStrengthBadgeValue,
-  strengthModifierBadgeLabel,
+  signedStrengthModifier,
   strengthModifierBadgeValue,
 } from "../features/cards/card-view-model";
 
@@ -98,7 +98,7 @@ describe("card view model ICE strength badge", () => {
 
     expect(enriched.strengthModifier).toBe(-1);
     expect(strengthModifierBadgeValue(enriched)).toBe(-1);
-    expect(strengthModifierBadgeLabel(-1)).toBe("−1 Stärke");
+    expect(signedStrengthModifier(-1)).toBe("−1");
   });
 
   it("keeps positive modifiers and omits a net modifier of zero", () => {
@@ -126,7 +126,7 @@ describe("card view model ICE strength badge", () => {
     );
 
     expect(strengthModifierBadgeValue(boostedIce)).toBe(1);
-    expect(strengthModifierBadgeLabel(1)).toBe("+1 Stärke");
+    expect(signedStrengthModifier(1)).toBe("+1");
     expect(unchangedIce.strengthModifier).toBeUndefined();
     expect(
       strengthModifierBadgeValue({ ...unchangedIce, strengthModifier: 0 }),
@@ -164,7 +164,10 @@ describe("card view model ICE strength badge", () => {
     );
 
     expect(badgeSource).toContain('data-testid="strength-modifier-badge"');
-    expect(badgeSource).toContain("strengthModifierBadgeLabel(amount)");
+    expect(badgeSource).toContain("signedStrengthModifier(amount)");
+    expect(cardSource).toMatch(
+      /counterDisplaysForRendering\(card\)\.filter\(\s*\(display\) => display\.id !== "ice_mark_modifier"/u,
+    );
     expect(cardSource).toMatch(
       /strengthModifier !== null\s*\?\s*\(?\s*<StrengthModifierBadge amount=\{strengthModifier\} \/>\s*\)?\s*:\s*null/u,
     );

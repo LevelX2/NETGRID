@@ -991,8 +991,8 @@
       "side": { "runner": "Runner", "corp": "Corp" },
       "sideArea": "{side} area",
       "randomStandard": "{side} · Random standard deck",
-      "standard": "{side} · Standard deck · {name}",
-      "personal": "{side} · My deck · {name}",
+      "standard": "{name} · {side} · Standard deck",
+      "personal": "{name} · {side} · My deck",
       "openOnTable": "View on deck table",
       "editOnTable": "Edit on deck table",
       "guide": {
@@ -1505,6 +1505,7 @@
       "gypsyRevealed": "Card {position}: revealed from R&D",
       "view": "View",
       "closeView": "Close view",
+      "outermostIceExposed": "{count, plural, one {Outermost ice exposed} other {# outermost ice exposed}}",
       "seen": "Seen"
     },
     "opponentCue": {
@@ -1853,7 +1854,7 @@
     "set": "Set {set}",
     "instance": "Instance {instance}",
     "strength": "Strength {value}",
-    "strengthModifier": "Strength modifier {value}",
+    "strengthModifier": "{value} strength",
     "agendaDifficultyModifier": "Advancement requirement {value}. Printed {printed} · Currently requires {current}",
     "concealedRunnerResource": "concealed Runner resource, not revealed to the Corp",
     "advancement": "{count, plural, one {# advancement} other {# advancements}}",
@@ -1884,7 +1885,6 @@
       "active": "Active",
       "actionsPerTurn": "+{count} {count, plural, one {action} other {actions}}/turn",
       "creditsPerTurn": "+{count} {count, plural, one {credit} other {credits}}/turn",
-      "iceStrength": "+{count} strength",
       "currentStrength": "Current strength {value}"
     }
   },
@@ -2173,7 +2173,9 @@
       "runContinued": "{subject}: continued the run on {server}.",
       "runContinuedToIce": "{subject}: continued the run on {server} to ICE {number}.",
       "runContinuedToRoot": "{subject}: continued the run on {server} to the root.",
-      "runJackedOut": "{subject}: jacked out.",
+      "runJackedOut": "{subject}: jacked out of the run on {server}.",
+      "runJackedOutBeforeIce": "{subject}: jacked out of the run on {server} before ICE {number}.",
+      "runJackedOutBeforeAccess": "{subject}: jacked out of the run on {server} before access.",
       "optionalBonusRunDeclined": "{subject}: declined the bonus run.",
       "runEnded": "The run ended.",
       "cardAccessed": "{subject}: accessed {card}.",
@@ -2387,7 +2389,9 @@
       "viralProgramTrashed": "{subject}: trashed {count} {count, select, 1 {program} other {programs}} through Viral 15: {card}.",
       "jackOutNoAccess": "No card was accessed on {server}.",
       "viralJackOut": "Viral 15: paid {amount} {amount, select, 1 {credit} other {credits}} to jack out; no access on {server} and no program trashed.",
-      "rio": "{subject}: passed {ice}; Rio de Janeiro City Grid rolls {roll} – {outcome}.",
+      "rio": "{subject}: passed {ice} on {server}. Rio de Janeiro City Grid rolls {roll} – {outcome}.",
+      "numberedIce": "ICE {number}",
+      "numberedNamedIce": "ICE {number} ({ice})",
       "vacuumRewind": "{subject}: {source} rolls {roll}; sent back {back} rezzed ICE to ICE {position}.",
       "vacuumNoRewind": "{subject}: {source} rolls {roll}; the run is not rewound.",
       "startupImmolator": "{subject}: exhausted Startup Immolator, trashed {ice} to Archives and paid {amount} {amount, select, 1 {credit} other {credits}}.",

@@ -2374,8 +2374,16 @@ mit genau einem Aktionspreis und einem festen öffentlichen `make_run`-Effekt.
 Abweichender HQ-/R&D-Zugriff benötigt aktuelle Accessquotes und vollständig
 gebundenes eigenes Inventar; fehlende Fakten bleiben unknown. Der Fact
 beschreibt eine Möglichkeit, keine Zielwahrscheinlichkeit. Der bestehende
-globale Defenseowner lässt sie zur exakten Install-/Fundingprüfung zu;
-er garantiert weder ihre Auswahl noch eine vollständig bessere Allokation.
+globale Defenseowner lässt sie zur exakten Install-/Fundingprüfung zu.
+
+Paarung 739, G4 D174 zeigt die Grenze der qualitativen Bewertung nach der
+Zulassung. Die Data-Wall-Installationen auf HQ, Archives und Remote 1
+erhalten im Verteidigungsvergleich jeweils den Wert 18. Die KI wählt HQ. Der
+folgende Runner-Zug erreicht HQ mit öffentlich installiertem Shredder Uplink
+Protocol über das freie Archives. Bei der Bewertung einer besseren
+Allokation sind der zusätzliche Schutz am gemeinsamen Zugriffsziel, die
+Rezreserve, die Breakkosten des Runners und seine bezahlbaren Ausweichrouten
+gemeinsam zu prüfen.
 
 Für einen offenen, legalen Eintritt zu einer unmittelbar siegbringenden
 Zentralagenda kann eine einzelne feste Trace-ICE-Schicht den direkten

@@ -1981,10 +1981,10 @@
     },
     {
       "standardDeckId": "standard_corp_siren_fortress",
-      "sourceDeckVersion": "1.1.0",
-      "sourceDeckHash": "standard-deck:1681b4ad",
-      "sourceAnalysisHash": "deck-analysis:d9d06185",
-      "reviewedAt": "2026-11-05",
+      "sourceDeckVersion": "1.4.0",
+      "sourceDeckHash": "standard-deck:a9516fa0",
+      "sourceAnalysisHash": "deck-analysis:10516425",
+      "reviewedAt": "2026-11-22",
       "analysis": {
         "primaryStrategyIds": [
           "corp.ice_tax_glacier",
@@ -1998,17 +1998,22 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:3d474202",
+      "sourceAnalysisInputHash": "deck-analysis-input:bea6829c",
       "contentByLocale": {
         "en": {
-          "summary": "Siren Fortress relies primarily on taxing ICE layers, a protected remote scoring line and a distributed asset economy. Additionally, the deck utilizes concrete flatline pressure, repeatable deck recycling and early rush score windows.",
-          "deckIdea": "Siren Fortress combines taxing ICE layers, a protected remote scoring line and a distributed asset economy. Stagger ICE so that the Runner has to pay repeatedly and your scoring window actually gets bigger. Establish a credible scoring remote and only deploy agendas when protection and follow-up moves match up. Develop economy assets so that the Runner has to choose between losing speed and your growing income.",
+          "summary": "Siren Fortress layers taxing ICE around a scoring remote. Three copies each of Efficiency Experts and Night Shift fund early rezzes. BBS Whispering Campaign replenishes the reserve between scores.",
+          "deckIdea": "Build a remote where successive ICE reinforce each other. Shock.r can stop the Runner from breaking the next ICE, and Haunting Inquisition can buy time to score. Use credit operations early and a protected BBS to fund the next agenda.",
           "gamePlan": {
-            "opening": "First secure economy, a sensible early ICE pattern and a credit reserve. Pay particular attention to Olivia Salazar and BBS Whispering Campaign without leaving an unbalanced starting hand.",
-            "midgame": "Stagger ICE so that the Runner has to pay repeatedly and your scoring window actually gets bigger. Establish a credible scoring remote and only deploy agendas when protection and follow-up moves match up. Develop economy assets so that the Runner has to choose between losing speed and your growing income.",
+            "opening": "Use Night Shift to gain two credits and draw toward the next ICE or agenda. Use Efficiency Experts when the extra credit makes a central ICE rez affordable. Keep enough credits to protect an installed BBS.",
+            "midgame": "Prepare the remote and budget for both the necessary rezzes and the remaining advancements. Refill with BBS and reuse the same remote for the next agenda.",
             "endgame": "Complete using the safest available scoring or flatline window. Have enough reserves so that the decisive move doesn't fail due to Rez, Trace or Advancement costs."
           },
           "keyCards": [
+            {
+              "cardId": 502,
+              "title": "Efficiency Experts",
+              "role": "Provides three immediate credits for the first rezzes."
+            },
             {
               "cardId": 575,
               "title": "Olivia Salazar",
@@ -2040,19 +2045,24 @@
             "Don't just rezz because you can; every expenditure should improve a specific access, tempo or score window."
           ],
           "weaknesses": [
-            "If Olivia Salazar and BBS Whispering Campaign fail or come too late, the deck loses part of its clearest line.",
+            "Expensive ICE can still consume the money needed to advance the next agenda. BBS may need protection before it pays back the installation action.",
             "Multiple simultaneous main lines can disperse credits and actions. Decide for each turn which plan actually fits the current board."
           ]
         },
         "de": {
-          "summary": "Siren Fortress setzt vor allem auf taxierende ICE-Staffeln, eine geschützte Remote-Scorelinie und eine verteilte Asset-Economy. Ergänzend nutzt das Deck konkreten Flatline-Druck, wiederholbares Deck-Recycling und frühe Rush-Scorefenster.",
-          "deckIdea": "Siren Fortress verbindet taxierende ICE-Staffeln, eine geschützte Remote-Scorelinie und eine verteilte Asset-Economy. Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Entwickle Economy-Assets so, dass der Runner zwischen Tempoverlust und deinem wachsenden Einkommen wählen muss.",
+          "summary": "Siren Fortress schützt einen Wertungs-Remote mit mehreren ICE-Schichten. Je drei Efficiency Experts und Night Shift finanzieren frühe Rezzes. BBS Whispering Campaign füllt die Bank zwischen den Wertungen auf.",
+          "deckIdea": "Baue einen Remote, dessen ICE in der richtigen Reihenfolge zusammenwirken. Shock.r kann das Brechen am nächsten ICE verhindern. Haunting Inquisition kann dir Zeit zum Werten verschaffen. Nutze am Anfang Creditoperationen und finanziere die nächste Agenda über eine geschützte BBS.",
           "gamePlan": {
-            "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Olivia Salazar und BBS Whispering Campaign, ohne dafür eine unausgewogene Starthand zu behalten.",
-            "midgame": "Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Entwickle Economy-Assets so, dass der Runner zwischen Tempoverlust und deinem wachsenden Einkommen wählen muss.",
+            "opening": "Nutze Night Shift für zwei Credits und eine weitere Karte auf der Suche nach ICE oder einer Agenda. Spiele Efficiency Experts, wenn der zusätzliche Credit ein frühes Rez vor HQ oder R&D ermöglicht. Halte nach der Installation einer BBS genug Credits für ihren Schutz bereit.",
+            "midgame": "Bereite den Remote vor und rechne die nötigen Rezzes und verbleibenden Advances zusammen. Fülle die Bank mit BBS wieder auf und nutze denselben Remote für die nächste Agenda.",
             "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
           },
           "keyCards": [
+            {
+              "cardId": 502,
+              "title": "Efficiency Experts",
+              "role": "Liefert sofort drei Credits für die ersten Rezzes."
+            },
             {
               "cardId": 575,
               "title": "Olivia Salazar",
@@ -2084,7 +2094,7 @@
             "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
           ],
           "weaknesses": [
-            "Fallen Olivia Salazar und BBS Whispering Campaign aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+            "Teures ICE kann die Credits für die nächste Entwicklung aufbrauchen. Eine BBS braucht Schutz, bis sich der Installationsklick ausgezahlt hat.",
             "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
           ]
         }
