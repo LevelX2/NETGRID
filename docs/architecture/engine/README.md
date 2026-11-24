@@ -78,10 +78,15 @@ Der Prozess hält dafür höchstens 128 Einträge. Replays projizieren bei der
 erneuten Anwendung jedes Ereignisses nur das neue öffentliche Ereignis. Der
 Replayzustand enthält weiterhin das Journal der nachgespielten Aktionen.
 
-Die Corp-Trace-Zahlwahl liest Spezialquellen und verfügbare Zahlungsbeträge
-einmal pro Auswahl. Sie bildet die legalen Verteilungen daraus in stabiler
-Reihenfolge. Beim Anwenden einer Auswahl prüft die Zahlungsquote Quellen,
-Beträge und erforderliche Trace-Counter erneut am aktuellen Zustand.
+Die Corp-Trace-Zahlwahl bietet je verfügbarer Spezialquelle einen Höchstbetrag
+und eine empfohlene Menge an. Das private Angebot enthält das feste Gebot, den
+Mindestbetrag aus Spezialquellen und die erforderlichen Trace-Counter. Die Corp
+bestätigt die ausgewählten Quellen und ihre Beträge in einer Aktion. Den Rest
+bucht die Engine nach der bestehenden Reihenfolge für temporäre Credits,
+Fort-Bits und reguläre Credits. Eine Trace-Reaktion aktualisiert ein offenes
+Zahlangebot. Beim Bestätigen prüft die Engine die gebundenen Options-IDs und
+Beträge sowie die Zahlungsquote am aktuellen Zustand erneut. In Blind-Profilen
+bucht sie die Zahlung erst bei der Aufdeckung beider Gebote.
 
 Aktionen und gebundene Verteidigungsvorschauen, die Effekte ausführen, kopieren
 die Journal-Liste flach und den veränderlichen Kernzustand tief. Beide behandeln

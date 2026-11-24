@@ -340,14 +340,15 @@ describe("trace orchestration", () => {
       actionFor("corp", "resolve_choice"),
       playerChoice("bid_3"),
     );
-    const allocationOption = state.pendingChoice?.options.find((option) =>
-      String(option.value).includes('"amount":1'),
-    );
+    const allocationOption = state.pendingChoice?.options.find((option) => option.value === poolId);
     if (!allocationOption) throw new Error("Krumz allocation option missing.");
     resolveTraceChoice(
       host,
       actionFor("corp", "resolve_choice"),
-      playerChoice(allocationOption.id),
+      {
+        ...playerChoice(allocationOption.id),
+        selectedChoices: { selectedOptionIds: [allocationOption.id], selectedOptionAmounts: [1] },
+      },
     );
 
     expect(state.corp.credits).toBe(3);

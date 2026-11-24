@@ -5,6 +5,7 @@ import {
   rezCostReductionSourceDefinitionIdsFor,
 } from "../payment";
 import { startRunnerMemoryCheckpointChoice } from "../checkpoints/runner-memory-checkpoint";
+import { refreshCorpBidPaymentChoice } from "../trace/trace-orchestration";
 import {
   corpInstalledCardIds,
   corpRootAssetIdsInServer,
@@ -346,6 +347,13 @@ export function configureActionRuntimeBootstrap({
           trashRunnerInstalledCardToHeap: (cardId, action) =>
             runtimePorts.trashRunnerInstalledCardToHeap(state, cardId, action),
         });
+        if (
+          legalAction.type !== "resolve_choice" &&
+          state.pendingChoice?.traceCorpPayment
+        )
+          refreshCorpBidPaymentChoice(
+            runtimePorts.traceOrchestrationHost(state),
+          );
         if (
           !state.pendingChoice &&
           !state.imminentEvent &&

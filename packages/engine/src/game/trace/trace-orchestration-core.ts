@@ -1,4 +1,5 @@
 import {
+  isPositiveSafeInteger,
   type CardDefinition,
   type CardDefinitionId,
   type CardInstanceId,
@@ -27,7 +28,7 @@ import {
   assertCorpTraceBidPaymentValid,
   assertRunnerTraceBidPaymentQuoteValid,
   assertRunnerTraceBidPaymentValid,
-  corpTraceBidPaymentAllocations,
+  quoteCorpTracePaymentChoice,
   corpTracePaymentPublicPayload,
   payCorpTraceBidQuote,
   payCommittedCorpTraceBidQuote,
@@ -344,7 +345,7 @@ function resolveTraceCorpBid(
   )
     return;
   const specializedSelections = pendingPaymentSelection
-    ? selectedCorpTracePaymentAllocation(state.pendingChoice, playerAction)
+    ? selectedCorpTracePaymentAllocation(state.pendingChoice, trace, bid, playerAction)
     : undefined;
   const tracePaymentQuote = specializedSelections
     ? quoteCorpTraceBidPayment(
@@ -360,6 +361,8 @@ function resolveTraceCorpBid(
         trace,
         bid,
       );
+  if (!tracePaymentQuote.canPay)
+    throw new Error("Die Trace-Zahlung ist nicht mehr bezahlbar.");
   const rules = traceRulesDefinitionForTrace(trace);
   const blindCommit = rules.resolutionMode === "hidden_commit_reveal";
   const tracePaymentReceipt = blindCommit
@@ -488,60 +491,10 @@ function startCorpBidPaymentChoice(
   bid: number,
   legalAction: LegalAction,
 ): boolean {
-  const allocations = corpTraceBidPaymentAllocations(
-    host.payment.corpTracePaymentDeps,
-    host.state,
-    trace,
-    bid,
-  );
-  if (allocations.length <= 1) return false;
-  const sourceTitles = new Map<CardInstanceId, string>();
-  host.state.trace = {
-    ...trace,
-    corpBidPaymentSelection: { bid },
-  };
-  host.state.pendingChoice = {
-    choiceId: `${trace.traceId}.corp.payment.${host.state.stateVersion + 1}`,
-    side: "corp",
-    source: `trace:${trace.traceId}:corp_payment`,
-    prompt: `Zahlungsquellen für Trace-Bid ${bid} wählen`,
-    presentationKey: "trace_corp_payment",
-    kind: "select_option",
-    options: allocations.map((allocation, index) => {
-      let remaining = bid;
-      const labelParts: string[] = [];
-      const paymentSources: Array<{ title?: string; amount: number }> = [];
-      for (const { sourceCardInstanceId, amount } of allocation) {
-        if (amount === 0) continue;
-        let title = sourceTitles.get(sourceCardInstanceId);
-        if (title === undefined) {
-          title = host.cards.definitionFor(sourceCardInstanceId).title;
-          sourceTitles.set(sourceCardInstanceId, title);
-        }
-        remaining -= amount;
-        labelParts.push(`${amount} aus ${title}`);
-        paymentSources.push({ title, amount });
-      }
-      if (remaining > 0) {
-        labelParts.push(`${remaining} übrige Quellen`);
-        paymentSources.push({ amount: remaining });
-      }
-      return {
-        id: `corp_payment_${index}`,
-        label: labelParts.join(", "),
-        value: JSON.stringify(allocation),
-        metadata: { paymentSources },
-      };
-    }),
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: host.state.stateVersion + 1,
-    visibility:
-      traceRulesDefinitionForTrace(trace).resolutionMode ===
-      "hidden_commit_reveal"
-        ? "hidden_info_barrier"
-        : "public",
-  };
+  const choice = corpBidPaymentChoice(host, trace, bid);
+  if (!choice) return false;
+  host.state.trace = { ...trace, corpBidPaymentSelection: { bid } };
+  host.state.pendingChoice = choice;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     traceId: trace.traceId,
@@ -552,18 +505,104 @@ function startCorpBidPaymentChoice(
   return true;
 }
 
+function corpBidPaymentChoice(
+  host: TraceOrchestrationHost,
+  trace: CurrentTrace,
+  bid: number,
+  existingChoiceId?: string,
+): ChoiceRequest | undefined {
+  const quote = quoteCorpTracePaymentChoice(
+    host.payment.corpTracePaymentDeps,
+    host.state,
+    trace,
+    bid,
+  );
+  if (!quote || (!quote.hasAlternatives && existingChoiceId === undefined))
+    return undefined;
+  return {
+    choiceId:
+      existingChoiceId ??
+      `${trace.traceId}.corp.payment.${host.state.stateVersion + 1}`,
+    side: "corp",
+    source: `trace:${trace.traceId}:corp_payment`,
+    prompt: `Zahlungsquellen für das Trace-Gebot von ${bid} wählen`,
+    presentationKey: "trace_corp_payment",
+    kind: "select_option",
+    traceCorpPayment: quote.choice,
+    options: quote.sources.map(({ sourceCardInstanceId, ...source }) => ({
+      id: `trace_payment_${sourceCardInstanceId}`,
+      label: host.cards.definitionFor(sourceCardInstanceId).title,
+      value: sourceCardInstanceId,
+      metadata: { traceCorpPaymentSource: source },
+    })),
+    minSelections: 0,
+    maxSelections: quote.sources.length,
+    stateVersion: host.state.stateVersion + 1,
+    visibility:
+      traceRulesDefinitionForTrace(trace).resolutionMode ===
+      "hidden_commit_reveal"
+        ? "hidden_info_barrier"
+        : "public",
+  };
+}
+
+export function refreshCorpBidPaymentChoice(
+  host: TraceOrchestrationHost,
+): void {
+  const { pendingChoice, trace } = host.state;
+  if (!pendingChoice?.traceCorpPayment || !trace?.corpBidPaymentSelection)
+    throw new Error(
+      "Das Trace-Zahlungsfenster ist nicht mehr an das Gebot gebunden.",
+    );
+  const choice = corpBidPaymentChoice(
+    host,
+    trace,
+    trace.corpBidPaymentSelection.bid,
+    pendingChoice.choiceId,
+  );
+  if (!choice)
+    throw new Error("Das Trace-Zahlungsfenster ist nicht mehr verfügbar.");
+  host.state.pendingChoice = choice;
+}
+
 function selectedCorpTracePaymentAllocation(
   choice: ChoiceRequest | undefined,
+  trace: CurrentTrace,
+  bid: number,
   playerAction: PlayerAction,
 ): CorpTracePaymentSelection[] {
-  const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
-  const option = choice?.options.find((candidate) => candidate.id === selected);
-  if (!option || typeof option.value !== "string")
-    throw new Error("Die Trace-Zahlungsquellen-Auswahl ist ungültig.");
-  const parsed = JSON.parse(option.value) as CorpTracePaymentSelection[];
-  if (!Array.isArray(parsed))
-    throw new Error("Die Trace-Zahlungsquellen-Auswahl ist ungültig.");
-  return parsed;
+  const amounts = playerAction.selectedChoices?.selectedOptionAmounts;
+  const ids = selectedChoiceIds(playerAction.selectedChoices);
+  if (
+    choice?.source !== `trace:${trace.traceId}:corp_payment` ||
+    choice.traceCorpPayment?.bid !== bid ||
+    !Array.isArray(amounts) ||
+    amounts.length !== ids.length
+  )
+    throw new Error("Die Auswahl der Trace-Zahlungsquellen ist ungültig.");
+  const amountsById = new Map(
+    ids.map((id, index) => [id, amounts[index] as unknown]),
+  );
+  const selections: CorpTracePaymentSelection[] = [];
+  for (const option of choice.options) {
+    if (!amountsById.has(option.id)) continue;
+    const amount = amountsById.get(option.id);
+    const source = option.metadata?.traceCorpPaymentSource;
+    if (
+      !source ||
+      !isPositiveSafeInteger(amount) ||
+      typeof option.value !== "string"
+    )
+      throw new Error("Die Auswahl der Trace-Zahlungsquellen ist ungültig.");
+    selections.push({
+      kind: source.kind,
+      sourceCardInstanceId: option.value,
+      amount,
+    });
+  }
+  if (selections.length !== ids.length)
+    throw new Error("Die Auswahl der Trace-Zahlungsquellen ist ungültig.");
+  return selections;
 }
 
 function startTraceBaseLinkChoice(

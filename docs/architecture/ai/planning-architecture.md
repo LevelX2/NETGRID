@@ -1936,6 +1936,12 @@ innerhalb rationaler legaler Kandidaten replaybar variieren. Sie ändert weder
 Punish-, Defense-, Run- oder Scoreplan wählen. Die Engine bindet und
 revalidiert den aktuellen `resolve_choice`-Step vor jedem RNG-Draw.
 
+Die anschließende Corp-Zahlwahl übernimmt die Engine-Verteilung des bereits
+gebundenen Gebots. Sie belegt zuerst die erforderlichen Trace-Counter und
+verwendet für den Rest bevorzugt wiederkehrende Trace-Bits. Die Choice bindet
+die aktuellen Quelloptionen und Beträge an dieselbe Ausführung. Executor, Root,
+Route und Step behalten ihre Bindung.
+
 Bei einer öffentlich enginebestätigten automatischen Trace-Wirkung mit
 gebotsunabhängiger Menge bleibt ausschließlich das kleinste legale Gebot
 rational. Die aktive `VisibleTraceState.bidEffect`-Tatsache wird nur für die

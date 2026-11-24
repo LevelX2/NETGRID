@@ -7,7 +7,7 @@ import type {
 } from "@netgrid/shared";
 import {
   assertCommittedCorpTraceBidPaymentQuoteValid,
-  corpTraceBidPaymentAllocations,
+  quoteCorpTracePaymentChoice,
   corpTracePaymentPublicPayload,
   payCorpTraceBidQuote,
   payCommittedCorpTraceBidQuote,
@@ -123,7 +123,7 @@ describe("trace payment pools", () => {
     ).toMatchObject({ canPay: true, corpTraceCountersToPay: 1 });
   });
 
-  it("reads specialized pools once and lists only affordable Classic allocations in order", () => {
+  it("quotes one entry per source and maximizes specialized spending within Classic limits", () => {
     const trace = corpBidTrace({
       traceLimit: 2,
       traceRulesProfile: "classic_blind",
@@ -151,23 +151,29 @@ describe("trace payment pools", () => {
       corpTraceCounterPoolTotal: () => 3,
     });
 
-    const allocations = corpTraceBidPaymentAllocations(deps, state, trace, 4);
+    const offer = quoteCorpTracePaymentChoice(deps, state, trace, 4)!;
 
     expect(bitSource).toHaveBeenCalledTimes(1);
     expect(counterSource).toHaveBeenCalledTimes(1);
+    expect(offer.choice).toEqual({
+      bid: 4,
+      minimumSpecializedAmount: 3,
+      requiredTraceCounters: 2,
+    });
+    expect(offer.hasAlternatives).toBe(true);
     expect(
-      allocations.map((allocation) => allocation.map(({ amount }) => amount)),
-    ).toEqual([
-      [0, 3],
-      [1, 2],
-      [1, 3],
-      [2, 2],
-    ]);
-    for (const allocation of allocations) {
-      expect(
-        quoteCorpTraceBidPayment(deps, state, trace, 4, allocation).canPay,
-      ).toBe(true);
-    }
+      offer.sources.map(({ recommendedAmount }) => recommendedAmount),
+    ).toEqual([2, 2]);
+    const selected = offer.sources.map(
+      ({ kind, sourceCardInstanceId, recommendedAmount }) => ({
+        kind,
+        sourceCardInstanceId,
+        amount: recommendedAmount,
+      }),
+    );
+    expect(
+      quoteCorpTraceBidPayment(deps, state, trace, 4, selected).canPay,
+    ).toBe(true);
   });
 
   it("does not apply the printed Trace N as a Modern Open bid limit", () => {

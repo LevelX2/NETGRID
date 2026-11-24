@@ -19,6 +19,7 @@ export {
   type AbilityPayloadDiscriminators,
 } from "./ability-payload";
 export * from "./match-offer-contracts";
+export { traceCorpPaymentBalance } from "./trace-payment-choice";
 import type { AbilityPayloadDiscriminators } from "./ability-payload";
 import type { ServerId } from "./server-ids";
 export { isRemoteServerId, type RemoteServerId, type ServerId } from "./server-ids";
@@ -1130,7 +1131,7 @@ export type ChoiceOption = {
     secondTargetTitle?: string;
     optionKind?: string;
     placements?: Array<{ title: string; amount: number }>;
-    paymentSources?: Array<{ title?: string; amount: number }>;
+    traceCorpPaymentSource?: TraceCorpPaymentSourceOffer;
     postBidTraceLinkDelta?: number;
     delayedInstallRemainingCounters?: number;
     /** Engine fact for this exact delayed-install destination; no program is displaced when false. */
@@ -1195,6 +1196,7 @@ export type ChoiceRequest = {
   visibility: EventVisibilityClass;
   stackSearchResolution?: StackSearchResolution;
   cardSearchPresentation?: CardSearchPresentation;
+  traceCorpPayment?: TraceCorpPaymentChoice;
   corpStartDrawQuote?: {
     sourceCardInstanceId: CardInstanceId;
     observedAtStateVersion: number;
@@ -1979,6 +1981,21 @@ export type TraceCorpPaymentSourceKind =
 export type TraceRunnerPaymentSourceKind =
   | "runner_credits"
   | "runner_trace_link_credit";
+
+export type TraceCorpPaymentChoice = {
+  bid: number;
+  minimumSpecializedAmount: number;
+  requiredTraceCounters: number;
+};
+
+export type TraceCorpPaymentSourceOffer = {
+  kind: Extract<
+    TraceCorpPaymentSourceKind,
+    "corp_trace_bit_pool" | "corp_trace_counter_pool"
+  >;
+  maxAmount: number;
+  recommendedAmount: number;
+};
 
 export type TraceCorpBidPaymentCommitment = {
   side: "corp";

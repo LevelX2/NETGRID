@@ -1,5 +1,5 @@
 import { parseCardDefinitionId, validOptionalCardDefinitionIds } from "../card-definition-id-input";
-import { isCardDefinitionId } from "@netgrid/shared";
+import { isCardDefinitionId, traceCorpPaymentBalance } from "@netgrid/shared";
 import { parseRunnerProgramInstallMemoryContinuation } from "@netgrid/engine";
 import {
   isRunnerProgramTrashBackupWindow,
@@ -1589,70 +1589,55 @@ export function selectedChoicesForDecision(
     return resolved([selectedOptionId], "post_bid_link");
   }
   if (choice.source.endsWith(":corp_payment")) {
-    const selectedOptionId = choice.options
-      .map((option) => {
-        if (typeof option.value !== "string") {
-          throw unresolvedChoiceFailure(
-            input,
-            action,
-            "The Engine-quoted Corp Trace payment allocation is not serialized.",
-          );
-        }
-        let allocation: unknown;
-        try {
-          allocation = JSON.parse(option.value);
-        } catch {
-          throw unresolvedChoiceFailure(
-            input,
-            action,
-            "The Engine-quoted Corp Trace payment allocation is malformed.",
-          );
-        }
-        if (!Array.isArray(allocation)) {
-          throw unresolvedChoiceFailure(
-            input,
-            action,
-            "The Engine-quoted Corp Trace payment allocation is not an array.",
-          );
-        }
-        const specializedTotal = allocation.reduce((sum, entry) => {
-          if (
-            !entry ||
-            typeof entry !== "object" ||
-            !Number.isSafeInteger((entry as { amount?: unknown }).amount) ||
-            Number((entry as { amount: number }).amount) < 0
-          ) {
-            throw unresolvedChoiceFailure(
-              input,
-              action,
-              "The Engine-quoted Corp Trace payment amount is invalid.",
-            );
-          }
-          const total = sum + Number((entry as { amount: number }).amount);
-          if (!Number.isSafeInteger(total)) {
-            throw unresolvedChoiceFailure(
-              input,
-              action,
-              "The Engine-quoted Corp Trace payment total is invalid.",
-            );
-          }
-          return total;
-        }, 0);
-        return { id: option.id, specializedTotal };
-      })
-      .sort(
-        (left, right) =>
-          right.specializedTotal - left.specializedTotal ||
-          left.id.localeCompare(right.id),
-      )[0]?.id;
-    if (!selectedOptionId) {
+    const payment = choice.traceCorpPayment;
+    const trace = input.playerView.trace;
+    if (
+      input.side !== "corp" ||
+      trace?.phase !== "corp_bid" ||
+      choice.source !== `trace:${trace.traceId}:corp_payment` ||
+      !payment
+    ) {
       throw unresolvedChoiceFailure(
         input,
         action,
-        "The Trace resolution must bind one current Engine-quoted Corp payment allocation.",
+        "The current Corp Trace action must bind its Engine payment quote.",
       );
     }
-    return resolved([selectedOptionId], "corp_trace_payment_sources");
+    const selectedIds: string[] = [];
+    const selectedOptionAmounts: number[] = [];
+    const sources = [];
+    for (const option of selectableOptions) {
+      const source = option.metadata?.traceCorpPaymentSource;
+      if (!source) {
+        throw unresolvedChoiceFailure(
+          input,
+          action,
+          "A Corp Trace payment source has an invalid Engine amount.",
+        );
+      }
+      sources.push({
+        kind: source.kind,
+        maxAmount: source.maxAmount,
+        amount: source.recommendedAmount,
+      });
+      if (source.recommendedAmount === 0) continue;
+      selectedIds.push(option.id);
+      selectedOptionAmounts.push(source.recommendedAmount);
+    }
+    if (
+      sources.length === 0 ||
+      !traceCorpPaymentBalance(payment, sources)?.canPay
+    ) {
+      throw unresolvedChoiceFailure(
+        input,
+        action,
+        "The Engine-quoted Corp Trace payment does not cover the current bid.",
+      );
+    }
+    return {
+      ...resolved(selectedIds, "corp_trace_payment_sources"),
+      selectedOptionAmounts,
+    };
   }
   if (choice.source.startsWith("trace_runner_bid_payment:")) {
     const selectedOptionId = choice.options

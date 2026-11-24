@@ -55,7 +55,7 @@ export {
   assertPostBidLinkPaymentValid,
   assertRunnerTraceBidPaymentQuoteValid,
   assertRunnerTraceBidPaymentValid,
-  corpTraceBidPaymentAllocations,
+  quoteCorpTracePaymentChoice,
   corpTracePaymentPublicPayload,
   payPostBidLinkPaymentQuote,
   payCommittedCorpTraceBidQuote,

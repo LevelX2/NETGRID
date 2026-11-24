@@ -1362,6 +1362,16 @@
       "turnActions": "Zug: {turn}  {actor} Aktionen",
       "remainingActions": "noch {count}"
     },
+    "tracePayment": {
+      "bid": "Trace-Gebot: {amount}",
+      "available": "bis zu {amount}",
+      "remaining": "Übrige Zahlungsquellen: {amount}",
+      "counterMinimum": "Mindestens {amount} Trace-Counter",
+      "specializedMinimum": "Mindestens {amount} aus den angegebenen Quellen",
+      "invalidAmount": "Prüfe die Beträge und das Trace-Gebot.",
+      "unavailable": "Die Zahlungsquellen sind gerade nicht verfügbar.",
+      "confirm": "Zahlung bestätigen"
+    },
     "cardChoice": {
       "cardDisplay": "Kartenanzeige",
       "all": "Alle",

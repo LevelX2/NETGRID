@@ -13,7 +13,9 @@ import type {
   LegalAction,
   ServerId,
   TraceCorpBidPaymentCommitment,
+  TraceCorpPaymentChoice,
   TraceCorpPaymentSourceKind,
+  TraceCorpPaymentSourceOffer,
   TraceRunnerPaymentSourceKind,
   TraceState,
 } from "@netgrid/shared";
@@ -702,21 +704,35 @@ function emptyCorpTracePaymentQuote(bid: number): CorpTracePaymentQuote {
   };
 }
 
-export function corpTraceBidPaymentAllocations(
+export function quoteCorpTracePaymentChoice(
   deps: CorpTracePaymentDependencies,
   state: GameState,
   trace: TraceState,
   bid: number,
-): CorpTracePaymentSelection[][] {
-  if (!isValidBidAmount(bid) || bid === 0) return [];
-  const sources = corpTraceSpecializedPaymentSources(deps, state);
-  if (sources.length === 0) return [];
-  const sourceIds = new Set(sources.map((source) => source.sourceCardInstanceId));
-  if (sourceIds.size !== sources.length) return [];
+):
+  | {
+      choice: TraceCorpPaymentChoice;
+      sources: Array<
+        TraceCorpPaymentSourceOffer & { sourceCardInstanceId: CardInstanceId }
+      >;
+      hasAlternatives: boolean;
+    }
+  | undefined {
+  if (!isValidBidAmount(bid) || bid === 0) return undefined;
+  const sources = corpTraceSpecializedPaymentSources(deps, state)
+    .filter(({ available }) => available > 0)
+    .map(({ kind, sourceCardInstanceId, available }) => ({
+      kind,
+      sourceCardInstanceId,
+      maxAmount: Math.min(bid, available),
+      recommendedAmount: 0,
+    }));
+  if (sources.length === 0) return undefined;
 
   const { pools, requiredTraceCounters, corpTraceCounterPoolAvailable } =
     readCorpTraceBidPaymentPools(deps, state, trace, bid);
-  if (requiredTraceCounters > corpTraceCounterPoolAvailable) return [];
+  if (requiredTraceCounters > corpTraceCounterPoolAvailable)
+    throw new Error("Die Trace-Zahlung hat zu wenige Trace-Counter.");
   const otherCapacity = pools.reduce(
     (capacity, pool) =>
       Math.min(
@@ -725,53 +741,91 @@ export function corpTraceBidPaymentAllocations(
       ),
     0,
   );
-  const minimumSpecialized = bid - otherCapacity;
-  const allocations: CorpTracePaymentSelection[][] = [];
-  const current: CorpTracePaymentSelection[] = [];
-  function collect(index: number, allocated: number, counters: number): void {
-    const source = sources[index];
-    if (!source) {
-      if (allocated >= minimumSpecialized && counters >= requiredTraceCounters)
-        allocations.push(current.slice());
-      return;
-    }
-    const { kind, sourceCardInstanceId } = source;
-    const isCounter = kind === "corp_trace_counter_pool";
-    const max = Math.min(source.available, bid - allocated);
-    for (let amount = 0; amount <= max; amount += 1) {
-      current.push({ kind, sourceCardInstanceId, amount });
-      collect(
-        index + 1,
-        allocated + amount,
-        counters + (isCounter ? amount : 0),
+  const minimumSpecializedAmount = bid - otherCapacity;
+  let missingCounters = requiredTraceCounters;
+  for (const source of sources) {
+    if (source.kind !== "corp_trace_counter_pool") continue;
+    source.recommendedAmount = Math.min(source.maxAmount, missingCounters);
+    missingCounters -= source.recommendedAmount;
+  }
+  if (missingCounters !== 0)
+    throw new Error("Die Trace-Zahlung hat zu wenige Trace-Counter.");
+  let remaining = bid - requiredTraceCounters;
+  let countersPaid = requiredTraceCounters;
+  for (const kind of [
+    "corp_trace_bit_pool",
+    "corp_trace_counter_pool",
+  ] as const) {
+    for (const source of sources) {
+      if (source.kind !== kind) continue;
+      const amount = Math.min(
+        remaining,
+        source.maxAmount - source.recommendedAmount,
       );
-      current.pop();
+      source.recommendedAmount += amount;
+      remaining -= amount;
+      if (kind === "corp_trace_counter_pool") countersPaid += amount;
     }
   }
-  collect(0, 0, 0);
-  return allocations;
+  if (remaining > otherCapacity)
+    throw new Error("Die Trace-Zahlung ist nicht mehr bezahlbar.");
+
+  // Beyond the minimum, the total can change. At a fixed total, an alternative
+  // exists exactly when one assigned unit can move to another eligible source.
+  const receivingSources = sources.filter(
+    (source) => source.recommendedAmount < source.maxAmount,
+  );
+  const receivingCounters = receivingSources.filter(
+    (source) => source.kind === "corp_trace_counter_pool",
+  );
+  const hasAlternatives =
+    bid - remaining >
+      Math.max(minimumSpecializedAmount, requiredTraceCounters) ||
+    sources.some((source) => {
+      if (source.recommendedAmount === 0) return false;
+      const mustPreserveCounter =
+        source.kind === "corp_trace_counter_pool" &&
+        countersPaid === requiredTraceCounters;
+      const receivers = mustPreserveCounter
+        ? receivingCounters
+        : receivingSources;
+      return (
+        receivers.length > (source.recommendedAmount < source.maxAmount ? 1 : 0)
+      );
+    });
+  return {
+    choice: { bid, minimumSpecializedAmount, requiredTraceCounters },
+    sources,
+    hasAlternatives,
+  };
 }
 
 function corpTraceSpecializedPaymentSources(
   deps: CorpTracePaymentDependencies,
   state: GameState,
 ): CorpTraceSpecializedPaymentSource[] {
-  if (deps.corpTraceBitPoolSources && deps.corpTraceCounterPoolSources)
-    return [
-      ...deps.corpTraceBitPoolSources(state),
-      ...deps.corpTraceCounterPoolSources(state),
-    ]
-      .map((source) => ({
-        ...source,
-        available: validatedTracePaymentPoolAmount(
-          source.available,
-          `${source.kind}:${source.sourceCardInstanceId}`,
-        ),
-      }))
-      .sort((left, right) =>
-        left.sourceCardInstanceId.localeCompare(right.sourceCardInstanceId),
-      );
-  return [];
+  if (!deps.corpTraceBitPoolSources || !deps.corpTraceCounterPoolSources)
+    return [];
+  const sources = [
+    ...deps.corpTraceBitPoolSources(state),
+    ...deps.corpTraceCounterPoolSources(state),
+  ]
+    .map((source) => ({
+      ...source,
+      available: validatedTracePaymentPoolAmount(
+        source.available,
+        `${source.kind}:${source.sourceCardInstanceId}`,
+      ),
+    }))
+    .sort((left, right) =>
+      left.sourceCardInstanceId.localeCompare(right.sourceCardInstanceId),
+    );
+  const sourceIds = new Set(
+    sources.map((source) => source.sourceCardInstanceId),
+  );
+  if (sourceIds.size !== sources.length)
+    throw new Error("runtime_duplicate_corp_trace_payment_source");
+  return sources;
 }
 
 function selectedCorpTraceSpecializedBreakdowns(
@@ -780,18 +834,22 @@ function selectedCorpTraceSpecializedBreakdowns(
   bid: number,
 ): CorpTracePaymentBreakdown[] | undefined {
   const seen = new Set<CardInstanceId>();
+  const sourcesById = new Map(
+    sources.map((source) => [source.sourceCardInstanceId, source]),
+  );
   const breakdown: CorpTracePaymentBreakdown[] = [];
   let total = 0;
   for (const selection of selections) {
     if (seen.has(selection.sourceCardInstanceId)) return undefined;
     seen.add(selection.sourceCardInstanceId);
     if (!isValidPaymentAmount(selection.amount)) return undefined;
-    const source = sources.find(
-      (candidate) =>
-        candidate.sourceCardInstanceId === selection.sourceCardInstanceId &&
-        candidate.kind === selection.kind,
-    );
-    if (!source || selection.amount > source.available) return undefined;
+    const source = sourcesById.get(selection.sourceCardInstanceId);
+    if (
+      !source ||
+      source.kind !== selection.kind ||
+      selection.amount > source.available
+    )
+      return undefined;
     total += selection.amount;
     if (total > bid) return undefined;
     if (selection.amount > 0)
@@ -804,7 +862,6 @@ function selectedCorpTraceSpecializedBreakdowns(
         ),
       );
   }
-  if (selections.length !== sources.length) return undefined;
   return breakdown;
 }
 

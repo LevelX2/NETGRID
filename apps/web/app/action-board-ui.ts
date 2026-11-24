@@ -4668,25 +4668,8 @@ export function choiceOptionPresentationLabel(
           card: cardTitle,
         });
       break;
-    case "trace_corp_payment": {
-      const sources = metadata?.paymentSources ?? [];
-      if (sources.length === 0)
-        return actionPresentationText(locale, "choiceNoPayment");
-      return sources
-        .map((source) =>
-          source.title
-            ? actionPresentationText(locale, "choiceTracePaymentFromCard", {
-                amount: source.amount,
-                card: source.title,
-              })
-            : actionPresentationText(
-                locale,
-                "choiceTracePaymentFromOtherSources",
-                { amount: source.amount },
-              ),
-        )
-        .join(", ");
-    }
+    case "trace_corp_payment":
+      return option.label;
     case "crash_draw":
       if (cardTitle && metadata?.optionKind === "trash")
         return actionPresentationText(locale, "choiceTrashCard", {

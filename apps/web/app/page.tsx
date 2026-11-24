@@ -5341,7 +5341,7 @@ export default function Page() {
     action: LegalAction,
     choiceId: SelectionId,
     selectedOptionIds: SelectionId[],
-    options: { immediateAudio?: boolean } = {},
+    options: { immediateAudio?: boolean; selectedOptionAmounts?: number[] } = {},
   ): boolean => {
     if (
       !session ||
@@ -5363,7 +5363,13 @@ export default function Page() {
       actionId: action.actionId,
       clientKnownStateVersion: stateVersion,
       clientKnownMatchVersion: payload.matchVersion,
-      selectedChoices: { choiceId, selectedOptionIds },
+      selectedChoices: {
+        choiceId,
+        selectedOptionIds,
+        ...(options.selectedOptionAmounts === undefined
+          ? {}
+          : { selectedOptionAmounts: options.selectedOptionAmounts }),
+      },
       idempotencyKey: `${session.side}-${stateVersion}-${action.actionId}-${selectedOptionIds.join(".")}-${runtimeRandomId()}`,
     });
     return true;
