@@ -2781,7 +2781,12 @@ Ziel über dem Limit, muss nach der Installation genug Grip übrig bleiben
 oder ein gebundener Draw bis zum Ziel reichen. Die Prüfung berücksichtigt
 Installationskosten, Grip-Verbrauch, verbleibende Klicks und sichtbare Draw
 Taxes. Nach der Installation bindet Defense den benötigten Draw am neuen
-Zustand. Eine sofort mögliche vollständige Tag-Entfernung
+Zustand. Kann der Runner mit dem letzten Klick durch die Basisaktion alle
+Tags entfernen und liegt seine Hand bereits innerhalb des Limits, stellt
+Defense eine Installation mit ausschließlich passivem Handlimitgewinn
+zurück. Das höhere Limit füllt die Hand vor dem Corp-Zug erst mit einem
+weiteren Draw. P862 G7/D20 prüft die Wahl bei drei Handkarten und einem Tag.
+Eine sofort mögliche vollständige Tag-Entfernung
 hat Vorrang, wenn sie den bekannten Gegenschlag abwendet. Eine freiwillige
 Informationsroute kann entfallen, wenn genau dieser Run den bekannten, mit
 der Hand nicht abfangbaren Gegenschlag auslöst. Unmittelbare Siegoptionen

@@ -59,6 +59,31 @@ export function runnerDefenseSupportSignals(
   const defenseSupportEvaluations = handDevelopment.filter(
     (evaluation) => evaluation.developmentRole === "defense_support",
   );
+  const { own } = input.playerView;
+  const canClearTagsOnLastClick =
+    own.clicks === 1 &&
+    own.tags > 0 &&
+    own.gripOrHq.length <= own.maxHandSize &&
+    candidates.some((candidate) =>
+      candidate.actionType === "remove_tag" &&
+      candidate.semanticActionType === "tag.remove" &&
+      currentRunnerTagReduction(candidate, own.tags) === own.tags,
+    );
+  const capacityOnlyInstalls = new Set(
+    canClearTagsOnLastClick
+      ? candidates.filter((candidate) =>
+          candidate.actionType === "install_card" &&
+          candidate.costProfile.clickCost === own.clicks &&
+          candidate.functionalEffects?.length &&
+          candidate.functionalEffects.every((effect) =>
+            effect.kind === "hand_size_modifier" &&
+            effect.scope === "runner" &&
+            effect.timing === "persistent" &&
+            (effect.amount ?? 0) > 0,
+          ),
+        ).map((candidate) => candidate.actionId)
+      : [],
+  );
   const defenseSupportInstallEvaluationActionIds = new Set(
     defenseSupportEvaluations.flatMap((evaluation) => {
       if (evaluation.legalActionId === undefined) return [];
@@ -88,6 +113,7 @@ export function runnerDefenseSupportSignals(
         defenseSupportInstallEvaluationActionIds.has(
           evaluation.legalActionId,
         ) &&
+        !capacityOnlyInstalls.has(evaluation.legalActionId) &&
         evaluation.availability === "legal_now" &&
         evaluation.currentNeed !== "none" &&
         evaluation.deferReason === "none",

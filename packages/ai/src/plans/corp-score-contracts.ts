@@ -214,3 +214,9 @@ export type CorpScoreProjectSignal = {
 };
 
 export type CorpScorePriorityClass = "P1" | "P2" | "P3" | "P4";
+
+export function corpScoreClosesBeforeMandatoryDraw(
+  project: CorpScoreProjectSignal,
+): boolean {
+  return project.feasible && project.sameTurnCloseout && project.terminalScore;
+}

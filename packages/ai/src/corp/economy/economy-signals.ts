@@ -11,7 +11,10 @@ import { type CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
 
 import { type CorpDefenseSignal } from "../../plans/corp-defense-contracts";
 import { corpVisibleLiquidityDemandTarget } from "./economy-domain-signals";
-import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
+import {
+  corpScoreClosesBeforeMandatoryDraw,
+  type CorpScoreProjectSignal,
+} from "../../plans/corp-score-contracts";
 import { corpScorePriorityClass } from "../score/corp-score-priority";
 import { scoreFundingPreservesCounterBanks } from "../score/score-counter-bank-funding";
 import { type CorpPlanDomain } from "../../plans/corp-tactical-plan-contracts";
@@ -1417,11 +1420,18 @@ export function corpRequiredEconomyNeeds(
               input,
               project,
               scoreProjects,
-              project.sameTurnFundingActionIds ??
-                (project.feasible &&
-                (project.sameTurnCloseout || project.terminalScore)
-                  ? terminalFundingActionIds
-                  : immediateFundingActionIds),
+              project.sameTurnFundingActionIds?.filter((id) =>
+                candidates.some((candidate) =>
+                  candidate.actionId === id &&
+                  corpCandidatePreservesVoluntaryDrawHorizon(
+                    input,
+                    candidate,
+                    corpScoreClosesBeforeMandatoryDraw(project),
+                  ),
+                ),
+              ) ?? (corpScoreClosesBeforeMandatoryDraw(project)
+                ? terminalFundingActionIds
+                : immediateFundingActionIds),
             ),
             parentPlanModuleId: "corp.score_agenda" as const,
             parentPlanInstanceId: planInstanceIdForProposal({

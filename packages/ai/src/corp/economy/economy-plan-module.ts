@@ -528,10 +528,7 @@ function currentParentFundingActions(
       context.input,
       context.actionCandidates,
       signal,
-      signal.incrementalDefenseReserve &&
-        hostedCreditBankCycle.currentCredits +
-          hostedCreditBankCycle.netLiquidCreditGain <
-          signal.incrementalDefenseReserve.targetCredits
+      signal.incrementalDefenseReserve
         ? corpTacticalPlanDomain<CorpPlanDomain>(context)
         : undefined,
     );

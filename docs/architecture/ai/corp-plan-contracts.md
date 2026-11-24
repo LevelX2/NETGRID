@@ -3016,6 +3016,20 @@ unbekannte Installationsfenster. Vorhandene Agenden in HQ oder Remotes,
 ausführbare Score-/Advanceköpfe, Ambush-/Punishfenster und anderes sofortiges
 Einkommen schließen sie aus. Die Meilensteinquote und der exklusive
 Bankpool-Claim gelten auch unter diesem Fundingparent.
+Discovery und die erneute Prüfung im Economy-Modul verwenden für die
+geplante ICE-Installation denselben aktuellen Defense-Kontext. Das gilt
+auch dann, wenn die Auszahlung den gesamten Installations- und Rezbedarf
+deckt. In P863 G10/D130 decken zwei Ladungen und eine Auszahlung die
+sechs fehlenden Credits für Liche am HQ. Der Scheduler kann weiterhin
+eine andere zugelassene Kampagne wählen.
+
+Für die Finanzierung einer Wertung gilt derselbe Pflichtzieh-Horizont
+wie für die Aktionsklassifikation. Eine Operation mit Kartenziehen darf
+die geschützte R&D-Reserve nur für eine ausführbare siegbringende Wertung
+im laufenden Zug verbrauchen. Die Wertung im nächsten Corp-Zug liegt
+hinter dessen Pflichtziehung. P860 G24/D450 prüft diese Grenze für eine
+bereits installierte Agenda.
+
 Paarung 576 R3/G13/D238 bestätigt nach der bereits ausgeführten wichtigen
 Installation Laden plus Auszahlung: zehn statt neun Endcredits bei gleicher
 Hand und gleichem Brett. Die 32-Credit-Schutzlinie bleibt ein Fundingziel;
