@@ -42,14 +42,16 @@ function checkpoint(clicks: number, damageObserved = true) {
   for (const id of state.runner.stack) {
     state.cardInstances[id]!.zone = { side: "runner", zone: "stack" };
   }
+  const turnSerial = state.turnSerial;
+  if (turnSerial === undefined) throw new Error("Missing Runner turn");
   const observedDamage: PublicGameEvent = {
     eventId: state.stateVersion + 2,
     type: "access_card",
     stateVersionBefore: state.stateVersion - 1,
     stateVersionAfter: state.stateVersion,
     stateHashAfter: "fnv1a:10f84158",
-    turnSerial: state.turnSerial,
-    visibilityClass: "private_to_actor",
+    turnSerial,
+    visibilityClass: "private_to_side",
     publicPayload: {
       actor: "runner",
       actionType: "access_card",
