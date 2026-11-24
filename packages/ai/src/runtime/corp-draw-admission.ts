@@ -94,7 +94,8 @@ export function assessCorpDrawAdmission(params: {
     projection !== undefined &&
     positiveSafeInteger(projection.cardsDrawn) &&
     Number.isSafeInteger(projection.netDeckConsumption) &&
-    nonNegativeSafeInteger(projection.netHandDelta) &&
+    Number.isSafeInteger(projection.netHandDelta) &&
+    nonNegativeSafeInteger(params.handSize + projection.netHandDelta) &&
     nonNegativeSafeInteger(projection.selfContainedDispositionCount) &&
     positiveSafeInteger(projection.clickCost) &&
     nonNegativeSafeInteger(params.handSize) &&

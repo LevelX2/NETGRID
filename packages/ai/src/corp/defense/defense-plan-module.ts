@@ -1905,7 +1905,10 @@ function exactScoreProtectionDrawProjection(
       netHandDelta: number;
     }
   | undefined {
-  if (candidate.semanticActionType === "draw.card") {
+  if (
+    candidate.semanticActionType === "draw.card" &&
+    candidate.sourceKind === "basic_action"
+  ) {
     return { cardsDrawn: 1, clickCost: 1, creditCost: 0, netHandDelta: 1 };
   }
   const cardsDrawn = candidate.economyProjection?.cardsDrawn;
@@ -1918,8 +1921,7 @@ function exactScoreProtectionDrawProjection(
     (clickCost ?? 0) > 0 &&
     Number.isSafeInteger(creditCost) &&
     (creditCost ?? -1) >= 0 &&
-    Number.isSafeInteger(netHandDelta) &&
-    (netHandDelta ?? -1) >= 0
+    Number.isSafeInteger(netHandDelta)
     ? {
         cardsDrawn: cardsDrawn!,
         clickCost: clickCost!,

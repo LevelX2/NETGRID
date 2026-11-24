@@ -14,6 +14,7 @@ export function exactCurrentCorpDrawAdmissionProjection(
       netDeckConsumption: number;
       netHandDelta: number;
       selfContainedDispositionCount: number;
+      hqCardsRecycledBeforeDrawCount: number;
       clickCost: number;
     }
   | undefined {
@@ -23,6 +24,7 @@ export function exactCurrentCorpDrawAdmissionProjection(
       netDeckConsumption: 1,
       netHandDelta: 1,
       selfContainedDispositionCount: 0,
+      hqCardsRecycledBeforeDrawCount: 0,
       clickCost: 1,
     };
   }
@@ -41,7 +43,7 @@ export function exactCurrentCorpDrawAdmissionProjection(
     (projection.cardsDrawn ?? 0) <= 0 ||
     !Number.isSafeInteger(projection.netDrawPileDelta) ||
     !Number.isSafeInteger(projection.netHandDelta) ||
-    (projection.netHandDelta ?? -1) < 0 ||
+    (projection.netHandDelta < 0 && zoneTransition.status !== "guaranteed") ||
     !Number.isSafeInteger(candidate.costProfile.clickCost) ||
     (candidate.costProfile.clickCost ?? 0) <= 0
   ) {
@@ -54,6 +56,10 @@ export function exactCurrentCorpDrawAdmissionProjection(
     selfContainedDispositionCount:
       zoneTransition.status === "guaranteed"
         ? zoneTransition.projection.postDrawDispositionCount
+        : 0,
+    hqCardsRecycledBeforeDrawCount:
+      zoneTransition.status === "guaranteed"
+        ? zoneTransition.projection.hqCardsRecycledBeforeDrawCount
         : 0,
     clickCost: candidate.costProfile.clickCost!,
   };
@@ -178,8 +184,9 @@ function exactCurrentCorpScoreMaterialDrawCandidate(
     projection.reliability !== "guaranteed" ||
     !Number.isSafeInteger(cardsDrawn) ||
     (cardsDrawn ?? 0) <= 0 ||
+    typeof netHandDelta !== "number" ||
     !Number.isSafeInteger(netHandDelta) ||
-    (netHandDelta ?? -1) < 0 ||
+    input.playerView.own.gripOrHq.length + netHandDelta < 0 ||
     !Number.isSafeInteger(clickCost) ||
     (clickCost ?? 0) <= 0 ||
     !Number.isSafeInteger(creditCost) ||

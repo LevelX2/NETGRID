@@ -220,11 +220,15 @@ export function arbitrateCorpHandConversionBeforeDraw(
     const candidate = candidates.find(
       (entry) => entry.actionId === params.actionId,
     );
+    const drawProjection = candidate
+      ? exactCurrentCorpDrawAdmissionProjection(input, candidate)
+      : undefined;
     const projectedSourceConsumption =
       candidate?.economyProjection?.cardsConsumed;
     const knownNonAgendaCleanupCandidates = Math.max(
       0,
       knownNonAgendaCount -
+        (drawProjection?.hqCardsRecycledBeforeDrawCount ?? 0) -
         (Number.isSafeInteger(projectedSourceConsumption) &&
         (projectedSourceConsumption ?? -1) >= 0
           ? projectedSourceConsumption!
@@ -235,9 +239,7 @@ export function arbitrateCorpHandConversionBeforeDraw(
       handSize: facts.pressure.handSize,
       maximumHandSize: facts.pressure.maximumHandSize,
       currentClicks: input.playerView.own.clicks,
-      drawProjection: candidate
-        ? exactCurrentCorpDrawAdmissionProjection(input, candidate)
-        : undefined,
+      drawProjection,
       capacityReleaseRoutes: releaseRoutes,
       parentProvidesExactSameTurnCapacityRelease:
         params.parentProvidesExactSameTurnCapacityRelease ?? false,

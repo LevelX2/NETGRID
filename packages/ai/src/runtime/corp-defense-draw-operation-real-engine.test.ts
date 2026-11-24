@@ -8,6 +8,8 @@ import type { GameState } from "@netgrid/shared";
 import catalog from "../../../../data/decks/standard-deck-catalog-1.0.0.json";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { chooseCorpAction } from "../index";
+import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import { exactCurrentCorpDrawAdmissionProjection } from "./corp-draw-action-facts";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInput } from "./ai-decision-input";
 import { corpOptionalDrawCapacity } from "./corp-economy/corp-defensive-draw";
@@ -34,10 +36,10 @@ const decks = Object.fromEntries(
   }),
 );
 beforeEach(() => resetResidentPlanPortfolioMemory());
-function fixture(drawCard = DAY, extraCard = false) {
+function fixture(drawCard = DAY, extraCard = false, corpDeck = decks.corp!) {
   let state = createGameAfterSetup({
     seed: "defense-draw-operation",
-    corpDeck: decks.corp!,
+    corpDeck,
     runnerDeck: decks.runner!,
   });
   state = apply(
@@ -59,13 +61,13 @@ function fixture(drawCard = DAY, extraCard = false) {
   state.turnSerial = 6;
   return state;
 }
-function input(state: GameState) {
+function input(state: GameState, corpDeck = decks.corp!) {
   return buildAiDecisionInput(state, "corp", {
     difficulty: "hard",
     ownDeckSnapshot: {
-      deckSnapshotId: decks.corp!.id,
+      deckSnapshotId: corpDeck.id,
       side: "corp",
-      cards: decks.corp!.cards.map((c) => ({
+      cards: corpDeck.cards.map((c) => ({
         cardId: c.id,
         quantity: c.quantity,
       })),
@@ -220,6 +222,44 @@ it("admits a net-one draw operation for the full-hand score-protection parent", 
   expect(after.corp.hq).toHaveLength(6);
   expect(after.corp.credits).toBe(4);
 });
+it("preserves the signed HQ change of an Engine-quoted redraw", () => {
+  const corpDeck = {
+    ...decks.corp!,
+    cards: [...decks.corp!.cards, { id: 400, quantity: 1 }],
+  };
+  let state = fixture(516, true, corpDeck);
+  RealEngineFixtureBuilder.forState(state)
+    .withCorpCardInHq(408)
+    .withCorpCardInHq(406)
+    .withCorpRemoteRoot("r1", 400, 5);
+  state = apply(
+    state,
+    getLegalActions(state, "corp").find((a) => a.type === "score_agenda")!
+      .actionId,
+  );
+  const i = input(state, corpDeck);
+  const redraw = i.legalActions.find(
+    (action) => action.payload?.agendaAbility === "hq_archives_shuffle_draw",
+  )!;
+  expect(i.playerView.own.gripOrHq).toHaveLength(6);
+  const [candidate] = buildActionSemanticCandidates({
+    legalActions: [redraw],
+    observerSide: "corp",
+    stateVersion: state.stateVersion,
+  });
+  expect(exactCurrentCorpDrawAdmissionProjection(i, candidate!)).toMatchObject({
+    cardsDrawn: 5,
+    netHandDelta: -1,
+    netDeckConsumption: -1,
+    hqCardsRecycledBeforeDrawCount: 6,
+    clickCost: 1,
+  });
+  const after = apply(state, redraw.actionId);
+  expect(after.corp.hq).toHaveLength(5);
+  expect(after.corp.rd).toHaveLength(state.corp.rd.length + 1);
+  expect(after.corp.clicks).toBe(state.corp.clicks - 1);
+});
+
 it("retains the basic draw when a three-card operation would overflow HQ", () => {
   const state = fixture(ANNUAL, true),
     i = input(state);

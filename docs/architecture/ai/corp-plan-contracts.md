@@ -3796,8 +3796,11 @@ unaufgelöste Ziel-/Choice-Anforderungen und unbekannte Nettoquoten liefern
 keinen solchen Nachweis. Der Hand-Owner führt diese Erholung mit P2 aus und
 revalidiert danach. Die Handkapazität richtet sich nach der tatsächlichen
 Nettoänderung; ein Refresh kann trotz Ziehen die Hand verkleinern. Auch die
-allgemeine Draw-Zulassung erhält das Vorzeichen der R&D-Nettoänderung:
-Wiederauffüllen ist negative Deckkonsumption, kein Draw mit Nullverbrauch.
+allgemeine Draw-Zulassung erhält beide Nettoänderungen mit ihrem Vorzeichen.
+Ein vollständig und aktuell quotierter Refresh kann beim Ziehen HQ verkleinern
+und R&D auffüllen. Zentralverteidigung kann den aktuellen Draw zur Antwortsuche
+nutzen, wenn seine Klickkosten und die übrigen Bedarfs- und Kapazitätsgrenzen
+passen. Zurückgemischte HQ-Karten zählen danach nicht als bekannte Abwurfreserve.
 
 `hand-start-draw.ts` entscheidet optionale Scored-Agenda-Startdraws vor der
 Payload-Auflösung als exakte Handplan-Choice. `corpStartDrawQuote` stammt aus

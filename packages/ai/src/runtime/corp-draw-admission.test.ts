@@ -8,6 +8,44 @@ describe("Corp draw admission", () => {
       .toBe("blocked_unknown_projection");
   });
 
+  it("admits an exact hand-reducing redraw for the bound central defense search", () => {
+    expect(
+      assessment({
+        ownerModuleId: "corp.defend_servers",
+        purpose: "central_defense_answer_search",
+        handSize: 6,
+        drawProjection: {
+          cardsDrawn: 5,
+          netDeckConsumption: -6,
+          netHandDelta: -1,
+          selfContainedDispositionCount: 0,
+          clickCost: 1,
+        },
+      }),
+    ).toMatchObject({
+      ownerModuleId: "corp.defend_servers",
+      disposition: "admitted",
+      projectedHandAfterDraw: 5,
+      projectedEndTurnOverflow: 0,
+      mandatoryDrawHorizonAfterDraw: 26,
+    });
+  });
+
+  it("rejects a negative draw delta beyond the available HQ cards", () => {
+    expect(
+      assessment({
+        handSize: 6,
+        drawProjection: {
+          cardsDrawn: 5,
+          netDeckConsumption: -1,
+          netHandDelta: -7,
+          selfContainedDispositionCount: 0,
+          clickCost: 1,
+        },
+      }).disposition,
+    ).toBe("blocked_unknown_projection");
+  });
+
   it("defers a same-class draw that would fill HQ until an exact conversion releases capacity", () => {
     expect(
       assessment({
