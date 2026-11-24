@@ -778,6 +778,16 @@ bekannte Pfad- und Stealkosten, Handpuffer, konkrete Gefahren und fehlende
 Abdeckung bleiben verbindlich. Diese Quote gilt auch für die gebundene
 Finanzierung und den laufenden Run; sie zertifiziert keine verdeckte ICE.
 
+Bei einer öffentlich erkennbaren Siegfrist und einem Remote ohne ICE prüft
+dieselbe Prerun-Quote den Handpuffer für verdeckten Zugriff unter akutem
+Schadensdruck. Ein in der Engine gequoteter Basisdraw mit genau einer
+zusätzlichen Handkarte und ohne Ziehsteuer erhält Vorrang, wenn danach
+derselbe kostenlose Basisrun noch im aktuellen Zug ausführbar ist. Die
+Vorbereitung nutzt `runner.defense_and_recovery`, der Run bleibt bei
+`runner.contest_remote`. Der Mindestpuffer setzt die bekannte
+Zugriffsgrenze um. Kosten einer verdeckten Agenda bleiben bis zum Zugriff
+offen.
+
 Im bereits gebundenen terminalen Contest darf der Run-Window-Owner die
 gewöhnliche spekulative Cashreserve für eine neu aufgedeckte reine
 ETR-Begegnung verbrauchen, wenn keine Runner-Aktion mehr bleibt und die

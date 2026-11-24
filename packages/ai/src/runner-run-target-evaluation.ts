@@ -314,34 +314,42 @@ export function assessRunnerRunAfterAccessPreparation(params: {
   return target ? { input, target } : undefined;
 }
 
+function runnerCanFitHandBufferDrawsBeforeRun(
+  input: AiDecisionInput,
+  run: LegalAction | undefined,
+  draws: number,
+): boolean {
+  const draw = input.legalActions.find((action) => action.type === "draw_card");
+  const runClicks = run?.costs.reduce(
+    (sum, cost) => sum + (cost.clicks ?? 0),
+    0,
+  );
+  return (
+    runClicks !== undefined &&
+    runClicks > 0 &&
+    Number.isSafeInteger(draws) &&
+    draws > 0 &&
+    draws + runClicks <= input.playerView.own.clicks &&
+    draws <= input.playerView.own.stackOrRdCount &&
+    draw !== undefined &&
+    draw.expiresAtStateVersion === input.playerView.stateVersion &&
+    draw.payload?.projectedNetHandDelta === 1 &&
+    draw.payload?.visibleDrawTaxSourceCount === 0 &&
+    draw.costs.reduce((sum, cost) => sum + (cost.clicks ?? 0), 0) === 1 &&
+    draw.costs.every((cost) => (cost.credits ?? 0) === 0)
+  );
+}
+
 /** A bounded resource quote for repeated current one-card draws, without inventing card identities. */
 export function quoteRunnerRunAfterHandBufferDraws(
   input: AiDecisionInput,
   target: RunnerRunTargetEvaluation,
 ): RunnerRunTargetEvaluation | undefined {
   const gap = target.prerunReserveQuote?.handBufferGap;
-  const draw = input.legalActions.find((action) => action.type === "draw_card");
   const run = input.legalActions.find(
     (action) => action.actionId === target.actionId,
   );
-  const runClicks = run?.costs.reduce(
-    (sum, cost) => sum + (cost.clicks ?? 0),
-    0,
-  );
-  if (
-    !runClicks ||
-    !gap ||
-    !Number.isSafeInteger(gap) ||
-    gap < 0 ||
-    !draw ||
-    gap + runClicks > input.playerView.own.clicks ||
-    draw.expiresAtStateVersion !== input.playerView.stateVersion ||
-    draw.payload?.projectedNetHandDelta !== 1 ||
-    draw.payload?.visibleDrawTaxSourceCount !== 0 ||
-    draw.costs.reduce((sum, cost) => sum + (cost.clicks ?? 0), 0) !== 1 ||
-    draw.costs.some((cost) => (cost.credits ?? 0) !== 0) ||
-    gap > input.playerView.own.stackOrRdCount
-  )
+  if (gap === undefined || !runnerCanFitHandBufferDrawsBeforeRun(input, run, gap))
     return undefined;
   const quotedInput: AiDecisionInput = {
     ...input,
@@ -2342,6 +2350,35 @@ function quoteRunnerPrerunReserve(params: {
     params.knownPathCost <= 1 &&
     creditsAvailableAfterKnownPath >=
       Math.min(1, params.unrezzedIceRiskCreditBuffer);
+  // The score threat leaves the card unknown. An open contest can use
+  // the ordinary access buffer when a legal draw fits before the same run.
+  const scoreThreat = params.accessPayoff === "score_threat";
+  const openBasicTerminalContest =
+    scoreThreat &&
+    riskTolerance === "terminal_remote_last_chance" &&
+    params.projection.action.type === "start_run" &&
+    params.projection.action.source === "basic_action" &&
+    params.knownPathCost === 0 &&
+    params.input.playerView.servers.some(
+      ({ id, ice }) => id === params.targetServerId && ice.length === 0,
+    );
+  const unknownAccessFloor = runnerCriticalUnknownAccessRequiredHandFloor(
+    params.input,
+    params.targetServerId,
+    params.accessPayoff === "agenda" || (scoreThreat && !openBasicTerminalContest),
+    params.runnerGripCount,
+    params.projectedKnownDamage,
+  );
+  const requiredUnknownAccessBuffer =
+    !scoreThreat ||
+    (openBasicTerminalContest &&
+      runnerCanFitHandBufferDrawsBeforeRun(
+        params.input,
+        params.projection.action,
+        unknownAccessFloor - params.runnerGripCount,
+      ))
+      ? unknownAccessFloor
+      : 0;
   return quoteRunnerRunRiskReserve({
     purpose,
     riskTolerance,
@@ -2356,14 +2393,7 @@ function quoteRunnerPrerunReserve(params: {
     runnerGripCount: params.runnerGripCount,
     requiredAccessHandBuffer: Math.max(
       params.requiredNextEncounterHandBuffer,
-      runnerCriticalUnknownAccessRequiredHandFloor(
-        params.input,
-        params.targetServerId,
-        params.accessPayoff === "agenda" ||
-          params.accessPayoff === "score_threat",
-        params.runnerGripCount,
-        params.projectedKnownDamage,
-      ),
+      requiredUnknownAccessBuffer,
     ),
     informationProbeAllowed,
     runnerRig: params.input.playerView.own.rig,
