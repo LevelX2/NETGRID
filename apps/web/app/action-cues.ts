@@ -27,7 +27,10 @@ import {
   publicAccessOwnsOutcomeEvent,
 } from "./access-presentation";
 import { coalesceAiPumpPresentationEvents } from "./ai-pump-presentation";
-import { payloadHasAbility } from "./action-payload";
+import {
+  isExposeOutermostIceEachDataFortPayload,
+  payloadHasAbility,
+} from "./action-payload";
 
 export type OpponentActionCue = {
   cueId: string;
@@ -190,6 +193,11 @@ export function deriveOpponentActionCues(
   const cues = presentationEvents.flatMap((event) => {
     const payload = event.publicPayload ?? {};
     const actionType = stringValue(payload.actionType) ?? event.type;
+    if (
+      payload.publicRevealKind === "expose" &&
+      isExposeOutermostIceEachDataFortPayload(payload)
+    )
+      return [];
     if (
       actionType === "access_card" &&
       cardDefinitionIdValue(payload.cardDefinitionId) &&

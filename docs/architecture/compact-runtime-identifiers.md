@@ -201,7 +201,12 @@ Schreibzugriff eine Storage-Diagnose.
 
 Der Browser prüft beim Laden der Standarddecks jede Karten-ID als gültige
 numerische Regelkarten-Referenz. Ungültige Katalogdaten zeigen den
-Diagnosecode und die betroffene Stelle im Katalog. Der lokale Starter
+Diagnosecode und die betroffene Stelle im Katalog. Die Deckauswahl braucht
+zusätzlich die Karten-Sets aus `/api/cards/catalog`, um die Decks für den
+gewählten Kartenpool zu prüfen. Schlägt diese Abfrage fehl, kann trotz
+erfolgreichem Abruf von `/api/decks/standards` nur die Zufallsoption angezeigt
+werden. Nach Wiederherstellung des Kartenkatalogs stößt ein Neuladen der Seite
+beide Abfragen erneut an. Der lokale Starter
 vergleicht die Buildkennung von Server und Webclient mit dem Checkout,
 aus dem das Startskript läuft. Damit erkennt er auch den Fall, dass beide
 laufenden Prozesse denselben älteren Build melden.

@@ -59,6 +59,7 @@ import {
 import {
   aiBoonRunStrengthBadgeValue,
   iceStrengthBadgeValue,
+  signedStrengthModifier,
   strengthModifierBadgeValue,
   type DisplayVisibleCard,
 } from "./card-view-model";
@@ -485,7 +486,9 @@ export function CardView({
         : [];
   const renderedCounterDisplays = preview
     ? []
-    : counterDisplaysForRendering(card);
+    : counterDisplaysForRendering(card).filter(
+        (display) => display.id !== "ice_mark_modifier",
+      );
   const selectedTarget =
     preview || forceCardBack ? null : selectedTargetDisplayLabel(card);
   const counterAriaSuffix = renderedCounterDisplays
@@ -504,7 +507,9 @@ export function CardView({
         : "";
   const strengthModifierAriaSuffix =
     strengthModifier !== null
-      ? t("strengthModifier", { value: strengthModifier })
+      ? t("strengthModifier", {
+          value: signedStrengthModifier(strengthModifier),
+        })
       : "";
   const concealedRunnerResourceAriaSuffix = knownConcealedRunnerResource
     ? t("concealedRunnerResource")

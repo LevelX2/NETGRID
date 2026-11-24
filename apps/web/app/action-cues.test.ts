@@ -300,6 +300,24 @@ describe("deriveOpponentActionCues", () => {
     expect(JSON.stringify(cues[0])).not.toContain("ce");
   });
 
+  it("leaves the outermost ICE reveal to its confirmation dialog", () => {
+    const cues = deriveOpponentActionCues({
+      viewerSide: "corp",
+      playerView: view("corp"),
+      events: [
+        event(110, "play_event", {
+          actor: "runner",
+          sourceDefinitionId: 304,
+          hiddenZoneAction: "v1911_expose_outermost_ice_each_data_fort",
+          publicRevealKind: "expose",
+          publicRevealDefinitionIds: "589,589",
+        }),
+      ],
+    });
+
+    expect(cues).toEqual([]);
+  });
+
   it("shows each resolved City Surveillance choice exactly once", () => {
     const cues = deriveOpponentActionCues({
       viewerSide: "corp",

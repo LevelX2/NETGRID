@@ -394,10 +394,19 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
       await expect(confirmation).toBeHidden();
       await expect(leaveSeries).toBeFocused();
 
+      await page.reload();
+      await expect(
+        result.getByRole("button", { name: "Nächstes Serienspiel", exact: true }),
+      ).toBeVisible();
       await leaveSeries.click();
       await confirmation.getByRole("button", { name: "Serie verlassen" }).click();
       await expect(page.getByTestId("setup-screen")).toBeVisible();
       await expect(result).toBeHidden();
+      await page.reload();
+      await expect(page.getByTestId("setup-screen")).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Fortsetzen", exact: true }),
+      ).toHaveCount(0);
     } finally {
       await joiner.context.close();
     }
