@@ -29,8 +29,7 @@ export function corpRemoteHasEngineQuotedReusableScoreFriction(
   serverId: string,
 ): boolean {
   const server = input.playerView.servers.find(
-    (candidate) =>
-      candidate.id === serverId && isRemoteServerId(candidate.id),
+    (candidate) => candidate.id === serverId && isRemoteServerId(candidate.id),
   );
   if (!server || server.root.length > 0 || server.ice.length === 0) {
     return false;
@@ -68,31 +67,36 @@ export function corpRemoteHasEngineQuotedFundableScoreFriction(
   );
   if (!server) return false;
   return server.ice.some((ice) => {
-    if (
-      ice.rezzed === true ||
-      !corpIceHasExactPostRezRunFriction(input, ice, serverId)
-    ) {
-      return false;
-    }
-    const quote = ice.effectiveRezCostQuote;
-    if (
-      quote?.context !== "installed" ||
-      quote.cardId !== ice.instanceId ||
-      quote.targetServerId !== serverId ||
-      quote.projectedServerId !== serverId ||
-      quote.expiresAtStateVersion !== input.playerView.stateVersion ||
-      quote.complete !== true ||
-      quote.mandatoryAdditionalCosts.agendaPoints !== 0 ||
-      !Number.isSafeInteger(quote.finalCredits) ||
-      quote.finalCredits < 0
-    ) {
-      return false;
-    }
+    const quote = corpInstalledIceInteractionRezQuote(input, ice, serverId);
     return (
+      quote !== undefined &&
       Math.max(0, quote.finalCredits - input.playerView.own.credits) <=
-      maximumAdditionalRezCredits
+        maximumAdditionalRezCredits
     );
   });
+}
+
+export function corpInstalledIceInteractionRezQuote(
+  input: AiDecisionInput,
+  ice: VisibleCard,
+  serverId: string,
+) {
+  const quote = ice.effectiveRezCostQuote;
+  if (
+    ice.rezzed === true ||
+    quote?.context !== "installed" ||
+    quote.cardId !== ice.instanceId ||
+    quote.targetServerId !== serverId ||
+    quote.projectedServerId !== serverId ||
+    quote.expiresAtStateVersion !== input.playerView.stateVersion ||
+    quote.complete !== true ||
+    quote.mandatoryAdditionalCosts.agendaPoints !== 0 ||
+    !Number.isSafeInteger(quote.finalCredits) ||
+    quote.finalCredits < 0 ||
+    !corpIceHasExactPostRezRunFriction(input, ice, serverId)
+  )
+    return undefined;
+  return quote;
 }
 
 function corpIceHasExactPostRezRunFriction(

@@ -45,6 +45,7 @@ export type CorpScoreProjectSignal = {
     | "visible_legal_score_conversion"
     | "corp_score_mandatory_draw_exceeds_deck"
     | "corp_funded_protected_score_advance"
+    | "corp_first_advance_waits_for_rez_reserve"
     | "corp_last_viable_deckout_matchpoint_advance"
     | "corp_engine_certified_mature_remote_score_advance"
     | "corp_exposed_agenda_progress_preserves_conversion_clock"

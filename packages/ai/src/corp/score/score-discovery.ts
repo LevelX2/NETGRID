@@ -23,6 +23,7 @@ import {
 } from "./score-asset-preservation";
 import { corpConditionalScoreCreditFunding } from "./score-conditional-credit-funding";
 import { withCorpSameTurnScoreDefenseReserve } from "./score-reserve-restoration";
+import { withCorpFirstAdvanceRezFunding } from "./score-first-advance-timing";
 import {
   corpShorterTerminalScoreRouteDominates,
   corpWinningScoreSiblingDominates,
@@ -493,7 +494,11 @@ export function reconcileCorpScoreProjects({
         ),
       ),
     ),
-  ].map((project) => withCorpCampaignSlotRelease(input, candidates, project));
+  ]
+    .map((project) => withCorpCampaignSlotRelease(input, candidates, project))
+    .map((project) =>
+      withCorpFirstAdvanceRezFunding(input, candidates, project),
+    );
   const deferredLastClickScoreProject =
     corpKnownDeferredLastClickScoreProject(scoreProjects);
   const exactLastClickLiquidityHeadAvailable =
