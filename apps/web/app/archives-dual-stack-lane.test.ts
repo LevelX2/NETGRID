@@ -64,16 +64,19 @@ describe("corp server width contract", () => {
 
   it("keeps the Corp HQ composite shrinkable and exposes the two-row hand layout", () => {
     expect(globalsCss).toMatch(
+      /\.serverBody\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/s,
+    );
+    expect(globalsCss).toMatch(
       /\.corpHqServer \.serverLayout,\s*\.corpHqServer \.serverBody\s*\{[^}]*width:\s*fit-content/s,
     );
     expect(globalsCss).toMatch(
-      /\.corpHqComposite\s*\{[^}]*width:\s*fit-content[^}]*max-width:\s*100%/s,
+      /\.corpHqComposite\s*\{[^}]*flex-wrap:\s*wrap[^}]*max-width:\s*100%/s,
     );
     expect(globalsCss).toMatch(
-      /\.corpHqHandPanel\s*\{[^}]*flex:\s*0 1 auto[^}]*width:\s*var\(--corp-hq-hand-preferred-width, max-content\)[^}]*min-width:\s*calc\(/s,
+      /\.corpHqHandPanel\s*\{[^}]*flex:\s*1 1 var\(--corp-hq-hand-min-width\)[^}]*max-width:\s*min\(100%, var\(--corp-hq-hand-width\)\)/s,
     );
     expect(globalsCss).toMatch(
-      /\.fixedZoneCards\.handCardsRowWrapped\s*\{[^}]*display:\s*grid/s,
+      /\.fixedZoneCards\.handCardsRowWrapped\s*\{[^}]*display:\s*grid[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/s,
     );
     expect(globalsCss).toMatch(
       /\.fixedZoneCards\.corpHqHandCards\.handCardsRowWrapped\s*\{[^}]*width:\s*100%/s,

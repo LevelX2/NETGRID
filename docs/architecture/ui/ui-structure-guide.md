@@ -178,8 +178,15 @@ ICE-Rezfenster an. Die eigentlichen Aktionen bleiben in den Aktionsbuttons.
 
 Im ICE-Stapel kennzeichnen Fadenkreuz und gelber Rahmen dieselbe Karteninstanz
 an der aktuellen Run-Position. Der Rahmen liegt über den Kartenflächen und
-lässt Zeiger- und Touch-Eingaben durch. Hover, sichtbarer Tastaturfokus und ein
-geöffnetes Aktionsmenü heben die jeweilige Kartenfläche an.
+unter allen ICE-Nummern. Nummern und Rahmen lassen Zeiger- und Touch-Eingaben
+durch. Hover, sichtbarer Tastaturfokus und ein geöffnetes Aktionsmenü heben die
+jeweilige Kartenfläche an.
+
+Bei wenig Platz rücken die Handkarten im HQ zusammen. Reicht die Breite für
+Hand, Root und ICE nebeneinander nicht aus, brechen die Bereiche innerhalb
+des Serverrahmens um. Ein ICE-Stapel, der selbst zu breit ist, lässt sich
+innerhalb seines Bereichs horizontal scrollen.
+
 Die lokalisierte Chronik übernimmt den öffentlichen
 Inside-Job-Bypass samt ICE-Identität auch aus dem zugehörigen Rez-Pass-Event.
 Fortsetzungsereignisse tragen mit `runDestination` und bei ICE zusätzlich

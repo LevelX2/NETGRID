@@ -20,6 +20,18 @@ import {
   type DisplayVisibleCard,
 } from "./card-view-model";
 
+export function IcePositionBadge({ position }: { position: string }) {
+  const t = useTranslations("Cards");
+  return (
+    <span
+      className="cardPositionBadge"
+      aria-label={t("icePosition", { position })}
+    >
+      {position}
+    </span>
+  );
+}
+
 export function AdvancementGems({
   card,
   display,

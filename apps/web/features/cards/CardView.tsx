@@ -71,6 +71,7 @@ import {
   AgendaDifficultyBadge,
   CounterDisplayBadge,
   IceModifierBadges,
+  IcePositionBadge,
   IceStrengthBadge,
   RunStrengthBadge,
   StrengthModifierBadge,
@@ -839,14 +840,7 @@ export function CardView({
           ))}
         </span>
       ) : null}
-      {positionBadge ? (
-        <span
-          className="cardPositionBadge"
-          aria-label={t("icePosition", { position: positionBadge })}
-        >
-          {positionBadge}
-        </span>
-      ) : null}
+      {positionBadge ? <IcePositionBadge position={positionBadge} /> : null}
       {runPositionActive ? (
         <span
           className="runPositionMarker"

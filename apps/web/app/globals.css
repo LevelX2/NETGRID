@@ -8143,6 +8143,7 @@ section[data-testid="legal-actions"].cueHighlight {
 
 .serverBody {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 6px;
   min-width: 0;
   width: fit-content;
@@ -8296,7 +8297,7 @@ section[data-testid="legal-actions"].cueHighlight {
 
 .corpHqComposite {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: flex-start;
   gap: 6px;
   min-width: 0;
@@ -8306,14 +8307,19 @@ section[data-testid="legal-actions"].cueHighlight {
 
 .corpHqHandPanel {
   --corp-hq-hand-card-minimum-step: 32px;
-  box-sizing: border-box;
-  flex: 0 1 auto;
-  width: var(--corp-hq-hand-preferred-width, max-content);
-  min-width: calc(
-    var(--cards-min-width, 108px) + var(--corp-hq-hand-card-minimum-step) +
-      var(--corp-hq-hand-card-minimum-step) + 14px
+  --corp-hq-hand-min-width: calc(
+    var(--cards-min-width, 108px) + 2 * var(--corp-hq-hand-card-minimum-step) +
+      14px
   );
-  max-width: 100%;
+  --corp-hq-hand-width: max(
+    var(--corp-hq-hand-min-width),
+    var(--corp-hq-hand-preferred-width)
+  );
+  box-sizing: border-box;
+  flex: 1 1 var(--corp-hq-hand-min-width);
+  width: var(--corp-hq-hand-width);
+  min-width: min(100%, var(--corp-hq-hand-min-width));
+  max-width: min(100%, var(--corp-hq-hand-width));
   padding: 6px;
   border: 1px solid
     color-mix(in srgb, var(--corp-status-accent), var(--line) 72%);
@@ -8331,6 +8337,7 @@ section[data-testid="legal-actions"].cueHighlight {
 
 .fixedZoneCards.handCardsRowWrapped {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 6px;
   align-content: start;
 }
@@ -8653,17 +8660,23 @@ section[data-testid="legal-actions"].cueHighlight {
 }
 
 .iceLane {
-  flex-wrap: nowrap;
-  gap: 0;
-  align-items: flex-start;
-  overflow: visible;
+  padding: max(6px, calc(6px * var(--lane-card-scale, 1)));
   isolation: isolate;
 }
 
-.iceLane.scrollableIceLane {
-  max-width: min(100%, calc(430px * var(--lane-card-scale, 1)));
+.iceStack {
+  display: flex;
+  flex: none;
+  align-items: flex-start;
+  width: max-content;
+}
+
+.iceLane[data-overflow] {
   overflow-x: auto;
   overflow-y: hidden;
+}
+
+.iceLane.scrollableIceLane {
   padding-bottom: calc(10px * var(--lane-card-scale, 1));
 }
 
@@ -8690,20 +8703,22 @@ section[data-testid="legal-actions"].cueHighlight {
   z-index: 2;
 }
 
-/* The frame follows the slot but paints above every card face in this lane. */
+/* Within the lane, faces sit below the frame and position numbers above it. */
 .iceLane .runPositionFrame {
   position: absolute;
   inset: -1px;
   z-index: 3;
   border: 3px solid #ffda47;
   border-radius: 8px;
-  box-shadow: 0 0 0 1px #493909, inset 0 0 0 1px #493909;
+  box-shadow:
+    0 0 0 1px #493909,
+    inset 0 0 0 1px #493909;
   pointer-events: none;
 }
 
 .pairedServerLanes {
-  display: grid;
-  grid-template-columns: repeat(2, max-content);
+  display: flex;
+  flex-wrap: wrap;
   gap: 6px;
   align-items: start;
   width: fit-content;
@@ -8712,21 +8727,28 @@ section[data-testid="legal-actions"].cueHighlight {
 
 .pairedServerLane {
   min-width: 0;
+  max-width: 100%;
+}
+
+.pairedServerLane:has(> .scrollableIceLane) {
+  max-width: calc(430px * var(--lane-card-scale, 1));
 }
 
 .pairedServerLane .lane {
   width: fit-content;
   max-width: 100%;
-  min-width: calc(108px * var(--lane-card-scale, 1) + 12px);
+  min-width: min(100%, calc(108px * var(--lane-card-scale, 1) + 12px));
 }
 
 .server[data-server-id="archives"]:has(.archivesDualStack) .pairedServerLanes {
-  grid-template-columns: minmax(0, 1fr) max-content;
   width: 100%;
 }
 
 .server[data-server-id="archives"]:has(.archivesDualStack)
-  .pairedServerLane:first-child,
+  .pairedServerLane:first-child {
+  flex: 1 1 min-content;
+}
+
 .server[data-server-id="archives"]:has(.archivesDualStack)
   .pairedServerLane:first-child
   .lane {
@@ -9919,6 +9941,7 @@ section[data-testid="legal-actions"].cueHighlight {
 }
 
 .lane .cardPositionBadge {
+  z-index: 4;
   left: calc(-5px * var(--lane-card-scale, 1));
   top: calc(-5px * var(--lane-card-scale, 1));
   min-width: calc(20px * var(--lane-card-scale, 1));
@@ -17507,7 +17530,8 @@ select,
   }
 
   .pairedServerLanes {
-    grid-template-columns: 1fr;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .corpHqComposite {

@@ -2,7 +2,12 @@
 
 import { type SelectionId } from "../../lib/presented-player-view";
 import { Route } from "lucide-react";
-import type { CSSProperties, ReactNode } from "react";
+import {
+  useLayoutEffect,
+  useRef,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import type { Side, VisibleCard } from "@netgrid/shared";
 import type { LegalAction, PlayerView } from "../../lib/presented-player-view";
 import { useLocale, useTranslations } from "use-intl/react";
@@ -18,6 +23,7 @@ import {
   showInstalledCorpState,
   type ActionContext,
 } from "../../app/action-board-ui";
+import { IcePositionBadge } from "../cards/CardBadges";
 import { CardView } from "../cards/CardView";
 import { useCatalogCardPresentations } from "../catalog/catalog-card-presentations";
 import type { DisplayVisibleCard } from "../cards/card-view-model";
@@ -274,9 +280,6 @@ export function ActiveServerGrid({
                           : ""
                       }
                       {...(lane.kind === "ice"
-                        ? { positionBadge: String(index + 1) }
-                        : {})}
-                      {...(lane.kind === "ice"
                         ? {
                             modifierBadges: iceModifierBadgesForServer(
                               server,
@@ -304,16 +307,22 @@ export function ActiveServerGrid({
                       }
                       {...fieldChoiceCardProps(card)}
                       onAction={onAction}
-                      {...(!exposedIce ? { onFocus, onActionContextSelect } : {})}
+                      {...(!exposedIce
+                        ? { onFocus, onActionContextSelect }
+                        : {})}
                     />
                   );
                   if (lane.kind !== "ice") return cardView;
                   return (
-                    <div key={card.instanceId} className={iceStackSlotClass(card)}>
+                    <div
+                      key={card.instanceId}
+                      className={iceStackSlotClass(card)}
+                    >
                       {cardView}
                       {isCurrentIce && (
                         <span className="runPositionFrame" aria-hidden="true" />
                       )}
+                      <IcePositionBadge position={String(index + 1)} />
                     </div>
                   );
                 });
@@ -584,12 +593,45 @@ function ServerLanes({
   }): ReactNode;
   wrapForCorpHq?: boolean;
 }) {
+  const iceStackRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const stack = iceStackRef.current;
+    const lane = stack?.parentElement;
+    if (!stack || !lane) return;
+
+    // Let marker tooltips extend outside stacks that fit without scrolling.
+    const syncOverflow = () => {
+      const { paddingLeft, paddingRight } = getComputedStyle(lane);
+      const availableWidth =
+        lane.clientWidth - parseFloat(paddingLeft) - parseFloat(paddingRight);
+      lane.toggleAttribute(
+        "data-overflow",
+        stack.offsetWidth > Math.round(availableWidth),
+      );
+    };
+    syncOverflow();
+    const observer = new ResizeObserver(syncOverflow);
+    observer.observe(lane);
+    observer.observe(stack);
+    return () => observer.disconnect();
+  }, []);
+
   const laneGroups = (
     <>
       {lanes.map((lane) => (
-        <div className="serverLaneGroup pairedServerLane" key={lane.label}>
-          <div className={laneClassName(lane)} style={boardLaneStyle}>
-            {renderLaneCards(lane)}
+        <div
+          className="serverLaneGroup pairedServerLane"
+          key={lane.label}
+          style={boardLaneStyle}
+        >
+          <div className={laneClassName(lane)}>
+            {lane.kind === "ice" ? (
+              <div className="iceStack" ref={iceStackRef}>
+                {renderLaneCards(lane)}
+              </div>
+            ) : (
+              renderLaneCards(lane)
+            )}
           </div>
         </div>
       ))}
