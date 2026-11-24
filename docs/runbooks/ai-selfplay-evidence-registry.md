@@ -1,6 +1,6 @@
 # KI-Selbstspiel-Evidenzregistrierung
 
-Stand: 2026-11-10
+Stand: 2026-11-24
 
 Der CLI-Export iteriert alle Tabellen zeilenweise innerhalb einer gemeinsamen
 Lesetransaktion, die bis zum Ende der Ausgabe offen bleibt. Er hält jeweils
@@ -82,6 +82,16 @@ Standardpfad. `NETGRID_SELFPLAY_EVIDENCE_DB` oder `--db` darf ihn für Tests
 - Ein Fix wird mit Regressionstest und gegebenenfalls veränderter
   KI-Vertragsdokumentation im eigenen Worktree committed. Die lokale
   `main`-Integration bleibt serialisiert und erfolgt nicht über SQLite.
+
+Für einen Lastvergleich können mehrere Clients desselben Jobs über den
+normalen KI-Endpunkt gleichzeitig auf **einer** isolierten Serverinstanz
+spielen. Serielle und parallele Kontrollspiele verwenden dieselben Seeds,
+Deck-Snapshots, Regeln und denselben Quellstand. Sie werden getrennt von den
+Wertungsspielen gezählt. Um Reihenfolgeeffekte zu erkennen, kann sich die
+Reihenfolge der beiden Betriebsarten zwischen den Kontrollgruppen umkehren.
+Zeitgleiche offene Match-IDs und tatsächlich überlappende KI-Anfragen messen
+verschiedene Arten von Last. Für den Vergleich zählen sowohl der Durchsatz
+aller Spiele als auch die Laufzeit jedes einzelnen Seeds.
 
 ## Kommandos
 
@@ -290,6 +300,20 @@ Selection-Purpose und sein längencodierter Kandidaten-Fingerprint die exakte
 Anfrage. Diese wird über `quoteRandomizedIceInstallSelection` erneut quotiert
 und mit `applyRandomizedIceInstallSelection` angewendet; die ausgewählte Action
 muss dem Trace entsprechen. Kein Zufallszähler wird von Hand angepasst.
+
+Bei einem vom Server ausgewürfelten verdeckten Gebot, etwa für *Social
+Engineering*, liefern `traceBidDecision`, der gewählte Planschritt und die
+legalen Optionen des offenen Choice-Fensters die Eingabe für
+`quoteRandomizedTraceBidSelection`. Die Anwendung mit
+`applyRandomizedTraceBidSelection` schreibt die Ziehung in
+`aiTurnPlanRandomDrawRecords`. Gebot, Gewicht, Zähler und Zufallszweck
+werden mit dem gespeicherten Entscheidungsbeleg abgeglichen, das Gebot
+zusätzlich mit dem zugehörigen Engine-Ereignis.
+
+Der vollständige StateHash schließt die Match-ID ein. Für einen
+Vergleich zweier Läufe desselben Seeds wird daher jeder Hash im eigenen Match
+geprüft. Zwischen den Matches lassen sich Entscheidungen, Ziele,
+Kartenauswahlen, Zufallsziehungen und Ergebnis vergleichen.
 
 Vor einer alternativen Folge müssen StateVersion und vollständiger StateHash
 exakt zum gespeicherten Checkpoint passen. Eine abweichende Rekonstruktion ist
