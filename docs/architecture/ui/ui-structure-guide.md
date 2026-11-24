@@ -166,10 +166,11 @@ Zustände. ICE-Rezzen (Schild) und das Rezzen anderer Karten (Power-Symbol)
 bleiben getrennt; insbesondere kündigt das Power-Symbol in „Bewegung“ kein
 ICE-Rezfenster an. Die eigentlichen Aktionen bleiben in den Aktionsbuttons.
 
-Im ICE-Stapel verändert der Marker für die aktuelle Run-Position nicht die
-Stapelhöhe. Nur Hover, sichtbarer Tastaturfokus und ein geöffnetes Aktionsmenü
-heben eine Karte an; ein vorheriger Mausklick darf mittlere ICE nicht dauerhaft
-verdecken. Die lokalisierte Chronik übernimmt den öffentlichen
+Im ICE-Stapel kennzeichnen Fadenkreuz und gelber Rahmen dieselbe Karteninstanz
+an der aktuellen Run-Position. Der Rahmen liegt über den Kartenflächen und
+lässt Zeiger- und Touch-Eingaben durch. Hover, sichtbarer Tastaturfokus und ein
+geöffnetes Aktionsmenü heben die jeweilige Kartenfläche an.
+Die lokalisierte Chronik übernimmt den öffentlichen
 Inside-Job-Bypass samt ICE-Identität auch aus dem zugehörigen Rez-Pass-Event.
 Fortsetzungsereignisse tragen mit `runDestination` und bei ICE zusätzlich
 `runDestinationIcePosition` das öffentliche Ziel aus dem Engine-Folgezustand.
