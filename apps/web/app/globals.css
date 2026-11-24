@@ -12525,6 +12525,11 @@ section[data-testid="legal-actions"].cueHighlight {
   font-size: 12px;
 }
 
+.resultScoreSide .resultPlayerTime {
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
 .gameOverFooter {
   display: flex;
   align-items: center;

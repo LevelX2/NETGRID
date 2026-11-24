@@ -1582,6 +1582,7 @@
       "leaveSeriesTitle": "Matchserie verlassen?",
       "leaveSeriesConfirm": "Du entfernst damit diese lokale Sitzung und kehrst zum Startbildschirm zurück.",
       "gameScore": "Spielwertung",
+      "playerTime": "Spielzeit {duration}",
       "agenda": "Agenda",
       "runner": "Runner",
       "corp": "Korp",

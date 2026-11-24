@@ -6666,6 +6666,7 @@ describe("MVP 0.2 multiplayer service", () => {
       mode: "player_clock",
       decisionOwnerSide: "corp",
       remainingMs: { runner: 120_000, corp: 118_000 },
+      consumedMs: { runner: 0, corp: 2_000 },
       graceRemainingMs: 0,
       warningLevel: "charging",
     });
@@ -6695,6 +6696,7 @@ describe("MVP 0.2 multiplayer service", () => {
     });
     expect(payload.resultSummary).toMatchObject({
       reason: "time_expired",
+      playerTimeMs: { runner: 0, corp: 120_000 },
       winner: "runner",
       winnerSide: "runner",
       loserSide: "corp",
@@ -6743,6 +6745,8 @@ describe("MVP 0.2 multiplayer service", () => {
       expect(expired).toMatchObject({ matchStatus: "finished", playerClock: { expiredSide: "corp" } });
       const after = (await storage.load(created.matchId))!;
       expect(after.lifecycleResult?.reason).toBe("time_expired");
+      expect(after.resultSnapshot?.playerTimeMs).toEqual({ runner: 0, corp: 120_000 });
+      expect(after.match.playerClock?.activity).toBeUndefined();
       expect(after.eventLog.at(-1)?.publicPayload.type).toBe("time_expired");
       expect(after.eventLog.length).toBe(before.eventLog.length + 1);
       expect(after.gameState.eventLog).toEqual(before.gameState.eventLog);
@@ -6754,9 +6758,16 @@ describe("MVP 0.2 multiplayer service", () => {
   it("moves the displayed player time to the Runner as soon as paced Corp AI finishes", async () => {
     const startMs = Date.parse("2026-07-13T08:00:00.000Z");
     let nowMs = startMs;
+    let msPerAiDecision = 0;
+    let aiThinkingMs = 0;
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "player-clock-paced-corp-ai",
       now: () => new Date(nowMs).toISOString(),
+      chooseAiAction: (input, options) => {
+        aiThinkingMs += msPerAiDecision;
+        nowMs += msPerAiDecision;
+        return chooseRuntimeAiAction(input, options);
+      },
     });
     const created = await service.createMatch({
       mode: "human_runner_vs_corp_ai",
@@ -6784,6 +6795,7 @@ describe("MVP 0.2 multiplayer service", () => {
     });
 
     nowMs = startMs + 2_000;
+    msPerAiDecision = 250;
     const advanced = await service.advanceAi({
       matchId: created.matchId,
       side: "runner",
@@ -6794,19 +6806,41 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(advanced.ok).toBe(true);
     if (!advanced.ok) throw new Error(advanced.error.message);
     expect(advanced.requesterPayload.playerView.activeSide).toBe("runner");
+    expect(aiThinkingMs).toBeGreaterThan(0);
+    const corpTimeMs = 2_000 + aiThinkingMs;
     expect(advanced.requesterPayload.playerClock).toMatchObject({
       mode: "none",
       decisionOwnerSide: "runner",
       activityStartedAtMs: nowMs,
-      consumedMs: { runner: 0, corp: 2_000 },
+      consumedMs: { runner: 0, corp: corpTimeMs },
     });
 
-    nowMs = startMs + 5_000;
+    nowMs += 3_000;
     const runnerTurn = await bootstrap(service, created.matchId, runner);
     expect(runnerTurn.playerClock).toMatchObject({
       decisionOwnerSide: "runner",
-      consumedMs: { runner: 3_000, corp: 2_000 },
+      consumedMs: { runner: 3_000, corp: corpTimeMs },
     });
+    nowMs += 4_000;
+    const finished = await service.forfeitMatch({
+      matchId: created.matchId,
+      side: "runner",
+      sessionToken: runner.sessionToken,
+    });
+    if (!finished.ok) throw new Error(finished.error.message);
+    const playerTimeMs = { runner: 7_000, corp: corpTimeMs };
+    expect(finished.actorPayload).toMatchObject({
+      resultSummary: { playerTimeMs },
+    });
+    expect(finished.actorPayload.playerClock).not.toHaveProperty(
+      "decisionOwnerSide",
+    );
+    const stored = await service.loadForTest(created.matchId);
+    expect(stored?.resultSnapshot?.playerTimeMs).toEqual(playerTimeMs);
+    nowMs += 3_600_000;
+    const reopened = await bootstrap(service, created.matchId, runner);
+    expect(reopened.resultSummary?.playerTimeMs).toEqual(playerTimeMs);
+    expect(reopened.playerClock?.consumedMs).toEqual(playerTimeMs);
   });
 
   it("tracks no-limit consumed player time without time-expiry losses", async () => {

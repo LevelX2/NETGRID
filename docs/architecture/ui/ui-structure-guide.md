@@ -44,6 +44,8 @@ volle Zeile zu lang sind, dürfen innerhalb ihres Felds umbrechen.
 Der Ergebnisdialog zeigt die Matchpunkte als zentrale, paarige Wertung mit
 den Teilnehmernamen unter den Zahlen. Bei Serien steht der Zwischen- oder
 Endstand der Serie über der kompakteren Wertung des gerade beendeten Spiels.
+Unter jedem Namen in der Einzelspielwertung steht die verbrauchte Spielerzeit
+dieser Partie in Minuten und Sekunden, sofern das Ergebnis sie enthält.
 Auf schmalen Displays erscheinen die Wertungen vor der Illustration.
 
 Die helle Variante (`data-theme="white"`) verwendet für den Endstand eine

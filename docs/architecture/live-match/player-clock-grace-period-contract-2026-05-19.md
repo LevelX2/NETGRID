@@ -81,6 +81,12 @@ Wenn Zeitablauf festgestellt wird, beendet der Server das Match über den Match-
 
 ## Zeitverbrauch
 
+Am Spielende rechnet der Server die letzte offene Entscheidung bis zum
+Endzeitpunkt ab und stoppt die Spieleruhr. Der Ergebnissnapshot enthält in
+`playerTimeMs` den Verbrauch je Seite für dieses Spiel. Ohne Limit zählt die
+Entscheidungszeit, mit Zeitlimit der Abzug vom Zeitkonto nach der Grundfrist.
+Auch im KI-Schnelllauf erfasst die Uhr jede KI-Entscheidung der zugehörigen Seite.
+
 Zeit läuft nur, wenn eine Seite tatsächlich eine Entscheidung treffen muss. Maßgeblich ist der aktuelle Entscheidungseigner, nicht pauschal die Zugseite.
 
 Zeitbelastete Kontexte:

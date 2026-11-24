@@ -153,6 +153,7 @@ export type ApiGameResultSummary = {
   successfulRunCount: number;
   stolenAgendaCount: number;
   scoredAgendaCount: number;
+  playerTimeMs?: Record<Side, number>;
   startedAt: string;
   finishedAt: string;
   finalStateHash: string;
@@ -281,6 +282,7 @@ export type ApiMatchResultSnapshot = {
   successfulRunCount?: number;
   stolenAgendaCount?: number;
   scoredAgendaCount?: number;
+  playerTimeMs?: Record<Side, number>;
   finalStateHash: string;
   series?: {
     seriesId: string;

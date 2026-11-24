@@ -1578,6 +1578,7 @@
       "leaveSeriesTitle": "Leave the match series?",
       "leaveSeriesConfirm": "This removes the local session and takes you back to the start screen.",
       "gameScore": "Game score",
+      "playerTime": "Time used {duration}",
       "agenda": "Agenda",
       "runner": "Runner",
       "corp": "Corp",
