@@ -482,7 +482,6 @@ import {
 import {
   formatCardCount,
   opponentSide,
-  sideFromPublicPayload,
   sideLabel,
   sideStatusLineForView,
   turnActionHeaderLabel,
@@ -3922,15 +3921,35 @@ export default function Page() {
       // must derive their display from the new history.
       lastSeenCueEventIdRef.current = latestId;
       setCurrentActionCue((current) =>
-        current?.traceTagOutcome ? null : current,
+        current?.traceTagOutcome || current?.creditChanges?.length
+          ? null
+          : current,
       );
-      setActionCueQueue((queue) => queue.filter((cue) => !cue.traceTagOutcome));
+      setActionCueQueue((queue) =>
+        queue.filter(
+          (cue) => !cue.traceTagOutcome && !cue.creditChanges?.length,
+        ),
+      );
       return;
     }
     const newEvents = publicEventsAfter(
       payload.playerView.publicEvents,
       lastSeen,
     );
+    const locallySoundedEventIds = new Set<MatchEventId>();
+    for (const event of newEvents) {
+      if (
+        event.publicPayload.actor === payload.side &&
+        locallyPlayedActionSoundKeysRef.current.delete(
+          localActionSoundKey(
+            payload.side,
+            event.stateVersionBefore,
+            eventActionType(event),
+          ),
+        )
+      )
+        locallySoundedEventIds.add(event.eventId);
+    }
     const contextByEventId = chronicleContextByEventId(
       payload.playerView.publicEvents,
       catalogDetailsById,
@@ -3946,6 +3965,8 @@ export default function Page() {
             playerView: payload.playerView,
             events: payload.playerView.publicEvents,
             lastPresentedEventId: lastSeen,
+            includeOwnCreditChanges: actionCueDisplayMode === "floating",
+            locallySoundedEventIds,
             includeAutomaticEffectCues: automaticEffectCuesEnabled,
             translate: chronicleTranslate,
             contextByEventId,
@@ -3986,21 +4007,17 @@ export default function Page() {
         );
         continue;
       }
-      if (overlayEventIds.has(event.eventId)) continue;
+      if (
+        overlayEventIds.has(event.eventId) ||
+        locallySoundedEventIds.has(event.eventId)
+      )
+        continue;
       const item = formatChronicleEvent(
         event,
         payload.side,
         contextByEventId[event.eventId] ?? {},
       );
       const actionType = eventActionType(event);
-      const actor = sideFromPublicPayload(event.publicPayload.actor);
-      if (
-        actor === payload.side &&
-        locallyPlayedActionSoundKeysRef.current.delete(
-          localActionSoundKey(actor, event.stateVersionBefore, actionType),
-        )
-      )
-        continue;
       const sound = actionSoundForActionType(
         actionType,
         item.visibility,
@@ -4017,6 +4034,7 @@ export default function Page() {
     actionCuesEnabled,
     automaticEffectCuesEnabled,
     audioEnabled,
+    actionCueDisplayMode,
     audioVolume,
     actionCueQueue,
     currentActionCue,

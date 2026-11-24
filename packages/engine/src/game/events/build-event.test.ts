@@ -37,7 +37,45 @@ describe("game event builder", () => {
         corpRdDrawnToHqCount: 1,
       });
       expect(JSON.stringify(surface)).not.toContain(drawnId);
+      expect(surface.publicPayload.creditChanges).toBeUndefined();
       expect(surface).not.toHaveProperty("privatePayload");
+    }
+  });
+
+  it("reports both public credit pools at the actual boundaries of a payment", () => {
+    const previous = createGame({
+      seed: "public-credit-changes",
+      setupMode: "completed",
+    });
+    previous.corp.credits = 7;
+    previous.runner.credits = 5;
+    const next = nextState(previous);
+    next.corp.credits = 3;
+    next.runner.credits = 6;
+    const action = {
+      ...mandatoryDrawLegalAction(previous),
+      type: "activated_card_ability",
+      costs: [{ credits: 6 }],
+    } satisfies LegalAction;
+    const event = buildEventWithHost(
+      testBuildEventHost(),
+      previous.stateVersion,
+      next.stateVersion,
+      hashState(next),
+      previous,
+      next,
+      action,
+      playerActionFor(previous, action),
+    );
+    for (const surface of [
+      toPublicEvent(event),
+      toPublicEventForSide(event, "runner"),
+      toPublicEventForSide(event, "corp"),
+    ]) {
+      expect(surface.publicPayload.creditChanges).toEqual([
+        { side: "corp", before: 7, after: 3 },
+        { side: "runner", before: 5, after: 6 },
+      ]);
     }
   });
 

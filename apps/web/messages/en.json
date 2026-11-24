@@ -199,7 +199,7 @@
     },
     "cues": {
       "title": "Info window",
-      "subtitle": "Local cues for AI and opposing turns",
+      "subtitle": "Notifications for game actions and credit changes",
       "show": "Show",
       "showAutomaticEffects": "Show automatic effects",
       "displayMode": "Display style",
@@ -1508,6 +1508,7 @@
       "seen": "Seen"
     },
     "opponentCue": {
+      "creditBalanceChange": "{side} balance from {before} to {after, plural, one {# credit} other {# credits}}",
       "traceTagPending": "Waiting for the tag decision…",
       "traceTagsPreventedBy": "{count, plural, one {Tag prevented by {cards}.} other {# tags prevented by {cards}.}}",
       "traceTagsPrevented": "{count, plural, one {1 tag prevented.} other {# tags prevented.}}",
@@ -2157,8 +2158,8 @@
       "gameCreated": "The game was created.",
       "timeExpired": "{subject}: player clock expired.",
       "cardsDrawn": "{subject}: drew {count} cards.",
-      "creditsGained": "{subject}: gained {amount} credits.",
-      "creditsLost": "{subject}: lost {amount} credits.",
+      "creditsGained": "{subject}: gained {amount, plural, one {# credit} other {# credits}}.",
+      "creditsLost": "{subject}: lost {amount, plural, one {# credit} other {# credits}}.",
       "cardInstalled": "{subject}: installed {card}.",
       "cardPlayed": "{subject}: played {card}.",
       "cardRezzed": "{subject}: rezzed {card}.",

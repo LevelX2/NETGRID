@@ -42,6 +42,43 @@ function deriveOpponentActionCues(input: CueDerivationInput) {
 }
 
 describe("deriveOpponentActionCues", () => {
+  it("keeps credit balances with each confirmed action for either player", () => {
+    const gain = { side: "runner", before: 5, after: 6 } as const;
+    const payment = { side: "corp", before: 7, after: 3 } as const;
+    const events = [
+      event(95, "gain_credit", {
+        actor: "runner",
+        amount: 1,
+        creditChanges: [gain],
+      }),
+      event(96, "rez_ice", {
+        actor: "corp",
+        rezCostPaid: 4,
+        creditChanges: [payment],
+      }),
+      event(97, "activated_card_ability", {
+        actor: "runner",
+        hostedCreditsAfter: 3,
+      }),
+    ];
+    const input = {
+      viewerSide: "runner" as const,
+      playerView: view("runner"),
+      events,
+    };
+    const cues = deriveOpponentActionCues({
+      ...input,
+      includeOwnCreditChanges: true,
+      locallySoundedEventIds: new Set([95]),
+    });
+    expect(cues.map((cue) => cue.creditChanges)).toEqual([[gain], [payment]]);
+    expect(cues[0]?.sound).toBeUndefined();
+    expect(cues[1]?.sound).toBe("ice_rez");
+    expect(deriveOpponentActionCues(input).map((cue) => cue.eventId)).toEqual([
+      96,
+    ]);
+  });
+
   it("localizes the shared window and floating cue model on the viewing client", () => {
     const input = {
       viewerSide: "runner" as const,
@@ -100,6 +137,7 @@ describe("deriveOpponentActionCues", () => {
           pumpStrengthAmount: 1,
           pumpBreakerCreditCost: 2,
           breakerStrengthAfter: 1,
+          creditChanges: [{ side: "runner", before: 7, after: 5 }],
         }),
         event(102, "pump_breaker", {
           actor: "runner",
@@ -118,6 +156,7 @@ describe("deriveOpponentActionCues", () => {
           pumpStrengthAmount: 1,
           pumpBreakerCreditCost: 2,
           breakerStrengthAfter: 3,
+          creditChanges: [{ side: "runner", before: 5, after: 3 }],
         }),
       ],
     });
@@ -126,6 +165,7 @@ describe("deriveOpponentActionCues", () => {
     expect(cues[0]).toMatchObject({
       eventId: 101,
       source: "ai",
+      creditChanges: [{ side: "runner", before: 7, after: 3 }],
       title:
         "Die Runner-KI hat Krash von Stärke 0 auf 3 gepumpt (3× gepumpt, +3 Stärke, 6 Credits insgesamt).",
       description:

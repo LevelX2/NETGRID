@@ -695,6 +695,12 @@ export function isPublicResolvedGameEffectId(value: unknown): value is number {
   return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
 }
 
+export type PublicCreditChange = {
+  side: Side;
+  before: number;
+  after: number;
+};
+
 /**
  * Side-safe fields shared by Chronicle, replay, AI and server projections.
  * Event-specific fields remain possible, but common semantics must use these
@@ -722,6 +728,8 @@ export type PublicEventPayload = Record<string, unknown> & {
   targets?: Record<string, string | number | boolean>;
   visibility?: PublicAbilityVisibility;
   resolvedEffects?: PublicResolvedGameEffect[];
+  /** Actual changes to the players' public credit pools over this transition. */
+  creditChanges?: PublicCreditChange[];
   /** Canonically ordered aggregate mutations from this engine transition. */
   counterMutations?: PublicCounterMutation[];
   publicVisibilityTransitions?: PublicCounterThresholdVisibilityTransition[];

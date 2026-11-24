@@ -199,7 +199,7 @@
     },
     "cues": {
       "title": "Fenêtre d'informations",
-      "subtitle": "Indices locaux pour l'IA et les tours adverses",
+      "subtitle": "Notifications des actions de jeu et des variations de crédits",
       "show": "Afficher",
       "showAutomaticEffects": "Afficher les effets automatiques",
       "displayMode": "Mode d’affichage",
@@ -1550,6 +1550,7 @@
       "seen": "Vu"
     },
     "opponentCue": {
+      "creditBalanceChange": "{side}, solde de {before} à {after, plural, one {# crédit} other {# crédits}}",
       "traceTagPending": "Décision sur le tag en attente…",
       "traceTagsPreventedBy": "{count, plural, one {Tag évité grâce à {cards}.} other {# tags évités grâce à {cards}.}}",
       "traceTagsPrevented": "{count, plural, one {1 tag évité.} other {# tags évités.}}",
@@ -2241,8 +2242,8 @@
       "gameCreated": "Le jeu a été créé.",
       "timeExpired": "{subject} : l'horloge du joueur a expiré.",
       "cardsDrawn": "{subject} : a pioché des cartes {count}.",
-      "creditsGained": "{subject} : avez gagné {amount} crédits.",
-      "creditsLost": "{subject} : crédits {amount} perdus.",
+      "creditsGained": "{subject} : {amount, plural, one {# crédit gagné} other {# crédits gagnés}}.",
+      "creditsLost": "{subject} : {amount, plural, one {# crédit perdu} other {# crédits perdus}}.",
       "cardInstalled": "{subject} : {card} installé.",
       "cardPlayed": "{subject} : joué à {card}.",
       "cardRezzed": "{subject} : rezz {card}.",

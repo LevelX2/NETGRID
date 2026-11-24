@@ -199,6 +199,14 @@ Korp-Aktionen ein oranges Badge. Es verwendet dieselbe öffentliche
 Aktionsnummerierung und zeigt bei mehreren verbrauchten Aktionen den Bereich.
 Automatische Folgeeffekte erhalten im schwebenden Hinweis keine Aktionsnummer.
 
+Bei einer Änderung des Credit-Kontos zeigt der Aktionshinweis Münzsymbol,
+vorherigen Stand, neuen Stand und Differenz. Im schwebenden Modus gilt das
+auch für eigene Aktionen. Für beide Seiten liefert `publicPayload.creditChanges`
+die tatsächlich geänderten öffentlichen Kontostände vor und nach der Aktion.
+Bei gemischten Zahlungen zeigt die Zeile den Betrag, der tatsächlich vom
+Konto abging. Bei zusammengefassten KI-Pumps reicht die Anzeige vom ersten
+bis zum letzten Stand der Gruppe.
+
 Programm-Trash-Subroutinen bleiben einschließlich Zielauswahl und Auflösung
 in der aktiven Run-Gruppe. Die Engine kennzeichnet ihre Zielauswahl mit
 `trash_installed_program`; die lokalisierte Aufforderung nennt ausdrücklich

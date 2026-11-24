@@ -199,7 +199,7 @@
     },
     "cues": {
       "title": "Infofenster",
-      "subtitle": "Lokale Hinweise zu KI- und Gegenzügen",
+      "subtitle": "Hinweise zu Spielaktionen und Credit-Änderungen",
       "show": "Anzeigen",
       "showAutomaticEffects": "Automatische Effekte anzeigen",
       "displayMode": "Darstellungsart",
@@ -1512,6 +1512,7 @@
       "seen": "Gesehen"
     },
     "opponentCue": {
+      "creditBalanceChange": "{side}, Kontostand von {before} auf {after, plural, one {# Credit} other {# Credits}}",
       "traceTagPending": "Tag-Entscheidung offen …",
       "traceTagsPreventedBy": "{count, plural, one {{cards} hat den Tag verhindert.} other {# Tags durch {cards} verhindert.}}",
       "traceTagsPrevented": "{count, plural, one {1 Tag verhindert.} other {# Tags verhindert.}}",
@@ -2165,8 +2166,8 @@
       "gameCreated": "Das Spiel wurde erstellt.",
       "timeExpired": "{subject}: Spielerzeit abgelaufen.",
       "cardsDrawn": "{subject}: {count} Karten gezogen.",
-      "creditsGained": "{subject}: {amount} Credits erhalten.",
-      "creditsLost": "{subject}: {amount} Credits verloren.",
+      "creditsGained": "{subject}: {amount, plural, one {# Credit} other {# Credits}} erhalten.",
+      "creditsLost": "{subject}: {amount, plural, one {# Credit} other {# Credits}} verloren.",
       "cardInstalled": "{subject}: {card} installiert.",
       "cardPlayed": "{subject}: {card} gespielt.",
       "cardRezzed": "{subject}: {card} gerezzt.",

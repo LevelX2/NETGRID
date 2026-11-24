@@ -1,5 +1,12 @@
 import { cardDefinitionIdValue } from "./card-definition-id";
-import type { CardDefinitionId, MatchEventId, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
+import type {
+  CardDefinitionId,
+  MatchEventId,
+  PublicCreditChange,
+  PublicGameEvent,
+  Side,
+  VisibleCard,
+} from "@netgrid/shared";
 import type { PlayerView } from "../lib/presented-player-view";
 import {
   chronicleActionUseByEventId,
@@ -29,6 +36,7 @@ export type OpponentActionCue = {
   actor?: Side;
   actorLabel: string;
   actionUse?: ChronicleActionUse;
+  creditChanges?: PublicCreditChange[];
   opponent: boolean;
   source: "human" | "ai" | "system";
   actionType: string;
@@ -156,6 +164,8 @@ export type CueDerivationInput = {
   events: PublicGameEvent[];
   lastPresentedEventId?: MatchEventId | null;
   includeOwnActions?: boolean;
+  includeOwnCreditChanges?: boolean;
+  locallySoundedEventIds?: ReadonlySet<MatchEventId>;
   includeAutomaticEffectCues?: boolean;
   translate?: ChronicleTranslate;
   contextByEventId?: Record<MatchEventId, Omit<ChronicleContext, "side">>;
@@ -210,8 +220,14 @@ export function deriveOpponentActionCues(
     )
       return [];
     if (isSocialEngineeringHiddenAmountSelectionEvent(event)) return [];
+    const creditChanges = payload.creditChanges;
+    const ownCreditCue =
+      input.includeOwnCreditChanges &&
+      actor === input.viewerSide &&
+      creditChanges?.length;
     if (
       !input.includeOwnActions &&
+      !ownCreditCue &&
       !opponent &&
       !systemCue &&
       !forcedPublicEffectCue &&
@@ -254,7 +270,9 @@ export function deriveOpponentActionCues(
       (entry) => entry.tagGain || entry.damage,
     );
     const sound =
-      hasDedicatedImpactEffect || traceTagOutcome?.pending === false
+      hasDedicatedImpactEffect ||
+      traceTagOutcome?.pending === false ||
+      (source === "human" && input.locallySoundedEventIds?.has(event.eventId))
         ? undefined
         : actionSoundForActionType(actionType, visibility);
     const soundCount = sound
@@ -267,6 +285,7 @@ export function deriveOpponentActionCues(
       viewerSide: input.viewerSide,
       ...(actor ? { actor } : {}),
       actorLabel: actorLabel(actor, source, input.translate),
+      ...(creditChanges?.length ? { creditChanges } : {}),
       ...(actionUsesByEventId[event.eventId]
         ? { actionUse: actionUsesByEventId[event.eventId] }
         : {}),
